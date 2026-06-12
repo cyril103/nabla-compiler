@@ -1,0 +1,11 @@
+import tests.utils.Math
+
+class Engine(base: Int) {
+    def run(): Int = {
+        (new OutilsMath()).multiplier() + 2
+    }
+}
+
+def main(): Int = {
+    (new Engine(20)).run()
+}

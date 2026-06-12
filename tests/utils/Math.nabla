@@ -1,0 +1,5 @@
+class OutilsMath() {
+    def multiplier(): Int = {
+        40 
+    }
+}
