@@ -33,3 +33,31 @@ nabla-compiler/
 │       └── Math.nabla     # Sous-module Nabla importé dynamiquement
 ├── Makefile           # Automatisation de la compilation du projet
 └── .gitignore         # Fichiers et binaires temporaires à ignorer
+
+## 🛠️ Compilation et usage
+
+Le projet se compile avec GNU C++17 et le `Makefile` expose des cibles pratiques :
+
+- `make` : compile le compilateur `nablac`
+- `make test` : exécute `nablac` sur la source par défaut (`tests/test_import.nabla`), affiche le code ASM généré et lance ensuite le binaire produit
+- `make debug` : exécute `nablac --keep-asm` sur la source par défaut, conserve le fichier assembleur `<basename>_tmp.asm`, puis lance le binaire
+- `make clean` : supprime `nablac` et le binaire généré par le test
+
+### Personnaliser le fichier source
+
+Le `Makefile` supporte une variable `SRC` pour choisir le fichier Nabla à compiler :
+
+```bash
+make debug SRC=tests/test_import.nabla
+make test SRC=tests/test_import.nabla
+```
+
+Le binaire exécuté est déterminé automatiquement à partir du nom de fichier `SRC`.
+
+### Fichier ASM généré
+
+Lorsque `--keep-asm` est utilisé (via `make debug`), le compilateur conserve le fichier assembleur généré. Par exemple pour `tests/test_import.nabla`, le fichier créé est :
+
+```text
+test_import_tmp.asm
+```
