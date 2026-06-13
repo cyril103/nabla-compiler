@@ -1,0 +1,5 @@
+import tests.utils.CycleA
+
+def main(): Int = {
+    (new CycleA()).run()
+}

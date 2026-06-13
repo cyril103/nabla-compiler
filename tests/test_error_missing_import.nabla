@@ -1,0 +1,5 @@
+import tests.utils.DoesNotExist
+
+def main(): Int = {
+    1
+}

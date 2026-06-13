@@ -1,0 +1,9 @@
+class Counter(value: Int) {
+    def run(): Int = {
+        value + 1
+    }
+}
+
+def main(): Int = {
+    (new Counter(10)).run()
+}

@@ -1,0 +1,7 @@
+import tests.utils.Math
+
+class Helper() {
+    def compute(): Int = {
+        (new OutilsMath()).multiplier() + 2
+    }
+}

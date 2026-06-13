@@ -1,0 +1,7 @@
+import tests.utils.CycleB
+
+class CycleA() {
+    def run(): Int = {
+        (new CycleB()).run()
+    }
+}

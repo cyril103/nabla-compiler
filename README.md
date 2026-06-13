@@ -61,3 +61,17 @@ Lorsque `--keep-asm` est utilisé (via `make debug`), le compilateur conserve le
 ```text
 test_import_tmp.asm
 ```
+
+### Tests automatiques
+
+Le projet dispose désormais d’une cible `make all-tests` qui exécute tous les fichiers `tests/*.nabla` avec `nablac --keep-temp`.
+
+```bash
+make all-tests
+```
+
+Chaque test est considéré comme réussi si le résultat correspond à l’attente :
+- tests normaux (`tests/*.nabla`) doivent renvoyer `0`
+- tests d’erreur dont le nom contient `error` ou `fail` doivent renvoyer une erreur non nulle
+
+La cible affiche `PASS` ou `FAIL` pour chaque fichier de test et renvoie `1` si un test donne un résultat inattendu.
