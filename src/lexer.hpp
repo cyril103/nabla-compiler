@@ -4,7 +4,7 @@
 #include <cctype>
 
 enum class TokenType {
-    KW_DEF, KW_CLASS, KW_NEW, KW_IMPORT, KW_IF, KW_ELSE, IDENTIFIER, LPAREN, RPAREN, COLON, EQUAL, LBRACE, RBRACE, 
+    KW_DEF, KW_CLASS, KW_NEW, KW_IMPORT, KW_IF, KW_ELSE, KW_WHILE, KW_FOR, IDENTIFIER, LPAREN, RPAREN, COLON, EQUAL, LBRACE, RBRACE, 
     COMMA, DOT, INT_LITERAL, PLUS, MINUS, STAR, SLASH, EQEQ, NEQ, LT, GT, LTE, GTE, EOF_TOKEN
 };
 
@@ -89,6 +89,8 @@ public:
                 else if (ident == "import") t = TokenType::KW_IMPORT;
                 else if (ident == "if") t = TokenType::KW_IF;
                 else if (ident == "else") t = TokenType::KW_ELSE;
+                else if (ident == "while") t = TokenType::KW_WHILE;
+                else if (ident == "for") t = TokenType::KW_FOR;
                 
                 tokens.push_back({t, ident, current_line});
                 continue;

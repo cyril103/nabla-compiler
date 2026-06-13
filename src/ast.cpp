@@ -55,6 +55,63 @@ void IfNode::generateASM(std::ofstream& out, CompilerContext& context) {
     out << ".L_endif_" << labelId << ":\n";
 }
 
+BlockNode::BlockNode(std::vector<std::unique_ptr<ASTNode>> exprs)
+    : expressions(std::move(exprs)) {}
+
+std::string BlockNode::getType() {
+    return expressions.back()->getType();
+}
+
+void BlockNode::generateASM(std::ofstream& out, CompilerContext& context) {
+    for (const auto& expr : expressions) {
+        if (expr) expr->generateASM(out, context);
+    }
+}
+
+WhileNode::WhileNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode> body)
+    : condition(std::move(condition)), body(std::move(body)) {}
+
+std::string WhileNode::getType() {
+    return "Int";
+}
+
+void WhileNode::generateASM(std::ofstream& out, CompilerContext& context) {
+    int labelId = context.nextLabelId++;
+    out << ".L_while_cond_" << labelId << ":\n";
+    condition->generateASM(out, context);
+    out << "    cmp rax, 1\n";
+    out << "    je .L_while_end_" << labelId << "\n";
+    body->generateASM(out, context);
+    out << "    jmp .L_while_cond_" << labelId << "\n";
+    out << ".L_while_end_" << labelId << ":\n";
+    out << "    mov rax, 1\n";
+}
+
+ForNode::ForNode(std::unique_ptr<ASTNode> count, std::unique_ptr<ASTNode> body)
+    : count(std::move(count)), body(std::move(body)) {}
+
+std::string ForNode::getType() {
+    return "Int";
+}
+
+void ForNode::generateASM(std::ofstream& out, CompilerContext& context) {
+    count->generateASM(out, context);
+    out << "    push rax\n";
+    int labelId = context.nextLabelId++;
+    out << ".L_for_cond_" << labelId << ":\n";
+    out << "    mov rax, [rsp]\n";
+    out << "    cmp rax, 1\n";
+    out << "    jle .L_for_end_" << labelId << "\n";
+    body->generateASM(out, context);
+    out << "    mov rax, [rsp]\n";
+    out << "    sub rax, 2\n";
+    out << "    mov [rsp], rax\n";
+    out << "    jmp .L_for_cond_" << labelId << "\n";
+    out << ".L_for_end_" << labelId << ":\n";
+    out << "    pop rax\n";
+    out << "    mov rax, 1\n";
+}
+
 FunctionDefNode::FunctionDefNode(std::string clName, std::string name, std::unique_ptr<ASTNode> body)
     : className(std::move(clName)), name(std::move(name)), body(std::move(body)) {}
 
@@ -90,7 +147,11 @@ void MethodCallNode::generateASM(std::ofstream& out, CompilerContext& context) {
         if (methodName == "+" || methodName == "-" || methodName == "*" || methodName == "/") {
             out << "    call Int_method_" << (methodName == "+" ? "add" : methodName == "-" ? "sub" : methodName == "*" ? "mul" : "div") << "\n";
         } else if (methodName == "==" || methodName == "!=" || methodName == "<" || methodName == ">" || methodName == "<=" || methodName == ">=") {
-            out << "    cmp rdi, rsi\n";
+            out << "    mov rax, rdi\n";
+            out << "    shr rax, 1\n";
+            out << "    mov rbx, rsi\n";
+            out << "    shr rbx, 1\n";
+            out << "    cmp rax, rbx\n";
             if (methodName == "==") out << "    sete al\n";
             else if (methodName == "!=") out << "    setne al\n";
             else if (methodName == "<") out << "    setl al\n";
@@ -100,8 +161,6 @@ void MethodCallNode::generateASM(std::ofstream& out, CompilerContext& context) {
             out << "    movzx rax, al\n";
             out << "    shl rax, 1\n";
             out << "    or rax, 1\n";
-            out << "    ret\n";
-            return;
         } else {
             out << "    call Int_method_toString\n";
         }

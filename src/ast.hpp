@@ -66,6 +66,32 @@ public:
     void generateASM(std::ofstream& out, CompilerContext& context) override;
 };
 
+class BlockNode : public ASTNode {
+    std::vector<std::unique_ptr<ASTNode>> expressions;
+public:
+    BlockNode(std::vector<std::unique_ptr<ASTNode>> exprs);
+    std::string getType() override;
+    void generateASM(std::ofstream& out, CompilerContext& context) override;
+};
+
+class WhileNode : public ASTNode {
+    std::unique_ptr<ASTNode> condition;
+    std::unique_ptr<ASTNode> body;
+public:
+    WhileNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode> body);
+    std::string getType() override;
+    void generateASM(std::ofstream& out, CompilerContext& context) override;
+};
+
+class ForNode : public ASTNode {
+    std::unique_ptr<ASTNode> count;
+    std::unique_ptr<ASTNode> body;
+public:
+    ForNode(std::unique_ptr<ASTNode> count, std::unique_ptr<ASTNode> body);
+    std::string getType() override;
+    void generateASM(std::ofstream& out, CompilerContext& context) override;
+};
+
 class FunctionDefNode : public ASTNode {
     std::string className;
     std::string name;

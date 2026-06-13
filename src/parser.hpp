@@ -25,11 +25,14 @@ private:
     void parseImport(std::unique_ptr<ProgramNode>& currentProgram);
     void parseClassDefinition(std::unique_ptr<ProgramNode>& program);
     std::unique_ptr<ASTNode> parseIfExpression();
+    std::unique_ptr<ASTNode> parseWhileExpression();
+    std::unique_ptr<ASTNode> parseForExpression();
     std::unique_ptr<ASTNode> parsePrimary();
     std::unique_ptr<ASTNode> parsePostfix();
     std::unique_ptr<ASTNode> parseMultiplicative();
     std::unique_ptr<ASTNode> parseAdditive();
     std::unique_ptr<ASTNode> parseComparison();
     std::unique_ptr<ASTNode> parseExpression();
+    std::unique_ptr<ASTNode> parseBlock();
     std::unique_ptr<ASTNode> parseFunctionDef(std::string clName);
 };

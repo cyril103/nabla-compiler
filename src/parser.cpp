@@ -96,18 +96,68 @@ std::unique_ptr<ASTNode> Parser::parseIfExpression() {
         consume(TokenType::RPAREN, "Parenthèse fermante attendue après la condition");
     }
     consume(TokenType::LBRACE, "Bloc 'then' attendu après la condition");
-    auto thenBranch = parseExpression();
+    auto thenBranch = parseBlock();
     consume(TokenType::RBRACE, "Fin du bloc 'then' attendue");
     consume(TokenType::KW_ELSE, "mot-clé 'else' attendu");
     consume(TokenType::LBRACE, "Bloc 'else' attendu après 'else'");
-    auto elseBranch = parseExpression();
+    auto elseBranch = parseBlock();
     consume(TokenType::RBRACE, "Fin du bloc 'else' attendue");
     return std::make_unique<IfNode>(std::move(condition), std::move(thenBranch), std::move(elseBranch));
+}
+
+std::unique_ptr<ASTNode> Parser::parseWhileExpression() {
+    consume(TokenType::KW_WHILE, "");
+    if (peek().type == TokenType::LPAREN) {
+        consume(TokenType::LPAREN, "Parenthèse ouvrante attendue après 'while'");
+    }
+    auto condition = parseExpression();
+    if (peek().type == TokenType::RPAREN) {
+        consume(TokenType::RPAREN, "Parenthèse fermante attendue après la condition");
+    }
+    consume(TokenType::LBRACE, "Bloc 'while' attendu après la condition");
+    auto body = parseBlock();
+    consume(TokenType::RBRACE, "Fin du bloc 'while' attendue");
+    return std::make_unique<WhileNode>(std::move(condition), std::move(body));
+}
+
+std::unique_ptr<ASTNode> Parser::parseBlock() {
+    std::vector<std::unique_ptr<ASTNode>> expressions;
+    while (peek().type != TokenType::RBRACE) {
+        expressions.push_back(parseExpression());
+    }
+    if (expressions.empty()) {
+        throw std::runtime_error("à la ligne " + std::to_string(peek().line) + " : bloc vide non autorisé");
+    }
+    if (expressions.size() == 1) {
+        return std::move(expressions[0]);
+    }
+    return std::make_unique<BlockNode>(std::move(expressions));
+}
+
+std::unique_ptr<ASTNode> Parser::parseForExpression() {
+    consume(TokenType::KW_FOR, "");
+    if (peek().type == TokenType::LPAREN) {
+        consume(TokenType::LPAREN, "Parenthèse ouvrante attendue après 'for'");
+    }
+    auto count = parseExpression();
+    if (peek().type == TokenType::RPAREN) {
+        consume(TokenType::RPAREN, "Parenthèse fermante attendue après la condition");
+    }
+    consume(TokenType::LBRACE, "Bloc 'for' attendu après la condition");
+    auto body = parseBlock();
+    consume(TokenType::RBRACE, "Fin du bloc 'for' attendue");
+    return std::make_unique<ForNode>(std::move(count), std::move(body));
 }
 
 std::unique_ptr<ASTNode> Parser::parsePrimary() {
     if (peek().type == TokenType::KW_IF) {
         return parseIfExpression();
+    }
+    if (peek().type == TokenType::KW_WHILE) {
+        return parseWhileExpression();
+    }
+    if (peek().type == TokenType::KW_FOR) {
+        return parseForExpression();
     }
     if (peek().type == TokenType::LPAREN) {
         consume(TokenType::LPAREN, "");
@@ -196,7 +246,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
     consume(TokenType::LPAREN, ""); consume(TokenType::RPAREN, "");
     consume(TokenType::COLON, ""); consume(TokenType::IDENTIFIER, "Type de retour attendu").value;
     consume(TokenType::EQUAL, ""); consume(TokenType::LBRACE, "");
-    auto body = parseExpression();
+    auto body = parseBlock();
     consume(TokenType::RBRACE, "");
     return std::make_unique<FunctionDefNode>(clName, name, std::move(body));
 }
