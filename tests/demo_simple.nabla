@@ -1,0 +1,10 @@
+def main(): Int = {
+    var sum = 0
+    val limit = 5
+    var i = 0
+    while (i < limit) {
+        sum = sum + i
+        i = i + 1
+    }
+    if (sum == 10) { sum } else { 0 }
+}
