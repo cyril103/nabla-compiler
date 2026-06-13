@@ -1,5 +1,13 @@
+# Build artifacts
+/build/
 nablac
+
+# Temporary assembly/object files
 *_tmp.asm
 *_tmp.o
-tests/test_import
+
+# Legacy test executables (in case some remain in repo root)
+test_*
+
+# macOS
 .DS_Store
