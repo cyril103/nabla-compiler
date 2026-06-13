@@ -58,8 +58,12 @@ int main(int argc, char* argv[]) {
     std::filesystem::path mainPath = sourcePath;
     if (!mainPath.is_absolute()) mainPath = std::filesystem::absolute(mainPath);
     std::string exeName = mainPath.stem().string();
-    std::string asmFilename = exeName + "_tmp.asm";
-    std::string objFilename = exeName + "_tmp.o";
+    const char* buildDirEnv = std::getenv("NABLA_BUILD_DIR");
+    std::filesystem::path buildDir = buildDirEnv ? std::filesystem::path(buildDirEnv) : std::filesystem::path(".");
+    if (!std::filesystem::exists(buildDir)) std::filesystem::create_directories(buildDir);
+    std::string asmFilename = (buildDir / (exeName + "_tmp.asm")).string();
+    std::string objFilename = (buildDir / (exeName + "_tmp.o")).string();
+    std::string exePath = (buildDir / exeName).string();
 
     std::ifstream file(mainPath);
     if (!file.is_open()) { std::cerr << "Erreur: Fichier introuvable '" << mainPath << "'\n"; return 1; }
@@ -82,7 +86,7 @@ int main(int argc, char* argv[]) {
         asmFile.close();
 
         std::string nasmCmd = "nasm -f elf64 " + asmFilename + " -o " + objFilename;
-        std::string ldCmd = "ld " + objFilename + " -o " + exeName;
+        std::string ldCmd = "ld " + objFilename + " -o " + exePath;
         if (std::system(nasmCmd.c_str()) != 0 || std::system(ldCmd.c_str()) != 0) return 1;
 
         if (!keepTemp) {
@@ -96,7 +100,7 @@ int main(int argc, char* argv[]) {
         if (keepTemp) {
             std::cout << "\033[1;33m[Nabla] Fichiers temporaires conservés : " << asmFilename << ", " << objFilename << "\033[0m\n";
         }
-        std::cout << "\033[1;32m[Nabla] Exécutable compilé avec succès : ./" << exeName << "\033[0m\n";
+        std::cout << "\033[1;32m[Nabla] Exécutable compilé avec succès : ./" << exePath << "\033[0m\n";
     } catch (const std::exception& e) {
         std::cerr << "Erreur: Parser Error " << e.what() << "\n";
         return 1;
