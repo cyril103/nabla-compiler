@@ -123,7 +123,7 @@ std::unique_ptr<ASTNode> Parser::parseWhileExpression() {
 std::unique_ptr<ASTNode> Parser::parseBlock() {
     std::vector<std::unique_ptr<ASTNode>> expressions;
     while (peek().type != TokenType::RBRACE) {
-        expressions.push_back(parseExpression());
+        expressions.push_back(parseStatement());
     }
     if (expressions.empty()) {
         throw std::runtime_error("à la ligne " + std::to_string(peek().line) + " : bloc vide non autorisé");
@@ -132,6 +132,28 @@ std::unique_ptr<ASTNode> Parser::parseBlock() {
         return std::move(expressions[0]);
     }
     return std::make_unique<BlockNode>(std::move(expressions));
+}
+
+std::unique_ptr<ASTNode> Parser::parseStatement() {
+    if (peek().type == TokenType::KW_VAL || peek().type == TokenType::KW_VAR) {
+        bool isMutable = (peek().type == TokenType::KW_VAR);
+        index++; // consume kw
+        std::string name = consume(TokenType::IDENTIFIER, "Nom de variable attendu").value;
+        consume(TokenType::EQUAL, "Initialisation requise pour 'val'/'var'");
+        auto init = parseExpression();
+        return std::make_unique<VarDeclNode>(name, std::move(init), isMutable);
+    }
+    if (peek().type == TokenType::IDENTIFIER) {
+        // possible assignment
+        Token t = tokens[index];
+        if (index + 1 < tokens.size() && tokens[index + 1].type == TokenType::EQUAL) {
+            std::string name = consume(TokenType::IDENTIFIER, "").value;
+            consume(TokenType::EQUAL, "");
+            auto rhs = parseExpression();
+            return std::make_unique<AssignmentNode>(name, std::move(rhs));
+        }
+    }
+    return parseExpression();
 }
 
 std::unique_ptr<ASTNode> Parser::parseForExpression() {
@@ -185,7 +207,7 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         if (!currentParsingClass.empty() && context.classLayouts[currentParsingClass].count(name)) {
             return std::make_unique<FieldAccessNode>(currentParsingClass, name);
         }
-        throw std::runtime_error("à la ligne " + std::to_string(peek().line) + " : identifiant inconnu '" + name + "'");
+        return std::make_unique<IdentifierNode>(name);
     }
     throw std::runtime_error("à la ligne " + std::to_string(peek().line) + " : expression primaire invalide '" + peek().value + "'");
 }

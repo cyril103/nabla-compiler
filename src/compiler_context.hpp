@@ -11,4 +11,11 @@ struct CompilerContext {
     std::filesystem::path rootDir;
     std::filesystem::path currentFile;
     int nextLabelId = 0;
+    struct SymbolInfo {
+        int offsetFromRbp;
+        bool isMutable;
+        std::string type;
+    };
+    std::map<std::string, SymbolInfo> localVars;
+    int localStackSize = 0; // bytes allocated for locals (grows by 8)
 };

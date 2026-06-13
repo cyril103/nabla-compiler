@@ -34,5 +34,6 @@ private:
     std::unique_ptr<ASTNode> parseComparison();
     std::unique_ptr<ASTNode> parseExpression();
     std::unique_ptr<ASTNode> parseBlock();
+    std::unique_ptr<ASTNode> parseStatement();
     std::unique_ptr<ASTNode> parseFunctionDef(std::string clName);
 };

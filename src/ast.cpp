@@ -190,6 +190,59 @@ void FunctionDefNode::generateASM(std::ofstream& out, CompilerContext& context) 
     if (!className.empty()) out << className << "_method_" << name << ":\n";
     else out << name << ":\n";
     out << "    push rbp\n    mov rbp, rsp\n";
+    // reset local symbol table for the function
+    context.localVars.clear();
+    context.localStackSize = 0;
     if (body) body->generateASM(out, context);
     out << "    mov rsp, rbp\n    pop rbp\n    ret\n\n";
+}
+
+IdentifierNode::IdentifierNode(std::string n) : name(std::move(n)) {}
+
+std::string IdentifierNode::getType() {
+    return "Int";
+}
+
+void IdentifierNode::generateASM(std::ofstream& out, CompilerContext& context) {
+    auto it = context.localVars.find(name);
+    if (it == context.localVars.end()) {
+        throw std::runtime_error("Variable non déclarée: " + name);
+    }
+    int offset = it->second.offsetFromRbp;
+    out << "    mov rax, [rbp - " << offset << "]\n";
+}
+
+VarDeclNode::VarDeclNode(std::string n, std::unique_ptr<ASTNode> init, bool mut)
+    : name(std::move(n)), initializer(std::move(init)), isMutable(mut) {}
+
+std::string VarDeclNode::getType() {
+    return initializer ? initializer->getType() : "Unit";
+}
+
+void VarDeclNode::generateASM(std::ofstream& out, CompilerContext& context) {
+    if (!initializer) throw std::runtime_error("Initialisateur requis pour la declaration de variable: " + name);
+    // generate initializer into rax
+    initializer->generateASM(out, context);
+    // allocate 8 bytes on stack
+    out << "    sub rsp, 8\n";
+    context.localStackSize += 8;
+    int offset = context.localStackSize;
+    context.localVars[name] = { offset, isMutable, initializer->getType() };
+    out << "    mov [rbp - " << offset << "], rax\n";
+}
+
+AssignmentNode::AssignmentNode(std::string n, std::unique_ptr<ASTNode> v)
+    : name(std::move(n)), value(std::move(v)) {}
+
+std::string AssignmentNode::getType() {
+    return value ? value->getType() : "Unit";
+}
+
+void AssignmentNode::generateASM(std::ofstream& out, CompilerContext& context) {
+    auto it = context.localVars.find(name);
+    if (it == context.localVars.end()) throw std::runtime_error("Affectation sur variable non déclarée: " + name);
+    if (!it->second.isMutable) throw std::runtime_error("Impossible d'affecter à une 'val' immuable: " + name);
+    value->generateASM(out, context);
+    int offset = it->second.offsetFromRbp;
+    out << "    mov [rbp - " << offset << "], rax\n";
 }

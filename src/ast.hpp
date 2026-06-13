@@ -101,3 +101,31 @@ public:
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
 };
+
+class IdentifierNode : public ASTNode {
+    std::string name;
+public:
+    IdentifierNode(std::string n);
+    std::string getType() override;
+    void generateASM(std::ofstream& out, CompilerContext& context) override;
+    const std::string& getName() const { return name; }
+};
+
+class VarDeclNode : public ASTNode {
+    std::string name;
+    std::unique_ptr<ASTNode> initializer;
+    bool isMutable;
+public:
+    VarDeclNode(std::string n, std::unique_ptr<ASTNode> init, bool mut);
+    std::string getType() override;
+    void generateASM(std::ofstream& out, CompilerContext& context) override;
+};
+
+class AssignmentNode : public ASTNode {
+    std::string name;
+    std::unique_ptr<ASTNode> value;
+public:
+    AssignmentNode(std::string n, std::unique_ptr<ASTNode> v);
+    std::string getType() override;
+    void generateASM(std::ofstream& out, CompilerContext& context) override;
+};
