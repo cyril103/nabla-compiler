@@ -4,8 +4,8 @@
 #include <cctype>
 
 enum class TokenType {
-    KW_DEF, KW_CLASS, KW_NEW, KW_IMPORT, IDENTIFIER, LPAREN, RPAREN, COLON, EQUAL, LBRACE, RBRACE, 
-    COMMA, DOT, INT_LITERAL, PLUS, MINUS, STAR, SLASH, EOF_TOKEN
+    KW_DEF, KW_CLASS, KW_NEW, KW_IMPORT, KW_IF, KW_ELSE, IDENTIFIER, LPAREN, RPAREN, COLON, EQUAL, LBRACE, RBRACE, 
+    COMMA, DOT, INT_LITERAL, PLUS, MINUS, STAR, SLASH, EQEQ, NEQ, LT, GT, LTE, GTE, EOF_TOKEN
 };
 
 struct Token { 
@@ -33,7 +33,43 @@ public:
             if (current == '(') { tokens.push_back({TokenType::LPAREN, "(", current_line}); index++; continue; }
             if (current == ')') { tokens.push_back({TokenType::RPAREN, ")", current_line}); index++; continue; }
             if (current == ':') { tokens.push_back({TokenType::COLON, ":", current_line});  index++; continue; }
-            if (current == '=') { tokens.push_back({TokenType::EQUAL, "=", current_line});  index++; continue; }
+            if (current == '=') {
+                if (index + 1 < src.size() && src[index + 1] == '=') {
+                    tokens.push_back({TokenType::EQEQ, "==", current_line});
+                    index += 2;
+                } else {
+                    tokens.push_back({TokenType::EQUAL, "=", current_line});
+                    index++;
+                }
+                continue;
+            }
+            if (current == '!') {
+                if (index + 1 < src.size() && src[index + 1] == '=') {
+                    tokens.push_back({TokenType::NEQ, "!=", current_line});
+                    index += 2;
+                    continue;
+                }
+            }
+            if (current == '<') {
+                if (index + 1 < src.size() && src[index + 1] == '=') {
+                    tokens.push_back({TokenType::LTE, "<=", current_line});
+                    index += 2;
+                } else {
+                    tokens.push_back({TokenType::LT, "<", current_line});
+                    index++;
+                }
+                continue;
+            }
+            if (current == '>') {
+                if (index + 1 < src.size() && src[index + 1] == '=') {
+                    tokens.push_back({TokenType::GTE, ">=", current_line});
+                    index += 2;
+                } else {
+                    tokens.push_back({TokenType::GT, ">", current_line});
+                    index++;
+                }
+                continue;
+            }
             if (current == '{') { tokens.push_back({TokenType::LBRACE, "{", current_line}); index++; continue; }
             if (current == '}') { tokens.push_back({TokenType::RBRACE, "}", current_line}); index++; continue; }
             if (current == ',') { tokens.push_back({TokenType::COMMA, ",", current_line});  index++; continue; }
@@ -51,6 +87,8 @@ public:
                 else if (ident == "class") t = TokenType::KW_CLASS;
                 else if (ident == "new") t = TokenType::KW_NEW;
                 else if (ident == "import") t = TokenType::KW_IMPORT;
+                else if (ident == "if") t = TokenType::KW_IF;
+                else if (ident == "else") t = TokenType::KW_ELSE;
                 
                 tokens.push_back({t, ident, current_line});
                 continue;

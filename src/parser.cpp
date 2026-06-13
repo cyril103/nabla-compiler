@@ -86,7 +86,29 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
     currentParsingClass.clear();
 }
 
+std::unique_ptr<ASTNode> Parser::parseIfExpression() {
+    consume(TokenType::KW_IF, "");
+    if (peek().type == TokenType::LPAREN) {
+        consume(TokenType::LPAREN, "Parenthèse ouvrante attendue après 'if'");
+    }
+    auto condition = parseExpression();
+    if (peek().type == TokenType::RPAREN) {
+        consume(TokenType::RPAREN, "Parenthèse fermante attendue après la condition");
+    }
+    consume(TokenType::LBRACE, "Bloc 'then' attendu après la condition");
+    auto thenBranch = parseExpression();
+    consume(TokenType::RBRACE, "Fin du bloc 'then' attendue");
+    consume(TokenType::KW_ELSE, "mot-clé 'else' attendu");
+    consume(TokenType::LBRACE, "Bloc 'else' attendu après 'else'");
+    auto elseBranch = parseExpression();
+    consume(TokenType::RBRACE, "Fin du bloc 'else' attendue");
+    return std::make_unique<IfNode>(std::move(condition), std::move(thenBranch), std::move(elseBranch));
+}
+
 std::unique_ptr<ASTNode> Parser::parsePrimary() {
+    if (peek().type == TokenType::KW_IF) {
+        return parseIfExpression();
+    }
     if (peek().type == TokenType::LPAREN) {
         consume(TokenType::LPAREN, "");
         auto expr = parseExpression();
@@ -144,7 +166,7 @@ std::unique_ptr<ASTNode> Parser::parseMultiplicative() {
     return expr;
 }
 
-std::unique_ptr<ASTNode> Parser::parseExpression() {
+std::unique_ptr<ASTNode> Parser::parseAdditive() {
     auto expr = parseMultiplicative();
     while (peek().type == TokenType::PLUS || peek().type == TokenType::MINUS) {
         Token op = tokens[index++];
@@ -152,6 +174,20 @@ std::unique_ptr<ASTNode> Parser::parseExpression() {
         expr = std::make_unique<MethodCallNode>(std::move(expr), op.value, std::move(right));
     }
     return expr;
+}
+
+std::unique_ptr<ASTNode> Parser::parseComparison() {
+    auto expr = parseAdditive();
+    while (peek().type == TokenType::EQEQ || peek().type == TokenType::NEQ || peek().type == TokenType::LT || peek().type == TokenType::GT || peek().type == TokenType::LTE || peek().type == TokenType::GTE) {
+        Token op = tokens[index++];
+        auto right = parseAdditive();
+        expr = std::make_unique<MethodCallNode>(std::move(expr), op.value, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<ASTNode> Parser::parseExpression() {
+    return parseComparison();
 }
 
 std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {

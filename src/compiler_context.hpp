@@ -10,4 +10,5 @@ struct CompilerContext {
     std::set<std::string> parsedFiles;
     std::filesystem::path rootDir;
     std::filesystem::path currentFile;
+    int nextLabelId = 0;
 };

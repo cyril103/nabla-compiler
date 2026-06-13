@@ -56,6 +56,16 @@ public:
     void generateASM(std::ofstream& out, CompilerContext& context) override;
 };
 
+class IfNode : public ASTNode {
+    std::unique_ptr<ASTNode> condition;
+    std::unique_ptr<ASTNode> thenBranch;
+    std::unique_ptr<ASTNode> elseBranch;
+public:
+    IfNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode> thenBranch, std::unique_ptr<ASTNode> elseBranch);
+    std::string getType() override;
+    void generateASM(std::ofstream& out, CompilerContext& context) override;
+};
+
 class FunctionDefNode : public ASTNode {
     std::string className;
     std::string name;

@@ -1,0 +1,13 @@
+class Compare(a: Int, b: Int) {
+    def run(): Int = {
+        if a < b {
+            1
+        } else {
+            0
+        }
+    }
+}
+
+def main(): Int = {
+    (new Compare(1, 2)).run()
+}

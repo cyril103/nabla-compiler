@@ -1,0 +1,7 @@
+def main(): Int = {
+    if 0 {
+        10
+    } else {
+        20
+    }
+}

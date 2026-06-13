@@ -36,6 +36,25 @@ std::string FieldAccessNode::getType() {
     return "Int";
 }
 
+IfNode::IfNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode> thenBranch, std::unique_ptr<ASTNode> elseBranch)
+    : condition(std::move(condition)), thenBranch(std::move(thenBranch)), elseBranch(std::move(elseBranch)) {}
+
+std::string IfNode::getType() {
+    return "Int";
+}
+
+void IfNode::generateASM(std::ofstream& out, CompilerContext& context) {
+    condition->generateASM(out, context);
+    int labelId = context.nextLabelId++;
+    out << "    cmp rax, 1\n";
+    out << "    je .L_else_" << labelId << "\n";
+    thenBranch->generateASM(out, context);
+    out << "    jmp .L_endif_" << labelId << "\n";
+    out << ".L_else_" << labelId << ":\n";
+    elseBranch->generateASM(out, context);
+    out << ".L_endif_" << labelId << ":\n";
+}
+
 FunctionDefNode::FunctionDefNode(std::string clName, std::string name, std::unique_ptr<ASTNode> body)
     : className(std::move(clName)), name(std::move(name)), body(std::move(body)) {}
 
@@ -68,7 +87,24 @@ void MethodCallNode::generateASM(std::ofstream& out, CompilerContext& context) {
     out << "    mov rdi, rax\n";
     if (argument) { out << "    pop rsi\n"; }
     if (targetClass == "Int") {
-        out << "    call Int_method_" << (methodName == "+" ? "add" : methodName == "-" ? "sub" : methodName == "*" ? "mul" : methodName == "/" ? "div" : "toString") << "\n";
+        if (methodName == "+" || methodName == "-" || methodName == "*" || methodName == "/") {
+            out << "    call Int_method_" << (methodName == "+" ? "add" : methodName == "-" ? "sub" : methodName == "*" ? "mul" : "div") << "\n";
+        } else if (methodName == "==" || methodName == "!=" || methodName == "<" || methodName == ">" || methodName == "<=" || methodName == ">=") {
+            out << "    cmp rdi, rsi\n";
+            if (methodName == "==") out << "    sete al\n";
+            else if (methodName == "!=") out << "    setne al\n";
+            else if (methodName == "<") out << "    setl al\n";
+            else if (methodName == ">") out << "    setg al\n";
+            else if (methodName == "<=") out << "    setle al\n";
+            else if (methodName == ">=") out << "    setge al\n";
+            out << "    movzx rax, al\n";
+            out << "    shl rax, 1\n";
+            out << "    or rax, 1\n";
+            out << "    ret\n";
+            return;
+        } else {
+            out << "    call Int_method_toString\n";
+        }
     } else {
         out << "    call " << targetClass << "_method_" << methodName << "\n";
     }
