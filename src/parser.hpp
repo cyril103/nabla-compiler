@@ -44,5 +44,6 @@ private:
     std::unique_ptr<ASTNode> parseBlock();
     std::unique_ptr<ASTNode> parseStatement();
     std::unique_ptr<ASTNode> parseFunctionDef(std::string clName);
+    std::vector<std::unique_ptr<ASTNode>> parseArguments();
     const ParsedSymbol* findLocal(const std::string& name) const;
 };

@@ -1,0 +1,8 @@
+def identity(value: Int): Int = {
+    value = 2
+    value
+}
+
+def main(): Int = {
+    identity(1)
+}

@@ -20,6 +20,9 @@ Le langage met l'accent sur une unification forte des types (tout est objet, y c
 * **Modèle Objet & Pointeur `this` :** L'instanciation via `new` crée une disposition linéaire d'éléments de 8 octets (Offset 0: Pointeur de VTable, Offsets suivants: Attributs). Lors de l'appel d'une méthode, le registre `RDI` reçoit secrètement l'adresse de l'objet faisant office de contexte `this`.
 * **Bump Allocator Interne :** L'allocation des objets se fait sur un tas statique virtuel (`global_heap`) géré par un pointeur de tas (`heap_pointer`) incrémenté de manière synchrone en assembleur.
 * **Système d'Import Résolutif :** Gestion des dépendances par graphe de fichiers avec détection des inclusions cycliques pour éviter la duplication de code généré.
+* **Fonctions et Méthodes Paramétrées :** Les signatures sont validées
+  statiquement. Les fonctions globales acceptent jusqu'à 6 paramètres et les
+  méthodes jusqu'à 5 paramètres, `RDI` étant réservé à `this`.
 
 ---
 
@@ -58,6 +61,24 @@ make test SRC=tests/test_import.nabla
 ```
 
 Le binaire exécuté est déterminé automatiquement à partir du nom de fichier `SRC`.
+
+### Fonctions et méthodes avec paramètres
+
+```nabla
+def add(a: Int, b: Int): Int = {
+    a + b
+}
+
+class Calculator(base: Int) {
+    def add(value: Int): Int = {
+        base + value
+    }
+}
+
+def main(): Int = {
+    add(20, (new Calculator(2)).add(20))
+}
+```
 
 ### Fichier ASM généré
 

@@ -16,12 +16,44 @@ void SemanticAnalyzer::validateDeclaredTypes() const {
                     "Type inconnu '" + fieldType + "' pour le champ '" + className + "." + fieldName + "'");
             }
         }
-        for (const auto& [methodName, returnType] : classInfo.methods) {
-            if (!isKnownType(returnType)) {
+        for (const auto& [methodName, signature] : classInfo.methods) {
+            if (signature.parameters.size() > 5) {
                 throw std::runtime_error(
-                    "Type de retour inconnu '" + returnType + "' pour la méthode '" +
+                    "La méthode '" + className + "." + methodName + "' dépasse la limite de 5 paramètres");
+            }
+            for (const auto& parameter : signature.parameters) {
+                if (!isKnownType(parameter.type)) {
+                    throw std::runtime_error(
+                        "Type inconnu '" + parameter.type + "' pour le paramètre '" +
+                        className + "." + methodName + "." + parameter.name + "'");
+                }
+            }
+            if (!isKnownType(signature.returnType)) {
+                throw std::runtime_error(
+                    "Type de retour inconnu '" + signature.returnType + "' pour la méthode '" +
                     className + "." + methodName + "'");
             }
+        }
+    }
+    for (const auto& [functionName, signature] : context.functions) {
+        if (signature.parameters.size() > 6) {
+            throw std::runtime_error(
+                "La fonction '" + functionName + "' dépasse la limite de 6 paramètres");
+        }
+        if (functionName == "main" && !signature.parameters.empty()) {
+            throw std::runtime_error("La fonction 'main' ne peut pas accepter de paramètres");
+        }
+        for (const auto& parameter : signature.parameters) {
+            if (!isKnownType(parameter.type)) {
+                throw std::runtime_error(
+                    "Type inconnu '" + parameter.type + "' pour le paramètre '" +
+                    functionName + "." + parameter.name + "'");
+            }
+        }
+        if (!isKnownType(signature.returnType)) {
+            throw std::runtime_error(
+                "Type de retour inconnu '" + signature.returnType + "' pour la fonction '" +
+                functionName + "'");
         }
     }
 }

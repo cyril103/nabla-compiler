@@ -215,16 +215,18 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         consume(TokenType::KW_NEW, "");
         std::string clName = consume(TokenType::IDENTIFIER, "Nom de classe attendu après 'new'").value;
         consume(TokenType::LPAREN, "");
-        std::vector<std::unique_ptr<ASTNode>> args;
-        while (peek().type != TokenType::RPAREN) {
-            args.push_back(parseExpression());
-            if (peek().type == TokenType::COMMA) consume(TokenType::COMMA, "");
-        }
+        auto args = parseArguments();
         consume(TokenType::RPAREN, "");
         return std::make_unique<NewNode>(clName, std::move(args));
     }
     if (peek().type == TokenType::IDENTIFIER) {
         std::string name = consume(TokenType::IDENTIFIER, "").value;
+        if (peek().type == TokenType::LPAREN) {
+            consume(TokenType::LPAREN, "");
+            auto arguments = parseArguments();
+            consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
+            return std::make_unique<FunctionCallNode>(name, std::move(arguments));
+        }
         if (const ParsedSymbol* symbol = findLocal(name)) {
             return std::make_unique<IdentifierNode>(name, symbol->internalName, symbol->type);
         }
@@ -246,12 +248,9 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
         consume(TokenType::DOT, "");
         std::string method = consume(TokenType::IDENTIFIER, "Nom de méthode attendu après '.'").value;
         consume(TokenType::LPAREN, "");
-        std::unique_ptr<ASTNode> arg;
-        if (peek().type != TokenType::RPAREN) {
-            arg = parseExpression();
-        }
+        auto arguments = parseArguments();
         consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de méthode");
-        expr = std::make_unique<MethodCallNode>(std::move(expr), method, std::move(arg));
+        expr = std::make_unique<MethodCallNode>(std::move(expr), method, std::move(arguments));
     }
     return expr;
 }
@@ -261,7 +260,9 @@ std::unique_ptr<ASTNode> Parser::parseMultiplicative() {
     while (peek().type == TokenType::STAR || peek().type == TokenType::SLASH) {
         Token op = tokens[index++];
         auto right = parsePostfix();
-        expr = std::make_unique<MethodCallNode>(std::move(expr), op.value, std::move(right));
+        std::vector<std::unique_ptr<ASTNode>> arguments;
+        arguments.push_back(std::move(right));
+        expr = std::make_unique<MethodCallNode>(std::move(expr), op.value, std::move(arguments));
     }
     return expr;
 }
@@ -271,7 +272,9 @@ std::unique_ptr<ASTNode> Parser::parseAdditive() {
     while (peek().type == TokenType::PLUS || peek().type == TokenType::MINUS) {
         Token op = tokens[index++];
         auto right = parseMultiplicative();
-        expr = std::make_unique<MethodCallNode>(std::move(expr), op.value, std::move(right));
+        std::vector<std::unique_ptr<ASTNode>> arguments;
+        arguments.push_back(std::move(right));
+        expr = std::make_unique<MethodCallNode>(std::move(expr), op.value, std::move(arguments));
     }
     return expr;
 }
@@ -281,7 +284,9 @@ std::unique_ptr<ASTNode> Parser::parseComparison() {
     while (peek().type == TokenType::EQEQ || peek().type == TokenType::NEQ || peek().type == TokenType::LT || peek().type == TokenType::GT || peek().type == TokenType::LTE || peek().type == TokenType::GTE) {
         Token op = tokens[index++];
         auto right = parseAdditive();
-        expr = std::make_unique<MethodCallNode>(std::move(expr), op.value, std::move(right));
+        std::vector<std::unique_ptr<ASTNode>> arguments;
+        arguments.push_back(std::move(right));
+        expr = std::make_unique<MethodCallNode>(std::move(expr), op.value, std::move(arguments));
     }
     return expr;
 }
@@ -293,19 +298,61 @@ std::unique_ptr<ASTNode> Parser::parseExpression() {
 std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
     consume(TokenType::KW_DEF, "");
     std::string name = consume(TokenType::IDENTIFIER, "Nom de fonction attendu").value;
-    consume(TokenType::LPAREN, ""); consume(TokenType::RPAREN, "");
+    consume(TokenType::LPAREN, "");
+    std::vector<FunctionDefNode::Parameter> parameters;
+    std::vector<CompilerContext::ParameterInfo> signatureParameters;
+    localScopes.emplace_back();
+    while (peek().type != TokenType::RPAREN) {
+        std::string parameterName = consume(TokenType::IDENTIFIER, "Nom de paramètre attendu").value;
+        consume(TokenType::COLON, "':' attendu après le nom du paramètre");
+        std::string parameterType = consume(TokenType::IDENTIFIER, "Type de paramètre attendu").value;
+        if (localScopes.back().count(parameterName)) {
+            throw std::runtime_error("Paramètre déjà déclaré: " + parameterName);
+        }
+        std::string symbolName = parameterName + "#" + std::to_string(nextSymbolId++);
+        localScopes.back()[parameterName] = {symbolName, parameterType, false};
+        parameters.push_back({parameterName, symbolName, parameterType});
+        signatureParameters.push_back({parameterName, parameterType});
+        if (peek().type == TokenType::COMMA) {
+            consume(TokenType::COMMA, "");
+        } else if (peek().type != TokenType::RPAREN) {
+            throw std::runtime_error("',' ou ')' attendu après le paramètre");
+        }
+    }
+    consume(TokenType::RPAREN, "");
     consume(TokenType::COLON, "");
     std::string returnType = consume(TokenType::IDENTIFIER, "Type de retour attendu").value;
+    CompilerContext::FunctionSignature signature{signatureParameters, returnType};
     if (!clName.empty()) {
         if (context.classes[clName].methods.count(name)) {
             throw std::runtime_error("Méthode déjà déclarée dans '" + clName + "': " + name);
         }
-        context.classes[clName].methods[name] = returnType;
+        context.classes[clName].methods[name] = signature;
+    } else {
+        if (context.functions.count(name)) {
+            throw std::runtime_error("Fonction déjà déclarée: " + name);
+        }
+        context.functions[name] = signature;
     }
     consume(TokenType::EQUAL, ""); consume(TokenType::LBRACE, "");
     auto body = parseBlock();
     consume(TokenType::RBRACE, "");
-    return std::make_unique<FunctionDefNode>(clName, name, returnType, std::move(body));
+    localScopes.pop_back();
+    return std::make_unique<FunctionDefNode>(
+        clName, name, returnType, std::move(parameters), std::move(body));
+}
+
+std::vector<std::unique_ptr<ASTNode>> Parser::parseArguments() {
+    std::vector<std::unique_ptr<ASTNode>> arguments;
+    while (peek().type != TokenType::RPAREN) {
+        arguments.push_back(parseExpression());
+        if (peek().type == TokenType::COMMA) {
+            consume(TokenType::COMMA, "");
+        } else if (peek().type != TokenType::RPAREN) {
+            throw std::runtime_error("',' ou ')' attendu après l'argument");
+        }
+    }
+    return arguments;
 }
 
 const Parser::ParsedSymbol* Parser::findLocal(const std::string& name) const {

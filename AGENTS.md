@@ -33,10 +33,12 @@ Source Nabla
 
 Le pipeline implemente actuellement :
 
-- tokenisation et parsing des classes, imports, fonctions sans parametres,
+- tokenisation et parsing des classes, imports, fonctions et methodes avec
+  parametres,
   expressions arithmetiques, comparaisons, `if`, `while`, `for`, `val` et `var`;
 - resolution des imports avec protection contre les cycles;
-- objets avec champs de constructeur et appels de methodes sans parametres;
+- objets avec champs de constructeur et appels de methodes parametres;
+- fonctions globales appelables avec parametres;
 - entiers immediats avec pointer tagging;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
@@ -47,9 +49,8 @@ Le pipeline implemente actuellement :
 
 Limites importantes :
 
-- les fonctions et methodes n'acceptent pas encore de parametres;
-- les appels de methodes ne gerent au plus qu'un argument syntaxique, reserve
-  actuellement aux operations internes de `Int`;
+- les fonctions globales sont limitees a 6 parametres et les methodes a 5,
+  conformement a la convention d'appel actuelle;
 - il n'existe pas encore de representation intermediaire entre AST et ASM;
 - les diagnostics ne contiennent pas encore systematiquement fichier, ligne et
   colonne;
@@ -64,6 +65,7 @@ Limites importantes :
 - Les emplacements de variables locales sont reserves une seule fois dans le
   prologue de fonction.
 - Une allocation imbriquee ne doit jamais modifier l'adresse de l'objet parent.
+- Les methodes sauvegardent `this` dans leur frame avant tout appel imbrique.
 - Toute nouvelle fonctionnalite du langage doit avoir au moins un test positif.
 - Toute nouvelle validation doit avoir au moins un test d'erreur.
 
@@ -86,11 +88,11 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ### P0 - Parametres De Fonctions Et Methodes
 
-- [ ] Parser des parametres nommes et types.
-- [ ] Enregistrer les signatures completes dans le registre semantique.
-- [ ] Valider nombre et types des arguments.
-- [ ] Definir la convention d'appel x86-64 Nabla.
-- [ ] Ajouter des tests pour fonctions, methodes et erreurs d'appel.
+- [x] Parser des parametres nommes et types.
+- [x] Enregistrer les signatures completes dans le registre semantique.
+- [x] Valider nombre et types des arguments.
+- [x] Definir la convention d'appel x86-64 Nabla.
+- [x] Ajouter des tests pour fonctions, methodes et erreurs d'appel.
 
 ### P1 - Diagnostics Sources
 
@@ -129,8 +131,10 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout de `AGENTS.md`, des conventions de contribution et de
-  la feuille de route maintenue.
+- Prochain commit - Ajout des parametres de fonctions et methodes, appels
+  globaux, validation des arguments et convention d'appel x86-64.
+- `93b942f` - Ajout de `AGENTS.md`, des conventions de contribution et de la
+  feuille de route maintenue.
 - `469f535` - Ajout de la phase d'analyse semantique et des validations de types.
 - `165a521` - Stabilisation des variables locales, portees, pile et allocations
   d'objets imbriquees; execution verifiee dans la suite de tests.
@@ -138,6 +142,5 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Implementer les parametres de fonctions et methodes de bout en bout. Cette etape
-doit commencer par les signatures semantiques, puis definir la convention
-d'appel, avant de modifier le generateur ASM.
+Ajouter des diagnostics sources uniformes avec fichier, ligne et colonne, puis
+les propager du lexer jusqu'a l'analyse semantique.

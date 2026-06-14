@@ -1,0 +1,15 @@
+class Helper() {
+    def identity(value: Int): Int = {
+        value
+    }
+}
+
+class Calculator(base: Int) {
+    def add(value: Int): Int = {
+        base + (new Helper()).identity(value)
+    }
+}
+
+def main(): Int = {
+    (new Calculator(20)).add(22)
+}

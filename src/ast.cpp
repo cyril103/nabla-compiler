@@ -1,5 +1,44 @@
 #include "ast.hpp"
 
+namespace {
+const std::vector<std::string> GLOBAL_ARGUMENT_REGISTERS = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+const std::vector<std::string> METHOD_ARGUMENT_REGISTERS = {"rsi", "rdx", "rcx", "r8", "r9"};
+
+void validateArguments(
+    const std::string& callableName,
+    const std::vector<std::unique_ptr<ASTNode>>& arguments,
+    const std::vector<CompilerContext::ParameterInfo>& parameters) {
+    if (arguments.size() != parameters.size()) {
+        throw std::runtime_error(
+            callableName + ": " + std::to_string(parameters.size()) +
+            " argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
+    }
+    for (size_t i = 0; i < arguments.size(); ++i) {
+        if (arguments[i]->getType() != parameters[i].type) {
+            throw std::runtime_error(
+                callableName + ", paramètre '" + parameters[i].name + "': type '" +
+                parameters[i].type + "' attendu, '" + arguments[i]->getType() + "' reçu");
+        }
+    }
+}
+
+void pushArguments(
+    std::ofstream& out,
+    CompilerContext& context,
+    const std::vector<std::unique_ptr<ASTNode>>& arguments) {
+    for (auto argument = arguments.rbegin(); argument != arguments.rend(); ++argument) {
+        (*argument)->generateASM(out, context);
+        out << "    push rax\n";
+    }
+}
+
+void popArguments(std::ofstream& out, const std::vector<std::string>& registers, size_t argumentCount) {
+    for (size_t i = 0; i < argumentCount; ++i) {
+        out << "    pop " << registers[i] << "\n";
+    }
+}
+}
+
 std::string ProgramNode::getType() {
     return "Unit";
 }
@@ -53,8 +92,9 @@ void NewNode::validateSemantics(CompilerContext& context) {
     }
 }
 
-MethodCallNode::MethodCallNode(std::unique_ptr<ASTNode> rec, std::string method, std::unique_ptr<ASTNode> arg)
-    : receiver(std::move(rec)), methodName(std::move(method)), argument(std::move(arg)) {}
+MethodCallNode::MethodCallNode(
+    std::unique_ptr<ASTNode> rec, std::string method, std::vector<std::unique_ptr<ASTNode>> args)
+    : receiver(std::move(rec)), methodName(std::move(method)), arguments(std::move(args)) {}
 
 std::string MethodCallNode::getType() {
     return resolvedType;
@@ -62,7 +102,7 @@ std::string MethodCallNode::getType() {
 
 void MethodCallNode::validateSemantics(CompilerContext& context) {
     receiver->validateSemantics(context);
-    if (argument) argument->validateSemantics(context);
+    for (const auto& argument : arguments) argument->validateSemantics(context);
 
     const std::string receiverType = receiver->getType();
     if (receiverType == "Int") {
@@ -71,15 +111,17 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             methodName == "==" || methodName == "!=" || methodName == "<" || methodName == ">" ||
             methodName == "<=" || methodName == ">=";
         if (binaryMethod) {
-            if (!argument) throw std::runtime_error("La méthode Int." + methodName + " attend un argument");
-            if (argument->getType() != "Int") {
+            if (arguments.size() != 1) {
+                throw std::runtime_error("La méthode Int." + methodName + " attend un argument");
+            }
+            if (arguments[0]->getType() != "Int") {
                 throw std::runtime_error("La méthode Int." + methodName + " attend un argument de type Int");
             }
             resolvedType = "Int";
             return;
         }
         if (methodName == "toString") {
-            if (argument) throw std::runtime_error("La méthode Int.toString n'accepte aucun argument");
+            if (!arguments.empty()) throw std::runtime_error("La méthode Int.toString n'accepte aucun argument");
             resolvedType = "String";
             return;
         }
@@ -94,10 +136,25 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
     if (methodIt == classIt->second.methods.end()) {
         throw std::runtime_error("Méthode inconnue: " + receiverType + "." + methodName);
     }
-    if (argument) {
-        throw std::runtime_error("La méthode " + receiverType + "." + methodName + " n'accepte aucun argument");
+    validateArguments(receiverType + "." + methodName, arguments, methodIt->second.parameters);
+    resolvedType = methodIt->second.returnType;
+}
+
+FunctionCallNode::FunctionCallNode(std::string functionName, std::vector<std::unique_ptr<ASTNode>> args)
+    : name(std::move(functionName)), arguments(std::move(args)) {}
+
+std::string FunctionCallNode::getType() {
+    return resolvedType;
+}
+
+void FunctionCallNode::validateSemantics(CompilerContext& context) {
+    for (const auto& argument : arguments) argument->validateSemantics(context);
+    auto function = context.functions.find(name);
+    if (function == context.functions.end()) {
+        throw std::runtime_error("Fonction inconnue: " + name);
     }
-    resolvedType = methodIt->second;
+    validateArguments(name, arguments, function->second.parameters);
+    resolvedType = function->second.returnType;
 }
 
 FieldAccessNode::FieldAccessNode(std::string clName, std::string field, std::string fieldType)
@@ -241,8 +298,11 @@ void ForNode::validateSemantics(CompilerContext& context) {
     }
 }
 
-FunctionDefNode::FunctionDefNode(std::string clName, std::string name, std::string declaredReturnType, std::unique_ptr<ASTNode> body)
-    : className(std::move(clName)), name(std::move(name)), returnType(std::move(declaredReturnType)), body(std::move(body)) {}
+FunctionDefNode::FunctionDefNode(
+    std::string clName, std::string name, std::string declaredReturnType,
+    std::vector<Parameter> params, std::unique_ptr<ASTNode> body)
+    : className(std::move(clName)), name(std::move(name)), returnType(std::move(declaredReturnType)),
+      parameters(std::move(params)), body(std::move(body)) {}
 
 std::string FunctionDefNode::getType() {
     return "Unit";
@@ -250,6 +310,9 @@ std::string FunctionDefNode::getType() {
 
 void FunctionDefNode::validateSemantics(CompilerContext& context) {
     context.semanticSymbolTypes.clear();
+    for (const auto& parameter : parameters) {
+        context.semanticSymbolTypes[parameter.symbolName] = parameter.type;
+    }
     if (body) body->validateSemantics(context);
     const bool knownType =
         returnType == "Int" || returnType == "String" || returnType == "Unit" ||
@@ -288,10 +351,10 @@ void NewNode::generateASM(std::ofstream& out, CompilerContext& context) {
 
 void MethodCallNode::generateASM(std::ofstream& out, CompilerContext& context) {
     std::string targetClass = receiver->getType();
-    if (argument) { argument->generateASM(out, context); out << "    push rax\n"; }
+    pushArguments(out, context, arguments);
     receiver->generateASM(out, context);
     out << "    mov rdi, rax\n";
-    if (argument) { out << "    pop rsi\n"; }
+    popArguments(out, METHOD_ARGUMENT_REGISTERS, arguments.size());
     if (targetClass == "Int") {
         if (methodName == "+" || methodName == "-" || methodName == "*" || methodName == "/") {
             out << "    call Int_method_" << (methodName == "+" ? "add" : methodName == "-" ? "sub" : methodName == "*" ? "mul" : "div") << "\n";
@@ -318,9 +381,16 @@ void MethodCallNode::generateASM(std::ofstream& out, CompilerContext& context) {
     }
 }
 
+void FunctionCallNode::generateASM(std::ofstream& out, CompilerContext& context) {
+    pushArguments(out, context, arguments);
+    popArguments(out, GLOBAL_ARGUMENT_REGISTERS, arguments.size());
+    out << "    call " << name << "\n";
+}
+
 void FieldAccessNode::generateASM(std::ofstream& out, CompilerContext& context) {
     int offset = context.classLayouts[className][fieldName];
-    out << "    mov rax, [rdi + " << offset << "]\n";
+    out << "    mov rax, [rbp - " << context.currentThisOffsetFromRbp << "]\n";
+    out << "    mov rax, [rax + " << offset << "]\n";
 }
 
 void FunctionDefNode::generateASM(std::ofstream& out, CompilerContext& context) {
@@ -341,8 +411,26 @@ void FunctionDefNode::generateASM(std::ofstream& out, CompilerContext& context) 
     out << "    push rbp\n    mov rbp, rsp\n";
     context.localVars.clear();
     int localStackSize = 0;
+    context.currentThisOffsetFromRbp = 0;
+    if (!className.empty()) {
+        localStackSize += 8;
+        context.currentThisOffsetFromRbp = localStackSize;
+    }
+    for (auto& parameter : parameters) {
+        localStackSize += 8;
+        parameter.offsetFromRbp = localStackSize;
+    }
     if (body) body->allocateLocals(localStackSize);
     if (localStackSize > 0) out << "    sub rsp, " << localStackSize << "\n";
+    if (!className.empty()) {
+        out << "    mov [rbp - " << context.currentThisOffsetFromRbp << "], rdi\n";
+    }
+    const auto& parameterRegisters = className.empty() ? GLOBAL_ARGUMENT_REGISTERS : METHOD_ARGUMENT_REGISTERS;
+    for (size_t i = 0; i < parameters.size(); ++i) {
+        const auto& parameter = parameters[i];
+        context.localVars[parameter.symbolName] = {parameter.offsetFromRbp, false, parameter.type};
+        out << "    mov [rbp - " << parameter.offsetFromRbp << "], " << parameterRegisters[i] << "\n";
+    }
     if (body) body->generateASM(out, context);
     out << "    mov rsp, rbp\n    pop rbp\n    ret\n\n";
 }

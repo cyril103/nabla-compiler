@@ -1,0 +1,11 @@
+def identity(value: Int): Int = {
+    value
+}
+
+def add(a: Int, b: Int): Int = {
+    a + b
+}
+
+def main(): Int = {
+    add(identity(20), identity(22))
+}

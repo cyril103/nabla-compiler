@@ -1,0 +1,13 @@
+def sum6(a: Int, b: Int, c: Int, d: Int, e: Int, f: Int): Int = {
+    a + b + c + d + e + f
+}
+
+class Sum(base: Int) {
+    def sum5(a: Int, b: Int, c: Int, d: Int, e: Int): Int = {
+        base + a + b + c + d + e
+    }
+}
+
+def main(): Int = {
+    (new Sum(sum6(1, 2, 3, 4, 5, 6))).sum5(1, 2, 3, 4, 11)
+}

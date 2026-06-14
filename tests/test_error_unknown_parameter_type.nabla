@@ -1,0 +1,7 @@
+def identity(value: Missing): Missing = {
+    value
+}
+
+def main(): Int = {
+    0
+}

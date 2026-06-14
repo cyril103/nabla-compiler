@@ -1,0 +1,13 @@
+class A() {
+    def run(): Int = {
+        1
+    }
+}
+
+def identity(value: Int): Int = {
+    value
+}
+
+def main(): Int = {
+    identity(new A())
+}

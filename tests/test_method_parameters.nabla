@@ -1,0 +1,15 @@
+class Value(number: Int) {
+    def read(): Int = {
+        number
+    }
+}
+
+class Reader() {
+    def read(value: Value): Int = {
+        value.read()
+    }
+}
+
+def main(): Int = {
+    (new Reader()).read(new Value(42))
+}

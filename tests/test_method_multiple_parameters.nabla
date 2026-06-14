@@ -1,0 +1,9 @@
+class Calculator(base: Int) {
+    def add(a: Int, b: Int): Int = {
+        base + a + b
+    }
+}
+
+def main(): Int = {
+    (new Calculator(2)).add(20, 20)
+}

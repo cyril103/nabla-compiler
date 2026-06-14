@@ -45,10 +45,21 @@ public:
 class MethodCallNode : public ASTNode {
     std::unique_ptr<ASTNode> receiver;
     std::string methodName;
-    std::unique_ptr<ASTNode> argument;
+    std::vector<std::unique_ptr<ASTNode>> arguments;
     std::string resolvedType = "Int";
 public:
-    MethodCallNode(std::unique_ptr<ASTNode> rec, std::string method, std::unique_ptr<ASTNode> arg);
+    MethodCallNode(std::unique_ptr<ASTNode> rec, std::string method, std::vector<std::unique_ptr<ASTNode>> args);
+    std::string getType() override;
+    void generateASM(std::ofstream& out, CompilerContext& context) override;
+    void validateSemantics(CompilerContext& context) override;
+};
+
+class FunctionCallNode : public ASTNode {
+    std::string name;
+    std::vector<std::unique_ptr<ASTNode>> arguments;
+    std::string resolvedType = "Int";
+public:
+    FunctionCallNode(std::string functionName, std::vector<std::unique_ptr<ASTNode>> args);
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void validateSemantics(CompilerContext& context) override;
@@ -111,12 +122,24 @@ public:
 };
 
 class FunctionDefNode : public ASTNode {
+public:
+    struct Parameter {
+        std::string name;
+        std::string symbolName;
+        std::string type;
+        int offsetFromRbp = 0;
+    };
+
+private:
     std::string className;
     std::string name;
     std::string returnType;
+    std::vector<Parameter> parameters;
     std::unique_ptr<ASTNode> body;
 public:
-    FunctionDefNode(std::string clName, std::string name, std::string declaredReturnType, std::unique_ptr<ASTNode> body);
+    FunctionDefNode(
+        std::string clName, std::string name, std::string declaredReturnType,
+        std::vector<Parameter> params, std::unique_ptr<ASTNode> body);
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void validateSemantics(CompilerContext& context) override;
