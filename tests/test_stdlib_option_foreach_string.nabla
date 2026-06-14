@@ -1,0 +1,6 @@
+import core.option
+
+def main(): Int = {
+    optionSome("ok").foreach(value => print(value))
+    42
+}

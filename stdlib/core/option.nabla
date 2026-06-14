@@ -27,6 +27,16 @@ class Option[T](defined: Bool, value: T) {
         }
     }
 
+    def foreach(f: (T) => Unit): Unit = {
+        if defined {
+            f(value)
+        } else {
+            while false {
+                0
+            }
+        }
+    }
+
     def filter(predicate: (T) => Bool): Option[T] = {
         if defined && predicate(value) {
             this
