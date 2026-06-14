@@ -26,15 +26,17 @@ bool isBoolBinaryMethod(const std::string& methodName) {
 
 bool isKnownBuiltinType(const std::string& type) {
     return type == "Int" || type == "Long" || type == "Float" || type == "Double" || type == "Bool" ||
-           type == "String" || type == "Unit" || type == "IntArray" || type == "LongArray";
+           type == "String" || type == "Unit" || type == "IntArray" || type == "LongArray" ||
+           type == "BoolArray";
 }
 
 bool isNativeArrayType(const std::string& type) {
-    return type == "IntArray" || type == "LongArray";
+    return type == "IntArray" || type == "LongArray" || type == "BoolArray";
 }
 
 std::string nativeArrayElementType(const std::string& type) {
     if (type == "LongArray") return "Long";
+    if (type == "BoolArray") return "Bool";
     return "Int";
 }
 
@@ -329,6 +331,7 @@ std::string NewNode::lowerToIR(IRBuilder& builder) const {
     for (const auto& argument : args) loweredArguments.push_back(argument->lowerToIR(builder));
     if (className == "IntArray") return builder.emitNewIntArray(loweredArguments[0]);
     if (className == "LongArray") return builder.emitNewLongArray(loweredArguments[0]);
+    if (className == "BoolArray") return builder.emitNewBoolArray(loweredArguments[0]);
     return builder.emitNewObject(className, loweredArguments);
 }
 
@@ -542,16 +545,24 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
     if (isNativeArrayType(receiverType)) {
         std::string loweredReceiver = receiver->lowerToIR(builder);
         if (methodName == "length" && arguments.empty()) {
+            if (receiverType == "BoolArray") return builder.emitBoolArrayLength(loweredReceiver);
             if (receiverType == "LongArray") return builder.emitLongArrayLength(loweredReceiver);
             return builder.emitIntArrayLength(loweredReceiver);
         }
         if (methodName == "get" && arguments.size() == 1) {
+            if (receiverType == "BoolArray") {
+                return builder.emitBoolArrayGet(loweredReceiver, arguments[0]->lowerToIR(builder));
+            }
             if (receiverType == "LongArray") {
                 return builder.emitLongArrayGet(loweredReceiver, arguments[0]->lowerToIR(builder));
             }
             return builder.emitIntArrayGet(loweredReceiver, arguments[0]->lowerToIR(builder));
         }
         if (methodName == "set" && arguments.size() == 2) {
+            if (receiverType == "BoolArray") {
+                return builder.emitBoolArraySet(
+                    loweredReceiver, arguments[0]->lowerToIR(builder), arguments[1]->lowerToIR(builder));
+            }
             if (receiverType == "LongArray") {
                 return builder.emitLongArraySet(
                     loweredReceiver, arguments[0]->lowerToIR(builder), arguments[1]->lowerToIR(builder));

@@ -90,6 +90,7 @@ Le pipeline implemente actuellement :
   `||`;
 - collection native `IntArray` avec `length`, `get` et `set`;
 - collection native `LongArray` avec `length`, `get` et `set`;
+- collection native `BoolArray` avec `length`, `get` et `set`;
 - entiers immediats `Int` et `Long` avec pointer tagging, litteraux decimaux
   `Float` / `Double` portes par l'IR typee et litteraux `String`;
 - affichage console de `String` via la primitive globale `print`;
@@ -113,6 +114,10 @@ Le pipeline implemente actuellement :
 - module de bibliotheque standard `collections.long_array` avec `ArrayLong`,
   `longArrayFill`, `longArraySum`, `longArrayMap`, `arrayLongFill`, `map`,
   `foreach`, `sum`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
+- module de bibliotheque standard `collections.bool_array` avec `ArrayBool`,
+  `boolArrayFill`, `boolArrayCountTrue`, `boolArrayAll`, `boolArrayAny`,
+  `boolArrayMap`, `arrayBoolFill`, `map`, `foreach`, `countTrue`, `all`,
+  `any`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -138,7 +143,8 @@ Limites importantes :
   `identity[Int]` sont utilisables comme valeurs, mais les fonctions generiques
   ne sont pas encore des valeurs vraiment polymorphes;
   `Array[Int]` reste une facade specialisee vers `ArrayInt`; `Array[Long]`
-  reste une facade specialisee vers `ArrayLong`; la
+  reste une facade specialisee vers `ArrayLong`; `Array[Bool]` reste une
+  facade specialisee vers `ArrayBool`; la
   monomorphisation complete des classes generiques reste a faire;
 - le tas est fixe et possede une verification de depassement, mais pas de
   ramasse-miettes;
@@ -285,6 +291,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter une primitive d'affichage console pour `String`.
 - [x] Ajouter une premiere collection native `IntArray`.
 - [x] Ajouter une collection native `LongArray`.
+- [x] Ajouter une collection native `BoolArray`.
 
 ### P3 - Outillage
 
@@ -297,6 +304,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `TBD` - Ajouter `BoolArray`, la facade standard `ArrayBool` et l'alias
+  `Array[Bool]`.
 - `5392788` - Ajouter `LongArray`, la facade standard `ArrayLong` et l'alias
   `Array[Long]`.
 - `6c0005b` - Centraliser les aliases de types standard, notamment

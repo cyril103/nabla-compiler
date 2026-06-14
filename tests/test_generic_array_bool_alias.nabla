@@ -1,0 +1,13 @@
+import collections.bool_array
+
+def count(values: Array[Bool]): Int = {
+    values.countTrue()
+}
+
+def main(): Int = {
+    if count(new Array[Bool](boolArrayFill(4, true))) == 4 {
+        42
+    } else {
+        1
+    }
+}

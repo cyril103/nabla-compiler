@@ -80,7 +80,7 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
                 typeParameterToken.value == "Float" || typeParameterToken.value == "Double" ||
                 typeParameterToken.value == "Bool" || typeParameterToken.value == "String" ||
                 typeParameterToken.value == "Unit" || typeParameterToken.value == "IntArray" ||
-                typeParameterToken.value == "LongArray") {
+                typeParameterToken.value == "LongArray" || typeParameterToken.value == "BoolArray") {
                 throw CompilerError(
                     ErrorKind::Parser, typeParameterToken.location,
                     "paramètre de type invalide: " + typeParameterToken.value);
@@ -873,7 +873,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
                 typeParameterToken.value == "Float" || typeParameterToken.value == "Double" ||
                 typeParameterToken.value == "Bool" || typeParameterToken.value == "String" ||
                 typeParameterToken.value == "Unit" || typeParameterToken.value == "IntArray" ||
-                typeParameterToken.value == "LongArray") {
+                typeParameterToken.value == "LongArray" || typeParameterToken.value == "BoolArray") {
                 throw CompilerError(
                     ErrorKind::Parser, typeParameterToken.location,
                     "paramètre de type invalide: " + typeParameterToken.value);
@@ -1068,6 +1068,11 @@ std::vector<std::string> Parser::expectedArgumentTypesForMethodCall(
     if (receiverType == "LongArray") {
         if (methodName == "get") return {"Int"};
         if (methodName == "set") return {"Int", "Long"};
+        return {};
+    }
+    if (receiverType == "BoolArray") {
+        if (methodName == "get") return {"Int"};
+        if (methodName == "set") return {"Int", "Bool"};
         return {};
     }
     const std::string classLookupName = genericBaseName(receiverType);

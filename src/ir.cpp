@@ -101,6 +101,18 @@ std::string IRProgram::format() const {
                 case IROpcode::LongArraySet:
                     out << "long_array_set " << join(instruction.operands, ", ");
                     break;
+                case IROpcode::NewBoolArray:
+                    out << "new_bool_array " << instruction.operands[0];
+                    break;
+                case IROpcode::BoolArrayLength:
+                    out << "bool_array_length " << instruction.operands[0];
+                    break;
+                case IROpcode::BoolArrayGet:
+                    out << "bool_array_get " << join(instruction.operands, ", ");
+                    break;
+                case IROpcode::BoolArraySet:
+                    out << "bool_array_set " << join(instruction.operands, ", ");
+                    break;
                 case IROpcode::FieldLoad:
                     out << "field " << instruction.operands[0] << ", " << instruction.operation;
                     break;
@@ -369,6 +381,31 @@ std::string IRBuilder::emitLongArraySet(
     const std::string& receiver, const std::string& index, const std::string& value) {
     std::string result = nextValue();
     emit({IROpcode::LongArraySet, result, "Unit", "", {receiver, index, value}});
+    return result;
+}
+
+std::string IRBuilder::emitNewBoolArray(const std::string& size) {
+    std::string result = nextValue();
+    emit({IROpcode::NewBoolArray, result, "BoolArray", "", {size}});
+    return result;
+}
+
+std::string IRBuilder::emitBoolArrayLength(const std::string& receiver) {
+    std::string result = nextValue();
+    emit({IROpcode::BoolArrayLength, result, "Int", "", {receiver}});
+    return result;
+}
+
+std::string IRBuilder::emitBoolArrayGet(const std::string& receiver, const std::string& index) {
+    std::string result = nextValue();
+    emit({IROpcode::BoolArrayGet, result, "Bool", "", {receiver, index}});
+    return result;
+}
+
+std::string IRBuilder::emitBoolArraySet(
+    const std::string& receiver, const std::string& index, const std::string& value) {
+    std::string result = nextValue();
+    emit({IROpcode::BoolArraySet, result, "Unit", "", {receiver, index, value}});
     return result;
 }
 

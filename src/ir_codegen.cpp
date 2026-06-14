@@ -235,6 +235,18 @@ private:
             case IROpcode::LongArraySet:
                 emitLongArraySet(instruction);
                 break;
+            case IROpcode::NewBoolArray:
+                emitNewBoolArray(instruction);
+                break;
+            case IROpcode::BoolArrayLength:
+                emitBoolArrayLength(instruction);
+                break;
+            case IROpcode::BoolArrayGet:
+                emitBoolArrayGet(instruction);
+                break;
+            case IROpcode::BoolArraySet:
+                emitBoolArraySet(instruction);
+                break;
             case IROpcode::FieldLoad:
                 emitFieldLoad(instruction);
                 break;
@@ -586,6 +598,10 @@ private:
         emitNewNativeArray(instruction);
     }
 
+    void emitNewBoolArray(const IRInstruction& instruction) {
+        emitNewNativeArray(instruction);
+    }
+
     void emitNativeArrayLength(const IRInstruction& instruction) {
         loadValue(instruction.operands[0], "rax");
         out << "    mov rax, [rax + 8]\n";
@@ -610,6 +626,10 @@ private:
         emitNativeArrayLength(instruction);
     }
 
+    void emitBoolArrayLength(const IRInstruction& instruction) {
+        emitNativeArrayLength(instruction);
+    }
+
     void emitNativeArrayGet(const IRInstruction& instruction) {
         loadValue(instruction.operands[0], "rbx");
         loadValue(instruction.operands[1], "rcx");
@@ -623,6 +643,10 @@ private:
     }
 
     void emitLongArrayGet(const IRInstruction& instruction) {
+        emitNativeArrayGet(instruction);
+    }
+
+    void emitBoolArrayGet(const IRInstruction& instruction) {
         emitNativeArrayGet(instruction);
     }
 
@@ -641,6 +665,10 @@ private:
     }
 
     void emitLongArraySet(const IRInstruction& instruction) {
+        emitNativeArraySet(instruction);
+    }
+
+    void emitBoolArraySet(const IRInstruction& instruction) {
         emitNativeArraySet(instruction);
     }
 

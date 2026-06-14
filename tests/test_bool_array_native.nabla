@@ -1,0 +1,11 @@
+def main(): Int = {
+    val xs = new BoolArray(3)
+    xs.set(0, true)
+    xs.set(1, false)
+    xs.set(2, true)
+    if xs.length() == 3 && xs.get(0) && !xs.get(1) && xs.get(2) {
+        42
+    } else {
+        1
+    }
+}

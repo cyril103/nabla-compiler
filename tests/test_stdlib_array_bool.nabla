@@ -1,0 +1,12 @@
+import collections.bool_array
+
+def main(): Int = {
+    val xs = arrayBoolFill(3, true)
+    xs.set(1, false)
+    val inverted = xs.map(value => !value)
+    if xs.countTrue() == 2 && xs.any() && !xs.all() && inverted.countTrue() == 1 {
+        42
+    } else {
+        1
+    }
+}

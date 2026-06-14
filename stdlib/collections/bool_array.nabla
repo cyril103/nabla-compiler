@@ -1,0 +1,119 @@
+def boolArrayFill(size: Int, value: Bool): BoolArray = {
+    val xs = new BoolArray(size)
+    var index = 0
+    while (index < size) {
+        xs.set(index, value)
+        index = index + 1
+    }
+    xs
+}
+
+def boolArrayCountTrue(xs: BoolArray): Int = {
+    var index = 0
+    var total = 0
+    while (index < xs.length()) {
+        if xs.get(index) {
+            total = total + 1
+        } else {
+            total
+        }
+        index = index + 1
+    }
+    total
+}
+
+def boolArrayAll(xs: BoolArray): Bool = {
+    var index = 0
+    var all = true
+    while (index < xs.length()) {
+        if xs.get(index) {
+            all
+        } else {
+            all = false
+        }
+        index = index + 1
+    }
+    all
+}
+
+def boolArrayAny(xs: BoolArray): Bool = {
+    var index = 0
+    var any = false
+    while (index < xs.length()) {
+        if xs.get(index) {
+            any = true
+        } else {
+            any
+        }
+        index = index + 1
+    }
+    any
+}
+
+def boolArrayMap(xs: BoolArray, f: (Bool) => Bool): BoolArray = {
+    val mapped = new BoolArray(xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        mapped.set(index, f(xs.get(index)))
+        index = index + 1
+    }
+    mapped
+}
+
+class ArrayBool(values: BoolArray) {
+    def length(): Int = {
+        values.length()
+    }
+
+    def size(): Int = {
+        values.length()
+    }
+
+    def isEmpty(): Bool = {
+        values.length() == 0
+    }
+
+    def nonEmpty(): Bool = {
+        values.length() != 0
+    }
+
+    def get(index: Int): Bool = {
+        values.get(index)
+    }
+
+    def set(index: Int, value: Bool): Unit = {
+        values.set(index, value)
+    }
+
+    def countTrue(): Int = {
+        boolArrayCountTrue(values)
+    }
+
+    def all(): Bool = {
+        boolArrayAll(values)
+    }
+
+    def any(): Bool = {
+        boolArrayAny(values)
+    }
+
+    def map(f: (Bool) => Bool): ArrayBool = {
+        new ArrayBool(boolArrayMap(values, f))
+    }
+
+    def foreach(f: (Bool) => Unit): Unit = {
+        var index = 0
+        while (index < values.length()) {
+            f(values.get(index))
+            index = index + 1
+        }
+    }
+
+    def raw(): BoolArray = {
+        values
+    }
+}
+
+def arrayBoolFill(size: Int, value: Bool): ArrayBool = {
+    new ArrayBool(boolArrayFill(size, value))
+}

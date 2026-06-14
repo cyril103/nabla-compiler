@@ -23,6 +23,10 @@ enum class IROpcode {
     LongArrayLength,
     LongArrayGet,
     LongArraySet,
+    NewBoolArray,
+    BoolArrayLength,
+    BoolArrayGet,
+    BoolArraySet,
     FieldLoad,
     Load,
     Store,
@@ -102,6 +106,11 @@ public:
     std::string emitLongArrayLength(const std::string& receiver);
     std::string emitLongArrayGet(const std::string& receiver, const std::string& index);
     std::string emitLongArraySet(
+        const std::string& receiver, const std::string& index, const std::string& value);
+    std::string emitNewBoolArray(const std::string& size);
+    std::string emitBoolArrayLength(const std::string& receiver);
+    std::string emitBoolArrayGet(const std::string& receiver, const std::string& index);
+    std::string emitBoolArraySet(
         const std::string& receiver, const std::string& index, const std::string& value);
     std::string emitFieldLoad(
         const SourceLocation& location, const std::string& className, const std::string& fieldName,
