@@ -56,6 +56,9 @@ Le pipeline implemente actuellement :
 - facade generique standard limitee pour `Array[T]` dans les signatures
   generiques utilisateur, avec inference de `T` depuis les specialisations
   concretes `ArrayInt`, `ArrayLong` et `ArrayBool`;
+- appels de methodes communs sur la facade generique `Array[T]` dans les corps
+  generiques, specialises vers `ArrayInt`, `ArrayLong` ou `ArrayBool` pour
+  `length`, `size`, `isEmpty`, `nonEmpty`, `get`, `set`, `map` et `foreach`;
 - declarations de classes generiques simples comme `Box[T]`, instanciables avec
   `Box[Int]` ou `Box[String]`, avec substitution des champs, retours de methodes
   et types fonction comme `(T) => T`;
@@ -155,8 +158,9 @@ Limites importantes :
   `arrayForeach[T]` sont des fonctions standard generiques specialisees pour
   `Int`, `Long` et `Bool`, mais pas encore une implementation unique de tableau
   generique; `Array[T]` est valide dans les signatures generiques utilisateur
-  et se specialise correctement quand `T` devient concret, mais les appels de
-  methodes directement sur un receveur `Array[T]` generique restent a ajouter; la
+  et se specialise correctement quand `T` devient concret, avec une premiere
+  surface de methodes communes, mais les operations non communes comme `sum`,
+  `countTrue`, `filter`, `fold` ou `flatMap` restent specialisees ou a ajouter; la
   monomorphisation complete des classes generiques reste a faire;
 - le tas est fixe et possede une verification de depassement, mais pas de
   ramasse-miettes;
@@ -298,9 +302,11 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   standard specialisees pour `Array[Int]`, `Array[Long]` et `Array[Bool]`.
 - [x] Autoriser `Array[T]` dans les signatures generiques utilisateur et inferer
   `T` depuis `ArrayInt`, `ArrayLong` et `ArrayBool`.
-- [ ] Ajouter les appels de methodes sur receveur generique `Array[T]` dans les
-  corps generiques (`xs.size()`, `xs.map(...)`) ou etendre les aliases standard
-  vers plus d'operations (`arrayFilter[T]`, `arrayFold[T]`).
+- [x] Ajouter les appels de methodes sur receveur generique `Array[T]` dans les
+  corps generiques pour `size`, `length`, `isEmpty`, `nonEmpty`, `get`, `set`,
+  `map` et `foreach`.
+- [ ] Etendre `Array[T]` vers plus d'operations (`filter`, `fold`, `flatMap`) ou
+  definir un vrai stockage generique pour les types non specialises.
 
 ### P2 - Runtime Et Objets
 
@@ -325,6 +331,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `TBD` - Ajouter les appels de methodes communs sur receveur generique
+  `Array[T]`, avec specialisation vers les facades concretes et lambdas
+  generiques specialisees.
 - `c34468f` - Ajouter `arrayMap[T]` et `arrayForeach[T]` comme operations communes
   specialisees pour `Array[Int]`, `Array[Long]` et `Array[Bool]`, et autoriser
   `Array[T]` comme facade de signature generique inferee depuis les
@@ -448,7 +457,6 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter les appels de methodes sur receveur generique `Array[T]` dans les corps
-generiques, par exemple `def sizeOf[T](xs: Array[T]): Int = { xs.size() }`, en
-substituant le type du receveur avant la resolution de méthode pendant le
-lowering specialise.
+Etendre la facade `Array[T]` avec `filter`, `fold` et eventuellement `flatMap`
+sur les types specialises, puis evaluer le modele de stockage necessaire pour
+supporter `Array[String]` et les tableaux d'objets.

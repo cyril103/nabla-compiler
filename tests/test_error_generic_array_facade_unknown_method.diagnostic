@@ -1,0 +1,1 @@
+tests/test_error_generic_array_facade_unknown_method.nabla:4:8: semantic error: type receveur inconnu pour l'appel de méthode: Array[T]

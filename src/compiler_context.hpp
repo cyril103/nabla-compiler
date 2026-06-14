@@ -179,6 +179,49 @@ inline std::optional<std::pair<std::string, std::vector<std::string>>> parameter
     return std::make_pair(baseName, arguments);
 }
 
+inline std::optional<CompilerContext::FunctionSignature> stdlibTypeAliasMethodSignature(
+    const std::string& receiverType, const std::string& methodName) {
+    auto parameterizedType = parameterizedTypeFromName(receiverType);
+    if (!parameterizedType) return std::nullopt;
+    const auto& [baseName, arguments] = *parameterizedType;
+    if (baseName != "Array" || arguments.size() != 1) return std::nullopt;
+
+    const std::string& elementType = arguments[0];
+    CompilerContext::FunctionSignature signature;
+    if (methodName == "length" || methodName == "size") {
+        signature.returnType = "Int";
+        return signature;
+    }
+    if (methodName == "isEmpty" || methodName == "nonEmpty") {
+        signature.returnType = "Bool";
+        return signature;
+    }
+    if (methodName == "get") {
+        signature.parameters.push_back({"index", "Int", {}});
+        signature.returnType = elementType;
+        return signature;
+    }
+    if (methodName == "set") {
+        signature.parameters.push_back({"index", "Int", {}});
+        signature.parameters.push_back({"value", elementType, {}});
+        signature.returnType = "Unit";
+        return signature;
+    }
+    if (methodName == "map") {
+        signature.parameters.push_back({
+            "f", formatFunctionType({{elementType}, elementType}), {}});
+        signature.returnType = receiverType;
+        return signature;
+    }
+    if (methodName == "foreach") {
+        signature.parameters.push_back({
+            "f", formatFunctionType({{elementType}, "Unit"}), {}});
+        signature.returnType = "Unit";
+        return signature;
+    }
+    return std::nullopt;
+}
+
 inline std::string resolveStdlibTypeAlias(const std::string& type) {
     auto parameterizedType = parameterizedTypeFromName(type);
     if (!parameterizedType) return type;
@@ -286,6 +329,19 @@ inline std::string substituteType(
     }
 
     return type;
+}
+
+inline std::optional<std::string> resolveActiveStdlibTypeAlias(
+    const std::string& type, const std::map<std::string, std::string>& substitution) {
+    auto parameterizedType = parameterizedTypeFromName(type);
+    if (!parameterizedType) return std::nullopt;
+    auto [baseName, arguments] = *parameterizedType;
+    for (auto& argument : arguments) {
+        argument = substituteType(argument, substitution);
+    }
+    const std::string resolvedType = resolveStdlibTypeAlias(formatParameterizedType(baseName, arguments));
+    if (resolvedType == type) return std::nullopt;
+    return resolvedType;
 }
 
 inline bool inferTypeArgumentsFromTypes(

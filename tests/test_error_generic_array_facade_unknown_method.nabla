@@ -1,0 +1,9 @@
+import collections.array
+
+def total[T](xs: Array[T]): Int = {
+    xs.sum()
+}
+
+def main(): Int = {
+    total(arrayFill[Int](1, 1))
+}

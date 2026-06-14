@@ -1,0 +1,29 @@
+import collections.array
+
+def arraySize[T](xs: Array[T]): Int = {
+    xs.size()
+}
+
+def arrayFirst[T](xs: Array[T]): T = {
+    xs.get(0)
+}
+
+def arrayIdentityMap[T](xs: Array[T]): Array[T] = {
+    xs.map(value => value)
+}
+
+def main(): Int = {
+    val ints = arrayIdentityMap(arrayFill[Int](3, 14))
+    val longs = arrayIdentityMap(arrayFill[Long](2, 21L))
+    val bools = arrayIdentityMap(arrayFill[Bool](4, true))
+    if arraySize(ints) == 3 &&
+       arrayFirst(ints) == 14 &&
+       arraySize(longs) == 2 &&
+       arrayFirst(longs) == 21L &&
+       arraySize(bools) == 4 &&
+       arrayFirst(bools) {
+        42
+    } else {
+        1
+    }
+}

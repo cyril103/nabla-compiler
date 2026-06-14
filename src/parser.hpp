@@ -36,6 +36,7 @@ private:
     std::vector<std::map<std::string, ParsedSymbol>> localScopes;
     std::vector<LambdaCaptureScope> lambdaCaptureScopes;
     std::vector<std::unique_ptr<ASTNode>> generatedFunctions;
+    std::vector<std::string> currentFunctionTypeParameters;
     int nextSymbolId = 0;
 
     Token peek() const;

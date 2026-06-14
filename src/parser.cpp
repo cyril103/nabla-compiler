@@ -357,10 +357,11 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
 
     const std::string returnType = body->getType();
     std::string lambdaName = "lambda." + std::to_string(context.nextLambdaId++);
-    context.functions[lambdaName] = {signatureParameters, returnType, {}, start.location, start.location};
+    context.functions[lambdaName] = {
+        signatureParameters, returnType, currentFunctionTypeParameters, start.location, start.location};
 
     auto function = located(std::make_unique<FunctionDefNode>(
-        "", lambdaName, returnType, std::vector<std::string>{},
+        "", lambdaName, returnType, currentFunctionTypeParameters,
         std::move(parameters), std::move(body), captures), start.location);
     generatedFunctions.push_back(std::move(function));
     CompilerContext::FunctionType lambdaType;
@@ -380,7 +381,7 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
     }
     return located(
         std::make_unique<FunctionReferenceNode>(
-            lambdaName, *functionType, std::vector<std::string>{}, std::move(referenceCaptures)),
+            lambdaName, *functionType, currentFunctionTypeParameters, std::move(referenceCaptures)),
         start.location);
 }
 
@@ -453,10 +454,11 @@ std::unique_ptr<ASTNode> Parser::parseInferredLambdaExpression(const std::string
 
     const std::string returnType = body->getType();
     std::string lambdaName = "lambda." + std::to_string(context.nextLambdaId++);
-    context.functions[lambdaName] = {signatureParameters, returnType, {}, start.location, start.location};
+    context.functions[lambdaName] = {
+        signatureParameters, returnType, currentFunctionTypeParameters, start.location, start.location};
 
     auto function = located(std::make_unique<FunctionDefNode>(
-        "", lambdaName, returnType, std::vector<std::string>{},
+        "", lambdaName, returnType, currentFunctionTypeParameters,
         std::move(parameters), std::move(body), captures), start.location);
     generatedFunctions.push_back(std::move(function));
 
@@ -478,7 +480,7 @@ std::unique_ptr<ASTNode> Parser::parseInferredLambdaExpression(const std::string
     }
     return located(
         std::make_unique<FunctionReferenceNode>(
-            lambdaName, *functionType, std::vector<std::string>{}, std::move(referenceCaptures)),
+            lambdaName, *functionType, currentFunctionTypeParameters, std::move(referenceCaptures)),
         start.location);
 }
 
@@ -750,7 +752,18 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
         std::string initialOwnerType = genericBaseName(receiverType);
         auto classIt = context.classes.find(initialOwnerType);
         const CompilerContext::FunctionSignature* methodSignature = nullptr;
+        std::optional<CompilerContext::FunctionSignature> stdlibMethodSignature;
         std::map<std::string, std::string> classSubstitution;
+        if (auto signature = stdlibTypeAliasMethodSignature(receiverType, method)) {
+            stdlibMethodSignature = *signature;
+            methodSignature = &*stdlibMethodSignature;
+            initialReturnType = methodSignature->returnType;
+            initialOwnerType.clear();
+            expectedArgumentTypes.clear();
+            for (const auto& parameter : methodSignature->parameters) {
+                expectedArgumentTypes.push_back(parameter.type);
+            }
+        }
         if (classIt != context.classes.end()) {
             auto methodIt = classIt->second.methods.find(method);
             if (methodIt != classIt->second.methods.end()) {
@@ -946,7 +959,15 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
         context.functions[name] = signature;
     }
     consume(TokenType::EQUAL, ""); consume(TokenType::LBRACE, "");
+    auto previousFunctionTypeParameters = currentFunctionTypeParameters;
+    currentFunctionTypeParameters.clear();
+    if (!clName.empty()) {
+        currentFunctionTypeParameters = context.classes[clName].typeParameters;
+    }
+    currentFunctionTypeParameters.insert(
+        currentFunctionTypeParameters.end(), typeParameters.begin(), typeParameters.end());
     auto body = parseBlock();
+    currentFunctionTypeParameters = previousFunctionTypeParameters;
     consume(TokenType::RBRACE, "");
     localScopes.pop_back();
     std::vector<std::string> ownerTypeParameters;
@@ -1092,6 +1113,13 @@ std::vector<std::string> Parser::expectedArgumentTypesForMethodCall(
     }
     const std::string classLookupName = genericBaseName(receiverType);
     auto classIt = context.classes.find(classLookupName);
+    if (auto signature = stdlibTypeAliasMethodSignature(receiverType, methodName)) {
+        std::vector<std::string> expectedTypes;
+        for (const auto& parameter : signature->parameters) {
+            expectedTypes.push_back(parameter.type);
+        }
+        return expectedTypes;
+    }
     if (classIt == context.classes.end()) return {};
     auto methodIt = classIt->second.methods.find(methodName);
     if (methodIt == classIt->second.methods.end()) return {};

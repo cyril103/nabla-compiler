@@ -458,6 +458,16 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         }
         semanticError("méthode inconnue: " + receiverType + "." + methodName);
     }
+    if (auto signature = stdlibTypeAliasMethodSignature(receiverType, methodName)) {
+        if (!typeArguments.empty()) {
+            semanticError("la méthode '" + receiverType + "." + methodName + "' n'accepte pas d'arguments de type");
+        }
+        validateArguments(receiverType + "." + methodName, arguments, signature->parameters, location);
+        resolvedType = signature->returnType;
+        resolvedTypeArguments.clear();
+        resolvedOwnerType.clear();
+        return;
+    }
 
     const std::string classLookupName = genericBaseName(receiverType);
     auto classIt = context.classes.find(classLookupName);
@@ -579,6 +589,15 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
                 loweredReceiver, arguments[0]->lowerToIR(builder), arguments[1]->lowerToIR(builder));
         }
         builder.unsupported(location, "la méthode " + receiverType + "." + methodName);
+    }
+    const std::string activeReceiverType = builder.substituteActiveType(receiverType);
+    if (activeReceiverType != receiverType && stdlibTypeAliasMethodSignature(receiverType, methodName)) {
+        std::string loweredReceiver = receiver->lowerToIR(builder);
+        std::vector<std::string> loweredArguments;
+        for (const auto& argument : arguments) loweredArguments.push_back(argument->lowerToIR(builder));
+        return builder.emitMethodCall(
+            activeReceiverType, methodName, loweredReceiver, loweredArguments,
+            builder.substituteActiveType(resolvedType));
     }
 
     std::string loweredReceiver = receiver->lowerToIR(builder);
