@@ -282,7 +282,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Inferer les arguments de type des methodes generiques, notamment
+- `01beb83` - Inferer les arguments de type des methodes generiques, notamment
   `Option[T].map(...)`.
 - `11cd62d` - Ajouter les methodes generiques explicites, utilisees par
   `Option[T].map[U]`.
