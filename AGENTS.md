@@ -304,7 +304,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Ajouter `BoolArray`, la facade standard `ArrayBool` et l'alias
+- `31b39ad` - Ajouter `BoolArray`, la facade standard `ArrayBool` et l'alias
   `Array[Bool]`.
 - `5392788` - Ajouter `LongArray`, la facade standard `ArrayLong` et l'alias
   `Array[Long]`.
