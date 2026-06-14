@@ -52,6 +52,8 @@ Le pipeline implemente actuellement :
   `IntConsumerFn` et `IntBinaryFn`;
 - syntaxe de types fonction parenthesee comme `(Int) => Int`, `(Int) => Unit`,
   `(Int, Int) => Int` et `(String) => Int`;
+- lambdas et appels indirects avec plusieurs parametres, dans les limites de la
+  convention d'appel actuelle;
 - type `Unit` formalise pour les fonctions a effet et les boucles `while` /
   `for`;
 - collection native `IntArray` avec `length`, `get` et `set`;
@@ -150,6 +152,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Generaliser `IntUnaryFn` vers des types fonction canoniques.
 - [x] Introduire une representation interne commune des types fonction.
 - [x] Ajouter la syntaxe de types fonction parenthesee pour les aliases actuels.
+- [x] Autoriser les lambdas a plus de deux parametres.
 - [x] Ajouter `IntBinaryFn` pour `fold` et operations binaires de collections.
 - [x] Ajouter les lambdas sans capture pour `IntUnaryFn`.
 - [x] Ajouter `IntConsumerFn` pour les fonctions `Int => Unit`.
@@ -179,7 +182,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Generalisation canonique des types fonction.
+- Prochain commit - Generalisation des lambdas multi-parametres.
+- `75a24fa` - Generalisation canonique des types fonction.
 - `cc342e4` - Ajout de la syntaxe de types fonction parenthesee.
 - `6534f3c` - Introduction d'une representation interne des types fonction.
 - `53533a2` - Ajout des closures avec capture par valeur.
@@ -224,5 +228,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Etendre la syntaxe de types fonction aux retours fonction et aux callbacks avec
-plus de deux parametres, puis retirer les aliases historiques.
+Etendre la syntaxe de types fonction aux retours fonction, puis retirer les
+aliases historiques.

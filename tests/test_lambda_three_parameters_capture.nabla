@@ -1,0 +1,10 @@
+def apply3(f: (Int, Int, Int) => Int): Int = {
+    f(1, 2, 3)
+}
+
+def main(): Int = {
+    val offset = 10
+    apply3((left: Int, middle: Int, right: Int) => {
+        left + middle + right + offset
+    })
+}

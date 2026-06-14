@@ -204,22 +204,29 @@ std::unique_ptr<ASTNode> Parser::parseForExpression() {
 }
 
 bool Parser::startsLambdaExpression() const {
-    if (peek().type != TokenType::LPAREN || index + 5 >= tokens.size()) return false;
-    if (tokens[index + 1].type != TokenType::IDENTIFIER ||
-        tokens[index + 2].type != TokenType::COLON ||
-        tokens[index + 3].type != TokenType::IDENTIFIER) {
+    if (peek().type != TokenType::LPAREN) return false;
+    size_t cursor = index + 1;
+    if (cursor >= tokens.size() || tokens[cursor].type == TokenType::RPAREN) return false;
+
+    while (cursor < tokens.size()) {
+        if (tokens[cursor].type != TokenType::IDENTIFIER) return false;
+        ++cursor;
+        if (cursor >= tokens.size() || tokens[cursor].type != TokenType::COLON) return false;
+        ++cursor;
+        if (cursor >= tokens.size() || tokens[cursor].type != TokenType::IDENTIFIER) return false;
+        ++cursor;
+        if (cursor >= tokens.size()) return false;
+        if (tokens[cursor].type == TokenType::COMMA) {
+            ++cursor;
+            continue;
+        }
+        if (tokens[cursor].type == TokenType::RPAREN) {
+            ++cursor;
+            return cursor < tokens.size() && tokens[cursor].type == TokenType::FAT_ARROW;
+        }
         return false;
     }
-    if (tokens[index + 4].type == TokenType::RPAREN) {
-        return tokens[index + 5].type == TokenType::FAT_ARROW;
-    }
-    return index + 9 < tokens.size() &&
-           tokens[index + 4].type == TokenType::COMMA &&
-           tokens[index + 5].type == TokenType::IDENTIFIER &&
-           tokens[index + 6].type == TokenType::COLON &&
-           tokens[index + 7].type == TokenType::IDENTIFIER &&
-           tokens[index + 8].type == TokenType::RPAREN &&
-           tokens[index + 9].type == TokenType::FAT_ARROW;
+    return false;
 }
 
 std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
@@ -249,10 +256,10 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
             throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ')' attendu après le paramètre");
         }
     }
-    if (parameters.empty() || parameters.size() > 2) {
+    if (parameters.empty()) {
         throw CompilerError(
             ErrorKind::Parser, start.location,
-            "seules les lambdas à un ou deux paramètres Int sont supportées pour l'instant");
+            "les lambdas doivent avoir au moins un paramètre");
     }
     consume(TokenType::RPAREN, "Parenthèse fermante attendue après le paramètre de lambda");
     consume(TokenType::FAT_ARROW, "'=>' attendu après le paramètre de lambda");
