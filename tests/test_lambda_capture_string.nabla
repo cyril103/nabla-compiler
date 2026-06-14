@@ -1,0 +1,10 @@
+def applyToText(value: String, f: (String) => Int): Int = {
+    f(value)
+}
+
+def main(): Int = {
+    val suffix = "nabla"
+    applyToText("core", (text: String) => {
+        text.length() + suffix.length()
+    })
+}

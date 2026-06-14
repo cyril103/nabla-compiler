@@ -1,0 +1,10 @@
+def renderedLength(value: Int, f: (Int) => String): Int = {
+    f(value).length()
+}
+
+def main(): Int = {
+    val offset = 40
+    renderedLength(2, (value: Int) => {
+        (value + offset).toString()
+    })
+}

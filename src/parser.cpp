@@ -233,7 +233,7 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
     Token start = consume(TokenType::LPAREN, "");
     std::vector<FunctionDefNode::Parameter> parameters;
     std::vector<CompilerContext::ParameterInfo> signatureParameters;
-    std::vector<std::pair<std::string, std::string>> scopedParameters;
+    std::vector<ParsedSymbol> scopedParameters;
     const size_t outerScopeCount = localScopes.size();
 
     while (peek().type != TokenType::RPAREN) {
@@ -249,7 +249,7 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
         std::string symbolName = parameterName + "#" + std::to_string(nextSymbolId++);
         parameters.push_back({parameterName, symbolName, parameterType});
         signatureParameters.push_back({parameterName, parameterType, parameterTypeLocation});
-        scopedParameters.push_back({parameterName, symbolName});
+        scopedParameters.push_back({symbolName, parameterType, false});
         if (peek().type == TokenType::COMMA) {
             consume(TokenType::COMMA, "");
         } else if (peek().type != TokenType::RPAREN) {
@@ -267,8 +267,8 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
 
     lambdaCaptureScopes.push_back({outerScopeCount, {}});
     localScopes.emplace_back();
-    for (const auto& [parameterName, symbolName] : scopedParameters) {
-        localScopes.back()[parameterName] = {symbolName, "Int", false};
+    for (size_t i = 0; i < scopedParameters.size(); ++i) {
+        localScopes.back()[parameters[i].name] = scopedParameters[i];
     }
     auto body = parseBlock();
     consume(TokenType::RBRACE, "Fin du bloc de lambda attendue");
@@ -352,11 +352,12 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
             auto [symbol, scopeIndex] = findLocalWithScope(name);
             if (symbol) {
-                if (isFunctionTypeName(symbol->type)) {
+                auto functionType = functionTypeFromName(symbol->type);
+                if (functionType) {
                     captureIfNeeded(name, *symbol, scopeIndex);
                     return located(
                         std::make_unique<FunctionValueCallNode>(
-                            name, symbol->internalName, std::move(arguments)),
+                            name, symbol->internalName, std::move(arguments), functionType->returnType),
                         nameToken.location);
                 }
             }

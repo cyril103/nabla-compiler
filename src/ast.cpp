@@ -128,6 +128,18 @@ MethodCallNode::MethodCallNode(
     : receiver(std::move(rec)), methodName(std::move(method)), arguments(std::move(args)) {}
 
 std::string MethodCallNode::getType() {
+    const std::string receiverType = receiver->getType();
+    if (receiverType == "Int") {
+        if (methodName == "toString") return "String";
+        return "Int";
+    }
+    if (receiverType == "String") {
+        if (methodName == "length") return "Int";
+    }
+    if (receiverType == "IntArray") {
+        if (methodName == "set") return "Unit";
+        if (methodName == "length" || methodName == "get") return "Int";
+    }
     return resolvedType;
 }
 
@@ -332,8 +344,10 @@ std::string FunctionReferenceNode::lowerToIR(IRBuilder& builder) const {
 }
 
 FunctionValueCallNode::FunctionValueCallNode(
-    std::string functionName, std::string symbol, std::vector<std::unique_ptr<ASTNode>> args)
-    : name(std::move(functionName)), symbolName(std::move(symbol)), arguments(std::move(args)) {}
+    std::string functionName, std::string symbol, std::vector<std::unique_ptr<ASTNode>> args,
+    std::string initialResolvedType)
+    : name(std::move(functionName)), symbolName(std::move(symbol)), arguments(std::move(args)),
+      resolvedType(std::move(initialResolvedType)) {}
 
 std::string FunctionValueCallNode::getType() {
     return resolvedType;
