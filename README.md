@@ -70,9 +70,9 @@ function add(%a: Int, %b: Int) -> Int
 ```
 
 Cette première IR couvre les fonctions globales, entiers, variables,
-affectations, opérations binaires et appels de fonctions globales. Les objets,
-méthodes et constructions de contrôle restent pour le moment générés
-directement depuis l'AST.
+affectations, opérations binaires, appels de fonctions globales, `if`, `while`
+et `for`. Les objets et méthodes restent pour le moment générés directement
+depuis l'AST.
 
 ### Personnaliser le fichier source
 

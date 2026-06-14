@@ -246,6 +246,21 @@ void IfNode::validateSemantics(CompilerContext& context) {
     resolvedType = thenBranch->getType();
 }
 
+std::string IfNode::lowerToIR(IRBuilder& builder) const {
+    std::string elseLabel = builder.makeLabel("if.else");
+    std::string endLabel = builder.makeLabel("if.end");
+
+    std::string loweredCondition = condition->lowerToIR(builder);
+    builder.emitBranchIfFalse(loweredCondition, elseLabel);
+    std::string thenValue = thenBranch->lowerToIR(builder);
+    builder.emitJump(endLabel);
+    builder.emitLabel(elseLabel);
+    std::string elseValue = elseBranch->lowerToIR(builder);
+    builder.emitJump(endLabel);
+    builder.emitLabel(endLabel);
+    return builder.emitPhi(thenValue, elseValue);
+}
+
 BlockNode::BlockNode(std::vector<std::unique_ptr<ASTNode>> exprs)
     : expressions(std::move(exprs)) {}
 
@@ -310,6 +325,22 @@ void WhileNode::validateSemantics(CompilerContext& context) {
     }
 }
 
+std::string WhileNode::lowerToIR(IRBuilder& builder) const {
+    std::string conditionLabel = builder.makeLabel("while.cond");
+    std::string bodyLabel = builder.makeLabel("while.body");
+    std::string endLabel = builder.makeLabel("while.end");
+
+    builder.emitJump(conditionLabel);
+    builder.emitLabel(conditionLabel);
+    std::string loweredCondition = condition->lowerToIR(builder);
+    builder.emitBranchIfFalse(loweredCondition, endLabel);
+    builder.emitLabel(bodyLabel);
+    body->lowerToIR(builder);
+    builder.emitJump(conditionLabel);
+    builder.emitLabel(endLabel);
+    return builder.emitConstant("0");
+}
+
 ForNode::ForNode(std::unique_ptr<ASTNode> count, std::unique_ptr<ASTNode> body)
     : count(std::move(count)), body(std::move(body)) {}
 
@@ -345,6 +376,34 @@ void ForNode::validateSemantics(CompilerContext& context) {
     if (count->getType() != "Int") {
         semanticError("le compteur d'un 'for' doit être de type Int");
     }
+}
+
+std::string ForNode::lowerToIR(IRBuilder& builder) const {
+    std::string counterSymbol = builder.makeTemporarySymbol("for.count");
+    std::string conditionLabel = builder.makeLabel("for.cond");
+    std::string bodyLabel = builder.makeLabel("for.body");
+    std::string endLabel = builder.makeLabel("for.end");
+
+    std::string initialCount = count->lowerToIR(builder);
+    builder.emitStore(counterSymbol, initialCount);
+    builder.emitJump(conditionLabel);
+
+    builder.emitLabel(conditionLabel);
+    std::string currentCount = builder.emitLoad(counterSymbol);
+    std::string zero = builder.emitConstant("0");
+    std::string shouldContinue = builder.emitBinary(">", currentCount, zero);
+    builder.emitBranchIfFalse(shouldContinue, endLabel);
+
+    builder.emitLabel(bodyLabel);
+    body->lowerToIR(builder);
+    std::string countBeforeDecrement = builder.emitLoad(counterSymbol);
+    std::string one = builder.emitConstant("1");
+    std::string decrementedCount = builder.emitBinary("-", countBeforeDecrement, one);
+    builder.emitStore(counterSymbol, decrementedCount);
+    builder.emitJump(conditionLabel);
+
+    builder.emitLabel(endLabel);
+    return builder.emitConstant("0");
 }
 
 FunctionDefNode::FunctionDefNode(

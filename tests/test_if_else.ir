@@ -1,0 +1,11 @@
+function main() -> Int
+  %0 = const 1
+  branch_if_false %0, if.else.0
+  %1 = const 10
+  jump if.end.1
+  label if.else.0
+  %2 = const 20
+  jump if.end.1
+  label if.end.1
+  %3 = phi %1, %2
+  return %3

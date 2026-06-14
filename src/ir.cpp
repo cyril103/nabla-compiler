@@ -43,6 +43,18 @@ std::string IRProgram::format() const {
                 case IROpcode::Store:
                     out << "store " << instruction.operands[1] << ", @" << instruction.operands[0];
                     break;
+                case IROpcode::Label:
+                    out << "label " << instruction.operands[0];
+                    break;
+                case IROpcode::BranchIfFalse:
+                    out << "branch_if_false " << instruction.operands[0] << ", " << instruction.operands[1];
+                    break;
+                case IROpcode::Jump:
+                    out << "jump " << instruction.operands[0];
+                    break;
+                case IROpcode::Phi:
+                    out << "phi " << join(instruction.operands, ", ");
+                    break;
                 case IROpcode::Return:
                     out << "return " << instruction.operands[0];
                     break;
@@ -67,6 +79,8 @@ void IRBuilder::beginFunction(
     currentFunction = &program.functions.back();
     parameterValues.clear();
     nextValueId = 0;
+    nextLabelId = 0;
+    nextTemporarySymbolId = 0;
 }
 
 void IRBuilder::endFunction(const std::string& returnValue) {
@@ -103,6 +117,32 @@ std::string IRBuilder::emitLoad(const std::string& symbol) {
 
 void IRBuilder::emitStore(const std::string& symbol, const std::string& value) {
     emit({IROpcode::Store, "", "", {symbol, value}});
+}
+
+std::string IRBuilder::emitPhi(const std::string& left, const std::string& right) {
+    std::string result = nextValue();
+    emit({IROpcode::Phi, result, "", {left, right}});
+    return result;
+}
+
+std::string IRBuilder::makeLabel(const std::string& prefix) {
+    return prefix + "." + std::to_string(nextLabelId++);
+}
+
+std::string IRBuilder::makeTemporarySymbol(const std::string& prefix) {
+    return prefix + "." + std::to_string(nextTemporarySymbolId++);
+}
+
+void IRBuilder::emitLabel(const std::string& label) {
+    emit({IROpcode::Label, "", "", {label}});
+}
+
+void IRBuilder::emitBranchIfFalse(const std::string& condition, const std::string& targetLabel) {
+    emit({IROpcode::BranchIfFalse, "", "", {condition, targetLabel}});
+}
+
+void IRBuilder::emitJump(const std::string& targetLabel) {
+    emit({IROpcode::Jump, "", "", {targetLabel}});
 }
 
 void IRBuilder::bindParameter(const std::string& symbol, const std::string& parameterName) {

@@ -1,0 +1,19 @@
+function main() -> Int
+  %0 = const 3
+  store %0, @for.count.0
+  jump for.cond.0
+  label for.cond.0
+  %1 = load @for.count.0
+  %2 = const 0
+  %3 = > %1, %2
+  branch_if_false %3, for.end.2
+  label for.body.1
+  %4 = const 1
+  %5 = load @for.count.0
+  %6 = const 1
+  %7 = - %5, %6
+  store %7, @for.count.0
+  jump for.cond.0
+  label for.end.2
+  %8 = const 0
+  return %8

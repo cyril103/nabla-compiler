@@ -105,6 +105,7 @@ public:
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void allocateLocals(int& nextOffset) override;
     void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
 };
 
 class BlockNode : public ASTNode {
@@ -127,6 +128,7 @@ public:
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void allocateLocals(int& nextOffset) override;
     void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
 };
 
 class ForNode : public ASTNode {
@@ -138,6 +140,7 @@ public:
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void allocateLocals(int& nextOffset) override;
     void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
 };
 
 class FunctionDefNode : public ASTNode {

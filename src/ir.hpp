@@ -11,6 +11,10 @@ enum class IROpcode {
     Call,
     Load,
     Store,
+    Label,
+    BranchIfFalse,
+    Jump,
+    Phi,
     Return
 };
 
@@ -52,6 +56,12 @@ public:
     std::string emitCall(const std::string& name, const std::vector<std::string>& arguments);
     std::string emitLoad(const std::string& symbol);
     void emitStore(const std::string& symbol, const std::string& value);
+    std::string emitPhi(const std::string& left, const std::string& right);
+    std::string makeLabel(const std::string& prefix);
+    std::string makeTemporarySymbol(const std::string& prefix);
+    void emitLabel(const std::string& label);
+    void emitBranchIfFalse(const std::string& condition, const std::string& targetLabel);
+    void emitJump(const std::string& targetLabel);
     void bindParameter(const std::string& symbol, const std::string& parameterName);
     [[noreturn]] void unsupported(const SourceLocation& location, const std::string& feature) const;
 
@@ -60,6 +70,8 @@ private:
     IRFunction* currentFunction = nullptr;
     std::map<std::string, std::string> parameterValues;
     int nextValueId = 0;
+    int nextLabelId = 0;
+    int nextTemporarySymbolId = 0;
 
     std::string nextValue();
     void emit(IRInstruction instruction);

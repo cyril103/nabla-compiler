@@ -1,0 +1,11 @@
+function main() -> Int
+  jump while.cond.0
+  label while.cond.0
+  %0 = const 0
+  branch_if_false %0, while.end.2
+  label while.body.1
+  %1 = const 1
+  jump while.cond.0
+  label while.end.2
+  %2 = const 0
+  return %2
