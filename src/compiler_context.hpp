@@ -54,6 +54,19 @@ struct CompilerContext {
     int nextLambdaId = 0;
 };
 
+struct StdlibTypeAlias {
+    std::string baseName;
+    std::vector<std::string> arguments;
+    std::string resolvedName;
+};
+
+inline const std::vector<StdlibTypeAlias>& stdlibTypeAliases() {
+    static const std::vector<StdlibTypeAlias> aliases = {
+        {"Array", {"Int"}, "ArrayInt"},
+    };
+    return aliases;
+}
+
 inline std::string formatFunctionType(const CompilerContext::FunctionType& functionType) {
     std::string formatted = "Fn(";
     for (size_t i = 0; i < functionType.parameterTypes.size(); ++i) {
@@ -132,7 +145,9 @@ inline std::string resolveStdlibTypeAlias(const std::string& type) {
     auto parameterizedType = parameterizedTypeFromName(type);
     if (!parameterizedType) return type;
     const auto& [baseName, arguments] = *parameterizedType;
-    if (baseName == "Array" && arguments.size() == 1 && arguments[0] == "Int") return "ArrayInt";
+    for (const auto& alias : stdlibTypeAliases()) {
+        if (alias.baseName == baseName && alias.arguments == arguments) return alias.resolvedName;
+    }
     return type;
 }
 

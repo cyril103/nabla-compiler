@@ -1,0 +1,10 @@
+import core.option
+import collections.int_array
+
+def maybe(values: Array[Int]): Option[Array[Int]] = {
+    optionSome(values)
+}
+
+def main(): Int = {
+    maybe(arrayIntRange(3)).map(0, values => values.sum()).getOrElse(0) + 39
+}

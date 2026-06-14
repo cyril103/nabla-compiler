@@ -49,9 +49,10 @@ Le pipeline implemente actuellement :
 - representation interne canonique des types fonction sous forme `Fn(...)->...`;
 - syntaxe de types fonction parenthesee comme `(Int) => Int`, `(Int) => Unit`,
   `(Int, Int) => Int` et `(String) => Int`;
-- premiere syntaxe de types parametres, avec `Array[Int]` canonise vers la
-  facade standard existante `ArrayInt` et `Option[T]` porte par une vraie classe
-  generique standard;
+- premiere syntaxe de types parametres, avec aliases standard extensibles
+  comme `Array[Int]` canonise vers la facade existante `ArrayInt`, y compris
+  dans les types imbriques et types fonction, et `Option[T]` porte par une
+  vraie classe generique standard;
 - declarations de classes generiques simples comme `Box[T]`, instanciables avec
   `Box[Int]` ou `Box[String]`, avec substitution des champs, retours de methodes
   et types fonction comme `(T) => T`;
@@ -211,6 +212,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [ ] Valider les types des branches, boucles et operateurs de facon uniforme.
 - [x] Ajouter une premiere syntaxe de types parametres pour `Option[Int]` et
   `Array[Int]` via aliases standard.
+- [x] Centraliser les aliases de types standard comme `Array[Int] -> ArrayInt`.
 - [x] Ajouter les declarations de classes generiques utilisateur `class Box[T]`
   avec substitution des champs, methodes et types fonction.
 - [x] Ajouter les fonctions generiques utilisateur explicites
@@ -289,6 +291,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `TBD` - Centraliser les aliases de types standard, notamment
+  `Array[Int] -> ArrayInt`, et les tester dans `Option[...]` et les types
+  fonction.
 - `fcce070` - Ajouter `Option[T].foreach` pour les effets controles sur
   `Some`.
 - `7bc14aa` - Ajouter `Option[T].flatMap[U]` a la bibliotheque standard generique.

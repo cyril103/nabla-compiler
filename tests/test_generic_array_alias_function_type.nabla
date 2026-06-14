@@ -1,0 +1,9 @@
+import collections.int_array
+
+def apply(values: Array[Int], summarize: (Array[Int]) => Int): Int = {
+    summarize(values)
+}
+
+def main(): Int = {
+    apply(arrayIntRange(3), values => values.sum()) + 39
+}
