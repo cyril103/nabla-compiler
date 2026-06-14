@@ -585,14 +585,29 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     ErrorKind::Parser, nameToken.location,
                     "les arguments de type ne sont supportés que pour les fonctions nommées");
             }
+            std::string functionLookupName = name;
+            std::vector<std::string> functionTypeArguments = typeArguments;
+            if (!initialSymbol) {
+                if (auto alias = resolveStdlibFunctionAlias(name, typeArguments)) {
+                    if (context.functions.count(*alias)) {
+                        functionLookupName = *alias;
+                        functionTypeArguments.clear();
+                    }
+                } else if (isStdlibFunctionAliasName(name) && !typeArguments.empty()) {
+                    throw CompilerError(
+                        ErrorKind::Parser, nameToken.location,
+                        "la fonction standard générique '" + name +
+                        "' ne supporte pas ces arguments de type");
+                }
+            }
             if (initialSymbol) {
                 auto functionType = functionTypeFromName(initialSymbol->type);
                 if (functionType) expectedArgumentTypes = functionType->parameterTypes;
             } else {
-                auto function = context.functions.find(name);
+                auto function = context.functions.find(functionLookupName);
                 if (function != context.functions.end()) {
                     std::map<std::string, std::string> substitution;
-                    if (auto genericSubstitution = genericFunctionSubstitutionFor(function->second, typeArguments)) {
+                    if (auto genericSubstitution = genericFunctionSubstitutionFor(function->second, functionTypeArguments)) {
                         substitution = *genericSubstitution;
                     }
                     for (const auto& parameter : function->second.parameters) {
@@ -602,9 +617,9 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             }
             consume(TokenType::LPAREN, "");
             std::vector<std::unique_ptr<ASTNode>> arguments;
-            auto namedFunction = context.functions.find(name);
+            auto namedFunction = context.functions.find(functionLookupName);
             if (!initialSymbol && namedFunction != context.functions.end()) {
-                arguments = parseFunctionCallArguments(namedFunction->second, typeArguments);
+                arguments = parseFunctionCallArguments(namedFunction->second, functionTypeArguments);
             } else {
                 arguments = parseArguments(expectedArgumentTypes);
             }
@@ -621,12 +636,12 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                 }
             }
             std::string initialReturnType = "Int";
-            auto function = context.functions.find(name);
+            auto function = context.functions.find(functionLookupName);
             if (function != context.functions.end()) {
                 std::map<std::string, std::string> substitution;
-                if (auto genericSubstitution = genericFunctionSubstitutionFor(function->second, typeArguments)) {
+                if (auto genericSubstitution = genericFunctionSubstitutionFor(function->second, functionTypeArguments)) {
                     substitution = *genericSubstitution;
-                } else if (typeArguments.empty() && !function->second.typeParameters.empty()) {
+                } else if (functionTypeArguments.empty() && !function->second.typeParameters.empty()) {
                     std::vector<std::string> actualArgumentTypes;
                     for (const auto& argument : arguments) actualArgumentTypes.push_back(argument->getType());
                     if (auto inferredSubstitution =
@@ -638,7 +653,7 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             }
             return located(
                 std::make_unique<FunctionCallNode>(
-                    name, std::move(arguments), std::move(typeArguments), initialReturnType),
+                    functionLookupName, std::move(arguments), std::move(functionTypeArguments), initialReturnType),
                 nameToken.location);
         }
         auto [symbol, scopeIndex] = findLocalWithScope(name);

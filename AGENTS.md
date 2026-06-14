@@ -118,6 +118,10 @@ Le pipeline implemente actuellement :
   `boolArrayFill`, `boolArrayCountTrue`, `boolArrayAll`, `boolArrayAny`,
   `boolArrayMap`, `arrayBoolFill`, `map`, `foreach`, `countTrue`, `all`,
   `any`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
+- module de bibliotheque standard `collections.array` comme point d'entree
+  commun pour les tableaux specialises, avec `arrayFill[T]` resolu vers
+  `arrayIntFill`, `arrayLongFill` ou `arrayBoolFill` pour `T = Int`, `Long` ou
+  `Bool`;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -144,7 +148,9 @@ Limites importantes :
   ne sont pas encore des valeurs vraiment polymorphes;
   `Array[Int]` reste une facade specialisee vers `ArrayInt`; `Array[Long]`
   reste une facade specialisee vers `ArrayLong`; `Array[Bool]` reste une
-  facade specialisee vers `ArrayBool`; la
+  facade specialisee vers `ArrayBool`; `arrayFill[T]` est une fonction standard
+  generique specialisee pour `Int`, `Long` et `Bool`, mais pas encore une
+  implementation unique de tableau generique; la
   monomorphisation complete des classes generiques reste a faire;
 - le tas est fixe et possede une verification de depassement, mais pas de
   ramasse-miettes;
@@ -280,6 +286,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `ArrayIntNested` et `ArrayIntNested.flatten()`.
 - [x] Ajouter `ArrayInt.grouped`, `ArrayIntNested.rowSize` et
   `ArrayIntNested.mapRows` pour une API imbriquee de collections imbriquees.
+- [x] Ajouter `collections.array` et `arrayFill[T]` comme premiere API commune
+  pour `Array[Int]`, `Array[Long]` et `Array[Bool]`.
+- [ ] Ajouter les operations generiques standard suivantes (`arrayMap[T]`,
+  `arrayForeach[T]`) ou une vraie facade `Array[T]` monomorphisee.
 
 ### P2 - Runtime Et Objets
 
@@ -304,6 +314,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `TBD` - Ajouter `collections.array` et `arrayFill[T]`, resolu vers les
+  specialisations `ArrayInt`, `ArrayLong` et `ArrayBool`.
 - `31b39ad` - Ajouter `BoolArray`, la facade standard `ArrayBool` et l'alias
   `Array[Bool]`.
 - `5392788` - Ajouter `LongArray`, la facade standard `ArrayLong` et l'alias
@@ -421,5 +433,6 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Introduire une IR typee pour les temporaires numeriques, puis ajouter les
-litteraux `Float` / `Double` et la generation SSE (`addss` / `addsd`, etc.).
+Etendre l'API commune de `Array[T]` au-dela de `arrayFill[T]`, probablement avec
+`arrayMap[T]` / `arrayForeach[T]` ou une facade generique monomorphisee quand le
+modele de stockage generique sera pret.

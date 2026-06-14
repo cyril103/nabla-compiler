@@ -1,0 +1,24 @@
+import collections.array
+
+def intTotal(xs: Array[Int]): Int = {
+    xs.sum()
+}
+
+def longTotal(xs: Array[Long]): Long = {
+    xs.sum()
+}
+
+def allTrue(xs: Array[Bool]): Bool = {
+    xs.all()
+}
+
+def main(): Int = {
+    val ints = arrayFill[Int](3, 14)
+    val longs = arrayFill[Long](2, 21L)
+    val bools = arrayFill[Bool](4, true)
+    if intTotal(ints) == 42 && longTotal(longs) == 42L && allTrue(bools) {
+        42
+    } else {
+        1
+    }
+}

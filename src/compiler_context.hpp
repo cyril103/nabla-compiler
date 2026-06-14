@@ -60,6 +60,12 @@ struct StdlibTypeAlias {
     std::string resolvedName;
 };
 
+struct StdlibFunctionAlias {
+    std::string name;
+    std::vector<std::string> typeArguments;
+    std::string resolvedName;
+};
+
 inline const std::vector<StdlibTypeAlias>& stdlibTypeAliases() {
     static const std::vector<StdlibTypeAlias> aliases = {
         {"Array", {"Int"}, "ArrayInt"},
@@ -67,6 +73,30 @@ inline const std::vector<StdlibTypeAlias>& stdlibTypeAliases() {
         {"Array", {"Bool"}, "ArrayBool"},
     };
     return aliases;
+}
+
+inline const std::vector<StdlibFunctionAlias>& stdlibFunctionAliases() {
+    static const std::vector<StdlibFunctionAlias> aliases = {
+        {"arrayFill", {"Int"}, "arrayIntFill"},
+        {"arrayFill", {"Long"}, "arrayLongFill"},
+        {"arrayFill", {"Bool"}, "arrayBoolFill"},
+    };
+    return aliases;
+}
+
+inline std::optional<std::string> resolveStdlibFunctionAlias(
+    const std::string& name, const std::vector<std::string>& typeArguments) {
+    for (const auto& alias : stdlibFunctionAliases()) {
+        if (alias.name == name && alias.typeArguments == typeArguments) return alias.resolvedName;
+    }
+    return std::nullopt;
+}
+
+inline bool isStdlibFunctionAliasName(const std::string& name) {
+    for (const auto& alias : stdlibFunctionAliases()) {
+        if (alias.name == name) return true;
+    }
+    return false;
 }
 
 inline std::string formatFunctionType(const CompilerContext::FunctionType& functionType) {
