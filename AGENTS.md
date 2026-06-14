@@ -54,6 +54,9 @@ Le pipeline implemente actuellement :
 - declarations de classes generiques simples comme `Box[T]`, instanciables avec
   `Box[Int]` ou `Box[String]`, avec substitution des champs, retours de methodes
   et types fonction comme `(T) => T`;
+- allocations de classes generiques conservees comme types concrets dans l'IR,
+  par exemple `new Box[Int]`, tout en reutilisant encore le corps de methode du
+  template;
 - declarations de fonctions generiques simples comme `identity[T]`, appelees avec
   arguments de type explicites comme `identity[Int](42)`, avec substitution dans
   les parametres, retours et types fonction;
@@ -116,7 +119,9 @@ Limites importantes :
   `Array[Int]`, et un premier support de classes generiques partageant le code
   du template; les fonctions generiques peuvent inferer leurs arguments de type
   depuis les arguments d'appel mais ne sont pas encore utilisables comme valeurs
-  polymorphes; la monomorphisation specialisee complete reste a faire;
+  polymorphes; les allocations generiques sont distinguees dans l'IR mais les
+  methodes generiques de classes restent partagees; la monomorphisation
+  specialisee complete reste a faire;
 - le tas est fixe et possede une verification de depassement, mais pas de
   ramasse-miettes;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
@@ -200,6 +205,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `def identity[T](value: T): T`.
 - [x] Ajouter l'inference des arguments de type des fonctions generiques.
 - [ ] Autoriser les fonctions generiques comme valeurs polymorphes.
+- [x] Distinguer les allocations de classes generiques concretes dans l'IR.
 - [ ] Ajouter la monomorphisation des classes et fonctions generiques.
 - [x] Generaliser `IntUnaryFn` vers des types fonction canoniques.
 - [x] Introduire une representation interne commune des types fonction.
@@ -260,6 +266,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `TBD` - Conserver les allocations de classes generiques concretes dans l'IR,
+  par exemple `new Box[Int]`, avec resolution de layout via le template.
 - `1a10139` - Ajouter l'inference des arguments de type des fonctions generiques,
   y compris le typage progressif des lambdas en argument.
 - `5b33e25` - Ajouter les fonctions generiques explicites comme `identity[T]`,

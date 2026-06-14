@@ -209,7 +209,8 @@ std::string IRBuilder::emitNewObject(
     const std::string& className, const std::vector<std::string>& arguments,
     const std::string& resultType) {
     std::string result = nextValue();
-    emit({IROpcode::NewObject, result, resultType.empty() ? className : resultType, className, arguments});
+    const std::string type = resultType.empty() ? className : resultType;
+    emit({IROpcode::NewObject, result, type, type, arguments});
     return result;
 }
 

@@ -19,9 +19,10 @@ const std::vector<std::string> METHOD_ARGUMENT_REGISTERS = {"rsi", "rdx", "rcx",
 }
 
 std::string asmFunctionName(const std::string& name) {
-    std::string result = name;
-    for (char& c : result) {
-        if (c == '.') c = '_';
+    std::string result;
+    for (char c : name) {
+        if (std::isalnum(static_cast<unsigned char>(c))) result += c;
+        else result += "_";
     }
     return result;
 }
@@ -484,11 +485,12 @@ private:
     }
 
     std::vector<int> fieldOffsetsByConstructorOrder(const std::string& className) const {
-        auto classIt = context.classes.find(className);
+        const std::string layoutClassName = genericBaseName(className);
+        auto classIt = context.classes.find(layoutClassName);
         if (classIt == context.classes.end()) {
             codegenError("layout de classe inconnu: " + className);
         }
-        auto layoutIt = context.classLayouts.find(className);
+        auto layoutIt = context.classLayouts.find(layoutClassName);
         if (classIt->second.fields.empty()) return {};
         if (layoutIt == context.classLayouts.end()) {
             codegenError("layout de classe inconnu: " + className);
@@ -497,7 +499,7 @@ private:
         for (const auto& field : classIt->second.fields) {
             auto offsetIt = layoutIt->second.find(field.name);
             if (offsetIt == layoutIt->second.end()) {
-                codegenError("offset de champ inconnu: " + className + "." + field.name);
+                codegenError("offset de champ inconnu: " + layoutClassName + "." + field.name);
             }
             offsets.push_back(offsetIt->second);
         }
@@ -512,7 +514,8 @@ private:
 
     int fieldOffsetFor(const std::string& qualifiedField) const {
         auto [className, fieldName] = splitQualifiedMember(qualifiedField);
-        auto layoutIt = context.classLayouts.find(className);
+        const std::string layoutClassName = genericBaseName(className);
+        auto layoutIt = context.classLayouts.find(layoutClassName);
         if (layoutIt == context.classLayouts.end()) {
             codegenError("layout de classe inconnu: " + className);
         }

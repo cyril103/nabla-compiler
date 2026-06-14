@@ -308,7 +308,7 @@ std::string NewNode::lowerToIR(IRBuilder& builder) const {
     std::vector<std::string> loweredArguments;
     for (const auto& argument : args) loweredArguments.push_back(argument->lowerToIR(builder));
     if (className == "IntArray") return builder.emitNewIntArray(loweredArguments[0]);
-    return builder.emitNewObject(genericBaseName(className), loweredArguments, className);
+    return builder.emitNewObject(className, loweredArguments);
 }
 
 MethodCallNode::MethodCallNode(

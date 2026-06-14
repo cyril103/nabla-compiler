@@ -1,0 +1,14 @@
+function Box.get(%this: Box) -> T
+  %0: T = field %this, Box.value
+  return %0
+
+function main() -> Int
+  %0: String = string "hello"
+  %1: Box[String] = new Box[String](%0)
+  store %1, @box#0
+  %2: Box[String] = load @box#0
+  %3: String = call_method Box.get(%2)
+  %4: Int = call_method String.length(%3)
+  %5: Int = const 37
+  %6: Int = + %4, %5
+  return %6
