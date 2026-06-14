@@ -325,7 +325,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Ajouter `arrayMap[T]` et `arrayForeach[T]` comme operations communes
+- `c34468f` - Ajouter `arrayMap[T]` et `arrayForeach[T]` comme operations communes
   specialisees pour `Array[Int]`, `Array[Long]` et `Array[Bool]`, et autoriser
   `Array[T]` comme facade de signature generique inferee depuis les
   specialisations concretes.
