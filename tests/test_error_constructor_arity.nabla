@@ -1,0 +1,9 @@
+class Pair(a: Int, b: Int) {
+    def run(): Int = {
+        a
+    }
+}
+
+def main(): Int = {
+    (new Pair(1)).run()
+}

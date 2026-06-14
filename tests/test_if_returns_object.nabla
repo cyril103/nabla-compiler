@@ -1,0 +1,19 @@
+class A() {
+    def run(): Int = {
+        42
+    }
+}
+
+class Factory() {
+    def choose(): A = {
+        if 1 {
+            new A()
+        } else {
+            new A()
+        }
+    }
+}
+
+def main(): Int = {
+    (new Factory()).choose().run()
+}

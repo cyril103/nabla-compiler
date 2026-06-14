@@ -64,13 +64,22 @@ void Parser::parseImport(std::unique_ptr<ProgramNode>& currentProgram) {
 void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
     consume(TokenType::KW_CLASS, "");
     std::string className = consume(TokenType::IDENTIFIER, "Nom de classe attendu").value;
+    if (context.classes.count(className)) {
+        throw std::runtime_error("Classe déjà déclarée: " + className);
+    }
+    context.classes[className] = {};
     currentParsingClass = className;
     consume(TokenType::LPAREN, "");
     int offset = 8;
     while (peek().type != TokenType::RPAREN) {
         std::string fieldName = consume(TokenType::IDENTIFIER, "Nom d'attribut attendu").value;
-        consume(TokenType::COLON, ""); consume(TokenType::IDENTIFIER, "Type attendu");
+        consume(TokenType::COLON, "");
+        std::string fieldType = consume(TokenType::IDENTIFIER, "Type attendu").value;
+        if (context.classLayouts[className].count(fieldName)) {
+            throw std::runtime_error("Champ déjà déclaré dans '" + className + "': " + fieldName);
+        }
         context.classLayouts[className][fieldName] = offset;
+        context.classes[className].fields.push_back({fieldName, fieldType});
         offset += 8;
         if (peek().type == TokenType::COMMA) consume(TokenType::COMMA, "");
     }
@@ -150,19 +159,19 @@ std::unique_ptr<ASTNode> Parser::parseStatement() {
             throw std::runtime_error("Variable déjà déclarée dans cette portée: " + name);
         }
         std::string symbolName = name + "#" + std::to_string(nextSymbolId++);
-        localScopes.back()[name] = {symbolName, init->getType()};
+        localScopes.back()[name] = {symbolName, init->getType(), isMutable};
         return std::make_unique<VarDeclNode>(name, symbolName, std::move(init), isMutable);
     }
     if (peek().type == TokenType::IDENTIFIER) {
         // possible assignment
-        Token t = tokens[index];
         if (index + 1 < tokens.size() && tokens[index + 1].type == TokenType::EQUAL) {
             std::string name = consume(TokenType::IDENTIFIER, "").value;
             consume(TokenType::EQUAL, "");
             auto rhs = parseExpression();
             const ParsedSymbol* symbol = findLocal(name);
             return std::make_unique<AssignmentNode>(
-                name, symbol ? symbol->internalName : name, std::move(rhs));
+                name, symbol ? symbol->internalName : name, symbol ? symbol->type : "Int",
+                symbol ? symbol->isMutable : false, std::move(rhs));
         }
     }
     return parseExpression();
@@ -220,7 +229,11 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             return std::make_unique<IdentifierNode>(name, symbol->internalName, symbol->type);
         }
         if (!currentParsingClass.empty() && context.classLayouts[currentParsingClass].count(name)) {
-            return std::make_unique<FieldAccessNode>(currentParsingClass, name);
+            for (const auto& [fieldName, fieldType] : context.classes[currentParsingClass].fields) {
+                if (fieldName == name) {
+                    return std::make_unique<FieldAccessNode>(currentParsingClass, name, fieldType);
+                }
+            }
         }
         return std::make_unique<IdentifierNode>(name, name, "Int");
     }
@@ -281,11 +294,18 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
     consume(TokenType::KW_DEF, "");
     std::string name = consume(TokenType::IDENTIFIER, "Nom de fonction attendu").value;
     consume(TokenType::LPAREN, ""); consume(TokenType::RPAREN, "");
-    consume(TokenType::COLON, ""); consume(TokenType::IDENTIFIER, "Type de retour attendu").value;
+    consume(TokenType::COLON, "");
+    std::string returnType = consume(TokenType::IDENTIFIER, "Type de retour attendu").value;
+    if (!clName.empty()) {
+        if (context.classes[clName].methods.count(name)) {
+            throw std::runtime_error("Méthode déjà déclarée dans '" + clName + "': " + name);
+        }
+        context.classes[clName].methods[name] = returnType;
+    }
     consume(TokenType::EQUAL, ""); consume(TokenType::LBRACE, "");
     auto body = parseBlock();
     consume(TokenType::RBRACE, "");
-    return std::make_unique<FunctionDefNode>(clName, name, std::move(body));
+    return std::make_unique<FunctionDefNode>(clName, name, returnType, std::move(body));
 }
 
 const Parser::ParsedSymbol* Parser::findLocal(const std::string& name) const {

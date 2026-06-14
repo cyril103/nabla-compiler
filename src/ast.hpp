@@ -12,6 +12,7 @@ public:
     virtual void generateASM(std::ofstream& out, CompilerContext& context) = 0;
     virtual std::string getType() = 0;
     virtual void allocateLocals(int& nextOffset) { (void) nextOffset; }
+    virtual void validateSemantics(CompilerContext& context) = 0;
 };
 
 class ProgramNode : public ASTNode {
@@ -19,6 +20,7 @@ public:
     std::vector<std::unique_ptr<ASTNode>> elements;
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
+    void validateSemantics(CompilerContext& context) override;
 };
 
 class IntNode : public ASTNode {
@@ -27,6 +29,7 @@ public:
     IntNode(std::string val);
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
+    void validateSemantics(CompilerContext& context) override;
 };
 
 class NewNode : public ASTNode {
@@ -36,36 +39,43 @@ public:
     NewNode(std::string clName, std::vector<std::unique_ptr<ASTNode>> arguments);
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
+    void validateSemantics(CompilerContext& context) override;
 };
 
 class MethodCallNode : public ASTNode {
     std::unique_ptr<ASTNode> receiver;
     std::string methodName;
     std::unique_ptr<ASTNode> argument;
+    std::string resolvedType = "Int";
 public:
     MethodCallNode(std::unique_ptr<ASTNode> rec, std::string method, std::unique_ptr<ASTNode> arg);
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
+    void validateSemantics(CompilerContext& context) override;
 };
 
 class FieldAccessNode : public ASTNode {
     std::string className;
     std::string fieldName;
+    std::string type;
 public:
-    FieldAccessNode(std::string clName, std::string field);
+    FieldAccessNode(std::string clName, std::string field, std::string fieldType);
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
+    void validateSemantics(CompilerContext& context) override;
 };
 
 class IfNode : public ASTNode {
     std::unique_ptr<ASTNode> condition;
     std::unique_ptr<ASTNode> thenBranch;
     std::unique_ptr<ASTNode> elseBranch;
+    std::string resolvedType = "Int";
 public:
     IfNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode> thenBranch, std::unique_ptr<ASTNode> elseBranch);
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void allocateLocals(int& nextOffset) override;
+    void validateSemantics(CompilerContext& context) override;
 };
 
 class BlockNode : public ASTNode {
@@ -75,6 +85,7 @@ public:
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void allocateLocals(int& nextOffset) override;
+    void validateSemantics(CompilerContext& context) override;
 };
 
 class WhileNode : public ASTNode {
@@ -85,6 +96,7 @@ public:
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void allocateLocals(int& nextOffset) override;
+    void validateSemantics(CompilerContext& context) override;
 };
 
 class ForNode : public ASTNode {
@@ -95,16 +107,19 @@ public:
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void allocateLocals(int& nextOffset) override;
+    void validateSemantics(CompilerContext& context) override;
 };
 
 class FunctionDefNode : public ASTNode {
     std::string className;
     std::string name;
+    std::string returnType;
     std::unique_ptr<ASTNode> body;
 public:
-    FunctionDefNode(std::string clName, std::string name, std::unique_ptr<ASTNode> body);
+    FunctionDefNode(std::string clName, std::string name, std::string declaredReturnType, std::unique_ptr<ASTNode> body);
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
+    void validateSemantics(CompilerContext& context) override;
 };
 
 class IdentifierNode : public ASTNode {
@@ -115,6 +130,7 @@ public:
     IdentifierNode(std::string n, std::string symbol, std::string resolvedType);
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
+    void validateSemantics(CompilerContext& context) override;
     const std::string& getName() const { return name; }
 };
 
@@ -129,14 +145,18 @@ public:
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void allocateLocals(int& nextOffset) override;
+    void validateSemantics(CompilerContext& context) override;
 };
 
 class AssignmentNode : public ASTNode {
     std::string name;
     std::string symbolName;
+    std::string targetType;
+    bool targetMutable;
     std::unique_ptr<ASTNode> value;
 public:
-    AssignmentNode(std::string n, std::string symbol, std::unique_ptr<ASTNode> v);
+    AssignmentNode(std::string n, std::string symbol, std::string type, bool isMutable, std::unique_ptr<ASTNode> v);
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
+    void validateSemantics(CompilerContext& context) override;
 };

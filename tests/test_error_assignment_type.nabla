@@ -1,0 +1,11 @@
+class A() {
+    def run(): Int = {
+        1
+    }
+}
+
+def main(): Int = {
+    var value = 1
+    value = new A()
+    value
+}

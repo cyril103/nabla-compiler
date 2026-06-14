@@ -22,6 +22,7 @@ private:
     struct ParsedSymbol {
         std::string internalName;
         std::string type;
+        bool isMutable;
     };
     std::vector<std::map<std::string, ParsedSymbol>> localScopes;
     int nextSymbolId = 0;

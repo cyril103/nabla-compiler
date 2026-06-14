@@ -1,0 +1,17 @@
+class A() {
+    def run(): Int = {
+        42
+    }
+}
+
+class Box(value: A) {
+    def get(): A = {
+        value
+    }
+}
+
+def main(): Int = {
+    val box = new Box(new A())
+    val value = box.get()
+    value.run()
+}

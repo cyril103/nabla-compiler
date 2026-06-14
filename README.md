@@ -2,6 +2,11 @@
 
 Un compilateur de recherche écrit en C++17 qui traduit un sous-ensemble orienté objet inspiré de **Scala** directement en assembleur **x86_64 natif (ELF Linux)**. 
 
+Le pipeline sépare désormais l'analyse syntaxique, l'analyse sémantique et la
+génération de code. L'analyse sémantique valide notamment les classes,
+constructeurs, appels de méthodes, types déclarés et affectations avant
+l'émission de l'assembleur.
+
 Le langage met l'accent sur une unification forte des types (tout est objet, y compris les entiers), l'absence de runtime lourd ou de machine virtuelle, et une exécution ultra-rapide au plus proche du matériel.
 
 ---

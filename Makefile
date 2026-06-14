@@ -6,9 +6,9 @@ BIN := $(BUILD_DIR)/$(notdir $(basename $(SRC)))
 
 all: nablac
 
-nablac: src/main.cpp src/parser.cpp src/ast.cpp src/lexer.hpp src/ast.hpp src/parser.hpp src/compiler_context.hpp
+nablac: src/main.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp src/lexer.hpp src/ast.hpp src/parser.hpp src/semantic_analyzer.hpp src/compiler_context.hpp
 	@mkdir -p $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) src/main.cpp src/parser.cpp src/ast.cpp -o $(BUILD_DIR)/nablac
+	$(CXX) $(CXXFLAGS) src/main.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp -o $(BUILD_DIR)/nablac
 
 test: nablac
 	@mkdir -p $(BUILD_DIR)

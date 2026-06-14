@@ -4,12 +4,12 @@ class A() {
     }
 }
 
-class Pair(a: A, b: Int) {
+class Box(value: Int) {
     def run(): Int = {
-        b
+        value
     }
 }
 
 def main(): Int = {
-    (new Pair(new A(), 42)).run()
+    (new Box(new A())).run()
 }

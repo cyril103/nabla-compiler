@@ -2,6 +2,7 @@
 #include "lexer.hpp"
 #include "ast.hpp"
 #include "parser.hpp"
+#include "semantic_analyzer.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -80,6 +81,8 @@ int main(int argc, char* argv[]) {
         Lexer lexer(buffer.str());
         Parser parser(lexer.tokenize(), context, mainPath);
         auto globalAST = parser.parseProgram();
+        SemanticAnalyzer semanticAnalyzer(context);
+        semanticAnalyzer.analyze(*globalAST);
 
         std::ofstream asmFile(asmFilename);
         globalAST->generateASM(asmFile, context);
@@ -102,7 +105,7 @@ int main(int argc, char* argv[]) {
         }
         std::cout << "\033[1;32m[Nabla] Exécutable compilé avec succès : ./" << exePath << "\033[0m\n";
     } catch (const std::exception& e) {
-        std::cerr << "Erreur: Parser Error " << e.what() << "\n";
+        std::cerr << "Erreur: " << e.what() << "\n";
         return 1;
     }
     return 0;
