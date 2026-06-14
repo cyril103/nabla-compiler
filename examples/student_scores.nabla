@@ -1,0 +1,86 @@
+import io
+import collections.array
+
+def sizeOf[T](values: Array[T]): Int = {
+    values.size()
+}
+
+def firstOf[T](values: Array[T]): T = {
+    values.get(0)
+}
+
+def identityMap[T](values: Array[T]): Array[T] = {
+    values.map(value => value)
+}
+
+def passed(score: Int): Bool = {
+    score >= 10
+}
+
+def bonus(score: Int): Int = {
+    score + 2
+}
+
+def printScore(value: Int): Unit = {
+    print(value.toString())
+    print(" ")
+}
+
+def printScores(title: String, scores: Array[Int]): Unit = {
+    println(title)
+    scores.foreach(value => printScore(value))
+    println("")
+}
+
+def printOptionInt(title: String, value: OptionInt): Unit = {
+    print(title)
+    if value.isEmpty() {
+        println("none")
+    } else {
+        println(value.getOrElse(0).toString())
+    }
+}
+
+def report(scores: Array[Int]): Int = {
+    val adjusted = identityMap(scores.map(score => bonus(score)))
+    val passing = adjusted.filter(score => passed(score))
+    val failed = adjusted.filter(score => !passed(score))
+    val total = adjusted.fold(0, (accumulator, score) => accumulator + score)
+    val average = total / adjusted.size()
+    val firstScore = firstOf(adjusted)
+
+    println("Nabla student score report")
+    printScores("adjusted scores:", adjusted)
+    printScores("passing scores:", passing)
+    printScores("failed scores:", failed)
+    print("class size: ")
+    println(sizeOf(adjusted).toString())
+    print("first adjusted score: ")
+    println(firstScore.toString())
+    print("total: ")
+    println(total.toString())
+    print("average: ")
+    println(average.toString())
+    print("passing count: ")
+    println(passing.size().toString())
+    printOptionInt("minimum: ", adjusted.min())
+    printOptionInt("maximum: ", adjusted.max())
+    printOptionInt("first excellent score: ", adjusted.find(score => score >= 18))
+
+    if passing.size() == 5 &&
+       failed.size() == 3 &&
+       total == 96 &&
+       average == 12 &&
+       firstScore == 5 &&
+       adjusted.max().getOrElse(0) == 19 {
+        42
+    } else {
+        1
+    }
+}
+
+def main(): Int = {
+    val raw = arrayIntRange(8)
+    val scores = raw.map(score => score * 2 + 3)
+    report(scores)
+}
