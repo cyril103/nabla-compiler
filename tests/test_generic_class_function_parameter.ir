@@ -17,6 +17,7 @@ function lambda.0(%value: Int) -> Int
   %1: Int = + %value, %0
   return %1
 
-function TransformBox[Int].transform(%this: TransformBox[Int], %arg0: Fn(Int)->Int) -> Int
-  %0: Int = call_method TransformBox.transform(%this, %arg0)
-  return %0
+function TransformBox[Int].transform(%this: TransformBox[Int], %f: Fn(Int)->Int) -> Int
+  %0: Int = field %this, TransformBox[Int].value
+  %1: Int = indirect_call %f, %0
+  return %1

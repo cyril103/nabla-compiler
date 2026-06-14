@@ -97,6 +97,9 @@ public:
     std::string emitLoad(const std::string& symbol, const std::string& type = "Int");
     void emitStore(const std::string& symbol, const std::string& value, const std::string& type = "Int");
     std::string emitPhi(const std::string& left, const std::string& right, const std::string& type = "Int");
+    void pushTypeSubstitution(const std::map<std::string, std::string>& substitution);
+    void popTypeSubstitution();
+    std::string substituteActiveType(const std::string& type) const;
     std::string makeLabel(const std::string& prefix);
     std::string makeTemporarySymbol(const std::string& prefix);
     void emitLabel(const std::string& label);
@@ -113,6 +116,8 @@ private:
     IRFunction* currentFunction = nullptr;
     std::map<std::string, std::string> parameterValues;
     std::map<std::string, int> captureValues;
+    std::vector<std::map<std::string, std::string>> typeSubstitutionStack;
+    std::map<std::string, std::string> activeTypeSubstitution;
     std::string thisValue;
     std::string closureValue;
     int nextValueId = 0;
@@ -129,5 +134,5 @@ private:
 
     std::string nextValue();
     void emit(IRInstruction instruction);
-    void emitMethodSpecializationWrappers();
+    void emitMethodSpecializations(const class ProgramNode& root);
 };

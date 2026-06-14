@@ -14,5 +14,5 @@ function main() -> Int
   return %6
 
 function Box[String].get(%this: Box[String]) -> String
-  %0: String = call_method Box.get(%this)
+  %0: String = field %this, Box[String].value
   return %0

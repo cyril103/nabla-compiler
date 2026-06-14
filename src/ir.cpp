@@ -124,15 +124,22 @@ std::string IRProgram::format() const {
 IRProgram IRBuilder::build(const ProgramNode& root) {
     program = {};
     methodSpecializations.clear();
+    typeSubstitutionStack.clear();
+    activeTypeSubstitution.clear();
     root.lowerToIR(*this);
-    emitMethodSpecializationWrappers();
+    emitMethodSpecializations(root);
     return program;
 }
 
 void IRBuilder::beginFunction(
     const std::string& name, const std::vector<IRParameter>& parameters,
     const std::string& returnType) {
-    program.functions.push_back({name, parameters, returnType, {}});
+    std::vector<IRParameter> substitutedParameters;
+    for (auto parameter : parameters) {
+        parameter.type = substituteActiveType(parameter.type);
+        substitutedParameters.push_back(std::move(parameter));
+    }
+    program.functions.push_back({name, substitutedParameters, substituteActiveType(returnType), {}});
     currentFunction = &program.functions.back();
     parameterValues.clear();
     captureValues.clear();
@@ -150,7 +157,7 @@ void IRBuilder::endFunction(const std::string& returnValue) {
 
 std::string IRBuilder::emitConstant(const std::string& value, const std::string& type) {
     std::string result = nextValue();
-    emit({IROpcode::Constant, result, type, "", {value}});
+    emit({IROpcode::Constant, result, substituteActiveType(type), "", {value}});
     return result;
 }
 
@@ -164,14 +171,14 @@ std::string IRBuilder::emitBinary(
     const std::string& operation, const std::string& left, const std::string& right,
     const std::string& type) {
     std::string result = nextValue();
-    emit({IROpcode::Binary, result, type, operation, {left, right}});
+    emit({IROpcode::Binary, result, substituteActiveType(type), operation, {left, right}});
     return result;
 }
 
 std::string IRBuilder::emitCall(
     const std::string& name, const std::vector<std::string>& arguments, const std::string& type) {
     std::string result = nextValue();
-    emit({IROpcode::Call, result, type, name, arguments});
+    emit({IROpcode::Call, result, substituteActiveType(type), name, arguments});
     return result;
 }
 
@@ -193,7 +200,7 @@ std::string IRBuilder::emitIndirectCall(
     std::vector<std::string> operands = {callee};
     operands.insert(operands.end(), arguments.begin(), arguments.end());
     std::string result = nextValue();
-    emit({IROpcode::IndirectCall, result, type, "", operands});
+    emit({IROpcode::IndirectCall, result, substituteActiveType(type), "", operands});
     return result;
 }
 
@@ -203,7 +210,9 @@ std::string IRBuilder::emitMethodCall(
     std::vector<std::string> operands = {receiver};
     operands.insert(operands.end(), arguments.begin(), arguments.end());
     std::string result = nextValue();
-    emit({IROpcode::MethodCall, result, type, qualifiedMember(className, methodName), operands});
+    emit({
+        IROpcode::MethodCall, result, substituteActiveType(type),
+        qualifiedMember(substituteActiveType(className), methodName), operands});
     return result;
 }
 
@@ -225,30 +234,26 @@ void IRBuilder::registerMethodSpecialization(
         concreteClassName, templateClassName, methodName, argumentTypes, returnType});
 }
 
-void IRBuilder::emitMethodSpecializationWrappers() {
+void IRBuilder::emitMethodSpecializations(const ProgramNode& root) {
     const auto specializations = methodSpecializations;
     for (const auto& specialization : specializations) {
-        std::vector<IRParameter> parameters = {{"this", specialization.concreteClassName}};
-        for (size_t i = 0; i < specialization.argumentTypes.size(); ++i) {
-            parameters.push_back({"arg" + std::to_string(i), specialization.argumentTypes[i]});
+        bool emitted = false;
+        for (const auto& element : root.elements) {
+            const auto* function = dynamic_cast<const FunctionDefNode*>(element.get());
+            if (!function) continue;
+            if (function->getClassName() == specialization.templateClassName &&
+                function->getName() == specialization.methodName) {
+                function->lowerSpecializedMethodToIR(*this, specialization.concreteClassName);
+                emitted = true;
+                break;
+            }
         }
-
-        beginFunction(
-            qualifiedMember(specialization.concreteClassName, specialization.methodName),
-            parameters, specialization.returnType);
-        bindParameter("this", "this");
-
-        std::vector<std::string> arguments;
-        for (size_t i = 0; i < specialization.argumentTypes.size(); ++i) {
-            const std::string parameterName = "arg" + std::to_string(i);
-            bindParameter(parameterName, parameterName);
-            arguments.push_back(emitLoad(parameterName, specialization.argumentTypes[i]));
+        if (!emitted) {
+            throw CompilerError(
+                ErrorKind::Codegen, SourceLocation{},
+                "méthode générique introuvable pour spécialisation: " +
+                qualifiedMember(specialization.templateClassName, specialization.methodName));
         }
-        std::string receiver = emitLoad("this", specialization.concreteClassName);
-        std::string result = emitMethodCall(
-            specialization.templateClassName, specialization.methodName,
-            receiver, arguments, specialization.returnType);
-        endFunction(result);
     }
 }
 
@@ -257,7 +262,8 @@ std::string IRBuilder::emitNewObject(
     const std::string& resultType) {
     std::string result = nextValue();
     const std::string type = resultType.empty() ? className : resultType;
-    emit({IROpcode::NewObject, result, type, type, arguments});
+    const std::string substitutedType = substituteActiveType(type);
+    emit({IROpcode::NewObject, result, substitutedType, substitutedType, arguments});
     return result;
 }
 
@@ -293,7 +299,9 @@ std::string IRBuilder::emitFieldLoad(
         unsupported(location, "l'accès au champ '" + qualifiedMember(className, fieldName) + "'");
     }
     std::string result = nextValue();
-    emit({IROpcode::FieldLoad, result, type, qualifiedMember(className, fieldName), {thisValue}});
+    emit({
+        IROpcode::FieldLoad, result, substituteActiveType(type),
+        qualifiedMember(substituteActiveType(className), fieldName), {thisValue}});
     return result;
 }
 
@@ -303,18 +311,37 @@ std::string IRBuilder::emitLoad(const std::string& symbol, const std::string& ty
     auto parameter = parameterValues.find(symbol);
     if (parameter != parameterValues.end()) return parameter->second;
     std::string result = nextValue();
-    emit({IROpcode::Load, result, type, "", {symbol}});
+    emit({IROpcode::Load, result, substituteActiveType(type), "", {symbol}});
     return result;
 }
 
 void IRBuilder::emitStore(const std::string& symbol, const std::string& value, const std::string& type) {
-    emit({IROpcode::Store, "", type, "", {symbol, value}});
+    emit({IROpcode::Store, "", substituteActiveType(type), "", {symbol, value}});
 }
 
 std::string IRBuilder::emitPhi(const std::string& left, const std::string& right, const std::string& type) {
     std::string result = nextValue();
-    emit({IROpcode::Phi, result, type, "", {left, right}});
+    emit({IROpcode::Phi, result, substituteActiveType(type), "", {left, right}});
     return result;
+}
+
+void IRBuilder::pushTypeSubstitution(const std::map<std::string, std::string>& substitution) {
+    typeSubstitutionStack.push_back(activeTypeSubstitution);
+    activeTypeSubstitution = substitution;
+}
+
+void IRBuilder::popTypeSubstitution() {
+    if (typeSubstitutionStack.empty()) {
+        activeTypeSubstitution.clear();
+        return;
+    }
+    activeTypeSubstitution = typeSubstitutionStack.back();
+    typeSubstitutionStack.pop_back();
+}
+
+std::string IRBuilder::substituteActiveType(const std::string& type) const {
+    if (activeTypeSubstitution.empty()) return type;
+    return substituteType(type, activeTypeSubstitution);
 }
 
 std::string IRBuilder::makeLabel(const std::string& prefix) {

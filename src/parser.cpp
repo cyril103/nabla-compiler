@@ -846,9 +846,12 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
     auto body = parseBlock();
     consume(TokenType::RBRACE, "");
     localScopes.pop_back();
+    std::vector<std::string> ownerTypeParameters;
+    if (!clName.empty()) ownerTypeParameters = context.classes[clName].typeParameters;
     return located(std::make_unique<FunctionDefNode>(
         clName, name, returnType, std::move(typeParameters),
-        std::move(parameters), std::move(body)), defToken.location);
+        std::move(parameters), std::move(body), std::vector<FunctionDefNode::Capture>{},
+        std::move(ownerTypeParameters)), defToken.location);
 }
 
 std::pair<std::string, SourceLocation> Parser::parseType(const std::string& expectedMessage) {

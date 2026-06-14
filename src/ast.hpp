@@ -249,6 +249,7 @@ private:
     std::string name;
     std::string returnType;
     std::vector<std::string> typeParameters;
+    std::vector<std::string> ownerTypeParameters;
     std::vector<Parameter> parameters;
     std::unique_ptr<ASTNode> body;
     std::vector<Capture> captures;
@@ -257,10 +258,15 @@ public:
         std::string clName, std::string name, std::string declaredReturnType,
         std::vector<std::string> genericTypeParameters,
         std::vector<Parameter> params, std::unique_ptr<ASTNode> body,
-        std::vector<Capture> capturedValues = {});
+        std::vector<Capture> capturedValues = {},
+        std::vector<std::string> genericOwnerTypeParameters = {});
     std::string getType() override;
     void validateSemantics(CompilerContext& context) override;
     std::string lowerToIR(IRBuilder& builder) const override;
+    std::string lowerSpecializedMethodToIR(
+        IRBuilder& builder, const std::string& concreteClassName) const;
+    const std::string& getClassName() const { return className; }
+    const std::string& getName() const { return name; }
 };
 
 class IdentifierNode : public ASTNode {

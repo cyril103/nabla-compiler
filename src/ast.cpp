@@ -796,9 +796,12 @@ std::string ForNode::lowerToIR(IRBuilder& builder) const {
 FunctionDefNode::FunctionDefNode(
     std::string clName, std::string name, std::string declaredReturnType,
     std::vector<std::string> genericTypeParameters,
-    std::vector<Parameter> params, std::unique_ptr<ASTNode> body, std::vector<Capture> capturedValues)
+    std::vector<Parameter> params, std::unique_ptr<ASTNode> body,
+    std::vector<Capture> capturedValues,
+    std::vector<std::string> genericOwnerTypeParameters)
     : className(std::move(clName)), name(std::move(name)), returnType(std::move(declaredReturnType)),
-      typeParameters(std::move(genericTypeParameters)), parameters(std::move(params)),
+      typeParameters(std::move(genericTypeParameters)),
+      ownerTypeParameters(std::move(genericOwnerTypeParameters)), parameters(std::move(params)),
       body(std::move(body)), captures(std::move(capturedValues)) {}
 
 std::string FunctionDefNode::getType() {
@@ -862,6 +865,41 @@ std::string FunctionDefNode::lowerToIR(IRBuilder& builder) const {
     }
     std::string result = body->lowerToIR(builder);
     builder.endFunction(result);
+    return "";
+}
+
+std::string FunctionDefNode::lowerSpecializedMethodToIR(
+    IRBuilder& builder, const std::string& concreteClassName) const {
+    auto parameterizedType = parameterizedTypeFromName(concreteClassName);
+    if (!parameterizedType || parameterizedType->first != className ||
+        parameterizedType->second.size() != ownerTypeParameters.size()) {
+        builder.unsupported(location, "la spécialisation de méthode " + concreteClassName + "." + name);
+    }
+
+    std::map<std::string, std::string> substitution;
+    substitution[className] = concreteClassName;
+    for (size_t i = 0; i < ownerTypeParameters.size(); ++i) {
+        substitution[ownerTypeParameters[i]] = parameterizedType->second[i];
+    }
+
+    builder.pushTypeSubstitution(substitution);
+
+    std::vector<IRParameter> irParameters;
+    irParameters.push_back({"this", concreteClassName});
+    for (const auto& parameter : parameters) {
+        irParameters.push_back({parameter.name, parameter.type});
+    }
+
+    builder.beginFunction(concreteClassName + "." + name, irParameters, returnType);
+    builder.bindThis();
+    builder.bindParameter("this", "this");
+    for (const auto& parameter : parameters) {
+        builder.bindParameter(parameter.symbolName, parameter.name);
+    }
+    std::string result = body->lowerToIR(builder);
+    builder.endFunction(result);
+
+    builder.popTypeSubstitution();
     return "";
 }
 

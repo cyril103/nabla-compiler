@@ -55,11 +55,10 @@ Le pipeline implemente actuellement :
   `Box[Int]` ou `Box[String]`, avec substitution des champs, retours de methodes
   et types fonction comme `(T) => T`;
 - allocations de classes generiques conservees comme types concrets dans l'IR,
-  par exemple `new Box[Int]`, tout en reutilisant encore le corps de methode du
-  template;
-- appels de methodes de classes generiques abaisses vers des wrappers IR
-  specialises comme `Box[Int].get`, avec signatures substituees et delegation
-  vers le corps template;
+  par exemple `new Box[Int]`;
+- appels de methodes de classes generiques abaisses vers des corps IR
+  specialises comme `Box[Int].get`, avec substitution de `T` dans les
+  parametres, retours, types fonction et acces aux champs;
 - declarations de fonctions generiques simples comme `identity[T]`, appelees avec
   arguments de type explicites comme `identity[Int](42)`, avec substitution dans
   les parametres, retours et types fonction;
@@ -122,9 +121,9 @@ Limites importantes :
   `Array[Int]`, et un premier support de classes generiques partageant le code
   du template; les fonctions generiques peuvent inferer leurs arguments de type
   depuis les arguments d'appel mais ne sont pas encore utilisables comme valeurs
-  polymorphes; les allocations et appels de methodes generiques sont distingues
-  dans l'IR via des wrappers specialises, mais les corps templates restent
-  partages; la duplication complete des corps specialises reste a faire;
+  polymorphes; les allocations et methodes de classes generiques sont
+  distinguees dans l'IR et les corps de methodes sont specialises pour les types
+  concrets; la monomorphisation des fonctions generiques reste a faire;
 - le tas est fixe et possede une verification de depassement, mais pas de
   ramasse-miettes;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
@@ -211,7 +210,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Distinguer les allocations de classes generiques concretes dans l'IR.
 - [x] Ajouter des wrappers IR specialises pour les methodes de classes
   generiques concretes.
-- [ ] Ajouter la monomorphisation des classes et fonctions generiques.
+- [x] Monomorphiser les corps des methodes de classes generiques dans l'IR.
+- [ ] Ajouter la monomorphisation des fonctions generiques.
+- [ ] Ajouter la monomorphisation complete des classes generiques.
 - [x] Generaliser `IntUnaryFn` vers des types fonction canoniques.
 - [x] Introduire une representation interne commune des types fonction.
 - [x] Ajouter la syntaxe de types fonction parenthesee pour les aliases actuels.
@@ -271,6 +272,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `TBD` - Monomorphiser les corps des methodes de classes generiques dans l'IR,
+  par exemple `Box[Int].get` charge directement `Box[Int].value`.
 - `75b59ec` - Ajouter des wrappers IR specialises pour les methodes de classes
   generiques concretes comme `Box[Int].get`.
 - `7147281` - Conserver les allocations de classes generiques concretes dans l'IR,

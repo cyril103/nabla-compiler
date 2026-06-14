@@ -11,5 +11,5 @@ function main() -> Int
   return %3
 
 function Box[Int].get(%this: Box[Int]) -> Int
-  %0: Int = call_method Box.get(%this)
+  %0: Int = field %this, Box[Int].value
   return %0
