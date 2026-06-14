@@ -266,7 +266,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Conserver les allocations de classes generiques concretes dans l'IR,
+- `7147281` - Conserver les allocations de classes generiques concretes dans l'IR,
   par exemple `new Box[Int]`, avec resolution de layout via le template.
 - `1a10139` - Ajouter l'inference des arguments de type des fonctions generiques,
   y compris le typage progressif des lambdas en argument.
