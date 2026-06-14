@@ -1,0 +1,1 @@
+tests/test_error_generic_class_raw_type.nabla:7:15: semantic error: type inconnu 'Box' pour le paramètre 'read.box'

@@ -71,9 +71,37 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
     Token classToken = consume(TokenType::KW_CLASS, "");
     Token classNameToken = consume(TokenType::IDENTIFIER, "Nom de classe attendu");
     std::string className = classNameToken.value;
+    std::vector<std::string> typeParameters;
+    if (peek().type == TokenType::LBRACKET) {
+        consume(TokenType::LBRACKET, "");
+        while (peek().type != TokenType::RBRACKET) {
+            Token typeParameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre de type attendu");
+            if (typeParameterToken.value == "Int" || typeParameterToken.value == "Long" ||
+                typeParameterToken.value == "Float" || typeParameterToken.value == "Double" ||
+                typeParameterToken.value == "Bool" || typeParameterToken.value == "String" ||
+                typeParameterToken.value == "Unit" || typeParameterToken.value == "IntArray") {
+                throw CompilerError(
+                    ErrorKind::Parser, typeParameterToken.location,
+                    "paramètre de type invalide: " + typeParameterToken.value);
+            }
+            if (isTypeParameterName(typeParameterToken.value, typeParameters)) {
+                throw CompilerError(
+                    ErrorKind::Parser, typeParameterToken.location,
+                    "paramètre de type déjà déclaré: " + typeParameterToken.value);
+            }
+            typeParameters.push_back(typeParameterToken.value);
+            if (peek().type == TokenType::COMMA) {
+                consume(TokenType::COMMA, "");
+            } else if (peek().type != TokenType::RBRACKET) {
+                throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ']' attendu après le paramètre de type");
+            }
+        }
+        consume(TokenType::RBRACKET, "']' attendu après les paramètres de type");
+    }
     if (context.classes.count(className)) {
         throw CompilerError(ErrorKind::Parser, classNameToken.location, "classe déjà déclarée: " + className);
     }
+    context.classes[className].typeParameters = typeParameters;
     context.classes[className].location = classToken.location;
     currentParsingClass = className;
     consume(TokenType::LPAREN, "");
@@ -597,11 +625,28 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
         consume(TokenType::DOT, "");
         Token methodToken = consume(TokenType::IDENTIFIER, "Nom de méthode attendu après '.'");
         std::string method = methodToken.value;
-        auto expectedArgumentTypes = expectedArgumentTypesForMethodCall(expr->getType(), method);
+        const std::string receiverType = expr->getType();
+        auto expectedArgumentTypes = expectedArgumentTypesForMethodCall(receiverType, method);
+        std::string initialReturnType = "Int";
+        std::string initialOwnerType = genericBaseName(receiverType);
+        auto classIt = context.classes.find(initialOwnerType);
+        if (classIt != context.classes.end()) {
+            auto methodIt = classIt->second.methods.find(method);
+            if (methodIt != classIt->second.methods.end()) {
+                std::map<std::string, std::string> substitution;
+                if (auto genericSubstitution = genericSubstitutionFor(context, receiverType)) {
+                    substitution = *genericSubstitution;
+                }
+                initialReturnType = substituteType(methodIt->second.returnType, substitution);
+            }
+        }
         consume(TokenType::LPAREN, "");
         auto arguments = parseArguments(expectedArgumentTypes);
         consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de méthode");
-        expr = located(std::make_unique<MethodCallNode>(std::move(expr), method, std::move(arguments)), methodToken.location);
+        expr = located(
+            std::make_unique<MethodCallNode>(
+                std::move(expr), method, std::move(arguments), initialReturnType, initialOwnerType),
+            methodToken.location);
     }
     return expr;
 }
@@ -813,13 +858,18 @@ std::vector<std::string> Parser::expectedArgumentTypesForMethodCall(
         if (methodName == "set") return {"Int", "Int"};
         return {};
     }
-    auto classIt = context.classes.find(receiverType);
+    const std::string classLookupName = genericBaseName(receiverType);
+    auto classIt = context.classes.find(classLookupName);
     if (classIt == context.classes.end()) return {};
     auto methodIt = classIt->second.methods.find(methodName);
     if (methodIt == classIt->second.methods.end()) return {};
+    std::map<std::string, std::string> substitution;
+    if (auto genericSubstitution = genericSubstitutionFor(context, receiverType)) {
+        substitution = *genericSubstitution;
+    }
     std::vector<std::string> expectedTypes;
     for (const auto& parameter : methodIt->second.parameters) {
-        expectedTypes.push_back(parameter.type);
+        expectedTypes.push_back(substituteType(parameter.type, substitution));
     }
     return expectedTypes;
 }

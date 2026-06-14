@@ -79,7 +79,9 @@ public:
     std::string emitMethodCall(
         const std::string& className, const std::string& methodName, const std::string& receiver,
         const std::vector<std::string>& arguments, const std::string& type = "Int");
-    std::string emitNewObject(const std::string& className, const std::vector<std::string>& arguments);
+    std::string emitNewObject(
+        const std::string& className, const std::vector<std::string>& arguments,
+        const std::string& resultType = "");
     std::string emitNewIntArray(const std::string& size);
     std::string emitIntArrayLength(const std::string& receiver);
     std::string emitIntArrayGet(const std::string& receiver, const std::string& index);

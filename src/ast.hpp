@@ -120,8 +120,11 @@ class MethodCallNode : public ASTNode {
     std::string methodName;
     std::vector<std::unique_ptr<ASTNode>> arguments;
     std::string resolvedType = "Int";
+    std::string resolvedOwnerType;
 public:
-    MethodCallNode(std::unique_ptr<ASTNode> rec, std::string method, std::vector<std::unique_ptr<ASTNode>> args);
+    MethodCallNode(
+        std::unique_ptr<ASTNode> rec, std::string method, std::vector<std::unique_ptr<ASTNode>> args,
+        std::string initialResolvedType = "Int", std::string initialOwnerType = "");
     std::string getType() override;
     void validateSemantics(CompilerContext& context) override;
     std::string lowerToIR(IRBuilder& builder) const override;

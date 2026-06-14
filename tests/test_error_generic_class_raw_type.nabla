@@ -1,0 +1,13 @@
+class Box[T](value: T) {
+    def get(): T = {
+        value
+    }
+}
+
+def read(box: Box): Int = {
+    42
+}
+
+def main(): Int = {
+    read(new Box[Int](42))
+}

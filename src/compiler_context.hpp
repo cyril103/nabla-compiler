@@ -37,6 +37,7 @@ struct CompilerContext {
     struct ClassInfo {
         std::vector<FieldInfo> fields;
         std::map<std::string, FunctionSignature> methods;
+        std::vector<std::string> typeParameters;
         SourceLocation location;
     };
 
@@ -48,6 +49,7 @@ struct CompilerContext {
     std::filesystem::path stdlibDir;
     std::filesystem::path currentFile;
     std::map<std::string, std::string> semanticSymbolTypes;
+    std::vector<std::string> semanticTypeParameters;
     int nextLambdaId = 0;
 };
 
@@ -151,6 +153,61 @@ inline std::string canonicalTypeName(const std::string& type) {
         }
         return resolveStdlibTypeAlias(formatParameterizedType(baseName, arguments));
     }
+    return type;
+}
+
+inline std::string genericBaseName(const std::string& type) {
+    auto parameterizedType = parameterizedTypeFromName(type);
+    if (!parameterizedType) return type;
+    return parameterizedType->first;
+}
+
+inline bool isTypeParameterName(const std::string& type, const std::vector<std::string>& typeParameters) {
+    for (const auto& typeParameter : typeParameters) {
+        if (type == typeParameter) return true;
+    }
+    return false;
+}
+
+inline std::optional<std::map<std::string, std::string>> genericSubstitutionFor(
+    const CompilerContext& context, const std::string& concreteType) {
+    auto parameterizedType = parameterizedTypeFromName(concreteType);
+    if (!parameterizedType) return std::nullopt;
+    const auto& [baseName, arguments] = *parameterizedType;
+    auto classIt = context.classes.find(baseName);
+    if (classIt == context.classes.end()) return std::nullopt;
+    const auto& typeParameters = classIt->second.typeParameters;
+    if (typeParameters.size() != arguments.size()) return std::nullopt;
+    std::map<std::string, std::string> substitution;
+    for (size_t i = 0; i < typeParameters.size(); ++i) {
+        substitution[typeParameters[i]] = arguments[i];
+    }
+    return substitution;
+}
+
+inline std::string substituteType(
+    const std::string& type, const std::map<std::string, std::string>& substitution) {
+    auto direct = substitution.find(type);
+    if (direct != substitution.end()) return direct->second;
+
+    auto functionType = functionTypeFromName(type);
+    if (functionType) {
+        for (auto& parameterType : functionType->parameterTypes) {
+            parameterType = substituteType(parameterType, substitution);
+        }
+        functionType->returnType = substituteType(functionType->returnType, substitution);
+        return formatFunctionType(*functionType);
+    }
+
+    auto parameterizedType = parameterizedTypeFromName(type);
+    if (parameterizedType) {
+        auto [baseName, arguments] = *parameterizedType;
+        for (auto& argument : arguments) {
+            argument = substituteType(argument, substitution);
+        }
+        return canonicalTypeName(formatParameterizedType(baseName, arguments));
+    }
+
     return type;
 }
 

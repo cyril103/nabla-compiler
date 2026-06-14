@@ -51,6 +51,9 @@ Le pipeline implemente actuellement :
   `(Int, Int) => Int` et `(String) => Int`;
 - premiere syntaxe de types parametres `Option[Int]` et `Array[Int]`, canonisee
   vers les facades standard existantes `OptionInt` et `ArrayInt`;
+- declarations de classes generiques simples comme `Box[T]`, instanciables avec
+  `Box[Int]` ou `Box[String]`, avec substitution des champs, retours de methodes
+  et types fonction comme `(T) => T`;
 - lambdas et appels indirects avec plusieurs parametres, dans les limites de la
   convention d'appel actuelle;
 - closures testees avec parametres, captures et retours non limites a `Int`;
@@ -104,8 +107,9 @@ Limites importantes :
   fonctions, lambdas et champs, mais pas encore `toString` ni les collections
   specialisees;
 - la genericite actuelle est un pont syntaxique pour `Option[Int]` et
-  `Array[Int]`; les definitions generiques utilisateur et la monomorphisation
-  complete restent a faire;
+  `Array[Int]`, et un premier support de classes generiques partageant le code
+  du template; les fonctions generiques utilisateur et la monomorphisation
+  specialisee complete restent a faire;
 - le tas est fixe et possede une verification de depassement, mais pas de
   ramasse-miettes;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
@@ -183,8 +187,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [ ] Valider les types des branches, boucles et operateurs de facon uniforme.
 - [x] Ajouter une premiere syntaxe de types parametres pour `Option[Int]` et
   `Array[Int]` via aliases standard.
-- [ ] Ajouter les declarations generiques utilisateur `class Box[T]` et
-  `def identity[T](value: T): T`.
+- [x] Ajouter les declarations de classes generiques utilisateur `class Box[T]`
+  avec substitution des champs, methodes et types fonction.
+- [ ] Ajouter les fonctions generiques utilisateur `def identity[T](value: T): T`.
 - [ ] Ajouter la monomorphisation des classes et fonctions generiques.
 - [x] Generaliser `IntUnaryFn` vers des types fonction canoniques.
 - [x] Introduire une representation interne commune des types fonction.
@@ -245,6 +250,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `TBD` - Ajouter les classes generiques utilisateur simples comme `Box[T]`,
+  avec instanciations concretes `Box[Int]` / `Box[String]` et substitution de
+  `T` dans les signatures de methodes.
 - `6fd4884` - Ajouter la syntaxe de types parametres `Option[Int]` et `Array[Int]`
   avec canonisation vers `OptionInt` et `ArrayInt`.
 - `94b4440` - Ajouter `Float` et `Double`, les litteraux decimaux, l'IR typee, les

@@ -206,9 +206,10 @@ std::string IRBuilder::emitMethodCall(
 }
 
 std::string IRBuilder::emitNewObject(
-    const std::string& className, const std::vector<std::string>& arguments) {
+    const std::string& className, const std::vector<std::string>& arguments,
+    const std::string& resultType) {
     std::string result = nextValue();
-    emit({IROpcode::NewObject, result, className, className, arguments});
+    emit({IROpcode::NewObject, result, resultType.empty() ? className : resultType, className, arguments});
     return result;
 }
 

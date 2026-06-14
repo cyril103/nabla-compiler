@@ -1,0 +1,10 @@
+class TransformBox[T](value: T) {
+    def transform(f: (T) => T): T = {
+        f(value)
+    }
+}
+
+def main(): Int = {
+    val box = new TransformBox[Int](41)
+    box.transform(value => value + 1)
+}

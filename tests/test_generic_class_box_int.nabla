@@ -1,0 +1,10 @@
+class Box[T](value: T) {
+    def get(): T = {
+        value
+    }
+}
+
+def main(): Int = {
+    val box = new Box[Int](42)
+    box.get()
+}

@@ -1,0 +1,1 @@
+tests/test_error_generic_class_constructor_type.nabla:8:31: semantic error: Constructeur de 'Box[String]', champ 'value': type 'String' attendu, 'Int' reçu

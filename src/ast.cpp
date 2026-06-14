@@ -29,6 +29,32 @@ bool isKnownBuiltinType(const std::string& type) {
            type == "String" || type == "Unit" || type == "IntArray";
 }
 
+bool isKnownTypeInContext(const std::string& type, const CompilerContext& context) {
+    if (isKnownBuiltinType(type) || isFunctionTypeName(type)) return true;
+    auto classIt = context.classes.find(type);
+    if (classIt != context.classes.end()) return classIt->second.typeParameters.empty();
+    if (isTypeParameterName(type, context.semanticTypeParameters)) return true;
+    auto substitution = genericSubstitutionFor(context, type);
+    if (!substitution) return false;
+    auto parameterizedType = parameterizedTypeFromName(type);
+    if (!parameterizedType) return false;
+    for (const auto& argument : parameterizedType->second) {
+        if (!isKnownTypeInContext(argument, context)) return false;
+    }
+    return true;
+}
+
+std::vector<CompilerContext::ParameterInfo> substituteParameters(
+    const std::vector<CompilerContext::ParameterInfo>& parameters,
+    const std::map<std::string, std::string>& substitution) {
+    std::vector<CompilerContext::ParameterInfo> substituted;
+    for (auto parameter : parameters) {
+        parameter.type = substituteType(parameter.type, substitution);
+        substituted.push_back(std::move(parameter));
+    }
+    return substituted;
+}
+
 void validateArguments(
     const std::string& callableName,
     const std::vector<std::unique_ptr<ASTNode>>& arguments,
@@ -250,9 +276,17 @@ void NewNode::validateSemantics(CompilerContext& context) {
         return;
     }
 
-    auto classIt = context.classes.find(className);
+    const std::string classLookupName = genericBaseName(className);
+    auto classIt = context.classes.find(classLookupName);
     if (classIt == context.classes.end()) {
         semanticError("classe inconnue dans 'new': " + className);
+    }
+    std::map<std::string, std::string> substitution;
+    if (auto genericSubstitution = genericSubstitutionFor(context, className)) {
+        substitution = *genericSubstitution;
+    } else if (!classIt->second.typeParameters.empty()) {
+        semanticError(
+            "classe générique '" + classLookupName + "' utilisée sans arguments de type");
     }
     const auto& fields = classIt->second.fields;
     if (args.size() != fields.size()) {
@@ -261,10 +295,11 @@ void NewNode::validateSemantics(CompilerContext& context) {
             " argument(s) attendu(s), " + std::to_string(args.size()) + " reçu(s)");
     }
     for (size_t i = 0; i < args.size(); ++i) {
-        if (args[i]->getType() != fields[i].type) {
+        const std::string expectedType = substituteType(fields[i].type, substitution);
+        if (args[i]->getType() != expectedType) {
             throw CompilerError(ErrorKind::Semantic, args[i]->getLocation(),
                 "Constructeur de '" + className + "', champ '" + fields[i].name +
-                "': type '" + fields[i].type + "' attendu, '" + args[i]->getType() + "' reçu");
+                "': type '" + expectedType + "' attendu, '" + args[i]->getType() + "' reçu");
         }
     }
 }
@@ -273,12 +308,14 @@ std::string NewNode::lowerToIR(IRBuilder& builder) const {
     std::vector<std::string> loweredArguments;
     for (const auto& argument : args) loweredArguments.push_back(argument->lowerToIR(builder));
     if (className == "IntArray") return builder.emitNewIntArray(loweredArguments[0]);
-    return builder.emitNewObject(className, loweredArguments);
+    return builder.emitNewObject(genericBaseName(className), loweredArguments, className);
 }
 
 MethodCallNode::MethodCallNode(
-    std::unique_ptr<ASTNode> rec, std::string method, std::vector<std::unique_ptr<ASTNode>> args)
-    : receiver(std::move(rec)), methodName(std::move(method)), arguments(std::move(args)) {}
+    std::unique_ptr<ASTNode> rec, std::string method, std::vector<std::unique_ptr<ASTNode>> args,
+    std::string initialResolvedType, std::string initialOwnerType)
+    : receiver(std::move(rec)), methodName(std::move(method)), arguments(std::move(args)),
+      resolvedType(std::move(initialResolvedType)), resolvedOwnerType(std::move(initialOwnerType)) {}
 
 std::string MethodCallNode::getType() {
     const std::string receiverType = receiver->getType();
@@ -386,16 +423,26 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         semanticError("méthode inconnue: IntArray." + methodName);
     }
 
-    auto classIt = context.classes.find(receiverType);
+    const std::string classLookupName = genericBaseName(receiverType);
+    auto classIt = context.classes.find(classLookupName);
     if (classIt == context.classes.end()) {
         semanticError("type receveur inconnu pour l'appel de méthode: " + receiverType);
+    }
+    std::map<std::string, std::string> substitution;
+    if (auto genericSubstitution = genericSubstitutionFor(context, receiverType)) {
+        substitution = *genericSubstitution;
+    } else if (!classIt->second.typeParameters.empty()) {
+        semanticError(
+            "classe générique '" + classLookupName + "' utilisée sans arguments de type");
     }
     auto methodIt = classIt->second.methods.find(methodName);
     if (methodIt == classIt->second.methods.end()) {
         semanticError("méthode inconnue: " + receiverType + "." + methodName);
     }
-    validateArguments(receiverType + "." + methodName, arguments, methodIt->second.parameters, location);
-    resolvedType = methodIt->second.returnType;
+    auto parameters = substituteParameters(methodIt->second.parameters, substitution);
+    validateArguments(receiverType + "." + methodName, arguments, parameters, location);
+    resolvedType = substituteType(methodIt->second.returnType, substitution);
+    resolvedOwnerType = classLookupName;
 }
 
 std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
@@ -454,7 +501,9 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
     std::string loweredReceiver = receiver->lowerToIR(builder);
     std::vector<std::string> loweredArguments;
     for (const auto& argument : arguments) loweredArguments.push_back(argument->lowerToIR(builder));
-    return builder.emitMethodCall(receiverType, methodName, loweredReceiver, loweredArguments, resolvedType);
+    return builder.emitMethodCall(
+        resolvedOwnerType.empty() ? receiverType : resolvedOwnerType,
+        methodName, loweredReceiver, loweredArguments, resolvedType);
 }
 
 FunctionCallNode::FunctionCallNode(
@@ -724,8 +773,13 @@ std::string FunctionDefNode::getType() {
 
 void FunctionDefNode::validateSemantics(CompilerContext& context) {
     context.semanticSymbolTypes.clear();
+    context.semanticTypeParameters.clear();
     if (!className.empty()) {
         context.semanticSymbolTypes["this"] = className;
+        auto classIt = context.classes.find(className);
+        if (classIt != context.classes.end()) {
+            context.semanticTypeParameters = classIt->second.typeParameters;
+        }
     }
     for (const auto& capture : captures) {
         context.semanticSymbolTypes[capture.symbolName] = capture.type;
@@ -734,9 +788,7 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
         context.semanticSymbolTypes[parameter.symbolName] = parameter.type;
     }
     if (body) body->validateSemantics(context);
-    const bool knownType =
-        isKnownBuiltinType(returnType) || isFunctionTypeName(returnType) ||
-        context.classes.count(returnType) != 0;
+    const bool knownType = isKnownTypeInContext(returnType, context);
     if (!knownType) {
         semanticError("type de retour inconnu '" + returnType + "' pour la fonction '" + name + "'");
     }
@@ -745,6 +797,7 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
             "Type de retour invalide pour '" + name + "': '" + returnType +
             "' attendu, '" + body->getType() + "' reçu");
     }
+    context.semanticTypeParameters.clear();
 }
 
 std::string FunctionDefNode::lowerToIR(IRBuilder& builder) const {

@@ -1,0 +1,14 @@
+class Pair[T](firstValue: T, secondValue: T) {
+    def first(): T = {
+        firstValue
+    }
+
+    def second(): T = {
+        secondValue
+    }
+}
+
+def main(): Int = {
+    val pair = new Pair[Int](40, 2)
+    pair.first() + pair.second()
+}
