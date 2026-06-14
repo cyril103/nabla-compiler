@@ -37,7 +37,6 @@ private:
     std::vector<LambdaCaptureScope> lambdaCaptureScopes;
     std::vector<std::unique_ptr<ASTNode>> generatedFunctions;
     int nextSymbolId = 0;
-    int nextLambdaId = 0;
 
     Token peek() const;
     Token consume(TokenType expected, const std::string& err);

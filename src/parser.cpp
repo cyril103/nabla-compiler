@@ -306,7 +306,7 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
     lambdaCaptureScopes.pop_back();
 
     const std::string returnType = body->getType();
-    std::string lambdaName = "lambda." + std::to_string(nextLambdaId++);
+    std::string lambdaName = "lambda." + std::to_string(context.nextLambdaId++);
     context.functions[lambdaName] = {signatureParameters, returnType, start.location, start.location};
 
     auto function = located(std::make_unique<FunctionDefNode>(
@@ -401,7 +401,7 @@ std::unique_ptr<ASTNode> Parser::parseInferredLambdaExpression(const std::string
     lambdaCaptureScopes.pop_back();
 
     const std::string returnType = body->getType();
-    std::string lambdaName = "lambda." + std::to_string(nextLambdaId++);
+    std::string lambdaName = "lambda." + std::to_string(context.nextLambdaId++);
     context.functions[lambdaName] = {signatureParameters, returnType, start.location, start.location};
 
     auto function = located(std::make_unique<FunctionDefNode>(

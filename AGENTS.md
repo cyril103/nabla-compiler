@@ -68,7 +68,7 @@ Le pipeline implemente actuellement :
 - premier module de bibliotheque standard `collections.int_array` avec
   `intArraySum`, `intArrayFill`, `intArrayRange`, `intArrayMap`,
   `intArrayFilter` et la facade objet `ArrayInt` avec `map`, `filter`,
-  `fold` et `foreach`;
+  `fold`, `foreach`, `exists`, `forall` et `contains`;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -171,6 +171,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter l'inference simple des types de parametres de lambda.
 - [x] Ajouter les lambdas mono-expression sans bloc.
 - [x] Ajouter l'inference des lambdas multi-parametres.
+- [x] Ajouter `ArrayInt.exists`, `ArrayInt.forall` et `ArrayInt.contains`.
 
 ### P2 - Runtime Et Objets
 
@@ -193,7 +194,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Inference des lambdas multi-parametres.
+- Prochain commit - Ajout de predicats de collection `ArrayInt`.
+- `6f896e5` - Inference des lambdas multi-parametres.
 - `decbfee` - Ajout des lambdas mono-expression inferees.
 - `00f0d39` - Inference simple des parametres de lambda.
 - `1243161` - Generalisation des closures aux types fonction canoniques.
@@ -245,5 +247,4 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter des methodes de collection `exists`, `forall` et `contains` sur
-`ArrayInt`.
+Introduire un vrai type `Bool` pour distinguer les predicats des entiers.

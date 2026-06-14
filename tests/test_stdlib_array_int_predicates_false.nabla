@@ -1,0 +1,6 @@
+import collections.int_array
+
+def main(): Int = {
+    val xs = arrayIntRange(5)
+    xs.exists(value => value == 9) + xs.forall(value => value < 3) + xs.contains(9)
+}

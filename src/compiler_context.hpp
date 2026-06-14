@@ -48,6 +48,7 @@ struct CompilerContext {
     std::filesystem::path stdlibDir;
     std::filesystem::path currentFile;
     std::map<std::string, std::string> semanticSymbolTypes;
+    int nextLambdaId = 0;
 };
 
 inline std::string formatFunctionType(const CompilerContext::FunctionType& functionType) {

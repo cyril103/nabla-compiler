@@ -76,6 +76,38 @@ def intArrayFold(xs: IntArray, initial: Int, combine: (Int, Int) => Int): Int = 
     accumulator
 }
 
+def intArrayExists(xs: IntArray, predicate: (Int) => Int): Int = {
+    var index = 0
+    var found = 0
+    while (index < xs.length()) {
+        if (predicate(xs.get(index))) {
+            found = 1
+        } else {
+            found
+        }
+        index = index + 1
+    }
+    found
+}
+
+def intArrayForall(xs: IntArray, predicate: (Int) => Int): Int = {
+    var index = 0
+    var all = 1
+    while (index < xs.length()) {
+        if (predicate(xs.get(index))) {
+            all
+        } else {
+            all = 0
+        }
+        index = index + 1
+    }
+    all
+}
+
+def intArrayContains(xs: IntArray, expected: Int): Int = {
+    intArrayExists(xs, value => value == expected)
+}
+
 class ArrayInt(values: IntArray) {
     def length(): Int = {
         values.length()
@@ -107,6 +139,18 @@ class ArrayInt(values: IntArray) {
             f(values.get(index))
             index = index + 1
         }
+    }
+
+    def exists(predicate: (Int) => Int): Int = {
+        intArrayExists(values, predicate)
+    }
+
+    def forall(predicate: (Int) => Int): Int = {
+        intArrayForall(values, predicate)
+    }
+
+    def contains(expected: Int): Int = {
+        intArrayContains(values, expected)
     }
 
     def raw(): IntArray = {
