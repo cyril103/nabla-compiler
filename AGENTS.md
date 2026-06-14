@@ -216,7 +216,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 ## Journal Des Jalons
 
 - Prochain commit - Ajouter `OptionInt` combinators (`map`, `filter`, `orElse`).
-- `7057c14` - Ajouter les accès optionnels et `ArrayInt.find` avec `OptionInt`.
+- `ef2609c` - Ajouter `ArrayInt.indexOfOption`.
 - `813100b` - Ajout de `OptionInt` et des bornes `ArrayInt`.
 - `3b6760f` - Ajout de `ArrayInt.indexOf` et `ArrayInt.count`.
 - `faaa691` - Ajout de `ArrayInt.slice`.
