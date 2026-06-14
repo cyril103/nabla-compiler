@@ -77,3 +77,11 @@ class ArrayLong(values: LongArray) {
 def arrayLongFill(size: Int, value: Long): ArrayLong = {
     new ArrayLong(longArrayFill(size, value))
 }
+
+def arrayLongMap(xs: ArrayLong, f: (Long) => Long): ArrayLong = {
+    xs.map(f)
+}
+
+def arrayLongForeach(xs: ArrayLong, f: (Long) => Unit): Unit = {
+    xs.foreach(f)
+}

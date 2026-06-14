@@ -1,0 +1,6 @@
+import collections.array
+
+def main(): Int = {
+    val xs = arrayFill[Int](2, 1)
+    arrayMap[String](xs, value => value)
+}

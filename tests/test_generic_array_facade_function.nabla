@@ -1,0 +1,24 @@
+import collections.array
+
+def sameArray[T](xs: Array[T]): Array[T] = {
+    xs
+}
+
+def chooseArray[T](left: Array[T], right: Array[T], useLeft: Bool): Array[T] = {
+    if useLeft {
+        left
+    } else {
+        right
+    }
+}
+
+def main(): Int = {
+    val ints = sameArray(arrayFill[Int](3, 14))
+    val longs = chooseArray(arrayFill[Long](1, 1L), arrayFill[Long](2, 21L), false)
+    val bools = sameArray(arrayMap[Bool](arrayFill[Bool](2, false), value => !value))
+    if ints.sum() == 42 && longs.sum() == 42L && bools.countTrue() == 2 {
+        42
+    } else {
+        1
+    }
+}

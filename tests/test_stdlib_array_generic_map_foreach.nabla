@@ -1,0 +1,15 @@
+import collections.array
+
+def main(): Int = {
+    val ints = arrayMap[Int](arrayFill[Int](3, 10), value => value + 4)
+    val longs = arrayMap[Long](arrayFill[Long](2, 20L), value => value + 1L)
+    val bools = arrayMap[Bool](arrayFill[Bool](4, false), value => !value)
+    arrayForeach[Int](ints, value => print(""))
+    arrayForeach[Long](longs, value => print(""))
+    arrayForeach[Bool](bools, value => print(""))
+    if ints.sum() == 42 && longs.sum() == 42L && bools.countTrue() == 4 {
+        42
+    } else {
+        1
+    }
+}

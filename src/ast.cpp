@@ -46,8 +46,16 @@ bool isKnownTypeInContext(const std::string& type, const CompilerContext& contex
     if (classIt != context.classes.end()) return classIt->second.typeParameters.empty();
     if (isTypeParameterName(type, context.semanticTypeParameters)) return true;
     auto substitution = genericSubstitutionFor(context, type);
-    if (!substitution) return false;
     auto parameterizedType = parameterizedTypeFromName(type);
+    if (!substitution) {
+        if (!parameterizedType) return false;
+        const auto& [baseName, arguments] = *parameterizedType;
+        if (!isStdlibTypeAliasFamily(baseName, arguments.size())) return false;
+        for (const auto& argument : arguments) {
+            if (!isTypeParameterName(argument, context.semanticTypeParameters)) return false;
+        }
+        return true;
+    }
     if (!parameterizedType) return false;
     for (const auto& argument : parameterizedType->second) {
         if (!isKnownTypeInContext(argument, context)) return false;

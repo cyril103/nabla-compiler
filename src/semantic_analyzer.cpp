@@ -100,7 +100,13 @@ bool SemanticAnalyzer::isKnownTypeInScope(
     if (parameterizedType) {
         const auto& [baseName, arguments] = *parameterizedType;
         auto classIt = context.classes.find(baseName);
-        if (classIt == context.classes.end()) return false;
+        if (classIt == context.classes.end()) {
+            if (!isStdlibTypeAliasFamily(baseName, arguments.size())) return false;
+            for (const auto& argument : arguments) {
+                if (!isTypeParameterName(argument, typeParameters)) return false;
+            }
+            return true;
+        }
         if (classIt->second.typeParameters.size() != arguments.size()) return false;
         for (const auto& argument : arguments) {
             if (!isKnownTypeInScope(argument, typeParameters)) return false;

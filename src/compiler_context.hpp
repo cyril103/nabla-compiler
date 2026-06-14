@@ -80,6 +80,12 @@ inline const std::vector<StdlibFunctionAlias>& stdlibFunctionAliases() {
         {"arrayFill", {"Int"}, "arrayIntFill"},
         {"arrayFill", {"Long"}, "arrayLongFill"},
         {"arrayFill", {"Bool"}, "arrayBoolFill"},
+        {"arrayMap", {"Int"}, "arrayIntMap"},
+        {"arrayMap", {"Long"}, "arrayLongMap"},
+        {"arrayMap", {"Bool"}, "arrayBoolMap"},
+        {"arrayForeach", {"Int"}, "arrayIntForeach"},
+        {"arrayForeach", {"Long"}, "arrayLongForeach"},
+        {"arrayForeach", {"Bool"}, "arrayBoolForeach"},
     };
     return aliases;
 }
@@ -181,6 +187,20 @@ inline std::string resolveStdlibTypeAlias(const std::string& type) {
         if (alias.baseName == baseName && alias.arguments == arguments) return alias.resolvedName;
     }
     return type;
+}
+
+inline bool isStdlibTypeAliasFamily(const std::string& baseName, size_t arity) {
+    for (const auto& alias : stdlibTypeAliases()) {
+        if (alias.baseName == baseName && alias.arguments.size() == arity) return true;
+    }
+    return false;
+}
+
+inline std::optional<StdlibTypeAlias> stdlibTypeAliasForResolvedName(const std::string& resolvedName) {
+    for (const auto& alias : stdlibTypeAliases()) {
+        if (alias.resolvedName == resolvedName) return alias;
+    }
+    return std::nullopt;
 }
 
 inline std::string canonicalTypeName(const std::string& type) {
@@ -298,7 +318,21 @@ inline bool inferTypeArgumentsFromTypes(
     auto expectedParameterized = parameterizedTypeFromName(expectedType);
     if (expectedParameterized) {
         auto actualParameterized = parameterizedTypeFromName(actualType);
-        if (!actualParameterized) return false;
+        if (!actualParameterized) {
+            auto alias = stdlibTypeAliasForResolvedName(actualType);
+            if (!alias || alias->baseName != expectedParameterized->first ||
+                alias->arguments.size() != expectedParameterized->second.size()) {
+                return false;
+            }
+            for (size_t i = 0; i < expectedParameterized->second.size(); ++i) {
+                if (!inferTypeArgumentsFromTypes(
+                        expectedParameterized->second[i], alias->arguments[i],
+                        typeParameters, substitution)) {
+                    return false;
+                }
+            }
+            return true;
+        }
         if (expectedParameterized->first != actualParameterized->first) return false;
         if (expectedParameterized->second.size() != actualParameterized->second.size()) return false;
         for (size_t i = 0; i < expectedParameterized->second.size(); ++i) {

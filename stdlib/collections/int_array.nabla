@@ -691,6 +691,14 @@ def arrayIntFill(size: Int, value: Int): ArrayInt = {
     new ArrayInt(intArrayFill(size, value))
 }
 
+def arrayIntMap(xs: ArrayInt, f: (Int) => Int): ArrayInt = {
+    xs.map(f)
+}
+
+def arrayIntForeach(xs: ArrayInt, f: (Int) => Unit): Unit = {
+    xs.foreach(f)
+}
+
 def arrayIntRange(size: Int): ArrayInt = {
     new ArrayInt(intArrayRange(size))
 }

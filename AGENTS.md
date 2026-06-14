@@ -53,6 +53,9 @@ Le pipeline implemente actuellement :
   comme `Array[Int]` canonise vers la facade existante `ArrayInt`, y compris
   dans les types imbriques et types fonction, et `Option[T]` porte par une
   vraie classe generique standard;
+- facade generique standard limitee pour `Array[T]` dans les signatures
+  generiques utilisateur, avec inference de `T` depuis les specialisations
+  concretes `ArrayInt`, `ArrayLong` et `ArrayBool`;
 - declarations de classes generiques simples comme `Box[T]`, instanciables avec
   `Box[Int]` ou `Box[String]`, avec substitution des champs, retours de methodes
   et types fonction comme `(T) => T`;
@@ -119,9 +122,9 @@ Le pipeline implemente actuellement :
   `boolArrayMap`, `arrayBoolFill`, `map`, `foreach`, `countTrue`, `all`,
   `any`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
 - module de bibliotheque standard `collections.array` comme point d'entree
-  commun pour les tableaux specialises, avec `arrayFill[T]` resolu vers
-  `arrayIntFill`, `arrayLongFill` ou `arrayBoolFill` pour `T = Int`, `Long` ou
-  `Bool`;
+  commun pour les tableaux specialises, avec `arrayFill[T]`, `arrayMap[T]` et
+  `arrayForeach[T]` resolus vers les specialisations `ArrayInt`, `ArrayLong` ou
+  `ArrayBool` pour `T = Int`, `Long` ou `Bool`;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -148,9 +151,12 @@ Limites importantes :
   ne sont pas encore des valeurs vraiment polymorphes;
   `Array[Int]` reste une facade specialisee vers `ArrayInt`; `Array[Long]`
   reste une facade specialisee vers `ArrayLong`; `Array[Bool]` reste une
-  facade specialisee vers `ArrayBool`; `arrayFill[T]` est une fonction standard
-  generique specialisee pour `Int`, `Long` et `Bool`, mais pas encore une
-  implementation unique de tableau generique; la
+  facade specialisee vers `ArrayBool`; `arrayFill[T]`, `arrayMap[T]` et
+  `arrayForeach[T]` sont des fonctions standard generiques specialisees pour
+  `Int`, `Long` et `Bool`, mais pas encore une implementation unique de tableau
+  generique; `Array[T]` est valide dans les signatures generiques utilisateur
+  et se specialise correctement quand `T` devient concret, mais les appels de
+  methodes directement sur un receveur `Array[T]` generique restent a ajouter; la
   monomorphisation complete des classes generiques reste a faire;
 - le tas est fixe et possede une verification de depassement, mais pas de
   ramasse-miettes;
@@ -288,8 +294,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `ArrayIntNested.mapRows` pour une API imbriquee de collections imbriquees.
 - [x] Ajouter `collections.array` et `arrayFill[T]` comme premiere API commune
   pour `Array[Int]`, `Array[Long]` et `Array[Bool]`.
-- [ ] Ajouter les operations generiques standard suivantes (`arrayMap[T]`,
-  `arrayForeach[T]`) ou une vraie facade `Array[T]` monomorphisee.
+- [x] Ajouter `arrayMap[T]` et `arrayForeach[T]` comme operations generiques
+  standard specialisees pour `Array[Int]`, `Array[Long]` et `Array[Bool]`.
+- [x] Autoriser `Array[T]` dans les signatures generiques utilisateur et inferer
+  `T` depuis `ArrayInt`, `ArrayLong` et `ArrayBool`.
+- [ ] Ajouter les appels de methodes sur receveur generique `Array[T]` dans les
+  corps generiques (`xs.size()`, `xs.map(...)`) ou etendre les aliases standard
+  vers plus d'operations (`arrayFilter[T]`, `arrayFold[T]`).
 
 ### P2 - Runtime Et Objets
 
@@ -314,6 +325,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `TBD` - Ajouter `arrayMap[T]` et `arrayForeach[T]` comme operations communes
+  specialisees pour `Array[Int]`, `Array[Long]` et `Array[Bool]`, et autoriser
+  `Array[T]` comme facade de signature generique inferee depuis les
+  specialisations concretes.
 - `a86a9ea` - Ajouter `collections.array` et `arrayFill[T]`, resolu vers les
   specialisations `ArrayInt`, `ArrayLong` et `ArrayBool`.
 - `31b39ad` - Ajouter `BoolArray`, la facade standard `ArrayBool` et l'alias
@@ -433,6 +448,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Etendre l'API commune de `Array[T]` au-dela de `arrayFill[T]`, probablement avec
-`arrayMap[T]` / `arrayForeach[T]` ou une facade generique monomorphisee quand le
-modele de stockage generique sera pret.
+Ajouter les appels de methodes sur receveur generique `Array[T]` dans les corps
+generiques, par exemple `def sizeOf[T](xs: Array[T]): Int = { xs.size() }`, en
+substituant le type du receveur avant la resolution de méthode pendant le
+lowering specialise.

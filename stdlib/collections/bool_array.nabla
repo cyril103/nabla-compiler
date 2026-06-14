@@ -117,3 +117,11 @@ class ArrayBool(values: BoolArray) {
 def arrayBoolFill(size: Int, value: Bool): ArrayBool = {
     new ArrayBool(boolArrayFill(size, value))
 }
+
+def arrayBoolMap(xs: ArrayBool, f: (Bool) => Bool): ArrayBool = {
+    xs.map(f)
+}
+
+def arrayBoolForeach(xs: ArrayBool, f: (Bool) => Unit): Unit = {
+    xs.foreach(f)
+}
