@@ -218,6 +218,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `a9f183d` - Ajouter `this` comme mot-clé et variable implicite dans les méthodes;
   corriger la résolution de `this` (`symbolName == "this"`) dans
   `IdentifierNode` pour permettre son usage en bibliothèque standard.
+- `0f33697` - Lier `this` dans le codegen des méthodes et corriger sa
+  résolution de portée.
 - `ef2609c` - Ajouter `ArrayInt.indexOfOption`.
 - `813100b` - Ajout de `OptionInt` et des bornes `ArrayInt`.
 - `3b6760f` - Ajout de `ArrayInt.indexOf` et `ArrayInt.count`.

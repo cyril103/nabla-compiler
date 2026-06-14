@@ -1,0 +1,18 @@
+class Box(value: Int) {
+    def id(): Box = {
+        this
+    }
+
+    def get(): Int = {
+        value
+    }
+
+    def plusOne(): Int = {
+        this.id().get() + 1
+    }
+}
+
+def main(): Int = {
+    val box = new Box(4)
+    box.plusOne()
+}
