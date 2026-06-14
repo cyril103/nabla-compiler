@@ -67,7 +67,8 @@ private:
         const std::vector<std::string>& expectedTypes = {});
     std::vector<std::unique_ptr<ASTNode>> parseFunctionCallArguments(
         const CompilerContext::FunctionSignature& signature,
-        const std::vector<std::string>& typeArguments);
+        const std::vector<std::string>& typeArguments,
+        std::map<std::string, std::string> initialSubstitution = {});
     std::unique_ptr<ASTNode> parseArgument(const std::string& expectedType);
     std::vector<std::string> expectedArgumentTypesForMethodCall(
         const std::string& receiverType, const std::string& methodName) const;

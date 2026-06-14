@@ -459,11 +459,22 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         resolvedTypeArguments.clear();
     } else {
         auto methodSubstitution = genericFunctionSubstitutionFor(methodIt->second, typeArguments);
+        if (!methodSubstitution && typeArguments.empty()) {
+            std::vector<std::string> actualArgumentTypes;
+            for (const auto& argument : arguments) actualArgumentTypes.push_back(argument->getType());
+            CompilerContext::FunctionSignature substitutedSignature = methodIt->second;
+            for (auto& parameter : substitutedSignature.parameters) {
+                parameter.type = substituteType(parameter.type, substitution);
+            }
+            substitutedSignature.returnType = substituteType(substitutedSignature.returnType, substitution);
+            methodSubstitution =
+                inferGenericFunctionSubstitution(substitutedSignature, actualArgumentTypes);
+        }
         if (!methodSubstitution) {
             if (typeArguments.empty()) {
                 semanticError(
-                    "la méthode générique '" + receiverType + "." + methodName +
-                    "' doit être appelée avec des arguments de type");
+                    "impossible d'inférer les arguments de type pour la méthode générique '" +
+                    receiverType + "." + methodName + "'");
             }
             semanticError(
                 "la méthode générique '" + receiverType + "." + methodName + "' attend " +

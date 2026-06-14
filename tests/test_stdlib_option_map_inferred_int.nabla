@@ -1,0 +1,5 @@
+import core.option
+
+def main(): Int = {
+    optionSome(41).map(0, value => value + 1).getOrElse(0)
+}

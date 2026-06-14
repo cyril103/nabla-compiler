@@ -707,12 +707,16 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
         std::string initialReturnType = "Int";
         std::string initialOwnerType = genericBaseName(receiverType);
         auto classIt = context.classes.find(initialOwnerType);
+        const CompilerContext::FunctionSignature* methodSignature = nullptr;
+        std::map<std::string, std::string> classSubstitution;
         if (classIt != context.classes.end()) {
             auto methodIt = classIt->second.methods.find(method);
             if (methodIt != classIt->second.methods.end()) {
+                methodSignature = &methodIt->second;
                 std::map<std::string, std::string> substitution;
                 if (auto genericSubstitution = genericSubstitutionFor(context, receiverType)) {
                     substitution = *genericSubstitution;
+                    classSubstitution = *genericSubstitution;
                 }
                 if (auto methodSubstitution = genericFunctionSubstitutionFor(methodIt->second, typeArguments)) {
                     substitution.insert(methodSubstitution->begin(), methodSubstitution->end());
@@ -725,8 +729,33 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
             }
         }
         consume(TokenType::LPAREN, "");
-        auto arguments = parseArguments(expectedArgumentTypes);
+        std::vector<std::unique_ptr<ASTNode>> arguments;
+        if (methodSignature) {
+            arguments = parseFunctionCallArguments(*methodSignature, typeArguments, classSubstitution);
+        } else {
+            arguments = parseArguments(expectedArgumentTypes);
+        }
         consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de méthode");
+        if (methodSignature) {
+            std::map<std::string, std::string> substitution = classSubstitution;
+            if (auto methodSubstitution = genericFunctionSubstitutionFor(*methodSignature, typeArguments)) {
+                substitution.insert(methodSubstitution->begin(), methodSubstitution->end());
+            } else if (typeArguments.empty() && !methodSignature->typeParameters.empty()) {
+                std::vector<std::string> actualArgumentTypes;
+                for (const auto& argument : arguments) actualArgumentTypes.push_back(argument->getType());
+                CompilerContext::FunctionSignature substitutedSignature = *methodSignature;
+                for (auto& parameter : substitutedSignature.parameters) {
+                    parameter.type = substituteType(parameter.type, classSubstitution);
+                }
+                substitutedSignature.returnType =
+                    substituteType(substitutedSignature.returnType, classSubstitution);
+                if (auto inferredSubstitution =
+                        inferGenericFunctionSubstitution(substitutedSignature, actualArgumentTypes)) {
+                    substitution.insert(inferredSubstitution->begin(), inferredSubstitution->end());
+                }
+            }
+            initialReturnType = substituteType(methodSignature->returnType, substitution);
+        }
         expr = located(
             std::make_unique<MethodCallNode>(
                 std::move(expr), method, std::move(arguments), std::move(typeArguments),
@@ -955,22 +984,25 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseArguments(const std::vector<s
 
 std::vector<std::unique_ptr<ASTNode>> Parser::parseFunctionCallArguments(
     const CompilerContext::FunctionSignature& signature,
-    const std::vector<std::string>& typeArguments) {
+    const std::vector<std::string>& typeArguments,
+    std::map<std::string, std::string> initialSubstitution) {
     std::vector<std::unique_ptr<ASTNode>> arguments;
-    std::map<std::string, std::string> substitution;
+    std::map<std::string, std::string> substitution = std::move(initialSubstitution);
     if (auto genericSubstitution = genericFunctionSubstitutionFor(signature, typeArguments)) {
-        substitution = *genericSubstitution;
+        substitution.insert(genericSubstitution->begin(), genericSubstitution->end());
     }
 
     while (peek().type != TokenType::RPAREN) {
         std::string expectedType;
+        std::string expectedPattern;
         if (arguments.size() < signature.parameters.size()) {
-            expectedType = substituteType(signature.parameters[arguments.size()].type, substitution);
+            expectedPattern = substituteType(signature.parameters[arguments.size()].type, substitution);
+            expectedType = expectedPattern;
         }
         auto argument = parseArgument(expectedType);
         if (typeArguments.empty() && arguments.size() < signature.parameters.size()) {
             inferTypeArgumentsFromTypes(
-                signature.parameters[arguments.size()].type, argument->getType(),
+                expectedPattern, argument->getType(),
                 signature.typeParameters, substitution);
         }
         arguments.push_back(std::move(argument));
