@@ -272,7 +272,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Monomorphiser les corps des methodes de classes generiques dans l'IR,
+- `4c7e3be` - Monomorphiser les corps des methodes de classes generiques dans l'IR,
   par exemple `Box[Int].get` charge directement `Box[Int].value`.
 - `75b59ec` - Ajouter des wrappers IR specialises pour les methodes de classes
   generiques concretes comme `Box[Int].get`.
