@@ -1,0 +1,9 @@
+def badAdder(x: Int): (Int) => Int = {
+    (text: String) => {
+        text.length()
+    }
+}
+
+def main(): Int = {
+    0
+}

@@ -1,0 +1,13 @@
+def makeAdder(x: Int): (Int) => Int = {
+    (y: Int) => {
+        x + y
+    }
+}
+
+def apply(value: Int, f: (Int) => Int): Int = {
+    f(value)
+}
+
+def main(): Int = {
+    apply(32, makeAdder(10))
+}

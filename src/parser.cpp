@@ -360,7 +360,15 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                         nameToken.location);
                 }
             }
-            return located(std::make_unique<FunctionCallNode>(name, std::move(arguments)), nameToken.location);
+            std::string initialReturnType = "Int";
+            auto function = context.functions.find(name);
+            if (function != context.functions.end()) {
+                initialReturnType = function->second.returnType;
+            }
+            return located(
+                std::make_unique<FunctionCallNode>(
+                    name, std::move(arguments), initialReturnType),
+                nameToken.location);
         }
         auto [symbol, scopeIndex] = findLocalWithScope(name);
         if (symbol) {
@@ -514,8 +522,9 @@ std::pair<std::string, SourceLocation> Parser::parseType(const std::string& expe
     }
     consume(TokenType::RPAREN, "Parenthèse fermante attendue dans le type fonction");
     consume(TokenType::FAT_ARROW, "'=>' attendu dans le type fonction");
-    Token returnTypeToken = consume(TokenType::IDENTIFIER, "Type de retour attendu dans le type fonction");
-    functionType.returnType = returnTypeToken.value;
+    auto [returnType, returnTypeLocation] = parseType("Type de retour attendu dans le type fonction");
+    (void) returnTypeLocation;
+    functionType.returnType = returnType;
 
     auto functionName = functionNameForType(functionType);
     if (!functionName) {

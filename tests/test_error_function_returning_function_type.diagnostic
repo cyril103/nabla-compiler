@@ -1,0 +1,1 @@
+tests/test_error_function_returning_function_type.nabla:1:1: semantic error: Type de retour invalide pour 'badAdder': 'Fn(Int)->Int' attendu, 'Fn(String)->Int' reçu

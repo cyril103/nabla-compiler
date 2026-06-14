@@ -265,8 +265,10 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
     return builder.emitMethodCall(receiverType, methodName, loweredReceiver, loweredArguments);
 }
 
-FunctionCallNode::FunctionCallNode(std::string functionName, std::vector<std::unique_ptr<ASTNode>> args)
-    : name(std::move(functionName)), arguments(std::move(args)) {}
+FunctionCallNode::FunctionCallNode(
+    std::string functionName, std::vector<std::unique_ptr<ASTNode>> args, std::string initialResolvedType)
+    : name(std::move(functionName)), arguments(std::move(args)),
+      resolvedType(std::move(initialResolvedType)) {}
 
 std::string FunctionCallNode::getType() {
     if (name == "print") return "Unit";

@@ -1,0 +1,10 @@
+def makeAdder(x: Int): (Int) => Int = {
+    (y: Int) => {
+        x + y
+    }
+}
+
+def main(): Int = {
+    val add10 = makeAdder(10)
+    add10(32)
+}

@@ -76,7 +76,9 @@ class FunctionCallNode : public ASTNode {
     std::vector<std::unique_ptr<ASTNode>> arguments;
     std::string resolvedType = "Int";
 public:
-    FunctionCallNode(std::string functionName, std::vector<std::unique_ptr<ASTNode>> args);
+    FunctionCallNode(
+        std::string functionName, std::vector<std::unique_ptr<ASTNode>> args,
+        std::string initialResolvedType = "Int");
     std::string getType() override;
     void validateSemantics(CompilerContext& context) override;
     std::string lowerToIR(IRBuilder& builder) const override;
