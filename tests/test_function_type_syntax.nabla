@@ -1,0 +1,9 @@
+def applyTwice(value: Int, f: (Int) => Int): Int = {
+    f(f(value))
+}
+
+def main(): Int = {
+    applyTwice(10, (value: Int) => {
+        value + 3
+    })
+}

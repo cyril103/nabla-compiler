@@ -28,7 +28,7 @@ def intArrayRange(size: Int): IntArray = {
     xs
 }
 
-def intArrayMap(xs: IntArray, f: IntUnaryFn): IntArray = {
+def intArrayMap(xs: IntArray, f: (Int) => Int): IntArray = {
     val mapped = new IntArray(xs.length())
     var index = 0
     while (index < xs.length()) {
@@ -38,7 +38,7 @@ def intArrayMap(xs: IntArray, f: IntUnaryFn): IntArray = {
     mapped
 }
 
-def intArrayFilter(xs: IntArray, predicate: IntUnaryFn): IntArray = {
+def intArrayFilter(xs: IntArray, predicate: (Int) => Int): IntArray = {
     var index = 0
     var kept = 0
     while (index < xs.length()) {
@@ -66,7 +66,7 @@ def intArrayFilter(xs: IntArray, predicate: IntUnaryFn): IntArray = {
     filtered
 }
 
-def intArrayFold(xs: IntArray, initial: Int, combine: IntBinaryFn): Int = {
+def intArrayFold(xs: IntArray, initial: Int, combine: (Int, Int) => Int): Int = {
     var index = 0
     var accumulator = initial
     while (index < xs.length()) {
@@ -89,19 +89,19 @@ class ArrayInt(values: IntArray) {
         intArraySum(values)
     }
 
-    def map(f: IntUnaryFn): ArrayInt = {
+    def map(f: (Int) => Int): ArrayInt = {
         new ArrayInt(intArrayMap(values, f))
     }
 
-    def filter(predicate: IntUnaryFn): ArrayInt = {
+    def filter(predicate: (Int) => Int): ArrayInt = {
         new ArrayInt(intArrayFilter(values, predicate))
     }
 
-    def fold(initial: Int, combine: IntBinaryFn): Int = {
+    def fold(initial: Int, combine: (Int, Int) => Int): Int = {
         intArrayFold(values, initial, combine)
     }
 
-    def foreach(f: IntConsumerFn): Unit = {
+    def foreach(f: (Int) => Unit): Unit = {
         var index = 0
         while (index < values.length()) {
             f(values.get(index))

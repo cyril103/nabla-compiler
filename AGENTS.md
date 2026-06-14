@@ -49,6 +49,8 @@ Le pipeline implemente actuellement :
   et `IntConsumerFn`;
 - representation interne commune des types fonction, avec aliases temporaires
   `IntUnaryFn`, `IntConsumerFn` et `IntBinaryFn`;
+- syntaxe de types fonction parenthesee `(Int) => Int`, `(Int) => Unit` et
+  `(Int, Int) => Int` mappee vers les aliases internes temporaires;
 - type `Unit` formalise pour les fonctions a effet et les boucles `while` /
   `for`;
 - collection native `IntArray` avec `length`, `get` et `set`;
@@ -146,6 +148,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [ ] Valider les types des branches, boucles et operateurs de facon uniforme.
 - [ ] Generaliser `IntUnaryFn` vers des types fonction complets.
 - [x] Introduire une representation interne commune des types fonction.
+- [x] Ajouter la syntaxe de types fonction parenthesee pour les aliases actuels.
 - [x] Ajouter `IntBinaryFn` pour `fold` et operations binaires de collections.
 - [x] Ajouter les lambdas sans capture pour `IntUnaryFn`.
 - [x] Ajouter `IntConsumerFn` pour les fonctions `Int => Unit`.
@@ -175,7 +178,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Introduction d'une representation interne des types fonction.
+- Prochain commit - Ajout de la syntaxe de types fonction parenthesee.
+- `6534f3c` - Introduction d'une representation interne des types fonction.
 - `53533a2` - Ajout des closures avec capture par valeur.
 - `8f71165` - Ajout de `IntConsumerFn` pour `foreach`.
 - `a40144e` - Formalisation de `Unit` pour les boucles et `foreach`.

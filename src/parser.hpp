@@ -59,6 +59,7 @@ private:
     std::unique_ptr<ASTNode> parseStatement();
     std::unique_ptr<ASTNode> parseFunctionDef(std::string clName);
     std::vector<std::unique_ptr<ASTNode>> parseArguments();
+    std::pair<std::string, SourceLocation> parseType(const std::string& expectedMessage);
     const ParsedSymbol* findLocal(const std::string& name) const;
     std::pair<const ParsedSymbol*, size_t> findLocalWithScope(const std::string& name) const;
     void captureIfNeeded(const std::string& name, const ParsedSymbol& symbol, size_t scopeIndex);

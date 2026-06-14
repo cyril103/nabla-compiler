@@ -82,13 +82,12 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
         Token fieldToken = consume(TokenType::IDENTIFIER, "Nom d'attribut attendu");
         std::string fieldName = fieldToken.value;
         consume(TokenType::COLON, "");
-        Token fieldTypeToken = consume(TokenType::IDENTIFIER, "Type attendu");
-        std::string fieldType = fieldTypeToken.value;
+        auto [fieldType, fieldTypeLocation] = parseType("Type attendu");
         if (context.classLayouts[className].count(fieldName)) {
             throw CompilerError(ErrorKind::Parser, fieldToken.location, "champ déjà déclaré dans '" + className + "': " + fieldName);
         }
         context.classLayouts[className][fieldName] = offset;
-        context.classes[className].fields.push_back({fieldName, fieldType, fieldTypeToken.location});
+        context.classes[className].fields.push_back({fieldName, fieldType, fieldTypeLocation});
         offset += 8;
         if (peek().type == TokenType::COMMA) consume(TokenType::COMMA, "");
     }
@@ -234,16 +233,15 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
         Token parameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre attendu dans la lambda");
         std::string parameterName = parameterToken.value;
         consume(TokenType::COLON, "':' attendu après le nom du paramètre de lambda");
-        Token parameterTypeToken = consume(TokenType::IDENTIFIER, "Type de paramètre attendu dans la lambda");
-        std::string parameterType = parameterTypeToken.value;
+        auto [parameterType, parameterTypeLocation] = parseType("Type de paramètre attendu dans la lambda");
         if (parameterType != "Int") {
             throw CompilerError(
-                ErrorKind::Parser, parameterTypeToken.location,
+                ErrorKind::Parser, parameterTypeLocation,
                 "seules les lambdas Int => Int, Int => Unit et (Int, Int) => Int sont supportées pour l'instant");
         }
         std::string symbolName = parameterName + "#" + std::to_string(nextSymbolId++);
         parameters.push_back({parameterName, symbolName, parameterType});
-        signatureParameters.push_back({parameterName, parameterType, parameterTypeToken.location});
+        signatureParameters.push_back({parameterName, parameterType, parameterTypeLocation});
         scopedParameters.push_back({parameterName, symbolName});
         if (peek().type == TokenType::COMMA) {
             consume(TokenType::COMMA, "");
@@ -457,15 +455,14 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
         Token parameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre attendu");
         std::string parameterName = parameterToken.value;
         consume(TokenType::COLON, "':' attendu après le nom du paramètre");
-        Token parameterTypeToken = consume(TokenType::IDENTIFIER, "Type de paramètre attendu");
-        std::string parameterType = parameterTypeToken.value;
+        auto [parameterType, parameterTypeLocation] = parseType("Type de paramètre attendu");
         if (localScopes.back().count(parameterName)) {
             throw CompilerError(ErrorKind::Parser, parameterToken.location, "paramètre déjà déclaré: " + parameterName);
         }
         std::string symbolName = parameterName + "#" + std::to_string(nextSymbolId++);
         localScopes.back()[parameterName] = {symbolName, parameterType, false};
         parameters.push_back({parameterName, symbolName, parameterType});
-        signatureParameters.push_back({parameterName, parameterType, parameterTypeToken.location});
+        signatureParameters.push_back({parameterName, parameterType, parameterTypeLocation});
         if (peek().type == TokenType::COMMA) {
             consume(TokenType::COMMA, "");
         } else if (peek().type != TokenType::RPAREN) {
@@ -474,9 +471,8 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
     }
     consume(TokenType::RPAREN, "");
     consume(TokenType::COLON, "");
-    Token returnTypeToken = consume(TokenType::IDENTIFIER, "Type de retour attendu");
-    std::string returnType = returnTypeToken.value;
-    CompilerContext::FunctionSignature signature{signatureParameters, returnType, defToken.location, returnTypeToken.location};
+    auto [returnType, returnTypeLocation] = parseType("Type de retour attendu");
+    CompilerContext::FunctionSignature signature{signatureParameters, returnType, defToken.location, returnTypeLocation};
     if (!clName.empty()) {
         if (context.classes[clName].methods.count(name)) {
             throw CompilerError(ErrorKind::Parser, nameToken.location, "méthode déjà déclarée dans '" + clName + "': " + name);
@@ -494,6 +490,40 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
     localScopes.pop_back();
     return located(std::make_unique<FunctionDefNode>(
         clName, name, returnType, std::move(parameters), std::move(body)), defToken.location);
+}
+
+std::pair<std::string, SourceLocation> Parser::parseType(const std::string& expectedMessage) {
+    if (peek().type == TokenType::IDENTIFIER) {
+        Token typeToken = consume(TokenType::IDENTIFIER, expectedMessage);
+        return {typeToken.value, typeToken.location};
+    }
+    if (peek().type != TokenType::LPAREN) {
+        throw CompilerError(ErrorKind::Parser, peek().location, expectedMessage + " (reçu '" + peek().value + "')");
+    }
+
+    Token start = consume(TokenType::LPAREN, "");
+    CompilerContext::FunctionType functionType;
+    while (peek().type != TokenType::RPAREN) {
+        Token parameterTypeToken = consume(TokenType::IDENTIFIER, "Type de paramètre attendu dans le type fonction");
+        functionType.parameterTypes.push_back(parameterTypeToken.value);
+        if (peek().type == TokenType::COMMA) {
+            consume(TokenType::COMMA, "");
+        } else if (peek().type != TokenType::RPAREN) {
+            throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ')' attendu dans le type fonction");
+        }
+    }
+    consume(TokenType::RPAREN, "Parenthèse fermante attendue dans le type fonction");
+    consume(TokenType::FAT_ARROW, "'=>' attendu dans le type fonction");
+    Token returnTypeToken = consume(TokenType::IDENTIFIER, "Type de retour attendu dans le type fonction");
+    functionType.returnType = returnTypeToken.value;
+
+    auto alias = functionAliasForType(functionType);
+    if (!alias) {
+        throw CompilerError(
+            ErrorKind::Parser, start.location,
+            "type fonction non supporté pour l'instant");
+    }
+    return {*alias, start.location};
 }
 
 std::vector<std::unique_ptr<ASTNode>> Parser::parseArguments() {
