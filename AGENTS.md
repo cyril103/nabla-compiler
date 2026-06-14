@@ -45,6 +45,8 @@ Le pipeline implemente actuellement :
   `IntBinaryFn`, references de fonctions nommees et appels indirects, avec
   lambdas sans capture `(x: Int) => { ... }` et
   `(acc: Int, value: Int) => { ... }`;
+- type `Unit` formalise pour les fonctions a effet et les boucles `while` /
+  `for`;
 - collection native `IntArray` avec `length`, `get` et `set`;
 - entiers immediats avec pointer tagging et litteraux `String`;
 - affichage console de `String` via la primitive globale `print`;
@@ -132,8 +134,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ### P2 - Systeme De Types
 
-- [ ] Formaliser `Unit`, `Int`, `String`, `IntArray`, `IntUnaryFn`,
+- [ ] Formaliser `Int`, `String`, `IntArray`, `IntUnaryFn`,
   `IntBinaryFn` et les types de classes.
+- [x] Formaliser `Unit` pour les fonctions a effet et les boucles.
 - [ ] Ajouter les booleens ou definir officiellement `Int` comme condition.
 - [ ] Ajouter les champs et methodes herites si l'heritage est retenu.
 - [ ] Valider les types des branches, boucles et operateurs de facon uniforme.
@@ -165,7 +168,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout de `arrayIntRange` et `ArrayInt.foreach`.
+- Prochain commit - Formalisation de `Unit` pour les boucles et `foreach`.
+- `70a808d` - Ajout de `arrayIntRange` et `ArrayInt.foreach`.
 - `51cba13` - Ajout de `IntBinaryFn` et `ArrayInt.fold`.
 - `fa730c6` - Ajout de `ArrayInt.filter`.
 - `209119f` - Ajout des fonctions valeurs `IntUnaryFn`, de `intArrayMap` et de
@@ -204,5 +208,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Formaliser `Unit` pour les fonctions a effet comme `foreach`, puis ajouter les
-closures avec capture et generaliser les types fonction.
+Ajouter un type fonction a effet pour `foreach`, puis les closures avec capture
+et la generalisation des types fonction.

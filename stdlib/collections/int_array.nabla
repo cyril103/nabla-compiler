@@ -101,13 +101,12 @@ class ArrayInt(values: IntArray) {
         intArrayFold(values, initial, combine)
     }
 
-    def foreach(f: IntUnaryFn): Int = {
+    def foreach(f: IntUnaryFn): Unit = {
         var index = 0
         while (index < values.length()) {
             f(values.get(index))
             index = index + 1
         }
-        0
     }
 
     def raw(): IntArray = {

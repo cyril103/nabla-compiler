@@ -8,4 +8,5 @@ function main() -> Int
   jump while.cond.0
   label while.end.2
   %2 = const 0
-  return %2
+  %3 = const 0
+  return %3

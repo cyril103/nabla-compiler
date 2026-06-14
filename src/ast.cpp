@@ -450,7 +450,7 @@ WhileNode::WhileNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode
     : condition(std::move(condition)), body(std::move(body)) {}
 
 std::string WhileNode::getType() {
-    return "Int";
+    return "Unit";
 }
 
 void WhileNode::validateSemantics(CompilerContext& context) {
@@ -481,7 +481,7 @@ ForNode::ForNode(std::unique_ptr<ASTNode> count, std::unique_ptr<ASTNode> body)
     : count(std::move(count)), body(std::move(body)) {}
 
 std::string ForNode::getType() {
-    return "Int";
+    return "Unit";
 }
 
 void ForNode::validateSemantics(CompilerContext& context) {

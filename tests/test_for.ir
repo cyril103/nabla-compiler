@@ -16,4 +16,5 @@ function main() -> Int
   jump for.cond.0
   label for.end.2
   %8 = const 0
-  return %8
+  %9 = const 0
+  return %9

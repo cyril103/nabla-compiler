@@ -1,0 +1,10 @@
+def skip(): Unit = {
+    while 0 {
+        1
+    }
+}
+
+def main(): Int = {
+    skip()
+    0
+}
