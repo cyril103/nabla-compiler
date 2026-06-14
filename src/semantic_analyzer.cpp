@@ -16,20 +16,23 @@ void SemanticAnalyzer::validateDeclaredTypes() const {
             }
         }
         for (const auto& [methodName, signature] : classInfo.methods) {
+            auto methodTypeParameters = classInfo.typeParameters;
+            methodTypeParameters.insert(
+                methodTypeParameters.end(), signature.typeParameters.begin(), signature.typeParameters.end());
             if (signature.parameters.size() > 5) {
                 throw CompilerError(
                     ErrorKind::Semantic, signature.location,
                     "la méthode '" + className + "." + methodName + "' dépasse la limite de 5 paramètres");
             }
             for (const auto& parameter : signature.parameters) {
-                if (!isKnownTypeInScope(parameter.type, classInfo.typeParameters)) {
+                if (!isKnownTypeInScope(parameter.type, methodTypeParameters)) {
                     throw CompilerError(
                         ErrorKind::Semantic, parameter.location,
                         "type inconnu '" + parameter.type + "' pour le paramètre '" +
                         className + "." + methodName + "." + parameter.name + "'");
                 }
             }
-            if (!isKnownTypeInScope(signature.returnType, classInfo.typeParameters)) {
+            if (!isKnownTypeInScope(signature.returnType, methodTypeParameters)) {
                 throw CompilerError(
                     ErrorKind::Semantic, signature.returnTypeLocation,
                     "type de retour inconnu '" + signature.returnType + "' pour la méthode '" +

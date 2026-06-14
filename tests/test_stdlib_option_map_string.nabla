@@ -1,0 +1,7 @@
+import core.option
+
+def main(): Int = {
+    val some = optionSome(40)
+    val mapped = some.map[String]("x", value => "hello")
+    mapped.getOrElse("x").length() + 37
+}

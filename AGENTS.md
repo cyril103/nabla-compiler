@@ -60,6 +60,9 @@ Le pipeline implemente actuellement :
 - appels de methodes de classes generiques abaisses vers des corps IR
   specialises comme `Box[Int].get`, avec substitution de `T` dans les
   parametres, retours, types fonction et acces aux champs;
+- methodes generiques avec arguments de type explicites comme
+  `option.map[String](...)`, specialisees dans l'IR avec le type de classe et
+  les types de methode;
 - declarations de fonctions generiques simples comme `identity[T]`, appelees avec
   arguments de type explicites comme `identity[Int](42)`, avec substitution dans
   les parametres, retours et types fonction, puis monomorphisees en corps IR
@@ -90,8 +93,8 @@ Le pipeline implemente actuellement :
 - module de bibliotheque standard `core.option_int` avec `OptionInt`,
   `optionIntSome`, `optionIntNone`, `map`, `filter` et `orElse`;
 - module de bibliotheque standard `core.option` avec `Option[T]`, `optionSome`,
-  `optionNone`, `isDefined`, `isEmpty`, `nonEmpty`, `filter`, `orElse` et
-  `getOrElse`;
+  `optionNone`, `isDefined`, `isEmpty`, `nonEmpty`, `map[U]`, `filter`,
+  `orElse` et `getOrElse`;
 - premier module de bibliotheque standard `collections.int_array` avec
   `intArraySum`, `intArrayFill`, `intArrayRange`, `intArrayMap`,
   `intArrayFilter` et la facade objet `ArrayInt` avec `map`, `filter`,
@@ -123,7 +126,8 @@ Limites importantes :
   fonctions, lambdas et champs, mais pas encore `toString` ni les collections
   specialisees;
 - la genericite actuelle couvre `Option[T]`, les fonctions generiques
-  monomorphisees et les methodes de classes generiques specialisees, mais les
+  monomorphisees et les methodes de classes generiques specialisees; les
+  methodes generiques exigent encore des arguments de type explicites et les
   fonctions generiques ne sont pas encore utilisables comme valeurs polymorphes;
   `Array[Int]` reste une facade specialisee vers `ArrayInt`; la
   monomorphisation complete des classes generiques reste a faire;
@@ -216,6 +220,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Monomorphiser les corps des methodes de classes generiques dans l'IR.
 - [x] Ajouter la monomorphisation des fonctions generiques.
 - [x] Ajouter `Option[T]` dans la bibliotheque standard generique.
+- [x] Ajouter les methodes generiques explicites comme `Option[T].map[U]`.
+- [ ] Inferer les arguments de type des methodes generiques.
 - [ ] Ajouter la monomorphisation complete des classes generiques.
 - [x] Generaliser `IntUnaryFn` vers des types fonction canoniques.
 - [x] Introduire une representation interne commune des types fonction.
@@ -276,6 +282,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `TBD` - Ajouter les methodes generiques explicites, utilisees par
+  `Option[T].map[U]`.
 - `e8ed453` - Ajouter `core.option` avec `Option[T]`, `optionSome`, `optionNone`,
   `filter`, `orElse` et `getOrElse`.
 - `7f5ac21` - Monomorphiser les fonctions generiques en corps IR specialises comme

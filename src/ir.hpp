@@ -81,8 +81,8 @@ public:
         const std::vector<std::string>& arguments, const std::string& type = "Int");
     void registerMethodSpecialization(
         const std::string& concreteClassName, const std::string& templateClassName,
-        const std::string& methodName, const std::vector<std::string>& argumentTypes,
-        const std::string& returnType);
+        const std::string& methodName, const std::vector<std::string>& methodTypeArguments,
+        const std::vector<std::string>& argumentTypes, const std::string& returnType);
     void registerFunctionSpecialization(
         const std::string& functionName, const std::vector<std::string>& typeArguments,
         const std::string& returnType);
@@ -130,6 +130,7 @@ private:
         std::string concreteClassName;
         std::string templateClassName;
         std::string methodName;
+        std::vector<std::string> methodTypeArguments;
         std::vector<std::string> argumentTypes;
         std::string returnType;
     };

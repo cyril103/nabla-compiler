@@ -684,6 +684,24 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
         consume(TokenType::DOT, "");
         Token methodToken = consume(TokenType::IDENTIFIER, "Nom de méthode attendu après '.'");
         std::string method = methodToken.value;
+        std::vector<std::string> typeArguments;
+        if (peek().type == TokenType::LBRACKET) {
+            consume(TokenType::LBRACKET, "");
+            while (peek().type != TokenType::RBRACKET) {
+                auto [typeArgument, typeLocation] = parseType("Type d'argument générique attendu");
+                (void) typeLocation;
+                typeArguments.push_back(typeArgument);
+                if (peek().type == TokenType::COMMA) {
+                    consume(TokenType::COMMA, "");
+                } else if (peek().type != TokenType::RBRACKET) {
+                    throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ']' attendu après l'argument de type");
+                }
+            }
+            consume(TokenType::RBRACKET, "']' attendu après les arguments de type");
+            if (peek().type != TokenType::LPAREN) {
+                throw CompilerError(ErrorKind::Parser, methodToken.location, "appel attendu après les arguments de type");
+            }
+        }
         const std::string receiverType = expr->getType();
         auto expectedArgumentTypes = expectedArgumentTypesForMethodCall(receiverType, method);
         std::string initialReturnType = "Int";
@@ -696,7 +714,14 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
                 if (auto genericSubstitution = genericSubstitutionFor(context, receiverType)) {
                     substitution = *genericSubstitution;
                 }
+                if (auto methodSubstitution = genericFunctionSubstitutionFor(methodIt->second, typeArguments)) {
+                    substitution.insert(methodSubstitution->begin(), methodSubstitution->end());
+                }
                 initialReturnType = substituteType(methodIt->second.returnType, substitution);
+                expectedArgumentTypes.clear();
+                for (const auto& parameter : methodIt->second.parameters) {
+                    expectedArgumentTypes.push_back(substituteType(parameter.type, substitution));
+                }
             }
         }
         consume(TokenType::LPAREN, "");
@@ -704,7 +729,8 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
         consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de méthode");
         expr = located(
             std::make_unique<MethodCallNode>(
-                std::move(expr), method, std::move(arguments), initialReturnType, initialOwnerType),
+                std::move(expr), method, std::move(arguments), std::move(typeArguments),
+                initialReturnType, initialOwnerType),
             methodToken.location);
     }
     return expr;

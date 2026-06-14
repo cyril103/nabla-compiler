@@ -11,6 +11,14 @@ class Option[T](defined: Bool, value: T) {
         defined
     }
 
+    def map[U](default: U, transform: (T) => U): Option[U] = {
+        if defined {
+            optionSome(transform(value))
+        } else {
+            optionNone(default)
+        }
+    }
+
     def filter(predicate: (T) => Bool): Option[T] = {
         if defined && predicate(value) {
             this

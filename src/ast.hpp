@@ -119,11 +119,14 @@ class MethodCallNode : public ASTNode {
     std::unique_ptr<ASTNode> receiver;
     std::string methodName;
     std::vector<std::unique_ptr<ASTNode>> arguments;
+    std::vector<std::string> typeArguments;
+    std::vector<std::string> resolvedTypeArguments;
     std::string resolvedType = "Int";
     std::string resolvedOwnerType;
 public:
     MethodCallNode(
         std::unique_ptr<ASTNode> rec, std::string method, std::vector<std::unique_ptr<ASTNode>> args,
+        std::vector<std::string> genericTypeArguments = {},
         std::string initialResolvedType = "Int", std::string initialOwnerType = "");
     std::string getType() override;
     void validateSemantics(CompilerContext& context) override;
@@ -265,7 +268,8 @@ public:
     void validateSemantics(CompilerContext& context) override;
     std::string lowerToIR(IRBuilder& builder) const override;
     std::string lowerSpecializedMethodToIR(
-        IRBuilder& builder, const std::string& concreteClassName) const;
+        IRBuilder& builder, const std::string& concreteClassName,
+        const std::vector<std::string>& concreteMethodTypeArguments) const;
     std::string lowerSpecializedFunctionToIR(
         IRBuilder& builder, const std::vector<std::string>& concreteTypeArguments) const;
     const std::string& getClassName() const { return className; }

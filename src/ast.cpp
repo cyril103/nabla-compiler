@@ -324,8 +324,10 @@ std::string NewNode::lowerToIR(IRBuilder& builder) const {
 
 MethodCallNode::MethodCallNode(
     std::unique_ptr<ASTNode> rec, std::string method, std::vector<std::unique_ptr<ASTNode>> args,
+    std::vector<std::string> genericTypeArguments,
     std::string initialResolvedType, std::string initialOwnerType)
     : receiver(std::move(rec)), methodName(std::move(method)), arguments(std::move(args)),
+      typeArguments(std::move(genericTypeArguments)),
       resolvedType(std::move(initialResolvedType)), resolvedOwnerType(std::move(initialOwnerType)) {}
 
 std::string MethodCallNode::getType() {
@@ -450,6 +452,26 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
     if (methodIt == classIt->second.methods.end()) {
         semanticError("méthode inconnue: " + receiverType + "." + methodName);
     }
+    if (methodIt->second.typeParameters.empty()) {
+        if (!typeArguments.empty()) {
+            semanticError("la méthode '" + receiverType + "." + methodName + "' n'accepte pas d'arguments de type");
+        }
+        resolvedTypeArguments.clear();
+    } else {
+        auto methodSubstitution = genericFunctionSubstitutionFor(methodIt->second, typeArguments);
+        if (!methodSubstitution) {
+            if (typeArguments.empty()) {
+                semanticError(
+                    "la méthode générique '" + receiverType + "." + methodName +
+                    "' doit être appelée avec des arguments de type");
+            }
+            semanticError(
+                "la méthode générique '" + receiverType + "." + methodName + "' attend " +
+                std::to_string(methodIt->second.typeParameters.size()) + " argument(s) de type");
+        }
+        substitution.insert(methodSubstitution->begin(), methodSubstitution->end());
+        resolvedTypeArguments = orderedTypeArguments(methodIt->second.typeParameters, *methodSubstitution);
+    }
     auto parameters = substituteParameters(methodIt->second.parameters, substitution);
     validateArguments(receiverType + "." + methodName, arguments, parameters, location);
     resolvedType = substituteType(methodIt->second.returnType, substitution);
@@ -514,13 +536,22 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
     for (const auto& argument : arguments) loweredArguments.push_back(argument->lowerToIR(builder));
     std::vector<std::string> argumentTypes;
     for (const auto& argument : arguments) argumentTypes.push_back(argument->getType());
-    if (receiverType != resolvedOwnerType && !resolvedOwnerType.empty()) {
+    std::vector<std::string> concreteTypeArguments;
+    for (const auto& typeArgument : resolvedTypeArguments) {
+        concreteTypeArguments.push_back(builder.substituteActiveType(typeArgument));
+    }
+    const std::string concreteMethodName = concreteTypeArguments.empty()
+        ? methodName
+        : formatParameterizedType(methodName, concreteTypeArguments);
+    const std::string concreteReturnType = builder.substituteActiveType(resolvedType);
+    if ((!concreteTypeArguments.empty() || receiverType != resolvedOwnerType) && !resolvedOwnerType.empty()) {
         builder.registerMethodSpecialization(
-            receiverType, resolvedOwnerType, methodName, argumentTypes, resolvedType);
+            receiverType, resolvedOwnerType, methodName, concreteTypeArguments,
+            argumentTypes, concreteReturnType);
     }
     return builder.emitMethodCall(
         receiverType,
-        methodName, loweredReceiver, loweredArguments, resolvedType);
+        concreteMethodName, loweredReceiver, loweredArguments, concreteReturnType);
 }
 
 FunctionCallNode::FunctionCallNode(
@@ -839,6 +870,8 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
         auto classIt = context.classes.find(className);
         if (classIt != context.classes.end()) {
             context.semanticTypeParameters = classIt->second.typeParameters;
+            context.semanticTypeParameters.insert(
+                context.semanticTypeParameters.end(), typeParameters.begin(), typeParameters.end());
             context.semanticSymbolTypes["this"] = classIt->second.typeParameters.empty()
                 ? className
                 : formatParameterizedType(className, classIt->second.typeParameters);
@@ -868,7 +901,7 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
 }
 
 std::string FunctionDefNode::lowerToIR(IRBuilder& builder) const {
-    if (className.empty() && !typeParameters.empty()) return "";
+    if (!typeParameters.empty()) return "";
 
     std::vector<IRParameter> irParameters;
     if (!className.empty()) {
@@ -899,10 +932,14 @@ std::string FunctionDefNode::lowerToIR(IRBuilder& builder) const {
 }
 
 std::string FunctionDefNode::lowerSpecializedMethodToIR(
-    IRBuilder& builder, const std::string& concreteClassName) const {
+    IRBuilder& builder, const std::string& concreteClassName,
+    const std::vector<std::string>& concreteMethodTypeArguments) const {
     auto parameterizedType = parameterizedTypeFromName(concreteClassName);
     if (!parameterizedType || parameterizedType->first != className ||
         parameterizedType->second.size() != ownerTypeParameters.size()) {
+        builder.unsupported(location, "la spécialisation de méthode " + concreteClassName + "." + name);
+    }
+    if (concreteMethodTypeArguments.size() != typeParameters.size()) {
         builder.unsupported(location, "la spécialisation de méthode " + concreteClassName + "." + name);
     }
 
@@ -910,6 +947,9 @@ std::string FunctionDefNode::lowerSpecializedMethodToIR(
     substitution[className] = concreteClassName;
     for (size_t i = 0; i < ownerTypeParameters.size(); ++i) {
         substitution[ownerTypeParameters[i]] = parameterizedType->second[i];
+    }
+    for (size_t i = 0; i < typeParameters.size(); ++i) {
+        substitution[typeParameters[i]] = concreteMethodTypeArguments[i];
     }
 
     builder.pushTypeSubstitution(substitution);
@@ -920,7 +960,10 @@ std::string FunctionDefNode::lowerSpecializedMethodToIR(
         irParameters.push_back({parameter.name, parameter.type});
     }
 
-    builder.beginFunction(concreteClassName + "." + name, irParameters, returnType);
+    const std::string concreteMethodName = concreteMethodTypeArguments.empty()
+        ? name
+        : formatParameterizedType(name, concreteMethodTypeArguments);
+    builder.beginFunction(concreteClassName + "." + concreteMethodName, irParameters, returnType);
     builder.bindThis();
     builder.bindParameter("this", "this");
     for (const auto& parameter : parameters) {

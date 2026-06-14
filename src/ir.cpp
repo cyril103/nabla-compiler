@@ -219,20 +219,22 @@ std::string IRBuilder::emitMethodCall(
 
 void IRBuilder::registerMethodSpecialization(
     const std::string& concreteClassName, const std::string& templateClassName,
-    const std::string& methodName, const std::vector<std::string>& argumentTypes,
-    const std::string& returnType) {
-    if (concreteClassName == templateClassName) return;
+    const std::string& methodName, const std::vector<std::string>& methodTypeArguments,
+    const std::vector<std::string>& argumentTypes, const std::string& returnType) {
+    if (concreteClassName == templateClassName && methodTypeArguments.empty()) return;
     for (const auto& specialization : methodSpecializations) {
         if (specialization.concreteClassName == concreteClassName &&
             specialization.templateClassName == templateClassName &&
             specialization.methodName == methodName &&
+            specialization.methodTypeArguments == methodTypeArguments &&
             specialization.argumentTypes == argumentTypes &&
             specialization.returnType == returnType) {
             return;
         }
     }
     methodSpecializations.push_back({
-        concreteClassName, templateClassName, methodName, argumentTypes, returnType});
+        concreteClassName, templateClassName, methodName, methodTypeArguments,
+        argumentTypes, returnType});
 }
 
 void IRBuilder::registerFunctionSpecialization(
@@ -287,7 +289,8 @@ void IRBuilder::emitMethodSpecialization(
         if (!function) continue;
         if (function->getClassName() == specialization.templateClassName &&
             function->getName() == specialization.methodName) {
-            function->lowerSpecializedMethodToIR(*this, specialization.concreteClassName);
+            function->lowerSpecializedMethodToIR(
+                *this, specialization.concreteClassName, specialization.methodTypeArguments);
             return;
         }
     }
