@@ -1,0 +1,19 @@
+class LongBox(value: Long) {
+    def add(delta: Long): Long = {
+        value + delta
+    }
+}
+
+def identity(value: Long): Long = {
+    value
+}
+
+def main(): Int = {
+    val box = new LongBox(30L)
+    val total = identity(box.add(12L))
+    if total == 42L {
+        42
+    } else {
+        1
+    }
+}

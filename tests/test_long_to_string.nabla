@@ -1,0 +1,4 @@
+def main(): Int = {
+    print(1234567890L.toString())
+    0
+}

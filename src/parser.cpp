@@ -458,6 +458,10 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         Token token = consume(TokenType::INT_LITERAL, "");
         return located(std::make_unique<IntNode>(token.value), token.location);
     }
+    if (peek().type == TokenType::LONG_LITERAL) {
+        Token token = consume(TokenType::LONG_LITERAL, "");
+        return located(std::make_unique<LongNode>(token.value), token.location);
+    }
     if (peek().type == TokenType::KW_TRUE) {
         Token token = consume(TokenType::KW_TRUE, "");
         return located(std::make_unique<BoolNode>(true), token.location);
@@ -748,12 +752,12 @@ std::unique_ptr<ASTNode> Parser::parseArgument(const std::string& expectedType) 
 
 std::vector<std::string> Parser::expectedArgumentTypesForMethodCall(
     const std::string& receiverType, const std::string& methodName) const {
-    if (receiverType == "Int") {
+    if (receiverType == "Int" || receiverType == "Long") {
         const bool binaryMethod =
             methodName == "+" || methodName == "-" || methodName == "*" || methodName == "/" ||
             methodName == "==" || methodName == "!=" || methodName == "<" || methodName == ">" ||
             methodName == "<=" || methodName == ">=";
-        if (binaryMethod) return {"Int"};
+        if (binaryMethod) return {receiverType};
         return {};
     }
     if (receiverType == "IntArray") {

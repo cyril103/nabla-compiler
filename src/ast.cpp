@@ -12,12 +12,17 @@ bool isArithmeticMethod(const std::string& methodName) {
     return methodName == "+" || methodName == "-" || methodName == "*" || methodName == "/";
 }
 
+bool isIntegerType(const std::string& type) {
+    return type == "Int" || type == "Long";
+}
+
 bool isBoolBinaryMethod(const std::string& methodName) {
     return methodName == "==" || methodName == "!=";
 }
 
 bool isKnownBuiltinType(const std::string& type) {
-    return type == "Int" || type == "Bool" || type == "String" || type == "Unit" || type == "IntArray";
+    return type == "Int" || type == "Long" || type == "Bool" || type == "String" || type == "Unit" ||
+           type == "IntArray";
 }
 
 void validateArguments(
@@ -72,6 +77,20 @@ void IntNode::validateSemantics(CompilerContext& context) {
 }
 
 std::string IntNode::lowerToIR(IRBuilder& builder) const {
+    return builder.emitConstant(value);
+}
+
+LongNode::LongNode(std::string val) : value(std::move(val)) {}
+
+std::string LongNode::getType() {
+    return "Long";
+}
+
+void LongNode::validateSemantics(CompilerContext& context) {
+    (void) context;
+}
+
+std::string LongNode::lowerToIR(IRBuilder& builder) const {
     return builder.emitConstant(value);
 }
 
@@ -231,10 +250,10 @@ MethodCallNode::MethodCallNode(
 
 std::string MethodCallNode::getType() {
     const std::string receiverType = receiver->getType();
-    if (receiverType == "Int") {
+    if (isIntegerType(receiverType)) {
         if (methodName == "toString") return "String";
         if (isComparisonMethod(methodName)) return "Bool";
-        return "Int";
+        return receiverType;
     }
     if (receiverType == "String") {
         if (methodName == "length") return "Int";
@@ -254,26 +273,29 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
     for (const auto& argument : arguments) argument->validateSemantics(context);
 
     const std::string receiverType = receiver->getType();
-    if (receiverType == "Int") {
+    if (isIntegerType(receiverType)) {
         const bool binaryMethod = isArithmeticMethod(methodName) || isComparisonMethod(methodName);
         if (binaryMethod) {
             if (arguments.size() != 1) {
-                semanticError("la méthode Int." + methodName + " attend un argument");
+                semanticError("la méthode " + receiverType + "." + methodName + " attend un argument");
             }
-            if (arguments[0]->getType() != "Int") {
+            if (arguments[0]->getType() != receiverType) {
                 throw CompilerError(
                     ErrorKind::Semantic, arguments[0]->getLocation(),
-                    "la méthode Int." + methodName + " attend un argument de type Int");
+                    "la méthode " + receiverType + "." + methodName +
+                    " attend un argument de type " + receiverType);
             }
-            resolvedType = isComparisonMethod(methodName) ? "Bool" : "Int";
+            resolvedType = isComparisonMethod(methodName) ? "Bool" : receiverType;
             return;
         }
         if (methodName == "toString") {
-            if (!arguments.empty()) semanticError("la méthode Int.toString n'accepte aucun argument");
+            if (!arguments.empty()) {
+                semanticError("la méthode " + receiverType + ".toString n'accepte aucun argument");
+            }
             resolvedType = "String";
             return;
         }
-        semanticError("méthode inconnue: Int." + methodName);
+        semanticError("méthode inconnue: " + receiverType + "." + methodName);
     }
     if (receiverType == "String") {
         if (methodName == "length") {
@@ -346,19 +368,19 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
 
 std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
     const std::string receiverType = receiver->getType();
-    if (receiverType == "Int") {
+    if (isIntegerType(receiverType)) {
         if (methodName == "toString") {
             if (!arguments.empty()) {
-                builder.unsupported(location, "l'appel de méthode Int.toString");
+                builder.unsupported(location, "l'appel de méthode " + receiverType + ".toString");
             }
             std::string loweredReceiver = receiver->lowerToIR(builder);
-            return builder.emitMethodCall("Int", "toString", loweredReceiver, {});
+            return builder.emitMethodCall(receiverType, "toString", loweredReceiver, {});
         }
         const std::vector<std::string> supported = {
             "+", "-", "*", "/", "==", "!=", "<", ">", "<=", ">="
         };
         if (std::find(supported.begin(), supported.end(), methodName) == supported.end()) {
-            builder.unsupported(location, "la méthode Int." + methodName);
+            builder.unsupported(location, "la méthode " + receiverType + "." + methodName);
         }
         if (arguments.size() != 1) {
             builder.unsupported(location, "l'appel de méthode '" + methodName + "'");

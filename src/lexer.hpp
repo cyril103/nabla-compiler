@@ -8,7 +8,7 @@
 enum class TokenType {
     KW_DEF, KW_CLASS, KW_NEW, KW_IMPORT, KW_IF, KW_ELSE, KW_WHILE, KW_FOR, KW_VAL, KW_VAR, KW_THIS,
     KW_TRUE, KW_FALSE,
-    IDENTIFIER, LPAREN, RPAREN, COLON, EQUAL, LBRACE, RBRACE, COMMA, DOT, INT_LITERAL, STRING_LITERAL,
+    IDENTIFIER, LPAREN, RPAREN, COLON, EQUAL, LBRACE, RBRACE, COMMA, DOT, INT_LITERAL, LONG_LITERAL, STRING_LITERAL,
     PLUS, MINUS, STAR, SLASH, BANG, AND_AND, OR_OR, FAT_ARROW, EQEQ, NEQ, LT, GT, LTE, GTE, EOF_TOKEN
 };
 
@@ -150,6 +150,11 @@ public:
                 while (index < src.size() && std::isdigit(static_cast<unsigned char>(src[index]))) {
                     number += src[index];
                     advance();
+                }
+                if (index < src.size() && (src[index] == 'L' || src[index] == 'l')) {
+                    advance();
+                    tokens.push_back({TokenType::LONG_LITERAL, number, start});
+                    continue;
                 }
                 tokens.push_back({TokenType::INT_LITERAL, number, start});
                 continue;

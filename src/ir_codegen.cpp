@@ -495,7 +495,7 @@ private:
             loadValue(instruction.operands[i + 1], callingConvention.methodArgumentRegisters[i]);
         }
 
-        if (className == "Int" && methodName == "toString") {
+        if ((className == "Int" || className == "Long") && methodName == "toString") {
             out << "    call Int_method_toString\n";
         } else if (className == "String" && methodName == "length") {
             out << "    mov rax, [rdi + 8]\n";

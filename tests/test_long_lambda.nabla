@@ -1,0 +1,12 @@
+def applyLong(value: Long, transform: (Long) => Long): Long = {
+    transform(value)
+}
+
+def main(): Int = {
+    val result = applyLong(20L, value => value + 22L)
+    if result == 42L {
+        42
+    } else {
+        1
+    }
+}

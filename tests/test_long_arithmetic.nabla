@@ -1,0 +1,10 @@
+def main(): Int = {
+    val left = 40L
+    val right = 2L
+    val total = left + right
+    if total == 42L && total > 41L && total <= 42L {
+        42
+    } else {
+        1
+    }
+}

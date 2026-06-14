@@ -59,12 +59,12 @@ Le pipeline implemente actuellement :
 - inference des types de parametres pour lambdas multi-parametres en argument,
   par exemple `xs.fold(0, (acc, value) => acc + value)`;
 - types fonction imbriques en retour, par exemple `(Int) => ((Int) => Int)`;
-- types `Bool` et `Unit` formalises; les comparaisons retournent `Bool` et
+- types `Bool`, `Unit` et `Long` formalises; les comparaisons retournent `Bool` et
   les conditions `if` / `while` attendent `Bool`;
 - operateurs booleens `&&`, `||` et `!`, avec court-circuit pour `&&` et
   `||`;
 - collection native `IntArray` avec `length`, `get` et `set`;
-- entiers immediats avec pointer tagging et litteraux `String`;
+- entiers immediats `Int` et `Long` avec pointer tagging et litteraux `String`;
 - affichage console de `String` via la primitive globale `print`;
 - premier module de bibliotheque standard `io` avec `println`;
 - module de bibliotheque standard `core.option_int` avec `OptionInt`,
@@ -161,6 +161,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 - [ ] Formaliser `Int`, `Bool`, `String`, `IntArray`, les types fonction canoniques et
   les types de classes.
+- [x] Ajouter `Long` avec litteraux suffixes `L`, arithmetique, comparaisons,
+  fonctions, champs et `toString`.
+- [ ] Ajouter `Float` et `Double` avec litteraux decimaux, IR typee et
+  generation SSE.
 - [x] Formaliser `Unit` pour les fonctions a effet et les boucles.
 - [x] Ajouter les booleens et typer les conditions en `Bool`.
 - [x] Ajouter les operateurs booleens `&&`, `||` et `!`.
@@ -226,6 +230,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `0c0cc44` - Ajouter `Long`, les litteraux `42L`, les operations numeriques Long,
+  les champs/fonctions Long et `Long.toString`.
 - `a9f183d` - Ajouter `this` comme mot-clé et variable implicite dans les méthodes;
   corriger la résolution de `this` (`symbolName == "this"`) dans
   `IdentifierNode` pour permettre son usage en bibliothèque standard.
@@ -303,6 +309,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Etendre `ArrayIntNested` avec des opérations en mode lignes (p. ex.
-`filterRows`, `mapRows` stable) et documenter des exemples d'usage dans un
-exemple de guide stdlib.
+Introduire une IR typee pour les temporaires numeriques, puis ajouter les
+litteraux `Float` / `Double` et la generation SSE (`addss` / `addsd`, etc.).

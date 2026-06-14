@@ -40,6 +40,15 @@ public:
     std::string lowerToIR(IRBuilder& builder) const override;
 };
 
+class LongNode : public ASTNode {
+    std::string value;
+public:
+    LongNode(std::string val);
+    std::string getType() override;
+    void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
+};
+
 class BoolNode : public ASTNode {
     bool value;
 public:
