@@ -44,6 +44,9 @@ void Parser::parseImport(std::unique_ptr<ProgramNode>& currentProgram) {
         importPath = context.rootDir / (path + ".nabla");
     }
     if (!std::filesystem::exists(importPath)) {
+        importPath = context.stdlibDir / (path + ".nabla");
+    }
+    if (!std::filesystem::exists(importPath)) {
         throw CompilerError(ErrorKind::Parser, importToken.location, "impossible de charger '" + importPath.string() + "'");
     }
 

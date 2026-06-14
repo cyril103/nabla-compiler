@@ -79,6 +79,7 @@ int main(int argc, char* argv[]) {
 
     CompilerContext context;
     context.rootDir = findProjectRoot(mainPath);
+    context.stdlibDir = context.rootDir / "stdlib";
     context.currentFile = mainPath;
 
     try {

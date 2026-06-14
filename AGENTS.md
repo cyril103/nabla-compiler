@@ -36,12 +36,14 @@ Le pipeline implemente actuellement :
 - tokenisation et parsing des classes, imports, fonctions et methodes avec
   parametres,
   expressions arithmetiques, comparaisons, `if`, `while`, `for`, `val` et `var`;
-- resolution des imports avec protection contre les cycles;
+- resolution des imports relatifs, depuis la racine projet et depuis `stdlib/`,
+  avec protection contre les cycles;
 - objets avec champs de constructeur et appels de methodes parametres;
 - fonctions globales appelables avec parametres;
 - collection native `IntArray` avec `length`, `get` et `set`;
 - entiers immediats avec pointer tagging et litteraux `String`;
 - affichage console de `String` via la primitive globale `print`;
+- premier module de bibliotheque standard `io` avec `println`;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -142,10 +144,12 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [ ] Ajouter une cible de formatage.
 - [x] Ajouter une integration continue.
 - [ ] Ajouter des tests unitaires du lexer, parser et analyseur semantique.
+- [x] Ajouter une racine `stdlib/` importable.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout de la collection native `IntArray`.
+- Prochain commit - Ajout d'une racine `stdlib/` et du module `io`.
+- `e0e611a` - Ajout de la collection native `IntArray`.
 - `b2996ad` - Ajout des litteraux `String`.
 - `92650b3` - Ajout de la primitive console `print`.
 - `0203ccb` - Ajout d'une verification de depassement du tas.
@@ -177,5 +181,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Formaliser `Unit`, `Int`, `String`, `IntArray` et les types de classes, puis
-preparer les generiques pour les collections typees.
+Ajouter `stdlib/math.nabla` et des helpers autour de `IntArray`, puis formaliser
+`Unit`, `Int`, `String`, `IntArray` et les types de classes.

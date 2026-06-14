@@ -38,6 +38,7 @@ struct CompilerContext {
     std::map<std::string, FunctionSignature> functions;
     std::set<std::string> parsedFiles;
     std::filesystem::path rootDir;
+    std::filesystem::path stdlibDir;
     std::filesystem::path currentFile;
     std::map<std::string, std::string> semanticSymbolTypes;
 };

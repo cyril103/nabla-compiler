@@ -1,0 +1,6 @@
+import io
+
+def main(): Int = {
+    println("depuis stdlib")
+    0
+}
