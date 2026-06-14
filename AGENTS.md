@@ -282,7 +282,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Ajouter les methodes generiques explicites, utilisees par
+- `11cd62d` - Ajouter les methodes generiques explicites, utilisees par
   `Option[T].map[U]`.
 - `e8ed453` - Ajouter `core.option` avec `Option[T]`, `optionSome`, `optionNone`,
   `filter`, `orElse` et `getOrElse`.
