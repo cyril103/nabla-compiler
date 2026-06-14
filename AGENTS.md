@@ -230,7 +230,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `0c0cc44` - Ajouter `Long`, les litteraux `42L`, les operations numeriques Long,
+- `53b77c1` - Ajouter `Long`, les litteraux `42L`, les operations numeriques Long,
   les champs/fonctions Long et `Long.toString`.
 - `a9f183d` - Ajouter `this` comme mot-clé et variable implicite dans les méthodes;
   corriger la résolution de `this` (`symbolName == "this"`) dans
