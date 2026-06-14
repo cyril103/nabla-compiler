@@ -28,6 +28,34 @@ def intArrayMap(xs: IntArray, f: IntUnaryFn): IntArray = {
     mapped
 }
 
+def intArrayFilter(xs: IntArray, predicate: IntUnaryFn): IntArray = {
+    var index = 0
+    var kept = 0
+    while (index < xs.length()) {
+        if (predicate(xs.get(index))) {
+            kept = kept + 1
+        } else {
+            kept
+        }
+        index = index + 1
+    }
+
+    val filtered = new IntArray(kept)
+    index = 0
+    var output = 0
+    while (index < xs.length()) {
+        val value = xs.get(index)
+        if (predicate(value)) {
+            filtered.set(output, value)
+            output = output + 1
+        } else {
+            output
+        }
+        index = index + 1
+    }
+    filtered
+}
+
 class ArrayInt(values: IntArray) {
     def length(): Int = {
         values.length()
@@ -43,6 +71,10 @@ class ArrayInt(values: IntArray) {
 
     def map(f: IntUnaryFn): ArrayInt = {
         new ArrayInt(intArrayMap(values, f))
+    }
+
+    def filter(predicate: IntUnaryFn): ArrayInt = {
+        new ArrayInt(intArrayFilter(values, predicate))
     }
 
     def raw(): IntArray = {

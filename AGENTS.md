@@ -48,7 +48,8 @@ Le pipeline implemente actuellement :
 - affichage console de `String` via la primitive globale `print`;
 - premier module de bibliotheque standard `io` avec `println`;
 - premier module de bibliotheque standard `collections.int_array` avec
-  `intArraySum`, `intArrayFill`, `intArrayMap` et la facade objet `ArrayInt`;
+  `intArraySum`, `intArrayFill`, `intArrayMap`, `intArrayFilter` et la facade
+  objet `ArrayInt`;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -134,6 +135,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [ ] Ajouter les champs et methodes herites si l'heritage est retenu.
 - [ ] Valider les types des branches, boucles et operateurs de facon uniforme.
 - [ ] Generaliser `IntUnaryFn` vers des types fonction complets.
+- [ ] Ajouter `IntBinaryFn` pour `fold` et operations binaires de collections.
 - [x] Ajouter les lambdas sans capture pour `IntUnaryFn`.
 - [ ] Ajouter les closures avec capture.
 
@@ -158,7 +160,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout des lambdas sans capture pour `IntUnaryFn`.
+- Prochain commit - Ajout de `ArrayInt.filter`.
 - `209119f` - Ajout des fonctions valeurs `IntUnaryFn`, de `intArrayMap` et de
   la facade objet `ArrayInt`.
 - `827c162` - Ajout du module `collections.int_array`.
@@ -195,5 +197,4 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Enrichir `ArrayInt` avec `filter` et `fold`, puis ajouter les closures avec
-capture.
+Ajouter `IntBinaryFn` et `ArrayInt.fold`, puis ajouter les closures avec capture.
