@@ -57,6 +57,9 @@ Le pipeline implemente actuellement :
 - declarations de fonctions generiques simples comme `identity[T]`, appelees avec
   arguments de type explicites comme `identity[Int](42)`, avec substitution dans
   les parametres, retours et types fonction;
+- inference des arguments de type des fonctions generiques depuis les arguments
+  d'appel, y compris pour typer une lambda suivante comme dans
+  `applyOnce(41, value => value + 1)`;
 - lambdas et appels indirects avec plusieurs parametres, dans les limites de la
   convention d'appel actuelle;
 - closures testees avec parametres, captures et retours non limites a `Int`;
@@ -111,9 +114,9 @@ Limites importantes :
   specialisees;
 - la genericite actuelle est un pont syntaxique pour `Option[Int]` et
   `Array[Int]`, et un premier support de classes generiques partageant le code
-  du template; les fonctions generiques demandent des arguments de type
-  explicites et ne sont pas encore utilisables comme valeurs polymorphes;
-  l'inference et la monomorphisation specialisee complete restent a faire;
+  du template; les fonctions generiques peuvent inferer leurs arguments de type
+  depuis les arguments d'appel mais ne sont pas encore utilisables comme valeurs
+  polymorphes; la monomorphisation specialisee complete reste a faire;
 - le tas est fixe et possede une verification de depassement, mais pas de
   ramasse-miettes;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
@@ -195,7 +198,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   avec substitution des champs, methodes et types fonction.
 - [x] Ajouter les fonctions generiques utilisateur explicites
   `def identity[T](value: T): T`.
-- [ ] Ajouter l'inference des arguments de type des fonctions generiques.
+- [x] Ajouter l'inference des arguments de type des fonctions generiques.
 - [ ] Autoriser les fonctions generiques comme valeurs polymorphes.
 - [ ] Ajouter la monomorphisation des classes et fonctions generiques.
 - [x] Generaliser `IntUnaryFn` vers des types fonction canoniques.
@@ -257,6 +260,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `TBD` - Ajouter l'inference des arguments de type des fonctions generiques,
+  y compris le typage progressif des lambdas en argument.
 - `5b33e25` - Ajouter les fonctions generiques explicites comme `identity[T]`,
   appelees avec `identity[Int](...)`, et la substitution de `T` dans les
   signatures.

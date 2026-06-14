@@ -222,6 +222,70 @@ inline std::string substituteType(
     return type;
 }
 
+inline bool inferTypeArgumentsFromTypes(
+    const std::string& expectedType, const std::string& actualType,
+    const std::vector<std::string>& typeParameters,
+    std::map<std::string, std::string>& substitution) {
+    if (isTypeParameterName(expectedType, typeParameters)) {
+        auto existing = substitution.find(expectedType);
+        if (existing != substitution.end()) return existing->second == actualType;
+        substitution[expectedType] = actualType;
+        return true;
+    }
+
+    auto expectedFunction = functionTypeFromName(expectedType);
+    if (expectedFunction) {
+        auto actualFunction = functionTypeFromName(actualType);
+        if (!actualFunction) return false;
+        if (expectedFunction->parameterTypes.size() != actualFunction->parameterTypes.size()) return false;
+        for (size_t i = 0; i < expectedFunction->parameterTypes.size(); ++i) {
+            if (!inferTypeArgumentsFromTypes(
+                    expectedFunction->parameterTypes[i], actualFunction->parameterTypes[i],
+                    typeParameters, substitution)) {
+                return false;
+            }
+        }
+        return inferTypeArgumentsFromTypes(
+            expectedFunction->returnType, actualFunction->returnType, typeParameters, substitution);
+    }
+
+    auto expectedParameterized = parameterizedTypeFromName(expectedType);
+    if (expectedParameterized) {
+        auto actualParameterized = parameterizedTypeFromName(actualType);
+        if (!actualParameterized) return false;
+        if (expectedParameterized->first != actualParameterized->first) return false;
+        if (expectedParameterized->second.size() != actualParameterized->second.size()) return false;
+        for (size_t i = 0; i < expectedParameterized->second.size(); ++i) {
+            if (!inferTypeArgumentsFromTypes(
+                    expectedParameterized->second[i], actualParameterized->second[i],
+                    typeParameters, substitution)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    return expectedType == actualType;
+}
+
+inline std::optional<std::map<std::string, std::string>> inferGenericFunctionSubstitution(
+    const CompilerContext::FunctionSignature& signature, const std::vector<std::string>& actualArgumentTypes) {
+    if (signature.typeParameters.empty()) return std::map<std::string, std::string>{};
+    if (signature.parameters.size() != actualArgumentTypes.size()) return std::nullopt;
+    std::map<std::string, std::string> substitution;
+    for (size_t i = 0; i < signature.parameters.size(); ++i) {
+        if (!inferTypeArgumentsFromTypes(
+                signature.parameters[i].type, actualArgumentTypes[i],
+                signature.typeParameters, substitution)) {
+            return std::nullopt;
+        }
+    }
+    for (const auto& typeParameter : signature.typeParameters) {
+        if (substitution.count(typeParameter) == 0) return std::nullopt;
+    }
+    return substitution;
+}
+
 inline bool isFunctionTypeName(const std::string& type) {
     return functionTypeFromName(type).has_value();
 }

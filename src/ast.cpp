@@ -544,8 +544,18 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
         resolvedType = function->second.returnType;
         return;
     }
-    auto substitution = genericFunctionSubstitutionFor(function->second, typeArguments);
+    std::optional<std::map<std::string, std::string>> substitution;
+    if (typeArguments.empty()) {
+        std::vector<std::string> actualArgumentTypes;
+        for (const auto& argument : arguments) actualArgumentTypes.push_back(argument->getType());
+        substitution = inferGenericFunctionSubstitution(function->second, actualArgumentTypes);
+    } else {
+        substitution = genericFunctionSubstitutionFor(function->second, typeArguments);
+    }
     if (!substitution) {
+        if (typeArguments.empty()) {
+            semanticError("impossible d'inférer les arguments de type pour la fonction générique '" + name + "'");
+        }
         semanticError(
             "la fonction générique '" + name + "' attend " +
             std::to_string(function->second.typeParameters.size()) + " argument(s) de type");

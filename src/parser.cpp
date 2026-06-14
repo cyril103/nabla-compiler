@@ -598,7 +598,13 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                 }
             }
             consume(TokenType::LPAREN, "");
-            auto arguments = parseArguments(expectedArgumentTypes);
+            std::vector<std::unique_ptr<ASTNode>> arguments;
+            auto namedFunction = context.functions.find(name);
+            if (!initialSymbol && namedFunction != context.functions.end()) {
+                arguments = parseFunctionCallArguments(namedFunction->second, typeArguments);
+            } else {
+                arguments = parseArguments(expectedArgumentTypes);
+            }
             consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
             auto [symbol, scopeIndex] = findLocalWithScope(name);
             if (symbol) {
@@ -617,6 +623,13 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                 std::map<std::string, std::string> substitution;
                 if (auto genericSubstitution = genericFunctionSubstitutionFor(function->second, typeArguments)) {
                     substitution = *genericSubstitution;
+                } else if (typeArguments.empty() && !function->second.typeParameters.empty()) {
+                    std::vector<std::string> actualArgumentTypes;
+                    for (const auto& argument : arguments) actualArgumentTypes.push_back(argument->getType());
+                    if (auto inferredSubstitution =
+                            inferGenericFunctionSubstitution(function->second, actualArgumentTypes)) {
+                        substitution = *inferredSubstitution;
+                    }
                 }
                 initialReturnType = substituteType(function->second.returnType, substitution);
             }
@@ -897,6 +910,36 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseArguments(const std::vector<s
         std::string expectedType;
         if (arguments.size() < expectedTypes.size()) expectedType = expectedTypes[arguments.size()];
         arguments.push_back(parseArgument(expectedType));
+        if (peek().type == TokenType::COMMA) {
+            consume(TokenType::COMMA, "");
+        } else if (peek().type != TokenType::RPAREN) {
+            throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ')' attendu après l'argument");
+        }
+    }
+    return arguments;
+}
+
+std::vector<std::unique_ptr<ASTNode>> Parser::parseFunctionCallArguments(
+    const CompilerContext::FunctionSignature& signature,
+    const std::vector<std::string>& typeArguments) {
+    std::vector<std::unique_ptr<ASTNode>> arguments;
+    std::map<std::string, std::string> substitution;
+    if (auto genericSubstitution = genericFunctionSubstitutionFor(signature, typeArguments)) {
+        substitution = *genericSubstitution;
+    }
+
+    while (peek().type != TokenType::RPAREN) {
+        std::string expectedType;
+        if (arguments.size() < signature.parameters.size()) {
+            expectedType = substituteType(signature.parameters[arguments.size()].type, substitution);
+        }
+        auto argument = parseArgument(expectedType);
+        if (typeArguments.empty() && arguments.size() < signature.parameters.size()) {
+            inferTypeArgumentsFromTypes(
+                signature.parameters[arguments.size()].type, argument->getType(),
+                signature.typeParameters, substitution);
+        }
+        arguments.push_back(std::move(argument));
         if (peek().type == TokenType::COMMA) {
             consume(TokenType::COMMA, "");
         } else if (peek().type != TokenType::RPAREN) {

@@ -1,0 +1,1 @@
+tests/test_error_generic_function_inference.nabla:6:5: semantic error: impossible d'inférer les arguments de type pour la fonction générique 'marker'

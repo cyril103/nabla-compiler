@@ -1,1 +1,0 @@
-tests/test_error_generic_function_missing_type_args.nabla:6:5: semantic error: la fonction générique 'identity' attend 1 argument(s) de type
