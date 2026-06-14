@@ -1,0 +1,11 @@
+import collections.int_array
+
+def identity(value: Int): Int = {
+    value
+}
+
+def main(): Int = {
+    val xs = arrayIntRange(1)
+    xs.foreach(identity)
+    0
+}

@@ -238,7 +238,7 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
         if (parameterType != "Int") {
             throw CompilerError(
                 ErrorKind::Parser, parameterTypeToken.location,
-                "seules les lambdas Int => Int et (Int, Int) => Int sont supportées pour l'instant");
+                "seules les lambdas Int => Int, Int => Unit et (Int, Int) => Int sont supportées pour l'instant");
         }
         std::string symbolName = parameterName + "#" + std::to_string(nextSymbolId++);
         parameters.push_back({parameterName, symbolName, parameterType});
@@ -259,9 +259,6 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
     consume(TokenType::FAT_ARROW, "'=>' attendu après le paramètre de lambda");
     consume(TokenType::LBRACE, "Bloc attendu après '=>'");
 
-    std::string lambdaName = "lambda." + std::to_string(nextLambdaId++);
-    context.functions[lambdaName] = {signatureParameters, "Int", start.location, start.location};
-
     localScopes.emplace_back();
     for (const auto& [parameterName, symbolName] : scopedParameters) {
         localScopes.back()[parameterName] = {symbolName, "Int", false};
@@ -270,10 +267,23 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
     consume(TokenType::RBRACE, "Fin du bloc de lambda attendue");
     localScopes.pop_back();
 
+    const std::string returnType = body->getType();
+    if ((signatureParameters.size() == 1 && returnType != "Int" && returnType != "Unit") ||
+        (signatureParameters.size() == 2 && returnType != "Int")) {
+        throw CompilerError(
+            ErrorKind::Parser, start.location,
+            "seules les lambdas Int => Int, Int => Unit et (Int, Int) => Int sont supportées pour l'instant");
+    }
+
+    std::string lambdaName = "lambda." + std::to_string(nextLambdaId++);
+    context.functions[lambdaName] = {signatureParameters, returnType, start.location, start.location};
+
     auto function = located(std::make_unique<FunctionDefNode>(
-        "", lambdaName, "Int", std::move(parameters), std::move(body)), start.location);
+        "", lambdaName, returnType, std::move(parameters), std::move(body)), start.location);
     generatedFunctions.push_back(std::move(function));
-    const std::string functionType = signatureParameters.size() == 1 ? "IntUnaryFn" : "IntBinaryFn";
+    const std::string functionType = signatureParameters.size() == 2
+        ? "IntBinaryFn"
+        : (returnType == "Unit" ? "IntConsumerFn" : "IntUnaryFn");
     return located(std::make_unique<FunctionReferenceNode>(lambdaName, functionType), start.location);
 }
 
@@ -320,7 +330,8 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             auto arguments = parseArguments();
             consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
             if (const ParsedSymbol* symbol = findLocal(name)) {
-                if (symbol->type == "IntUnaryFn" || symbol->type == "IntBinaryFn") {
+                if (symbol->type == "IntUnaryFn" || symbol->type == "IntConsumerFn" ||
+                    symbol->type == "IntBinaryFn") {
                     return located(
                         std::make_unique<FunctionValueCallNode>(
                             name, symbol->internalName, std::move(arguments)),
@@ -342,7 +353,11 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         if (context.functions.count(name)) {
             const auto& signature = context.functions[name];
             std::string functionType = "IntUnaryFn";
-            if (signature.parameters.size() == 2) functionType = "IntBinaryFn";
+            if (signature.parameters.size() == 2) {
+                functionType = "IntBinaryFn";
+            } else if (signature.parameters.size() == 1 && signature.returnType == "Unit") {
+                functionType = "IntConsumerFn";
+            }
             return located(std::make_unique<FunctionReferenceNode>(name, functionType), nameToken.location);
         }
         return located(std::make_unique<IdentifierNode>(name, name, "Int"), nameToken.location);

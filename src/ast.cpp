@@ -27,6 +27,11 @@ bool isIntUnaryFunction(const CompilerContext::FunctionSignature& signature) {
            signature.returnType == "Int";
 }
 
+bool isIntConsumerFunction(const CompilerContext::FunctionSignature& signature) {
+    return signature.parameters.size() == 1 && signature.parameters[0].type == "Int" &&
+           signature.returnType == "Unit";
+}
+
 bool isIntBinaryFunction(const CompilerContext::FunctionSignature& signature) {
     return signature.parameters.size() == 2 && signature.parameters[0].type == "Int" &&
            signature.parameters[1].type == "Int" && signature.returnType == "Int";
@@ -279,6 +284,7 @@ FunctionCallNode::FunctionCallNode(std::string functionName, std::vector<std::un
     : name(std::move(functionName)), arguments(std::move(args)) {}
 
 std::string FunctionCallNode::getType() {
+    if (name == "print") return "Unit";
     return resolvedType;
 }
 
@@ -325,6 +331,7 @@ void FunctionReferenceNode::validateSemantics(CompilerContext& context) {
     }
     const bool validFunction =
         (resolvedType == "IntUnaryFn" && isIntUnaryFunction(function->second)) ||
+        (resolvedType == "IntConsumerFn" && isIntConsumerFunction(function->second)) ||
         (resolvedType == "IntBinaryFn" && isIntBinaryFunction(function->second));
     if (!validFunction) {
         semanticError("la fonction '" + name + "' n'est pas compatible avec " + resolvedType);
@@ -340,7 +347,7 @@ FunctionValueCallNode::FunctionValueCallNode(
     : name(std::move(functionName)), symbolName(std::move(symbol)), arguments(std::move(args)) {}
 
 std::string FunctionValueCallNode::getType() {
-    return "Int";
+    return resolvedType;
 }
 
 void FunctionValueCallNode::validateSemantics(CompilerContext& context) {
@@ -349,15 +356,17 @@ void FunctionValueCallNode::validateSemantics(CompilerContext& context) {
     if (symbol == context.semanticSymbolTypes.end()) {
         semanticError("fonction utilisée hors de sa portée: " + name);
     }
-    if (symbol->second != "IntUnaryFn" && symbol->second != "IntBinaryFn") {
+    if (symbol->second != "IntUnaryFn" && symbol->second != "IntConsumerFn" &&
+        symbol->second != "IntBinaryFn") {
         semanticError("la valeur '" + name + "' n'est pas appelable");
     }
-    const size_t expectedArgumentCount = symbol->second == "IntUnaryFn" ? 1 : 2;
+    const size_t expectedArgumentCount = symbol->second == "IntBinaryFn" ? 2 : 1;
     if (arguments.size() != expectedArgumentCount) {
         semanticError(
             symbol->second + ": " + std::to_string(expectedArgumentCount) +
             " argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
     }
+    resolvedType = symbol->second == "IntConsumerFn" ? "Unit" : "Int";
     for (const auto& argument : arguments) {
         if (argument->getType() != "Int") {
             throw CompilerError(
@@ -538,8 +547,8 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
     if (body) body->validateSemantics(context);
     const bool knownType =
         returnType == "Int" || returnType == "String" || returnType == "Unit" ||
-        returnType == "IntArray" || returnType == "IntUnaryFn" || returnType == "IntBinaryFn" ||
-        context.classes.count(returnType) != 0;
+        returnType == "IntArray" || returnType == "IntUnaryFn" ||
+        returnType == "IntConsumerFn" || returnType == "IntBinaryFn" || context.classes.count(returnType) != 0;
     if (!knownType) {
         semanticError("type de retour inconnu '" + returnType + "' pour la fonction '" + name + "'");
     }

@@ -4,7 +4,6 @@ def main(): Int = {
     val xs = arrayIntRange(4)
     xs.foreach((value: Int) => {
         print(value.toString())
-        0
     })
     xs.sum()
 }

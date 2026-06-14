@@ -41,7 +41,7 @@ Le pipeline implemente actuellement :
   avec protection contre les cycles;
 - objets avec champs de constructeur et appels de methodes parametres;
 - fonctions globales appelables avec parametres;
-- premier type fonction-valeur `IntUnaryFn`, references de fonctions nommees et
+- premiers types fonction-valeur `IntUnaryFn`, `IntConsumerFn` et
   `IntBinaryFn`, references de fonctions nommees et appels indirects, avec
   lambdas sans capture `(x: Int) => { ... }` et
   `(acc: Int, value: Int) => { ... }`;
@@ -134,7 +134,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ### P2 - Systeme De Types
 
-- [ ] Formaliser `Int`, `String`, `IntArray`, `IntUnaryFn`,
+- [ ] Formaliser `Int`, `String`, `IntArray`, `IntUnaryFn`, `IntConsumerFn`,
   `IntBinaryFn` et les types de classes.
 - [x] Formaliser `Unit` pour les fonctions a effet et les boucles.
 - [ ] Ajouter les booleens ou definir officiellement `Int` comme condition.
@@ -143,6 +143,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [ ] Generaliser `IntUnaryFn` vers des types fonction complets.
 - [x] Ajouter `IntBinaryFn` pour `fold` et operations binaires de collections.
 - [x] Ajouter les lambdas sans capture pour `IntUnaryFn`.
+- [x] Ajouter `IntConsumerFn` pour les fonctions `Int => Unit`.
 - [x] Ajouter `arrayIntRange` et `ArrayInt.foreach` comme premiers parcours
   fonctionnels de collection.
 - [ ] Ajouter les closures avec capture.
@@ -168,7 +169,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Formalisation de `Unit` pour les boucles et `foreach`.
+- Prochain commit - Ajout de `IntConsumerFn` pour `foreach`.
+- `a40144e` - Formalisation de `Unit` pour les boucles et `foreach`.
 - `70a808d` - Ajout de `arrayIntRange` et `ArrayInt.foreach`.
 - `51cba13` - Ajout de `IntBinaryFn` et `ArrayInt.fold`.
 - `fa730c6` - Ajout de `ArrayInt.filter`.
@@ -208,5 +210,4 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter un type fonction a effet pour `foreach`, puis les closures avec capture
-et la generalisation des types fonction.
+Ajouter les closures avec capture, puis generaliser les types fonction.

@@ -101,7 +101,7 @@ class ArrayInt(values: IntArray) {
         intArrayFold(values, initial, combine)
     }
 
-    def foreach(f: IntUnaryFn): Unit = {
+    def foreach(f: IntConsumerFn): Unit = {
         var index = 0
         while (index < values.length()) {
             f(values.get(index))

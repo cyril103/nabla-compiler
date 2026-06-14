@@ -96,6 +96,7 @@ class FunctionValueCallNode : public ASTNode {
     std::string name;
     std::string symbolName;
     std::vector<std::unique_ptr<ASTNode>> arguments;
+    std::string resolvedType = "Int";
 public:
     FunctionValueCallNode(
         std::string functionName, std::string symbol, std::vector<std::unique_ptr<ASTNode>> args);
