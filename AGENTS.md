@@ -257,7 +257,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Ajouter les fonctions generiques explicites comme `identity[T]`,
+- `5b33e25` - Ajouter les fonctions generiques explicites comme `identity[T]`,
   appelees avec `identity[Int](...)`, et la substitution de `T` dans les
   signatures.
 - `1d9fc36` - Ajouter les classes generiques utilisateur simples comme `Box[T]`,
