@@ -297,7 +297,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Ajouter `LongArray`, la facade standard `ArrayLong` et l'alias
+- `5392788` - Ajouter `LongArray`, la facade standard `ArrayLong` et l'alias
   `Array[Long]`.
 - `6c0005b` - Centraliser les aliases de types standard, notamment
   `Array[Int] -> ArrayInt`, et les tester dans `Option[...]` et les types
