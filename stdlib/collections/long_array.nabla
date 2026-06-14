@@ -1,0 +1,79 @@
+def longArrayFill(size: Int, value: Long): LongArray = {
+    val xs = new LongArray(size)
+    var index = 0
+    while (index < size) {
+        xs.set(index, value)
+        index = index + 1
+    }
+    xs
+}
+
+def longArraySum(xs: LongArray): Long = {
+    var index = 0
+    var total = 0L
+    while (index < xs.length()) {
+        total = total + xs.get(index)
+        index = index + 1
+    }
+    total
+}
+
+def longArrayMap(xs: LongArray, f: (Long) => Long): LongArray = {
+    val mapped = new LongArray(xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        mapped.set(index, f(xs.get(index)))
+        index = index + 1
+    }
+    mapped
+}
+
+class ArrayLong(values: LongArray) {
+    def length(): Int = {
+        values.length()
+    }
+
+    def size(): Int = {
+        values.length()
+    }
+
+    def isEmpty(): Bool = {
+        values.length() == 0
+    }
+
+    def nonEmpty(): Bool = {
+        values.length() != 0
+    }
+
+    def get(index: Int): Long = {
+        values.get(index)
+    }
+
+    def set(index: Int, value: Long): Unit = {
+        values.set(index, value)
+    }
+
+    def sum(): Long = {
+        longArraySum(values)
+    }
+
+    def map(f: (Long) => Long): ArrayLong = {
+        new ArrayLong(longArrayMap(values, f))
+    }
+
+    def foreach(f: (Long) => Unit): Unit = {
+        var index = 0
+        while (index < values.length()) {
+            f(values.get(index))
+            index = index + 1
+        }
+    }
+
+    def raw(): LongArray = {
+        values
+    }
+}
+
+def arrayLongFill(size: Int, value: Long): ArrayLong = {
+    new ArrayLong(longArrayFill(size, value))
+}

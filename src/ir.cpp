@@ -89,6 +89,18 @@ std::string IRProgram::format() const {
                 case IROpcode::IntArraySet:
                     out << "int_array_set " << join(instruction.operands, ", ");
                     break;
+                case IROpcode::NewLongArray:
+                    out << "new_long_array " << instruction.operands[0];
+                    break;
+                case IROpcode::LongArrayLength:
+                    out << "long_array_length " << instruction.operands[0];
+                    break;
+                case IROpcode::LongArrayGet:
+                    out << "long_array_get " << join(instruction.operands, ", ");
+                    break;
+                case IROpcode::LongArraySet:
+                    out << "long_array_set " << join(instruction.operands, ", ");
+                    break;
                 case IROpcode::FieldLoad:
                     out << "field " << instruction.operands[0] << ", " << instruction.operation;
                     break;
@@ -332,6 +344,31 @@ std::string IRBuilder::emitIntArraySet(
     const std::string& receiver, const std::string& index, const std::string& value) {
     std::string result = nextValue();
     emit({IROpcode::IntArraySet, result, "Unit", "", {receiver, index, value}});
+    return result;
+}
+
+std::string IRBuilder::emitNewLongArray(const std::string& size) {
+    std::string result = nextValue();
+    emit({IROpcode::NewLongArray, result, "LongArray", "", {size}});
+    return result;
+}
+
+std::string IRBuilder::emitLongArrayLength(const std::string& receiver) {
+    std::string result = nextValue();
+    emit({IROpcode::LongArrayLength, result, "Int", "", {receiver}});
+    return result;
+}
+
+std::string IRBuilder::emitLongArrayGet(const std::string& receiver, const std::string& index) {
+    std::string result = nextValue();
+    emit({IROpcode::LongArrayGet, result, "Long", "", {receiver, index}});
+    return result;
+}
+
+std::string IRBuilder::emitLongArraySet(
+    const std::string& receiver, const std::string& index, const std::string& value) {
+    std::string result = nextValue();
+    emit({IROpcode::LongArraySet, result, "Unit", "", {receiver, index, value}});
     return result;
 }
 

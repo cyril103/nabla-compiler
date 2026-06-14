@@ -63,6 +63,7 @@ struct StdlibTypeAlias {
 inline const std::vector<StdlibTypeAlias>& stdlibTypeAliases() {
     static const std::vector<StdlibTypeAlias> aliases = {
         {"Array", {"Int"}, "ArrayInt"},
+        {"Array", {"Long"}, "ArrayLong"},
     };
     return aliases;
 }

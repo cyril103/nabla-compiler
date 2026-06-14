@@ -1,0 +1,10 @@
+import collections.long_array
+
+def main(): Int = {
+    val xs = arrayLongFill(3, 14L)
+    if xs.sum() == 42L && xs.map(value => value + 1L).sum() == 45L {
+        42
+    } else {
+        1
+    }
+}

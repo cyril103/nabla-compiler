@@ -89,6 +89,7 @@ Le pipeline implemente actuellement :
 - operateurs booleens `&&`, `||` et `!`, avec court-circuit pour `&&` et
   `||`;
 - collection native `IntArray` avec `length`, `get` et `set`;
+- collection native `LongArray` avec `length`, `get` et `set`;
 - entiers immediats `Int` et `Long` avec pointer tagging, litteraux decimaux
   `Float` / `Double` portes par l'IR typee et litteraux `String`;
 - affichage console de `String` via la primitive globale `print`;
@@ -109,6 +110,9 @@ Le pipeline implemente actuellement :
   `zipWithIndex`, `grouped`, `ArrayIntNested`, `ArrayIntNested.flatten()`,
   `ArrayIntNested.rowSize` et `ArrayIntNested.mapRows`.
   avec predicats booleens;
+- module de bibliotheque standard `collections.long_array` avec `ArrayLong`,
+  `longArrayFill`, `longArraySum`, `longArrayMap`, `arrayLongFill`, `map`,
+  `foreach`, `sum`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -133,7 +137,8 @@ Limites importantes :
   inference des arguments de type; les references explicites comme
   `identity[Int]` sont utilisables comme valeurs, mais les fonctions generiques
   ne sont pas encore des valeurs vraiment polymorphes;
-  `Array[Int]` reste une facade specialisee vers `ArrayInt`; la
+  `Array[Int]` reste une facade specialisee vers `ArrayInt`; `Array[Long]`
+  reste une facade specialisee vers `ArrayLong`; la
   monomorphisation complete des classes generiques reste a faire;
 - le tas est fixe et possede une verification de depassement, mais pas de
   ramasse-miettes;
@@ -279,6 +284,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [ ] Choisir une strategie memoire a long terme.
 - [x] Ajouter une primitive d'affichage console pour `String`.
 - [x] Ajouter une premiere collection native `IntArray`.
+- [x] Ajouter une collection native `LongArray`.
 
 ### P3 - Outillage
 
@@ -291,6 +297,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `TBD` - Ajouter `LongArray`, la facade standard `ArrayLong` et l'alias
+  `Array[Long]`.
 - `6c0005b` - Centraliser les aliases de types standard, notamment
   `Array[Int] -> ArrayInt`, et les tester dans `Option[...]` et les types
   fonction.

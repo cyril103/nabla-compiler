@@ -1,0 +1,1 @@
+tests/test_error_long_array_set_type.nabla:3:15: semantic error: la méthode LongArray.set attend une valeur de type Long

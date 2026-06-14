@@ -79,7 +79,8 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
             if (typeParameterToken.value == "Int" || typeParameterToken.value == "Long" ||
                 typeParameterToken.value == "Float" || typeParameterToken.value == "Double" ||
                 typeParameterToken.value == "Bool" || typeParameterToken.value == "String" ||
-                typeParameterToken.value == "Unit" || typeParameterToken.value == "IntArray") {
+                typeParameterToken.value == "Unit" || typeParameterToken.value == "IntArray" ||
+                typeParameterToken.value == "LongArray") {
                 throw CompilerError(
                     ErrorKind::Parser, typeParameterToken.location,
                     "paramètre de type invalide: " + typeParameterToken.value);
@@ -871,7 +872,8 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
             if (typeParameterToken.value == "Int" || typeParameterToken.value == "Long" ||
                 typeParameterToken.value == "Float" || typeParameterToken.value == "Double" ||
                 typeParameterToken.value == "Bool" || typeParameterToken.value == "String" ||
-                typeParameterToken.value == "Unit" || typeParameterToken.value == "IntArray") {
+                typeParameterToken.value == "Unit" || typeParameterToken.value == "IntArray" ||
+                typeParameterToken.value == "LongArray") {
                 throw CompilerError(
                     ErrorKind::Parser, typeParameterToken.location,
                     "paramètre de type invalide: " + typeParameterToken.value);
@@ -1061,6 +1063,11 @@ std::vector<std::string> Parser::expectedArgumentTypesForMethodCall(
     if (receiverType == "IntArray") {
         if (methodName == "get") return {"Int"};
         if (methodName == "set") return {"Int", "Int"};
+        return {};
+    }
+    if (receiverType == "LongArray") {
+        if (methodName == "get") return {"Int"};
+        if (methodName == "set") return {"Int", "Long"};
         return {};
     }
     const std::string classLookupName = genericBaseName(receiverType);

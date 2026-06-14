@@ -26,7 +26,16 @@ bool isBoolBinaryMethod(const std::string& methodName) {
 
 bool isKnownBuiltinType(const std::string& type) {
     return type == "Int" || type == "Long" || type == "Float" || type == "Double" || type == "Bool" ||
-           type == "String" || type == "Unit" || type == "IntArray";
+           type == "String" || type == "Unit" || type == "IntArray" || type == "LongArray";
+}
+
+bool isNativeArrayType(const std::string& type) {
+    return type == "IntArray" || type == "LongArray";
+}
+
+std::string nativeArrayElementType(const std::string& type) {
+    if (type == "LongArray") return "Long";
+    return "Int";
 }
 
 bool isKnownTypeInContext(const std::string& type, const CompilerContext& context) {
@@ -272,16 +281,16 @@ std::string NewNode::getType() {
 void NewNode::validateSemantics(CompilerContext& context) {
     for (const auto& arg : args) arg->validateSemantics(context);
 
-    if (className == "IntArray") {
+    if (isNativeArrayType(className)) {
         if (args.size() != 1) {
             semanticError(
-                "Constructeur de 'IntArray': 1 argument(s) attendu(s), " +
+                "Constructeur de '" + className + "': 1 argument(s) attendu(s), " +
                 std::to_string(args.size()) + " reçu(s)");
         }
         if (args[0]->getType() != "Int") {
             throw CompilerError(
                 ErrorKind::Semantic, args[0]->getLocation(),
-                "Constructeur de 'IntArray', paramètre 'size': type 'Int' attendu, '" +
+                "Constructeur de '" + className + "', paramètre 'size': type 'Int' attendu, '" +
                 args[0]->getType() + "' reçu");
         }
         return;
@@ -319,6 +328,7 @@ std::string NewNode::lowerToIR(IRBuilder& builder) const {
     std::vector<std::string> loweredArguments;
     for (const auto& argument : args) loweredArguments.push_back(argument->lowerToIR(builder));
     if (className == "IntArray") return builder.emitNewIntArray(loweredArguments[0]);
+    if (className == "LongArray") return builder.emitNewLongArray(loweredArguments[0]);
     return builder.emitNewObject(className, loweredArguments);
 }
 
@@ -343,9 +353,10 @@ std::string MethodCallNode::getType() {
     if (receiverType == "Bool") {
         if (isBoolBinaryMethod(methodName)) return "Bool";
     }
-    if (receiverType == "IntArray") {
+    if (isNativeArrayType(receiverType)) {
         if (methodName == "set") return "Unit";
-        if (methodName == "length" || methodName == "get") return "Int";
+        if (methodName == "length") return "Int";
+        if (methodName == "get") return nativeArrayElementType(receiverType);
     }
     return resolvedType;
 }
@@ -402,38 +413,39 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         }
         semanticError("méthode inconnue: Bool." + methodName);
     }
-    if (receiverType == "IntArray") {
+    if (isNativeArrayType(receiverType)) {
         if (methodName == "length") {
-            if (!arguments.empty()) semanticError("la méthode IntArray.length n'accepte aucun argument");
+            if (!arguments.empty()) semanticError("la méthode " + receiverType + ".length n'accepte aucun argument");
             resolvedType = "Int";
             return;
         }
         if (methodName == "get") {
-            if (arguments.size() != 1) semanticError("la méthode IntArray.get attend un argument");
+            if (arguments.size() != 1) semanticError("la méthode " + receiverType + ".get attend un argument");
             if (arguments[0]->getType() != "Int") {
                 throw CompilerError(
                     ErrorKind::Semantic, arguments[0]->getLocation(),
-                    "la méthode IntArray.get attend un index de type Int");
+                    "la méthode " + receiverType + ".get attend un index de type Int");
             }
-            resolvedType = "Int";
+            resolvedType = nativeArrayElementType(receiverType);
             return;
         }
         if (methodName == "set") {
-            if (arguments.size() != 2) semanticError("la méthode IntArray.set attend deux arguments");
+            if (arguments.size() != 2) semanticError("la méthode " + receiverType + ".set attend deux arguments");
             if (arguments[0]->getType() != "Int") {
                 throw CompilerError(
                     ErrorKind::Semantic, arguments[0]->getLocation(),
-                    "la méthode IntArray.set attend un index de type Int");
+                    "la méthode " + receiverType + ".set attend un index de type Int");
             }
-            if (arguments[1]->getType() != "Int") {
+            const std::string elementType = nativeArrayElementType(receiverType);
+            if (arguments[1]->getType() != elementType) {
                 throw CompilerError(
                     ErrorKind::Semantic, arguments[1]->getLocation(),
-                    "la méthode IntArray.set attend une valeur de type Int");
+                    "la méthode " + receiverType + ".set attend une valeur de type " + elementType);
             }
             resolvedType = "Unit";
             return;
         }
-        semanticError("méthode inconnue: IntArray." + methodName);
+        semanticError("méthode inconnue: " + receiverType + "." + methodName);
     }
 
     const std::string classLookupName = genericBaseName(receiverType);
@@ -527,19 +539,27 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         std::string right = arguments[0]->lowerToIR(builder);
         return builder.emitBinary(methodName, left, right, "Bool");
     }
-    if (receiverType == "IntArray") {
+    if (isNativeArrayType(receiverType)) {
         std::string loweredReceiver = receiver->lowerToIR(builder);
         if (methodName == "length" && arguments.empty()) {
+            if (receiverType == "LongArray") return builder.emitLongArrayLength(loweredReceiver);
             return builder.emitIntArrayLength(loweredReceiver);
         }
         if (methodName == "get" && arguments.size() == 1) {
+            if (receiverType == "LongArray") {
+                return builder.emitLongArrayGet(loweredReceiver, arguments[0]->lowerToIR(builder));
+            }
             return builder.emitIntArrayGet(loweredReceiver, arguments[0]->lowerToIR(builder));
         }
         if (methodName == "set" && arguments.size() == 2) {
+            if (receiverType == "LongArray") {
+                return builder.emitLongArraySet(
+                    loweredReceiver, arguments[0]->lowerToIR(builder), arguments[1]->lowerToIR(builder));
+            }
             return builder.emitIntArraySet(
                 loweredReceiver, arguments[0]->lowerToIR(builder), arguments[1]->lowerToIR(builder));
         }
-        builder.unsupported(location, "la méthode IntArray." + methodName);
+        builder.unsupported(location, "la méthode " + receiverType + "." + methodName);
     }
 
     std::string loweredReceiver = receiver->lowerToIR(builder);

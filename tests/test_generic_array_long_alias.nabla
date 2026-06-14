@@ -1,0 +1,13 @@
+import collections.long_array
+
+def total(xs: Array[Long]): Long = {
+    xs.sum()
+}
+
+def main(): Int = {
+    if total(new Array[Long](longArrayFill(2, 21L))) == 42L {
+        42
+    } else {
+        1
+    }
+}

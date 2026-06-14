@@ -70,7 +70,8 @@ void SemanticAnalyzer::validateDeclaredTypes() const {
 
 bool SemanticAnalyzer::isKnownType(const std::string& type) const {
     if (type == "Int" || type == "Long" || type == "Float" || type == "Double" || type == "Bool" ||
-        type == "String" || type == "Unit" || type == "IntArray" || isFunctionTypeName(type)) {
+        type == "String" || type == "Unit" || type == "IntArray" || type == "LongArray" ||
+        isFunctionTypeName(type)) {
         return true;
     }
     auto classIt = context.classes.find(type);

@@ -223,6 +223,18 @@ private:
             case IROpcode::IntArraySet:
                 emitIntArraySet(instruction);
                 break;
+            case IROpcode::NewLongArray:
+                emitNewLongArray(instruction);
+                break;
+            case IROpcode::LongArrayLength:
+                emitLongArrayLength(instruction);
+                break;
+            case IROpcode::LongArrayGet:
+                emitLongArrayGet(instruction);
+                break;
+            case IROpcode::LongArraySet:
+                emitLongArraySet(instruction);
+                break;
             case IROpcode::FieldLoad:
                 emitFieldLoad(instruction);
                 break;
@@ -543,7 +555,7 @@ private:
         storeRegister(instruction.result, "rbx");
     }
 
-    void emitNewIntArray(const IRInstruction& instruction) {
+    void emitNewNativeArray(const IRInstruction& instruction) {
         loadValue(instruction.operands[0], "rax");
         out << "    cmp rax, 1\n";
         out << "    jl Runtime_bounds_error\n";
@@ -566,7 +578,15 @@ private:
         storeRegister(instruction.result, "rbx");
     }
 
-    void emitIntArrayLength(const IRInstruction& instruction) {
+    void emitNewIntArray(const IRInstruction& instruction) {
+        emitNewNativeArray(instruction);
+    }
+
+    void emitNewLongArray(const IRInstruction& instruction) {
+        emitNewNativeArray(instruction);
+    }
+
+    void emitNativeArrayLength(const IRInstruction& instruction) {
         loadValue(instruction.operands[0], "rax");
         out << "    mov rax, [rax + 8]\n";
         storeRegister(instruction.result, "rax");
@@ -582,7 +602,15 @@ private:
         out << "    jge Runtime_bounds_error\n";
     }
 
-    void emitIntArrayGet(const IRInstruction& instruction) {
+    void emitIntArrayLength(const IRInstruction& instruction) {
+        emitNativeArrayLength(instruction);
+    }
+
+    void emitLongArrayLength(const IRInstruction& instruction) {
+        emitNativeArrayLength(instruction);
+    }
+
+    void emitNativeArrayGet(const IRInstruction& instruction) {
         loadValue(instruction.operands[0], "rbx");
         loadValue(instruction.operands[1], "rcx");
         emitArrayBoundsCheck("rbx", "rcx");
@@ -590,7 +618,15 @@ private:
         storeRegister(instruction.result, "rax");
     }
 
-    void emitIntArraySet(const IRInstruction& instruction) {
+    void emitIntArrayGet(const IRInstruction& instruction) {
+        emitNativeArrayGet(instruction);
+    }
+
+    void emitLongArrayGet(const IRInstruction& instruction) {
+        emitNativeArrayGet(instruction);
+    }
+
+    void emitNativeArraySet(const IRInstruction& instruction) {
         loadValue(instruction.operands[0], "rbx");
         loadValue(instruction.operands[1], "rcx");
         emitArrayBoundsCheck("rbx", "rcx");
@@ -598,6 +634,14 @@ private:
         out << "    mov [rbx + 16 + rcx * 8], rax\n";
         out << "    mov rax, 1\n";
         storeRegister(instruction.result, "rax");
+    }
+
+    void emitIntArraySet(const IRInstruction& instruction) {
+        emitNativeArraySet(instruction);
+    }
+
+    void emitLongArraySet(const IRInstruction& instruction) {
+        emitNativeArraySet(instruction);
     }
 
     void emitFieldLoad(const IRInstruction& instruction) {
