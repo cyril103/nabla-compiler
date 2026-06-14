@@ -49,7 +49,8 @@ Le pipeline implemente actuellement :
   operations binaires, appels de fonctions globales, `if`, `while`, `for`,
   objets et methodes;
 - backend ASM experimental depuis l'IR pour fonctions globales, entiers,
-  variables locales, operations binaires et appels globaux;
+  variables locales, operations binaires, appels globaux, branchements et
+  boucles;
 - generation directe d'assembleur x86-64;
 - tests de compilation et d'execution via `make all-tests`.
 
@@ -58,8 +59,7 @@ Limites importantes :
 - les fonctions globales sont limitees a 6 parametres et les methodes a 5,
   conformement a la convention d'appel actuelle;
 - l'assembleur par defaut est encore genere directement depuis l'AST;
-- le backend ASM depuis IR ne couvre pas encore controle de flux, objets et
-  methodes;
+- le backend ASM depuis IR ne couvre pas encore objets et methodes;
 - le tas est fixe et ne possede ni verification de depassement ni ramasse-miettes;
 - les binaires historiques sous `build/` sont encore suivis par Git.
 
@@ -141,7 +141,8 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout d'un backend ASM experimental depuis l'IR.
+- Prochain commit - Ajout du controle de flux au backend ASM depuis IR.
+- `48f7e1d` - Ajout d'un backend ASM experimental depuis l'IR.
 - `0f33a89` - Ajout des objets, champs et appels de methodes dans l'IR.
 - `f38e0a6` - Ajout du controle de flux `if`/`while`/`for` dans l'IR.
 - `1dcff81` - Ajout de l'IR minimale, de `--emit-ir` et des snapshots IR.
@@ -158,5 +159,4 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Etendre le backend ASM depuis IR au controle de flux, puis aux objets et
-methodes.
+Etendre le backend ASM depuis IR aux objets et methodes.

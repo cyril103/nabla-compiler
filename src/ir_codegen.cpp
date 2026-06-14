@@ -22,14 +22,24 @@ std::string asmFunctionName(const std::string& name) {
     return result;
 }
 
+std::string asmLabelName(const std::string& functionName, const std::string& label) {
+    return ".L_ir_" + asmFunctionName(functionName) + "_" + asmFunctionName(label);
+}
+
 long long boxedInt(const std::string& value) {
     return (std::stoll(value) << 1) | 1;
 }
+
+struct PhiInfo {
+    std::string result;
+    std::vector<std::string> operands;
+};
 
 class FunctionEmitter {
 public:
     FunctionEmitter(const IRFunction& function, std::ostream& out)
         : function(function), out(out) {
+        collectPhiLabels();
         collectSlots();
     }
 
@@ -53,6 +63,25 @@ private:
     std::ostream& out;
     std::map<std::string, int> slotOffsets;
     std::vector<std::string> slotOrder;
+    std::map<std::string, std::vector<PhiInfo>> phiLabels;
+    std::map<std::string, int> emittedIncomingJumps;
+
+    void collectPhiLabels() {
+        for (size_t i = 0; i < function.instructions.size(); ++i) {
+            const auto& instruction = function.instructions[i];
+            if (instruction.opcode != IROpcode::Label) continue;
+
+            std::vector<PhiInfo> phis;
+            size_t next = i + 1;
+            while (next < function.instructions.size() &&
+                   function.instructions[next].opcode == IROpcode::Phi) {
+                const auto& phi = function.instructions[next];
+                phis.push_back({phi.result, phi.operands});
+                ++next;
+            }
+            if (!phis.empty()) phiLabels[instruction.operands[0]] = phis;
+        }
+    }
 
     void collectSlots() {
         for (const auto& parameter : function.parameters) addSlot("%" + parameter.name);
@@ -106,14 +135,38 @@ private:
                 loadValue(instruction.operands[0], "rax");
                 out << "    mov rsp, rbp\n    pop rbp\n    ret\n";
                 break;
+            case IROpcode::Label:
+                out << asmLabelName(function.name, instruction.operands[0]) << ":\n";
+                break;
+            case IROpcode::BranchIfFalse:
+                loadValue(instruction.operands[0], "rax");
+                out << "    cmp rax, 1\n";
+                out << "    je " << asmLabelName(function.name, instruction.operands[1]) << "\n";
+                break;
+            case IROpcode::Jump:
+                emitPhiTransfers(instruction.operands[0]);
+                out << "    jmp " << asmLabelName(function.name, instruction.operands[0]) << "\n";
+                break;
+            case IROpcode::Phi:
+                break;
             case IROpcode::MethodCall:
             case IROpcode::NewObject:
             case IROpcode::FieldLoad:
-            case IROpcode::Label:
-            case IROpcode::BranchIfFalse:
-            case IROpcode::Jump:
-            case IROpcode::Phi:
                 codegenError("instruction IR non supportee par le backend ASM initial");
+        }
+    }
+
+    void emitPhiTransfers(const std::string& targetLabel) {
+        auto phis = phiLabels.find(targetLabel);
+        if (phis == phiLabels.end()) return;
+
+        int incomingIndex = emittedIncomingJumps[targetLabel]++;
+        for (const auto& phi : phis->second) {
+            if (incomingIndex >= static_cast<int>(phi.operands.size())) {
+                codegenError("phi IR sans operande pour le saut vers " + targetLabel);
+            }
+            loadValue(phi.operands[incomingIndex], "rax");
+            storeRegister(phi.result, "rax");
         }
     }
 

@@ -83,7 +83,8 @@ build/nablac --backend-ir tests/test_arithmetic.nabla
 ```
 
 Ce backend couvre pour l'instant les fonctions globales, entiers, variables
-locales, opérations binaires et appels de fonctions globales.
+locales, opérations binaires, appels de fonctions globales, branchements et
+boucles.
 
 ### Personnaliser le fichier source
 
