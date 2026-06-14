@@ -78,7 +78,7 @@ Executer avant chaque commit :
 make all-tests
 g++ -std=c++17 -Wall -Wextra -Werror \
   src/main.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp src/ir.cpp \
-  src/ir_codegen.cpp \
+  src/ir_codegen.cpp src/runtime_asm.cpp \
   -o /tmp/nablac-werror
 git diff --check
 ```
@@ -125,6 +125,7 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 - [ ] Verifier les depassements du tas.
 - [ ] Definir et utiliser de vraies vtables ou retirer leur emplacement reserve.
+- [x] Extraire le runtime ASM commun du backend IR.
 - [ ] Stabiliser la representation de `String`.
 - [ ] Choisir une strategie memoire a long terme.
 
@@ -137,7 +138,8 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Retrait des binaires historiques suivis sous `build/`.
+- Prochain commit - Extraction du runtime ASM commun du backend IR.
+- `ed879e1` - Retrait des binaires historiques suivis sous `build/`.
 - `63c286e` - Structuration de la frame et de la convention d'appel du backend
   IR.
 - `c771250` - Suppression de l'ancien code de generation ASM depuis l'AST.
@@ -162,5 +164,5 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Extraire le runtime ASM commun du backend IR, puis ajouter une integration
-continue.
+Ajouter une integration continue, puis stabiliser la representation runtime de
+`String`.
