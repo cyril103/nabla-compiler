@@ -50,15 +50,14 @@ Le pipeline implemente actuellement :
   objets et methodes;
 - backend ASM par defaut depuis l'IR couvrant la suite positive actuelle
   (fonctions, variables, controle de flux, imports, objets et methodes);
-- ancien backend direct depuis l'AST disponible temporairement via
-  `--backend-ast`;
 - tests de compilation et d'execution via `make all-tests`.
 
 Limites importantes :
 
 - les fonctions globales sont limitees a 6 parametres et les methodes a 5,
   conformement a la convention d'appel actuelle;
-- le backend direct depuis l'AST est conserve comme repli temporaire;
+- l'ancien code de generation directe depuis l'AST est encore present mais
+  n'est plus expose par la CLI;
 - le tas est fixe et ne possede ni verification de depassement ni ramasse-miettes;
 - les binaires historiques sous `build/` sont encore suivis par Git.
 
@@ -116,7 +115,7 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 - [ ] Deplacer l'allocation de pile et les conventions d'appel vers le backend.
 - [x] Couvrir le backend ASM depuis IR pour tout le langage actuel.
 - [x] Generer l'assembleur par defaut depuis l'IR.
-- [ ] Retirer l'ancien backend direct depuis l'AST.
+- [ ] Supprimer l'ancien code de generation directe depuis l'AST.
 
 ### P2 - Systeme De Types
 
@@ -141,7 +140,8 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Bascule du backend ASM par defaut vers l'IR.
+- Prochain commit - Retrait du repli CLI vers l'ancien backend AST.
+- `3d93076` - Bascule du backend ASM par defaut vers l'IR.
 - `baefaa6` - Ajout des objets et methodes au backend ASM depuis IR.
 - `5a97aa4` - Ajout du controle de flux au backend ASM depuis IR.
 - `48f7e1d` - Ajout d'un backend ASM experimental depuis l'IR.
@@ -161,5 +161,5 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Retirer progressivement l'ancien backend direct depuis l'AST apres une derniere
-passe de stabilisation du backend IR.
+Supprimer les methodes `generateASM` et `allocateLocals` des noeuds AST, puis
+retirer l'etat de codegen AST restant dans `CompilerContext`.

@@ -85,12 +85,6 @@ Ce backend couvre désormais la suite positive actuelle, incluant fonctions,
 variables, contrôle de flux, imports, objets, champs, appels de méthodes et
 `Int.toString`.
 
-L'ancien backend direct depuis l'AST reste disponible temporairement :
-
-```bash
-build/nablac --backend-ast tests/test_arithmetic.nabla
-```
-
 ### Personnaliser le fichier source
 
 Le `Makefile` supporte une variable `SRC` pour choisir le fichier Nabla à compiler :
