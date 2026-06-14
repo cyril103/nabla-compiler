@@ -276,7 +276,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Ajouter `core.option` avec `Option[T]`, `optionSome`, `optionNone`,
+- `e8ed453` - Ajouter `core.option` avec `Option[T]`, `optionSome`, `optionNone`,
   `filter`, `orElse` et `getOrElse`.
 - `7f5ac21` - Monomorphiser les fonctions generiques en corps IR specialises comme
   `identity[Int]` et `applyOnce[Int]`.
