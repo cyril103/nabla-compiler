@@ -274,7 +274,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Monomorphiser les fonctions generiques en corps IR specialises comme
+- `7f5ac21` - Monomorphiser les fonctions generiques en corps IR specialises comme
   `identity[Int]` et `applyOnce[Int]`.
 - `4c7e3be` - Monomorphiser les corps des methodes de classes generiques dans l'IR,
   par exemple `Box[Int].get` charge directement `Box[Int].value`.
