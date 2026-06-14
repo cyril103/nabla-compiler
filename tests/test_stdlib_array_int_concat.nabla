@@ -1,0 +1,8 @@
+import collections.int_array
+
+def main(): Int = {
+    val left = arrayIntRange(3)
+    val right = arrayIntFill(2, 9)
+    val combined = left.concat(right)
+    combined.size() + combined.head() + combined.get(2) + combined.get(3) + combined.last()
+}

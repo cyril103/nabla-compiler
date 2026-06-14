@@ -140,6 +140,22 @@ def intArrayReverse(xs: IntArray): IntArray = {
     reversed
 }
 
+def intArrayConcat(left: IntArray, right: IntArray): IntArray = {
+    val combined = new IntArray(left.length() + right.length())
+    var index = 0
+    while (index < left.length()) {
+        combined.set(index, left.get(index))
+        index = index + 1
+    }
+
+    var rightIndex = 0
+    while (rightIndex < right.length()) {
+        combined.set(left.length() + rightIndex, right.get(rightIndex))
+        rightIndex = rightIndex + 1
+    }
+    combined
+}
+
 class ArrayInt(values: IntArray) {
     def length(): Int = {
         values.length()
@@ -191,6 +207,10 @@ class ArrayInt(values: IntArray) {
 
     def reverse(): ArrayInt = {
         new ArrayInt(intArrayReverse(values))
+    }
+
+    def concat(other: ArrayInt): ArrayInt = {
+        new ArrayInt(intArrayConcat(values, other.raw()))
     }
 
     def fold(initial: Int, combine: (Int, Int) => Int): Int = {
