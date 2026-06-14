@@ -356,10 +356,11 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
 
     const std::string returnType = body->getType();
     std::string lambdaName = "lambda." + std::to_string(context.nextLambdaId++);
-    context.functions[lambdaName] = {signatureParameters, returnType, start.location, start.location};
+    context.functions[lambdaName] = {signatureParameters, returnType, {}, start.location, start.location};
 
     auto function = located(std::make_unique<FunctionDefNode>(
-        "", lambdaName, returnType, std::move(parameters), std::move(body), captures), start.location);
+        "", lambdaName, returnType, std::vector<std::string>{},
+        std::move(parameters), std::move(body), captures), start.location);
     generatedFunctions.push_back(std::move(function));
     CompilerContext::FunctionType lambdaType;
     for (const auto& parameter : signatureParameters) {
@@ -451,10 +452,11 @@ std::unique_ptr<ASTNode> Parser::parseInferredLambdaExpression(const std::string
 
     const std::string returnType = body->getType();
     std::string lambdaName = "lambda." + std::to_string(context.nextLambdaId++);
-    context.functions[lambdaName] = {signatureParameters, returnType, start.location, start.location};
+    context.functions[lambdaName] = {signatureParameters, returnType, {}, start.location, start.location};
 
     auto function = located(std::make_unique<FunctionDefNode>(
-        "", lambdaName, returnType, std::move(parameters), std::move(body), captures), start.location);
+        "", lambdaName, returnType, std::vector<std::string>{},
+        std::move(parameters), std::move(body), captures), start.location);
     generatedFunctions.push_back(std::move(function));
 
     CompilerContext::FunctionType lambdaType;
@@ -553,18 +555,45 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
     if (peek().type == TokenType::IDENTIFIER) {
         Token nameToken = consume(TokenType::IDENTIFIER, "");
         std::string name = nameToken.value;
+        std::vector<std::string> typeArguments;
+        if (peek().type == TokenType::LBRACKET) {
+            consume(TokenType::LBRACKET, "");
+            while (peek().type != TokenType::RBRACKET) {
+                auto [typeArgument, typeLocation] = parseType("Type d'argument générique attendu");
+                (void) typeLocation;
+                typeArguments.push_back(typeArgument);
+                if (peek().type == TokenType::COMMA) {
+                    consume(TokenType::COMMA, "");
+                } else if (peek().type != TokenType::RBRACKET) {
+                    throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ']' attendu après l'argument de type");
+                }
+            }
+            consume(TokenType::RBRACKET, "']' attendu après les arguments de type");
+            if (peek().type != TokenType::LPAREN) {
+                throw CompilerError(ErrorKind::Parser, nameToken.location, "appel attendu après les arguments de type");
+            }
+        }
         if (peek().type == TokenType::LPAREN) {
             std::vector<std::string> expectedArgumentTypes;
             auto [initialSymbol, initialScopeIndex] = findLocalWithScope(name);
             (void) initialScopeIndex;
+            if (initialSymbol && !typeArguments.empty()) {
+                throw CompilerError(
+                    ErrorKind::Parser, nameToken.location,
+                    "les arguments de type ne sont supportés que pour les fonctions nommées");
+            }
             if (initialSymbol) {
                 auto functionType = functionTypeFromName(initialSymbol->type);
                 if (functionType) expectedArgumentTypes = functionType->parameterTypes;
             } else {
                 auto function = context.functions.find(name);
                 if (function != context.functions.end()) {
+                    std::map<std::string, std::string> substitution;
+                    if (auto genericSubstitution = genericFunctionSubstitutionFor(function->second, typeArguments)) {
+                        substitution = *genericSubstitution;
+                    }
                     for (const auto& parameter : function->second.parameters) {
-                        expectedArgumentTypes.push_back(parameter.type);
+                        expectedArgumentTypes.push_back(substituteType(parameter.type, substitution));
                     }
                 }
             }
@@ -585,12 +614,19 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             std::string initialReturnType = "Int";
             auto function = context.functions.find(name);
             if (function != context.functions.end()) {
-                initialReturnType = function->second.returnType;
+                std::map<std::string, std::string> substitution;
+                if (auto genericSubstitution = genericFunctionSubstitutionFor(function->second, typeArguments)) {
+                    substitution = *genericSubstitution;
+                }
+                initialReturnType = substituteType(function->second.returnType, substitution);
             }
             return located(
                 std::make_unique<FunctionCallNode>(
-                    name, std::move(arguments), initialReturnType),
+                    name, std::move(arguments), std::move(typeArguments), initialReturnType),
                 nameToken.location);
+        }
+        if (!typeArguments.empty()) {
+            throw CompilerError(ErrorKind::Parser, nameToken.location, "appel attendu après les arguments de type");
         }
         auto [symbol, scopeIndex] = findLocalWithScope(name);
         if (symbol) {
@@ -606,6 +642,11 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         }
         if (context.functions.count(name)) {
             const auto& signature = context.functions[name];
+            if (!signature.typeParameters.empty()) {
+                throw CompilerError(
+                    ErrorKind::Parser, nameToken.location,
+                    "la fonction générique '" + name + "' doit être appelée avec des arguments de type");
+            }
             auto functionType = functionNameForSignature(signature);
             if (!functionType) {
                 throw CompilerError(
@@ -723,6 +764,33 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
     Token defToken = consume(TokenType::KW_DEF, "");
     Token nameToken = consume(TokenType::IDENTIFIER, "Nom de fonction attendu");
     std::string name = nameToken.value;
+    std::vector<std::string> typeParameters;
+    if (peek().type == TokenType::LBRACKET) {
+        consume(TokenType::LBRACKET, "");
+        while (peek().type != TokenType::RBRACKET) {
+            Token typeParameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre de type attendu");
+            if (typeParameterToken.value == "Int" || typeParameterToken.value == "Long" ||
+                typeParameterToken.value == "Float" || typeParameterToken.value == "Double" ||
+                typeParameterToken.value == "Bool" || typeParameterToken.value == "String" ||
+                typeParameterToken.value == "Unit" || typeParameterToken.value == "IntArray") {
+                throw CompilerError(
+                    ErrorKind::Parser, typeParameterToken.location,
+                    "paramètre de type invalide: " + typeParameterToken.value);
+            }
+            if (isTypeParameterName(typeParameterToken.value, typeParameters)) {
+                throw CompilerError(
+                    ErrorKind::Parser, typeParameterToken.location,
+                    "paramètre de type déjà déclaré: " + typeParameterToken.value);
+            }
+            typeParameters.push_back(typeParameterToken.value);
+            if (peek().type == TokenType::COMMA) {
+                consume(TokenType::COMMA, "");
+            } else if (peek().type != TokenType::RBRACKET) {
+                throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ']' attendu après le paramètre de type");
+            }
+        }
+        consume(TokenType::RBRACKET, "']' attendu après les paramètres de type");
+    }
     consume(TokenType::LPAREN, "");
     std::vector<FunctionDefNode::Parameter> parameters;
     std::vector<CompilerContext::ParameterInfo> signatureParameters;
@@ -748,7 +816,8 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
     consume(TokenType::RPAREN, "");
     consume(TokenType::COLON, "");
     auto [returnType, returnTypeLocation] = parseType("Type de retour attendu");
-    CompilerContext::FunctionSignature signature{signatureParameters, returnType, defToken.location, returnTypeLocation};
+    CompilerContext::FunctionSignature signature{
+        signatureParameters, returnType, typeParameters, defToken.location, returnTypeLocation};
     if (!clName.empty()) {
         if (context.classes[clName].methods.count(name)) {
             throw CompilerError(ErrorKind::Parser, nameToken.location, "méthode déjà déclarée dans '" + clName + "': " + name);
@@ -765,7 +834,8 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
     consume(TokenType::RBRACE, "");
     localScopes.pop_back();
     return located(std::make_unique<FunctionDefNode>(
-        clName, name, returnType, std::move(parameters), std::move(body)), defToken.location);
+        clName, name, returnType, std::move(typeParameters),
+        std::move(parameters), std::move(body)), defToken.location);
 }
 
 std::pair<std::string, SourceLocation> Parser::parseType(const std::string& expectedMessage) {

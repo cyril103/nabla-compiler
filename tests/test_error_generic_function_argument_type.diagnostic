@@ -1,0 +1,1 @@
+tests/test_error_generic_function_argument_type.nabla:6:22: semantic error: identity, paramètre 'value': type 'String' attendu, 'Int' reçu

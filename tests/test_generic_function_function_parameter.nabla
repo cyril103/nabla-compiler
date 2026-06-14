@@ -1,0 +1,7 @@
+def applyOnce[T](value: T, f: (T) => T): T = {
+    f(value)
+}
+
+def main(): Int = {
+    applyOnce[Int](41, value => value + 1)
+}

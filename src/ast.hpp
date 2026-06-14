@@ -133,10 +133,12 @@ public:
 class FunctionCallNode : public ASTNode {
     std::string name;
     std::vector<std::unique_ptr<ASTNode>> arguments;
+    std::vector<std::string> typeArguments;
     std::string resolvedType = "Int";
 public:
     FunctionCallNode(
         std::string functionName, std::vector<std::unique_ptr<ASTNode>> args,
+        std::vector<std::string> genericTypeArguments = {},
         std::string initialResolvedType = "Int");
     std::string getType() override;
     void validateSemantics(CompilerContext& context) override;
@@ -246,12 +248,14 @@ private:
     std::string className;
     std::string name;
     std::string returnType;
+    std::vector<std::string> typeParameters;
     std::vector<Parameter> parameters;
     std::unique_ptr<ASTNode> body;
     std::vector<Capture> captures;
 public:
     FunctionDefNode(
         std::string clName, std::string name, std::string declaredReturnType,
+        std::vector<std::string> genericTypeParameters,
         std::vector<Parameter> params, std::unique_ptr<ASTNode> body,
         std::vector<Capture> capturedValues = {});
     std::string getType() override;

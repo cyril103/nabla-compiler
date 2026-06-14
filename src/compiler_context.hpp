@@ -24,6 +24,7 @@ struct CompilerContext {
     struct FunctionSignature {
         std::vector<ParameterInfo> parameters;
         std::string returnType;
+        std::vector<std::string> typeParameters;
         SourceLocation location;
         SourceLocation returnTypeLocation;
     };
@@ -181,6 +182,16 @@ inline std::optional<std::map<std::string, std::string>> genericSubstitutionFor(
     std::map<std::string, std::string> substitution;
     for (size_t i = 0; i < typeParameters.size(); ++i) {
         substitution[typeParameters[i]] = arguments[i];
+    }
+    return substitution;
+}
+
+inline std::optional<std::map<std::string, std::string>> genericFunctionSubstitutionFor(
+    const CompilerContext::FunctionSignature& signature, const std::vector<std::string>& arguments) {
+    if (signature.typeParameters.size() != arguments.size()) return std::nullopt;
+    std::map<std::string, std::string> substitution;
+    for (size_t i = 0; i < signature.typeParameters.size(); ++i) {
+        substitution[signature.typeParameters[i]] = arguments[i];
     }
     return substitution;
 }

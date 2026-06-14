@@ -1,0 +1,8 @@
+def identity[T](value: T): T = {
+    value
+}
+
+def main(): Int = {
+    val f = identity
+    42
+}

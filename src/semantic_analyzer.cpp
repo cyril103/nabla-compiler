@@ -49,14 +49,14 @@ void SemanticAnalyzer::validateDeclaredTypes() const {
                 "la fonction 'main' ne peut pas accepter de paramètres");
         }
         for (const auto& parameter : signature.parameters) {
-            if (!isKnownType(parameter.type)) {
+            if (!isKnownType(parameter.type) && !isTypeParameterName(parameter.type, signature.typeParameters)) {
                 throw CompilerError(
                     ErrorKind::Semantic, parameter.location,
                     "type inconnu '" + parameter.type + "' pour le paramètre '" +
                     functionName + "." + parameter.name + "'");
             }
         }
-        if (!isKnownType(signature.returnType)) {
+        if (!isKnownType(signature.returnType) && !isTypeParameterName(signature.returnType, signature.typeParameters)) {
             throw CompilerError(
                 ErrorKind::Semantic, signature.returnTypeLocation,
                 "type de retour inconnu '" + signature.returnType + "' pour la fonction '" +

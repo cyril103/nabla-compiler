@@ -507,8 +507,9 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
 }
 
 FunctionCallNode::FunctionCallNode(
-    std::string functionName, std::vector<std::unique_ptr<ASTNode>> args, std::string initialResolvedType)
-    : name(std::move(functionName)), arguments(std::move(args)),
+    std::string functionName, std::vector<std::unique_ptr<ASTNode>> args,
+    std::vector<std::string> genericTypeArguments, std::string initialResolvedType)
+    : name(std::move(functionName)), arguments(std::move(args)), typeArguments(std::move(genericTypeArguments)),
       resolvedType(std::move(initialResolvedType)) {}
 
 std::string FunctionCallNode::getType() {
@@ -535,8 +536,23 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
     if (function == context.functions.end()) {
         semanticError("fonction inconnue: " + name);
     }
-    validateArguments(name, arguments, function->second.parameters, location);
-    resolvedType = function->second.returnType;
+    if (function->second.typeParameters.empty()) {
+        if (!typeArguments.empty()) {
+            semanticError("la fonction '" + name + "' n'accepte pas d'arguments de type");
+        }
+        validateArguments(name, arguments, function->second.parameters, location);
+        resolvedType = function->second.returnType;
+        return;
+    }
+    auto substitution = genericFunctionSubstitutionFor(function->second, typeArguments);
+    if (!substitution) {
+        semanticError(
+            "la fonction générique '" + name + "' attend " +
+            std::to_string(function->second.typeParameters.size()) + " argument(s) de type");
+    }
+    auto parameters = substituteParameters(function->second.parameters, *substitution);
+    validateArguments(name, arguments, parameters, location);
+    resolvedType = substituteType(function->second.returnType, *substitution);
 }
 
 std::string FunctionCallNode::lowerToIR(IRBuilder& builder) const {
@@ -763,9 +779,11 @@ std::string ForNode::lowerToIR(IRBuilder& builder) const {
 
 FunctionDefNode::FunctionDefNode(
     std::string clName, std::string name, std::string declaredReturnType,
+    std::vector<std::string> genericTypeParameters,
     std::vector<Parameter> params, std::unique_ptr<ASTNode> body, std::vector<Capture> capturedValues)
     : className(std::move(clName)), name(std::move(name)), returnType(std::move(declaredReturnType)),
-      parameters(std::move(params)), body(std::move(body)), captures(std::move(capturedValues)) {}
+      typeParameters(std::move(genericTypeParameters)), parameters(std::move(params)),
+      body(std::move(body)), captures(std::move(capturedValues)) {}
 
 std::string FunctionDefNode::getType() {
     return "Unit";
@@ -780,6 +798,8 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
         if (classIt != context.classes.end()) {
             context.semanticTypeParameters = classIt->second.typeParameters;
         }
+    } else {
+        context.semanticTypeParameters = typeParameters;
     }
     for (const auto& capture : captures) {
         context.semanticSymbolTypes[capture.symbolName] = capture.type;
