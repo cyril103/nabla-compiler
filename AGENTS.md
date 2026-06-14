@@ -96,7 +96,7 @@ Le pipeline implemente actuellement :
   `optionIntSome`, `optionIntNone`, `map`, `filter` et `orElse`;
 - module de bibliotheque standard `core.option` avec `Option[T]`, `optionSome`,
   `optionNone`, `isDefined`, `isEmpty`, `nonEmpty`, `map[U]`, `filter`,
-  `orElse` et `getOrElse`;
+  `flatMap[U]`, `orElse` et `getOrElse`;
 - premier module de bibliotheque standard `collections.int_array` avec
   `intArraySum`, `intArrayFill`, `intArrayRange`, `intArrayMap`,
   `intArrayFilter` et la facade objet `ArrayInt` avec `map`, `filter`,
@@ -227,6 +227,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `Option[T]` dans la bibliotheque standard generique.
 - [x] Ajouter les methodes generiques explicites comme `Option[T].map[U]`.
 - [x] Inferer les arguments de type des methodes generiques.
+- [x] Ajouter `Option[T].flatMap[U]`.
 - [ ] Ajouter la monomorphisation complete des classes generiques.
 - [x] Generaliser `IntUnaryFn` vers des types fonction canoniques.
 - [x] Introduire une representation interne commune des types fonction.
@@ -287,6 +288,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `TBD` - Ajouter `Option[T].flatMap[U]` a la bibliotheque standard generique.
 - `3aa4fe5` - Autoriser les references de fonctions generiques specialisees comme
   valeurs fonction, par exemple `identity[Int]`.
 - `01beb83` - Inferer les arguments de type des methodes generiques, notamment

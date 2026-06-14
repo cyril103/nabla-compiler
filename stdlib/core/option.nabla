@@ -19,6 +19,14 @@ class Option[T](defined: Bool, value: T) {
         }
     }
 
+    def flatMap[U](default: U, transform: (T) => Option[U]): Option[U] = {
+        if defined {
+            transform(value)
+        } else {
+            optionNone(default)
+        }
+    }
+
     def filter(predicate: (T) => Bool): Option[T] = {
         if defined && predicate(value) {
             this

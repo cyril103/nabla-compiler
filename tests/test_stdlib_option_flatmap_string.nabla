@@ -1,0 +1,5 @@
+import core.option
+
+def main(): Int = {
+    optionSome(40).flatMap("x", value => optionSome("hello")).getOrElse("x").length() + 37
+}
