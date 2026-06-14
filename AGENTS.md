@@ -277,7 +277,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `1dcff81` - Ajout de l'IR minimale, de `--emit-ir` et des snapshots IR.
 - `8b7be03` - Ajout des diagnostics sources uniformes, de `CompilerError` et des
   tests de diagnostics exacts.
-- `cfcfef8` - Ajouter `ArrayInt.takeWhile` et `ArrayInt.dropWhile`.
+- `5b7a7ce` - Ajouter `ArrayInt.takeWhile` et `ArrayInt.dropWhile`.
 - `1062f09` - Ajout des parametres de fonctions et methodes, appels globaux,
   validation des arguments et convention d'appel x86-64.
 - `93b942f` - Ajout de `AGENTS.md`, des conventions de contribution et de la
