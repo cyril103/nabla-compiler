@@ -458,6 +458,14 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         Token token = consume(TokenType::INT_LITERAL, "");
         return located(std::make_unique<IntNode>(token.value), token.location);
     }
+    if (peek().type == TokenType::KW_TRUE) {
+        Token token = consume(TokenType::KW_TRUE, "");
+        return located(std::make_unique<BoolNode>(true), token.location);
+    }
+    if (peek().type == TokenType::KW_FALSE) {
+        Token token = consume(TokenType::KW_FALSE, "");
+        return located(std::make_unique<BoolNode>(false), token.location);
+    }
     if (peek().type == TokenType::STRING_LITERAL) {
         Token token = consume(TokenType::STRING_LITERAL, "");
         return located(std::make_unique<StringNode>(token.value), token.location);

@@ -6,7 +6,7 @@ class A() {
 
 class Factory() {
     def choose(): A = {
-        if 1 {
+        if true {
             new A()
         } else {
             new A()

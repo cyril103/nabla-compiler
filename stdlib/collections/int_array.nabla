@@ -38,7 +38,7 @@ def intArrayMap(xs: IntArray, f: (Int) => Int): IntArray = {
     mapped
 }
 
-def intArrayFilter(xs: IntArray, predicate: (Int) => Int): IntArray = {
+def intArrayFilter(xs: IntArray, predicate: (Int) => Bool): IntArray = {
     var index = 0
     var kept = 0
     while (index < xs.length()) {
@@ -76,12 +76,12 @@ def intArrayFold(xs: IntArray, initial: Int, combine: (Int, Int) => Int): Int = 
     accumulator
 }
 
-def intArrayExists(xs: IntArray, predicate: (Int) => Int): Int = {
+def intArrayExists(xs: IntArray, predicate: (Int) => Bool): Bool = {
     var index = 0
-    var found = 0
+    var found = false
     while (index < xs.length()) {
         if (predicate(xs.get(index))) {
-            found = 1
+            found = true
         } else {
             found
         }
@@ -90,21 +90,21 @@ def intArrayExists(xs: IntArray, predicate: (Int) => Int): Int = {
     found
 }
 
-def intArrayForall(xs: IntArray, predicate: (Int) => Int): Int = {
+def intArrayForall(xs: IntArray, predicate: (Int) => Bool): Bool = {
     var index = 0
-    var all = 1
+    var all = true
     while (index < xs.length()) {
         if (predicate(xs.get(index))) {
             all
         } else {
-            all = 0
+            all = false
         }
         index = index + 1
     }
     all
 }
 
-def intArrayContains(xs: IntArray, expected: Int): Int = {
+def intArrayContains(xs: IntArray, expected: Int): Bool = {
     intArrayExists(xs, value => value == expected)
 }
 
@@ -125,7 +125,7 @@ class ArrayInt(values: IntArray) {
         new ArrayInt(intArrayMap(values, f))
     }
 
-    def filter(predicate: (Int) => Int): ArrayInt = {
+    def filter(predicate: (Int) => Bool): ArrayInt = {
         new ArrayInt(intArrayFilter(values, predicate))
     }
 
@@ -141,15 +141,15 @@ class ArrayInt(values: IntArray) {
         }
     }
 
-    def exists(predicate: (Int) => Int): Int = {
+    def exists(predicate: (Int) => Bool): Bool = {
         intArrayExists(values, predicate)
     }
 
-    def forall(predicate: (Int) => Int): Int = {
+    def forall(predicate: (Int) => Bool): Bool = {
         intArrayForall(values, predicate)
     }
 
-    def contains(expected: Int): Int = {
+    def contains(expected: Int): Bool = {
         intArrayContains(values, expected)
     }
 

@@ -1,0 +1,10 @@
+import collections.int_array
+
+def identity(value: Int): Int = {
+    value
+}
+
+def main(): Int = {
+    val xs = arrayIntRange(3)
+    xs.filter(identity).sum()
+}

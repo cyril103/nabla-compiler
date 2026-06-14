@@ -3,6 +3,19 @@
 #include <algorithm>
 
 namespace {
+bool isComparisonMethod(const std::string& methodName) {
+    return methodName == "==" || methodName == "!=" || methodName == "<" || methodName == ">" ||
+           methodName == "<=" || methodName == ">=";
+}
+
+bool isArithmeticMethod(const std::string& methodName) {
+    return methodName == "+" || methodName == "-" || methodName == "*" || methodName == "/";
+}
+
+bool isKnownBuiltinType(const std::string& type) {
+    return type == "Int" || type == "Bool" || type == "String" || type == "Unit" || type == "IntArray";
+}
+
 void validateArguments(
     const std::string& callableName,
     const std::vector<std::unique_ptr<ASTNode>>& arguments,
@@ -56,6 +69,20 @@ void IntNode::validateSemantics(CompilerContext& context) {
 
 std::string IntNode::lowerToIR(IRBuilder& builder) const {
     return builder.emitConstant(value);
+}
+
+BoolNode::BoolNode(bool val) : value(val) {}
+
+std::string BoolNode::getType() {
+    return "Bool";
+}
+
+void BoolNode::validateSemantics(CompilerContext& context) {
+    (void) context;
+}
+
+std::string BoolNode::lowerToIR(IRBuilder& builder) const {
+    return builder.emitConstant(value ? "1" : "0");
 }
 
 StringNode::StringNode(std::string val) : value(std::move(val)) {}
@@ -131,6 +158,7 @@ std::string MethodCallNode::getType() {
     const std::string receiverType = receiver->getType();
     if (receiverType == "Int") {
         if (methodName == "toString") return "String";
+        if (isComparisonMethod(methodName)) return "Bool";
         return "Int";
     }
     if (receiverType == "String") {
@@ -149,10 +177,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
 
     const std::string receiverType = receiver->getType();
     if (receiverType == "Int") {
-        const bool binaryMethod =
-            methodName == "+" || methodName == "-" || methodName == "*" || methodName == "/" ||
-            methodName == "==" || methodName == "!=" || methodName == "<" || methodName == ">" ||
-            methodName == "<=" || methodName == ">=";
+        const bool binaryMethod = isArithmeticMethod(methodName) || isComparisonMethod(methodName);
         if (binaryMethod) {
             if (arguments.size() != 1) {
                 semanticError("la méthode Int." + methodName + " attend un argument");
@@ -162,7 +187,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
                     ErrorKind::Semantic, arguments[0]->getLocation(),
                     "la méthode Int." + methodName + " attend un argument de type Int");
             }
-            resolvedType = "Int";
+            resolvedType = isComparisonMethod(methodName) ? "Bool" : "Int";
             return;
         }
         if (methodName == "toString") {
@@ -413,8 +438,8 @@ void IfNode::validateSemantics(CompilerContext& context) {
     condition->validateSemantics(context);
     thenBranch->validateSemantics(context);
     elseBranch->validateSemantics(context);
-    if (condition->getType() != "Int") {
-        semanticError("la condition d'un 'if' doit être de type Int");
+    if (condition->getType() != "Bool") {
+        semanticError("la condition d'un 'if' doit être de type Bool");
     }
     if (thenBranch->getType() != elseBranch->getType()) {
         semanticError("les branches d'un 'if' doivent avoir le même type");
@@ -468,8 +493,8 @@ std::string WhileNode::getType() {
 void WhileNode::validateSemantics(CompilerContext& context) {
     condition->validateSemantics(context);
     body->validateSemantics(context);
-    if (condition->getType() != "Int") {
-        semanticError("la condition d'un 'while' doit être de type Int");
+    if (condition->getType() != "Bool") {
+        semanticError("la condition d'un 'while' doit être de type Bool");
     }
 }
 
@@ -552,8 +577,7 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
     }
     if (body) body->validateSemantics(context);
     const bool knownType =
-        returnType == "Int" || returnType == "String" || returnType == "Unit" ||
-        returnType == "IntArray" || isFunctionTypeName(returnType) ||
+        isKnownBuiltinType(returnType) || isFunctionTypeName(returnType) ||
         context.classes.count(returnType) != 0;
     if (!knownType) {
         semanticError("type de retour inconnu '" + returnType + "' pour la fonction '" + name + "'");

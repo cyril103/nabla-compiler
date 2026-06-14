@@ -2,5 +2,9 @@ import collections.int_array
 
 def main(): Int = {
     val xs = arrayIntRange(5)
-    xs.contains(4)
+    if xs.contains(4) {
+        1
+    } else {
+        0
+    }
 }

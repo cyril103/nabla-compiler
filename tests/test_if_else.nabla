@@ -1,5 +1,5 @@
 def main(): Int = {
-    if 1 {
+    if true {
         10
     } else {
         20

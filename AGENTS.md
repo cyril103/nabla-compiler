@@ -59,8 +59,8 @@ Le pipeline implemente actuellement :
 - inference des types de parametres pour lambdas multi-parametres en argument,
   par exemple `xs.fold(0, (acc, value) => acc + value)`;
 - types fonction imbriques en retour, par exemple `(Int) => ((Int) => Int)`;
-- type `Unit` formalise pour les fonctions a effet et les boucles `while` /
-  `for`;
+- types `Bool` et `Unit` formalises; les comparaisons retournent `Bool` et
+  les conditions `if` / `while` attendent `Bool`;
 - collection native `IntArray` avec `length`, `get` et `set`;
 - entiers immediats avec pointer tagging et litteraux `String`;
 - affichage console de `String` via la primitive globale `print`;
@@ -68,7 +68,8 @@ Le pipeline implemente actuellement :
 - premier module de bibliotheque standard `collections.int_array` avec
   `intArraySum`, `intArrayFill`, `intArrayRange`, `intArrayMap`,
   `intArrayFilter` et la facade objet `ArrayInt` avec `map`, `filter`,
-  `fold`, `foreach`, `exists`, `forall` et `contains`;
+  `fold`, `foreach`, `exists`, `forall` et `contains`, avec predicats
+  booleens;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -148,10 +149,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ### P2 - Systeme De Types
 
-- [ ] Formaliser `Int`, `String`, `IntArray`, les types fonction canoniques et
+- [ ] Formaliser `Int`, `Bool`, `String`, `IntArray`, les types fonction canoniques et
   les types de classes.
 - [x] Formaliser `Unit` pour les fonctions a effet et les boucles.
-- [ ] Ajouter les booleens ou definir officiellement `Int` comme condition.
+- [x] Ajouter les booleens et typer les conditions en `Bool`.
 - [ ] Ajouter les champs et methodes herites si l'heritage est retenu.
 - [ ] Valider les types des branches, boucles et operateurs de facon uniforme.
 - [x] Generaliser `IntUnaryFn` vers des types fonction canoniques.
@@ -172,6 +173,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter les lambdas mono-expression sans bloc.
 - [x] Ajouter l'inference des lambdas multi-parametres.
 - [x] Ajouter `ArrayInt.exists`, `ArrayInt.forall` et `ArrayInt.contains`.
+- [x] Typer les predicats de collections avec `Bool`.
 
 ### P2 - Runtime Et Objets
 
@@ -194,7 +196,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout de predicats de collection `ArrayInt`.
+- Prochain commit - Introduction du type `Bool`.
+- `8f21d03` - Ajout de predicats de collection `ArrayInt`.
 - `6f896e5` - Inference des lambdas multi-parametres.
 - `decbfee` - Ajout des lambdas mono-expression inferees.
 - `00f0d39` - Inference simple des parametres de lambda.
@@ -247,4 +250,4 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Introduire un vrai type `Bool` pour distinguer les predicats des entiers.
+Ajouter les operateurs booleens `&&`, `||` et `!`.

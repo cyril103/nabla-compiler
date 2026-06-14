@@ -1,0 +1,11 @@
+def yes(): Bool = {
+    1 < 2
+}
+
+def main(): Int = {
+    if yes() {
+        7
+    } else {
+        0
+    }
+}
