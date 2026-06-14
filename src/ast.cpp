@@ -670,6 +670,9 @@ std::string FunctionDefNode::getType() {
 
 void FunctionDefNode::validateSemantics(CompilerContext& context) {
     context.semanticSymbolTypes.clear();
+    if (!className.empty()) {
+        context.semanticSymbolTypes["this"] = className;
+    }
     for (const auto& capture : captures) {
         context.semanticSymbolTypes[capture.symbolName] = capture.type;
     }

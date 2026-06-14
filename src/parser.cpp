@@ -478,6 +478,16 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         consume(TokenType::RPAREN, "");
         return located(std::make_unique<NewNode>(clName, std::move(args)), start.location);
     }
+    if (peek().type == TokenType::KW_THIS) {
+        if (currentParsingClass.empty()) {
+            throw CompilerError(ErrorKind::Parser, peek().location, "'this' non autorisé en dehors d'une méthode de classe");
+        }
+        Token thisToken = consume(TokenType::KW_THIS, "'this' invalide");
+        return located(
+            std::make_unique<IdentifierNode>(
+                thisToken.value, "this", currentParsingClass),
+            thisToken.location);
+    }
     if (peek().type == TokenType::IDENTIFIER) {
         Token nameToken = consume(TokenType::IDENTIFIER, "");
         std::string name = nameToken.value;

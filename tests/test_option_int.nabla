@@ -3,7 +3,15 @@ import core.option_int
 def main(): Int = {
     val some = optionIntSome(7)
     val none = optionIntNone()
-    if some.nonEmpty() && !some.isEmpty() && none.isEmpty() {
+    val mappedSome = some.map(value => value + 1)
+    val filteredSome = some.filter(value => value > 0)
+    val filteredNone = some.filter(value => value > 10)
+    val orElseSome = none.orElse(mappedSome)
+    if some.nonEmpty() && !some.isEmpty() && none.isEmpty()
+        && mappedSome.getOrElse(0) == 8
+        && filteredSome.getOrElse(0) == 7
+        && filteredNone.isEmpty()
+        && orElseSome.getOrElse(0) == 8 {
         some.getOrElse(1) + none.getOrElse(2)
     } else {
         99

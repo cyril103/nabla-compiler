@@ -68,7 +68,7 @@ Le pipeline implemente actuellement :
 - affichage console de `String` via la primitive globale `print`;
 - premier module de bibliotheque standard `io` avec `println`;
 - module de bibliotheque standard `core.option_int` avec `OptionInt`,
-  `optionIntSome` et `optionIntNone`;
+  `optionIntSome`, `optionIntNone`, `map`, `filter` et `orElse`;
 - premier module de bibliotheque standard `collections.int_array` avec
   `intArraySum`, `intArrayFill`, `intArrayRange`, `intArrayMap`,
   `intArrayFilter` et la facade objet `ArrayInt` avec `map`, `filter`,
@@ -215,7 +215,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajouter `OptionInt` combinators (`map`, `filter`, `orElse`).
+- Prochain commit - Utiliser `this` dans une bibliothèque standard et valider l\'impact sur les diagnostics de méthode.
+- `fc1b9a2` - Ajouter `this` comme mot-clé et variable implicite dans les méthodes.
 - `ef2609c` - Ajouter `ArrayInt.indexOfOption`.
 - `813100b` - Ajout de `OptionInt` et des bornes `ArrayInt`.
 - `3b6760f` - Ajout de `ArrayInt.indexOf` et `ArrayInt.count`.

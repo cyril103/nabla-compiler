@@ -7,6 +7,30 @@ class OptionInt(isDefined: Bool, value: Int) {
         isDefined
     }
 
+    def map(transform: (Int) => Int): OptionInt = {
+        if isDefined {
+            optionIntSome(transform(value))
+        } else {
+            this
+        }
+    }
+
+    def filter(predicate: (Int) => Bool): OptionInt = {
+        if isDefined && predicate(value) {
+            this
+        } else {
+            optionIntNone()
+        }
+    }
+
+    def orElse(other: OptionInt): OptionInt = {
+        if isDefined {
+            this
+        } else {
+            other
+        }
+    }
+
     def getOrElse(default: Int): Int = {
         if isDefined {
             value
