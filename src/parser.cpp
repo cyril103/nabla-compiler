@@ -330,7 +330,6 @@ std::unique_ptr<ASTNode> Parser::parseInferredLambdaExpression(const std::string
     }
 
     consume(TokenType::FAT_ARROW, "'=>' attendu après le paramètre de lambda");
-    consume(TokenType::LBRACE, "Bloc attendu après '=>'");
 
     const size_t outerScopeCount = localScopes.size();
     std::string parameterName = parameterToken.value;
@@ -345,8 +344,14 @@ std::unique_ptr<ASTNode> Parser::parseInferredLambdaExpression(const std::string
     lambdaCaptureScopes.push_back({outerScopeCount, {}});
     localScopes.emplace_back();
     localScopes.back()[parameterName] = {symbolName, parameterType, false};
-    auto body = parseBlock();
-    consume(TokenType::RBRACE, "Fin du bloc de lambda attendue");
+    std::unique_ptr<ASTNode> body;
+    if (peek().type == TokenType::LBRACE) {
+        consume(TokenType::LBRACE, "Bloc attendu après '=>'");
+        body = parseBlock();
+        consume(TokenType::RBRACE, "Fin du bloc de lambda attendue");
+    } else {
+        body = parseExpression();
+    }
     localScopes.pop_back();
 
     std::vector<FunctionDefNode::Capture> captures;
