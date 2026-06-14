@@ -129,6 +129,14 @@ class ArrayInt(values: IntArray) {
         values.get(index)
     }
 
+    def head(): Int = {
+        values.get(0)
+    }
+
+    def last(): Int = {
+        values.get(values.length() - 1)
+    }
+
     def sum(): Int = {
         intArraySum(values)
     }
