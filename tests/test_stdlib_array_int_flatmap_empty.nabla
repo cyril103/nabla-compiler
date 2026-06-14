@@ -1,0 +1,16 @@
+import collections.int_array
+
+def main(): Int = {
+    val xs = new ArrayInt(new IntArray(3))
+    val index0 = 0
+    xs.raw().set(index0, 1)
+    xs.raw().set(index0 + 1, 2)
+    xs.raw().set(index0 + 2, 3)
+
+    val maybeEmpty = xs.flatMap(value => new ArrayInt(new IntArray(0)))
+    if maybeEmpty.isEmpty() {
+        42
+    } else {
+        1
+    }
+}

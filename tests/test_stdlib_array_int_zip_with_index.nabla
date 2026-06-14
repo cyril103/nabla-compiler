@@ -1,0 +1,21 @@
+import collections.int_array
+
+def main(): Int = {
+    val xs = new ArrayInt(new IntArray(4))
+    val index0 = 0
+    xs.raw().set(index0, 10)
+    xs.raw().set(index0 + 1, 20)
+    xs.raw().set(index0 + 2, 30)
+    xs.raw().set(index0 + 3, 40)
+
+    val zipped = xs.zipWithIndex()
+    if zipped.size() == 4 &&
+        zipped.value(index0) == 10 && zipped.index(index0) == 0 &&
+        zipped.value(index0 + 1) == 20 && zipped.index(index0 + 1) == 1 &&
+        zipped.value(index0 + 2) == 30 && zipped.index(index0 + 2) == 2 &&
+        zipped.value(index0 + 3) == 40 && zipped.index(index0 + 3) == 3 {
+        42
+    } else {
+        1
+    }
+}

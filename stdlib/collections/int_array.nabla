@@ -362,6 +362,37 @@ def intArraySpan(xs: IntArray, predicate: (Int) => Bool): ArrayIntSpan = {
     new ArrayIntSpan(new ArrayInt(first), new ArrayInt(second))
 }
 
+def intArrayPartition(xs: IntArray, predicate: (Int) => Bool): ArrayIntPartition = {
+    val matching = intArrayFilter(xs, predicate)
+    val notMatching = intArrayFilter(xs, value => !predicate(value))
+    new ArrayIntPartition(new ArrayInt(matching), new ArrayInt(notMatching))
+}
+
+def intArrayFlatMap(xs: IntArray, transform: (Int) => ArrayInt): ArrayInt = {
+    var index = 0
+    var flattened = new IntArray(0)
+    while (index < xs.length()) {
+        val mapped = transform(xs.get(index))
+        flattened = intArrayConcat(flattened, mapped.raw())
+        index = index + 1
+    }
+    new ArrayInt(flattened)
+}
+
+def intArrayZipWithIndex(xs: IntArray): ArrayIntWithIndex = {
+    val indices = new IntArray(xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        indices.set(index, index)
+        index = index + 1
+    }
+    new ArrayIntWithIndex(new ArrayInt(xs), new ArrayInt(indices))
+}
+
+def intArrayNested(values: IntArray, boundaries: IntArray): ArrayIntNested = {
+    new ArrayIntNested(values, boundaries)
+}
+
 class ArrayInt(values: IntArray) {
     def length(): Int = {
         values.length()
@@ -463,6 +494,18 @@ class ArrayInt(values: IntArray) {
         intArraySpan(values, predicate)
     }
 
+    def partition(predicate: (Int) => Bool): ArrayIntPartition = {
+        intArrayPartition(values, predicate)
+    }
+
+    def flatMap(transform: (Int) => ArrayInt): ArrayInt = {
+        intArrayFlatMap(values, transform)
+    }
+
+    def zipWithIndex(): ArrayIntWithIndex = {
+        intArrayZipWithIndex(values)
+    }
+
     def fold(initial: Int, combine: (Int, Int) => Int): Int = {
         intArrayFold(values, initial, combine)
     }
@@ -523,6 +566,69 @@ class ArrayIntSpan(prefixValues: ArrayInt, suffixValues: ArrayInt) {
 
     def suffix(): ArrayInt = {
         suffixValues
+    }
+}
+
+class ArrayIntPartition(matchingValues: ArrayInt, nonMatchingValues: ArrayInt) {
+    def matching(): ArrayInt = {
+        matchingValues
+    }
+
+    def nonMatching(): ArrayInt = {
+        nonMatchingValues
+    }
+}
+
+class ArrayIntWithIndex(values: ArrayInt, indexes: ArrayInt) {
+    def size(): Int = {
+        values.length()
+    }
+
+    def value(index: Int): Int = {
+        values.get(index)
+    }
+
+    def index(index: Int): Int = {
+        indexes.get(index)
+    }
+
+    def valuesArray(): ArrayInt = {
+        values
+    }
+
+    def indexArray(): ArrayInt = {
+        indexes
+    }
+}
+
+class ArrayIntNested(values: IntArray, boundaries: IntArray) {
+    def rowCount(): Int = {
+        val count = boundaries.length() - 1
+        if count < 0 {
+            0
+        } else {
+            count
+        }
+    }
+
+    def isEmpty(): Bool = {
+        this.rowCount() == 0
+    }
+
+    def isNonEmpty(): Bool = {
+        this.rowCount() != 0
+    }
+
+    def row(index: Int): ArrayInt = {
+        new ArrayInt(intArraySlice(values, boundaries.get(index), boundaries.get(index + 1)))
+    }
+
+    def rowArray(index: Int): IntArray = {
+        intArraySlice(values, boundaries.get(index), boundaries.get(index + 1))
+    }
+
+    def flatten(): ArrayInt = {
+        new ArrayInt(values)
     }
 }
 

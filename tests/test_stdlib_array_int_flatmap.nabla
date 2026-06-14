@@ -1,0 +1,26 @@
+import collections.int_array
+
+def main(): Int = {
+    val xs = new ArrayInt(new IntArray(4))
+    val index0 = 0
+    xs.raw().set(index0, 1)
+    xs.raw().set(index0 + 1, 2)
+    xs.raw().set(index0 + 2, 3)
+    xs.raw().set(index0 + 3, 4)
+
+    val duplicated = xs.flatMap(value => {
+        val base = new IntArray(2)
+        base.set(0, value)
+        base.set(1, value)
+        new ArrayInt(base)
+    })
+
+    if duplicated.size() == 8 && duplicated.get(0) == 1 && duplicated.get(1) == 1 &&
+        duplicated.get(2) == 2 && duplicated.get(3) == 2 &&
+        duplicated.get(4) == 3 && duplicated.get(5) == 3 &&
+        duplicated.get(6) == 4 && duplicated.get(7) == 4 {
+        42
+    } else {
+        1
+    }
+}

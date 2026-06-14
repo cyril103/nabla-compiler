@@ -76,7 +76,8 @@ Le pipeline implemente actuellement :
   `nonEmpty`, `head`, `last`, `append`, `prepend`, `reverse`, `concat`,
   `take`, `drop`, `slice`, `indexOf`, `indexOfOption`, `count`, `find`, `min`, `max`,
   `getOption`, `headOption`, `lastOption`, `takeWhile`, `dropWhile`,
-  `takeRight`, `dropRight` et `span`,
+  `takeRight`, `dropRight`, `span`, `partition`, `flatMap`,
+  `zipWithIndex`, `ArrayIntNested` et `ArrayIntNested.flatten()`,
   avec predicats booleens;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
@@ -197,6 +198,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `ArrayInt.getOption`, `headOption`, `lastOption` et `find`.
 - [x] Ajouter `ArrayInt.takeWhile` et `ArrayInt.dropWhile`.
 - [x] Ajouter `ArrayInt.takeRight`, `ArrayInt.dropRight` et `ArrayInt.span`.
+- [x] Ajouter `ArrayInt.partition` et `ArrayInt.flatMap`.
+- [x] Ajouter `ArrayInt.zipWithIndex`.
+- [x] Ajouter `ArrayIntNested` et `ArrayIntNested.flatten()`.
 
 ### P2 - Runtime Et Objets
 
@@ -280,7 +284,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `8b7be03` - Ajout des diagnostics sources uniformes, de `CompilerError` et des
   tests de diagnostics exacts.
 - `5b7a7ce` - Ajouter `ArrayInt.takeWhile` et `ArrayInt.dropWhile`.
-- `58301f4` - Ajouter `ArrayInt.takeRight`, `ArrayInt.dropRight` et `ArrayInt.span`.
+- `94eeecf` - Ajouter `ArrayInt.takeRight`, `ArrayInt.dropRight` et `ArrayInt.span`.
+- `1bc9417` - Ajouter `ArrayInt.zipWithIndex`, `ArrayInt.partition`,
+  `ArrayInt.flatMap` et `ArrayIntNested.flatten()`.
 - `1062f09` - Ajout des parametres de fonctions et methodes, appels globaux,
   validation des arguments et convention d'appel x86-64.
 - `93b942f` - Ajout de `AGENTS.md`, des conventions de contribution et de la
@@ -292,5 +298,6 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter `ArrayInt.partition` et `ArrayInt.flatMap` pour approfondir les
-transformations fonctionnelles de `ArrayInt`.
+Ajouter une collection imbriquée de premier ordre (`ArrayInt[][]` ou une
+abstraction dédiée) pour exprimer `flatten` dans une API plus naturelle,
+et documenter son usage dans la stdlib.

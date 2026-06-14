@@ -1,0 +1,23 @@
+import collections.int_array
+
+def main(): Int = {
+    val xs = new ArrayInt(new IntArray(6))
+    val index0 = 0
+    xs.raw().set(index0, 1)
+    xs.raw().set(index0 + 1, 2)
+    xs.raw().set(index0 + 2, 3)
+    xs.raw().set(index0 + 3, 4)
+    xs.raw().set(index0 + 4, 5)
+    xs.raw().set(index0 + 5, 6)
+
+    val result = xs.partition(value => value < 4)
+    val small = result.matching()
+    val large = result.nonMatching()
+
+    if small.size() == 3 && small.get(0) == 1 && small.get(1) == 2 && small.get(2) == 3 &&
+        large.size() == 3 && large.get(0) == 4 && large.get(1) == 5 && large.get(2) == 6 {
+        42
+    } else {
+        1
+    }
+}

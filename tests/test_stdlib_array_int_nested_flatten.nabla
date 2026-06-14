@@ -1,0 +1,33 @@
+import collections.int_array
+
+def main(): Int = {
+    val values = new IntArray(6)
+    values.set(0, 1)
+    values.set(1, 2)
+    values.set(2, 3)
+    values.set(3, 4)
+    values.set(4, 5)
+    values.set(5, 6)
+
+    val boundaries = new IntArray(4)
+    boundaries.set(0, 0)
+    boundaries.set(1, 2)
+    boundaries.set(2, 4)
+    boundaries.set(3, 6)
+
+    val nested = new ArrayIntNested(values, boundaries)
+    val row0 = nested.row(0)
+    val row1 = nested.row(1)
+    val row2 = nested.row(2)
+    val flattened = nested.flatten()
+
+    if row0.size() == 2 && row0.get(0) == 1 && row0.get(1) == 2 &&
+        row1.size() == 2 && row1.get(0) == 3 && row1.get(1) == 4 &&
+        row2.size() == 2 && row2.get(0) == 5 && row2.get(1) == 6 &&
+        nested.rowCount() == 3 &&
+        flattened.size() == 6 && flattened.get(0) == 1 && flattened.get(5) == 6 {
+        42
+    } else {
+        1
+    }
+}
