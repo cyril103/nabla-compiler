@@ -250,7 +250,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Ajouter les classes generiques utilisateur simples comme `Box[T]`,
+- `1d9fc36` - Ajouter les classes generiques utilisateur simples comme `Box[T]`,
   avec instanciations concretes `Box[Int]` / `Box[String]` et substitution de
   `T` dans les signatures de methodes.
 - `6fd4884` - Ajouter la syntaxe de types parametres `Option[Int]` et `Array[Int]`
