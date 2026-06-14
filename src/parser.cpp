@@ -289,16 +289,24 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
     auto function = located(std::make_unique<FunctionDefNode>(
         "", lambdaName, returnType, std::move(parameters), std::move(body), captures), start.location);
     generatedFunctions.push_back(std::move(function));
-    const std::string functionType = signatureParameters.size() == 2
-        ? "IntBinaryFn"
-        : (returnType == "Unit" ? "IntConsumerFn" : "IntUnaryFn");
+    CompilerContext::FunctionType lambdaType;
+    for (const auto& parameter : signatureParameters) {
+        lambdaType.parameterTypes.push_back(parameter.type);
+    }
+    lambdaType.returnType = returnType;
+    auto functionType = functionAliasForType(lambdaType);
+    if (!functionType) {
+        throw CompilerError(
+            ErrorKind::Parser, start.location,
+            "seules les lambdas Int => Int, Int => Unit et (Int, Int) => Int sont supportées pour l'instant");
+    }
     std::vector<FunctionReferenceNode::Capture> referenceCaptures;
     for (const auto& capture : captures) {
         referenceCaptures.push_back({capture.name, capture.symbolName, capture.type});
     }
     return located(
         std::make_unique<FunctionReferenceNode>(
-            lambdaName, functionType, std::move(referenceCaptures)),
+            lambdaName, *functionType, std::move(referenceCaptures)),
         start.location);
 }
 
@@ -346,8 +354,7 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
             auto [symbol, scopeIndex] = findLocalWithScope(name);
             if (symbol) {
-                if (symbol->type == "IntUnaryFn" || symbol->type == "IntConsumerFn" ||
-                    symbol->type == "IntBinaryFn") {
+                if (isFunctionTypeAlias(symbol->type)) {
                     captureIfNeeded(name, *symbol, scopeIndex);
                     return located(
                         std::make_unique<FunctionValueCallNode>(
@@ -371,13 +378,13 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         }
         if (context.functions.count(name)) {
             const auto& signature = context.functions[name];
-            std::string functionType = "IntUnaryFn";
-            if (signature.parameters.size() == 2) {
-                functionType = "IntBinaryFn";
-            } else if (signature.parameters.size() == 1 && signature.returnType == "Unit") {
-                functionType = "IntConsumerFn";
+            auto functionType = functionAliasForSignature(signature);
+            if (!functionType) {
+                throw CompilerError(
+                    ErrorKind::Parser, nameToken.location,
+                    "la fonction '" + name + "' n'a pas encore de type fonction valeur supporté");
             }
-            return located(std::make_unique<FunctionReferenceNode>(name, functionType), nameToken.location);
+            return located(std::make_unique<FunctionReferenceNode>(name, *functionType), nameToken.location);
         }
         return located(std::make_unique<IdentifierNode>(name, name, "Int"), nameToken.location);
     }

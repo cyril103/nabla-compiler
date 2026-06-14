@@ -47,6 +47,8 @@ Le pipeline implemente actuellement :
   `(acc: Int, value: Int) => { ... }`;
 - closures avec capture par valeur pour les lambdas specialisees `IntUnaryFn`
   et `IntConsumerFn`;
+- representation interne commune des types fonction, avec aliases temporaires
+  `IntUnaryFn`, `IntConsumerFn` et `IntBinaryFn`;
 - type `Unit` formalise pour les fonctions a effet et les boucles `while` /
   `for`;
 - collection native `IntArray` avec `length`, `get` et `set`;
@@ -143,6 +145,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [ ] Ajouter les champs et methodes herites si l'heritage est retenu.
 - [ ] Valider les types des branches, boucles et operateurs de facon uniforme.
 - [ ] Generaliser `IntUnaryFn` vers des types fonction complets.
+- [x] Introduire une representation interne commune des types fonction.
 - [x] Ajouter `IntBinaryFn` pour `fold` et operations binaires de collections.
 - [x] Ajouter les lambdas sans capture pour `IntUnaryFn`.
 - [x] Ajouter `IntConsumerFn` pour les fonctions `Int => Unit`.
@@ -172,7 +175,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout des closures avec capture par valeur.
+- Prochain commit - Introduction d'une representation interne des types fonction.
+- `53533a2` - Ajout des closures avec capture par valeur.
 - `8f71165` - Ajout de `IntConsumerFn` pour `foreach`.
 - `a40144e` - Formalisation de `Unit` pour les boucles et `foreach`.
 - `70a808d` - Ajout de `arrayIntRange` et `ArrayInt.foreach`.

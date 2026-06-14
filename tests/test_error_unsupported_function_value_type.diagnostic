@@ -1,0 +1,1 @@
+tests/test_error_unsupported_function_value_type.nabla:6:13: parser error: la fonction 'stringify' n'a pas encore de type fonction valeur supporté

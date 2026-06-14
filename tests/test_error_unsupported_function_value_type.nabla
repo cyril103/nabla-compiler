@@ -1,0 +1,8 @@
+def stringify(value: Int): String = {
+    value.toString()
+}
+
+def main(): Int = {
+    val f = stringify
+    0
+}
