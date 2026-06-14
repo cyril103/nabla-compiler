@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ make nasm binutils
+
+      - name: Run test suite
+        run: make all-tests
+
+      - name: Compile with warnings as errors
+        run: |
+          g++ -std=c++17 -Wall -Wextra -Werror \
+            src/main.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp src/ir.cpp \
+            src/ir_codegen.cpp src/runtime_asm.cpp \
+            -o /tmp/nablac-werror
+
+      - name: Check whitespace
+        run: git diff --check

@@ -133,12 +133,13 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 - [x] Retirer les binaires suivis sous `build/`.
 - [ ] Ajouter une cible de formatage.
-- [ ] Ajouter une integration continue.
+- [x] Ajouter une integration continue.
 - [ ] Ajouter des tests unitaires du lexer, parser et analyseur semantique.
 
 ## Journal Des Jalons
 
-- Prochain commit - Extraction du runtime ASM commun du backend IR.
+- Prochain commit - Ajout de l'integration continue GitHub Actions.
+- `b1a6938` - Extraction du runtime ASM commun du backend IR.
 - `ed879e1` - Retrait des binaires historiques suivis sous `build/`.
 - `63c286e` - Structuration de la frame et de la convention d'appel du backend
   IR.
@@ -164,5 +165,5 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter une integration continue, puis stabiliser la representation runtime de
-`String`.
+Stabiliser la representation runtime de `String`, puis verifier les
+depassements du tas.
