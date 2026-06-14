@@ -379,7 +379,7 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
     }
     return located(
         std::make_unique<FunctionReferenceNode>(
-            lambdaName, *functionType, std::move(referenceCaptures)),
+            lambdaName, *functionType, std::vector<std::string>{}, std::move(referenceCaptures)),
         start.location);
 }
 
@@ -477,7 +477,7 @@ std::unique_ptr<ASTNode> Parser::parseInferredLambdaExpression(const std::string
     }
     return located(
         std::make_unique<FunctionReferenceNode>(
-            lambdaName, *functionType, std::move(referenceCaptures)),
+            lambdaName, *functionType, std::vector<std::string>{}, std::move(referenceCaptures)),
         start.location);
 }
 
@@ -574,9 +574,6 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                 }
             }
             consume(TokenType::RBRACKET, "']' attendu après les arguments de type");
-            if (peek().type != TokenType::LPAREN) {
-                throw CompilerError(ErrorKind::Parser, nameToken.location, "appel attendu après les arguments de type");
-            }
         }
         if (peek().type == TokenType::LPAREN) {
             std::vector<std::string> expectedArgumentTypes;
@@ -643,11 +640,13 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     name, std::move(arguments), std::move(typeArguments), initialReturnType),
                 nameToken.location);
         }
-        if (!typeArguments.empty()) {
-            throw CompilerError(ErrorKind::Parser, nameToken.location, "appel attendu après les arguments de type");
-        }
         auto [symbol, scopeIndex] = findLocalWithScope(name);
         if (symbol) {
+            if (!typeArguments.empty()) {
+                throw CompilerError(
+                    ErrorKind::Parser, nameToken.location,
+                    "les arguments de type ne sont supportés que pour les fonctions nommées");
+            }
             captureIfNeeded(name, *symbol, scopeIndex);
             return located(std::make_unique<IdentifierNode>(name, symbol->internalName, symbol->type), nameToken.location);
         }
@@ -661,9 +660,30 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         if (context.functions.count(name)) {
             const auto& signature = context.functions[name];
             if (!signature.typeParameters.empty()) {
+                if (typeArguments.empty()) {
+                    throw CompilerError(
+                        ErrorKind::Parser, nameToken.location,
+                        "la fonction générique '" + name + "' doit être référencée avec des arguments de type");
+                }
+                std::string functionType = "Int";
+                if (auto substitution = genericFunctionSubstitutionFor(signature, typeArguments)) {
+                    CompilerContext::FunctionSignature substitutedSignature = signature;
+                    for (auto& parameter : substitutedSignature.parameters) {
+                        parameter.type = substituteType(parameter.type, *substitution);
+                    }
+                    substitutedSignature.returnType = substituteType(substitutedSignature.returnType, *substitution);
+                    if (auto substitutedFunctionType = functionNameForSignature(substitutedSignature)) {
+                        functionType = *substitutedFunctionType;
+                    }
+                }
+                return located(
+                    std::make_unique<FunctionReferenceNode>(name, functionType, std::move(typeArguments)),
+                    nameToken.location);
+            }
+            if (!typeArguments.empty()) {
                 throw CompilerError(
                     ErrorKind::Parser, nameToken.location,
-                    "la fonction générique '" + name + "' doit être appelée avec des arguments de type");
+                    "la fonction '" + name + "' n'accepte pas d'arguments de type");
             }
             auto functionType = functionNameForSignature(signature);
             if (!functionType) {
@@ -671,7 +691,13 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     ErrorKind::Parser, nameToken.location,
                     "la fonction '" + name + "' n'a pas encore de type fonction valeur supporté");
             }
-            return located(std::make_unique<FunctionReferenceNode>(name, *functionType), nameToken.location);
+            return located(
+                std::make_unique<FunctionReferenceNode>(
+                    name, *functionType, std::vector<std::string>{}),
+                nameToken.location);
+        }
+        if (!typeArguments.empty()) {
+            throw CompilerError(ErrorKind::Parser, nameToken.location, "appel attendu après les arguments de type");
         }
         return located(std::make_unique<IdentifierNode>(name, name, "Int"), nameToken.location);
     }

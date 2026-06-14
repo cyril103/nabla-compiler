@@ -160,10 +160,14 @@ public:
 private:
     std::string name;
     std::string resolvedType;
+    std::vector<std::string> typeArguments;
+    std::vector<std::string> resolvedTypeArguments;
     std::vector<Capture> captures;
 public:
     FunctionReferenceNode(
-        std::string functionName, std::string functionType, std::vector<Capture> capturedValues = {});
+        std::string functionName, std::string functionType,
+        std::vector<std::string> genericTypeArguments = {},
+        std::vector<Capture> capturedValues = {});
     std::string getType() override;
     void validateSemantics(CompilerContext& context) override;
     std::string lowerToIR(IRBuilder& builder) const override;

@@ -1,0 +1,14 @@
+function apply(%value: Int, %f: Fn(Int)->Int) -> Int
+  %0: Int = indirect_call %f, %value
+  return %0
+
+function main() -> Int
+  %0: Closure = closure_ref identity[Int]
+  store %0, @f#3
+  %1: Int = const 42
+  %2: Fn(Int)->Int = load @f#3
+  %3: Int = call apply(%1, %2)
+  return %3
+
+function identity[Int](%value: Int) -> Int
+  return %value

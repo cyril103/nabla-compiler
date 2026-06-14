@@ -67,6 +67,8 @@ Le pipeline implemente actuellement :
   arguments de type explicites comme `identity[Int](42)`, avec substitution dans
   les parametres, retours et types fonction, puis monomorphisees en corps IR
   specialises comme `identity[Int]`;
+- references de fonctions generiques specialisees comme `identity[Int]`
+  utilisables comme valeurs fonction, monomorphisees a la demande;
 - inference des arguments de type des fonctions generiques depuis les arguments
   d'appel, y compris pour typer une lambda suivante comme dans
   `applyOnce(41, value => value + 1)`;
@@ -127,8 +129,9 @@ Limites importantes :
   specialisees;
 - la genericite actuelle couvre `Option[T]`, les fonctions generiques
   monomorphisees et les methodes de classes generiques specialisees avec
-  inference des arguments de type; les fonctions generiques ne sont pas encore
-  utilisables comme valeurs polymorphes;
+  inference des arguments de type; les references explicites comme
+  `identity[Int]` sont utilisables comme valeurs, mais les fonctions generiques
+  ne sont pas encore des valeurs vraiment polymorphes;
   `Array[Int]` reste une facade specialisee vers `ArrayInt`; la
   monomorphisation complete des classes generiques reste a faire;
 - le tas est fixe et possede une verification de depassement, mais pas de
@@ -213,6 +216,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter les fonctions generiques utilisateur explicites
   `def identity[T](value: T): T`.
 - [x] Ajouter l'inference des arguments de type des fonctions generiques.
+- [x] Autoriser les references de fonctions generiques specialisees comme
+  valeurs, par exemple `identity[Int]`.
 - [ ] Autoriser les fonctions generiques comme valeurs polymorphes.
 - [x] Distinguer les allocations de classes generiques concretes dans l'IR.
 - [x] Ajouter des wrappers IR specialises pour les methodes de classes
@@ -282,6 +287,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `TBD` - Autoriser les references de fonctions generiques specialisees comme
+  valeurs fonction, par exemple `identity[Int]`.
 - `01beb83` - Inferer les arguments de type des methodes generiques, notamment
   `Option[T].map(...)`.
 - `11cd62d` - Ajouter les methodes generiques explicites, utilisees par

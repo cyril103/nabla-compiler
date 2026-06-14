@@ -644,8 +644,10 @@ std::string FunctionCallNode::lowerToIR(IRBuilder& builder) const {
 }
 
 FunctionReferenceNode::FunctionReferenceNode(
-    std::string functionName, std::string functionType, std::vector<Capture> capturedValues)
+    std::string functionName, std::string functionType,
+    std::vector<std::string> genericTypeArguments, std::vector<Capture> capturedValues)
     : name(std::move(functionName)), resolvedType(std::move(functionType)),
+      typeArguments(std::move(genericTypeArguments)),
       captures(std::move(capturedValues)) {}
 
 std::string FunctionReferenceNode::getType() {
@@ -657,15 +659,52 @@ void FunctionReferenceNode::validateSemantics(CompilerContext& context) {
     if (function == context.functions.end()) {
         semanticError("fonction inconnue: " + name);
     }
-    if (!functionTypeNameMatchesSignature(resolvedType, function->second)) {
+    if (function->second.typeParameters.empty()) {
+        if (!typeArguments.empty()) {
+            semanticError("la fonction '" + name + "' n'accepte pas d'arguments de type");
+        }
+        if (!functionTypeNameMatchesSignature(resolvedType, function->second)) {
+            semanticError("la fonction '" + name + "' n'est pas compatible avec " + resolvedType);
+        }
+        resolvedTypeArguments.clear();
+        return;
+    }
+    auto substitution = genericFunctionSubstitutionFor(function->second, typeArguments);
+    if (!substitution) {
+        if (typeArguments.empty()) {
+            semanticError(
+                "la fonction générique '" + name + "' doit être référencée avec des arguments de type");
+        }
+        semanticError(
+            "la fonction générique '" + name + "' attend " +
+            std::to_string(function->second.typeParameters.size()) + " argument(s) de type");
+    }
+    auto substitutedSignature = function->second;
+    for (auto& parameter : substitutedSignature.parameters) {
+        parameter.type = substituteType(parameter.type, *substitution);
+    }
+    substitutedSignature.returnType = substituteType(substitutedSignature.returnType, *substitution);
+    if (!functionTypeNameMatchesSignature(resolvedType, substitutedSignature)) {
         semanticError("la fonction '" + name + "' n'est pas compatible avec " + resolvedType);
     }
+    resolvedTypeArguments = orderedTypeArguments(function->second.typeParameters, *substitution);
 }
 
 std::string FunctionReferenceNode::lowerToIR(IRBuilder& builder) const {
     std::vector<std::string> loweredCaptures;
     for (const auto& capture : captures) {
         loweredCaptures.push_back(builder.emitLoad(capture.symbolName, capture.type));
+    }
+    std::vector<std::string> concreteTypeArguments;
+    for (const auto& typeArgument : resolvedTypeArguments) {
+        concreteTypeArguments.push_back(builder.substituteActiveType(typeArgument));
+    }
+    if (!concreteTypeArguments.empty()) {
+        auto functionType = functionTypeFromName(resolvedType);
+        const std::string concreteReturnType = functionType ? functionType->returnType : "";
+        builder.registerFunctionSpecialization(name, concreteTypeArguments, concreteReturnType);
+        return builder.emitFunctionReference(
+            formatParameterizedType(name, concreteTypeArguments), loweredCaptures);
     }
     return builder.emitFunctionReference(name, loweredCaptures);
 }
