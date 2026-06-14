@@ -8,7 +8,7 @@
 enum class TokenType {
     KW_DEF, KW_CLASS, KW_NEW, KW_IMPORT, KW_IF, KW_ELSE, KW_WHILE, KW_FOR, KW_VAL, KW_VAR,
     IDENTIFIER, LPAREN, RPAREN, COLON, EQUAL, LBRACE, RBRACE, COMMA, DOT, INT_LITERAL, STRING_LITERAL,
-    PLUS, MINUS, STAR, SLASH, EQEQ, NEQ, LT, GT, LTE, GTE, EOF_TOKEN
+    PLUS, MINUS, STAR, SLASH, FAT_ARROW, EQEQ, NEQ, LT, GT, LTE, GTE, EOF_TOKEN
 };
 
 struct Token {
@@ -49,7 +49,8 @@ public:
             if (current == '*') { add(tokens, TokenType::STAR, "*", start, 1); continue; }
             if (current == '/') { add(tokens, TokenType::SLASH, "/", start, 1); continue; }
             if (current == '=') {
-                if (nextIs('=')) add(tokens, TokenType::EQEQ, "==", start, 2);
+                if (nextIs('>')) add(tokens, TokenType::FAT_ARROW, "=>", start, 2);
+                else if (nextIs('=')) add(tokens, TokenType::EQEQ, "==", start, 2);
                 else add(tokens, TokenType::EQUAL, "=", start, 1);
                 continue;
             }

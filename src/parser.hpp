@@ -25,7 +25,9 @@ private:
         bool isMutable;
     };
     std::vector<std::map<std::string, ParsedSymbol>> localScopes;
+    std::vector<std::unique_ptr<ASTNode>> generatedFunctions;
     int nextSymbolId = 0;
+    int nextLambdaId = 0;
 
     Token peek() const;
     Token consume(TokenType expected, const std::string& err);
@@ -35,6 +37,8 @@ private:
     std::unique_ptr<ASTNode> parseIfExpression();
     std::unique_ptr<ASTNode> parseWhileExpression();
     std::unique_ptr<ASTNode> parseForExpression();
+    bool startsLambdaExpression() const;
+    std::unique_ptr<ASTNode> parseLambdaExpression();
     std::unique_ptr<ASTNode> parsePrimary();
     std::unique_ptr<ASTNode> parsePostfix();
     std::unique_ptr<ASTNode> parseMultiplicative();

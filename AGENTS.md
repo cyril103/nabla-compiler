@@ -42,7 +42,7 @@ Le pipeline implemente actuellement :
 - objets avec champs de constructeur et appels de methodes parametres;
 - fonctions globales appelables avec parametres;
 - premier type fonction-valeur `IntUnaryFn`, references de fonctions nommees et
-  appels indirects;
+  appels indirects, avec lambdas sans capture `(x: Int) => { ... }`;
 - collection native `IntArray` avec `length`, `get` et `set`;
 - entiers immediats avec pointer tagging et litteraux `String`;
 - affichage console de `String` via la primitive globale `print`;
@@ -134,7 +134,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [ ] Ajouter les champs et methodes herites si l'heritage est retenu.
 - [ ] Valider les types des branches, boucles et operateurs de facon uniforme.
 - [ ] Generaliser `IntUnaryFn` vers des types fonction complets.
-- [ ] Ajouter les lambdas sans capture, puis les closures avec capture.
+- [x] Ajouter les lambdas sans capture pour `IntUnaryFn`.
+- [ ] Ajouter les closures avec capture.
 
 ### P2 - Runtime Et Objets
 
@@ -157,8 +158,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout des fonctions valeurs `IntUnaryFn`, de `intArrayMap`
-  et de la facade objet `ArrayInt`.
+- Prochain commit - Ajout des lambdas sans capture pour `IntUnaryFn`.
+- `209119f` - Ajout des fonctions valeurs `IntUnaryFn`, de `intArrayMap` et de
+  la facade objet `ArrayInt`.
 - `827c162` - Ajout du module `collections.int_array`.
 - `9d1cab5` - Ajout d'une racine `stdlib/` et du module `io`.
 - `e0e611a` - Ajout de la collection native `IntArray`.
@@ -193,5 +195,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter les lambdas sans capture pour `IntUnaryFn`, puis enrichir `ArrayInt`
-avec `filter` et `fold`.
+Enrichir `ArrayInt` avec `filter` et `fold`, puis ajouter les closures avec
+capture.

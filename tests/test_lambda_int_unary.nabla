@@ -1,0 +1,6 @@
+def main(): Int = {
+    val f = (value: Int) => {
+        value * 2
+    }
+    f(21)
+}

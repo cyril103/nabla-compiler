@@ -18,6 +18,9 @@ std::unique_ptr<ProgramNode> Parser::parseProgram() {
             throw CompilerError(ErrorKind::Parser, peek().location, "instruction inattendue '" + peek().value + "'");
         }
     }
+    for (auto& function : generatedFunctions) {
+        program->elements.push_back(std::move(function));
+    }
     return program;
 }
 
@@ -201,6 +204,52 @@ std::unique_ptr<ASTNode> Parser::parseForExpression() {
     return located(std::make_unique<ForNode>(std::move(count), std::move(body)), start.location);
 }
 
+bool Parser::startsLambdaExpression() const {
+    if (peek().type != TokenType::LPAREN || index + 5 >= tokens.size()) return false;
+    return tokens[index + 1].type == TokenType::IDENTIFIER &&
+           tokens[index + 2].type == TokenType::COLON &&
+           tokens[index + 3].type == TokenType::IDENTIFIER &&
+           tokens[index + 4].type == TokenType::RPAREN &&
+           tokens[index + 5].type == TokenType::FAT_ARROW;
+}
+
+std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
+    Token start = consume(TokenType::LPAREN, "");
+    Token parameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre attendu dans la lambda");
+    std::string parameterName = parameterToken.value;
+    consume(TokenType::COLON, "':' attendu après le nom du paramètre de lambda");
+    Token parameterTypeToken = consume(TokenType::IDENTIFIER, "Type de paramètre attendu dans la lambda");
+    std::string parameterType = parameterTypeToken.value;
+    if (parameterType != "Int") {
+        throw CompilerError(
+            ErrorKind::Parser, parameterTypeToken.location,
+            "seules les lambdas Int => Int sont supportées pour l'instant");
+    }
+    consume(TokenType::RPAREN, "Parenthèse fermante attendue après le paramètre de lambda");
+    consume(TokenType::FAT_ARROW, "'=>' attendu après le paramètre de lambda");
+    consume(TokenType::LBRACE, "Bloc attendu après '=>'");
+
+    std::string lambdaName = "lambda." + std::to_string(nextLambdaId++);
+    std::string symbolName = parameterName + "#" + std::to_string(nextSymbolId++);
+
+    std::vector<FunctionDefNode::Parameter> parameters;
+    parameters.push_back({parameterName, symbolName, parameterType});
+    std::vector<CompilerContext::ParameterInfo> signatureParameters;
+    signatureParameters.push_back({parameterName, parameterType, parameterTypeToken.location});
+    context.functions[lambdaName] = {signatureParameters, "Int", start.location, start.location};
+
+    localScopes.emplace_back();
+    localScopes.back()[parameterName] = {symbolName, parameterType, false};
+    auto body = parseBlock();
+    consume(TokenType::RBRACE, "Fin du bloc de lambda attendue");
+    localScopes.pop_back();
+
+    auto function = located(std::make_unique<FunctionDefNode>(
+        "", lambdaName, "Int", std::move(parameters), std::move(body)), start.location);
+    generatedFunctions.push_back(std::move(function));
+    return located(std::make_unique<FunctionReferenceNode>(lambdaName), start.location);
+}
+
 std::unique_ptr<ASTNode> Parser::parsePrimary() {
     if (peek().type == TokenType::KW_IF) {
         return parseIfExpression();
@@ -210,6 +259,9 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
     }
     if (peek().type == TokenType::KW_FOR) {
         return parseForExpression();
+    }
+    if (startsLambdaExpression()) {
+        return parseLambdaExpression();
     }
     if (peek().type == TokenType::LPAREN) {
         consume(TokenType::LPAREN, "");
