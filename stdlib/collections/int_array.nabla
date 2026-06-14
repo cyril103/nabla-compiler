@@ -191,6 +191,25 @@ def intArrayDrop(xs: IntArray, count: Int): IntArray = {
     dropped
 }
 
+def intArraySlice(xs: IntArray, from: Int, until: Int): IntArray = {
+    val start = intClamp(from, 0, xs.length())
+    val stop = intClamp(until, 0, xs.length())
+    var kept = 0
+    if stop > start {
+        kept = stop - start
+    } else {
+        kept
+    }
+
+    val sliced = new IntArray(kept)
+    var index = 0
+    while (index < kept) {
+        sliced.set(index, xs.get(start + index))
+        index = index + 1
+    }
+    sliced
+}
+
 class ArrayInt(values: IntArray) {
     def length(): Int = {
         values.length()
@@ -254,6 +273,10 @@ class ArrayInt(values: IntArray) {
 
     def drop(count: Int): ArrayInt = {
         new ArrayInt(intArrayDrop(values, count))
+    }
+
+    def slice(from: Int, until: Int): ArrayInt = {
+        new ArrayInt(intArraySlice(values, from, until))
     }
 
     def fold(initial: Int, combine: (Int, Int) => Int): Int = {
