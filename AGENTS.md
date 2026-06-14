@@ -57,7 +57,6 @@ Limites importantes :
 - les fonctions globales sont limitees a 6 parametres et les methodes a 5,
   conformement a la convention d'appel actuelle;
 - le tas est fixe et ne possede ni verification de depassement ni ramasse-miettes;
-- les binaires historiques sous `build/` sont encore suivis par Git.
 
 ## Invariants D'Architecture
 
@@ -131,15 +130,16 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ### P3 - Outillage
 
-- [ ] Retirer les binaires suivis sous `build/`.
+- [x] Retirer les binaires suivis sous `build/`.
 - [ ] Ajouter une cible de formatage.
 - [ ] Ajouter une integration continue.
 - [ ] Ajouter des tests unitaires du lexer, parser et analyseur semantique.
 
 ## Journal Des Jalons
 
-- Prochain commit - Structuration de la frame et de la convention d'appel du
-  backend IR.
+- Prochain commit - Retrait des binaires historiques suivis sous `build/`.
+- `63c286e` - Structuration de la frame et de la convention d'appel du backend
+  IR.
 - `c771250` - Suppression de l'ancien code de generation ASM depuis l'AST.
 - `1266271` - Retrait du repli CLI vers l'ancien backend AST.
 - `3d93076` - Bascule du backend ASM par defaut vers l'IR.
@@ -162,5 +162,5 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Retirer les binaires historiques suivis sous `build/`, puis extraire le runtime
-ASM commun du backend IR.
+Extraire le runtime ASM commun du backend IR, puis ajouter une integration
+continue.
