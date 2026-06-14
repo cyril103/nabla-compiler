@@ -314,7 +314,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Ajouter `collections.array` et `arrayFill[T]`, resolu vers les
+- `a86a9ea` - Ajouter `collections.array` et `arrayFill[T]`, resolu vers les
   specialisations `ArrayInt`, `ArrayLong` et `ArrayBool`.
 - `31b39ad` - Ajouter `BoolArray`, la facade standard `ArrayBool` et l'alias
   `Array[Bool]`.
