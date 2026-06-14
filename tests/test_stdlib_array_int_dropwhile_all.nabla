@@ -1,0 +1,17 @@
+import collections.int_array
+
+def main(): Int = {
+    val xs = new ArrayInt(new IntArray(4))
+    val index0 = 0
+    xs.raw().set(index0, 0)
+    xs.raw().set(index0 + 1, 0)
+    xs.raw().set(index0 + 2, 0)
+    xs.raw().set(index0 + 3, 0)
+
+    val dropped = xs.dropWhile(value => value == 0)
+    if dropped.isEmpty() {
+        42
+    } else {
+        1
+    }
+}

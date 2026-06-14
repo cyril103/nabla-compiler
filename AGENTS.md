@@ -75,7 +75,8 @@ Le pipeline implemente actuellement :
   `fold`, `foreach`, `exists`, `forall`, `contains`, `size`, `isEmpty` et
   `nonEmpty`, `head`, `last`, `append`, `prepend`, `reverse`, `concat`,
   `take`, `drop`, `slice`, `indexOf`, `indexOfOption`, `count`, `find`, `min`, `max`,
-  `getOption`, `headOption` et `lastOption`, avec predicats booleens;
+  `getOption`, `headOption`, `lastOption`, `takeWhile` et `dropWhile`,
+  avec predicats booleens;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -193,6 +194,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `ArrayInt.indexOfOption`.
 - [x] Ajouter `OptionInt` puis `ArrayInt.min` et `ArrayInt.max`.
 - [x] Ajouter `ArrayInt.getOption`, `headOption`, `lastOption` et `find`.
+- [x] Ajouter `ArrayInt.takeWhile` et `ArrayInt.dropWhile`.
 
 ### P2 - Runtime Et Objets
 
@@ -275,6 +277,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `1dcff81` - Ajout de l'IR minimale, de `--emit-ir` et des snapshots IR.
 - `8b7be03` - Ajout des diagnostics sources uniformes, de `CompilerError` et des
   tests de diagnostics exacts.
+- `cfcfef8` - Ajouter `ArrayInt.takeWhile` et `ArrayInt.dropWhile`.
 - `1062f09` - Ajout des parametres de fonctions et methodes, appels globaux,
   validation des arguments et convention d'appel x86-64.
 - `93b942f` - Ajout de `AGENTS.md`, des conventions de contribution et de la
@@ -286,5 +289,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter `OptionInt.map`, `OptionInt.filter` et `OptionInt.orElse` pour
-approfondir l'API fonctionnelle des options.
+Ajouter `ArrayInt.takeRight`, `ArrayInt.dropRight` et `ArrayInt.span` pour
+compléter les opérations de découpage fonctionnelles.

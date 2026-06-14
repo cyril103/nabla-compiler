@@ -1,0 +1,11 @@
+import collections.int_array
+
+def main(): Int = {
+    val xs = new ArrayInt(new IntArray(0))
+    val taken = xs.takeWhile(value => value == 0)
+    if taken.isEmpty() {
+        42
+    } else {
+        1
+    }
+}

@@ -1,0 +1,18 @@
+import collections.int_array
+
+def main(): Int = {
+    val xs = new ArrayInt(new IntArray(5))
+    val index0 = 0
+    xs.raw().set(index0, 0)
+    xs.raw().set(index0 + 1, 0)
+    xs.raw().set(index0 + 2, 1)
+    xs.raw().set(index0 + 3, 0)
+    xs.raw().set(index0 + 4, 2)
+
+    val taken = xs.takeWhile(value => value == 0)
+    if taken.size() == 2 && taken.last() == 0 {
+        42
+    } else {
+        1
+    }
+}

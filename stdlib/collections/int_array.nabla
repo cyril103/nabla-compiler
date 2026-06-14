@@ -309,6 +309,36 @@ def intArraySlice(xs: IntArray, from: Int, until: Int): IntArray = {
     sliced
 }
 
+def intArrayTakeWhile(xs: IntArray, predicate: (Int) => Bool): IntArray = {
+    var kept = 0
+    while (kept < xs.length() && predicate(xs.get(kept))) {
+        kept = kept + 1
+    }
+
+    val taken = new IntArray(kept)
+    var index = 0
+    while (index < kept) {
+        taken.set(index, xs.get(index))
+        index = index + 1
+    }
+    taken
+}
+
+def intArrayDropWhile(xs: IntArray, predicate: (Int) => Bool): IntArray = {
+    var skip = 0
+    while (skip < xs.length() && predicate(xs.get(skip))) {
+        skip = skip + 1
+    }
+
+    val dropped = new IntArray(xs.length() - skip)
+    var index = 0
+    while (index < xs.length() - skip) {
+        dropped.set(index, xs.get(skip + index))
+        index = index + 1
+    }
+    dropped
+}
+
 class ArrayInt(values: IntArray) {
     def length(): Int = {
         values.length()
@@ -388,6 +418,14 @@ class ArrayInt(values: IntArray) {
 
     def slice(from: Int, until: Int): ArrayInt = {
         new ArrayInt(intArraySlice(values, from, until))
+    }
+
+    def takeWhile(predicate: (Int) => Bool): ArrayInt = {
+        new ArrayInt(intArrayTakeWhile(values, predicate))
+    }
+
+    def dropWhile(predicate: (Int) => Bool): ArrayInt = {
+        new ArrayInt(intArrayDropWhile(values, predicate))
     }
 
     def fold(initial: Int, combine: (Int, Int) => Int): Int = {
