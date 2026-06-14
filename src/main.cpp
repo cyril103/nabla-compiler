@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
 
         std::ofstream asmFile(asmFilename);
         if (backendIR) {
-            IRCodeGenerator().generateASM(irProgram, asmFile);
+            IRCodeGenerator().generateASM(irProgram, context, asmFile);
         } else {
             globalAST->generateASM(asmFile, context);
         }

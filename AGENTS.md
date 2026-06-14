@@ -48,9 +48,8 @@ Le pipeline implemente actuellement :
 - IR textuelle pour les fonctions globales, entiers, variables, affectations,
   operations binaires, appels de fonctions globales, `if`, `while`, `for`,
   objets et methodes;
-- backend ASM experimental depuis l'IR pour fonctions globales, entiers,
-  variables locales, operations binaires, appels globaux, branchements et
-  boucles;
+- backend ASM experimental depuis l'IR couvrant la suite positive actuelle
+  (fonctions, variables, controle de flux, imports, objets et methodes);
 - generation directe d'assembleur x86-64;
 - tests de compilation et d'execution via `make all-tests`.
 
@@ -59,7 +58,6 @@ Limites importantes :
 - les fonctions globales sont limitees a 6 parametres et les methodes a 5,
   conformement a la convention d'appel actuelle;
 - l'assembleur par defaut est encore genere directement depuis l'AST;
-- le backend ASM depuis IR ne couvre pas encore objets et methodes;
 - le tas est fixe et ne possede ni verification de depassement ni ramasse-miettes;
 - les binaires historiques sous `build/` sont encore suivis par Git.
 
@@ -115,7 +113,7 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Representer les branchements et boucles dans l'IR.
 - [x] Representer les objets, champs et appels de methodes dans l'IR.
 - [ ] Deplacer l'allocation de pile et les conventions d'appel vers le backend.
-- [ ] Couvrir le backend ASM depuis IR pour tout le langage actuel.
+- [x] Couvrir le backend ASM depuis IR pour tout le langage actuel.
 - [ ] Generer l'assembleur uniquement depuis l'IR.
 
 ### P2 - Systeme De Types
@@ -141,7 +139,8 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout du controle de flux au backend ASM depuis IR.
+- Prochain commit - Ajout des objets et methodes au backend ASM depuis IR.
+- `5a97aa4` - Ajout du controle de flux au backend ASM depuis IR.
 - `48f7e1d` - Ajout d'un backend ASM experimental depuis l'IR.
 - `0f33a89` - Ajout des objets, champs et appels de methodes dans l'IR.
 - `f38e0a6` - Ajout du controle de flux `if`/`while`/`for` dans l'IR.
@@ -159,4 +158,5 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Etendre le backend ASM depuis IR aux objets et methodes.
+Basculer la generation assembleur par defaut vers le backend IR en conservant
+temporairement une option de repli vers l'ancien backend AST.

@@ -82,9 +82,9 @@ l'IR :
 build/nablac --backend-ir tests/test_arithmetic.nabla
 ```
 
-Ce backend couvre pour l'instant les fonctions globales, entiers, variables
-locales, opérations binaires, appels de fonctions globales, branchements et
-boucles.
+Ce backend couvre désormais la suite positive actuelle, incluant fonctions,
+variables, contrôle de flux, imports, objets, champs, appels de méthodes et
+`Int.toString`.
 
 ### Personnaliser le fichier source
 

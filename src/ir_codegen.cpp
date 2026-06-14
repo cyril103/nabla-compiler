@@ -1,5 +1,6 @@
 #include "ir_codegen.hpp"
 #include "compiler_error.hpp"
+#include <algorithm>
 #include <map>
 #include <ostream>
 #include <set>
@@ -9,6 +10,7 @@
 
 namespace {
 const std::vector<std::string> GLOBAL_ARGUMENT_REGISTERS = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+const std::vector<std::string> METHOD_ARGUMENT_REGISTERS = {"rsi", "rdx", "rcx", "r8", "r9"};
 
 [[noreturn]] void codegenError(const std::string& message) {
     throw CompilerError(ErrorKind::Codegen, {"<ir>", 1, 1}, message);
@@ -26,6 +28,12 @@ std::string asmLabelName(const std::string& functionName, const std::string& lab
     return ".L_ir_" + asmFunctionName(functionName) + "_" + asmFunctionName(label);
 }
 
+std::pair<std::string, std::string> splitQualifiedMember(const std::string& name) {
+    size_t dot = name.find('.');
+    if (dot == std::string::npos) codegenError("membre IR non qualifie: " + name);
+    return {name.substr(0, dot), name.substr(dot + 1)};
+}
+
 long long boxedInt(const std::string& value) {
     return (std::stoll(value) << 1) | 1;
 }
@@ -37,8 +45,9 @@ struct PhiInfo {
 
 class FunctionEmitter {
 public:
-    FunctionEmitter(const IRFunction& function, std::ostream& out)
-        : function(function), out(out) {
+    FunctionEmitter(
+        const IRFunction& function, const CompilerContext& context, std::ostream& out)
+        : function(function), context(context), out(out) {
         collectPhiLabels();
         collectSlots();
     }
@@ -60,6 +69,7 @@ public:
 
 private:
     const IRFunction& function;
+    const CompilerContext& context;
     std::ostream& out;
     std::map<std::string, int> slotOffsets;
     std::vector<std::string> slotOrder;
@@ -123,6 +133,15 @@ private:
             case IROpcode::Call:
                 emitCall(instruction);
                 break;
+            case IROpcode::MethodCall:
+                emitMethodCall(instruction);
+                break;
+            case IROpcode::NewObject:
+                emitNewObject(instruction);
+                break;
+            case IROpcode::FieldLoad:
+                emitFieldLoad(instruction);
+                break;
             case IROpcode::Load:
                 loadValue(instruction.operands[0], "rax");
                 storeRegister(instruction.result, "rax");
@@ -149,10 +168,6 @@ private:
                 break;
             case IROpcode::Phi:
                 break;
-            case IROpcode::MethodCall:
-            case IROpcode::NewObject:
-            case IROpcode::FieldLoad:
-                codegenError("instruction IR non supportee par le backend ASM initial");
         }
     }
 
@@ -207,13 +222,102 @@ private:
         out << "    call " << asmFunctionName(instruction.operation) << "\n";
         storeRegister(instruction.result, "rax");
     }
+
+    std::vector<int> fieldOffsetsByConstructorOrder(const std::string& className) const {
+        auto classIt = context.classes.find(className);
+        if (classIt == context.classes.end()) {
+            codegenError("layout de classe inconnu: " + className);
+        }
+        auto layoutIt = context.classLayouts.find(className);
+        if (classIt->second.fields.empty()) return {};
+        if (layoutIt == context.classLayouts.end()) {
+            codegenError("layout de classe inconnu: " + className);
+        }
+        std::vector<int> offsets;
+        for (const auto& field : classIt->second.fields) {
+            auto offsetIt = layoutIt->second.find(field.name);
+            if (offsetIt == layoutIt->second.end()) {
+                codegenError("offset de champ inconnu: " + className + "." + field.name);
+            }
+            offsets.push_back(offsetIt->second);
+        }
+        return offsets;
+    }
+
+    int objectSizeFor(const std::string& className) const {
+        std::vector<int> offsets = fieldOffsetsByConstructorOrder(className);
+        if (offsets.empty()) return 8;
+        return *std::max_element(offsets.begin(), offsets.end()) + 8;
+    }
+
+    int fieldOffsetFor(const std::string& qualifiedField) const {
+        auto [className, fieldName] = splitQualifiedMember(qualifiedField);
+        auto layoutIt = context.classLayouts.find(className);
+        if (layoutIt == context.classLayouts.end()) {
+            codegenError("layout de classe inconnu: " + className);
+        }
+        auto fieldIt = layoutIt->second.find(fieldName);
+        if (fieldIt == layoutIt->second.end()) {
+            codegenError("offset de champ inconnu: " + qualifiedField);
+        }
+        return fieldIt->second;
+    }
+
+    void emitNewObject(const IRInstruction& instruction) {
+        std::vector<int> fieldOffsets = fieldOffsetsByConstructorOrder(instruction.operation);
+        if (instruction.operands.size() != fieldOffsets.size()) {
+            codegenError("nombre d'arguments invalide pour new " + instruction.operation);
+        }
+
+        out << "    mov rbx, [heap_pointer]\n";
+        out << "    add qword [heap_pointer], " << objectSizeFor(instruction.operation) << "\n";
+        out << "    mov qword [rbx], 0\n";
+        for (size_t i = 0; i < instruction.operands.size(); ++i) {
+            loadValue(instruction.operands[i], "rax");
+            out << "    mov [rbx + " << fieldOffsets[i] << "], rax\n";
+        }
+        storeRegister(instruction.result, "rbx");
+    }
+
+    void emitFieldLoad(const IRInstruction& instruction) {
+        loadValue(instruction.operands[0], "rax");
+        out << "    mov rax, [rax + " << fieldOffsetFor(instruction.operation) << "]\n";
+        storeRegister(instruction.result, "rax");
+    }
+
+    void emitMethodCall(const IRInstruction& instruction) {
+        auto [className, methodName] = splitQualifiedMember(instruction.operation);
+        if (instruction.operands.empty()) codegenError("appel de methode IR sans receveur");
+
+        loadValue(instruction.operands[0], "rdi");
+        const size_t methodArgumentCount = instruction.operands.size() - 1;
+        if (methodArgumentCount > METHOD_ARGUMENT_REGISTERS.size()) {
+            codegenError("appel de methode IR avec plus de 5 arguments");
+        }
+        for (size_t i = 0; i < methodArgumentCount; ++i) {
+            loadValue(instruction.operands[i + 1], METHOD_ARGUMENT_REGISTERS[i]);
+        }
+
+        if (className == "Int" && methodName == "toString") {
+            out << "    call Int_method_toString\n";
+        } else {
+            out << "    call " << asmFunctionName(instruction.operation) << "\n";
+        }
+        storeRegister(instruction.result, "rax");
+    }
 };
 }
 
-void IRCodeGenerator::generateASM(const IRProgram& program, std::ostream& out) const {
+void IRCodeGenerator::generateASM(
+    const IRProgram& program, const CompilerContext& context, std::ostream& out) const {
+    out << "section .data\n    global_heap: times 4096 db 0\n    heap_pointer: dq global_heap\n"
+        << "    Int_str_obj: dq 0, 0, Int_str_buffer\n    Int_str_buffer: times 32 db 0\n\n";
     out << "section .text\nglobal _start\n\n";
     out << "_start:\n    call main\n    mov rdi, rax\n    shr rdi, 1\n    mov rax, 60\n    syscall\n\n";
+    out << "Int_method_toString:\n    mov rax, rdi\n    shr rax, 1\n    mov rcx, 10\n    mov rsi, Int_str_buffer + 30\n    mov r8, 0\n"
+        << ".L_loop_str:\n    dec rsi\n    inc r8\n    cqo\n    idiv rcx\n    add dl, 0x30\n    mov [rsi], dl\n    test rax, rax\n    jnz .L_loop_str\n"
+        << "    mov [Int_str_obj + 8], r8\n    mov [Int_str_obj + 16], rsi\n    mov rax, Int_str_obj\n    ret\n\n";
     for (const auto& function : program.functions) {
-        FunctionEmitter(function, out).emit();
+        FunctionEmitter(function, context, out).emit();
     }
 }
