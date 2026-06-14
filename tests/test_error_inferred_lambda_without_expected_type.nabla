@@ -1,0 +1,6 @@
+def main(): Int = {
+    val f = value => {
+        value + 1
+    }
+    0
+}

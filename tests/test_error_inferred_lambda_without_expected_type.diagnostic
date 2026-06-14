@@ -1,0 +1,1 @@
+tests/test_error_inferred_lambda_without_expected_type.nabla:2:13: parser error: type attendu requis pour inférer le paramètre de lambda

@@ -52,6 +52,8 @@ Le pipeline implemente actuellement :
 - lambdas et appels indirects avec plusieurs parametres, dans les limites de la
   convention d'appel actuelle;
 - closures testees avec parametres, captures et retours non limites a `Int`;
+- inference du type du parametre pour les lambdas mono-parametre en position
+  d'argument, par exemple `xs.map(value => { value + 1 })`;
 - types fonction imbriques en retour, par exemple `(Int) => ((Int) => Int)`;
 - type `Unit` formalise pour les fonctions a effet et les boucles `while` /
   `for`;
@@ -162,6 +164,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   fonctionnels de collection.
 - [x] Ajouter les closures avec capture par valeur pour les lambdas `Int`.
 - [x] Generaliser les closures aux types fonction complets.
+- [x] Ajouter l'inference simple des types de parametres de lambda.
 
 ### P2 - Runtime Et Objets
 
@@ -184,7 +187,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Generalisation des closures aux types fonction canoniques.
+- Prochain commit - Inference simple des parametres de lambda.
+- `1243161` - Generalisation des closures aux types fonction canoniques.
 - `917c2a2` - Retrait des aliases de types fonction historiques.
 - `771223d` - Ajout des types fonction en retour.
 - `c8a69eb` - Generalisation des lambdas multi-parametres.
@@ -233,5 +237,4 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter l'inference simple des types de parametres de lambda depuis le type
-fonction attendu, par exemple `xs.map(x => x + 1)`.
+Ajouter les lambdas mono-expression sans bloc, par exemple `xs.map(x => x + 1)`.

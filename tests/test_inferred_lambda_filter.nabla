@@ -1,0 +1,8 @@
+import collections.int_array
+
+def main(): Int = {
+    val xs = arrayIntRange(6)
+    xs.filter(value => {
+        value > 2
+    }).sum()
+}

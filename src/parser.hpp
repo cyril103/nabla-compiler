@@ -48,7 +48,9 @@ private:
     std::unique_ptr<ASTNode> parseWhileExpression();
     std::unique_ptr<ASTNode> parseForExpression();
     bool startsLambdaExpression() const;
+    bool startsInferredLambdaExpression() const;
     std::unique_ptr<ASTNode> parseLambdaExpression();
+    std::unique_ptr<ASTNode> parseInferredLambdaExpression(const std::string& expectedType);
     std::unique_ptr<ASTNode> parsePrimary();
     std::unique_ptr<ASTNode> parsePostfix();
     std::unique_ptr<ASTNode> parseMultiplicative();
@@ -58,7 +60,11 @@ private:
     std::unique_ptr<ASTNode> parseBlock();
     std::unique_ptr<ASTNode> parseStatement();
     std::unique_ptr<ASTNode> parseFunctionDef(std::string clName);
-    std::vector<std::unique_ptr<ASTNode>> parseArguments();
+    std::vector<std::unique_ptr<ASTNode>> parseArguments(
+        const std::vector<std::string>& expectedTypes = {});
+    std::unique_ptr<ASTNode> parseArgument(const std::string& expectedType);
+    std::vector<std::string> expectedArgumentTypesForMethodCall(
+        const std::string& receiverType, const std::string& methodName) const;
     std::pair<std::string, SourceLocation> parseType(const std::string& expectedMessage);
     const ParsedSymbol* findLocal(const std::string& name) const;
     std::pair<const ParsedSymbol*, size_t> findLocalWithScope(const std::string& name) const;
