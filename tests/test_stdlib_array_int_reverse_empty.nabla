@@ -1,0 +1,10 @@
+import collections.int_array
+
+def main(): Int = {
+    val reversed = arrayIntRange(0).reverse()
+    if reversed.size() == 0 && reversed.isEmpty() {
+        42
+    } else {
+        1
+    }
+}

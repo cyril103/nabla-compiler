@@ -71,7 +71,8 @@ Le pipeline implemente actuellement :
   `intArraySum`, `intArrayFill`, `intArrayRange`, `intArrayMap`,
   `intArrayFilter` et la facade objet `ArrayInt` avec `map`, `filter`,
   `fold`, `foreach`, `exists`, `forall`, `contains`, `size`, `isEmpty` et
-  `nonEmpty`, `head`, `last`, `append` et `prepend`, avec predicats booleens;
+  `nonEmpty`, `head`, `last`, `append`, `prepend` et `reverse`, avec
+  predicats booleens;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -181,6 +182,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `ArrayInt.size`, `isEmpty` et `nonEmpty`.
 - [x] Ajouter `ArrayInt.head` et `ArrayInt.last`.
 - [x] Ajouter `ArrayInt.append` et `ArrayInt.prepend`.
+- [x] Ajouter `ArrayInt.reverse`.
 
 ### P2 - Runtime Et Objets
 
@@ -203,7 +205,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout de `ArrayInt.append` et `ArrayInt.prepend`.
+- Prochain commit - Ajout de `ArrayInt.reverse`.
+- `689f55c` - Ajout de `ArrayInt.append` et `ArrayInt.prepend`.
 - `60de4bf` - Ajout de `ArrayInt.head` et `ArrayInt.last`.
 - `e96457c` - Ajout des predicats de taille `ArrayInt`.
 - `7b534be` - Ajout du court-circuit booleen.
@@ -262,5 +265,4 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter `ArrayInt.reverse` pour continuer les operations qui produisent de
-nouveaux tableaux.
+Ajouter `ArrayInt.concat(other: ArrayInt)` pour combiner deux collections.

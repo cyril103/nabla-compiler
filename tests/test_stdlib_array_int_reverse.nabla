@@ -1,0 +1,7 @@
+import collections.int_array
+
+def main(): Int = {
+    val xs = arrayIntRange(4)
+    val reversed = xs.reverse()
+    reversed.head() + reversed.get(1) + reversed.last()
+}

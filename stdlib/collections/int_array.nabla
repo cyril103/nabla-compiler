@@ -130,6 +130,16 @@ def intArrayPrepend(xs: IntArray, value: Int): IntArray = {
     prepended
 }
 
+def intArrayReverse(xs: IntArray): IntArray = {
+    val reversed = new IntArray(xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        reversed.set(index, xs.get(xs.length() - index - 1))
+        index = index + 1
+    }
+    reversed
+}
+
 class ArrayInt(values: IntArray) {
     def length(): Int = {
         values.length()
@@ -177,6 +187,10 @@ class ArrayInt(values: IntArray) {
 
     def prepend(value: Int): ArrayInt = {
         new ArrayInt(intArrayPrepend(values, value))
+    }
+
+    def reverse(): ArrayInt = {
+        new ArrayInt(intArrayReverse(values))
     }
 
     def fold(initial: Int, combine: (Int, Int) => Int): Int = {
