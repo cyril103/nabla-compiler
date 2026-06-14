@@ -1,0 +1,1 @@
+tests/test_error_legacy_function_alias.nabla:1:26: semantic error: type inconnu 'IntUnaryFn' pour le paramètre 'apply.f'

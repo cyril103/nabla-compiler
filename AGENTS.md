@@ -41,15 +41,12 @@ Le pipeline implemente actuellement :
   avec protection contre les cycles;
 - objets avec champs de constructeur et appels de methodes parametres;
 - fonctions globales appelables avec parametres;
-- premiers types fonction-valeur `IntUnaryFn`, `IntConsumerFn` et
-  `IntBinaryFn`, references de fonctions nommees et appels indirects, avec
-  lambdas sans capture `(x: Int) => { ... }` et
+- types fonction-valeur canoniques `Fn(...)->...`, references de fonctions
+  nommees et appels indirects, avec lambdas sans capture `(x: Int) => { ... }` et
   `(acc: Int, value: Int) => { ... }`;
-- closures avec capture par valeur pour les lambdas specialisees `IntUnaryFn`
-  et `IntConsumerFn`;
-- representation interne canonique des types fonction sous forme `Fn(...)->...`,
-  avec compatibilite de lecture pour les anciens aliases `IntUnaryFn`,
-  `IntConsumerFn` et `IntBinaryFn`;
+- closures avec capture par valeur pour les lambdas de types fonction
+  canoniques;
+- representation interne canonique des types fonction sous forme `Fn(...)->...`;
 - syntaxe de types fonction parenthesee comme `(Int) => Int`, `(Int) => Unit`,
   `(Int, Int) => Int` et `(String) => Int`;
 - lambdas et appels indirects avec plusieurs parametres, dans les limites de la
@@ -144,8 +141,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ### P2 - Systeme De Types
 
-- [ ] Formaliser `Int`, `String`, `IntArray`, `IntUnaryFn`, `IntConsumerFn`,
-  `IntBinaryFn` et les types de classes.
+- [ ] Formaliser `Int`, `String`, `IntArray`, les types fonction canoniques et
+  les types de classes.
 - [x] Formaliser `Unit` pour les fonctions a effet et les boucles.
 - [ ] Ajouter les booleens ou definir officiellement `Int` comme condition.
 - [ ] Ajouter les champs et methodes herites si l'heritage est retenu.
@@ -155,6 +152,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter la syntaxe de types fonction parenthesee pour les aliases actuels.
 - [x] Autoriser les lambdas a plus de deux parametres.
 - [x] Autoriser les types fonction en position de retour.
+- [x] Retirer les aliases historiques `IntUnaryFn`, `IntConsumerFn` et
+  `IntBinaryFn`.
 - [x] Ajouter `IntBinaryFn` pour `fold` et operations binaires de collections.
 - [x] Ajouter les lambdas sans capture pour `IntUnaryFn`.
 - [x] Ajouter `IntConsumerFn` pour les fonctions `Int => Unit`.
@@ -184,7 +183,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout des types fonction en retour.
+- Prochain commit - Retrait des aliases de types fonction historiques.
+- `771223d` - Ajout des types fonction en retour.
 - `c8a69eb` - Generalisation des lambdas multi-parametres.
 - `75a24fa` - Generalisation canonique des types fonction.
 - `cc342e4` - Ajout de la syntaxe de types fonction parenthesee.
@@ -231,4 +231,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Retirer les aliases historiques `IntUnaryFn`, `IntConsumerFn` et `IntBinaryFn`.
+Generaliser les closures a tous les types fonction canoniques, au-dela des cas
+`Int`.

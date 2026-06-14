@@ -62,10 +62,6 @@ inline std::string formatFunctionType(const CompilerContext::FunctionType& funct
 }
 
 inline std::optional<CompilerContext::FunctionType> functionTypeFromName(const std::string& type) {
-    if (type == "IntUnaryFn") return CompilerContext::FunctionType{{"Int"}, "Int"};
-    if (type == "IntConsumerFn") return CompilerContext::FunctionType{{"Int"}, "Unit"};
-    if (type == "IntBinaryFn") return CompilerContext::FunctionType{{"Int", "Int"}, "Int"};
-
     const std::string prefix = "Fn(";
     const std::string arrow = ")->";
     if (type.rfind(prefix, 0) != 0) return std::nullopt;

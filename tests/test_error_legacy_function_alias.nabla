@@ -1,0 +1,9 @@
+def apply(value: Int, f: IntUnaryFn): Int = {
+    value
+}
+
+def main(): Int = {
+    apply(1, (x: Int) => {
+        x + 1
+    })
+}
