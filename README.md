@@ -75,16 +75,21 @@ affectations, opérations binaires, appels de fonctions globales, `if`, `while`,
 `Int.toString`. La génération assembleur reste pour le moment directe depuis
 l'AST.
 
-Un backend assembleur expérimental peut compiler un premier sous-ensemble depuis
-l'IR :
+La génération assembleur utilise désormais le backend IR par défaut :
 
 ```bash
-build/nablac --backend-ir tests/test_arithmetic.nabla
+build/nablac tests/test_arithmetic.nabla
 ```
 
 Ce backend couvre désormais la suite positive actuelle, incluant fonctions,
 variables, contrôle de flux, imports, objets, champs, appels de méthodes et
 `Int.toString`.
+
+L'ancien backend direct depuis l'AST reste disponible temporairement :
+
+```bash
+build/nablac --backend-ast tests/test_arithmetic.nabla
+```
 
 ### Personnaliser le fichier source
 

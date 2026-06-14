@@ -48,16 +48,17 @@ Le pipeline implemente actuellement :
 - IR textuelle pour les fonctions globales, entiers, variables, affectations,
   operations binaires, appels de fonctions globales, `if`, `while`, `for`,
   objets et methodes;
-- backend ASM experimental depuis l'IR couvrant la suite positive actuelle
+- backend ASM par defaut depuis l'IR couvrant la suite positive actuelle
   (fonctions, variables, controle de flux, imports, objets et methodes);
-- generation directe d'assembleur x86-64;
+- ancien backend direct depuis l'AST disponible temporairement via
+  `--backend-ast`;
 - tests de compilation et d'execution via `make all-tests`.
 
 Limites importantes :
 
 - les fonctions globales sont limitees a 6 parametres et les methodes a 5,
   conformement a la convention d'appel actuelle;
-- l'assembleur par defaut est encore genere directement depuis l'AST;
+- le backend direct depuis l'AST est conserve comme repli temporaire;
 - le tas est fixe et ne possede ni verification de depassement ni ramasse-miettes;
 - les binaires historiques sous `build/` sont encore suivis par Git.
 
@@ -114,7 +115,8 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Representer les objets, champs et appels de methodes dans l'IR.
 - [ ] Deplacer l'allocation de pile et les conventions d'appel vers le backend.
 - [x] Couvrir le backend ASM depuis IR pour tout le langage actuel.
-- [ ] Generer l'assembleur uniquement depuis l'IR.
+- [x] Generer l'assembleur par defaut depuis l'IR.
+- [ ] Retirer l'ancien backend direct depuis l'AST.
 
 ### P2 - Systeme De Types
 
@@ -139,7 +141,8 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout des objets et methodes au backend ASM depuis IR.
+- Prochain commit - Bascule du backend ASM par defaut vers l'IR.
+- `baefaa6` - Ajout des objets et methodes au backend ASM depuis IR.
 - `5a97aa4` - Ajout du controle de flux au backend ASM depuis IR.
 - `48f7e1d` - Ajout d'un backend ASM experimental depuis l'IR.
 - `0f33a89` - Ajout des objets, champs et appels de methodes dans l'IR.
@@ -158,5 +161,5 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Basculer la generation assembleur par defaut vers le backend IR en conservant
-temporairement une option de repli vers l'ancien backend AST.
+Retirer progressivement l'ancien backend direct depuis l'AST apres une derniere
+passe de stabilisation du backend IR.

@@ -26,7 +26,7 @@ static std::filesystem::path findProjectRoot(const std::filesystem::path& start)
 }
 
 static void printUsage(const char* programName) {
-    std::cerr << "Usage: " << programName << " [--keep-asm|--keep-temp|--emit-ir|--backend-ir] <fichier.nabla>\n";
+    std::cerr << "Usage: " << programName << " [--keep-asm|--keep-temp|--emit-ir|--backend-ir|--backend-ast] <fichier.nabla>\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     bool keepAsm = false;
     bool keepTemp = false;
     bool emitIR = false;
-    bool backendIR = false;
+    bool backendAST = false;
     std::string sourcePath;
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
@@ -47,7 +47,10 @@ int main(int argc, char* argv[]) {
         } else if (arg == "--emit-ir") {
             emitIR = true;
         } else if (arg == "--backend-ir") {
-            backendIR = true;
+            // Kept for compatibility; IR is now the default backend.
+            backendAST = false;
+        } else if (arg == "--backend-ast") {
+            backendAST = true;
         } else if (arg == "--help" || arg == "-h") {
             printUsage(argv[0]);
             return 0;
@@ -92,7 +95,7 @@ int main(int argc, char* argv[]) {
         SemanticAnalyzer semanticAnalyzer(context);
         semanticAnalyzer.analyze(*globalAST);
         IRProgram irProgram;
-        if (emitIR || backendIR) {
+        if (emitIR || !backendAST) {
             irProgram = IRBuilder().build(*globalAST);
         }
         if (emitIR) {
@@ -101,10 +104,10 @@ int main(int argc, char* argv[]) {
         }
 
         std::ofstream asmFile(asmFilename);
-        if (backendIR) {
-            IRCodeGenerator().generateASM(irProgram, context, asmFile);
-        } else {
+        if (backendAST) {
             globalAST->generateASM(asmFile, context);
+        } else {
+            IRCodeGenerator().generateASM(irProgram, context, asmFile);
         }
         asmFile.close();
 
