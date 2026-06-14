@@ -1,0 +1,1 @@
+tests/test_error_function_argument_type.nabla:12:14: semantic error: identity, paramètre 'value': type 'Int' attendu, 'A' reçu

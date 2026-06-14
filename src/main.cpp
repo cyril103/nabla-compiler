@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
         std::string canonicalMain = std::filesystem::canonical(mainPath).string();
         context.parsedFiles.insert(canonicalMain);
 
-        Lexer lexer(buffer.str());
+        Lexer lexer(buffer.str(), mainPath.string());
         Parser parser(lexer.tokenize(), context, mainPath);
         auto globalAST = parser.parseProgram();
         SemanticAnalyzer semanticAnalyzer(context);
@@ -104,6 +104,9 @@ int main(int argc, char* argv[]) {
             std::cout << "\033[1;33m[Nabla] Fichiers temporaires conservés : " << asmFilename << ", " << objFilename << "\033[0m\n";
         }
         std::cout << "\033[1;32m[Nabla] Exécutable compilé avec succès : ./" << exePath << "\033[0m\n";
+    } catch (const CompilerError& e) {
+        std::cerr << e.format() << "\n";
+        return 1;
     } catch (const std::exception& e) {
         std::cerr << "Erreur: " << e.what() << "\n";
         return 1;

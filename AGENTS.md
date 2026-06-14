@@ -44,6 +44,7 @@ Le pipeline implemente actuellement :
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
   affectations;
+- diagnostics uniformes avec fichier, ligne, colonne et phase du compilateur;
 - generation directe d'assembleur x86-64;
 - tests de compilation et d'execution via `make all-tests`.
 
@@ -52,8 +53,6 @@ Limites importantes :
 - les fonctions globales sont limitees a 6 parametres et les methodes a 5,
   conformement a la convention d'appel actuelle;
 - il n'existe pas encore de representation intermediaire entre AST et ASM;
-- les diagnostics ne contiennent pas encore systematiquement fichier, ligne et
-  colonne;
 - le tas est fixe et ne possede ni verification de depassement ni ramasse-miettes;
 - les binaires historiques sous `build/` sont encore suivis par Git.
 
@@ -96,10 +95,10 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ### P1 - Diagnostics Sources
 
-- [ ] Ajouter colonne et fichier aux tokens.
-- [ ] Attacher une position source aux noeuds AST.
-- [ ] Introduire un type d'erreur commun pour lexer, parser et semantique.
-- [ ] Afficher des diagnostics sous la forme `fichier:ligne:colonne`.
+- [x] Ajouter colonne et fichier aux tokens.
+- [x] Attacher une position source aux noeuds AST.
+- [x] Introduire un type d'erreur commun pour lexer, parser et semantique.
+- [x] Afficher des diagnostics sous la forme `fichier:ligne:colonne`.
 
 ### P1 - Representation Intermediaire
 
@@ -131,8 +130,10 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout des parametres de fonctions et methodes, appels
-  globaux, validation des arguments et convention d'appel x86-64.
+- Prochain commit - Ajout des diagnostics sources uniformes, de `CompilerError`
+  et des tests de diagnostics exacts.
+- `1062f09` - Ajout des parametres de fonctions et methodes, appels globaux,
+  validation des arguments et convention d'appel x86-64.
 - `93b942f` - Ajout de `AGENTS.md`, des conventions de contribution et de la
   feuille de route maintenue.
 - `469f535` - Ajout de la phase d'analyse semantique et des validations de types.
@@ -142,5 +143,5 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter des diagnostics sources uniformes avec fichier, ligne et colonne, puis
-les propager du lexer jusqu'a l'analyse semantique.
+Introduire une representation intermediaire minimale entre l'AST semantiquement
+valide et la generation d'assembleur.

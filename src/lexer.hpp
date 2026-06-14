@@ -1,115 +1,142 @@
 #pragma once
+
+#include "compiler_error.hpp"
+#include <cctype>
 #include <string>
 #include <vector>
-#include <cctype>
 
 enum class TokenType {
-    KW_DEF, KW_CLASS, KW_NEW, KW_IMPORT, KW_IF, KW_ELSE, KW_WHILE, KW_FOR, KW_VAL, KW_VAR, IDENTIFIER, LPAREN, RPAREN, COLON, EQUAL, LBRACE, RBRACE, 
-    COMMA, DOT, INT_LITERAL, PLUS, MINUS, STAR, SLASH, EQEQ, NEQ, LT, GT, LTE, GTE, EOF_TOKEN
+    KW_DEF, KW_CLASS, KW_NEW, KW_IMPORT, KW_IF, KW_ELSE, KW_WHILE, KW_FOR, KW_VAL, KW_VAR,
+    IDENTIFIER, LPAREN, RPAREN, COLON, EQUAL, LBRACE, RBRACE, COMMA, DOT, INT_LITERAL,
+    PLUS, MINUS, STAR, SLASH, EQEQ, NEQ, LT, GT, LTE, GTE, EOF_TOKEN
 };
 
-struct Token { 
-    TokenType type; 
-    std::string value; 
-    int line; 
+struct Token {
+    TokenType type;
+    std::string value;
+    SourceLocation location;
 };
 
 class Lexer {
 public:
-    Lexer(const std::string& source) : src(source), index(0), current_line(1) {}
-    
+    Lexer(const std::string& source, std::string file)
+        : src(source), file(std::move(file)), index(0), currentLine(1), currentColumn(1) {}
+
     std::vector<Token> tokenize() {
         std::vector<Token> tokens;
         while (index < src.size()) {
             char current = src[index];
-            
-            if (current == '\n') { 
-                current_line++; 
-                index++; 
-                continue; 
+
+            if (current == '\n') {
+                advance();
+                continue;
             }
-            if (isspace(current)) { index++; continue; }
-            
-            if (current == '(') { tokens.push_back({TokenType::LPAREN, "(", current_line}); index++; continue; }
-            if (current == ')') { tokens.push_back({TokenType::RPAREN, ")", current_line}); index++; continue; }
-            if (current == ':') { tokens.push_back({TokenType::COLON, ":", current_line});  index++; continue; }
+            if (std::isspace(static_cast<unsigned char>(current))) {
+                advance();
+                continue;
+            }
+
+            SourceLocation start = location();
+            if (current == '(') { add(tokens, TokenType::LPAREN, "(", start, 1); continue; }
+            if (current == ')') { add(tokens, TokenType::RPAREN, ")", start, 1); continue; }
+            if (current == ':') { add(tokens, TokenType::COLON, ":", start, 1); continue; }
+            if (current == '{') { add(tokens, TokenType::LBRACE, "{", start, 1); continue; }
+            if (current == '}') { add(tokens, TokenType::RBRACE, "}", start, 1); continue; }
+            if (current == ',') { add(tokens, TokenType::COMMA, ",", start, 1); continue; }
+            if (current == '.') { add(tokens, TokenType::DOT, ".", start, 1); continue; }
+            if (current == '+') { add(tokens, TokenType::PLUS, "+", start, 1); continue; }
+            if (current == '-') { add(tokens, TokenType::MINUS, "-", start, 1); continue; }
+            if (current == '*') { add(tokens, TokenType::STAR, "*", start, 1); continue; }
+            if (current == '/') { add(tokens, TokenType::SLASH, "/", start, 1); continue; }
             if (current == '=') {
-                if (index + 1 < src.size() && src[index + 1] == '=') {
-                    tokens.push_back({TokenType::EQEQ, "==", current_line});
-                    index += 2;
-                } else {
-                    tokens.push_back({TokenType::EQUAL, "=", current_line});
-                    index++;
-                }
+                if (nextIs('=')) add(tokens, TokenType::EQEQ, "==", start, 2);
+                else add(tokens, TokenType::EQUAL, "=", start, 1);
                 continue;
             }
             if (current == '!') {
-                if (index + 1 < src.size() && src[index + 1] == '=') {
-                    tokens.push_back({TokenType::NEQ, "!=", current_line});
-                    index += 2;
+                if (nextIs('=')) {
+                    add(tokens, TokenType::NEQ, "!=", start, 2);
                     continue;
                 }
+                throw CompilerError(ErrorKind::Lexer, start, "caractère inattendu '!'");
             }
             if (current == '<') {
-                if (index + 1 < src.size() && src[index + 1] == '=') {
-                    tokens.push_back({TokenType::LTE, "<=", current_line});
-                    index += 2;
-                } else {
-                    tokens.push_back({TokenType::LT, "<", current_line});
-                    index++;
-                }
+                if (nextIs('=')) add(tokens, TokenType::LTE, "<=", start, 2);
+                else add(tokens, TokenType::LT, "<", start, 1);
                 continue;
             }
             if (current == '>') {
-                if (index + 1 < src.size() && src[index + 1] == '=') {
-                    tokens.push_back({TokenType::GTE, ">=", current_line});
-                    index += 2;
-                } else {
-                    tokens.push_back({TokenType::GT, ">", current_line});
-                    index++;
-                }
+                if (nextIs('=')) add(tokens, TokenType::GTE, ">=", start, 2);
+                else add(tokens, TokenType::GT, ">", start, 1);
                 continue;
             }
-            if (current == '{') { tokens.push_back({TokenType::LBRACE, "{", current_line}); index++; continue; }
-            if (current == '}') { tokens.push_back({TokenType::RBRACE, "}", current_line}); index++; continue; }
-            if (current == ',') { tokens.push_back({TokenType::COMMA, ",", current_line});  index++; continue; }
-            if (current == '.') { tokens.push_back({TokenType::DOT, ".", current_line});    index++; continue; }
-            if (current == '+') { tokens.push_back({TokenType::PLUS, "+", current_line});   index++; continue; }
-            if (current == '-') { tokens.push_back({TokenType::MINUS, "-", current_line});  index++; continue; }
-            if (current == '*') { tokens.push_back({TokenType::STAR, "*", current_line});   index++; continue; }
-            if (current == '/') { tokens.push_back({TokenType::SLASH, "/", current_line});  index++; continue; }
 
-            if (isalpha(current)) {
+            if (std::isalpha(static_cast<unsigned char>(current))) {
                 std::string ident;
-                while (index < src.size() && isalnum(src[index])) { ident += src[index++]; }
-                TokenType t = TokenType::IDENTIFIER;
-                if (ident == "def") t = TokenType::KW_DEF;
-                else if (ident == "class") t = TokenType::KW_CLASS;
-                else if (ident == "new") t = TokenType::KW_NEW;
-                else if (ident == "import") t = TokenType::KW_IMPORT;
-                else if (ident == "if") t = TokenType::KW_IF;
-                else if (ident == "else") t = TokenType::KW_ELSE;
-                else if (ident == "while") t = TokenType::KW_WHILE;
-                else if (ident == "for") t = TokenType::KW_FOR;
-                else if (ident == "val") t = TokenType::KW_VAL;
-                else if (ident == "var") t = TokenType::KW_VAR;
-                
-                tokens.push_back({t, ident, current_line});
+                while (index < src.size() && std::isalnum(static_cast<unsigned char>(src[index]))) {
+                    ident += src[index];
+                    advance();
+                }
+                TokenType type = TokenType::IDENTIFIER;
+                if (ident == "def") type = TokenType::KW_DEF;
+                else if (ident == "class") type = TokenType::KW_CLASS;
+                else if (ident == "new") type = TokenType::KW_NEW;
+                else if (ident == "import") type = TokenType::KW_IMPORT;
+                else if (ident == "if") type = TokenType::KW_IF;
+                else if (ident == "else") type = TokenType::KW_ELSE;
+                else if (ident == "while") type = TokenType::KW_WHILE;
+                else if (ident == "for") type = TokenType::KW_FOR;
+                else if (ident == "val") type = TokenType::KW_VAL;
+                else if (ident == "var") type = TokenType::KW_VAR;
+                tokens.push_back({type, ident, start});
                 continue;
             }
-            if (isdigit(current)) {
-                std::string num;
-                while (index < src.size() && isdigit(src[index])) { num += src[index++]; }
-                tokens.push_back({TokenType::INT_LITERAL, num, current_line}); 
+            if (std::isdigit(static_cast<unsigned char>(current))) {
+                std::string number;
+                while (index < src.size() && std::isdigit(static_cast<unsigned char>(src[index]))) {
+                    number += src[index];
+                    advance();
+                }
+                tokens.push_back({TokenType::INT_LITERAL, number, start});
                 continue;
             }
-            index++;
+
+            throw CompilerError(
+                ErrorKind::Lexer, start, "caractère inattendu '" + std::string(1, current) + "'");
         }
-        tokens.push_back({TokenType::EOF_TOKEN, "", current_line}); 
+        tokens.push_back({TokenType::EOF_TOKEN, "", location()});
         return tokens;
     }
+
 private:
-    std::string src; 
+    std::string src;
+    std::string file;
     size_t index;
-    int current_line;
+    int currentLine;
+    int currentColumn;
+
+    SourceLocation location() const {
+        return {file, currentLine, currentColumn};
+    }
+
+    bool nextIs(char expected) const {
+        return index + 1 < src.size() && src[index + 1] == expected;
+    }
+
+    void advance() {
+        if (src[index] == '\n') {
+            currentLine++;
+            currentColumn = 1;
+        } else {
+            currentColumn++;
+        }
+        index++;
+    }
+
+    void add(
+        std::vector<Token>& tokens, TokenType type, const std::string& value,
+        const SourceLocation& start, int length) {
+        tokens.push_back({type, value, start});
+        for (int i = 0; i < length; ++i) advance();
+    }
 };

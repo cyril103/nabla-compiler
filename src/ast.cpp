@@ -7,15 +7,16 @@ const std::vector<std::string> METHOD_ARGUMENT_REGISTERS = {"rsi", "rdx", "rcx",
 void validateArguments(
     const std::string& callableName,
     const std::vector<std::unique_ptr<ASTNode>>& arguments,
-    const std::vector<CompilerContext::ParameterInfo>& parameters) {
+    const std::vector<CompilerContext::ParameterInfo>& parameters,
+    const SourceLocation& location) {
     if (arguments.size() != parameters.size()) {
-        throw std::runtime_error(
+        throw CompilerError(ErrorKind::Semantic, location,
             callableName + ": " + std::to_string(parameters.size()) +
             " argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
     }
     for (size_t i = 0; i < arguments.size(); ++i) {
         if (arguments[i]->getType() != parameters[i].type) {
-            throw std::runtime_error(
+            throw CompilerError(ErrorKind::Semantic, arguments[i]->getLocation(),
                 callableName + ", paramètre '" + parameters[i].name + "': type '" +
                 parameters[i].type + "' attendu, '" + arguments[i]->getType() + "' reçu");
         }
@@ -75,19 +76,19 @@ void NewNode::validateSemantics(CompilerContext& context) {
 
     auto classIt = context.classes.find(className);
     if (classIt == context.classes.end()) {
-        throw std::runtime_error("Classe inconnue dans 'new': " + className);
+        semanticError("classe inconnue dans 'new': " + className);
     }
     const auto& fields = classIt->second.fields;
     if (args.size() != fields.size()) {
-        throw std::runtime_error(
+        semanticError(
             "Constructeur de '" + className + "': " + std::to_string(fields.size()) +
             " argument(s) attendu(s), " + std::to_string(args.size()) + " reçu(s)");
     }
     for (size_t i = 0; i < args.size(); ++i) {
-        if (args[i]->getType() != fields[i].second) {
-            throw std::runtime_error(
-                "Constructeur de '" + className + "', champ '" + fields[i].first +
-                "': type '" + fields[i].second + "' attendu, '" + args[i]->getType() + "' reçu");
+        if (args[i]->getType() != fields[i].type) {
+            throw CompilerError(ErrorKind::Semantic, args[i]->getLocation(),
+                "Constructeur de '" + className + "', champ '" + fields[i].name +
+                "': type '" + fields[i].type + "' attendu, '" + args[i]->getType() + "' reçu");
         }
     }
 }
@@ -112,31 +113,33 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             methodName == "<=" || methodName == ">=";
         if (binaryMethod) {
             if (arguments.size() != 1) {
-                throw std::runtime_error("La méthode Int." + methodName + " attend un argument");
+                semanticError("la méthode Int." + methodName + " attend un argument");
             }
             if (arguments[0]->getType() != "Int") {
-                throw std::runtime_error("La méthode Int." + methodName + " attend un argument de type Int");
+                throw CompilerError(
+                    ErrorKind::Semantic, arguments[0]->getLocation(),
+                    "la méthode Int." + methodName + " attend un argument de type Int");
             }
             resolvedType = "Int";
             return;
         }
         if (methodName == "toString") {
-            if (!arguments.empty()) throw std::runtime_error("La méthode Int.toString n'accepte aucun argument");
+            if (!arguments.empty()) semanticError("la méthode Int.toString n'accepte aucun argument");
             resolvedType = "String";
             return;
         }
-        throw std::runtime_error("Méthode inconnue: Int." + methodName);
+        semanticError("méthode inconnue: Int." + methodName);
     }
 
     auto classIt = context.classes.find(receiverType);
     if (classIt == context.classes.end()) {
-        throw std::runtime_error("Type receveur inconnu pour l'appel de méthode: " + receiverType);
+        semanticError("type receveur inconnu pour l'appel de méthode: " + receiverType);
     }
     auto methodIt = classIt->second.methods.find(methodName);
     if (methodIt == classIt->second.methods.end()) {
-        throw std::runtime_error("Méthode inconnue: " + receiverType + "." + methodName);
+        semanticError("méthode inconnue: " + receiverType + "." + methodName);
     }
-    validateArguments(receiverType + "." + methodName, arguments, methodIt->second.parameters);
+    validateArguments(receiverType + "." + methodName, arguments, methodIt->second.parameters, location);
     resolvedType = methodIt->second.returnType;
 }
 
@@ -151,9 +154,9 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
     for (const auto& argument : arguments) argument->validateSemantics(context);
     auto function = context.functions.find(name);
     if (function == context.functions.end()) {
-        throw std::runtime_error("Fonction inconnue: " + name);
+        semanticError("fonction inconnue: " + name);
     }
-    validateArguments(name, arguments, function->second.parameters);
+    validateArguments(name, arguments, function->second.parameters, location);
     resolvedType = function->second.returnType;
 }
 
@@ -197,10 +200,10 @@ void IfNode::validateSemantics(CompilerContext& context) {
     thenBranch->validateSemantics(context);
     elseBranch->validateSemantics(context);
     if (condition->getType() != "Int") {
-        throw std::runtime_error("La condition d'un 'if' doit être de type Int");
+        semanticError("la condition d'un 'if' doit être de type Int");
     }
     if (thenBranch->getType() != elseBranch->getType()) {
-        throw std::runtime_error("Les branches d'un 'if' doivent avoir le même type");
+        semanticError("les branches d'un 'if' doivent avoir le même type");
     }
     resolvedType = thenBranch->getType();
 }
@@ -257,7 +260,7 @@ void WhileNode::validateSemantics(CompilerContext& context) {
     condition->validateSemantics(context);
     body->validateSemantics(context);
     if (condition->getType() != "Int") {
-        throw std::runtime_error("La condition d'un 'while' doit être de type Int");
+        semanticError("la condition d'un 'while' doit être de type Int");
     }
 }
 
@@ -294,7 +297,7 @@ void ForNode::validateSemantics(CompilerContext& context) {
     count->validateSemantics(context);
     body->validateSemantics(context);
     if (count->getType() != "Int") {
-        throw std::runtime_error("Le compteur d'un 'for' doit être de type Int");
+        semanticError("le compteur d'un 'for' doit être de type Int");
     }
 }
 
@@ -318,10 +321,10 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
         returnType == "Int" || returnType == "String" || returnType == "Unit" ||
         context.classes.count(returnType) != 0;
     if (!knownType) {
-        throw std::runtime_error("Type de retour inconnu '" + returnType + "' pour la fonction '" + name + "'");
+        semanticError("type de retour inconnu '" + returnType + "' pour la fonction '" + name + "'");
     }
     if (body && body->getType() != returnType) {
-        throw std::runtime_error(
+        semanticError(
             "Type de retour invalide pour '" + name + "': '" + returnType +
             "' attendu, '" + body->getType() + "' reçu");
     }
@@ -445,7 +448,7 @@ std::string IdentifierNode::getType() {
 void IdentifierNode::generateASM(std::ofstream& out, CompilerContext& context) {
     auto it = context.localVars.find(symbolName);
     if (it == context.localVars.end()) {
-        throw std::runtime_error("Variable non déclarée: " + name);
+        codegenError("variable non déclarée: " + name);
     }
     int offset = it->second.offsetFromRbp;
     out << "    mov rax, [rbp - " << offset << "]\n";
@@ -453,11 +456,11 @@ void IdentifierNode::generateASM(std::ofstream& out, CompilerContext& context) {
 
 void IdentifierNode::validateSemantics(CompilerContext& context) {
     if (symbolName == name) {
-        throw std::runtime_error("Variable non déclarée: " + name);
+        semanticError("variable non déclarée: " + name);
     }
     auto symbol = context.semanticSymbolTypes.find(symbolName);
     if (symbol == context.semanticSymbolTypes.end()) {
-        throw std::runtime_error("Variable utilisée hors de sa portée: " + name);
+        semanticError("variable utilisée hors de sa portée: " + name);
     }
     type = symbol->second;
 }
@@ -470,7 +473,7 @@ std::string VarDeclNode::getType() {
 }
 
 void VarDeclNode::generateASM(std::ofstream& out, CompilerContext& context) {
-    if (!initializer) throw std::runtime_error("Initialisateur requis pour la declaration de variable: " + name);
+    if (!initializer) codegenError("initialisateur requis pour la déclaration de variable: " + name);
     initializer->generateASM(out, context);
     context.localVars[symbolName] = { offsetFromRbp, isMutable, initializer->getType() };
     out << "    mov [rbp - " << offsetFromRbp << "], rax\n";
@@ -497,8 +500,8 @@ std::string AssignmentNode::getType() {
 
 void AssignmentNode::generateASM(std::ofstream& out, CompilerContext& context) {
     auto it = context.localVars.find(symbolName);
-    if (it == context.localVars.end()) throw std::runtime_error("Affectation sur variable non déclarée: " + name);
-    if (!it->second.isMutable) throw std::runtime_error("Impossible d'affecter à une 'val' immuable: " + name);
+    if (it == context.localVars.end()) codegenError("affectation sur variable non déclarée: " + name);
+    if (!it->second.isMutable) codegenError("impossible d'affecter à une 'val' immuable: " + name);
     value->generateASM(out, context);
     int offset = it->second.offsetFromRbp;
     out << "    mov [rbp - " << offset << "], rax\n";
@@ -507,18 +510,18 @@ void AssignmentNode::generateASM(std::ofstream& out, CompilerContext& context) {
 void AssignmentNode::validateSemantics(CompilerContext& context) {
     value->validateSemantics(context);
     if (symbolName == name) {
-        throw std::runtime_error("Affectation sur variable non déclarée: " + name);
+        semanticError("affectation sur variable non déclarée: " + name);
     }
     if (!targetMutable) {
-        throw std::runtime_error("Impossible d'affecter à une 'val' immuable: " + name);
+        semanticError("impossible d'affecter à une 'val' immuable: " + name);
     }
     auto symbol = context.semanticSymbolTypes.find(symbolName);
     if (symbol == context.semanticSymbolTypes.end()) {
-        throw std::runtime_error("Affectation sur variable hors de sa portée: " + name);
+        semanticError("affectation sur variable hors de sa portée: " + name);
     }
     targetType = symbol->second;
     if (value->getType() != targetType) {
-        throw std::runtime_error(
+        semanticError(
             "Affectation invalide pour '" + name + "': type '" + targetType +
             "' attendu, '" + value->getType() + "' reçu");
     }

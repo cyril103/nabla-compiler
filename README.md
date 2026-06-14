@@ -7,6 +7,12 @@ génération de code. L'analyse sémantique valide notamment les classes,
 constructeurs, appels de méthodes, types déclarés et affectations avant
 l'émission de l'assembleur.
 
+Les diagnostics indiquent le fichier, la ligne, la colonne et la phase concernée :
+
+```text
+tests/example.nabla:8:15: semantic error: méthode inconnue: A.missing
+```
+
 Le langage met l'accent sur une unification forte des types (tout est objet, y compris les entiers), l'absence de runtime lourd ou de machine virtuelle, et une exécution ultra-rapide au plus proche du matériel.
 
 ---
@@ -99,6 +105,8 @@ make all-tests
 Chaque test normal possède un fichier voisin `<nom>.expected` contenant le code de
 sortie attendu. La cible compile puis exécute le programme et compare son code de
 sortie à cette valeur. Les tests d’erreur dont le nom contient `error` ou `fail`
-doivent échouer pendant la compilation.
+doivent échouer pendant la compilation. Lorsqu'un fichier voisin
+`<nom>.diagnostic` existe, le message d'erreur normalisé doit également
+correspondre exactement.
 
 La cible affiche `PASS` ou `FAIL` pour chaque fichier de test et renvoie `1` si un test donne un résultat inattendu.

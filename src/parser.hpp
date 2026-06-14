@@ -46,4 +46,10 @@ private:
     std::unique_ptr<ASTNode> parseFunctionDef(std::string clName);
     std::vector<std::unique_ptr<ASTNode>> parseArguments();
     const ParsedSymbol* findLocal(const std::string& name) const;
+
+    template<typename T>
+    std::unique_ptr<T> located(std::unique_ptr<T> node, const SourceLocation& location) {
+        node->setLocation(location);
+        return node;
+    }
 };

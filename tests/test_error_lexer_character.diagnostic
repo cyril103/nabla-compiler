@@ -1,0 +1,1 @@
+tests/test_error_lexer_character.nabla:2:5: lexer error: caractère inattendu '@'

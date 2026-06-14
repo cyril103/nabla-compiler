@@ -13,6 +13,17 @@ public:
     virtual std::string getType() = 0;
     virtual void allocateLocals(int& nextOffset) { (void) nextOffset; }
     virtual void validateSemantics(CompilerContext& context) = 0;
+    void setLocation(SourceLocation sourceLocation) { location = std::move(sourceLocation); }
+    const SourceLocation& getLocation() const { return location; }
+
+protected:
+    SourceLocation location;
+    [[noreturn]] void semanticError(const std::string& message) const {
+        throw CompilerError(ErrorKind::Semantic, location, message);
+    }
+    [[noreturn]] void codegenError(const std::string& message) const {
+        throw CompilerError(ErrorKind::Codegen, location, message);
+    }
 };
 
 class ProgramNode : public ASTNode {

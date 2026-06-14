@@ -1,5 +1,6 @@
 #pragma once
 
+#include "compiler_error.hpp"
 #include <map>
 #include <set>
 #include <string>
@@ -10,16 +11,26 @@ struct CompilerContext {
     struct ParameterInfo {
         std::string name;
         std::string type;
+        SourceLocation location;
     };
 
     struct FunctionSignature {
         std::vector<ParameterInfo> parameters;
         std::string returnType;
+        SourceLocation location;
+        SourceLocation returnTypeLocation;
+    };
+
+    struct FieldInfo {
+        std::string name;
+        std::string type;
+        SourceLocation location;
     };
 
     struct ClassInfo {
-        std::vector<std::pair<std::string, std::string>> fields;
+        std::vector<FieldInfo> fields;
         std::map<std::string, FunctionSignature> methods;
+        SourceLocation location;
     };
 
     std::map<std::string, std::map<std::string, int>> classLayouts;
