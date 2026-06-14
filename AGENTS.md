@@ -271,7 +271,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Ajouter des wrappers IR specialises pour les methodes de classes
+- `75b59ec` - Ajouter des wrappers IR specialises pour les methodes de classes
   generiques concretes comme `Box[Int].get`.
 - `7147281` - Conserver les allocations de classes generiques concretes dans l'IR,
   par exemple `new Box[Int]`, avec resolution de layout via le template.
