@@ -62,6 +62,30 @@ inline std::string formatFunctionType(const CompilerContext::FunctionType& funct
     return formatted;
 }
 
+inline std::vector<std::string> splitTopLevelTypes(const std::string& types) {
+    std::vector<std::string> parts;
+    size_t start = 0;
+    int parenDepth = 0;
+    int bracketDepth = 0;
+    for (size_t i = 0; i < types.size(); ++i) {
+        char c = types[i];
+        if (c == '(') ++parenDepth;
+        else if (c == ')') --parenDepth;
+        else if (c == '[') ++bracketDepth;
+        else if (c == ']') --bracketDepth;
+        else if (c == ',' && parenDepth == 0 && bracketDepth == 0) {
+            if (i == start) return {};
+            parts.push_back(types.substr(start, i - start));
+            start = i + 1;
+        }
+        if (parenDepth < 0 || bracketDepth < 0) return {};
+    }
+    if (parenDepth != 0 || bracketDepth != 0) return {};
+    if (start < types.size()) parts.push_back(types.substr(start));
+    else if (!types.empty()) return {};
+    return parts;
+}
+
 inline std::optional<CompilerContext::FunctionType> functionTypeFromName(const std::string& type) {
     const std::string prefix = "Fn(";
     const std::string arrow = ")->";
@@ -71,23 +95,63 @@ inline std::optional<CompilerContext::FunctionType> functionTypeFromName(const s
 
     CompilerContext::FunctionType functionType;
     std::string parameters = type.substr(prefix.size(), arrowPosition - prefix.size());
-    size_t start = 0;
-    while (start < parameters.size()) {
-        size_t comma = parameters.find(',', start);
-        if (comma == std::string::npos) comma = parameters.size();
-        if (comma == start) return std::nullopt;
-        functionType.parameterTypes.push_back(parameters.substr(start, comma - start));
-        start = comma + 1;
-    }
+    functionType.parameterTypes = splitTopLevelTypes(parameters);
+    if (!parameters.empty() && functionType.parameterTypes.empty()) return std::nullopt;
     functionType.returnType = type.substr(arrowPosition + arrow.size());
     if (functionType.returnType.empty()) return std::nullopt;
     return functionType;
 }
 
+inline std::string formatParameterizedType(
+    const std::string& baseName, const std::vector<std::string>& arguments) {
+    std::string formatted = baseName + "[";
+    for (size_t i = 0; i < arguments.size(); ++i) {
+        if (i > 0) formatted += ",";
+        formatted += arguments[i];
+    }
+    formatted += "]";
+    return formatted;
+}
+
+inline std::optional<std::pair<std::string, std::vector<std::string>>> parameterizedTypeFromName(
+    const std::string& type) {
+    size_t bracket = type.find('[');
+    if (bracket == std::string::npos || type.empty() || type.back() != ']') return std::nullopt;
+    std::string baseName = type.substr(0, bracket);
+    if (baseName.empty()) return std::nullopt;
+    std::string argumentsText = type.substr(bracket + 1, type.size() - bracket - 2);
+    auto arguments = splitTopLevelTypes(argumentsText);
+    if (arguments.empty()) return std::nullopt;
+    return std::make_pair(baseName, arguments);
+}
+
+inline std::string resolveStdlibTypeAlias(const std::string& type) {
+    auto parameterizedType = parameterizedTypeFromName(type);
+    if (!parameterizedType) return type;
+    const auto& [baseName, arguments] = *parameterizedType;
+    if (baseName == "Option" && arguments.size() == 1 && arguments[0] == "Int") return "OptionInt";
+    if (baseName == "Array" && arguments.size() == 1 && arguments[0] == "Int") return "ArrayInt";
+    return type;
+}
+
 inline std::string canonicalTypeName(const std::string& type) {
     auto functionType = functionTypeFromName(type);
-    if (!functionType) return type;
-    return formatFunctionType(*functionType);
+    if (functionType) {
+        for (auto& parameterType : functionType->parameterTypes) {
+            parameterType = canonicalTypeName(parameterType);
+        }
+        functionType->returnType = canonicalTypeName(functionType->returnType);
+        return formatFunctionType(*functionType);
+    }
+    auto parameterizedType = parameterizedTypeFromName(type);
+    if (parameterizedType) {
+        auto [baseName, arguments] = *parameterizedType;
+        for (auto& argument : arguments) {
+            argument = canonicalTypeName(argument);
+        }
+        return resolveStdlibTypeAlias(formatParameterizedType(baseName, arguments));
+    }
+    return type;
 }
 
 inline bool isFunctionTypeName(const std::string& type) {

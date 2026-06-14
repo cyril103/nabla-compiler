@@ -213,8 +213,7 @@ bool Parser::startsLambdaExpression() const {
         ++cursor;
         if (cursor >= tokens.size() || tokens[cursor].type != TokenType::COLON) return false;
         ++cursor;
-        if (cursor >= tokens.size() || tokens[cursor].type != TokenType::IDENTIFIER) return false;
-        ++cursor;
+        if (!skipTypeAt(cursor)) return false;
         if (cursor >= tokens.size()) return false;
         if (tokens[cursor].type == TokenType::COMMA) {
             ++cursor;
@@ -223,6 +222,28 @@ bool Parser::startsLambdaExpression() const {
         if (tokens[cursor].type == TokenType::RPAREN) {
             ++cursor;
             return cursor < tokens.size() && tokens[cursor].type == TokenType::FAT_ARROW;
+        }
+        return false;
+    }
+    return false;
+}
+
+bool Parser::skipTypeAt(size_t& cursor) const {
+    if (cursor >= tokens.size() || tokens[cursor].type != TokenType::IDENTIFIER) return false;
+    ++cursor;
+    if (cursor >= tokens.size() || tokens[cursor].type != TokenType::LBRACKET) return true;
+
+    ++cursor;
+    while (cursor < tokens.size()) {
+        if (!skipTypeAt(cursor)) return false;
+        if (cursor >= tokens.size()) return false;
+        if (tokens[cursor].type == TokenType::COMMA) {
+            ++cursor;
+            continue;
+        }
+        if (tokens[cursor].type == TokenType::RBRACKET) {
+            ++cursor;
+            return true;
         }
         return false;
     }
@@ -484,7 +505,8 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
     }
     if (peek().type == TokenType::KW_NEW) {
         Token start = consume(TokenType::KW_NEW, "");
-        std::string clName = consume(TokenType::IDENTIFIER, "Nom de classe attendu après 'new'").value;
+        auto [clName, typeLocation] = parseType("Nom de classe attendu après 'new'");
+        (void) typeLocation;
         consume(TokenType::LPAREN, "");
         auto args = parseArguments();
         consume(TokenType::RPAREN, "");
@@ -704,7 +726,24 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
 std::pair<std::string, SourceLocation> Parser::parseType(const std::string& expectedMessage) {
     if (peek().type == TokenType::IDENTIFIER) {
         Token typeToken = consume(TokenType::IDENTIFIER, expectedMessage);
-        return {canonicalTypeName(typeToken.value), typeToken.location};
+        std::string typeName = typeToken.value;
+        if (peek().type == TokenType::LBRACKET) {
+            consume(TokenType::LBRACKET, "");
+            std::vector<std::string> typeArguments;
+            while (peek().type != TokenType::RBRACKET) {
+                auto [argumentType, argumentLocation] = parseType("Type d'argument générique attendu");
+                (void) argumentLocation;
+                typeArguments.push_back(argumentType);
+                if (peek().type == TokenType::COMMA) {
+                    consume(TokenType::COMMA, "");
+                } else if (peek().type != TokenType::RBRACKET) {
+                    throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ']' attendu dans le type générique");
+                }
+            }
+            consume(TokenType::RBRACKET, "']' attendu après les arguments génériques");
+            typeName = formatParameterizedType(typeName, typeArguments);
+        }
+        return {canonicalTypeName(typeName), typeToken.location};
     }
     if (peek().type != TokenType::LPAREN) {
         throw CompilerError(ErrorKind::Parser, peek().location, expectedMessage + " (reçu '" + peek().value + "')");
@@ -713,8 +752,9 @@ std::pair<std::string, SourceLocation> Parser::parseType(const std::string& expe
     Token start = consume(TokenType::LPAREN, "");
     CompilerContext::FunctionType functionType;
     while (peek().type != TokenType::RPAREN) {
-        Token parameterTypeToken = consume(TokenType::IDENTIFIER, "Type de paramètre attendu dans le type fonction");
-        functionType.parameterTypes.push_back(parameterTypeToken.value);
+        auto [parameterType, parameterLocation] = parseType("Type de paramètre attendu dans le type fonction");
+        (void) parameterLocation;
+        functionType.parameterTypes.push_back(parameterType);
         if (peek().type == TokenType::COMMA) {
             consume(TokenType::COMMA, "");
         } else if (peek().type != TokenType::RPAREN) {

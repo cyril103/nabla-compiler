@@ -8,7 +8,7 @@
 enum class TokenType {
     KW_DEF, KW_CLASS, KW_NEW, KW_IMPORT, KW_IF, KW_ELSE, KW_WHILE, KW_FOR, KW_VAL, KW_VAR, KW_THIS,
     KW_TRUE, KW_FALSE,
-    IDENTIFIER, LPAREN, RPAREN, COLON, EQUAL, LBRACE, RBRACE, COMMA, DOT,
+    IDENTIFIER, LPAREN, RPAREN, LBRACKET, RBRACKET, COLON, EQUAL, LBRACE, RBRACE, COMMA, DOT,
     INT_LITERAL, LONG_LITERAL, FLOAT_LITERAL, DOUBLE_LITERAL, STRING_LITERAL,
     PLUS, MINUS, STAR, SLASH, BANG, AND_AND, OR_OR, FAT_ARROW, EQEQ, NEQ, LT, GT, LTE, GTE, EOF_TOKEN
 };
@@ -41,6 +41,8 @@ public:
             SourceLocation start = location();
             if (current == '(') { add(tokens, TokenType::LPAREN, "(", start, 1); continue; }
             if (current == ')') { add(tokens, TokenType::RPAREN, ")", start, 1); continue; }
+            if (current == '[') { add(tokens, TokenType::LBRACKET, "[", start, 1); continue; }
+            if (current == ']') { add(tokens, TokenType::RBRACKET, "]", start, 1); continue; }
             if (current == ':') { add(tokens, TokenType::COLON, ":", start, 1); continue; }
             if (current == '{') { add(tokens, TokenType::LBRACE, "{", start, 1); continue; }
             if (current == '}') { add(tokens, TokenType::RBRACE, "}", start, 1); continue; }

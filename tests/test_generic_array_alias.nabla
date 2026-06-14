@@ -1,0 +1,9 @@
+import collections.int_array
+
+def read(xs: Array[Int]): Int = {
+    xs.map(value => value + 1).sum()
+}
+
+def main(): Int = {
+    read(arrayIntRange(3)) + new Array[Int](new IntArray(1)).size() + 35
+}

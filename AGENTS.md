@@ -49,6 +49,8 @@ Le pipeline implemente actuellement :
 - representation interne canonique des types fonction sous forme `Fn(...)->...`;
 - syntaxe de types fonction parenthesee comme `(Int) => Int`, `(Int) => Unit`,
   `(Int, Int) => Int` et `(String) => Int`;
+- premiere syntaxe de types parametres `Option[Int]` et `Array[Int]`, canonisee
+  vers les facades standard existantes `OptionInt` et `ArrayInt`;
 - lambdas et appels indirects avec plusieurs parametres, dans les limites de la
   convention d'appel actuelle;
 - closures testees avec parametres, captures et retours non limites a `Int`;
@@ -101,6 +103,9 @@ Limites importantes :
 - `Float` et `Double` couvrent les litteraux, operations, comparaisons,
   fonctions, lambdas et champs, mais pas encore `toString` ni les collections
   specialisees;
+- la genericite actuelle est un pont syntaxique pour `Option[Int]` et
+  `Array[Int]`; les definitions generiques utilisateur et la monomorphisation
+  complete restent a faire;
 - le tas est fixe et possede une verification de depassement, mais pas de
   ramasse-miettes;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
@@ -176,6 +181,11 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter le court-circuit pour `&&` et `||`.
 - [ ] Ajouter les champs et methodes herites si l'heritage est retenu.
 - [ ] Valider les types des branches, boucles et operateurs de facon uniforme.
+- [x] Ajouter une premiere syntaxe de types parametres pour `Option[Int]` et
+  `Array[Int]` via aliases standard.
+- [ ] Ajouter les declarations generiques utilisateur `class Box[T]` et
+  `def identity[T](value: T): T`.
+- [ ] Ajouter la monomorphisation des classes et fonctions generiques.
 - [x] Generaliser `IntUnaryFn` vers des types fonction canoniques.
 - [x] Introduire une representation interne commune des types fonction.
 - [x] Ajouter la syntaxe de types fonction parenthesee pour les aliases actuels.
@@ -235,6 +245,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `TBD` - Ajouter la syntaxe de types parametres `Option[Int]` et `Array[Int]`
+  avec canonisation vers `OptionInt` et `ArrayInt`.
 - `94b4440` - Ajouter `Float` et `Double`, les litteraux decimaux, l'IR typee, les
   operations SSE et les tests positifs et negatifs associes.
 - `53b77c1` - Ajouter `Long`, les litteraux `42L`, les operations numeriques Long,

@@ -48,6 +48,7 @@ private:
     std::unique_ptr<ASTNode> parseForExpression();
     bool startsLambdaExpression() const;
     bool startsInferredLambdaExpression() const;
+    bool skipTypeAt(size_t& cursor) const;
     std::unique_ptr<ASTNode> parseLambdaExpression();
     std::unique_ptr<ASTNode> parseInferredLambdaExpression(const std::string& expectedType);
     std::unique_ptr<ASTNode> parsePrimary();

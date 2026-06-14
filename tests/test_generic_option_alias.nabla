@@ -1,0 +1,20 @@
+import core.option_int
+
+class Holder(value: Option[Int]) {
+    def get(): Option[Int] = {
+        value
+    }
+}
+
+def read(value: Option[Int]): Int = {
+    value.getOrElse(0)
+}
+
+def maybe(value: Int): Option[Int] = {
+    optionIntSome(value)
+}
+
+def main(): Int = {
+    val holder = new Holder(maybe(42))
+    read(holder.get())
+}
