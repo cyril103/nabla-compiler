@@ -230,9 +230,28 @@ bool Parser::startsLambdaExpression() const {
 }
 
 bool Parser::startsInferredLambdaExpression() const {
-    return peek().type == TokenType::IDENTIFIER &&
-           index + 1 < tokens.size() &&
-           tokens[index + 1].type == TokenType::FAT_ARROW;
+    if (peek().type == TokenType::IDENTIFIER) {
+        return index + 1 < tokens.size() && tokens[index + 1].type == TokenType::FAT_ARROW;
+    }
+    if (peek().type != TokenType::LPAREN) return false;
+    size_t cursor = index + 1;
+    if (cursor >= tokens.size() || tokens[cursor].type == TokenType::RPAREN) return false;
+
+    while (cursor < tokens.size()) {
+        if (tokens[cursor].type != TokenType::IDENTIFIER) return false;
+        ++cursor;
+        if (cursor >= tokens.size()) return false;
+        if (tokens[cursor].type == TokenType::COMMA) {
+            ++cursor;
+            continue;
+        }
+        if (tokens[cursor].type == TokenType::RPAREN) {
+            ++cursor;
+            return cursor < tokens.size() && tokens[cursor].type == TokenType::FAT_ARROW;
+        }
+        return false;
+    }
+    return false;
 }
 
 std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
@@ -315,35 +334,55 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
 }
 
 std::unique_ptr<ASTNode> Parser::parseInferredLambdaExpression(const std::string& expectedType) {
-    Token parameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre attendu dans la lambda");
-    auto expectedFunctionType = functionTypeFromName(expectedType);
-    if (!expectedFunctionType || expectedFunctionType->parameterTypes.size() != 1) {
-        throw CompilerError(
-            ErrorKind::Parser, parameterToken.location,
-            "impossible d'inférer le type du paramètre de lambda sans type fonction attendu");
+    Token start = peek();
+    std::vector<Token> parameterTokens;
+    if (peek().type == TokenType::IDENTIFIER) {
+        parameterTokens.push_back(consume(TokenType::IDENTIFIER, "Nom de paramètre attendu dans la lambda"));
+    } else {
+        consume(TokenType::LPAREN, "");
+        while (peek().type != TokenType::RPAREN) {
+            parameterTokens.push_back(consume(TokenType::IDENTIFIER, "Nom de paramètre attendu dans la lambda"));
+            if (peek().type == TokenType::COMMA) {
+                consume(TokenType::COMMA, "");
+            } else if (peek().type != TokenType::RPAREN) {
+                throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ')' attendu après le paramètre");
+            }
+        }
+        consume(TokenType::RPAREN, "Parenthèse fermante attendue après les paramètres de lambda");
     }
-    const std::string parameterType = expectedFunctionType->parameterTypes[0];
-    if (isFunctionTypeName(parameterType)) {
+
+    auto expectedFunctionType = functionTypeFromName(expectedType);
+    if (!expectedFunctionType || expectedFunctionType->parameterTypes.size() != parameterTokens.size()) {
         throw CompilerError(
-            ErrorKind::Parser, parameterToken.location,
-            "les paramètres de lambda ne peuvent pas encore être des fonctions");
+            ErrorKind::Parser, start.location,
+            "impossible d'inférer les types des paramètres de lambda sans type fonction attendu");
     }
 
     consume(TokenType::FAT_ARROW, "'=>' attendu après le paramètre de lambda");
 
     const size_t outerScopeCount = localScopes.size();
-    std::string parameterName = parameterToken.value;
-    std::string symbolName = parameterName + "#" + std::to_string(nextSymbolId++);
-    std::vector<FunctionDefNode::Parameter> parameters = {
-        {parameterName, symbolName, parameterType}
-    };
-    std::vector<CompilerContext::ParameterInfo> signatureParameters = {
-        {parameterName, parameterType, parameterToken.location}
-    };
+    std::vector<FunctionDefNode::Parameter> parameters;
+    std::vector<CompilerContext::ParameterInfo> signatureParameters;
+    std::vector<ParsedSymbol> scopedParameters;
+    for (size_t i = 0; i < parameterTokens.size(); ++i) {
+        const std::string parameterType = expectedFunctionType->parameterTypes[i];
+        if (isFunctionTypeName(parameterType)) {
+            throw CompilerError(
+                ErrorKind::Parser, parameterTokens[i].location,
+                "les paramètres de lambda ne peuvent pas encore être des fonctions");
+        }
+        std::string parameterName = parameterTokens[i].value;
+        std::string symbolName = parameterName + "#" + std::to_string(nextSymbolId++);
+        parameters.push_back({parameterName, symbolName, parameterType});
+        signatureParameters.push_back({parameterName, parameterType, parameterTokens[i].location});
+        scopedParameters.push_back({symbolName, parameterType, false});
+    }
 
     lambdaCaptureScopes.push_back({outerScopeCount, {}});
     localScopes.emplace_back();
-    localScopes.back()[parameterName] = {symbolName, parameterType, false};
+    for (size_t i = 0; i < scopedParameters.size(); ++i) {
+        localScopes.back()[parameters[i].name] = scopedParameters[i];
+    }
     std::unique_ptr<ASTNode> body;
     if (peek().type == TokenType::LBRACE) {
         consume(TokenType::LBRACE, "Bloc attendu après '=>'");
@@ -363,17 +402,21 @@ std::unique_ptr<ASTNode> Parser::parseInferredLambdaExpression(const std::string
 
     const std::string returnType = body->getType();
     std::string lambdaName = "lambda." + std::to_string(nextLambdaId++);
-    context.functions[lambdaName] = {signatureParameters, returnType, parameterToken.location, parameterToken.location};
+    context.functions[lambdaName] = {signatureParameters, returnType, start.location, start.location};
 
     auto function = located(std::make_unique<FunctionDefNode>(
-        "", lambdaName, returnType, std::move(parameters), std::move(body), captures), parameterToken.location);
+        "", lambdaName, returnType, std::move(parameters), std::move(body), captures), start.location);
     generatedFunctions.push_back(std::move(function));
 
-    CompilerContext::FunctionType lambdaType{{parameterType}, returnType};
+    CompilerContext::FunctionType lambdaType;
+    for (const auto& parameter : signatureParameters) {
+        lambdaType.parameterTypes.push_back(parameter.type);
+    }
+    lambdaType.returnType = returnType;
     auto functionType = functionNameForType(lambdaType);
     if (!functionType) {
         throw CompilerError(
-            ErrorKind::Parser, parameterToken.location,
+            ErrorKind::Parser, start.location,
             "type fonction de lambda non supporté pour l'instant");
     }
 
@@ -384,7 +427,7 @@ std::unique_ptr<ASTNode> Parser::parseInferredLambdaExpression(const std::string
     return located(
         std::make_unique<FunctionReferenceNode>(
             lambdaName, *functionType, std::move(referenceCaptures)),
-        parameterToken.location);
+        start.location);
 }
 
 std::unique_ptr<ASTNode> Parser::parsePrimary() {

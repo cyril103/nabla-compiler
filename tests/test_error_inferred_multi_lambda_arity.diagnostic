@@ -1,0 +1,1 @@
+tests/test_error_inferred_multi_lambda_arity.nabla:5:16: parser error: impossible d'inférer les types des paramètres de lambda sans type fonction attendu

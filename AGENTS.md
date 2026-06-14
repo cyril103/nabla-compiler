@@ -56,6 +56,8 @@ Le pipeline implemente actuellement :
   d'argument, par exemple `xs.map(value => { value + 1 })`;
 - lambdas mono-expression inferees en argument, par exemple
   `xs.map(value => value + 1)`;
+- inference des types de parametres pour lambdas multi-parametres en argument,
+  par exemple `xs.fold(0, (acc, value) => acc + value)`;
 - types fonction imbriques en retour, par exemple `(Int) => ((Int) => Int)`;
 - type `Unit` formalise pour les fonctions a effet et les boucles `while` /
   `for`;
@@ -168,6 +170,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Generaliser les closures aux types fonction complets.
 - [x] Ajouter l'inference simple des types de parametres de lambda.
 - [x] Ajouter les lambdas mono-expression sans bloc.
+- [x] Ajouter l'inference des lambdas multi-parametres.
 
 ### P2 - Runtime Et Objets
 
@@ -190,7 +193,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout des lambdas mono-expression inferees.
+- Prochain commit - Inference des lambdas multi-parametres.
+- `decbfee` - Ajout des lambdas mono-expression inferees.
 - `00f0d39` - Inference simple des parametres de lambda.
 - `1243161` - Generalisation des closures aux types fonction canoniques.
 - `917c2a2` - Retrait des aliases de types fonction historiques.
@@ -241,5 +245,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter l'inference des lambdas multi-parametres, par exemple
-`xs.fold(0, (acc, value) => acc + value)`.
+Ajouter des methodes de collection `exists`, `forall` et `contains` sur
+`ArrayInt`.

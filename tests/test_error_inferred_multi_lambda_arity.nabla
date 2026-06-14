@@ -1,0 +1,6 @@
+import collections.int_array
+
+def main(): Int = {
+    val xs = arrayIntFill(3, 7)
+    xs.fold(0, (accumulator) => accumulator)
+}
