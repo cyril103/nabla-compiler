@@ -39,13 +39,5 @@ struct CompilerContext {
     std::set<std::string> parsedFiles;
     std::filesystem::path rootDir;
     std::filesystem::path currentFile;
-    int nextLabelId = 0;
-    struct SymbolInfo {
-        int offsetFromRbp;
-        bool isMutable;
-        std::string type;
-    };
-    std::map<std::string, SymbolInfo> localVars;
     std::map<std::string, std::string> semanticSymbolTypes;
-    int currentThisOffsetFromRbp = 0;
 };

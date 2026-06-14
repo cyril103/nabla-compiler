@@ -56,8 +56,6 @@ Limites importantes :
 
 - les fonctions globales sont limitees a 6 parametres et les methodes a 5,
   conformement a la convention d'appel actuelle;
-- l'ancien code de generation directe depuis l'AST est encore present mais
-  n'est plus expose par la CLI;
 - le tas est fixe et ne possede ni verification de depassement ni ramasse-miettes;
 - les binaires historiques sous `build/` sont encore suivis par Git.
 
@@ -115,7 +113,7 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 - [ ] Deplacer l'allocation de pile et les conventions d'appel vers le backend.
 - [x] Couvrir le backend ASM depuis IR pour tout le langage actuel.
 - [x] Generer l'assembleur par defaut depuis l'IR.
-- [ ] Supprimer l'ancien code de generation directe depuis l'AST.
+- [x] Supprimer l'ancien code de generation directe depuis l'AST.
 
 ### P2 - Systeme De Types
 
@@ -140,7 +138,8 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Retrait du repli CLI vers l'ancien backend AST.
+- Prochain commit - Suppression de l'ancien code de generation ASM depuis l'AST.
+- `1266271` - Retrait du repli CLI vers l'ancien backend AST.
 - `3d93076` - Bascule du backend ASM par defaut vers l'IR.
 - `baefaa6` - Ajout des objets et methodes au backend ASM depuis IR.
 - `5a97aa4` - Ajout du controle de flux au backend ASM depuis IR.
@@ -161,5 +160,6 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Supprimer les methodes `generateASM` et `allocateLocals` des noeuds AST, puis
-retirer l'etat de codegen AST restant dans `CompilerContext`.
+Deplacer l'allocation de pile et les conventions d'appel dans des structures de
+backend IR plus explicites, puis retirer les binaires historiques suivis sous
+`build/`.
