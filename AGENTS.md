@@ -235,7 +235,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Ajouter `Float` et `Double`, les litteraux decimaux, l'IR typee, les
+- `94b4440` - Ajouter `Float` et `Double`, les litteraux decimaux, l'IR typee, les
   operations SSE et les tests positifs et negatifs associes.
 - `53b77c1` - Ajouter `Long`, les litteraux `42L`, les operations numeriques Long,
   les champs/fonctions Long et `Long.toString`.
