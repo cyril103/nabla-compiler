@@ -291,7 +291,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Centraliser les aliases de types standard, notamment
+- `6c0005b` - Centraliser les aliases de types standard, notamment
   `Array[Int] -> ArrayInt`, et les tester dans `Option[...]` et les types
   fonction.
 - `fcce070` - Ajouter `Option[T].foreach` pour les effets controles sur
