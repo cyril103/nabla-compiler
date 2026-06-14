@@ -122,6 +122,14 @@ def intArrayContains(xs: IntArray, expected: Int): Bool = {
     intArrayExists(xs, value => value == expected)
 }
 
+def intArrayGetOption(xs: IntArray, index: Int): OptionInt = {
+    if index < 0 || index >= xs.length() {
+        optionIntNone()
+    } else {
+        optionIntSome(xs.get(index))
+    }
+}
+
 def intArrayIndexOf(xs: IntArray, expected: Int): Int = {
     var index = 0
     var found = 0 - 1
@@ -148,6 +156,20 @@ def intArrayCount(xs: IntArray, predicate: (Int) => Bool): Int = {
         index = index + 1
     }
     total
+}
+
+def intArrayFind(xs: IntArray, predicate: (Int) => Bool): OptionInt = {
+    var index = 0
+    var found = optionIntNone()
+    while (index < xs.length()) {
+        if found.isEmpty() && predicate(xs.get(index)) {
+            found = optionIntSome(xs.get(index))
+        } else {
+            found
+        }
+        index = index + 1
+    }
+    found
 }
 
 def intArrayMin(xs: IntArray): OptionInt = {
@@ -299,12 +321,24 @@ class ArrayInt(values: IntArray) {
         values.get(index)
     }
 
+    def getOption(index: Int): OptionInt = {
+        intArrayGetOption(values, index)
+    }
+
     def head(): Int = {
         values.get(0)
     }
 
+    def headOption(): OptionInt = {
+        intArrayGetOption(values, 0)
+    }
+
     def last(): Int = {
         values.get(values.length() - 1)
+    }
+
+    def lastOption(): OptionInt = {
+        intArrayGetOption(values, values.length() - 1)
     }
 
     def sum(): Int = {
@@ -377,6 +411,10 @@ class ArrayInt(values: IntArray) {
 
     def count(predicate: (Int) => Bool): Int = {
         intArrayCount(values, predicate)
+    }
+
+    def find(predicate: (Int) => Bool): OptionInt = {
+        intArrayFind(values, predicate)
     }
 
     def min(): OptionInt = {

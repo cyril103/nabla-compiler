@@ -1,0 +1,6 @@
+import collections.int_array
+
+def main(): Int = {
+    val xs = arrayIntRange(3)
+    xs.getOption(1).getOrElse(9) + xs.getOption(8).getOrElse(10) + xs.getOption(0 - 1).getOrElse(20)
+}
