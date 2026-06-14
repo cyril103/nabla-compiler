@@ -75,7 +75,8 @@ Le pipeline implemente actuellement :
   `fold`, `foreach`, `exists`, `forall`, `contains`, `size`, `isEmpty` et
   `nonEmpty`, `head`, `last`, `append`, `prepend`, `reverse`, `concat`,
   `take`, `drop`, `slice`, `indexOf`, `indexOfOption`, `count`, `find`, `min`, `max`,
-  `getOption`, `headOption`, `lastOption`, `takeWhile` et `dropWhile`,
+  `getOption`, `headOption`, `lastOption`, `takeWhile`, `dropWhile`,
+  `takeRight`, `dropRight` et `span`,
   avec predicats booleens;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
@@ -195,6 +196,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `OptionInt` puis `ArrayInt.min` et `ArrayInt.max`.
 - [x] Ajouter `ArrayInt.getOption`, `headOption`, `lastOption` et `find`.
 - [x] Ajouter `ArrayInt.takeWhile` et `ArrayInt.dropWhile`.
+- [x] Ajouter `ArrayInt.takeRight`, `ArrayInt.dropRight` et `ArrayInt.span`.
 
 ### P2 - Runtime Et Objets
 
@@ -278,6 +280,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `8b7be03` - Ajout des diagnostics sources uniformes, de `CompilerError` et des
   tests de diagnostics exacts.
 - `5b7a7ce` - Ajouter `ArrayInt.takeWhile` et `ArrayInt.dropWhile`.
+- `58301f4` - Ajouter `ArrayInt.takeRight`, `ArrayInt.dropRight` et `ArrayInt.span`.
 - `1062f09` - Ajout des parametres de fonctions et methodes, appels globaux,
   validation des arguments et convention d'appel x86-64.
 - `93b942f` - Ajout de `AGENTS.md`, des conventions de contribution et de la
@@ -289,5 +292,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter `ArrayInt.takeRight`, `ArrayInt.dropRight` et `ArrayInt.span` pour
-compléter les opérations de découpage fonctionnelles.
+Ajouter `ArrayInt.partition` et `ArrayInt.flatMap` pour approfondir les
+transformations fonctionnelles de `ArrayInt`.

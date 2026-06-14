@@ -1,0 +1,18 @@
+import collections.int_array
+
+def main(): Int = {
+    val xs = new ArrayInt(new IntArray(5))
+    val index0 = 0
+    xs.raw().set(index0, 10)
+    xs.raw().set(index0 + 1, 20)
+    xs.raw().set(index0 + 2, 30)
+    xs.raw().set(index0 + 3, 40)
+    xs.raw().set(index0 + 4, 50)
+
+    val dropped = xs.dropRight(2)
+    if dropped.size() == 3 && dropped.get(0) == 10 && dropped.get(1) == 20 && dropped.get(2) == 30 {
+        42
+    } else {
+        1
+    }
+}

@@ -339,6 +339,29 @@ def intArrayDropWhile(xs: IntArray, predicate: (Int) => Bool): IntArray = {
     dropped
 }
 
+def intArrayTakeRight(xs: IntArray, count: Int): IntArray = {
+    val kept = intClamp(count, 0, xs.length())
+    val skipped = xs.length() - kept
+    val taken = new IntArray(kept)
+    var index = 0
+    while (index < kept) {
+        taken.set(index, xs.get(skipped + index))
+        index = index + 1
+    }
+    taken
+}
+
+def intArrayDropRight(xs: IntArray, count: Int): IntArray = {
+    val dropped = intArrayTake(xs, xs.length() - intClamp(count, 0, xs.length()))
+    dropped
+}
+
+def intArraySpan(xs: IntArray, predicate: (Int) => Bool): ArrayIntSpan = {
+    val first = intArrayTakeWhile(xs, predicate)
+    val second = intArrayDropWhile(xs, predicate)
+    new ArrayIntSpan(new ArrayInt(first), new ArrayInt(second))
+}
+
 class ArrayInt(values: IntArray) {
     def length(): Int = {
         values.length()
@@ -428,6 +451,18 @@ class ArrayInt(values: IntArray) {
         new ArrayInt(intArrayDropWhile(values, predicate))
     }
 
+    def takeRight(count: Int): ArrayInt = {
+        new ArrayInt(intArrayTakeRight(values, count))
+    }
+
+    def dropRight(count: Int): ArrayInt = {
+        new ArrayInt(intArrayDropRight(values, count))
+    }
+
+    def span(predicate: (Int) => Bool): ArrayIntSpan = {
+        intArraySpan(values, predicate)
+    }
+
     def fold(initial: Int, combine: (Int, Int) => Int): Int = {
         intArrayFold(values, initial, combine)
     }
@@ -478,6 +513,16 @@ class ArrayInt(values: IntArray) {
 
     def raw(): IntArray = {
         values
+    }
+}
+
+class ArrayIntSpan(prefixValues: ArrayInt, suffixValues: ArrayInt) {
+    def prefix(): ArrayInt = {
+        prefixValues
+    }
+
+    def suffix(): ArrayInt = {
+        suffixValues
     }
 }
 

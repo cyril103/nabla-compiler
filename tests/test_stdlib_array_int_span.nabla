@@ -1,0 +1,21 @@
+import collections.int_array
+
+def main(): Int = {
+    val xs = new ArrayInt(new IntArray(5))
+    val index0 = 0
+    xs.raw().set(index0, 1)
+    xs.raw().set(index0 + 1, 2)
+    xs.raw().set(index0 + 2, 3)
+    xs.raw().set(index0 + 3, 4)
+    xs.raw().set(index0 + 4, 5)
+
+    val result = xs.span(value => value < 4)
+    val left = result.prefix()
+    val right = result.suffix()
+    if left.size() == 3 && left.last() == 3 &&
+        right.size() == 2 && right.get(0) == 4 && right.get(1) == 5 {
+        42
+    } else {
+        1
+    }
+}
