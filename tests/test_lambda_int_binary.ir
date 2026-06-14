@@ -1,0 +1,12 @@
+function main() -> Int
+  %0 = function_ref lambda.0
+  store %0, @combine#2
+  %1 = load @combine#2
+  %2 = const 20
+  %3 = const 22
+  %4 = indirect_call %1, %2, %3
+  return %4
+
+function lambda.0(%left: Int, %right: Int) -> Int
+  %0 = + %left, %right
+  return %0

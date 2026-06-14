@@ -1,0 +1,6 @@
+def main(): Int = {
+    val combine = (left: Int, right: Int) => {
+        left + right
+    }
+    combine(20, 22)
+}

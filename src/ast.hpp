@@ -84,8 +84,9 @@ public:
 
 class FunctionReferenceNode : public ASTNode {
     std::string name;
+    std::string resolvedType;
 public:
-    FunctionReferenceNode(std::string functionName);
+    FunctionReferenceNode(std::string functionName, std::string functionType);
     std::string getType() override;
     void validateSemantics(CompilerContext& context) override;
     std::string lowerToIR(IRBuilder& builder) const override;

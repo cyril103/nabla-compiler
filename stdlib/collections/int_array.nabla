@@ -56,6 +56,16 @@ def intArrayFilter(xs: IntArray, predicate: IntUnaryFn): IntArray = {
     filtered
 }
 
+def intArrayFold(xs: IntArray, initial: Int, combine: IntBinaryFn): Int = {
+    var index = 0
+    var accumulator = initial
+    while (index < xs.length()) {
+        accumulator = combine(accumulator, xs.get(index))
+        index = index + 1
+    }
+    accumulator
+}
+
 class ArrayInt(values: IntArray) {
     def length(): Int = {
         values.length()
@@ -75,6 +85,10 @@ class ArrayInt(values: IntArray) {
 
     def filter(predicate: IntUnaryFn): ArrayInt = {
         new ArrayInt(intArrayFilter(values, predicate))
+    }
+
+    def fold(initial: Int, combine: IntBinaryFn): Int = {
+        intArrayFold(values, initial, combine)
     }
 
     def raw(): IntArray = {

@@ -206,40 +206,66 @@ std::unique_ptr<ASTNode> Parser::parseForExpression() {
 
 bool Parser::startsLambdaExpression() const {
     if (peek().type != TokenType::LPAREN || index + 5 >= tokens.size()) return false;
-    return tokens[index + 1].type == TokenType::IDENTIFIER &&
-           tokens[index + 2].type == TokenType::COLON &&
-           tokens[index + 3].type == TokenType::IDENTIFIER &&
-           tokens[index + 4].type == TokenType::RPAREN &&
-           tokens[index + 5].type == TokenType::FAT_ARROW;
+    if (tokens[index + 1].type != TokenType::IDENTIFIER ||
+        tokens[index + 2].type != TokenType::COLON ||
+        tokens[index + 3].type != TokenType::IDENTIFIER) {
+        return false;
+    }
+    if (tokens[index + 4].type == TokenType::RPAREN) {
+        return tokens[index + 5].type == TokenType::FAT_ARROW;
+    }
+    return index + 9 < tokens.size() &&
+           tokens[index + 4].type == TokenType::COMMA &&
+           tokens[index + 5].type == TokenType::IDENTIFIER &&
+           tokens[index + 6].type == TokenType::COLON &&
+           tokens[index + 7].type == TokenType::IDENTIFIER &&
+           tokens[index + 8].type == TokenType::RPAREN &&
+           tokens[index + 9].type == TokenType::FAT_ARROW;
 }
 
 std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
     Token start = consume(TokenType::LPAREN, "");
-    Token parameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre attendu dans la lambda");
-    std::string parameterName = parameterToken.value;
-    consume(TokenType::COLON, "':' attendu après le nom du paramètre de lambda");
-    Token parameterTypeToken = consume(TokenType::IDENTIFIER, "Type de paramètre attendu dans la lambda");
-    std::string parameterType = parameterTypeToken.value;
-    if (parameterType != "Int") {
+    std::vector<FunctionDefNode::Parameter> parameters;
+    std::vector<CompilerContext::ParameterInfo> signatureParameters;
+    std::vector<std::pair<std::string, std::string>> scopedParameters;
+
+    while (peek().type != TokenType::RPAREN) {
+        Token parameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre attendu dans la lambda");
+        std::string parameterName = parameterToken.value;
+        consume(TokenType::COLON, "':' attendu après le nom du paramètre de lambda");
+        Token parameterTypeToken = consume(TokenType::IDENTIFIER, "Type de paramètre attendu dans la lambda");
+        std::string parameterType = parameterTypeToken.value;
+        if (parameterType != "Int") {
+            throw CompilerError(
+                ErrorKind::Parser, parameterTypeToken.location,
+                "seules les lambdas Int => Int et (Int, Int) => Int sont supportées pour l'instant");
+        }
+        std::string symbolName = parameterName + "#" + std::to_string(nextSymbolId++);
+        parameters.push_back({parameterName, symbolName, parameterType});
+        signatureParameters.push_back({parameterName, parameterType, parameterTypeToken.location});
+        scopedParameters.push_back({parameterName, symbolName});
+        if (peek().type == TokenType::COMMA) {
+            consume(TokenType::COMMA, "");
+        } else if (peek().type != TokenType::RPAREN) {
+            throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ')' attendu après le paramètre");
+        }
+    }
+    if (parameters.empty() || parameters.size() > 2) {
         throw CompilerError(
-            ErrorKind::Parser, parameterTypeToken.location,
-            "seules les lambdas Int => Int sont supportées pour l'instant");
+            ErrorKind::Parser, start.location,
+            "seules les lambdas à un ou deux paramètres Int sont supportées pour l'instant");
     }
     consume(TokenType::RPAREN, "Parenthèse fermante attendue après le paramètre de lambda");
     consume(TokenType::FAT_ARROW, "'=>' attendu après le paramètre de lambda");
     consume(TokenType::LBRACE, "Bloc attendu après '=>'");
 
     std::string lambdaName = "lambda." + std::to_string(nextLambdaId++);
-    std::string symbolName = parameterName + "#" + std::to_string(nextSymbolId++);
-
-    std::vector<FunctionDefNode::Parameter> parameters;
-    parameters.push_back({parameterName, symbolName, parameterType});
-    std::vector<CompilerContext::ParameterInfo> signatureParameters;
-    signatureParameters.push_back({parameterName, parameterType, parameterTypeToken.location});
     context.functions[lambdaName] = {signatureParameters, "Int", start.location, start.location};
 
     localScopes.emplace_back();
-    localScopes.back()[parameterName] = {symbolName, parameterType, false};
+    for (const auto& [parameterName, symbolName] : scopedParameters) {
+        localScopes.back()[parameterName] = {symbolName, "Int", false};
+    }
     auto body = parseBlock();
     consume(TokenType::RBRACE, "Fin du bloc de lambda attendue");
     localScopes.pop_back();
@@ -247,7 +273,8 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
     auto function = located(std::make_unique<FunctionDefNode>(
         "", lambdaName, "Int", std::move(parameters), std::move(body)), start.location);
     generatedFunctions.push_back(std::move(function));
-    return located(std::make_unique<FunctionReferenceNode>(lambdaName), start.location);
+    const std::string functionType = signatureParameters.size() == 1 ? "IntUnaryFn" : "IntBinaryFn";
+    return located(std::make_unique<FunctionReferenceNode>(lambdaName, functionType), start.location);
 }
 
 std::unique_ptr<ASTNode> Parser::parsePrimary() {
@@ -293,7 +320,7 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             auto arguments = parseArguments();
             consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
             if (const ParsedSymbol* symbol = findLocal(name)) {
-                if (symbol->type == "IntUnaryFn") {
+                if (symbol->type == "IntUnaryFn" || symbol->type == "IntBinaryFn") {
                     return located(
                         std::make_unique<FunctionValueCallNode>(
                             name, symbol->internalName, std::move(arguments)),
@@ -313,7 +340,10 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             }
         }
         if (context.functions.count(name)) {
-            return located(std::make_unique<FunctionReferenceNode>(name), nameToken.location);
+            const auto& signature = context.functions[name];
+            std::string functionType = "IntUnaryFn";
+            if (signature.parameters.size() == 2) functionType = "IntBinaryFn";
+            return located(std::make_unique<FunctionReferenceNode>(name, functionType), nameToken.location);
         }
         return located(std::make_unique<IdentifierNode>(name, name, "Int"), nameToken.location);
     }

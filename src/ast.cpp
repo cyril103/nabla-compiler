@@ -26,6 +26,11 @@ bool isIntUnaryFunction(const CompilerContext::FunctionSignature& signature) {
     return signature.parameters.size() == 1 && signature.parameters[0].type == "Int" &&
            signature.returnType == "Int";
 }
+
+bool isIntBinaryFunction(const CompilerContext::FunctionSignature& signature) {
+    return signature.parameters.size() == 2 && signature.parameters[0].type == "Int" &&
+           signature.parameters[1].type == "Int" && signature.returnType == "Int";
+}
 }
 
 std::string ASTNode::lowerToIR(IRBuilder& builder) const {
@@ -306,11 +311,11 @@ std::string FunctionCallNode::lowerToIR(IRBuilder& builder) const {
     return builder.emitCall(name, loweredArguments);
 }
 
-FunctionReferenceNode::FunctionReferenceNode(std::string functionName)
-    : name(std::move(functionName)) {}
+FunctionReferenceNode::FunctionReferenceNode(std::string functionName, std::string functionType)
+    : name(std::move(functionName)), resolvedType(std::move(functionType)) {}
 
 std::string FunctionReferenceNode::getType() {
-    return "IntUnaryFn";
+    return resolvedType;
 }
 
 void FunctionReferenceNode::validateSemantics(CompilerContext& context) {
@@ -318,8 +323,11 @@ void FunctionReferenceNode::validateSemantics(CompilerContext& context) {
     if (function == context.functions.end()) {
         semanticError("fonction inconnue: " + name);
     }
-    if (!isIntUnaryFunction(function->second)) {
-        semanticError("la fonction '" + name + "' n'est pas compatible avec IntUnaryFn");
+    const bool validFunction =
+        (resolvedType == "IntUnaryFn" && isIntUnaryFunction(function->second)) ||
+        (resolvedType == "IntBinaryFn" && isIntBinaryFunction(function->second));
+    if (!validFunction) {
+        semanticError("la fonction '" + name + "' n'est pas compatible avec " + resolvedType);
     }
 }
 
@@ -341,17 +349,22 @@ void FunctionValueCallNode::validateSemantics(CompilerContext& context) {
     if (symbol == context.semanticSymbolTypes.end()) {
         semanticError("fonction utilisée hors de sa portée: " + name);
     }
-    if (symbol->second != "IntUnaryFn") {
+    if (symbol->second != "IntUnaryFn" && symbol->second != "IntBinaryFn") {
         semanticError("la valeur '" + name + "' n'est pas appelable");
     }
-    if (arguments.size() != 1) {
-        semanticError("IntUnaryFn: 1 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
+    const size_t expectedArgumentCount = symbol->second == "IntUnaryFn" ? 1 : 2;
+    if (arguments.size() != expectedArgumentCount) {
+        semanticError(
+            symbol->second + ": " + std::to_string(expectedArgumentCount) +
+            " argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
     }
-    if (arguments[0]->getType() != "Int") {
-        throw CompilerError(
-            ErrorKind::Semantic, arguments[0]->getLocation(),
-            "IntUnaryFn, paramètre 'value': type 'Int' attendu, '" +
-            arguments[0]->getType() + "' reçu");
+    for (const auto& argument : arguments) {
+        if (argument->getType() != "Int") {
+            throw CompilerError(
+                ErrorKind::Semantic, argument->getLocation(),
+                symbol->second + ", paramètre: type 'Int' attendu, '" +
+                argument->getType() + "' reçu");
+        }
     }
 }
 
@@ -525,7 +538,7 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
     if (body) body->validateSemantics(context);
     const bool knownType =
         returnType == "Int" || returnType == "String" || returnType == "Unit" ||
-        returnType == "IntArray" || returnType == "IntUnaryFn" ||
+        returnType == "IntArray" || returnType == "IntUnaryFn" || returnType == "IntBinaryFn" ||
         context.classes.count(returnType) != 0;
     if (!knownType) {
         semanticError("type de retour inconnu '" + returnType + "' pour la fonction '" + name + "'");

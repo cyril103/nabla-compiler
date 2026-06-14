@@ -42,14 +42,16 @@ Le pipeline implemente actuellement :
 - objets avec champs de constructeur et appels de methodes parametres;
 - fonctions globales appelables avec parametres;
 - premier type fonction-valeur `IntUnaryFn`, references de fonctions nommees et
-  appels indirects, avec lambdas sans capture `(x: Int) => { ... }`;
+  `IntBinaryFn`, references de fonctions nommees et appels indirects, avec
+  lambdas sans capture `(x: Int) => { ... }` et
+  `(acc: Int, value: Int) => { ... }`;
 - collection native `IntArray` avec `length`, `get` et `set`;
 - entiers immediats avec pointer tagging et litteraux `String`;
 - affichage console de `String` via la primitive globale `print`;
 - premier module de bibliotheque standard `io` avec `println`;
 - premier module de bibliotheque standard `collections.int_array` avec
   `intArraySum`, `intArrayFill`, `intArrayMap`, `intArrayFilter` et la facade
-  objet `ArrayInt`;
+  objet `ArrayInt` avec `map`, `filter` et `fold`;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -129,13 +131,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ### P2 - Systeme De Types
 
-- [ ] Formaliser `Unit`, `Int`, `String`, `IntArray`, `IntUnaryFn` et les types
-  de classes.
+- [ ] Formaliser `Unit`, `Int`, `String`, `IntArray`, `IntUnaryFn`,
+  `IntBinaryFn` et les types de classes.
 - [ ] Ajouter les booleens ou definir officiellement `Int` comme condition.
 - [ ] Ajouter les champs et methodes herites si l'heritage est retenu.
 - [ ] Valider les types des branches, boucles et operateurs de facon uniforme.
 - [ ] Generaliser `IntUnaryFn` vers des types fonction complets.
-- [ ] Ajouter `IntBinaryFn` pour `fold` et operations binaires de collections.
+- [x] Ajouter `IntBinaryFn` pour `fold` et operations binaires de collections.
 - [x] Ajouter les lambdas sans capture pour `IntUnaryFn`.
 - [ ] Ajouter les closures avec capture.
 
@@ -160,7 +162,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout de `ArrayInt.filter`.
+- Prochain commit - Ajout de `IntBinaryFn` et `ArrayInt.fold`.
+- `fa730c6` - Ajout de `ArrayInt.filter`.
 - `209119f` - Ajout des fonctions valeurs `IntUnaryFn`, de `intArrayMap` et de
   la facade objet `ArrayInt`.
 - `827c162` - Ajout du module `collections.int_array`.
@@ -197,4 +200,4 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter `IntBinaryFn` et `ArrayInt.fold`, puis ajouter les closures avec capture.
+Ajouter les closures avec capture, puis generaliser les types fonction.
