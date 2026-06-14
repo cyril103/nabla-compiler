@@ -1,7 +1,0 @@
-def main(): Int = {
-    0
-}
-
-def lengthOf(f: (String) => Int): Int = {
-    0
-}

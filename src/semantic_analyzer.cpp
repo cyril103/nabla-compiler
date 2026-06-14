@@ -67,5 +67,5 @@ void SemanticAnalyzer::validateDeclaredTypes() const {
 
 bool SemanticAnalyzer::isKnownType(const std::string& type) const {
     return type == "Int" || type == "String" || type == "Unit" || type == "IntArray" ||
-           isFunctionTypeAlias(type) || context.classes.count(type) != 0;
+           isFunctionTypeName(type) || context.classes.count(type) != 0;
 }

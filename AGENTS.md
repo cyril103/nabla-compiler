@@ -47,10 +47,11 @@ Le pipeline implemente actuellement :
   `(acc: Int, value: Int) => { ... }`;
 - closures avec capture par valeur pour les lambdas specialisees `IntUnaryFn`
   et `IntConsumerFn`;
-- representation interne commune des types fonction, avec aliases temporaires
-  `IntUnaryFn`, `IntConsumerFn` et `IntBinaryFn`;
-- syntaxe de types fonction parenthesee `(Int) => Int`, `(Int) => Unit` et
-  `(Int, Int) => Int` mappee vers les aliases internes temporaires;
+- representation interne canonique des types fonction sous forme `Fn(...)->...`,
+  avec compatibilite de lecture pour les anciens aliases `IntUnaryFn`,
+  `IntConsumerFn` et `IntBinaryFn`;
+- syntaxe de types fonction parenthesee comme `(Int) => Int`, `(Int) => Unit`,
+  `(Int, Int) => Int` et `(String) => Int`;
 - type `Unit` formalise pour les fonctions a effet et les boucles `while` /
   `for`;
 - collection native `IntArray` avec `length`, `get` et `set`;
@@ -146,7 +147,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [ ] Ajouter les booleens ou definir officiellement `Int` comme condition.
 - [ ] Ajouter les champs et methodes herites si l'heritage est retenu.
 - [ ] Valider les types des branches, boucles et operateurs de facon uniforme.
-- [ ] Generaliser `IntUnaryFn` vers des types fonction complets.
+- [x] Generaliser `IntUnaryFn` vers des types fonction canoniques.
 - [x] Introduire une representation interne commune des types fonction.
 - [x] Ajouter la syntaxe de types fonction parenthesee pour les aliases actuels.
 - [x] Ajouter `IntBinaryFn` pour `fold` et operations binaires de collections.
@@ -178,7 +179,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout de la syntaxe de types fonction parenthesee.
+- Prochain commit - Generalisation canonique des types fonction.
+- `cc342e4` - Ajout de la syntaxe de types fonction parenthesee.
 - `6534f3c` - Introduction d'une representation interne des types fonction.
 - `53533a2` - Ajout des closures avec capture par valeur.
 - `8f71165` - Ajout de `IntConsumerFn` pour `foreach`.
@@ -222,5 +224,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Generaliser les types fonction pour remplacer les variantes specialisees
-`IntUnaryFn`, `IntConsumerFn` et `IntBinaryFn`.
+Etendre la syntaxe de types fonction aux retours fonction et aux callbacks avec
+plus de deux parametres, puis retirer les aliases historiques.

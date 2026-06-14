@@ -234,10 +234,10 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
         std::string parameterName = parameterToken.value;
         consume(TokenType::COLON, "':' attendu après le nom du paramètre de lambda");
         auto [parameterType, parameterTypeLocation] = parseType("Type de paramètre attendu dans la lambda");
-        if (parameterType != "Int") {
+        if (isFunctionTypeName(parameterType)) {
             throw CompilerError(
                 ErrorKind::Parser, parameterTypeLocation,
-                "seules les lambdas Int => Int, Int => Unit et (Int, Int) => Int sont supportées pour l'instant");
+                "les paramètres de lambda ne peuvent pas encore être des fonctions");
         }
         std::string symbolName = parameterName + "#" + std::to_string(nextSymbolId++);
         parameters.push_back({parameterName, symbolName, parameterType});
@@ -274,13 +274,6 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
     lambdaCaptureScopes.pop_back();
 
     const std::string returnType = body->getType();
-    if ((signatureParameters.size() == 1 && returnType != "Int" && returnType != "Unit") ||
-        (signatureParameters.size() == 2 && returnType != "Int")) {
-        throw CompilerError(
-            ErrorKind::Parser, start.location,
-            "seules les lambdas Int => Int, Int => Unit et (Int, Int) => Int sont supportées pour l'instant");
-    }
-
     std::string lambdaName = "lambda." + std::to_string(nextLambdaId++);
     context.functions[lambdaName] = {signatureParameters, returnType, start.location, start.location};
 
@@ -292,11 +285,11 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
         lambdaType.parameterTypes.push_back(parameter.type);
     }
     lambdaType.returnType = returnType;
-    auto functionType = functionAliasForType(lambdaType);
+    auto functionType = functionNameForType(lambdaType);
     if (!functionType) {
         throw CompilerError(
             ErrorKind::Parser, start.location,
-            "seules les lambdas Int => Int, Int => Unit et (Int, Int) => Int sont supportées pour l'instant");
+            "type fonction de lambda non supporté pour l'instant");
     }
     std::vector<FunctionReferenceNode::Capture> referenceCaptures;
     for (const auto& capture : captures) {
@@ -352,7 +345,7 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
             auto [symbol, scopeIndex] = findLocalWithScope(name);
             if (symbol) {
-                if (isFunctionTypeAlias(symbol->type)) {
+                if (isFunctionTypeName(symbol->type)) {
                     captureIfNeeded(name, *symbol, scopeIndex);
                     return located(
                         std::make_unique<FunctionValueCallNode>(
@@ -376,7 +369,7 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         }
         if (context.functions.count(name)) {
             const auto& signature = context.functions[name];
-            auto functionType = functionAliasForSignature(signature);
+            auto functionType = functionNameForSignature(signature);
             if (!functionType) {
                 throw CompilerError(
                     ErrorKind::Parser, nameToken.location,
@@ -495,7 +488,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
 std::pair<std::string, SourceLocation> Parser::parseType(const std::string& expectedMessage) {
     if (peek().type == TokenType::IDENTIFIER) {
         Token typeToken = consume(TokenType::IDENTIFIER, expectedMessage);
-        return {typeToken.value, typeToken.location};
+        return {canonicalTypeName(typeToken.value), typeToken.location};
     }
     if (peek().type != TokenType::LPAREN) {
         throw CompilerError(ErrorKind::Parser, peek().location, expectedMessage + " (reçu '" + peek().value + "')");
@@ -517,13 +510,13 @@ std::pair<std::string, SourceLocation> Parser::parseType(const std::string& expe
     Token returnTypeToken = consume(TokenType::IDENTIFIER, "Type de retour attendu dans le type fonction");
     functionType.returnType = returnTypeToken.value;
 
-    auto alias = functionAliasForType(functionType);
-    if (!alias) {
+    auto functionName = functionNameForType(functionType);
+    if (!functionName) {
         throw CompilerError(
             ErrorKind::Parser, start.location,
             "type fonction non supporté pour l'instant");
     }
-    return {*alias, start.location};
+    return {*functionName, start.location};
 }
 
 std::vector<std::unique_ptr<ASTNode>> Parser::parseArguments() {

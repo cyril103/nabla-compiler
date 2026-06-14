@@ -1,0 +1,9 @@
+def applyToText(value: String, f: (String) => Int): Int = {
+    f(value)
+}
+
+def main(): Int = {
+    applyToText("nabla", (text: String) => {
+        text.length()
+    })
+}

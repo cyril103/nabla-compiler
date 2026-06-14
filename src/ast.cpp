@@ -316,7 +316,7 @@ void FunctionReferenceNode::validateSemantics(CompilerContext& context) {
     if (function == context.functions.end()) {
         semanticError("fonction inconnue: " + name);
     }
-    if (!functionAliasMatchesSignature(resolvedType, function->second)) {
+    if (!functionTypeNameMatchesSignature(resolvedType, function->second)) {
         semanticError("la fonction '" + name + "' n'est pas compatible avec " + resolvedType);
     }
 }
@@ -343,7 +343,7 @@ void FunctionValueCallNode::validateSemantics(CompilerContext& context) {
     if (symbol == context.semanticSymbolTypes.end()) {
         semanticError("fonction utilisée hors de sa portée: " + name);
     }
-    auto functionType = functionTypeFromAlias(symbol->second);
+    auto functionType = functionTypeFromName(symbol->second);
     if (!functionType) {
         semanticError("la valeur '" + name + "' n'est pas appelable");
     }
@@ -537,7 +537,7 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
     if (body) body->validateSemantics(context);
     const bool knownType =
         returnType == "Int" || returnType == "String" || returnType == "Unit" ||
-        returnType == "IntArray" || isFunctionTypeAlias(returnType) ||
+        returnType == "IntArray" || isFunctionTypeName(returnType) ||
         context.classes.count(returnType) != 0;
     if (!knownType) {
         semanticError("type de retour inconnu '" + returnType + "' pour la fonction '" + name + "'");

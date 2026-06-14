@@ -1,1 +1,1 @@
-tests/test_error_foreach_function_type.nabla:9:16: semantic error: ArrayInt.foreach, paramètre 'f': type 'IntConsumerFn' attendu, 'IntUnaryFn' reçu
+tests/test_error_foreach_function_type.nabla:9:16: semantic error: ArrayInt.foreach, paramètre 'f': type 'Fn(Int)->Unit' attendu, 'Fn(Int)->Int' reçu

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "compiler_error.hpp"
+#include <cstddef>
 #include <map>
 #include <optional>
 #include <set>
@@ -49,47 +50,72 @@ struct CompilerContext {
     std::map<std::string, std::string> semanticSymbolTypes;
 };
 
-inline std::optional<CompilerContext::FunctionType> functionTypeFromAlias(const std::string& type) {
+inline std::string formatFunctionType(const CompilerContext::FunctionType& functionType) {
+    std::string formatted = "Fn(";
+    for (size_t i = 0; i < functionType.parameterTypes.size(); ++i) {
+        if (i > 0) formatted += ",";
+        formatted += functionType.parameterTypes[i];
+    }
+    formatted += ")->";
+    formatted += functionType.returnType;
+    return formatted;
+}
+
+inline std::optional<CompilerContext::FunctionType> functionTypeFromName(const std::string& type) {
     if (type == "IntUnaryFn") return CompilerContext::FunctionType{{"Int"}, "Int"};
     if (type == "IntConsumerFn") return CompilerContext::FunctionType{{"Int"}, "Unit"};
     if (type == "IntBinaryFn") return CompilerContext::FunctionType{{"Int", "Int"}, "Int"};
-    return std::nullopt;
+
+    const std::string prefix = "Fn(";
+    const std::string arrow = ")->";
+    if (type.rfind(prefix, 0) != 0) return std::nullopt;
+    size_t arrowPosition = type.find(arrow, prefix.size());
+    if (arrowPosition == std::string::npos) return std::nullopt;
+
+    CompilerContext::FunctionType functionType;
+    std::string parameters = type.substr(prefix.size(), arrowPosition - prefix.size());
+    size_t start = 0;
+    while (start < parameters.size()) {
+        size_t comma = parameters.find(',', start);
+        if (comma == std::string::npos) comma = parameters.size();
+        if (comma == start) return std::nullopt;
+        functionType.parameterTypes.push_back(parameters.substr(start, comma - start));
+        start = comma + 1;
+    }
+    functionType.returnType = type.substr(arrowPosition + arrow.size());
+    if (functionType.returnType.empty()) return std::nullopt;
+    return functionType;
 }
 
-inline bool isFunctionTypeAlias(const std::string& type) {
-    return functionTypeFromAlias(type).has_value();
+inline std::string canonicalTypeName(const std::string& type) {
+    auto functionType = functionTypeFromName(type);
+    if (!functionType) return type;
+    return formatFunctionType(*functionType);
 }
 
-inline std::optional<std::string> functionAliasForType(
+inline bool isFunctionTypeName(const std::string& type) {
+    return functionTypeFromName(type).has_value();
+}
+
+inline std::optional<std::string> functionNameForType(
     const CompilerContext::FunctionType& functionType) {
-    if (functionType.parameterTypes == std::vector<std::string>{"Int"} &&
-        functionType.returnType == "Int") {
-        return "IntUnaryFn";
-    }
-    if (functionType.parameterTypes == std::vector<std::string>{"Int"} &&
-        functionType.returnType == "Unit") {
-        return "IntConsumerFn";
-    }
-    if (functionType.parameterTypes == std::vector<std::string>{"Int", "Int"} &&
-        functionType.returnType == "Int") {
-        return "IntBinaryFn";
-    }
-    return std::nullopt;
+    if (functionType.parameterTypes.empty()) return std::nullopt;
+    return formatFunctionType(functionType);
 }
 
-inline std::optional<std::string> functionAliasForSignature(
+inline std::optional<std::string> functionNameForSignature(
     const CompilerContext::FunctionSignature& signature) {
     CompilerContext::FunctionType functionType;
     for (const auto& parameter : signature.parameters) {
         functionType.parameterTypes.push_back(parameter.type);
     }
     functionType.returnType = signature.returnType;
-    return functionAliasForType(functionType);
+    return functionNameForType(functionType);
 }
 
-inline bool functionAliasMatchesSignature(
-    const std::string& alias, const CompilerContext::FunctionSignature& signature) {
-    auto expectedType = functionTypeFromAlias(alias);
+inline bool functionTypeNameMatchesSignature(
+    const std::string& typeName, const CompilerContext::FunctionSignature& signature) {
+    auto expectedType = functionTypeFromName(typeName);
     if (!expectedType) return false;
     if (expectedType->parameterTypes.size() != signature.parameters.size()) return false;
     for (size_t i = 0; i < expectedType->parameterTypes.size(); ++i) {

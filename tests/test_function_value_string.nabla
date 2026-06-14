@@ -4,5 +4,5 @@ def stringify(value: Int): String = {
 
 def main(): Int = {
     val f = stringify
-    0
+    f(123).length()
 }
