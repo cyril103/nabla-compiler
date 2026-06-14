@@ -43,6 +43,38 @@ struct PhiInfo {
     std::vector<std::string> operands;
 };
 
+struct CallingConvention {
+    std::vector<std::string> globalArgumentRegisters = GLOBAL_ARGUMENT_REGISTERS;
+    std::vector<std::string> methodArgumentRegisters = METHOD_ARGUMENT_REGISTERS;
+};
+
+class StackFrame {
+public:
+    void addSlot(const std::string& name) {
+        if (slotOffsets.count(name)) return;
+        slotOrder.push_back(name);
+        slotOffsets[name] = static_cast<int>(slotOrder.size()) * 8;
+    }
+
+    bool empty() const {
+        return slotOffsets.empty();
+    }
+
+    size_t byteSize() const {
+        return slotOffsets.size() * 8;
+    }
+
+    int offsetFor(const std::string& name) const {
+        auto slot = slotOffsets.find(name);
+        if (slot == slotOffsets.end()) codegenError("valeur IR inconnue: " + name);
+        return slot->second;
+    }
+
+private:
+    std::map<std::string, int> slotOffsets;
+    std::vector<std::string> slotOrder;
+};
+
 class FunctionEmitter {
 public:
     FunctionEmitter(
@@ -53,15 +85,15 @@ public:
     }
 
     void emit() {
-        if (function.parameters.size() > GLOBAL_ARGUMENT_REGISTERS.size()) {
+        if (function.parameters.size() > callingConvention.globalArgumentRegisters.size()) {
             codegenError("le backend IR limite les fonctions globales a 6 parametres");
         }
 
         out << asmFunctionName(function.name) << ":\n";
         out << "    push rbp\n    mov rbp, rsp\n";
-        if (!slotOffsets.empty()) out << "    sub rsp, " << (slotOffsets.size() * 8) << "\n";
+        if (!frame.empty()) out << "    sub rsp, " << frame.byteSize() << "\n";
         for (size_t i = 0; i < function.parameters.size(); ++i) {
-            storeRegister("%" + function.parameters[i].name, GLOBAL_ARGUMENT_REGISTERS[i]);
+            storeRegister("%" + function.parameters[i].name, callingConvention.globalArgumentRegisters[i]);
         }
         for (const auto& instruction : function.instructions) emitInstruction(instruction);
         out << "\n";
@@ -71,8 +103,8 @@ private:
     const IRFunction& function;
     const CompilerContext& context;
     std::ostream& out;
-    std::map<std::string, int> slotOffsets;
-    std::vector<std::string> slotOrder;
+    CallingConvention callingConvention;
+    StackFrame frame;
     std::map<std::string, std::vector<PhiInfo>> phiLabels;
     std::map<std::string, int> emittedIncomingJumps;
 
@@ -94,31 +126,19 @@ private:
     }
 
     void collectSlots() {
-        for (const auto& parameter : function.parameters) addSlot("%" + parameter.name);
+        for (const auto& parameter : function.parameters) frame.addSlot("%" + parameter.name);
         for (const auto& instruction : function.instructions) {
-            if (!instruction.result.empty()) addSlot(instruction.result);
-            if (instruction.opcode == IROpcode::Store) addSlot(instruction.operands[0]);
+            if (!instruction.result.empty()) frame.addSlot(instruction.result);
+            if (instruction.opcode == IROpcode::Store) frame.addSlot(instruction.operands[0]);
         }
     }
 
-    void addSlot(const std::string& name) {
-        if (slotOffsets.count(name)) return;
-        slotOrder.push_back(name);
-        slotOffsets[name] = static_cast<int>(slotOrder.size()) * 8;
-    }
-
-    int offsetFor(const std::string& name) const {
-        auto slot = slotOffsets.find(name);
-        if (slot == slotOffsets.end()) codegenError("valeur IR inconnue: " + name);
-        return slot->second;
-    }
-
     void loadValue(const std::string& name, const std::string& reg) const {
-        out << "    mov " << reg << ", [rbp - " << offsetFor(name) << "]\n";
+        out << "    mov " << reg << ", [rbp - " << frame.offsetFor(name) << "]\n";
     }
 
     void storeRegister(const std::string& name, const std::string& reg) const {
-        out << "    mov [rbp - " << offsetFor(name) << "], " << reg << "\n";
+        out << "    mov [rbp - " << frame.offsetFor(name) << "], " << reg << "\n";
     }
 
     void emitInstruction(const IRInstruction& instruction) {
@@ -213,11 +233,11 @@ private:
     }
 
     void emitCall(const IRInstruction& instruction) {
-        if (instruction.operands.size() > GLOBAL_ARGUMENT_REGISTERS.size()) {
+        if (instruction.operands.size() > callingConvention.globalArgumentRegisters.size()) {
             codegenError("appel IR avec plus de 6 arguments");
         }
         for (size_t i = 0; i < instruction.operands.size(); ++i) {
-            loadValue(instruction.operands[i], GLOBAL_ARGUMENT_REGISTERS[i]);
+            loadValue(instruction.operands[i], callingConvention.globalArgumentRegisters[i]);
         }
         out << "    call " << asmFunctionName(instruction.operation) << "\n";
         storeRegister(instruction.result, "rax");
@@ -291,11 +311,11 @@ private:
 
         loadValue(instruction.operands[0], "rdi");
         const size_t methodArgumentCount = instruction.operands.size() - 1;
-        if (methodArgumentCount > METHOD_ARGUMENT_REGISTERS.size()) {
+        if (methodArgumentCount > callingConvention.methodArgumentRegisters.size()) {
             codegenError("appel de methode IR avec plus de 5 arguments");
         }
         for (size_t i = 0; i < methodArgumentCount; ++i) {
-            loadValue(instruction.operands[i + 1], METHOD_ARGUMENT_REGISTERS[i]);
+            loadValue(instruction.operands[i + 1], callingConvention.methodArgumentRegisters[i]);
         }
 
         if (className == "Int" && methodName == "toString") {

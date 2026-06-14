@@ -110,7 +110,7 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Abaisser tout l'AST semantiquement valide vers l'IR.
 - [x] Representer les branchements et boucles dans l'IR.
 - [x] Representer les objets, champs et appels de methodes dans l'IR.
-- [ ] Deplacer l'allocation de pile et les conventions d'appel vers le backend.
+- [x] Deplacer l'allocation de pile et les conventions d'appel vers le backend.
 - [x] Couvrir le backend ASM depuis IR pour tout le langage actuel.
 - [x] Generer l'assembleur par defaut depuis l'IR.
 - [x] Supprimer l'ancien code de generation directe depuis l'AST.
@@ -138,7 +138,9 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Suppression de l'ancien code de generation ASM depuis l'AST.
+- Prochain commit - Structuration de la frame et de la convention d'appel du
+  backend IR.
+- `c771250` - Suppression de l'ancien code de generation ASM depuis l'AST.
 - `1266271` - Retrait du repli CLI vers l'ancien backend AST.
 - `3d93076` - Bascule du backend ASM par defaut vers l'IR.
 - `baefaa6` - Ajout des objets et methodes au backend ASM depuis IR.
@@ -160,6 +162,5 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Deplacer l'allocation de pile et les conventions d'appel dans des structures de
-backend IR plus explicites, puis retirer les binaires historiques suivis sous
-`build/`.
+Retirer les binaires historiques suivis sous `build/`, puis extraire le runtime
+ASM commun du backend IR.
