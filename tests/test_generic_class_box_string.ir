@@ -7,8 +7,12 @@ function main() -> Int
   %1: Box[String] = new Box[String](%0)
   store %1, @box#0
   %2: Box[String] = load @box#0
-  %3: String = call_method Box.get(%2)
+  %3: String = call_method Box[String].get(%2)
   %4: Int = call_method String.length(%3)
   %5: Int = const 37
   %6: Int = + %4, %5
   return %6
+
+function Box[String].get(%this: Box[String]) -> String
+  %0: String = call_method Box.get(%this)
+  return %0

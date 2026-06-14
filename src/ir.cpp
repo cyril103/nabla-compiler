@@ -123,7 +123,9 @@ std::string IRProgram::format() const {
 
 IRProgram IRBuilder::build(const ProgramNode& root) {
     program = {};
+    methodSpecializations.clear();
     root.lowerToIR(*this);
+    emitMethodSpecializationWrappers();
     return program;
 }
 
@@ -203,6 +205,51 @@ std::string IRBuilder::emitMethodCall(
     std::string result = nextValue();
     emit({IROpcode::MethodCall, result, type, qualifiedMember(className, methodName), operands});
     return result;
+}
+
+void IRBuilder::registerMethodSpecialization(
+    const std::string& concreteClassName, const std::string& templateClassName,
+    const std::string& methodName, const std::vector<std::string>& argumentTypes,
+    const std::string& returnType) {
+    if (concreteClassName == templateClassName) return;
+    for (const auto& specialization : methodSpecializations) {
+        if (specialization.concreteClassName == concreteClassName &&
+            specialization.templateClassName == templateClassName &&
+            specialization.methodName == methodName &&
+            specialization.argumentTypes == argumentTypes &&
+            specialization.returnType == returnType) {
+            return;
+        }
+    }
+    methodSpecializations.push_back({
+        concreteClassName, templateClassName, methodName, argumentTypes, returnType});
+}
+
+void IRBuilder::emitMethodSpecializationWrappers() {
+    const auto specializations = methodSpecializations;
+    for (const auto& specialization : specializations) {
+        std::vector<IRParameter> parameters = {{"this", specialization.concreteClassName}};
+        for (size_t i = 0; i < specialization.argumentTypes.size(); ++i) {
+            parameters.push_back({"arg" + std::to_string(i), specialization.argumentTypes[i]});
+        }
+
+        beginFunction(
+            qualifiedMember(specialization.concreteClassName, specialization.methodName),
+            parameters, specialization.returnType);
+        bindParameter("this", "this");
+
+        std::vector<std::string> arguments;
+        for (size_t i = 0; i < specialization.argumentTypes.size(); ++i) {
+            const std::string parameterName = "arg" + std::to_string(i);
+            bindParameter(parameterName, parameterName);
+            arguments.push_back(emitLoad(parameterName, specialization.argumentTypes[i]));
+        }
+        std::string receiver = emitLoad("this", specialization.concreteClassName);
+        std::string result = emitMethodCall(
+            specialization.templateClassName, specialization.methodName,
+            receiver, arguments, specialization.returnType);
+        endFunction(result);
+    }
 }
 
 std::string IRBuilder::emitNewObject(

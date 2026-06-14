@@ -7,5 +7,9 @@ function main() -> Int
   %1: Box[Int] = new Box[Int](%0)
   store %1, @box#0
   %2: Box[Int] = load @box#0
-  %3: Int = call_method Box.get(%2)
+  %3: Int = call_method Box[Int].get(%2)
   return %3
+
+function Box[Int].get(%this: Box[Int]) -> Int
+  %0: Int = call_method Box.get(%this)
+  return %0

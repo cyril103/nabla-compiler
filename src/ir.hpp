@@ -79,6 +79,10 @@ public:
     std::string emitMethodCall(
         const std::string& className, const std::string& methodName, const std::string& receiver,
         const std::vector<std::string>& arguments, const std::string& type = "Int");
+    void registerMethodSpecialization(
+        const std::string& concreteClassName, const std::string& templateClassName,
+        const std::string& methodName, const std::vector<std::string>& argumentTypes,
+        const std::string& returnType);
     std::string emitNewObject(
         const std::string& className, const std::vector<std::string>& arguments,
         const std::string& resultType = "");
@@ -114,7 +118,16 @@ private:
     int nextValueId = 0;
     int nextLabelId = 0;
     int nextTemporarySymbolId = 0;
+    struct MethodSpecialization {
+        std::string concreteClassName;
+        std::string templateClassName;
+        std::string methodName;
+        std::vector<std::string> argumentTypes;
+        std::string returnType;
+    };
+    std::vector<MethodSpecialization> methodSpecializations;
 
     std::string nextValue();
     void emit(IRInstruction instruction);
+    void emitMethodSpecializationWrappers();
 };

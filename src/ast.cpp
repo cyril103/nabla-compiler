@@ -501,8 +501,14 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
     std::string loweredReceiver = receiver->lowerToIR(builder);
     std::vector<std::string> loweredArguments;
     for (const auto& argument : arguments) loweredArguments.push_back(argument->lowerToIR(builder));
+    std::vector<std::string> argumentTypes;
+    for (const auto& argument : arguments) argumentTypes.push_back(argument->getType());
+    if (receiverType != resolvedOwnerType && !resolvedOwnerType.empty()) {
+        builder.registerMethodSpecialization(
+            receiverType, resolvedOwnerType, methodName, argumentTypes, resolvedType);
+    }
     return builder.emitMethodCall(
-        resolvedOwnerType.empty() ? receiverType : resolvedOwnerType,
+        receiverType,
         methodName, loweredReceiver, loweredArguments, resolvedType);
 }
 
