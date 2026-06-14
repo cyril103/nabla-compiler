@@ -1,0 +1,11 @@
+import core.option_int
+
+def main(): Int = {
+    val some = optionIntSome(7)
+    val none = optionIntNone()
+    if some.nonEmpty() && !some.isEmpty() && none.isEmpty() {
+        some.getOrElse(1) + none.getOrElse(2)
+    } else {
+        99
+    }
+}

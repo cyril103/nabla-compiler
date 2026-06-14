@@ -1,0 +1,25 @@
+class OptionInt(isDefined: Bool, value: Int) {
+    def isEmpty(): Bool = {
+        !isDefined
+    }
+
+    def nonEmpty(): Bool = {
+        isDefined
+    }
+
+    def getOrElse(default: Int): Int = {
+        if isDefined {
+            value
+        } else {
+            default
+        }
+    }
+}
+
+def optionIntSome(value: Int): OptionInt = {
+    new OptionInt(true, value)
+}
+
+def optionIntNone(): OptionInt = {
+    new OptionInt(false, 0)
+}

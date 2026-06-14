@@ -1,3 +1,5 @@
+import core.option_int
+
 def intClamp(value: Int, minimum: Int, maximum: Int): Int = {
     if value < minimum {
         minimum
@@ -146,6 +148,44 @@ def intArrayCount(xs: IntArray, predicate: (Int) => Bool): Int = {
         index = index + 1
     }
     total
+}
+
+def intArrayMin(xs: IntArray): OptionInt = {
+    if xs.length() == 0 {
+        optionIntNone()
+    } else {
+        var index = 1
+        var current = xs.get(0)
+        while (index < xs.length()) {
+            val value = xs.get(index)
+            if value < current {
+                current = value
+            } else {
+                current
+            }
+            index = index + 1
+        }
+        optionIntSome(current)
+    }
+}
+
+def intArrayMax(xs: IntArray): OptionInt = {
+    if xs.length() == 0 {
+        optionIntNone()
+    } else {
+        var index = 1
+        var current = xs.get(0)
+        while (index < xs.length()) {
+            val value = xs.get(index)
+            if value > current {
+                current = value
+            } else {
+                current
+            }
+            index = index + 1
+        }
+        optionIntSome(current)
+    }
 }
 
 def intArrayAppend(xs: IntArray, value: Int): IntArray = {
@@ -337,6 +377,14 @@ class ArrayInt(values: IntArray) {
 
     def count(predicate: (Int) => Bool): Int = {
         intArrayCount(values, predicate)
+    }
+
+    def min(): OptionInt = {
+        intArrayMin(values)
+    }
+
+    def max(): OptionInt = {
+        intArrayMax(values)
     }
 
     def raw(): IntArray = {

@@ -67,12 +67,15 @@ Le pipeline implemente actuellement :
 - entiers immediats avec pointer tagging et litteraux `String`;
 - affichage console de `String` via la primitive globale `print`;
 - premier module de bibliotheque standard `io` avec `println`;
+- module de bibliotheque standard `core.option_int` avec `OptionInt`,
+  `optionIntSome` et `optionIntNone`;
 - premier module de bibliotheque standard `collections.int_array` avec
   `intArraySum`, `intArrayFill`, `intArrayRange`, `intArrayMap`,
   `intArrayFilter` et la facade objet `ArrayInt` avec `map`, `filter`,
   `fold`, `foreach`, `exists`, `forall`, `contains`, `size`, `isEmpty` et
   `nonEmpty`, `head`, `last`, `append`, `prepend`, `reverse`, `concat`,
-  `take`, `drop`, `slice`, `indexOf` et `count`, avec predicats booleens;
+  `take`, `drop`, `slice`, `indexOf`, `count`, `min` et `max`, avec predicats
+  booleens;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -187,6 +190,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `ArrayInt.take` et `ArrayInt.drop` avec bornes clampees.
 - [x] Ajouter `ArrayInt.slice` avec bornes clampees.
 - [x] Ajouter `ArrayInt.indexOf` et `ArrayInt.count`.
+- [x] Ajouter `OptionInt` puis `ArrayInt.min` et `ArrayInt.max`.
 
 ### P2 - Runtime Et Objets
 
@@ -209,7 +213,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout de `ArrayInt.indexOf` et `ArrayInt.count`.
+- Prochain commit - Ajout de `OptionInt` et des bornes `ArrayInt`.
+- `3b6760f` - Ajout de `ArrayInt.indexOf` et `ArrayInt.count`.
 - `faaa691` - Ajout de `ArrayInt.slice`.
 - `1bbd935` - Ajout de `ArrayInt.take` et `ArrayInt.drop`.
 - `fe4ee39` - Ajout de `ArrayInt.concat`.
@@ -273,5 +278,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter `ArrayInt.min` et `ArrayInt.max`, ou introduire ensuite un type
-`OptionInt` pour eviter les sentinelles sur collections vides.
+Generaliser progressivement `OptionInt` ou ajouter `ArrayInt.sumOption` /
+`average` selon la direction choisie pour les types numeriques.

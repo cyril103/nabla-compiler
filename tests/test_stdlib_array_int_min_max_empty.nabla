@@ -1,0 +1,10 @@
+import collections.int_array
+
+def main(): Int = {
+    val xs = arrayIntRange(0)
+    if xs.min().isEmpty() && xs.max().isEmpty() {
+        xs.min().getOrElse(20) + xs.max().getOrElse(22)
+    } else {
+        1
+    }
+}
