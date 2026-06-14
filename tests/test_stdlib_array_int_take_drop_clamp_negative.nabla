@@ -1,0 +1,12 @@
+import collections.int_array
+
+def main(): Int = {
+    val xs = arrayIntRange(3)
+    val taken = xs.take(0 - 2)
+    val dropped = xs.drop(0 - 2)
+    if taken.isEmpty() && dropped.size() == 3 && dropped.head() == 0 {
+        42
+    } else {
+        1
+    }
+}

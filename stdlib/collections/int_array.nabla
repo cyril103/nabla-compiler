@@ -1,3 +1,15 @@
+def intClamp(value: Int, minimum: Int, maximum: Int): Int = {
+    if value < minimum {
+        minimum
+    } else {
+        if value > maximum {
+            maximum
+        } else {
+            value
+        }
+    }
+}
+
 def intArraySum(xs: IntArray): Int = {
     var index = 0
     var total = 0
@@ -156,6 +168,29 @@ def intArrayConcat(left: IntArray, right: IntArray): IntArray = {
     combined
 }
 
+def intArrayTake(xs: IntArray, count: Int): IntArray = {
+    val kept = intClamp(count, 0, xs.length())
+    val taken = new IntArray(kept)
+    var index = 0
+    while (index < kept) {
+        taken.set(index, xs.get(index))
+        index = index + 1
+    }
+    taken
+}
+
+def intArrayDrop(xs: IntArray, count: Int): IntArray = {
+    val skipped = intClamp(count, 0, xs.length())
+    val kept = xs.length() - skipped
+    val dropped = new IntArray(kept)
+    var index = 0
+    while (index < kept) {
+        dropped.set(index, xs.get(skipped + index))
+        index = index + 1
+    }
+    dropped
+}
+
 class ArrayInt(values: IntArray) {
     def length(): Int = {
         values.length()
@@ -211,6 +246,14 @@ class ArrayInt(values: IntArray) {
 
     def concat(other: ArrayInt): ArrayInt = {
         new ArrayInt(intArrayConcat(values, other.raw()))
+    }
+
+    def take(count: Int): ArrayInt = {
+        new ArrayInt(intArrayTake(values, count))
+    }
+
+    def drop(count: Int): ArrayInt = {
+        new ArrayInt(intArrayDrop(values, count))
     }
 
     def fold(initial: Int, combine: (Int, Int) => Int): Int = {

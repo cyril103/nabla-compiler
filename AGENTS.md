@@ -71,8 +71,8 @@ Le pipeline implemente actuellement :
   `intArraySum`, `intArrayFill`, `intArrayRange`, `intArrayMap`,
   `intArrayFilter` et la facade objet `ArrayInt` avec `map`, `filter`,
   `fold`, `foreach`, `exists`, `forall`, `contains`, `size`, `isEmpty` et
-  `nonEmpty`, `head`, `last`, `append`, `prepend`, `reverse` et `concat`,
-  avec predicats booleens;
+  `nonEmpty`, `head`, `last`, `append`, `prepend`, `reverse`, `concat`,
+  `take` et `drop`, avec predicats booleens;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -184,6 +184,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `ArrayInt.append` et `ArrayInt.prepend`.
 - [x] Ajouter `ArrayInt.reverse`.
 - [x] Ajouter `ArrayInt.concat`.
+- [x] Ajouter `ArrayInt.take` et `ArrayInt.drop` avec bornes clampees.
 
 ### P2 - Runtime Et Objets
 
@@ -206,7 +207,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout de `ArrayInt.concat`.
+- Prochain commit - Ajout de `ArrayInt.take` et `ArrayInt.drop`.
+- `fe4ee39` - Ajout de `ArrayInt.concat`.
 - `4b1e449` - Ajout de `ArrayInt.reverse`.
 - `689f55c` - Ajout de `ArrayInt.append` et `ArrayInt.prepend`.
 - `60de4bf` - Ajout de `ArrayInt.head` et `ArrayInt.last`.
@@ -267,5 +269,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter `ArrayInt.take(count: Int)` et `ArrayInt.drop(count: Int)` avec une
-politique claire pour les bornes.
+Ajouter `ArrayInt.slice(from: Int, until: Int)` en reutilisant la politique de
+bornes clampees.

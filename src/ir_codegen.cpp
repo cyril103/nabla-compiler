@@ -260,11 +260,11 @@ private:
         } else if (op == "-") {
             out << "    sub rax, rbx\n    add rax, 1\n";
         } else if (op == "*") {
-            out << "    shr rax, 1\n    shr rbx, 1\n    imul rax, rbx\n    shl rax, 1\n    or rax, 1\n";
+            out << "    sar rax, 1\n    sar rbx, 1\n    imul rax, rbx\n    shl rax, 1\n    or rax, 1\n";
         } else if (op == "/") {
-            out << "    shr rax, 1\n    shr rbx, 1\n    cqo\n    idiv rbx\n    shl rax, 1\n    or rax, 1\n";
+            out << "    sar rax, 1\n    sar rbx, 1\n    cqo\n    idiv rbx\n    shl rax, 1\n    or rax, 1\n";
         } else if (op == "==" || op == "!=" || op == "<" || op == ">" || op == "<=" || op == ">=") {
-            out << "    shr rax, 1\n    shr rbx, 1\n    cmp rax, rbx\n";
+            out << "    sar rax, 1\n    sar rbx, 1\n    cmp rax, rbx\n";
             if (op == "==") out << "    sete al\n";
             else if (op == "!=") out << "    setne al\n";
             else if (op == "<") out << "    setl al\n";
