@@ -61,7 +61,8 @@ Le pipeline implemente actuellement :
   parametres, retours, types fonction et acces aux champs;
 - declarations de fonctions generiques simples comme `identity[T]`, appelees avec
   arguments de type explicites comme `identity[Int](42)`, avec substitution dans
-  les parametres, retours et types fonction;
+  les parametres, retours et types fonction, puis monomorphisees en corps IR
+  specialises comme `identity[Int]`;
 - inference des arguments de type des fonctions generiques depuis les arguments
   d'appel, y compris pour typer une lambda suivante comme dans
   `applyOnce(41, value => value + 1)`;
@@ -120,10 +121,11 @@ Limites importantes :
 - la genericite actuelle est un pont syntaxique pour `Option[Int]` et
   `Array[Int]`, et un premier support de classes generiques partageant le code
   du template; les fonctions generiques peuvent inferer leurs arguments de type
-  depuis les arguments d'appel mais ne sont pas encore utilisables comme valeurs
-  polymorphes; les allocations et methodes de classes generiques sont
-  distinguees dans l'IR et les corps de methodes sont specialises pour les types
-  concrets; la monomorphisation des fonctions generiques reste a faire;
+  depuis les arguments d'appel et sont monomorphisees en fonctions IR
+  specialisees, mais ne sont pas encore utilisables comme valeurs polymorphes;
+  les allocations et methodes de classes generiques sont distinguees dans l'IR
+  et les corps de methodes sont specialises pour les types concrets; la
+  monomorphisation complete des classes generiques reste a faire;
 - le tas est fixe et possede une verification de depassement, mais pas de
   ramasse-miettes;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
@@ -211,7 +213,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter des wrappers IR specialises pour les methodes de classes
   generiques concretes.
 - [x] Monomorphiser les corps des methodes de classes generiques dans l'IR.
-- [ ] Ajouter la monomorphisation des fonctions generiques.
+- [x] Ajouter la monomorphisation des fonctions generiques.
 - [ ] Ajouter la monomorphisation complete des classes generiques.
 - [x] Generaliser `IntUnaryFn` vers des types fonction canoniques.
 - [x] Introduire une representation interne commune des types fonction.
@@ -272,6 +274,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `TBD` - Monomorphiser les fonctions generiques en corps IR specialises comme
+  `identity[Int]` et `applyOnce[Int]`.
 - `4c7e3be` - Monomorphiser les corps des methodes de classes generiques dans l'IR,
   par exemple `Box[Int].get` charge directement `Box[Int].value`.
 - `75b59ec` - Ajouter des wrappers IR specialises pour les methodes de classes

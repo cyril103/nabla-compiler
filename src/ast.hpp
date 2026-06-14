@@ -134,6 +134,7 @@ class FunctionCallNode : public ASTNode {
     std::string name;
     std::vector<std::unique_ptr<ASTNode>> arguments;
     std::vector<std::string> typeArguments;
+    std::vector<std::string> resolvedTypeArguments;
     std::string resolvedType = "Int";
 public:
     FunctionCallNode(
@@ -265,6 +266,8 @@ public:
     std::string lowerToIR(IRBuilder& builder) const override;
     std::string lowerSpecializedMethodToIR(
         IRBuilder& builder, const std::string& concreteClassName) const;
+    std::string lowerSpecializedFunctionToIR(
+        IRBuilder& builder, const std::vector<std::string>& concreteTypeArguments) const;
     const std::string& getClassName() const { return className; }
     const std::string& getName() const { return name; }
 };

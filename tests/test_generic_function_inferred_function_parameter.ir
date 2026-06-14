@@ -1,0 +1,14 @@
+function main() -> Int
+  %0: Int = const 41
+  %1: Closure = closure_ref lambda.0
+  %2: Int = call applyOnce[Int](%0, %1)
+  return %2
+
+function lambda.0(%value: Int) -> Int
+  %0: Int = const 1
+  %1: Int = + %value, %0
+  return %1
+
+function applyOnce[Int](%value: Int, %f: Fn(Int)->Int) -> Int
+  %0: Int = indirect_call %f, %value
+  return %0

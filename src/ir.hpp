@@ -83,6 +83,9 @@ public:
         const std::string& concreteClassName, const std::string& templateClassName,
         const std::string& methodName, const std::vector<std::string>& argumentTypes,
         const std::string& returnType);
+    void registerFunctionSpecialization(
+        const std::string& functionName, const std::vector<std::string>& typeArguments,
+        const std::string& returnType);
     std::string emitNewObject(
         const std::string& className, const std::vector<std::string>& arguments,
         const std::string& resultType = "");
@@ -130,9 +133,17 @@ private:
         std::vector<std::string> argumentTypes;
         std::string returnType;
     };
+    struct FunctionSpecialization {
+        std::string functionName;
+        std::vector<std::string> typeArguments;
+        std::string returnType;
+    };
     std::vector<MethodSpecialization> methodSpecializations;
+    std::vector<FunctionSpecialization> functionSpecializations;
 
     std::string nextValue();
     void emit(IRInstruction instruction);
-    void emitMethodSpecializations(const class ProgramNode& root);
+    void emitPendingSpecializations(const class ProgramNode& root);
+    void emitMethodSpecialization(const MethodSpecialization& specialization, const class ProgramNode& root);
+    void emitFunctionSpecialization(const FunctionSpecialization& specialization, const class ProgramNode& root);
 };

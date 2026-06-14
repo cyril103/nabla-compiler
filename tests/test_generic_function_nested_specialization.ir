@@ -1,0 +1,11 @@
+function main() -> Int
+  %0: Int = const 42
+  %1: Int = call idTwice[Int](%0)
+  return %1
+
+function idTwice[Int](%value: Int) -> Int
+  %0: Int = call identity[Int](%value)
+  return %0
+
+function identity[Int](%value: Int) -> Int
+  return %value

@@ -55,6 +55,17 @@ std::vector<CompilerContext::ParameterInfo> substituteParameters(
     return substituted;
 }
 
+std::vector<std::string> orderedTypeArguments(
+    const std::vector<std::string>& typeParameters,
+    const std::map<std::string, std::string>& substitution) {
+    std::vector<std::string> arguments;
+    for (const auto& typeParameter : typeParameters) {
+        auto argument = substitution.find(typeParameter);
+        if (argument != substitution.end()) arguments.push_back(argument->second);
+    }
+    return arguments;
+}
+
 void validateArguments(
     const std::string& callableName,
     const std::vector<std::unique_ptr<ASTNode>>& arguments,
@@ -548,6 +559,7 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
         }
         validateArguments(name, arguments, function->second.parameters, location);
         resolvedType = function->second.returnType;
+        resolvedTypeArguments.clear();
         return;
     }
     std::optional<std::map<std::string, std::string>> substitution;
@@ -569,11 +581,23 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
     auto parameters = substituteParameters(function->second.parameters, *substitution);
     validateArguments(name, arguments, parameters, location);
     resolvedType = substituteType(function->second.returnType, *substitution);
+    resolvedTypeArguments = orderedTypeArguments(function->second.typeParameters, *substitution);
 }
 
 std::string FunctionCallNode::lowerToIR(IRBuilder& builder) const {
     std::vector<std::string> loweredArguments;
     for (const auto& argument : arguments) loweredArguments.push_back(argument->lowerToIR(builder));
+    std::vector<std::string> concreteTypeArguments;
+    for (const auto& typeArgument : resolvedTypeArguments) {
+        concreteTypeArguments.push_back(builder.substituteActiveType(typeArgument));
+    }
+    if (!concreteTypeArguments.empty()) {
+        const std::string concreteReturnType = builder.substituteActiveType(resolvedType);
+        builder.registerFunctionSpecialization(name, concreteTypeArguments, concreteReturnType);
+        return builder.emitCall(
+            formatParameterizedType(name, concreteTypeArguments),
+            loweredArguments, concreteReturnType);
+    }
     return builder.emitCall(name, loweredArguments, resolvedType);
 }
 
@@ -840,6 +864,8 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
 }
 
 std::string FunctionDefNode::lowerToIR(IRBuilder& builder) const {
+    if (className.empty() && !typeParameters.empty()) return "";
+
     std::vector<IRParameter> irParameters;
     if (!className.empty()) {
         irParameters.push_back({"this", className});
@@ -893,6 +919,35 @@ std::string FunctionDefNode::lowerSpecializedMethodToIR(
     builder.beginFunction(concreteClassName + "." + name, irParameters, returnType);
     builder.bindThis();
     builder.bindParameter("this", "this");
+    for (const auto& parameter : parameters) {
+        builder.bindParameter(parameter.symbolName, parameter.name);
+    }
+    std::string result = body->lowerToIR(builder);
+    builder.endFunction(result);
+
+    builder.popTypeSubstitution();
+    return "";
+}
+
+std::string FunctionDefNode::lowerSpecializedFunctionToIR(
+    IRBuilder& builder, const std::vector<std::string>& concreteTypeArguments) const {
+    if (!className.empty() || concreteTypeArguments.size() != typeParameters.size()) {
+        builder.unsupported(location, "la spécialisation de fonction " + name);
+    }
+
+    std::map<std::string, std::string> substitution;
+    for (size_t i = 0; i < typeParameters.size(); ++i) {
+        substitution[typeParameters[i]] = concreteTypeArguments[i];
+    }
+
+    builder.pushTypeSubstitution(substitution);
+
+    std::vector<IRParameter> irParameters;
+    for (const auto& parameter : parameters) {
+        irParameters.push_back({parameter.name, parameter.type});
+    }
+
+    builder.beginFunction(formatParameterizedType(name, concreteTypeArguments), irParameters, returnType);
     for (const auto& parameter : parameters) {
         builder.bindParameter(parameter.symbolName, parameter.name);
     }

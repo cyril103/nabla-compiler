@@ -124,10 +124,11 @@ std::string IRProgram::format() const {
 IRProgram IRBuilder::build(const ProgramNode& root) {
     program = {};
     methodSpecializations.clear();
+    functionSpecializations.clear();
     typeSubstitutionStack.clear();
     activeTypeSubstitution.clear();
     root.lowerToIR(*this);
-    emitMethodSpecializations(root);
+    emitPendingSpecializations(root);
     return program;
 }
 
@@ -234,27 +235,66 @@ void IRBuilder::registerMethodSpecialization(
         concreteClassName, templateClassName, methodName, argumentTypes, returnType});
 }
 
-void IRBuilder::emitMethodSpecializations(const ProgramNode& root) {
-    const auto specializations = methodSpecializations;
-    for (const auto& specialization : specializations) {
-        bool emitted = false;
-        for (const auto& element : root.elements) {
-            const auto* function = dynamic_cast<const FunctionDefNode*>(element.get());
-            if (!function) continue;
-            if (function->getClassName() == specialization.templateClassName &&
-                function->getName() == specialization.methodName) {
-                function->lowerSpecializedMethodToIR(*this, specialization.concreteClassName);
-                emitted = true;
-                break;
-            }
-        }
-        if (!emitted) {
-            throw CompilerError(
-                ErrorKind::Codegen, SourceLocation{},
-                "méthode générique introuvable pour spécialisation: " +
-                qualifiedMember(specialization.templateClassName, specialization.methodName));
+void IRBuilder::registerFunctionSpecialization(
+    const std::string& functionName, const std::vector<std::string>& typeArguments,
+    const std::string& returnType) {
+    if (typeArguments.empty()) return;
+    for (const auto& specialization : functionSpecializations) {
+        if (specialization.functionName == functionName &&
+            specialization.typeArguments == typeArguments &&
+            specialization.returnType == returnType) {
+            return;
         }
     }
+    functionSpecializations.push_back({functionName, typeArguments, returnType});
+}
+
+void IRBuilder::emitPendingSpecializations(const ProgramNode& root) {
+    size_t nextFunctionSpecialization = 0;
+    size_t nextMethodSpecialization = 0;
+    while (nextFunctionSpecialization < functionSpecializations.size() ||
+           nextMethodSpecialization < methodSpecializations.size()) {
+        while (nextFunctionSpecialization < functionSpecializations.size()) {
+            emitFunctionSpecialization(functionSpecializations[nextFunctionSpecialization], root);
+            ++nextFunctionSpecialization;
+        }
+        while (nextMethodSpecialization < methodSpecializations.size()) {
+            emitMethodSpecialization(methodSpecializations[nextMethodSpecialization], root);
+            ++nextMethodSpecialization;
+        }
+    }
+}
+
+void IRBuilder::emitFunctionSpecialization(
+    const FunctionSpecialization& specialization, const ProgramNode& root) {
+    for (const auto& element : root.elements) {
+        const auto* function = dynamic_cast<const FunctionDefNode*>(element.get());
+        if (!function) continue;
+        if (function->getClassName().empty() && function->getName() == specialization.functionName) {
+            function->lowerSpecializedFunctionToIR(*this, specialization.typeArguments);
+            return;
+        }
+    }
+    throw CompilerError(
+        ErrorKind::Codegen, SourceLocation{},
+        "fonction générique introuvable pour spécialisation: " + specialization.functionName);
+}
+
+void IRBuilder::emitMethodSpecialization(
+    const MethodSpecialization& specialization, const ProgramNode& root) {
+    for (const auto& element : root.elements) {
+        const auto* function = dynamic_cast<const FunctionDefNode*>(element.get());
+        if (!function) continue;
+        if (function->getClassName() == specialization.templateClassName &&
+            function->getName() == specialization.methodName) {
+            function->lowerSpecializedMethodToIR(*this, specialization.concreteClassName);
+            return;
+        }
+    }
+    throw CompilerError(
+        ErrorKind::Codegen, SourceLocation{},
+        "méthode générique introuvable pour spécialisation: " +
+        qualifiedMember(specialization.templateClassName, specialization.methodName));
 }
 
 std::string IRBuilder::emitNewObject(

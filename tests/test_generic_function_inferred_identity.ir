@@ -1,0 +1,7 @@
+function main() -> Int
+  %0: Int = const 42
+  %1: Int = call identity[Int](%0)
+  return %1
+
+function identity[Int](%value: Int) -> Int
+  return %value

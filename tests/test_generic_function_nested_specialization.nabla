@@ -1,0 +1,11 @@
+def identity[T](value: T): T = {
+    value
+}
+
+def idTwice[T](value: T): T = {
+    identity(value)
+}
+
+def main(): Int = {
+    idTwice[Int](42)
+}
