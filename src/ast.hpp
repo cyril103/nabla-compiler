@@ -83,10 +83,20 @@ public:
 };
 
 class FunctionReferenceNode : public ASTNode {
+public:
+    struct Capture {
+        std::string name;
+        std::string symbolName;
+        std::string type;
+    };
+
+private:
     std::string name;
     std::string resolvedType;
+    std::vector<Capture> captures;
 public:
-    FunctionReferenceNode(std::string functionName, std::string functionType);
+    FunctionReferenceNode(
+        std::string functionName, std::string functionType, std::vector<Capture> capturedValues = {});
     std::string getType() override;
     void validateSemantics(CompilerContext& context) override;
     std::string lowerToIR(IRBuilder& builder) const override;
@@ -164,6 +174,11 @@ public:
         std::string symbolName;
         std::string type;
     };
+    struct Capture {
+        std::string name;
+        std::string symbolName;
+        std::string type;
+    };
 
 private:
     std::string className;
@@ -171,10 +186,12 @@ private:
     std::string returnType;
     std::vector<Parameter> parameters;
     std::unique_ptr<ASTNode> body;
+    std::vector<Capture> captures;
 public:
     FunctionDefNode(
         std::string clName, std::string name, std::string declaredReturnType,
-        std::vector<Parameter> params, std::unique_ptr<ASTNode> body);
+        std::vector<Parameter> params, std::unique_ptr<ASTNode> body,
+        std::vector<Capture> capturedValues = {});
     std::string getType() override;
     void validateSemantics(CompilerContext& context) override;
     std::string lowerToIR(IRBuilder& builder) const override;

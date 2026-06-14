@@ -11,6 +11,7 @@ enum class IROpcode {
     Binary,
     Call,
     FunctionReference,
+    ClosureLoad,
     IndirectCall,
     MethodCall,
     NewObject,
@@ -65,7 +66,9 @@ public:
     std::string emitBinary(
         const std::string& operation, const std::string& left, const std::string& right);
     std::string emitCall(const std::string& name, const std::vector<std::string>& arguments);
-    std::string emitFunctionReference(const std::string& name);
+    std::string emitFunctionReference(
+        const std::string& name, const std::vector<std::string>& captures = {});
+    std::string emitClosureLoad(const std::string& closure, int captureIndex);
     std::string emitIndirectCall(
         const std::string& callee, const std::vector<std::string>& arguments);
     std::string emitMethodCall(
@@ -89,13 +92,17 @@ public:
     void emitJump(const std::string& targetLabel);
     void bindParameter(const std::string& symbol, const std::string& parameterName);
     void bindThis();
+    void bindClosure();
+    void bindCapture(const std::string& symbol, int captureIndex);
     [[noreturn]] void unsupported(const SourceLocation& location, const std::string& feature) const;
 
 private:
     IRProgram program;
     IRFunction* currentFunction = nullptr;
     std::map<std::string, std::string> parameterValues;
+    std::map<std::string, int> captureValues;
     std::string thisValue;
+    std::string closureValue;
     int nextValueId = 0;
     int nextLabelId = 0;
     int nextTemporarySymbolId = 0;

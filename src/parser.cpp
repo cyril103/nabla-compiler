@@ -228,6 +228,7 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
     std::vector<FunctionDefNode::Parameter> parameters;
     std::vector<CompilerContext::ParameterInfo> signatureParameters;
     std::vector<std::pair<std::string, std::string>> scopedParameters;
+    const size_t outerScopeCount = localScopes.size();
 
     while (peek().type != TokenType::RPAREN) {
         Token parameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre attendu dans la lambda");
@@ -259,6 +260,7 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
     consume(TokenType::FAT_ARROW, "'=>' attendu après le paramètre de lambda");
     consume(TokenType::LBRACE, "Bloc attendu après '=>'");
 
+    lambdaCaptureScopes.push_back({outerScopeCount, {}});
     localScopes.emplace_back();
     for (const auto& [parameterName, symbolName] : scopedParameters) {
         localScopes.back()[parameterName] = {symbolName, "Int", false};
@@ -266,6 +268,12 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
     auto body = parseBlock();
     consume(TokenType::RBRACE, "Fin du bloc de lambda attendue");
     localScopes.pop_back();
+    std::vector<FunctionDefNode::Capture> captures;
+    for (const auto& [symbolName, capture] : lambdaCaptureScopes.back().capturesBySymbol) {
+        (void) symbolName;
+        captures.push_back({capture.name, capture.symbolName, capture.type});
+    }
+    lambdaCaptureScopes.pop_back();
 
     const std::string returnType = body->getType();
     if ((signatureParameters.size() == 1 && returnType != "Int" && returnType != "Unit") ||
@@ -279,12 +287,19 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
     context.functions[lambdaName] = {signatureParameters, returnType, start.location, start.location};
 
     auto function = located(std::make_unique<FunctionDefNode>(
-        "", lambdaName, returnType, std::move(parameters), std::move(body)), start.location);
+        "", lambdaName, returnType, std::move(parameters), std::move(body), captures), start.location);
     generatedFunctions.push_back(std::move(function));
     const std::string functionType = signatureParameters.size() == 2
         ? "IntBinaryFn"
         : (returnType == "Unit" ? "IntConsumerFn" : "IntUnaryFn");
-    return located(std::make_unique<FunctionReferenceNode>(lambdaName, functionType), start.location);
+    std::vector<FunctionReferenceNode::Capture> referenceCaptures;
+    for (const auto& capture : captures) {
+        referenceCaptures.push_back({capture.name, capture.symbolName, capture.type});
+    }
+    return located(
+        std::make_unique<FunctionReferenceNode>(
+            lambdaName, functionType, std::move(referenceCaptures)),
+        start.location);
 }
 
 std::unique_ptr<ASTNode> Parser::parsePrimary() {
@@ -329,9 +344,11 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             consume(TokenType::LPAREN, "");
             auto arguments = parseArguments();
             consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
-            if (const ParsedSymbol* symbol = findLocal(name)) {
+            auto [symbol, scopeIndex] = findLocalWithScope(name);
+            if (symbol) {
                 if (symbol->type == "IntUnaryFn" || symbol->type == "IntConsumerFn" ||
                     symbol->type == "IntBinaryFn") {
+                    captureIfNeeded(name, *symbol, scopeIndex);
                     return located(
                         std::make_unique<FunctionValueCallNode>(
                             name, symbol->internalName, std::move(arguments)),
@@ -340,7 +357,9 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             }
             return located(std::make_unique<FunctionCallNode>(name, std::move(arguments)), nameToken.location);
         }
-        if (const ParsedSymbol* symbol = findLocal(name)) {
+        auto [symbol, scopeIndex] = findLocalWithScope(name);
+        if (symbol) {
+            captureIfNeeded(name, *symbol, scopeIndex);
             return located(std::make_unique<IdentifierNode>(name, symbol->internalName, symbol->type), nameToken.location);
         }
         if (!currentParsingClass.empty() && context.classLayouts[currentParsingClass].count(name)) {
@@ -484,9 +503,22 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseArguments() {
 }
 
 const Parser::ParsedSymbol* Parser::findLocal(const std::string& name) const {
+    return findLocalWithScope(name).first;
+}
+
+std::pair<const Parser::ParsedSymbol*, size_t> Parser::findLocalWithScope(const std::string& name) const {
     for (auto scope = localScopes.rbegin(); scope != localScopes.rend(); ++scope) {
         auto symbol = scope->find(name);
-        if (symbol != scope->end()) return &symbol->second;
+        if (symbol != scope->end()) {
+            return {&symbol->second, static_cast<size_t>(std::distance(scope, localScopes.rend()) - 1)};
+        }
     }
-    return nullptr;
+    return {nullptr, 0};
+}
+
+void Parser::captureIfNeeded(const std::string& name, const ParsedSymbol& symbol, size_t scopeIndex) {
+    if (lambdaCaptureScopes.empty()) return;
+    auto& lambda = lambdaCaptureScopes.back();
+    if (scopeIndex >= lambda.outerScopeCount) return;
+    lambda.capturesBySymbol[symbol.internalName] = {name, symbol.internalName, symbol.type};
 }

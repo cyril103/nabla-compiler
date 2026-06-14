@@ -317,8 +317,10 @@ std::string FunctionCallNode::lowerToIR(IRBuilder& builder) const {
     return builder.emitCall(name, loweredArguments);
 }
 
-FunctionReferenceNode::FunctionReferenceNode(std::string functionName, std::string functionType)
-    : name(std::move(functionName)), resolvedType(std::move(functionType)) {}
+FunctionReferenceNode::FunctionReferenceNode(
+    std::string functionName, std::string functionType, std::vector<Capture> capturedValues)
+    : name(std::move(functionName)), resolvedType(std::move(functionType)),
+      captures(std::move(capturedValues)) {}
 
 std::string FunctionReferenceNode::getType() {
     return resolvedType;
@@ -339,7 +341,11 @@ void FunctionReferenceNode::validateSemantics(CompilerContext& context) {
 }
 
 std::string FunctionReferenceNode::lowerToIR(IRBuilder& builder) const {
-    return builder.emitFunctionReference(name);
+    std::vector<std::string> loweredCaptures;
+    for (const auto& capture : captures) {
+        loweredCaptures.push_back(builder.emitLoad(capture.symbolName));
+    }
+    return builder.emitFunctionReference(name, loweredCaptures);
 }
 
 FunctionValueCallNode::FunctionValueCallNode(
@@ -531,9 +537,9 @@ std::string ForNode::lowerToIR(IRBuilder& builder) const {
 
 FunctionDefNode::FunctionDefNode(
     std::string clName, std::string name, std::string declaredReturnType,
-    std::vector<Parameter> params, std::unique_ptr<ASTNode> body)
+    std::vector<Parameter> params, std::unique_ptr<ASTNode> body, std::vector<Capture> capturedValues)
     : className(std::move(clName)), name(std::move(name)), returnType(std::move(declaredReturnType)),
-      parameters(std::move(params)), body(std::move(body)) {}
+      parameters(std::move(params)), body(std::move(body)), captures(std::move(capturedValues)) {}
 
 std::string FunctionDefNode::getType() {
     return "Unit";
@@ -541,6 +547,9 @@ std::string FunctionDefNode::getType() {
 
 void FunctionDefNode::validateSemantics(CompilerContext& context) {
     context.semanticSymbolTypes.clear();
+    for (const auto& capture : captures) {
+        context.semanticSymbolTypes[capture.symbolName] = capture.type;
+    }
     for (const auto& parameter : parameters) {
         context.semanticSymbolTypes[parameter.symbolName] = parameter.type;
     }
@@ -563,6 +572,8 @@ std::string FunctionDefNode::lowerToIR(IRBuilder& builder) const {
     std::vector<IRParameter> irParameters;
     if (!className.empty()) {
         irParameters.push_back({"this", className});
+    } else if (!captures.empty()) {
+        irParameters.push_back({"closure", "Closure"});
     }
     for (const auto& parameter : parameters) {
         irParameters.push_back({parameter.name, parameter.type});
@@ -571,6 +582,11 @@ std::string FunctionDefNode::lowerToIR(IRBuilder& builder) const {
     builder.beginFunction(functionName, irParameters, returnType);
     if (!className.empty()) {
         builder.bindThis();
+    } else if (!captures.empty()) {
+        builder.bindClosure();
+        for (size_t i = 0; i < captures.size(); ++i) {
+            builder.bindCapture(captures[i].symbolName, static_cast<int>(i));
+        }
     }
     for (const auto& parameter : parameters) {
         builder.bindParameter(parameter.symbolName, parameter.name);

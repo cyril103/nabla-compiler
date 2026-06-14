@@ -128,6 +128,7 @@ private:
     StackFrame frame;
     std::map<std::string, std::vector<PhiInfo>> phiLabels;
     std::map<std::string, int> emittedIncomingJumps;
+    int nextIndirectCallId = 0;
 
     void collectPhiLabels() {
         for (size_t i = 0; i < function.instructions.size(); ++i) {
@@ -179,6 +180,9 @@ private:
                 break;
             case IROpcode::FunctionReference:
                 emitFunctionReference(instruction);
+                break;
+            case IROpcode::ClosureLoad:
+                emitClosureLoad(instruction);
                 break;
             case IROpcode::IndirectCall:
                 emitIndirectCall(instruction);
@@ -305,7 +309,24 @@ private:
     }
 
     void emitFunctionReference(const IRInstruction& instruction) {
-        out << "    mov rax, " << asmFunctionName(instruction.operation) << "\n";
+        const size_t objectSize = 16 + instruction.operands.size() * 8;
+        out << "    mov rdi, " << objectSize << "\n";
+        out << "    call Runtime_alloc\n";
+        out << "    mov rbx, rax\n";
+        out << "    mov qword [rbx], " << asmFunctionName(instruction.operation) << "\n";
+        out << "    mov qword [rbx + 8], " << (instruction.operands.empty() ? 0 : 1) << "\n";
+        for (size_t i = 0; i < instruction.operands.size(); ++i) {
+            loadValue(instruction.operands[i], "rax");
+            out << "    mov [rbx + " << (16 + i * 8) << "], rax\n";
+        }
+        storeRegister(instruction.result, "rbx");
+    }
+
+    void emitClosureLoad(const IRInstruction& instruction) {
+        if (instruction.operands.size() != 2) codegenError("lecture de closure IR invalide");
+        loadValue(instruction.operands[0], "rax");
+        const int captureIndex = std::stoi(instruction.operands[1]);
+        out << "    mov rax, [rax + " << (16 + captureIndex * 8) << "]\n";
         storeRegister(instruction.result, "rax");
     }
 
@@ -315,11 +336,29 @@ private:
         if (argumentCount > callingConvention.globalArgumentRegisters.size()) {
             codegenError("appel indirect IR avec plus de 6 arguments");
         }
+        if (argumentCount + 1 > callingConvention.globalArgumentRegisters.size()) {
+            codegenError("appel indirect capturant IR avec plus de 5 arguments");
+        }
+        const int callId = nextIndirectCallId++;
+        const std::string capturedLabel = ".L_closure_captured_" + asmSymbolPart(function.name) + "_" +
+                                          std::to_string(callId);
+        const std::string doneLabel = ".L_closure_done_" + asmSymbolPart(function.name) + "_" +
+                                      std::to_string(callId);
         loadValue(instruction.operands[0], "r11");
+        out << "    cmp qword [r11 + 8], 0\n";
+        out << "    jne " << capturedLabel << "\n";
         for (size_t i = 0; i < argumentCount; ++i) {
             loadValue(instruction.operands[i + 1], callingConvention.globalArgumentRegisters[i]);
         }
-        out << "    call r11\n";
+        out << "    call qword [r11]\n";
+        out << "    jmp " << doneLabel << "\n";
+        out << capturedLabel << ":\n";
+        out << "    mov rdi, r11\n";
+        for (size_t i = 0; i < argumentCount; ++i) {
+            loadValue(instruction.operands[i + 1], callingConvention.globalArgumentRegisters[i + 1]);
+        }
+        out << "    call qword [r11]\n";
+        out << doneLabel << ":\n";
         storeRegister(instruction.result, "rax");
     }
 

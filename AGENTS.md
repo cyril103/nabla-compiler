@@ -45,6 +45,8 @@ Le pipeline implemente actuellement :
   `IntBinaryFn`, references de fonctions nommees et appels indirects, avec
   lambdas sans capture `(x: Int) => { ... }` et
   `(acc: Int, value: Int) => { ... }`;
+- closures avec capture par valeur pour les lambdas specialisees `IntUnaryFn`
+  et `IntConsumerFn`;
 - type `Unit` formalise pour les fonctions a effet et les boucles `while` /
   `for`;
 - collection native `IntArray` avec `length`, `get` et `set`;
@@ -146,7 +148,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `IntConsumerFn` pour les fonctions `Int => Unit`.
 - [x] Ajouter `arrayIntRange` et `ArrayInt.foreach` comme premiers parcours
   fonctionnels de collection.
-- [ ] Ajouter les closures avec capture.
+- [x] Ajouter les closures avec capture par valeur pour les lambdas `Int`.
+- [ ] Generaliser les closures aux types fonction complets.
 
 ### P2 - Runtime Et Objets
 
@@ -169,7 +172,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout de `IntConsumerFn` pour `foreach`.
+- Prochain commit - Ajout des closures avec capture par valeur.
+- `8f71165` - Ajout de `IntConsumerFn` pour `foreach`.
 - `a40144e` - Formalisation de `Unit` pour les boucles et `foreach`.
 - `70a808d` - Ajout de `arrayIntRange` et `ArrayInt.foreach`.
 - `51cba13` - Ajout de `IntBinaryFn` et `ArrayInt.fold`.
@@ -210,4 +214,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter les closures avec capture, puis generaliser les types fonction.
+Generaliser les types fonction pour remplacer les variantes specialisees
+`IntUnaryFn`, `IntConsumerFn` et `IntBinaryFn`.

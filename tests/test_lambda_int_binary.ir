@@ -1,5 +1,5 @@
 function main() -> Int
-  %0 = function_ref lambda.0
+  %0 = closure_ref lambda.0
   store %0, @combine#2
   %1 = load @combine#2
   %2 = const 20

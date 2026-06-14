@@ -1,0 +1,9 @@
+import collections.int_array
+
+def main(): Int = {
+    val factor = 3
+    val xs = arrayIntRange(4)
+    xs.map((value: Int) => {
+        value * factor
+    }).sum()
+}

@@ -58,7 +58,11 @@ std::string IRProgram::format() const {
                     out << "call " << instruction.operation << "(" << join(instruction.operands, ", ") << ")";
                     break;
                 case IROpcode::FunctionReference:
-                    out << "function_ref " << instruction.operation;
+                    out << "closure_ref " << instruction.operation;
+                    if (!instruction.operands.empty()) out << "(" << join(instruction.operands, ", ") << ")";
+                    break;
+                case IROpcode::ClosureLoad:
+                    out << "closure_load " << instruction.operands[0] << ", " << instruction.operands[1];
                     break;
                 case IROpcode::IndirectCall:
                     out << "indirect_call " << join(instruction.operands, ", ");
@@ -125,7 +129,9 @@ void IRBuilder::beginFunction(
     program.functions.push_back({name, parameters, returnType, {}});
     currentFunction = &program.functions.back();
     parameterValues.clear();
+    captureValues.clear();
     thisValue.clear();
+    closureValue.clear();
     nextValueId = 0;
     nextLabelId = 0;
     nextTemporarySymbolId = 0;
@@ -161,9 +167,16 @@ std::string IRBuilder::emitCall(const std::string& name, const std::vector<std::
     return result;
 }
 
-std::string IRBuilder::emitFunctionReference(const std::string& name) {
+std::string IRBuilder::emitFunctionReference(
+    const std::string& name, const std::vector<std::string>& captures) {
     std::string result = nextValue();
-    emit({IROpcode::FunctionReference, result, name, {}});
+    emit({IROpcode::FunctionReference, result, name, captures});
+    return result;
+}
+
+std::string IRBuilder::emitClosureLoad(const std::string& closure, int captureIndex) {
+    std::string result = nextValue();
+    emit({IROpcode::ClosureLoad, result, "", {closure, std::to_string(captureIndex)}});
     return result;
 }
 
@@ -229,6 +242,8 @@ std::string IRBuilder::emitFieldLoad(
 }
 
 std::string IRBuilder::emitLoad(const std::string& symbol) {
+    auto capture = captureValues.find(symbol);
+    if (capture != captureValues.end()) return emitClosureLoad(closureValue, capture->second);
     auto parameter = parameterValues.find(symbol);
     if (parameter != parameterValues.end()) return parameter->second;
     std::string result = nextValue();
@@ -272,6 +287,14 @@ void IRBuilder::bindParameter(const std::string& symbol, const std::string& para
 
 void IRBuilder::bindThis() {
     thisValue = "%this";
+}
+
+void IRBuilder::bindClosure() {
+    closureValue = "%closure";
+}
+
+void IRBuilder::bindCapture(const std::string& symbol, int captureIndex) {
+    captureValues[symbol] = captureIndex;
 }
 
 [[noreturn]] void IRBuilder::unsupported(

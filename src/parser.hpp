@@ -24,7 +24,17 @@ private:
         std::string type;
         bool isMutable;
     };
+    struct CapturedSymbol {
+        std::string name;
+        std::string symbolName;
+        std::string type;
+    };
+    struct LambdaCaptureScope {
+        size_t outerScopeCount;
+        std::map<std::string, CapturedSymbol> capturesBySymbol;
+    };
     std::vector<std::map<std::string, ParsedSymbol>> localScopes;
+    std::vector<LambdaCaptureScope> lambdaCaptureScopes;
     std::vector<std::unique_ptr<ASTNode>> generatedFunctions;
     int nextSymbolId = 0;
     int nextLambdaId = 0;
@@ -50,6 +60,8 @@ private:
     std::unique_ptr<ASTNode> parseFunctionDef(std::string clName);
     std::vector<std::unique_ptr<ASTNode>> parseArguments();
     const ParsedSymbol* findLocal(const std::string& name) const;
+    std::pair<const ParsedSymbol*, size_t> findLocalWithScope(const std::string& name) const;
+    void captureIfNeeded(const std::string& name, const ParsedSymbol& symbol, size_t scopeIndex);
 
     template<typename T>
     std::unique_ptr<T> located(std::unique_ptr<T> node, const SourceLocation& location) {
