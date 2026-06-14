@@ -1,0 +1,4 @@
+def main(): Int = {
+    val xs = new IntArray(2)
+    xs.get(2)
+}

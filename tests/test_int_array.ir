@@ -1,0 +1,31 @@
+function main() -> Int
+  %0 = const 3
+  %1 = new_int_array %0
+  store %1, @xs#0
+  %2 = load @xs#0
+  %3 = const 10
+  %4 = const 0
+  %5 = int_array_set %2, %4, %3
+  %6 = load @xs#0
+  %7 = const 20
+  %8 = const 1
+  %9 = int_array_set %6, %8, %7
+  %10 = load @xs#0
+  %11 = const 12
+  %12 = const 2
+  %13 = int_array_set %10, %12, %11
+  %14 = load @xs#0
+  %15 = const 0
+  %16 = int_array_get %14, %15
+  %17 = load @xs#0
+  %18 = const 1
+  %19 = int_array_get %17, %18
+  %20 = + %16, %19
+  %21 = load @xs#0
+  %22 = const 2
+  %23 = int_array_get %21, %22
+  %24 = + %20, %23
+  %25 = load @xs#0
+  %26 = int_array_length %25
+  %27 = + %24, %26
+  return %27

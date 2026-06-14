@@ -21,6 +21,10 @@ void emit(std::ostream& out) {
         << "    mov rdi, 255\n"
         << "    mov rax, 60\n"
         << "    syscall\n\n";
+    out << "Runtime_bounds_error:\n"
+        << "    mov rdi, 254\n"
+        << "    mov rax, 60\n"
+        << "    syscall\n\n";
     out << "Runtime_print:\n"
         << "    mov rdx, [rdi + 8]\n"
         << "    mov rsi, [rdi + 16]\n"

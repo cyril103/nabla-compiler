@@ -1,0 +1,7 @@
+def main(): Int = {
+    val xs = new IntArray(3)
+    xs.set(0, 10)
+    xs.set(1, 20)
+    xs.set(2, 12)
+    xs.get(0) + xs.get(1) + xs.get(2) + xs.length()
+}

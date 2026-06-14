@@ -1,0 +1,1 @@
+tests/test_error_int_array_get_type.nabla:3:12: semantic error: la méthode IntArray.get attend un index de type Int

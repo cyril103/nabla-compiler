@@ -82,6 +82,21 @@ std::string NewNode::getType() {
 void NewNode::validateSemantics(CompilerContext& context) {
     for (const auto& arg : args) arg->validateSemantics(context);
 
+    if (className == "IntArray") {
+        if (args.size() != 1) {
+            semanticError(
+                "Constructeur de 'IntArray': 1 argument(s) attendu(s), " +
+                std::to_string(args.size()) + " reçu(s)");
+        }
+        if (args[0]->getType() != "Int") {
+            throw CompilerError(
+                ErrorKind::Semantic, args[0]->getLocation(),
+                "Constructeur de 'IntArray', paramètre 'size': type 'Int' attendu, '" +
+                args[0]->getType() + "' reçu");
+        }
+        return;
+    }
+
     auto classIt = context.classes.find(className);
     if (classIt == context.classes.end()) {
         semanticError("classe inconnue dans 'new': " + className);
@@ -104,6 +119,7 @@ void NewNode::validateSemantics(CompilerContext& context) {
 std::string NewNode::lowerToIR(IRBuilder& builder) const {
     std::vector<std::string> loweredArguments;
     for (const auto& argument : args) loweredArguments.push_back(argument->lowerToIR(builder));
+    if (className == "IntArray") return builder.emitNewIntArray(loweredArguments[0]);
     return builder.emitNewObject(className, loweredArguments);
 }
 
@@ -152,6 +168,39 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         }
         semanticError("méthode inconnue: String." + methodName);
     }
+    if (receiverType == "IntArray") {
+        if (methodName == "length") {
+            if (!arguments.empty()) semanticError("la méthode IntArray.length n'accepte aucun argument");
+            resolvedType = "Int";
+            return;
+        }
+        if (methodName == "get") {
+            if (arguments.size() != 1) semanticError("la méthode IntArray.get attend un argument");
+            if (arguments[0]->getType() != "Int") {
+                throw CompilerError(
+                    ErrorKind::Semantic, arguments[0]->getLocation(),
+                    "la méthode IntArray.get attend un index de type Int");
+            }
+            resolvedType = "Int";
+            return;
+        }
+        if (methodName == "set") {
+            if (arguments.size() != 2) semanticError("la méthode IntArray.set attend deux arguments");
+            if (arguments[0]->getType() != "Int") {
+                throw CompilerError(
+                    ErrorKind::Semantic, arguments[0]->getLocation(),
+                    "la méthode IntArray.set attend un index de type Int");
+            }
+            if (arguments[1]->getType() != "Int") {
+                throw CompilerError(
+                    ErrorKind::Semantic, arguments[1]->getLocation(),
+                    "la méthode IntArray.set attend une valeur de type Int");
+            }
+            resolvedType = "Unit";
+            return;
+        }
+        semanticError("méthode inconnue: IntArray." + methodName);
+    }
 
     auto classIt = context.classes.find(receiverType);
     if (classIt == context.classes.end()) {
@@ -194,6 +243,20 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         }
         std::string loweredReceiver = receiver->lowerToIR(builder);
         return builder.emitMethodCall("String", "length", loweredReceiver, {});
+    }
+    if (receiverType == "IntArray") {
+        std::string loweredReceiver = receiver->lowerToIR(builder);
+        if (methodName == "length" && arguments.empty()) {
+            return builder.emitIntArrayLength(loweredReceiver);
+        }
+        if (methodName == "get" && arguments.size() == 1) {
+            return builder.emitIntArrayGet(loweredReceiver, arguments[0]->lowerToIR(builder));
+        }
+        if (methodName == "set" && arguments.size() == 2) {
+            return builder.emitIntArraySet(
+                loweredReceiver, arguments[0]->lowerToIR(builder), arguments[1]->lowerToIR(builder));
+        }
+        builder.unsupported(location, "la méthode IntArray." + methodName);
     }
 
     std::string loweredReceiver = receiver->lowerToIR(builder);
@@ -401,6 +464,7 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
     if (body) body->validateSemantics(context);
     const bool knownType =
         returnType == "Int" || returnType == "String" || returnType == "Unit" ||
+        returnType == "IntArray" ||
         context.classes.count(returnType) != 0;
     if (!knownType) {
         semanticError("type de retour inconnu '" + returnType + "' pour la fonction '" + name + "'");

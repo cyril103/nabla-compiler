@@ -183,6 +183,18 @@ private:
             case IROpcode::NewObject:
                 emitNewObject(instruction);
                 break;
+            case IROpcode::NewIntArray:
+                emitNewIntArray(instruction);
+                break;
+            case IROpcode::IntArrayLength:
+                emitIntArrayLength(instruction);
+                break;
+            case IROpcode::IntArrayGet:
+                emitIntArrayGet(instruction);
+                break;
+            case IROpcode::IntArraySet:
+                emitIntArraySet(instruction);
+                break;
             case IROpcode::FieldLoad:
                 emitFieldLoad(instruction);
                 break;
@@ -341,6 +353,63 @@ private:
             out << "    mov [rbx + " << fieldOffsets[i] << "], rax\n";
         }
         storeRegister(instruction.result, "rbx");
+    }
+
+    void emitNewIntArray(const IRInstruction& instruction) {
+        loadValue(instruction.operands[0], "rax");
+        out << "    cmp rax, 1\n";
+        out << "    jl Runtime_bounds_error\n";
+        out << "    mov r8, rax\n";
+        out << "    sar rax, 1\n";
+        out << "    lea rdi, [rax * 8 + 16]\n";
+        out << "    call Runtime_alloc\n";
+        out << "    mov rbx, rax\n";
+        out << "    mov qword [rbx], 0\n";
+        out << "    mov [rbx + 8], r8\n";
+        out << "    sar r8, 1\n";
+        out << "    xor rcx, rcx\n";
+        out << ".L_array_init_" << asmSymbolPart(function.name) << "_" << asmSymbolPart(instruction.result) << ":\n";
+        out << "    cmp rcx, r8\n";
+        out << "    jge .L_array_init_done_" << asmSymbolPart(function.name) << "_" << asmSymbolPart(instruction.result) << "\n";
+        out << "    mov qword [rbx + 16 + rcx * 8], 1\n";
+        out << "    inc rcx\n";
+        out << "    jmp .L_array_init_" << asmSymbolPart(function.name) << "_" << asmSymbolPart(instruction.result) << "\n";
+        out << ".L_array_init_done_" << asmSymbolPart(function.name) << "_" << asmSymbolPart(instruction.result) << ":\n";
+        storeRegister(instruction.result, "rbx");
+    }
+
+    void emitIntArrayLength(const IRInstruction& instruction) {
+        loadValue(instruction.operands[0], "rax");
+        out << "    mov rax, [rax + 8]\n";
+        storeRegister(instruction.result, "rax");
+    }
+
+    void emitArrayBoundsCheck(const std::string& arrayReg, const std::string& indexReg) {
+        out << "    sar " << indexReg << ", 1\n";
+        out << "    cmp " << indexReg << ", 0\n";
+        out << "    jl Runtime_bounds_error\n";
+        out << "    mov rdx, [" << arrayReg << " + 8]\n";
+        out << "    sar rdx, 1\n";
+        out << "    cmp " << indexReg << ", rdx\n";
+        out << "    jge Runtime_bounds_error\n";
+    }
+
+    void emitIntArrayGet(const IRInstruction& instruction) {
+        loadValue(instruction.operands[0], "rbx");
+        loadValue(instruction.operands[1], "rcx");
+        emitArrayBoundsCheck("rbx", "rcx");
+        out << "    mov rax, [rbx + 16 + rcx * 8]\n";
+        storeRegister(instruction.result, "rax");
+    }
+
+    void emitIntArraySet(const IRInstruction& instruction) {
+        loadValue(instruction.operands[0], "rbx");
+        loadValue(instruction.operands[1], "rcx");
+        emitArrayBoundsCheck("rbx", "rcx");
+        loadValue(instruction.operands[2], "rax");
+        out << "    mov [rbx + 16 + rcx * 8], rax\n";
+        out << "    mov rax, 1\n";
+        storeRegister(instruction.result, "rax");
     }
 
     void emitFieldLoad(const IRInstruction& instruction) {

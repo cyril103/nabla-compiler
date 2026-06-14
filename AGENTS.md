@@ -39,6 +39,7 @@ Le pipeline implemente actuellement :
 - resolution des imports avec protection contre les cycles;
 - objets avec champs de constructeur et appels de methodes parametres;
 - fonctions globales appelables avec parametres;
+- collection native `IntArray` avec `length`, `get` et `set`;
 - entiers immediats avec pointer tagging et litteraux `String`;
 - affichage console de `String` via la primitive globale `print`;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
@@ -59,6 +60,7 @@ Limites importantes :
   conformement a la convention d'appel actuelle;
 - le tas est fixe et possede une verification de depassement, mais pas de
   ramasse-miettes;
+- les acces hors bornes de `IntArray` terminent le programme avec le code 254;
 
 ## Invariants D'Architecture
 
@@ -132,6 +134,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Stabiliser la representation de `String`.
 - [ ] Choisir une strategie memoire a long terme.
 - [x] Ajouter une primitive d'affichage console pour `String`.
+- [x] Ajouter une premiere collection native `IntArray`.
 
 ### P3 - Outillage
 
@@ -142,7 +145,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout des litteraux `String`.
+- Prochain commit - Ajout de la collection native `IntArray`.
+- `b2996ad` - Ajout des litteraux `String`.
 - `92650b3` - Ajout de la primitive console `print`.
 - `0203ccb` - Ajout d'une verification de depassement du tas.
 - `48dacc8` - Stabilisation de la representation runtime de `String`.
@@ -173,5 +177,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Formaliser `Unit`, `Int`, `String` et les types de classes, puis choisir une
-strategie memoire a long terme.
+Formaliser `Unit`, `Int`, `String`, `IntArray` et les types de classes, puis
+preparer les generiques pour les collections typees.

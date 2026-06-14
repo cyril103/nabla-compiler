@@ -63,6 +63,18 @@ std::string IRProgram::format() const {
                 case IROpcode::NewObject:
                     out << "new " << instruction.operation << "(" << join(instruction.operands, ", ") << ")";
                     break;
+                case IROpcode::NewIntArray:
+                    out << "new_int_array " << instruction.operands[0];
+                    break;
+                case IROpcode::IntArrayLength:
+                    out << "int_array_length " << instruction.operands[0];
+                    break;
+                case IROpcode::IntArrayGet:
+                    out << "int_array_get " << join(instruction.operands, ", ");
+                    break;
+                case IROpcode::IntArraySet:
+                    out << "int_array_set " << join(instruction.operands, ", ");
+                    break;
                 case IROpcode::FieldLoad:
                     out << "field " << instruction.operands[0] << ", " << instruction.operation;
                     break;
@@ -157,6 +169,31 @@ std::string IRBuilder::emitNewObject(
     const std::string& className, const std::vector<std::string>& arguments) {
     std::string result = nextValue();
     emit({IROpcode::NewObject, result, className, arguments});
+    return result;
+}
+
+std::string IRBuilder::emitNewIntArray(const std::string& size) {
+    std::string result = nextValue();
+    emit({IROpcode::NewIntArray, result, "", {size}});
+    return result;
+}
+
+std::string IRBuilder::emitIntArrayLength(const std::string& receiver) {
+    std::string result = nextValue();
+    emit({IROpcode::IntArrayLength, result, "", {receiver}});
+    return result;
+}
+
+std::string IRBuilder::emitIntArrayGet(const std::string& receiver, const std::string& index) {
+    std::string result = nextValue();
+    emit({IROpcode::IntArrayGet, result, "", {receiver, index}});
+    return result;
+}
+
+std::string IRBuilder::emitIntArraySet(
+    const std::string& receiver, const std::string& index, const std::string& value) {
+    std::string result = nextValue();
+    emit({IROpcode::IntArraySet, result, "", {receiver, index, value}});
     return result;
 }
 
