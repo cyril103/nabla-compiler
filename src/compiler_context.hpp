@@ -132,7 +132,6 @@ inline std::string resolveStdlibTypeAlias(const std::string& type) {
     auto parameterizedType = parameterizedTypeFromName(type);
     if (!parameterizedType) return type;
     const auto& [baseName, arguments] = *parameterizedType;
-    if (baseName == "Option" && arguments.size() == 1 && arguments[0] == "Int") return "OptionInt";
     if (baseName == "Array" && arguments.size() == 1 && arguments[0] == "Int") return "ArrayInt";
     return type;
 }

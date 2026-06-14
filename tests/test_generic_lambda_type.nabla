@@ -1,11 +1,11 @@
-import core.option_int
+import core.option
 
 def apply(value: Option[Int], transform: (Option[Int]) => Int): Int = {
     transform(value)
 }
 
 def main(): Int = {
-    apply(optionIntSome(42), (value: Option[Int]) => {
+    apply(optionSome(42), (value: Option[Int]) => {
         value.getOrElse(0)
     })
 }

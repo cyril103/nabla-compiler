@@ -49,8 +49,9 @@ Le pipeline implemente actuellement :
 - representation interne canonique des types fonction sous forme `Fn(...)->...`;
 - syntaxe de types fonction parenthesee comme `(Int) => Int`, `(Int) => Unit`,
   `(Int, Int) => Int` et `(String) => Int`;
-- premiere syntaxe de types parametres `Option[Int]` et `Array[Int]`, canonisee
-  vers les facades standard existantes `OptionInt` et `ArrayInt`;
+- premiere syntaxe de types parametres, avec `Array[Int]` canonise vers la
+  facade standard existante `ArrayInt` et `Option[T]` porte par une vraie classe
+  generique standard;
 - declarations de classes generiques simples comme `Box[T]`, instanciables avec
   `Box[Int]` ou `Box[String]`, avec substitution des champs, retours de methodes
   et types fonction comme `(T) => T`;
@@ -88,6 +89,9 @@ Le pipeline implemente actuellement :
 - premier module de bibliotheque standard `io` avec `println`;
 - module de bibliotheque standard `core.option_int` avec `OptionInt`,
   `optionIntSome`, `optionIntNone`, `map`, `filter` et `orElse`;
+- module de bibliotheque standard `core.option` avec `Option[T]`, `optionSome`,
+  `optionNone`, `isDefined`, `isEmpty`, `nonEmpty`, `filter`, `orElse` et
+  `getOrElse`;
 - premier module de bibliotheque standard `collections.int_array` avec
   `intArraySum`, `intArrayFill`, `intArrayRange`, `intArrayMap`,
   `intArrayFilter` et la facade objet `ArrayInt` avec `map`, `filter`,
@@ -118,13 +122,10 @@ Limites importantes :
 - `Float` et `Double` couvrent les litteraux, operations, comparaisons,
   fonctions, lambdas et champs, mais pas encore `toString` ni les collections
   specialisees;
-- la genericite actuelle est un pont syntaxique pour `Option[Int]` et
-  `Array[Int]`, et un premier support de classes generiques partageant le code
-  du template; les fonctions generiques peuvent inferer leurs arguments de type
-  depuis les arguments d'appel et sont monomorphisees en fonctions IR
-  specialisees, mais ne sont pas encore utilisables comme valeurs polymorphes;
-  les allocations et methodes de classes generiques sont distinguees dans l'IR
-  et les corps de methodes sont specialises pour les types concrets; la
+- la genericite actuelle couvre `Option[T]`, les fonctions generiques
+  monomorphisees et les methodes de classes generiques specialisees, mais les
+  fonctions generiques ne sont pas encore utilisables comme valeurs polymorphes;
+  `Array[Int]` reste une facade specialisee vers `ArrayInt`; la
   monomorphisation complete des classes generiques reste a faire;
 - le tas est fixe et possede une verification de depassement, mais pas de
   ramasse-miettes;
@@ -214,6 +215,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   generiques concretes.
 - [x] Monomorphiser les corps des methodes de classes generiques dans l'IR.
 - [x] Ajouter la monomorphisation des fonctions generiques.
+- [x] Ajouter `Option[T]` dans la bibliotheque standard generique.
 - [ ] Ajouter la monomorphisation complete des classes generiques.
 - [x] Generaliser `IntUnaryFn` vers des types fonction canoniques.
 - [x] Introduire une representation interne commune des types fonction.
@@ -274,6 +276,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `TBD` - Ajouter `core.option` avec `Option[T]`, `optionSome`, `optionNone`,
+  `filter`, `orElse` et `getOrElse`.
 - `7f5ac21` - Monomorphiser les fonctions generiques en corps IR specialises comme
   `identity[Int]` et `applyOnce[Int]`.
 - `4c7e3be` - Monomorphiser les corps des methodes de classes generiques dans l'IR,

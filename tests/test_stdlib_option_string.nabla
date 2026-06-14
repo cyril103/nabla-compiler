@@ -1,0 +1,7 @@
+import core.option
+
+def main(): Int = {
+    val some = optionSome("hello")
+    val none = optionNone("fallback")
+    some.getOrElse("x").length() + none.getOrElse("fallback").length() + 29
+}

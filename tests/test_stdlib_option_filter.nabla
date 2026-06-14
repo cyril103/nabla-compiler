@@ -1,0 +1,7 @@
+import core.option
+
+def main(): Int = {
+    val kept = optionSome(42).filter(value => value > 10)
+    val dropped = optionSome(7).filter(value => value > 10)
+    kept.getOrElse(0) + dropped.getOrElse(0)
+}

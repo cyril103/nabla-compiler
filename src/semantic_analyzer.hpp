@@ -13,4 +13,6 @@ private:
 
     void validateDeclaredTypes() const;
     bool isKnownType(const std::string& type) const;
+    bool isKnownTypeInScope(
+        const std::string& type, const std::vector<std::string>& typeParameters) const;
 };

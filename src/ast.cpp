@@ -836,10 +836,14 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
     context.semanticSymbolTypes.clear();
     context.semanticTypeParameters.clear();
     if (!className.empty()) {
-        context.semanticSymbolTypes["this"] = className;
         auto classIt = context.classes.find(className);
         if (classIt != context.classes.end()) {
             context.semanticTypeParameters = classIt->second.typeParameters;
+            context.semanticSymbolTypes["this"] = classIt->second.typeParameters.empty()
+                ? className
+                : formatParameterizedType(className, classIt->second.typeParameters);
+        } else {
+            context.semanticSymbolTypes["this"] = className;
         }
     } else {
         context.semanticTypeParameters = typeParameters;

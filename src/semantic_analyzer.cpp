@@ -9,7 +9,7 @@ void SemanticAnalyzer::analyze(ProgramNode& program) {
 void SemanticAnalyzer::validateDeclaredTypes() const {
     for (const auto& [className, classInfo] : context.classes) {
         for (const auto& field : classInfo.fields) {
-            if (!isKnownType(field.type) && !isTypeParameterName(field.type, classInfo.typeParameters)) {
+            if (!isKnownTypeInScope(field.type, classInfo.typeParameters)) {
                 throw CompilerError(
                     ErrorKind::Semantic, field.location,
                     "type inconnu '" + field.type + "' pour le champ '" + className + "." + field.name + "'");
@@ -22,14 +22,14 @@ void SemanticAnalyzer::validateDeclaredTypes() const {
                     "la méthode '" + className + "." + methodName + "' dépasse la limite de 5 paramètres");
             }
             for (const auto& parameter : signature.parameters) {
-                if (!isKnownType(parameter.type) && !isTypeParameterName(parameter.type, classInfo.typeParameters)) {
+                if (!isKnownTypeInScope(parameter.type, classInfo.typeParameters)) {
                     throw CompilerError(
                         ErrorKind::Semantic, parameter.location,
                         "type inconnu '" + parameter.type + "' pour le paramètre '" +
                         className + "." + methodName + "." + parameter.name + "'");
                 }
             }
-            if (!isKnownType(signature.returnType) && !isTypeParameterName(signature.returnType, classInfo.typeParameters)) {
+            if (!isKnownTypeInScope(signature.returnType, classInfo.typeParameters)) {
                 throw CompilerError(
                     ErrorKind::Semantic, signature.returnTypeLocation,
                     "type de retour inconnu '" + signature.returnType + "' pour la méthode '" +
@@ -49,14 +49,14 @@ void SemanticAnalyzer::validateDeclaredTypes() const {
                 "la fonction 'main' ne peut pas accepter de paramètres");
         }
         for (const auto& parameter : signature.parameters) {
-            if (!isKnownType(parameter.type) && !isTypeParameterName(parameter.type, signature.typeParameters)) {
+            if (!isKnownTypeInScope(parameter.type, signature.typeParameters)) {
                 throw CompilerError(
                     ErrorKind::Semantic, parameter.location,
                     "type inconnu '" + parameter.type + "' pour le paramètre '" +
                     functionName + "." + parameter.name + "'");
             }
         }
-        if (!isKnownType(signature.returnType) && !isTypeParameterName(signature.returnType, signature.typeParameters)) {
+        if (!isKnownTypeInScope(signature.returnType, signature.typeParameters)) {
             throw CompilerError(
                 ErrorKind::Semantic, signature.returnTypeLocation,
                 "type de retour inconnu '" + signature.returnType + "' pour la fonction '" +
@@ -80,4 +80,28 @@ bool SemanticAnalyzer::isKnownType(const std::string& type) const {
         if (!isKnownType(argument)) return false;
     }
     return true;
+}
+
+bool SemanticAnalyzer::isKnownTypeInScope(
+    const std::string& type, const std::vector<std::string>& typeParameters) const {
+    if (isTypeParameterName(type, typeParameters)) return true;
+    auto functionType = functionTypeFromName(type);
+    if (functionType) {
+        for (const auto& parameterType : functionType->parameterTypes) {
+            if (!isKnownTypeInScope(parameterType, typeParameters)) return false;
+        }
+        return isKnownTypeInScope(functionType->returnType, typeParameters);
+    }
+    auto parameterizedType = parameterizedTypeFromName(type);
+    if (parameterizedType) {
+        const auto& [baseName, arguments] = *parameterizedType;
+        auto classIt = context.classes.find(baseName);
+        if (classIt == context.classes.end()) return false;
+        if (classIt->second.typeParameters.size() != arguments.size()) return false;
+        for (const auto& argument : arguments) {
+            if (!isKnownTypeInScope(argument, typeParameters)) return false;
+        }
+        return true;
+    }
+    return isKnownType(type);
 }

@@ -1,0 +1,7 @@
+import core.option
+
+def main(): Int = {
+    val first = optionNone(0)
+    val second = optionSome(42)
+    first.orElse(second).getOrElse(0)
+}

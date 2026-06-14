@@ -1,4 +1,4 @@
-import core.option_int
+import core.option
 
 class Holder(value: Option[Int]) {
     def get(): Option[Int] = {
@@ -11,7 +11,7 @@ def read(value: Option[Int]): Int = {
 }
 
 def maybe(value: Int): Option[Int] = {
-    optionIntSome(value)
+    optionSome(value)
 }
 
 def main(): Int = {

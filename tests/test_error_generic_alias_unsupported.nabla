@@ -1,7 +1,7 @@
-import core.option_int
+import collections.int_array
 
-def maybe(): Option[String] = {
-    optionIntNone()
+def values(): Array[String] = {
+    new ArrayInt(new IntArray(0))
 }
 
 def main(): Int = {

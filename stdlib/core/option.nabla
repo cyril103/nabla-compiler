@@ -1,0 +1,45 @@
+class Option[T](defined: Bool, value: T) {
+    def isDefined(): Bool = {
+        defined
+    }
+
+    def isEmpty(): Bool = {
+        !defined
+    }
+
+    def nonEmpty(): Bool = {
+        defined
+    }
+
+    def filter(predicate: (T) => Bool): Option[T] = {
+        if defined && predicate(value) {
+            this
+        } else {
+            optionNone(value)
+        }
+    }
+
+    def orElse(other: Option[T]): Option[T] = {
+        if defined {
+            this
+        } else {
+            other
+        }
+    }
+
+    def getOrElse(default: T): T = {
+        if defined {
+            value
+        } else {
+            default
+        }
+    }
+}
+
+def optionSome[T](value: T): Option[T] = {
+    new Option[T](true, value)
+}
+
+def optionNone[T](default: T): Option[T] = {
+    new Option[T](false, default)
+}
