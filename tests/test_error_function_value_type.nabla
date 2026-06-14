@@ -1,0 +1,11 @@
+import collections.int_array
+
+def stringify(value: Int): String = {
+    value.toString()
+}
+
+def main(): Int = {
+    val xs = intArrayFill(1, 7)
+    val mapped = intArrayMap(xs, stringify)
+    intArraySum(mapped)
+}

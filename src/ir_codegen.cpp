@@ -177,6 +177,12 @@ private:
             case IROpcode::Call:
                 emitCall(instruction);
                 break;
+            case IROpcode::FunctionReference:
+                emitFunctionReference(instruction);
+                break;
+            case IROpcode::IndirectCall:
+                emitIndirectCall(instruction);
+                break;
             case IROpcode::MethodCall:
                 emitMethodCall(instruction);
                 break;
@@ -295,6 +301,25 @@ private:
         } else {
             out << "    call " << asmFunctionName(instruction.operation) << "\n";
         }
+        storeRegister(instruction.result, "rax");
+    }
+
+    void emitFunctionReference(const IRInstruction& instruction) {
+        out << "    mov rax, " << asmFunctionName(instruction.operation) << "\n";
+        storeRegister(instruction.result, "rax");
+    }
+
+    void emitIndirectCall(const IRInstruction& instruction) {
+        if (instruction.operands.empty()) codegenError("appel indirect IR sans callee");
+        const size_t argumentCount = instruction.operands.size() - 1;
+        if (argumentCount > callingConvention.globalArgumentRegisters.size()) {
+            codegenError("appel indirect IR avec plus de 6 arguments");
+        }
+        loadValue(instruction.operands[0], "r11");
+        for (size_t i = 0; i < argumentCount; ++i) {
+            loadValue(instruction.operands[i + 1], callingConvention.globalArgumentRegisters[i]);
+        }
+        out << "    call r11\n";
         storeRegister(instruction.result, "rax");
     }
 

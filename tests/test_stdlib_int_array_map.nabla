@@ -1,0 +1,11 @@
+import collections.int_array
+
+def double(value: Int): Int = {
+    value * 2
+}
+
+def main(): Int = {
+    val xs = intArrayFill(3, 7)
+    val doubled = intArrayMap(xs, double)
+    intArraySum(doubled)
+}

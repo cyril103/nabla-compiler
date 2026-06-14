@@ -10,6 +10,8 @@ enum class IROpcode {
     StringLiteral,
     Binary,
     Call,
+    FunctionReference,
+    IndirectCall,
     MethodCall,
     NewObject,
     NewIntArray,
@@ -63,6 +65,9 @@ public:
     std::string emitBinary(
         const std::string& operation, const std::string& left, const std::string& right);
     std::string emitCall(const std::string& name, const std::vector<std::string>& arguments);
+    std::string emitFunctionReference(const std::string& name);
+    std::string emitIndirectCall(
+        const std::string& callee, const std::vector<std::string>& arguments);
     std::string emitMethodCall(
         const std::string& className, const std::string& methodName, const std::string& receiver,
         const std::vector<std::string>& arguments);

@@ -57,6 +57,12 @@ std::string IRProgram::format() const {
                 case IROpcode::Call:
                     out << "call " << instruction.operation << "(" << join(instruction.operands, ", ") << ")";
                     break;
+                case IROpcode::FunctionReference:
+                    out << "function_ref " << instruction.operation;
+                    break;
+                case IROpcode::IndirectCall:
+                    out << "indirect_call " << join(instruction.operands, ", ");
+                    break;
                 case IROpcode::MethodCall:
                     out << "call_method " << instruction.operation << "(" << join(instruction.operands, ", ") << ")";
                     break;
@@ -152,6 +158,21 @@ std::string IRBuilder::emitBinary(
 std::string IRBuilder::emitCall(const std::string& name, const std::vector<std::string>& arguments) {
     std::string result = nextValue();
     emit({IROpcode::Call, result, name, arguments});
+    return result;
+}
+
+std::string IRBuilder::emitFunctionReference(const std::string& name) {
+    std::string result = nextValue();
+    emit({IROpcode::FunctionReference, result, name, {}});
+    return result;
+}
+
+std::string IRBuilder::emitIndirectCall(
+    const std::string& callee, const std::vector<std::string>& arguments) {
+    std::vector<std::string> operands = {callee};
+    operands.insert(operands.end(), arguments.begin(), arguments.end());
+    std::string result = nextValue();
+    emit({IROpcode::IndirectCall, result, "", operands});
     return result;
 }
 

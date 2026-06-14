@@ -240,6 +240,14 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             consume(TokenType::LPAREN, "");
             auto arguments = parseArguments();
             consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
+            if (const ParsedSymbol* symbol = findLocal(name)) {
+                if (symbol->type == "IntUnaryFn") {
+                    return located(
+                        std::make_unique<FunctionValueCallNode>(
+                            name, symbol->internalName, std::move(arguments)),
+                        nameToken.location);
+                }
+            }
             return located(std::make_unique<FunctionCallNode>(name, std::move(arguments)), nameToken.location);
         }
         if (const ParsedSymbol* symbol = findLocal(name)) {
@@ -251,6 +259,9 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     return located(std::make_unique<FieldAccessNode>(currentParsingClass, name, field.type), nameToken.location);
                 }
             }
+        }
+        if (context.functions.count(name)) {
+            return located(std::make_unique<FunctionReferenceNode>(name), nameToken.location);
         }
         return located(std::make_unique<IdentifierNode>(name, name, "Int"), nameToken.location);
     }

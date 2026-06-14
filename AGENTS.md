@@ -41,12 +41,14 @@ Le pipeline implemente actuellement :
   avec protection contre les cycles;
 - objets avec champs de constructeur et appels de methodes parametres;
 - fonctions globales appelables avec parametres;
+- premier type fonction-valeur `IntUnaryFn`, references de fonctions nommees et
+  appels indirects;
 - collection native `IntArray` avec `length`, `get` et `set`;
 - entiers immediats avec pointer tagging et litteraux `String`;
 - affichage console de `String` via la primitive globale `print`;
 - premier module de bibliotheque standard `io` avec `println`;
 - premier module de bibliotheque standard `collections.int_array` avec
-  `intArraySum` et `intArrayFill`;
+  `intArraySum`, `intArrayFill`, `intArrayMap` et la facade objet `ArrayInt`;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -126,10 +128,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ### P2 - Systeme De Types
 
-- [ ] Formaliser `Unit`, `Int`, `String` et les types de classes.
+- [ ] Formaliser `Unit`, `Int`, `String`, `IntArray`, `IntUnaryFn` et les types
+  de classes.
 - [ ] Ajouter les booleens ou definir officiellement `Int` comme condition.
 - [ ] Ajouter les champs et methodes herites si l'heritage est retenu.
 - [ ] Valider les types des branches, boucles et operateurs de facon uniforme.
+- [ ] Generaliser `IntUnaryFn` vers des types fonction complets.
+- [ ] Ajouter les lambdas sans capture, puis les closures avec capture.
 
 ### P2 - Runtime Et Objets
 
@@ -152,7 +157,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout du module `collections.int_array`.
+- Prochain commit - Ajout des fonctions valeurs `IntUnaryFn`, de `intArrayMap`
+  et de la facade objet `ArrayInt`.
+- `827c162` - Ajout du module `collections.int_array`.
 - `9d1cab5` - Ajout d'une racine `stdlib/` et du module `io`.
 - `e0e611a` - Ajout de la collection native `IntArray`.
 - `b2996ad` - Ajout des litteraux `String`.
@@ -186,5 +193,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter `stdlib/math.nabla`, puis formaliser `Unit`, `Int`, `String`,
-`IntArray` et les types de classes.
+Ajouter les lambdas sans capture pour `IntUnaryFn`, puis enrichir `ArrayInt`
+avec `filter` et `fold`.

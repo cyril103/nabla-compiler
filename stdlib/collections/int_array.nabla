@@ -17,3 +17,39 @@ def intArrayFill(size: Int, value: Int): IntArray = {
     }
     xs
 }
+
+def intArrayMap(xs: IntArray, f: IntUnaryFn): IntArray = {
+    val mapped = new IntArray(xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        mapped.set(index, f(xs.get(index)))
+        index = index + 1
+    }
+    mapped
+}
+
+class ArrayInt(values: IntArray) {
+    def length(): Int = {
+        values.length()
+    }
+
+    def get(index: Int): Int = {
+        values.get(index)
+    }
+
+    def sum(): Int = {
+        intArraySum(values)
+    }
+
+    def map(f: IntUnaryFn): ArrayInt = {
+        new ArrayInt(intArrayMap(values, f))
+    }
+
+    def raw(): IntArray = {
+        values
+    }
+}
+
+def arrayIntFill(size: Int, value: Int): ArrayInt = {
+    new ArrayInt(intArrayFill(size, value))
+}

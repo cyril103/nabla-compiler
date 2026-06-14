@@ -82,6 +82,27 @@ public:
     std::string lowerToIR(IRBuilder& builder) const override;
 };
 
+class FunctionReferenceNode : public ASTNode {
+    std::string name;
+public:
+    FunctionReferenceNode(std::string functionName);
+    std::string getType() override;
+    void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
+};
+
+class FunctionValueCallNode : public ASTNode {
+    std::string name;
+    std::string symbolName;
+    std::vector<std::unique_ptr<ASTNode>> arguments;
+public:
+    FunctionValueCallNode(
+        std::string functionName, std::string symbol, std::vector<std::unique_ptr<ASTNode>> args);
+    std::string getType() override;
+    void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
+};
+
 class FieldAccessNode : public ASTNode {
     std::string className;
     std::string fieldName;

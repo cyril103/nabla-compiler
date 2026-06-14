@@ -1,0 +1,1 @@
+tests/test_error_function_value_type.nabla:9:34: semantic error: la fonction 'stringify' n'est pas compatible avec IntUnaryFn

@@ -1,0 +1,10 @@
+import collections.int_array
+
+def double(value: Int): Int = {
+    value * 2
+}
+
+def main(): Int = {
+    val xs = arrayIntFill(3, 7)
+    xs.map(double).sum()
+}

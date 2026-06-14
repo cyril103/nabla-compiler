@@ -21,6 +21,11 @@ void validateArguments(
         }
     }
 }
+
+bool isIntUnaryFunction(const CompilerContext::FunctionSignature& signature) {
+    return signature.parameters.size() == 1 && signature.parameters[0].type == "Int" &&
+           signature.returnType == "Int";
+}
 }
 
 std::string ASTNode::lowerToIR(IRBuilder& builder) const {
@@ -301,6 +306,62 @@ std::string FunctionCallNode::lowerToIR(IRBuilder& builder) const {
     return builder.emitCall(name, loweredArguments);
 }
 
+FunctionReferenceNode::FunctionReferenceNode(std::string functionName)
+    : name(std::move(functionName)) {}
+
+std::string FunctionReferenceNode::getType() {
+    return "IntUnaryFn";
+}
+
+void FunctionReferenceNode::validateSemantics(CompilerContext& context) {
+    auto function = context.functions.find(name);
+    if (function == context.functions.end()) {
+        semanticError("fonction inconnue: " + name);
+    }
+    if (!isIntUnaryFunction(function->second)) {
+        semanticError("la fonction '" + name + "' n'est pas compatible avec IntUnaryFn");
+    }
+}
+
+std::string FunctionReferenceNode::lowerToIR(IRBuilder& builder) const {
+    return builder.emitFunctionReference(name);
+}
+
+FunctionValueCallNode::FunctionValueCallNode(
+    std::string functionName, std::string symbol, std::vector<std::unique_ptr<ASTNode>> args)
+    : name(std::move(functionName)), symbolName(std::move(symbol)), arguments(std::move(args)) {}
+
+std::string FunctionValueCallNode::getType() {
+    return "Int";
+}
+
+void FunctionValueCallNode::validateSemantics(CompilerContext& context) {
+    for (const auto& argument : arguments) argument->validateSemantics(context);
+    auto symbol = context.semanticSymbolTypes.find(symbolName);
+    if (symbol == context.semanticSymbolTypes.end()) {
+        semanticError("fonction utilisée hors de sa portée: " + name);
+    }
+    if (symbol->second != "IntUnaryFn") {
+        semanticError("la valeur '" + name + "' n'est pas appelable");
+    }
+    if (arguments.size() != 1) {
+        semanticError("IntUnaryFn: 1 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
+    }
+    if (arguments[0]->getType() != "Int") {
+        throw CompilerError(
+            ErrorKind::Semantic, arguments[0]->getLocation(),
+            "IntUnaryFn, paramètre 'value': type 'Int' attendu, '" +
+            arguments[0]->getType() + "' reçu");
+    }
+}
+
+std::string FunctionValueCallNode::lowerToIR(IRBuilder& builder) const {
+    std::string loweredFunction = builder.emitLoad(symbolName);
+    std::vector<std::string> loweredArguments;
+    for (const auto& argument : arguments) loweredArguments.push_back(argument->lowerToIR(builder));
+    return builder.emitIndirectCall(loweredFunction, loweredArguments);
+}
+
 FieldAccessNode::FieldAccessNode(std::string clName, std::string field, std::string fieldType)
     : className(std::move(clName)), fieldName(std::move(field)), type(std::move(fieldType)) {}
 
@@ -464,7 +525,7 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
     if (body) body->validateSemantics(context);
     const bool knownType =
         returnType == "Int" || returnType == "String" || returnType == "Unit" ||
-        returnType == "IntArray" ||
+        returnType == "IntArray" || returnType == "IntUnaryFn" ||
         context.classes.count(returnType) != 0;
     if (!knownType) {
         semanticError("type de retour inconnu '" + returnType + "' pour la fonction '" + name + "'");
