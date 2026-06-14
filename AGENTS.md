@@ -215,8 +215,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Utiliser `this` dans une bibliothèque standard et valider l\'impact sur les diagnostics de méthode.
-- `fc1b9a2` - Ajouter `this` comme mot-clé et variable implicite dans les méthodes.
+- `a9f183d` - Ajouter `this` comme mot-clé et variable implicite dans les méthodes;
+  corriger la résolution de `this` (`symbolName == "this"`) dans
+  `IdentifierNode` pour permettre son usage en bibliothèque standard.
 - `ef2609c` - Ajouter `ArrayInt.indexOfOption`.
 - `813100b` - Ajout de `OptionInt` et des bornes `ArrayInt`.
 - `3b6760f` - Ajout de `ArrayInt.indexOf` et `ArrayInt.count`.

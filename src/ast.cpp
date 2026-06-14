@@ -707,6 +707,7 @@ std::string FunctionDefNode::lowerToIR(IRBuilder& builder) const {
     builder.beginFunction(functionName, irParameters, returnType);
     if (!className.empty()) {
         builder.bindThis();
+        builder.bindParameter("this", "this");
     } else if (!captures.empty()) {
         builder.bindClosure();
         for (size_t i = 0; i < captures.size(); ++i) {
@@ -729,7 +730,7 @@ std::string IdentifierNode::getType() {
 }
 
 void IdentifierNode::validateSemantics(CompilerContext& context) {
-    if (symbolName == name) {
+    if (symbolName == name && symbolName != "this") {
         semanticError("variable non déclarée: " + name);
     }
     auto symbol = context.semanticSymbolTypes.find(symbolName);
