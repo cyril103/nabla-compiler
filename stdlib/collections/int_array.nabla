@@ -113,6 +113,18 @@ class ArrayInt(values: IntArray) {
         values.length()
     }
 
+    def size(): Int = {
+        values.length()
+    }
+
+    def isEmpty(): Bool = {
+        values.length() == 0
+    }
+
+    def nonEmpty(): Bool = {
+        values.length() != 0
+    }
+
     def get(index: Int): Int = {
         values.get(index)
     }

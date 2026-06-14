@@ -70,8 +70,8 @@ Le pipeline implemente actuellement :
 - premier module de bibliotheque standard `collections.int_array` avec
   `intArraySum`, `intArrayFill`, `intArrayRange`, `intArrayMap`,
   `intArrayFilter` et la facade objet `ArrayInt` avec `map`, `filter`,
-  `fold`, `foreach`, `exists`, `forall` et `contains`, avec predicats
-  booleens;
+  `fold`, `foreach`, `exists`, `forall`, `contains`, `size`, `isEmpty` et
+  `nonEmpty`, avec predicats booleens;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -178,6 +178,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter l'inference des lambdas multi-parametres.
 - [x] Ajouter `ArrayInt.exists`, `ArrayInt.forall` et `ArrayInt.contains`.
 - [x] Typer les predicats de collections avec `Bool`.
+- [x] Ajouter `ArrayInt.size`, `isEmpty` et `nonEmpty`.
 
 ### P2 - Runtime Et Objets
 
@@ -200,7 +201,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout du court-circuit booleen.
+- Prochain commit - Ajout des predicats de taille `ArrayInt`.
+- `7b534be` - Ajout du court-circuit booleen.
 - `842a8c1` - Ajout des operateurs booleens.
 - `d03b1f6` - Introduction du type `Bool`.
 - `8f21d03` - Ajout de predicats de collection `ArrayInt`.
@@ -256,4 +258,4 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter des methodes `ArrayInt.size`, `isEmpty` et `nonEmpty`.
+Ajouter des methodes `ArrayInt.head` et `ArrayInt.last` avec tests de bornes.

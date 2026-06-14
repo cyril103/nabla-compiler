@@ -1,0 +1,15 @@
+import collections.int_array
+
+def main(): Int = {
+    val empty = arrayIntRange(0)
+    val values = arrayIntRange(3)
+    if empty.size() == 0 && empty.isEmpty() && !empty.nonEmpty() {
+        if values.size() == 3 && !values.isEmpty() && values.nonEmpty() {
+            42
+        } else {
+            1
+        }
+    } else {
+        2
+    }
+}
