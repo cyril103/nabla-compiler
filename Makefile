@@ -63,7 +63,13 @@ all-tests: nablac
 					all_status=1; \
 				else \
 					executable=$(BUILD_DIR)/$$(basename "$$testfile" .nabla); \
-					"$$executable" >/dev/null 2>&1; \
+					stdout_file=$${testfile%.nabla}.stdout; \
+					actual_stdout=$(BUILD_DIR)/$$(basename "$$testfile" .nabla).stdout; \
+					if [ -f "$$stdout_file" ]; then \
+						"$$executable" >"$$actual_stdout" 2>/dev/null; \
+					else \
+						"$$executable" >/dev/null 2>&1; \
+					fi; \
 					run_status=$$?; \
 					expected=$$(tr -d '[:space:]' < "$$expected_file"); \
 					if [ "$$run_status" = "$$expected" ]; then \
@@ -71,6 +77,16 @@ all-tests: nablac
 					else \
 						echo "${RED}FAIL:${NC} $$testfile (exit=$$run_status, expected=$$expected)"; \
 						all_status=1; \
+					fi; \
+					if [ -f "$$stdout_file" ]; then \
+						if cmp -s "$$actual_stdout" "$$stdout_file"; then \
+							echo "${GREEN}PASS (stdout):${NC} $$testfile"; \
+						else \
+							echo "${RED}FAIL:${NC} $$testfile (stdout mismatch)"; \
+							diff -u "$$stdout_file" "$$actual_stdout" || true; \
+							all_status=1; \
+						fi; \
+						rm -f "$$actual_stdout"; \
 					fi; \
 					expected_ir=$${testfile%.nabla}.ir; \
 					if [ -f "$$expected_ir" ]; then \
@@ -91,7 +107,11 @@ all-tests: nablac
 						NABLA_BUILD_DIR=$(BUILD_DIR) $(BUILD_DIR)/nablac --backend-ir "$$testfile" >/dev/null 2>&1; \
 						ir_backend_status=$$?; \
 						if [ $$ir_backend_status -eq 0 ]; then \
-							"$$executable" >/dev/null 2>&1; \
+							if [ -f "$$stdout_file" ]; then \
+								"$$executable" >"$$actual_stdout" 2>/dev/null; \
+							else \
+								"$$executable" >/dev/null 2>&1; \
+							fi; \
 							ir_backend_run_status=$$?; \
 							expected_ir_backend_status=$$(tr -d '[:space:]' < "$$expected_ir_backend"); \
 							if [ "$$ir_backend_run_status" = "$$expected_ir_backend_status" ]; then \
@@ -99,6 +119,16 @@ all-tests: nablac
 							else \
 								echo "${RED}FAIL:${NC} $$testfile (IR backend exit=$$ir_backend_run_status, expected=$$expected_ir_backend_status)"; \
 								all_status=1; \
+							fi; \
+							if [ -f "$$stdout_file" ]; then \
+								if cmp -s "$$actual_stdout" "$$stdout_file"; then \
+									echo "${GREEN}PASS (IR backend stdout):${NC} $$testfile"; \
+								else \
+									echo "${RED}FAIL:${NC} $$testfile (IR backend stdout mismatch)"; \
+									diff -u "$$stdout_file" "$$actual_stdout" || true; \
+									all_status=1; \
+								fi; \
+								rm -f "$$actual_stdout"; \
 							fi; \
 						else \
 							echo "${RED}FAIL:${NC} $$testfile (IR backend compilation status=$$ir_backend_status)"; \

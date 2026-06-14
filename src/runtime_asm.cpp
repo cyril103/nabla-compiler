@@ -6,7 +6,8 @@ void emit(std::ostream& out) {
     out << "section .data\n"
         << "    global_heap: times 4096 db 0\n"
         << "    global_heap_end:\n"
-        << "    heap_pointer: dq global_heap\n\n";
+        << "    heap_pointer: dq global_heap\n"
+        << "    newline: db 10\n\n";
     out << "section .text\nglobal _start\n\n";
     out << "_start:\n    call main\n    mov rdi, rax\n    shr rdi, 1\n    mov rax, 60\n    syscall\n\n";
     out << "Runtime_alloc:\n"
@@ -20,6 +21,19 @@ void emit(std::ostream& out) {
         << "    mov rdi, 255\n"
         << "    mov rax, 60\n"
         << "    syscall\n\n";
+    out << "Runtime_print:\n"
+        << "    mov rdx, [rdi + 8]\n"
+        << "    mov rsi, [rdi + 16]\n"
+        << "    mov rdi, 1\n"
+        << "    mov rax, 1\n"
+        << "    syscall\n"
+        << "    mov rdx, 1\n"
+        << "    mov rsi, newline\n"
+        << "    mov rdi, 1\n"
+        << "    mov rax, 1\n"
+        << "    syscall\n"
+        << "    mov rax, 1\n"
+        << "    ret\n\n";
     out << "Int_method_toString:\n"
         << "    mov r10, rdi\n"
         << "    mov rdi, 56\n"

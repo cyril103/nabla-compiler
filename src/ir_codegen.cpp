@@ -240,7 +240,11 @@ private:
         for (size_t i = 0; i < instruction.operands.size(); ++i) {
             loadValue(instruction.operands[i], callingConvention.globalArgumentRegisters[i]);
         }
-        out << "    call " << asmFunctionName(instruction.operation) << "\n";
+        if (instruction.operation == "print") {
+            out << "    call Runtime_print\n";
+        } else {
+            out << "    call " << asmFunctionName(instruction.operation) << "\n";
+        }
         storeRegister(instruction.result, "rax");
     }
 

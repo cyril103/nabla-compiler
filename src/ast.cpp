@@ -197,6 +197,19 @@ std::string FunctionCallNode::getType() {
 
 void FunctionCallNode::validateSemantics(CompilerContext& context) {
     for (const auto& argument : arguments) argument->validateSemantics(context);
+    if (name == "print") {
+        if (arguments.size() != 1) {
+            semanticError("print: 1 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
+        }
+        if (arguments[0]->getType() != "String") {
+            throw CompilerError(
+                ErrorKind::Semantic, arguments[0]->getLocation(),
+                "print, paramètre 'value': type 'String' attendu, '" +
+                arguments[0]->getType() + "' reçu");
+        }
+        resolvedType = "Unit";
+        return;
+    }
     auto function = context.functions.find(name);
     if (function == context.functions.end()) {
         semanticError("fonction inconnue: " + name);

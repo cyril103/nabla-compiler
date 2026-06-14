@@ -40,6 +40,7 @@ Le pipeline implemente actuellement :
 - objets avec champs de constructeur et appels de methodes parametres;
 - fonctions globales appelables avec parametres;
 - entiers immediats avec pointer tagging;
+- affichage console de `String` via la primitive globale `print`;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -56,7 +57,8 @@ Limites importantes :
 
 - les fonctions globales sont limitees a 6 parametres et les methodes a 5,
   conformement a la convention d'appel actuelle;
-- le tas est fixe et ne possede ni verification de depassement ni ramasse-miettes;
+- le tas est fixe et possede une verification de depassement, mais pas de
+  ramasse-miettes;
 
 ## Invariants D'Architecture
 
@@ -83,8 +85,9 @@ g++ -std=c++17 -Wall -Wextra -Werror \
 git diff --check
 ```
 
-Les tests normaux utilisent un fichier voisin `<nom>.expected`. Les fichiers dont
-le nom contient `error` ou `fail` doivent echouer pendant la compilation.
+Les tests normaux utilisent un fichier voisin `<nom>.expected`. Un fichier
+optionnel `<nom>.stdout` valide la sortie console. Les fichiers dont le nom
+contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Feuille De Route
 
@@ -128,6 +131,7 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Extraire le runtime ASM commun du backend IR.
 - [x] Stabiliser la representation de `String`.
 - [ ] Choisir une strategie memoire a long terme.
+- [x] Ajouter une primitive d'affichage console pour `String`.
 
 ### P3 - Outillage
 
@@ -138,7 +142,8 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout d'une verification de depassement du tas.
+- Prochain commit - Ajout de la primitive console `print`.
+- `0203ccb` - Ajout d'une verification de depassement du tas.
 - `48dacc8` - Stabilisation de la representation runtime de `String`.
 - `0af02cd` - Ajout de l'integration continue GitHub Actions.
 - `b1a6938` - Extraction du runtime ASM commun du backend IR.
@@ -167,5 +172,5 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Choisir une strategie memoire a long terme, puis formaliser `Unit`, `Int`,
-`String` et les types de classes.
+Formaliser `Unit`, `Int`, `String` et les types de classes, puis choisir une
+strategie memoire a long terme.
