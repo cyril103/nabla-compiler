@@ -289,7 +289,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Ajouter `Option[T].foreach` pour les effets controles sur
+- `fcce070` - Ajouter `Option[T].foreach` pour les effets controles sur
   `Some`.
 - `7bc14aa` - Ajouter `Option[T].flatMap[U]` a la bibliotheque standard generique.
 - `3aa4fe5` - Autoriser les references de fonctions generiques specialisees comme
