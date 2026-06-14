@@ -4,6 +4,7 @@
 #include "parser.hpp"
 #include "semantic_analyzer.hpp"
 #include "ir.hpp"
+#include "ir_codegen.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -25,7 +26,7 @@ static std::filesystem::path findProjectRoot(const std::filesystem::path& start)
 }
 
 static void printUsage(const char* programName) {
-    std::cerr << "Usage: " << programName << " [--keep-asm|--keep-temp|--emit-ir] <fichier.nabla>\n";
+    std::cerr << "Usage: " << programName << " [--keep-asm|--keep-temp|--emit-ir|--backend-ir] <fichier.nabla>\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -34,6 +35,7 @@ int main(int argc, char* argv[]) {
     bool keepAsm = false;
     bool keepTemp = false;
     bool emitIR = false;
+    bool backendIR = false;
     std::string sourcePath;
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
@@ -44,6 +46,8 @@ int main(int argc, char* argv[]) {
             keepTemp = true;
         } else if (arg == "--emit-ir") {
             emitIR = true;
+        } else if (arg == "--backend-ir") {
+            backendIR = true;
         } else if (arg == "--help" || arg == "-h") {
             printUsage(argv[0]);
             return 0;
@@ -87,14 +91,21 @@ int main(int argc, char* argv[]) {
         auto globalAST = parser.parseProgram();
         SemanticAnalyzer semanticAnalyzer(context);
         semanticAnalyzer.analyze(*globalAST);
+        IRProgram irProgram;
+        if (emitIR || backendIR) {
+            irProgram = IRBuilder().build(*globalAST);
+        }
         if (emitIR) {
-            IRBuilder irBuilder;
-            std::cout << irBuilder.build(*globalAST).format();
+            std::cout << irProgram.format();
             return 0;
         }
 
         std::ofstream asmFile(asmFilename);
-        globalAST->generateASM(asmFile, context);
+        if (backendIR) {
+            IRCodeGenerator().generateASM(irProgram, asmFile);
+        } else {
+            globalAST->generateASM(asmFile, context);
+        }
         asmFile.close();
 
         std::string nasmCmd = "nasm -f elf64 " + asmFilename + " -o " + objFilename;

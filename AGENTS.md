@@ -48,6 +48,8 @@ Le pipeline implemente actuellement :
 - IR textuelle pour les fonctions globales, entiers, variables, affectations,
   operations binaires, appels de fonctions globales, `if`, `while`, `for`,
   objets et methodes;
+- backend ASM experimental depuis l'IR pour fonctions globales, entiers,
+  variables locales, operations binaires et appels globaux;
 - generation directe d'assembleur x86-64;
 - tests de compilation et d'execution via `make all-tests`.
 
@@ -55,7 +57,9 @@ Limites importantes :
 
 - les fonctions globales sont limitees a 6 parametres et les methodes a 5,
   conformement a la convention d'appel actuelle;
-- l'assembleur est encore genere directement depuis l'AST;
+- l'assembleur par defaut est encore genere directement depuis l'AST;
+- le backend ASM depuis IR ne couvre pas encore controle de flux, objets et
+  methodes;
 - le tas est fixe et ne possede ni verification de depassement ni ramasse-miettes;
 - les binaires historiques sous `build/` sont encore suivis par Git.
 
@@ -79,6 +83,7 @@ Executer avant chaque commit :
 make all-tests
 g++ -std=c++17 -Wall -Wextra -Werror \
   src/main.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp src/ir.cpp \
+  src/ir_codegen.cpp \
   -o /tmp/nablac-werror
 git diff --check
 ```
@@ -110,6 +115,7 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Representer les branchements et boucles dans l'IR.
 - [x] Representer les objets, champs et appels de methodes dans l'IR.
 - [ ] Deplacer l'allocation de pile et les conventions d'appel vers le backend.
+- [ ] Couvrir le backend ASM depuis IR pour tout le langage actuel.
 - [ ] Generer l'assembleur uniquement depuis l'IR.
 
 ### P2 - Systeme De Types
@@ -135,7 +141,8 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout des objets, champs et appels de methodes dans l'IR.
+- Prochain commit - Ajout d'un backend ASM experimental depuis l'IR.
+- `0f33a89` - Ajout des objets, champs et appels de methodes dans l'IR.
 - `f38e0a6` - Ajout du controle de flux `if`/`while`/`for` dans l'IR.
 - `1dcff81` - Ajout de l'IR minimale, de `--emit-ir` et des snapshots IR.
 - `8b7be03` - Ajout des diagnostics sources uniformes, de `CompilerError` et des
@@ -151,5 +158,5 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Completer les dernieres operations runtime dans l'IR, puis commencer la
-migration de la generation assembleur vers le backend IR.
+Etendre le backend ASM depuis IR au controle de flux, puis aux objets et
+methodes.

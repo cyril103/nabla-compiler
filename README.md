@@ -75,6 +75,16 @@ affectations, opérations binaires, appels de fonctions globales, `if`, `while`,
 `Int.toString`. La génération assembleur reste pour le moment directe depuis
 l'AST.
 
+Un backend assembleur expérimental peut compiler un premier sous-ensemble depuis
+l'IR :
+
+```bash
+build/nablac --backend-ir tests/test_arithmetic.nabla
+```
+
+Ce backend couvre pour l'instant les fonctions globales, entiers, variables
+locales, opérations binaires et appels de fonctions globales.
+
 ### Personnaliser le fichier source
 
 Le `Makefile` supporte une variable `SRC` pour choisir le fichier Nabla à compiler :
@@ -126,6 +136,8 @@ sortie à cette valeur. Les tests d’erreur dont le nom contient `error` ou `fa
 doivent échouer pendant la compilation. Lorsqu'un fichier voisin
 `<nom>.diagnostic` existe, le message d'erreur normalisé doit également
 correspondre exactement. Lorsqu'un fichier voisin `<nom>.ir` existe, la sortie
-de `nablac --emit-ir` est elle aussi comparée exactement au snapshot.
+de `nablac --emit-ir` est elle aussi comparée exactement au snapshot. Lorsqu'un
+fichier voisin `<nom>.ir-backend.expected` existe, le même test est aussi compilé
+avec `nablac --backend-ir` puis exécuté.
 
 La cible affiche `PASS` ou `FAIL` pour chaque fichier de test et renvoie `1` si un test donne un résultat inattendu.

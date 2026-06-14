@@ -6,9 +6,9 @@ BIN := $(BUILD_DIR)/$(notdir $(basename $(SRC)))
 
 all: nablac
 
-nablac: src/main.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp src/ir.cpp src/lexer.hpp src/ast.hpp src/parser.hpp src/semantic_analyzer.hpp src/ir.hpp src/compiler_context.hpp src/compiler_error.hpp
+nablac: src/main.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp src/ir.cpp src/ir_codegen.cpp src/lexer.hpp src/ast.hpp src/parser.hpp src/semantic_analyzer.hpp src/ir.hpp src/ir_codegen.hpp src/compiler_context.hpp src/compiler_error.hpp
 	@mkdir -p $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) src/main.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp src/ir.cpp -o $(BUILD_DIR)/nablac
+	$(CXX) $(CXXFLAGS) src/main.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp src/ir.cpp src/ir_codegen.cpp -o $(BUILD_DIR)/nablac
 
 test: nablac
 	@mkdir -p $(BUILD_DIR)
@@ -85,6 +85,25 @@ all-tests: nablac
 							all_status=1; \
 						fi; \
 						rm -f "$$actual_ir"; \
+					fi; \
+					expected_ir_backend=$${testfile%.nabla}.ir-backend.expected; \
+					if [ -f "$$expected_ir_backend" ]; then \
+						NABLA_BUILD_DIR=$(BUILD_DIR) $(BUILD_DIR)/nablac --backend-ir "$$testfile" >/dev/null 2>&1; \
+						ir_backend_status=$$?; \
+						if [ $$ir_backend_status -eq 0 ]; then \
+							"$$executable" >/dev/null 2>&1; \
+							ir_backend_run_status=$$?; \
+							expected_ir_backend_status=$$(tr -d '[:space:]' < "$$expected_ir_backend"); \
+							if [ "$$ir_backend_run_status" = "$$expected_ir_backend_status" ]; then \
+								echo "${GREEN}PASS (IR backend):${NC} $$testfile (exit=$$ir_backend_run_status)"; \
+							else \
+								echo "${RED}FAIL:${NC} $$testfile (IR backend exit=$$ir_backend_run_status, expected=$$expected_ir_backend_status)"; \
+								all_status=1; \
+							fi; \
+						else \
+							echo "${RED}FAIL:${NC} $$testfile (IR backend compilation status=$$ir_backend_status)"; \
+							all_status=1; \
+						fi; \
 					fi; \
 				fi; \
 				;; \
