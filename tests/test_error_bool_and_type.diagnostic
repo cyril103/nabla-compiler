@@ -1,0 +1,1 @@
+tests/test_error_bool_and_type.nabla:2:16: semantic error: la méthode Bool.&& attend un argument de type Bool

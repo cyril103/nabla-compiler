@@ -12,6 +12,10 @@ bool isArithmeticMethod(const std::string& methodName) {
     return methodName == "+" || methodName == "-" || methodName == "*" || methodName == "/";
 }
 
+bool isBoolBinaryMethod(const std::string& methodName) {
+    return methodName == "&&" || methodName == "||" || methodName == "==" || methodName == "!=";
+}
+
 bool isKnownBuiltinType(const std::string& type) {
     return type == "Int" || type == "Bool" || type == "String" || type == "Unit" || type == "IntArray";
 }
@@ -83,6 +87,25 @@ void BoolNode::validateSemantics(CompilerContext& context) {
 
 std::string BoolNode::lowerToIR(IRBuilder& builder) const {
     return builder.emitConstant(value ? "1" : "0");
+}
+
+NotNode::NotNode(std::unique_ptr<ASTNode> expr) : expression(std::move(expr)) {}
+
+std::string NotNode::getType() {
+    return "Bool";
+}
+
+void NotNode::validateSemantics(CompilerContext& context) {
+    expression->validateSemantics(context);
+    if (expression->getType() != "Bool") {
+        semanticError("l'opérateur '!' attend une expression de type Bool");
+    }
+}
+
+std::string NotNode::lowerToIR(IRBuilder& builder) const {
+    std::string loweredExpression = expression->lowerToIR(builder);
+    std::string falseValue = builder.emitConstant("0");
+    return builder.emitBinary("==", loweredExpression, falseValue);
 }
 
 StringNode::StringNode(std::string val) : value(std::move(val)) {}
@@ -164,6 +187,9 @@ std::string MethodCallNode::getType() {
     if (receiverType == "String") {
         if (methodName == "length") return "Int";
     }
+    if (receiverType == "Bool") {
+        if (isBoolBinaryMethod(methodName)) return "Bool";
+    }
     if (receiverType == "IntArray") {
         if (methodName == "set") return "Unit";
         if (methodName == "length" || methodName == "get") return "Int";
@@ -204,6 +230,21 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             return;
         }
         semanticError("méthode inconnue: String." + methodName);
+    }
+    if (receiverType == "Bool") {
+        if (isBoolBinaryMethod(methodName)) {
+            if (arguments.size() != 1) {
+                semanticError("la méthode Bool." + methodName + " attend un argument");
+            }
+            if (arguments[0]->getType() != "Bool") {
+                throw CompilerError(
+                    ErrorKind::Semantic, arguments[0]->getLocation(),
+                    "la méthode Bool." + methodName + " attend un argument de type Bool");
+            }
+            resolvedType = "Bool";
+            return;
+        }
+        semanticError("méthode inconnue: Bool." + methodName);
     }
     if (receiverType == "IntArray") {
         if (methodName == "length") {
@@ -280,6 +321,14 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         }
         std::string loweredReceiver = receiver->lowerToIR(builder);
         return builder.emitMethodCall("String", "length", loweredReceiver, {});
+    }
+    if (receiverType == "Bool") {
+        if (!isBoolBinaryMethod(methodName) || arguments.size() != 1) {
+            builder.unsupported(location, "la méthode Bool." + methodName);
+        }
+        std::string left = receiver->lowerToIR(builder);
+        std::string right = arguments[0]->lowerToIR(builder);
+        return builder.emitBinary(methodName, left, right);
     }
     if (receiverType == "IntArray") {
         std::string loweredReceiver = receiver->lowerToIR(builder);

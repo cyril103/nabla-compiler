@@ -49,6 +49,15 @@ public:
     std::string lowerToIR(IRBuilder& builder) const override;
 };
 
+class NotNode : public ASTNode {
+    std::unique_ptr<ASTNode> expression;
+public:
+    NotNode(std::unique_ptr<ASTNode> expr);
+    std::string getType() override;
+    void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
+};
+
 class StringNode : public ASTNode {
     std::string value;
 public:

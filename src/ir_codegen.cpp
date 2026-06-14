@@ -263,6 +263,11 @@ private:
             out << "    shr rax, 1\n    shr rbx, 1\n    imul rax, rbx\n    shl rax, 1\n    or rax, 1\n";
         } else if (op == "/") {
             out << "    shr rax, 1\n    shr rbx, 1\n    cqo\n    idiv rbx\n    shl rax, 1\n    or rax, 1\n";
+        } else if (op == "&&" || op == "||") {
+            out << "    shr rax, 1\n    shr rbx, 1\n";
+            if (op == "&&") out << "    and rax, rbx\n";
+            else out << "    or rax, rbx\n";
+            out << "    shl rax, 1\n    or rax, 1\n";
         } else if (op == "==" || op == "!=" || op == "<" || op == ">" || op == "<=" || op == ">=") {
             out << "    shr rax, 1\n    shr rbx, 1\n    cmp rax, rbx\n";
             if (op == "==") out << "    sete al\n";

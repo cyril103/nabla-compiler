@@ -562,11 +562,19 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
     return expr;
 }
 
+std::unique_ptr<ASTNode> Parser::parseUnary() {
+    if (peek().type == TokenType::BANG) {
+        Token op = consume(TokenType::BANG, "");
+        return located(std::make_unique<NotNode>(parseUnary()), op.location);
+    }
+    return parsePostfix();
+}
+
 std::unique_ptr<ASTNode> Parser::parseMultiplicative() {
-    auto expr = parsePostfix();
+    auto expr = parseUnary();
     while (peek().type == TokenType::STAR || peek().type == TokenType::SLASH) {
         Token op = tokens[index++];
-        auto right = parsePostfix();
+        auto right = parseUnary();
         std::vector<std::unique_ptr<ASTNode>> arguments;
         arguments.push_back(std::move(right));
         expr = located(std::make_unique<MethodCallNode>(std::move(expr), op.value, std::move(arguments)), op.location);
@@ -598,8 +606,32 @@ std::unique_ptr<ASTNode> Parser::parseComparison() {
     return expr;
 }
 
+std::unique_ptr<ASTNode> Parser::parseLogicalAnd() {
+    auto expr = parseComparison();
+    while (peek().type == TokenType::AND_AND) {
+        Token op = tokens[index++];
+        auto right = parseComparison();
+        std::vector<std::unique_ptr<ASTNode>> arguments;
+        arguments.push_back(std::move(right));
+        expr = located(std::make_unique<MethodCallNode>(std::move(expr), op.value, std::move(arguments)), op.location);
+    }
+    return expr;
+}
+
+std::unique_ptr<ASTNode> Parser::parseLogicalOr() {
+    auto expr = parseLogicalAnd();
+    while (peek().type == TokenType::OR_OR) {
+        Token op = tokens[index++];
+        auto right = parseLogicalAnd();
+        std::vector<std::unique_ptr<ASTNode>> arguments;
+        arguments.push_back(std::move(right));
+        expr = located(std::make_unique<MethodCallNode>(std::move(expr), op.value, std::move(arguments)), op.location);
+    }
+    return expr;
+}
+
 std::unique_ptr<ASTNode> Parser::parseExpression() {
-    return parseComparison();
+    return parseLogicalOr();
 }
 
 std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {

@@ -1,0 +1,7 @@
+def main(): Int = {
+    if false || true && !false {
+        7
+    } else {
+        0
+    }
+}
