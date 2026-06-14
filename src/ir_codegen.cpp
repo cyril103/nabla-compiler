@@ -290,8 +290,9 @@ private:
             codegenError("nombre d'arguments invalide pour new " + instruction.operation);
         }
 
-        out << "    mov rbx, [heap_pointer]\n";
-        out << "    add qword [heap_pointer], " << objectSizeFor(instruction.operation) << "\n";
+        out << "    mov rdi, " << objectSizeFor(instruction.operation) << "\n";
+        out << "    call Runtime_alloc\n";
+        out << "    mov rbx, rax\n";
         out << "    mov qword [rbx], 0\n";
         for (size_t i = 0; i < instruction.operands.size(); ++i) {
             loadValue(instruction.operands[i], "rax");

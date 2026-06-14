@@ -123,7 +123,7 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ### P2 - Runtime Et Objets
 
-- [ ] Verifier les depassements du tas.
+- [x] Verifier les depassements du tas.
 - [ ] Definir et utiliser de vraies vtables ou retirer leur emplacement reserve.
 - [x] Extraire le runtime ASM commun du backend IR.
 - [x] Stabiliser la representation de `String`.
@@ -138,7 +138,8 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Stabilisation de la representation runtime de `String`.
+- Prochain commit - Ajout d'une verification de depassement du tas.
+- `48dacc8` - Stabilisation de la representation runtime de `String`.
 - `0af02cd` - Ajout de l'integration continue GitHub Actions.
 - `b1a6938` - Extraction du runtime ASM commun du backend IR.
 - `ed879e1` - Retrait des binaires historiques suivis sous `build/`.
@@ -166,5 +167,5 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Verifier les depassements du tas, puis choisir une strategie memoire a long
-terme.
+Choisir une strategie memoire a long terme, puis formaliser `Unit`, `Int`,
+`String` et les types de classes.

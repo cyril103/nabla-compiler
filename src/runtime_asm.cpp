@@ -3,14 +3,30 @@
 
 namespace RuntimeASM {
 void emit(std::ostream& out) {
-    out << "section .data\n    global_heap: times 4096 db 0\n    heap_pointer: dq global_heap\n\n";
+    out << "section .data\n"
+        << "    global_heap: times 4096 db 0\n"
+        << "    global_heap_end:\n"
+        << "    heap_pointer: dq global_heap\n\n";
     out << "section .text\nglobal _start\n\n";
     out << "_start:\n    call main\n    mov rdi, rax\n    shr rdi, 1\n    mov rax, 60\n    syscall\n\n";
+    out << "Runtime_alloc:\n"
+        << "    mov rax, [heap_pointer]\n"
+        << "    lea rcx, [rax + rdi]\n"
+        << "    cmp rcx, global_heap_end\n"
+        << "    ja Runtime_heap_overflow\n"
+        << "    mov [heap_pointer], rcx\n"
+        << "    ret\n\n"
+        << "Runtime_heap_overflow:\n"
+        << "    mov rdi, 255\n"
+        << "    mov rax, 60\n"
+        << "    syscall\n\n";
     out << "Int_method_toString:\n"
-        << "    mov rax, rdi\n"
+        << "    mov r10, rdi\n"
+        << "    mov rdi, 56\n"
+        << "    call Runtime_alloc\n"
+        << "    mov rbx, rax\n"
+        << "    mov rax, r10\n"
         << "    sar rax, 1\n"
-        << "    mov rbx, [heap_pointer]\n"
-        << "    add qword [heap_pointer], 56\n"
         << "    mov qword [rbx], 0\n"
         << "    mov rcx, 10\n"
         << "    lea rsi, [rbx + 56]\n"

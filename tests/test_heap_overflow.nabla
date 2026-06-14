@@ -1,0 +1,6 @@
+def main(): Int = {
+    for 80 {
+        42.toString()
+    }
+    0
+}
