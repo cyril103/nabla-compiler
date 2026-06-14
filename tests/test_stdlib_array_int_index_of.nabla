@@ -1,0 +1,6 @@
+import collections.int_array
+
+def main(): Int = {
+    val xs = arrayIntRange(5).append(3)
+    xs.indexOf(3)
+}

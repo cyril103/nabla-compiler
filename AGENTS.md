@@ -72,7 +72,7 @@ Le pipeline implemente actuellement :
   `intArrayFilter` et la facade objet `ArrayInt` avec `map`, `filter`,
   `fold`, `foreach`, `exists`, `forall`, `contains`, `size`, `isEmpty` et
   `nonEmpty`, `head`, `last`, `append`, `prepend`, `reverse`, `concat`,
-  `take`, `drop` et `slice`, avec predicats booleens;
+  `take`, `drop`, `slice`, `indexOf` et `count`, avec predicats booleens;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -186,6 +186,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `ArrayInt.concat`.
 - [x] Ajouter `ArrayInt.take` et `ArrayInt.drop` avec bornes clampees.
 - [x] Ajouter `ArrayInt.slice` avec bornes clampees.
+- [x] Ajouter `ArrayInt.indexOf` et `ArrayInt.count`.
 
 ### P2 - Runtime Et Objets
 
@@ -208,7 +209,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout de `ArrayInt.slice`.
+- Prochain commit - Ajout de `ArrayInt.indexOf` et `ArrayInt.count`.
+- `faaa691` - Ajout de `ArrayInt.slice`.
 - `1bbd935` - Ajout de `ArrayInt.take` et `ArrayInt.drop`.
 - `fe4ee39` - Ajout de `ArrayInt.concat`.
 - `4b1e449` - Ajout de `ArrayInt.reverse`.
@@ -271,5 +273,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter `ArrayInt.indexOf(value: Int)` et `ArrayInt.count(predicate)` pour les
-recherches et agrégations simples.
+Ajouter `ArrayInt.min` et `ArrayInt.max`, ou introduire ensuite un type
+`OptionInt` pour eviter les sentinelles sur collections vides.

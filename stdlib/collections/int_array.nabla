@@ -120,6 +120,34 @@ def intArrayContains(xs: IntArray, expected: Int): Bool = {
     intArrayExists(xs, value => value == expected)
 }
 
+def intArrayIndexOf(xs: IntArray, expected: Int): Int = {
+    var index = 0
+    var found = 0 - 1
+    while (index < xs.length()) {
+        if found == 0 - 1 && xs.get(index) == expected {
+            found = index
+        } else {
+            found
+        }
+        index = index + 1
+    }
+    found
+}
+
+def intArrayCount(xs: IntArray, predicate: (Int) => Bool): Int = {
+    var index = 0
+    var total = 0
+    while (index < xs.length()) {
+        if predicate(xs.get(index)) {
+            total = total + 1
+        } else {
+            total
+        }
+        index = index + 1
+    }
+    total
+}
+
 def intArrayAppend(xs: IntArray, value: Int): IntArray = {
     val appended = new IntArray(xs.length() + 1)
     var index = 0
@@ -301,6 +329,14 @@ class ArrayInt(values: IntArray) {
 
     def contains(expected: Int): Bool = {
         intArrayContains(values, expected)
+    }
+
+    def indexOf(expected: Int): Int = {
+        intArrayIndexOf(values, expected)
+    }
+
+    def count(predicate: (Int) => Bool): Int = {
+        intArrayCount(values, predicate)
     }
 
     def raw(): IntArray = {
