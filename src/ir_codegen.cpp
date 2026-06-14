@@ -2,6 +2,7 @@
 #include "compiler_error.hpp"
 #include "runtime_asm.hpp"
 #include <algorithm>
+#include <cctype>
 #include <map>
 #include <ostream>
 #include <set>
@@ -37,6 +38,25 @@ std::pair<std::string, std::string> splitQualifiedMember(const std::string& name
 
 long long boxedInt(const std::string& value) {
     return (std::stoll(value) << 1) | 1;
+}
+
+std::string asmDataBytes(const std::string& value) {
+    if (value.empty()) return "";
+    std::ostringstream out;
+    for (size_t i = 0; i < value.size(); ++i) {
+        if (i > 0) out << ", ";
+        out << static_cast<int>(static_cast<unsigned char>(value[i]));
+    }
+    return out.str();
+}
+
+std::string asmSymbolPart(const std::string& value) {
+    std::string result;
+    for (char c : value) {
+        if (std::isalnum(static_cast<unsigned char>(c))) result += c;
+        else result += "_";
+    }
+    return result;
 }
 
 struct PhiInfo {
@@ -148,6 +168,9 @@ private:
                 out << "    mov rax, " << boxedInt(instruction.operands[0]) << "\n";
                 storeRegister(instruction.result, "rax");
                 break;
+            case IROpcode::StringLiteral:
+                emitStringLiteral(instruction);
+                break;
             case IROpcode::Binary:
                 emitBinary(instruction);
                 break;
@@ -230,6 +253,21 @@ private:
         } else {
             codegenError("operation IR inconnue: " + op);
         }
+        storeRegister(instruction.result, "rax");
+    }
+
+    void emitStringLiteral(const IRInstruction& instruction) {
+        const std::string label = "nabla_string_" + asmSymbolPart(function.name) + "_" +
+                                  asmSymbolPart(instruction.result);
+        out << "section .data\n";
+        if (!instruction.operands[0].empty()) {
+            out << label << "_chars: db " << asmDataBytes(instruction.operands[0]) << "\n";
+        } else {
+            out << label << "_chars: db 0\n";
+        }
+        out << label << "_obj: dq 0, " << instruction.operands[0].size() << ", " << label << "_chars\n";
+        out << "section .text\n";
+        out << "    mov rax, " << label << "_obj\n";
         storeRegister(instruction.result, "rax");
     }
 

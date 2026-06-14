@@ -1,0 +1,4 @@
+function main() -> Int
+  %0 = string "abc"
+  %1 = call_method String.length(%0)
+  return %1

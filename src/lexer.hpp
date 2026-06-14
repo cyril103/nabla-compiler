@@ -7,7 +7,7 @@
 
 enum class TokenType {
     KW_DEF, KW_CLASS, KW_NEW, KW_IMPORT, KW_IF, KW_ELSE, KW_WHILE, KW_FOR, KW_VAL, KW_VAR,
-    IDENTIFIER, LPAREN, RPAREN, COLON, EQUAL, LBRACE, RBRACE, COMMA, DOT, INT_LITERAL,
+    IDENTIFIER, LPAREN, RPAREN, COLON, EQUAL, LBRACE, RBRACE, COMMA, DOT, INT_LITERAL, STRING_LITERAL,
     PLUS, MINUS, STAR, SLASH, EQEQ, NEQ, LT, GT, LTE, GTE, EOF_TOKEN
 };
 
@@ -68,6 +68,40 @@ public:
             if (current == '>') {
                 if (nextIs('=')) add(tokens, TokenType::GTE, ">=", start, 2);
                 else add(tokens, TokenType::GT, ">", start, 1);
+                continue;
+            }
+            if (current == '"') {
+                advance();
+                std::string value;
+                while (index < src.size() && src[index] != '"') {
+                    if (src[index] == '\n') {
+                        throw CompilerError(ErrorKind::Lexer, start, "chaîne de caractères non terminée");
+                    }
+                    if (src[index] == '\\') {
+                        advance();
+                        if (index >= src.size()) {
+                            throw CompilerError(ErrorKind::Lexer, start, "chaîne de caractères non terminée");
+                        }
+                        char escaped = src[index];
+                        if (escaped == 'n') value += '\n';
+                        else if (escaped == '"') value += '"';
+                        else if (escaped == '\\') value += '\\';
+                        else {
+                            throw CompilerError(
+                                ErrorKind::Lexer, location(),
+                                "échappement inconnu '\\" + std::string(1, escaped) + "'");
+                        }
+                        advance();
+                        continue;
+                    }
+                    value += src[index];
+                    advance();
+                }
+                if (index >= src.size()) {
+                    throw CompilerError(ErrorKind::Lexer, start, "chaîne de caractères non terminée");
+                }
+                advance();
+                tokens.push_back({TokenType::STRING_LITERAL, value, start});
                 continue;
             }
 

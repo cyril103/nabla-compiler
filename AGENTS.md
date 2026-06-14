@@ -39,7 +39,7 @@ Le pipeline implemente actuellement :
 - resolution des imports avec protection contre les cycles;
 - objets avec champs de constructeur et appels de methodes parametres;
 - fonctions globales appelables avec parametres;
-- entiers immediats avec pointer tagging;
+- entiers immediats avec pointer tagging et litteraux `String`;
 - affichage console de `String` via la primitive globale `print`;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
@@ -142,7 +142,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout de la primitive console `print`.
+- Prochain commit - Ajout des litteraux `String`.
+- `92650b3` - Ajout de la primitive console `print`.
 - `0203ccb` - Ajout d'une verification de depassement du tas.
 - `48dacc8` - Stabilisation de la representation runtime de `String`.
 - `0af02cd` - Ajout de l'integration continue GitHub Actions.

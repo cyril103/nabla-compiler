@@ -58,6 +58,20 @@ std::string IntNode::lowerToIR(IRBuilder& builder) const {
     return builder.emitConstant(value);
 }
 
+StringNode::StringNode(std::string val) : value(std::move(val)) {}
+
+std::string StringNode::getType() {
+    return "String";
+}
+
+void StringNode::validateSemantics(CompilerContext& context) {
+    (void) context;
+}
+
+std::string StringNode::lowerToIR(IRBuilder& builder) const {
+    return builder.emitStringLiteral(value);
+}
+
 NewNode::NewNode(std::string clName, std::vector<std::unique_ptr<ASTNode>> arguments)
     : className(std::move(clName)), args(std::move(arguments)) {}
 

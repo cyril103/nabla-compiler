@@ -7,6 +7,7 @@
 
 enum class IROpcode {
     Constant,
+    StringLiteral,
     Binary,
     Call,
     MethodCall,
@@ -54,6 +55,7 @@ public:
         const std::string& returnType);
     void endFunction(const std::string& returnValue);
     std::string emitConstant(const std::string& value);
+    std::string emitStringLiteral(const std::string& value);
     std::string emitBinary(
         const std::string& operation, const std::string& left, const std::string& right);
     std::string emitCall(const std::string& name, const std::vector<std::string>& arguments);

@@ -40,6 +40,15 @@ public:
     std::string lowerToIR(IRBuilder& builder) const override;
 };
 
+class StringNode : public ASTNode {
+    std::string value;
+public:
+    StringNode(std::string val);
+    std::string getType() override;
+    void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
+};
+
 class NewNode : public ASTNode {
     std::string className;
     std::vector<std::unique_ptr<ASTNode>> args;

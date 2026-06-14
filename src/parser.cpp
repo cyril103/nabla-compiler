@@ -218,6 +218,10 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         Token token = consume(TokenType::INT_LITERAL, "");
         return located(std::make_unique<IntNode>(token.value), token.location);
     }
+    if (peek().type == TokenType::STRING_LITERAL) {
+        Token token = consume(TokenType::STRING_LITERAL, "");
+        return located(std::make_unique<StringNode>(token.value), token.location);
+    }
     if (peek().type == TokenType::KW_NEW) {
         Token start = consume(TokenType::KW_NEW, "");
         std::string clName = consume(TokenType::IDENTIFIER, "Nom de classe attendu après 'new'").value;

@@ -15,6 +15,19 @@ std::string join(const std::vector<std::string>& values, const std::string& sepa
 std::string qualifiedMember(const std::string& className, const std::string& memberName) {
     return className + "." + memberName;
 }
+
+std::string quotedString(const std::string& value) {
+    std::ostringstream out;
+    out << "\"";
+    for (char c : value) {
+        if (c == '\n') out << "\\n";
+        else if (c == '"') out << "\\\"";
+        else if (c == '\\') out << "\\\\";
+        else out << c;
+    }
+    out << "\"";
+    return out.str();
+}
 }
 
 std::string IRProgram::format() const {
@@ -34,6 +47,9 @@ std::string IRProgram::format() const {
             switch (instruction.opcode) {
                 case IROpcode::Constant:
                     out << "const " << instruction.operands[0];
+                    break;
+                case IROpcode::StringLiteral:
+                    out << "string " << quotedString(instruction.operands[0]);
                     break;
                 case IROpcode::Binary:
                     out << instruction.operation << " " << join(instruction.operands, ", ");
@@ -105,6 +121,12 @@ void IRBuilder::endFunction(const std::string& returnValue) {
 std::string IRBuilder::emitConstant(const std::string& value) {
     std::string result = nextValue();
     emit({IROpcode::Constant, result, "", {value}});
+    return result;
+}
+
+std::string IRBuilder::emitStringLiteral(const std::string& value) {
+    std::string result = nextValue();
+    emit({IROpcode::StringLiteral, result, "", {value}});
     return result;
 }
 
