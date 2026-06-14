@@ -288,7 +288,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Ajouter `Option[T].flatMap[U]` a la bibliotheque standard generique.
+- `7bc14aa` - Ajouter `Option[T].flatMap[U]` a la bibliotheque standard generique.
 - `3aa4fe5` - Autoriser les references de fonctions generiques specialisees comme
   valeurs fonction, par exemple `identity[Int]`.
 - `01beb83` - Inferer les arguments de type des methodes generiques, notamment
