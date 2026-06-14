@@ -611,9 +611,7 @@ std::unique_ptr<ASTNode> Parser::parseLogicalAnd() {
     while (peek().type == TokenType::AND_AND) {
         Token op = tokens[index++];
         auto right = parseComparison();
-        std::vector<std::unique_ptr<ASTNode>> arguments;
-        arguments.push_back(std::move(right));
-        expr = located(std::make_unique<MethodCallNode>(std::move(expr), op.value, std::move(arguments)), op.location);
+        expr = located(std::make_unique<LogicalNode>(op.value, std::move(expr), std::move(right)), op.location);
     }
     return expr;
 }
@@ -623,9 +621,7 @@ std::unique_ptr<ASTNode> Parser::parseLogicalOr() {
     while (peek().type == TokenType::OR_OR) {
         Token op = tokens[index++];
         auto right = parseLogicalAnd();
-        std::vector<std::unique_ptr<ASTNode>> arguments;
-        arguments.push_back(std::move(right));
-        expr = located(std::make_unique<MethodCallNode>(std::move(expr), op.value, std::move(arguments)), op.location);
+        expr = located(std::make_unique<LogicalNode>(op.value, std::move(expr), std::move(right)), op.location);
     }
     return expr;
 }

@@ -61,7 +61,8 @@ Le pipeline implemente actuellement :
 - types fonction imbriques en retour, par exemple `(Int) => ((Int) => Int)`;
 - types `Bool` et `Unit` formalises; les comparaisons retournent `Bool` et
   les conditions `if` / `while` attendent `Bool`;
-- operateurs booleens `&&`, `||` et `!`;
+- operateurs booleens `&&`, `||` et `!`, avec court-circuit pour `&&` et
+  `||`;
 - collection native `IntArray` avec `length`, `get` et `set`;
 - entiers immediats avec pointer tagging et litteraux `String`;
 - affichage console de `String` via la primitive globale `print`;
@@ -155,6 +156,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Formaliser `Unit` pour les fonctions a effet et les boucles.
 - [x] Ajouter les booleens et typer les conditions en `Bool`.
 - [x] Ajouter les operateurs booleens `&&`, `||` et `!`.
+- [x] Ajouter le court-circuit pour `&&` et `||`.
 - [ ] Ajouter les champs et methodes herites si l'heritage est retenu.
 - [ ] Valider les types des branches, boucles et operateurs de facon uniforme.
 - [x] Generaliser `IntUnaryFn` vers des types fonction canoniques.
@@ -198,7 +200,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout des operateurs booleens.
+- Prochain commit - Ajout du court-circuit booleen.
+- `842a8c1` - Ajout des operateurs booleens.
 - `d03b1f6` - Introduction du type `Bool`.
 - `8f21d03` - Ajout de predicats de collection `ArrayInt`.
 - `6f896e5` - Inference des lambdas multi-parametres.
@@ -253,4 +256,4 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter le court-circuit pour les operateurs booleens `&&` et `||`.
+Ajouter des methodes `ArrayInt.size`, `isEmpty` et `nonEmpty`.

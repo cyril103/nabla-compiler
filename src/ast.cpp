@@ -13,7 +13,7 @@ bool isArithmeticMethod(const std::string& methodName) {
 }
 
 bool isBoolBinaryMethod(const std::string& methodName) {
-    return methodName == "&&" || methodName == "||" || methodName == "==" || methodName == "!=";
+    return methodName == "==" || methodName == "!=";
 }
 
 bool isKnownBuiltinType(const std::string& type) {
@@ -106,6 +106,58 @@ std::string NotNode::lowerToIR(IRBuilder& builder) const {
     std::string loweredExpression = expression->lowerToIR(builder);
     std::string falseValue = builder.emitConstant("0");
     return builder.emitBinary("==", loweredExpression, falseValue);
+}
+
+LogicalNode::LogicalNode(
+    std::string op, std::unique_ptr<ASTNode> leftExpr, std::unique_ptr<ASTNode> rightExpr)
+    : operation(std::move(op)), left(std::move(leftExpr)), right(std::move(rightExpr)) {}
+
+std::string LogicalNode::getType() {
+    return "Bool";
+}
+
+void LogicalNode::validateSemantics(CompilerContext& context) {
+    left->validateSemantics(context);
+    right->validateSemantics(context);
+    if (left->getType() != "Bool") {
+        semanticError("l'opérateur '" + operation + "' attend une expression gauche de type Bool");
+    }
+    if (right->getType() != "Bool") {
+        throw CompilerError(
+            ErrorKind::Semantic, right->getLocation(),
+            "l'opérateur '" + operation + "' attend une expression droite de type Bool");
+    }
+}
+
+std::string LogicalNode::lowerToIR(IRBuilder& builder) const {
+    const std::string skipLabel = builder.makeLabel(operation == "&&" ? "and.false" : "or.true");
+    const std::string rightLabel = builder.makeLabel(operation == "&&" ? "and.right" : "or.right");
+    const std::string endLabel = builder.makeLabel(operation == "&&" ? "and.end" : "or.end");
+
+    std::string leftValue = left->lowerToIR(builder);
+    if (operation == "&&") {
+        builder.emitBranchIfFalse(leftValue, skipLabel);
+        builder.emitJump(rightLabel);
+        builder.emitLabel(skipLabel);
+        std::string falseValue = builder.emitConstant("0");
+        builder.emitJump(endLabel);
+        builder.emitLabel(rightLabel);
+        std::string rightValue = right->lowerToIR(builder);
+        builder.emitJump(endLabel);
+        builder.emitLabel(endLabel);
+        return builder.emitPhi(falseValue, rightValue);
+    }
+
+    builder.emitBranchIfFalse(leftValue, rightLabel);
+    builder.emitJump(skipLabel);
+    builder.emitLabel(rightLabel);
+    std::string rightValue = right->lowerToIR(builder);
+    builder.emitJump(endLabel);
+    builder.emitLabel(skipLabel);
+    std::string trueValue = builder.emitConstant("1");
+    builder.emitJump(endLabel);
+    builder.emitLabel(endLabel);
+    return builder.emitPhi(rightValue, trueValue);
 }
 
 StringNode::StringNode(std::string val) : value(std::move(val)) {}

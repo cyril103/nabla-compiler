@@ -1,0 +1,8 @@
+def main(): Int = {
+    val xs = new IntArray(0)
+    if false && xs.get(0) == 1 {
+        1
+    } else {
+        42
+    }
+}
