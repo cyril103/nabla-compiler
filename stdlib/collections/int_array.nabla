@@ -108,6 +108,28 @@ def intArrayContains(xs: IntArray, expected: Int): Bool = {
     intArrayExists(xs, value => value == expected)
 }
 
+def intArrayAppend(xs: IntArray, value: Int): IntArray = {
+    val appended = new IntArray(xs.length() + 1)
+    var index = 0
+    while (index < xs.length()) {
+        appended.set(index, xs.get(index))
+        index = index + 1
+    }
+    appended.set(xs.length(), value)
+    appended
+}
+
+def intArrayPrepend(xs: IntArray, value: Int): IntArray = {
+    val prepended = new IntArray(xs.length() + 1)
+    prepended.set(0, value)
+    var index = 0
+    while (index < xs.length()) {
+        prepended.set(index + 1, xs.get(index))
+        index = index + 1
+    }
+    prepended
+}
+
 class ArrayInt(values: IntArray) {
     def length(): Int = {
         values.length()
@@ -147,6 +169,14 @@ class ArrayInt(values: IntArray) {
 
     def filter(predicate: (Int) => Bool): ArrayInt = {
         new ArrayInt(intArrayFilter(values, predicate))
+    }
+
+    def append(value: Int): ArrayInt = {
+        new ArrayInt(intArrayAppend(values, value))
+    }
+
+    def prepend(value: Int): ArrayInt = {
+        new ArrayInt(intArrayPrepend(values, value))
     }
 
     def fold(initial: Int, combine: (Int, Int) => Int): Int = {
