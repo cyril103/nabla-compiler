@@ -1,12 +1,12 @@
 function main() -> Int
-  %0 = closure_ref lambda.0
+  %0: Closure = closure_ref lambda.0
   store %0, @combine#2
   %1 = load @combine#2
-  %2 = const 20
-  %3 = const 22
-  %4 = indirect_call %1, %2, %3
+  %2: Int = const 20
+  %3: Int = const 22
+  %4: Int = indirect_call %1, %2, %3
   return %4
 
 function lambda.0(%left: Int, %right: Int) -> Int
-  %0 = + %left, %right
+  %0: Int = + %left, %right
   return %0

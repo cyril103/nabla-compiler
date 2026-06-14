@@ -27,7 +27,7 @@ std::string asmFunctionName(const std::string& name) {
 }
 
 std::string asmLabelName(const std::string& functionName, const std::string& label) {
-    return ".L_ir_" + asmFunctionName(functionName) + "_" + asmFunctionName(label);
+    return "L_ir_" + asmFunctionName(functionName) + "_" + asmFunctionName(label);
 }
 
 std::pair<std::string, std::string> splitQualifiedMember(const std::string& name) {
@@ -61,6 +61,7 @@ std::string asmSymbolPart(const std::string& value) {
 
 struct PhiInfo {
     std::string result;
+    std::string type;
     std::vector<std::string> operands;
 };
 
@@ -127,6 +128,7 @@ private:
     CallingConvention callingConvention;
     StackFrame frame;
     std::map<std::string, std::vector<PhiInfo>> phiLabels;
+    std::map<std::string, std::string> valueTypes;
     std::map<std::string, int> emittedIncomingJumps;
     int nextIndirectCallId = 0;
 
@@ -140,7 +142,7 @@ private:
             while (next < function.instructions.size() &&
                    function.instructions[next].opcode == IROpcode::Phi) {
                 const auto& phi = function.instructions[next];
-                phis.push_back({phi.result, phi.operands});
+                phis.push_back({phi.result, phi.type, phi.operands});
                 ++next;
             }
             if (!phis.empty()) phiLabels[instruction.operands[0]] = phis;
@@ -148,10 +150,20 @@ private:
     }
 
     void collectSlots() {
-        for (const auto& parameter : function.parameters) frame.addSlot("%" + parameter.name);
+        for (const auto& parameter : function.parameters) {
+            const std::string name = "%" + parameter.name;
+            frame.addSlot(name);
+            valueTypes[name] = parameter.type;
+        }
         for (const auto& instruction : function.instructions) {
-            if (!instruction.result.empty()) frame.addSlot(instruction.result);
-            if (instruction.opcode == IROpcode::Store) frame.addSlot(instruction.operands[0]);
+            if (!instruction.result.empty()) {
+                frame.addSlot(instruction.result);
+                valueTypes[instruction.result] = instruction.type;
+            }
+            if (instruction.opcode == IROpcode::Store) {
+                frame.addSlot(instruction.operands[0]);
+                valueTypes[instruction.operands[0]] = instruction.type;
+            }
         }
     }
 
@@ -163,11 +175,16 @@ private:
         out << "    mov [rbp - " << frame.offsetFor(name) << "], " << reg << "\n";
     }
 
+    std::string typeOf(const std::string& name) const {
+        auto type = valueTypes.find(name);
+        if (type == valueTypes.end() || type->second.empty()) return "Int";
+        return type->second;
+    }
+
     void emitInstruction(const IRInstruction& instruction) {
         switch (instruction.opcode) {
             case IROpcode::Constant:
-                out << "    mov rax, " << boxedInt(instruction.operands[0]) << "\n";
-                storeRegister(instruction.result, "rax");
+                emitConstant(instruction);
                 break;
             case IROpcode::StringLiteral:
                 emitStringLiteral(instruction);
@@ -252,6 +269,14 @@ private:
     }
 
     void emitBinary(const IRInstruction& instruction) {
+        if (instruction.type == "Float" || typeOf(instruction.operands[0]) == "Float") {
+            emitFloatBinary(instruction);
+            return;
+        }
+        if (instruction.type == "Double" || typeOf(instruction.operands[0]) == "Double") {
+            emitDoubleBinary(instruction);
+            return;
+        }
         loadValue(instruction.operands[0], "rax");
         loadValue(instruction.operands[1], "rbx");
         const std::string& op = instruction.operation;
@@ -274,6 +299,102 @@ private:
             out << "    movzx rax, al\n    shl rax, 1\n    or rax, 1\n";
         } else {
             codegenError("operation IR inconnue: " + op);
+        }
+        storeRegister(instruction.result, "rax");
+    }
+
+    void emitConstant(const IRInstruction& instruction) {
+        if (instruction.type == "Double") {
+            const std::string label = "nabla_double_" + asmSymbolPart(function.name) + "_" +
+                                      asmSymbolPart(instruction.result);
+            out << "section .data\n";
+            out << label << ": dq __float64__(" << instruction.operands[0] << ")\n";
+            out << "section .text\n";
+            out << "    mov rax, [" << label << "]\n";
+            storeRegister(instruction.result, "rax");
+            return;
+        }
+        if (instruction.type == "Float") {
+            const std::string label = "nabla_float_" + asmSymbolPart(function.name) + "_" +
+                                      asmSymbolPart(instruction.result);
+            out << "section .data\n";
+            out << label << ": dd __float32__(" << instruction.operands[0] << ")\n";
+            out << "section .text\n";
+            out << "    xor rax, rax\n";
+            out << "    mov eax, [" << label << "]\n";
+            storeRegister(instruction.result, "rax");
+            return;
+        }
+        out << "    mov rax, " << boxedInt(instruction.operands[0]) << "\n";
+        storeRegister(instruction.result, "rax");
+    }
+
+    void emitFloatBinary(const IRInstruction& instruction) {
+        loadValue(instruction.operands[0], "rax");
+        loadValue(instruction.operands[1], "rbx");
+        out << "    movd xmm0, eax\n";
+        out << "    movd xmm1, ebx\n";
+        const std::string& op = instruction.operation;
+        if (op == "+") {
+            out << "    addss xmm0, xmm1\n";
+            out << "    xor rax, rax\n";
+            out << "    movd eax, xmm0\n";
+        } else if (op == "-") {
+            out << "    subss xmm0, xmm1\n";
+            out << "    xor rax, rax\n";
+            out << "    movd eax, xmm0\n";
+        } else if (op == "*") {
+            out << "    mulss xmm0, xmm1\n";
+            out << "    xor rax, rax\n";
+            out << "    movd eax, xmm0\n";
+        } else if (op == "/") {
+            out << "    divss xmm0, xmm1\n";
+            out << "    xor rax, rax\n";
+            out << "    movd eax, xmm0\n";
+        } else if (op == "==" || op == "!=" || op == "<" || op == ">" || op == "<=" || op == ">=") {
+            out << "    ucomiss xmm0, xmm1\n";
+            if (op == "==") out << "    sete al\n";
+            else if (op == "!=") out << "    setne al\n";
+            else if (op == "<") out << "    setb al\n";
+            else if (op == ">") out << "    seta al\n";
+            else if (op == "<=") out << "    setbe al\n";
+            else out << "    setae al\n";
+            out << "    movzx rax, al\n    shl rax, 1\n    or rax, 1\n";
+        } else {
+            codegenError("operation IR Float inconnue: " + op);
+        }
+        storeRegister(instruction.result, "rax");
+    }
+
+    void emitDoubleBinary(const IRInstruction& instruction) {
+        loadValue(instruction.operands[0], "rax");
+        loadValue(instruction.operands[1], "rbx");
+        out << "    movq xmm0, rax\n";
+        out << "    movq xmm1, rbx\n";
+        const std::string& op = instruction.operation;
+        if (op == "+") {
+            out << "    addsd xmm0, xmm1\n";
+            out << "    movq rax, xmm0\n";
+        } else if (op == "-") {
+            out << "    subsd xmm0, xmm1\n";
+            out << "    movq rax, xmm0\n";
+        } else if (op == "*") {
+            out << "    mulsd xmm0, xmm1\n";
+            out << "    movq rax, xmm0\n";
+        } else if (op == "/") {
+            out << "    divsd xmm0, xmm1\n";
+            out << "    movq rax, xmm0\n";
+        } else if (op == "==" || op == "!=" || op == "<" || op == ">" || op == "<=" || op == ">=") {
+            out << "    ucomisd xmm0, xmm1\n";
+            if (op == "==") out << "    sete al\n";
+            else if (op == "!=") out << "    setne al\n";
+            else if (op == "<") out << "    setb al\n";
+            else if (op == ">") out << "    seta al\n";
+            else if (op == "<=") out << "    setbe al\n";
+            else out << "    setae al\n";
+            out << "    movzx rax, al\n    shl rax, 1\n    or rax, 1\n";
+        } else {
+            codegenError("operation IR Double inconnue: " + op);
         }
         storeRegister(instruction.result, "rax");
     }

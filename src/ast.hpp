@@ -49,6 +49,24 @@ public:
     std::string lowerToIR(IRBuilder& builder) const override;
 };
 
+class DoubleNode : public ASTNode {
+    std::string value;
+public:
+    DoubleNode(std::string val);
+    std::string getType() override;
+    void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
+};
+
+class FloatNode : public ASTNode {
+    std::string value;
+public:
+    FloatNode(std::string val);
+    std::string getType() override;
+    void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
+};
+
 class BoolNode : public ASTNode {
     bool value;
 public:

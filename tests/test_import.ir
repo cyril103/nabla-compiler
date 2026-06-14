@@ -1,16 +1,16 @@
 function OutilsMath.multiplier(%this: OutilsMath) -> Int
-  %0 = const 40
+  %0: Int = const 40
   return %0
 
 function Engine.run(%this: Engine) -> Int
-  %0 = new OutilsMath()
-  %1 = call_method OutilsMath.multiplier(%0)
-  %2 = const 2
-  %3 = + %1, %2
+  %0: OutilsMath = new OutilsMath()
+  %1: Int = call_method OutilsMath.multiplier(%0)
+  %2: Int = const 2
+  %3: Int = + %1, %2
   return %3
 
 function main() -> Int
-  %0 = const 20
-  %1 = new Engine(%0)
-  %2 = call_method Engine.run(%1)
+  %0: Int = const 20
+  %1: Engine = new Engine(%0)
+  %2: Int = call_method Engine.run(%1)
   return %2

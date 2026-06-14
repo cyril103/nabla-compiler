@@ -59,12 +59,14 @@ Le pipeline implemente actuellement :
 - inference des types de parametres pour lambdas multi-parametres en argument,
   par exemple `xs.fold(0, (acc, value) => acc + value)`;
 - types fonction imbriques en retour, par exemple `(Int) => ((Int) => Int)`;
-- types `Bool`, `Unit` et `Long` formalises; les comparaisons retournent `Bool` et
-  les conditions `if` / `while` attendent `Bool`;
+- types `Bool`, `Unit`, `Long`, `Float` et `Double` formalises; les
+  comparaisons retournent `Bool` et les conditions `if` / `while` attendent
+  `Bool`;
 - operateurs booleens `&&`, `||` et `!`, avec court-circuit pour `&&` et
   `||`;
 - collection native `IntArray` avec `length`, `get` et `set`;
-- entiers immediats `Int` et `Long` avec pointer tagging et litteraux `String`;
+- entiers immediats `Int` et `Long` avec pointer tagging, litteraux decimaux
+  `Float` / `Double` portes par l'IR typee et litteraux `String`;
 - affichage console de `String` via la primitive globale `print`;
 - premier module de bibliotheque standard `io` avec `println`;
 - module de bibliotheque standard `core.option_int` avec `OptionInt`,
@@ -96,6 +98,9 @@ Limites importantes :
 
 - les fonctions globales sont limitees a 6 parametres et les methodes a 5,
   conformement a la convention d'appel actuelle;
+- `Float` et `Double` couvrent les litteraux, operations, comparaisons,
+  fonctions, lambdas et champs, mais pas encore `toString` ni les collections
+  specialisees;
 - le tas est fixe et possede une verification de depassement, mais pas de
   ramasse-miettes;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
@@ -163,7 +168,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   les types de classes.
 - [x] Ajouter `Long` avec litteraux suffixes `L`, arithmetique, comparaisons,
   fonctions, champs et `toString`.
-- [ ] Ajouter `Float` et `Double` avec litteraux decimaux, IR typee et
+- [x] Ajouter `Float` et `Double` avec litteraux decimaux, IR typee et
   generation SSE.
 - [x] Formaliser `Unit` pour les fonctions a effet et les boucles.
 - [x] Ajouter les booleens et typer les conditions en `Bool`.
@@ -230,6 +235,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `TBD` - Ajouter `Float` et `Double`, les litteraux decimaux, l'IR typee, les
+  operations SSE et les tests positifs et negatifs associes.
 - `53b77c1` - Ajouter `Long`, les litteraux `42L`, les operations numeriques Long,
   les champs/fonctions Long et `Long.toString`.
 - `a9f183d` - Ajouter `this` comme mot-clé et variable implicite dans les méthodes;

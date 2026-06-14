@@ -1,8 +1,8 @@
 function A.run(%this: A) -> Int
-  %0 = const 42
+  %0: Int = const 42
   return %0
 
 function main() -> Int
-  %0 = new A()
-  %1 = call_method A.run(%0)
+  %0: A = new A()
+  %1: Int = call_method A.run(%0)
   return %1

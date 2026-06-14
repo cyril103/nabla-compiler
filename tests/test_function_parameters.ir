@@ -1,9 +1,9 @@
 function add(%a: Int, %b: Int) -> Int
-  %0 = + %a, %b
+  %0: Int = + %a, %b
   return %0
 
 function main() -> Int
-  %0 = const 20
-  %1 = const 22
-  %2 = call add(%0, %1)
+  %0: Int = const 20
+  %1: Int = const 22
+  %2: Int = call add(%0, %1)
   return %2

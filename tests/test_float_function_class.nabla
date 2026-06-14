@@ -1,0 +1,19 @@
+class FloatBox(value: Float) {
+    def add(delta: Float): Float = {
+        value + delta
+    }
+}
+
+def identity(value: Float): Float = {
+    value
+}
+
+def main(): Int = {
+    val box = new FloatBox(40.0F)
+    val total = identity(box.add(2.5F))
+    if total == 42.5F {
+        42
+    } else {
+        1
+    }
+}

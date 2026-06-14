@@ -1,0 +1,12 @@
+def applyFloat(value: Float, transform: (Float) => Float): Float = {
+    transform(value)
+}
+
+def main(): Int = {
+    val result = applyFloat(20.5F, value => value + 21.5F)
+    if result == 42.0F {
+        42
+    } else {
+        1
+    }
+}

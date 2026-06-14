@@ -1,0 +1,19 @@
+class DoubleBox(value: Double) {
+    def add(delta: Double): Double = {
+        value + delta
+    }
+}
+
+def identity(value: Double): Double = {
+    value
+}
+
+def main(): Int = {
+    val box = new DoubleBox(40.0)
+    val total = identity(box.add(2.5))
+    if total == 42.5 {
+        42
+    } else {
+        1
+    }
+}

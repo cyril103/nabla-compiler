@@ -1,0 +1,12 @@
+def applyDouble(value: Double, transform: (Double) => Double): Double = {
+    transform(value)
+}
+
+def main(): Int = {
+    val result = applyDouble(20.5, value => value + 21.5)
+    if result == 42.0 {
+        42
+    } else {
+        1
+    }
+}

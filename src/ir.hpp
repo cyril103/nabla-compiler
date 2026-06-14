@@ -32,6 +32,7 @@ enum class IROpcode {
 struct IRInstruction {
     IROpcode opcode;
     std::string result;
+    std::string type;
     std::string operation;
     std::vector<std::string> operands;
 };
@@ -61,19 +62,23 @@ public:
         const std::string& name, const std::vector<IRParameter>& parameters,
         const std::string& returnType);
     void endFunction(const std::string& returnValue);
-    std::string emitConstant(const std::string& value);
+    std::string emitConstant(const std::string& value, const std::string& type = "Int");
     std::string emitStringLiteral(const std::string& value);
     std::string emitBinary(
-        const std::string& operation, const std::string& left, const std::string& right);
-    std::string emitCall(const std::string& name, const std::vector<std::string>& arguments);
+        const std::string& operation, const std::string& left, const std::string& right,
+        const std::string& type = "Int");
+    std::string emitCall(
+        const std::string& name, const std::vector<std::string>& arguments,
+        const std::string& type = "Int");
     std::string emitFunctionReference(
         const std::string& name, const std::vector<std::string>& captures = {});
     std::string emitClosureLoad(const std::string& closure, int captureIndex);
     std::string emitIndirectCall(
-        const std::string& callee, const std::vector<std::string>& arguments);
+        const std::string& callee, const std::vector<std::string>& arguments,
+        const std::string& type = "Int");
     std::string emitMethodCall(
         const std::string& className, const std::string& methodName, const std::string& receiver,
-        const std::vector<std::string>& arguments);
+        const std::vector<std::string>& arguments, const std::string& type = "Int");
     std::string emitNewObject(const std::string& className, const std::vector<std::string>& arguments);
     std::string emitNewIntArray(const std::string& size);
     std::string emitIntArrayLength(const std::string& receiver);
@@ -81,10 +86,11 @@ public:
     std::string emitIntArraySet(
         const std::string& receiver, const std::string& index, const std::string& value);
     std::string emitFieldLoad(
-        const SourceLocation& location, const std::string& className, const std::string& fieldName);
-    std::string emitLoad(const std::string& symbol);
-    void emitStore(const std::string& symbol, const std::string& value);
-    std::string emitPhi(const std::string& left, const std::string& right);
+        const SourceLocation& location, const std::string& className, const std::string& fieldName,
+        const std::string& type);
+    std::string emitLoad(const std::string& symbol, const std::string& type = "Int");
+    void emitStore(const std::string& symbol, const std::string& value, const std::string& type = "Int");
+    std::string emitPhi(const std::string& left, const std::string& right, const std::string& type = "Int");
     std::string makeLabel(const std::string& prefix);
     std::string makeTemporarySymbol(const std::string& prefix);
     void emitLabel(const std::string& label);

@@ -1,8 +1,8 @@
 function Formatter.text(%this: Formatter) -> String
-  %0 = const 42
-  %1 = call_method Int.toString(%0)
+  %0: Int = const 42
+  %1: String = call_method Int.toString(%0)
   return %1
 
 function main() -> Int
-  %0 = const 0
+  %0: Int = const 0
   return %0

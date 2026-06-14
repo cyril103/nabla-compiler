@@ -43,7 +43,11 @@ std::string IRProgram::format() const {
 
         for (const auto& instruction : function.instructions) {
             out << "  ";
-            if (!instruction.result.empty()) out << instruction.result << " = ";
+            if (!instruction.result.empty()) {
+                out << instruction.result;
+                if (!instruction.type.empty()) out << ": " << instruction.type;
+                out << " = ";
+            }
             switch (instruction.opcode) {
                 case IROpcode::Constant:
                     out << "const " << instruction.operands[0];
@@ -138,126 +142,129 @@ void IRBuilder::beginFunction(
 }
 
 void IRBuilder::endFunction(const std::string& returnValue) {
-    emit({IROpcode::Return, "", "", {returnValue}});
+    emit({IROpcode::Return, "", "", "", {returnValue}});
     currentFunction = nullptr;
 }
 
-std::string IRBuilder::emitConstant(const std::string& value) {
+std::string IRBuilder::emitConstant(const std::string& value, const std::string& type) {
     std::string result = nextValue();
-    emit({IROpcode::Constant, result, "", {value}});
+    emit({IROpcode::Constant, result, type, "", {value}});
     return result;
 }
 
 std::string IRBuilder::emitStringLiteral(const std::string& value) {
     std::string result = nextValue();
-    emit({IROpcode::StringLiteral, result, "", {value}});
+    emit({IROpcode::StringLiteral, result, "String", "", {value}});
     return result;
 }
 
 std::string IRBuilder::emitBinary(
-    const std::string& operation, const std::string& left, const std::string& right) {
+    const std::string& operation, const std::string& left, const std::string& right,
+    const std::string& type) {
     std::string result = nextValue();
-    emit({IROpcode::Binary, result, operation, {left, right}});
+    emit({IROpcode::Binary, result, type, operation, {left, right}});
     return result;
 }
 
-std::string IRBuilder::emitCall(const std::string& name, const std::vector<std::string>& arguments) {
+std::string IRBuilder::emitCall(
+    const std::string& name, const std::vector<std::string>& arguments, const std::string& type) {
     std::string result = nextValue();
-    emit({IROpcode::Call, result, name, arguments});
+    emit({IROpcode::Call, result, type, name, arguments});
     return result;
 }
 
 std::string IRBuilder::emitFunctionReference(
     const std::string& name, const std::vector<std::string>& captures) {
     std::string result = nextValue();
-    emit({IROpcode::FunctionReference, result, name, captures});
+    emit({IROpcode::FunctionReference, result, "Closure", name, captures});
     return result;
 }
 
 std::string IRBuilder::emitClosureLoad(const std::string& closure, int captureIndex) {
     std::string result = nextValue();
-    emit({IROpcode::ClosureLoad, result, "", {closure, std::to_string(captureIndex)}});
+    emit({IROpcode::ClosureLoad, result, "", "", {closure, std::to_string(captureIndex)}});
     return result;
 }
 
 std::string IRBuilder::emitIndirectCall(
-    const std::string& callee, const std::vector<std::string>& arguments) {
+    const std::string& callee, const std::vector<std::string>& arguments, const std::string& type) {
     std::vector<std::string> operands = {callee};
     operands.insert(operands.end(), arguments.begin(), arguments.end());
     std::string result = nextValue();
-    emit({IROpcode::IndirectCall, result, "", operands});
+    emit({IROpcode::IndirectCall, result, type, "", operands});
     return result;
 }
 
 std::string IRBuilder::emitMethodCall(
     const std::string& className, const std::string& methodName, const std::string& receiver,
-    const std::vector<std::string>& arguments) {
+    const std::vector<std::string>& arguments, const std::string& type) {
     std::vector<std::string> operands = {receiver};
     operands.insert(operands.end(), arguments.begin(), arguments.end());
     std::string result = nextValue();
-    emit({IROpcode::MethodCall, result, qualifiedMember(className, methodName), operands});
+    emit({IROpcode::MethodCall, result, type, qualifiedMember(className, methodName), operands});
     return result;
 }
 
 std::string IRBuilder::emitNewObject(
     const std::string& className, const std::vector<std::string>& arguments) {
     std::string result = nextValue();
-    emit({IROpcode::NewObject, result, className, arguments});
+    emit({IROpcode::NewObject, result, className, className, arguments});
     return result;
 }
 
 std::string IRBuilder::emitNewIntArray(const std::string& size) {
     std::string result = nextValue();
-    emit({IROpcode::NewIntArray, result, "", {size}});
+    emit({IROpcode::NewIntArray, result, "IntArray", "", {size}});
     return result;
 }
 
 std::string IRBuilder::emitIntArrayLength(const std::string& receiver) {
     std::string result = nextValue();
-    emit({IROpcode::IntArrayLength, result, "", {receiver}});
+    emit({IROpcode::IntArrayLength, result, "Int", "", {receiver}});
     return result;
 }
 
 std::string IRBuilder::emitIntArrayGet(const std::string& receiver, const std::string& index) {
     std::string result = nextValue();
-    emit({IROpcode::IntArrayGet, result, "", {receiver, index}});
+    emit({IROpcode::IntArrayGet, result, "Int", "", {receiver, index}});
     return result;
 }
 
 std::string IRBuilder::emitIntArraySet(
     const std::string& receiver, const std::string& index, const std::string& value) {
     std::string result = nextValue();
-    emit({IROpcode::IntArraySet, result, "", {receiver, index, value}});
+    emit({IROpcode::IntArraySet, result, "Unit", "", {receiver, index, value}});
     return result;
 }
 
 std::string IRBuilder::emitFieldLoad(
-    const SourceLocation& location, const std::string& className, const std::string& fieldName) {
+    const SourceLocation& location, const std::string& className, const std::string& fieldName,
+    const std::string& type) {
     if (thisValue.empty()) {
         unsupported(location, "l'accès au champ '" + qualifiedMember(className, fieldName) + "'");
     }
     std::string result = nextValue();
-    emit({IROpcode::FieldLoad, result, qualifiedMember(className, fieldName), {thisValue}});
+    emit({IROpcode::FieldLoad, result, type, qualifiedMember(className, fieldName), {thisValue}});
     return result;
 }
 
-std::string IRBuilder::emitLoad(const std::string& symbol) {
+std::string IRBuilder::emitLoad(const std::string& symbol, const std::string& type) {
     auto capture = captureValues.find(symbol);
     if (capture != captureValues.end()) return emitClosureLoad(closureValue, capture->second);
     auto parameter = parameterValues.find(symbol);
     if (parameter != parameterValues.end()) return parameter->second;
     std::string result = nextValue();
-    emit({IROpcode::Load, result, "", {symbol}});
+    emit({IROpcode::Load, result, type, "", {symbol}});
     return result;
 }
 
-void IRBuilder::emitStore(const std::string& symbol, const std::string& value) {
-    emit({IROpcode::Store, "", "", {symbol, value}});
+void IRBuilder::emitStore(const std::string& symbol, const std::string& value, const std::string& type) {
+    emit({IROpcode::Store, "", type, "", {symbol, value}});
 }
 
-std::string IRBuilder::emitPhi(const std::string& left, const std::string& right) {
+std::string IRBuilder::emitPhi(const std::string& left, const std::string& right, const std::string& type) {
     std::string result = nextValue();
-    emit({IROpcode::Phi, result, "", {left, right}});
+    emit({IROpcode::Phi, result, type, "", {left, right}});
     return result;
 }
 
@@ -270,15 +277,15 @@ std::string IRBuilder::makeTemporarySymbol(const std::string& prefix) {
 }
 
 void IRBuilder::emitLabel(const std::string& label) {
-    emit({IROpcode::Label, "", "", {label}});
+    emit({IROpcode::Label, "", "", "", {label}});
 }
 
 void IRBuilder::emitBranchIfFalse(const std::string& condition, const std::string& targetLabel) {
-    emit({IROpcode::BranchIfFalse, "", "", {condition, targetLabel}});
+    emit({IROpcode::BranchIfFalse, "", "", "", {condition, targetLabel}});
 }
 
 void IRBuilder::emitJump(const std::string& targetLabel) {
-    emit({IROpcode::Jump, "", "", {targetLabel}});
+    emit({IROpcode::Jump, "", "", "", {targetLabel}});
 }
 
 void IRBuilder::bindParameter(const std::string& symbol, const std::string& parameterName) {

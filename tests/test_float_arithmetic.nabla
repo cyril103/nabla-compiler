@@ -1,0 +1,10 @@
+def main(): Int = {
+    val left = 10.5F
+    val right = 2.0F
+    val result = (left + right) * 2.0F
+    if result == 25.0F && result > 24.0F && result <= 25.0F {
+        42
+    } else {
+        1
+    }
+}

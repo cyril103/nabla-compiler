@@ -16,13 +16,17 @@ bool isIntegerType(const std::string& type) {
     return type == "Int" || type == "Long";
 }
 
+bool isNumericType(const std::string& type) {
+    return isIntegerType(type) || type == "Float" || type == "Double";
+}
+
 bool isBoolBinaryMethod(const std::string& methodName) {
     return methodName == "==" || methodName == "!=";
 }
 
 bool isKnownBuiltinType(const std::string& type) {
-    return type == "Int" || type == "Long" || type == "Bool" || type == "String" || type == "Unit" ||
-           type == "IntArray";
+    return type == "Int" || type == "Long" || type == "Float" || type == "Double" || type == "Bool" ||
+           type == "String" || type == "Unit" || type == "IntArray";
 }
 
 void validateArguments(
@@ -91,7 +95,35 @@ void LongNode::validateSemantics(CompilerContext& context) {
 }
 
 std::string LongNode::lowerToIR(IRBuilder& builder) const {
-    return builder.emitConstant(value);
+    return builder.emitConstant(value, "Long");
+}
+
+DoubleNode::DoubleNode(std::string val) : value(std::move(val)) {}
+
+std::string DoubleNode::getType() {
+    return "Double";
+}
+
+void DoubleNode::validateSemantics(CompilerContext& context) {
+    (void) context;
+}
+
+std::string DoubleNode::lowerToIR(IRBuilder& builder) const {
+    return builder.emitConstant(value, "Double");
+}
+
+FloatNode::FloatNode(std::string val) : value(std::move(val)) {}
+
+std::string FloatNode::getType() {
+    return "Float";
+}
+
+void FloatNode::validateSemantics(CompilerContext& context) {
+    (void) context;
+}
+
+std::string FloatNode::lowerToIR(IRBuilder& builder) const {
+    return builder.emitConstant(value, "Float");
 }
 
 BoolNode::BoolNode(bool val) : value(val) {}
@@ -105,7 +137,7 @@ void BoolNode::validateSemantics(CompilerContext& context) {
 }
 
 std::string BoolNode::lowerToIR(IRBuilder& builder) const {
-    return builder.emitConstant(value ? "1" : "0");
+    return builder.emitConstant(value ? "1" : "0", "Bool");
 }
 
 NotNode::NotNode(std::unique_ptr<ASTNode> expr) : expression(std::move(expr)) {}
@@ -123,8 +155,8 @@ void NotNode::validateSemantics(CompilerContext& context) {
 
 std::string NotNode::lowerToIR(IRBuilder& builder) const {
     std::string loweredExpression = expression->lowerToIR(builder);
-    std::string falseValue = builder.emitConstant("0");
-    return builder.emitBinary("==", loweredExpression, falseValue);
+    std::string falseValue = builder.emitConstant("0", "Bool");
+    return builder.emitBinary("==", loweredExpression, falseValue, "Bool");
 }
 
 LogicalNode::LogicalNode(
@@ -158,13 +190,13 @@ std::string LogicalNode::lowerToIR(IRBuilder& builder) const {
         builder.emitBranchIfFalse(leftValue, skipLabel);
         builder.emitJump(rightLabel);
         builder.emitLabel(skipLabel);
-        std::string falseValue = builder.emitConstant("0");
+        std::string falseValue = builder.emitConstant("0", "Bool");
         builder.emitJump(endLabel);
         builder.emitLabel(rightLabel);
         std::string rightValue = right->lowerToIR(builder);
         builder.emitJump(endLabel);
         builder.emitLabel(endLabel);
-        return builder.emitPhi(falseValue, rightValue);
+        return builder.emitPhi(falseValue, rightValue, "Bool");
     }
 
     builder.emitBranchIfFalse(leftValue, rightLabel);
@@ -173,10 +205,10 @@ std::string LogicalNode::lowerToIR(IRBuilder& builder) const {
     std::string rightValue = right->lowerToIR(builder);
     builder.emitJump(endLabel);
     builder.emitLabel(skipLabel);
-    std::string trueValue = builder.emitConstant("1");
+    std::string trueValue = builder.emitConstant("1", "Bool");
     builder.emitJump(endLabel);
     builder.emitLabel(endLabel);
-    return builder.emitPhi(rightValue, trueValue);
+    return builder.emitPhi(rightValue, trueValue, "Bool");
 }
 
 StringNode::StringNode(std::string val) : value(std::move(val)) {}
@@ -250,8 +282,8 @@ MethodCallNode::MethodCallNode(
 
 std::string MethodCallNode::getType() {
     const std::string receiverType = receiver->getType();
-    if (isIntegerType(receiverType)) {
-        if (methodName == "toString") return "String";
+    if (isNumericType(receiverType)) {
+        if (isIntegerType(receiverType) && methodName == "toString") return "String";
         if (isComparisonMethod(methodName)) return "Bool";
         return receiverType;
     }
@@ -273,7 +305,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
     for (const auto& argument : arguments) argument->validateSemantics(context);
 
     const std::string receiverType = receiver->getType();
-    if (isIntegerType(receiverType)) {
+    if (isNumericType(receiverType)) {
         const bool binaryMethod = isArithmeticMethod(methodName) || isComparisonMethod(methodName);
         if (binaryMethod) {
             if (arguments.size() != 1) {
@@ -288,7 +320,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             resolvedType = isComparisonMethod(methodName) ? "Bool" : receiverType;
             return;
         }
-        if (methodName == "toString") {
+        if (isIntegerType(receiverType) && methodName == "toString") {
             if (!arguments.empty()) {
                 semanticError("la méthode " + receiverType + ".toString n'accepte aucun argument");
             }
@@ -368,13 +400,13 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
 
 std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
     const std::string receiverType = receiver->getType();
-    if (isIntegerType(receiverType)) {
-        if (methodName == "toString") {
+    if (isNumericType(receiverType)) {
+        if (isIntegerType(receiverType) && methodName == "toString") {
             if (!arguments.empty()) {
                 builder.unsupported(location, "l'appel de méthode " + receiverType + ".toString");
             }
             std::string loweredReceiver = receiver->lowerToIR(builder);
-            return builder.emitMethodCall(receiverType, "toString", loweredReceiver, {});
+            return builder.emitMethodCall(receiverType, "toString", loweredReceiver, {}, "String");
         }
         const std::vector<std::string> supported = {
             "+", "-", "*", "/", "==", "!=", "<", ">", "<=", ">="
@@ -387,14 +419,14 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         }
         std::string left = receiver->lowerToIR(builder);
         std::string right = arguments[0]->lowerToIR(builder);
-        return builder.emitBinary(methodName, left, right);
+        return builder.emitBinary(methodName, left, right, isComparisonMethod(methodName) ? "Bool" : receiverType);
     }
     if (receiverType == "String") {
         if (methodName != "length" || !arguments.empty()) {
             builder.unsupported(location, "la méthode String." + methodName);
         }
         std::string loweredReceiver = receiver->lowerToIR(builder);
-        return builder.emitMethodCall("String", "length", loweredReceiver, {});
+        return builder.emitMethodCall("String", "length", loweredReceiver, {}, "Int");
     }
     if (receiverType == "Bool") {
         if (!isBoolBinaryMethod(methodName) || arguments.size() != 1) {
@@ -402,7 +434,7 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         }
         std::string left = receiver->lowerToIR(builder);
         std::string right = arguments[0]->lowerToIR(builder);
-        return builder.emitBinary(methodName, left, right);
+        return builder.emitBinary(methodName, left, right, "Bool");
     }
     if (receiverType == "IntArray") {
         std::string loweredReceiver = receiver->lowerToIR(builder);
@@ -422,7 +454,7 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
     std::string loweredReceiver = receiver->lowerToIR(builder);
     std::vector<std::string> loweredArguments;
     for (const auto& argument : arguments) loweredArguments.push_back(argument->lowerToIR(builder));
-    return builder.emitMethodCall(receiverType, methodName, loweredReceiver, loweredArguments);
+    return builder.emitMethodCall(receiverType, methodName, loweredReceiver, loweredArguments, resolvedType);
 }
 
 FunctionCallNode::FunctionCallNode(
@@ -461,7 +493,7 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
 std::string FunctionCallNode::lowerToIR(IRBuilder& builder) const {
     std::vector<std::string> loweredArguments;
     for (const auto& argument : arguments) loweredArguments.push_back(argument->lowerToIR(builder));
-    return builder.emitCall(name, loweredArguments);
+    return builder.emitCall(name, loweredArguments, resolvedType);
 }
 
 FunctionReferenceNode::FunctionReferenceNode(
@@ -486,7 +518,7 @@ void FunctionReferenceNode::validateSemantics(CompilerContext& context) {
 std::string FunctionReferenceNode::lowerToIR(IRBuilder& builder) const {
     std::vector<std::string> loweredCaptures;
     for (const auto& capture : captures) {
-        loweredCaptures.push_back(builder.emitLoad(capture.symbolName));
+        loweredCaptures.push_back(builder.emitLoad(capture.symbolName, capture.type));
     }
     return builder.emitFunctionReference(name, loweredCaptures);
 }
@@ -529,10 +561,10 @@ void FunctionValueCallNode::validateSemantics(CompilerContext& context) {
 }
 
 std::string FunctionValueCallNode::lowerToIR(IRBuilder& builder) const {
-    std::string loweredFunction = builder.emitLoad(symbolName);
+    std::string loweredFunction = builder.emitLoad(symbolName, "");
     std::vector<std::string> loweredArguments;
     for (const auto& argument : arguments) loweredArguments.push_back(argument->lowerToIR(builder));
-    return builder.emitIndirectCall(loweredFunction, loweredArguments);
+    return builder.emitIndirectCall(loweredFunction, loweredArguments, resolvedType);
 }
 
 FieldAccessNode::FieldAccessNode(std::string clName, std::string field, std::string fieldType)
@@ -547,7 +579,7 @@ void FieldAccessNode::validateSemantics(CompilerContext& context) {
 }
 
 std::string FieldAccessNode::lowerToIR(IRBuilder& builder) const {
-    return builder.emitFieldLoad(location, className, fieldName);
+    return builder.emitFieldLoad(location, className, fieldName, type);
 }
 
 IfNode::IfNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode> thenBranch, std::unique_ptr<ASTNode> elseBranch)
@@ -582,7 +614,7 @@ std::string IfNode::lowerToIR(IRBuilder& builder) const {
     std::string elseValue = elseBranch->lowerToIR(builder);
     builder.emitJump(endLabel);
     builder.emitLabel(endLabel);
-    return builder.emitPhi(thenValue, elseValue);
+    return builder.emitPhi(thenValue, elseValue, resolvedType);
 }
 
 BlockNode::BlockNode(std::vector<std::unique_ptr<ASTNode>> exprs)
@@ -634,7 +666,7 @@ std::string WhileNode::lowerToIR(IRBuilder& builder) const {
     body->lowerToIR(builder);
     builder.emitJump(conditionLabel);
     builder.emitLabel(endLabel);
-    return builder.emitConstant("0");
+    return builder.emitConstant("0", "Unit");
 }
 
 ForNode::ForNode(std::unique_ptr<ASTNode> count, std::unique_ptr<ASTNode> body)
@@ -659,25 +691,25 @@ std::string ForNode::lowerToIR(IRBuilder& builder) const {
     std::string endLabel = builder.makeLabel("for.end");
 
     std::string initialCount = count->lowerToIR(builder);
-    builder.emitStore(counterSymbol, initialCount);
+    builder.emitStore(counterSymbol, initialCount, "Int");
     builder.emitJump(conditionLabel);
 
     builder.emitLabel(conditionLabel);
-    std::string currentCount = builder.emitLoad(counterSymbol);
-    std::string zero = builder.emitConstant("0");
-    std::string shouldContinue = builder.emitBinary(">", currentCount, zero);
+    std::string currentCount = builder.emitLoad(counterSymbol, "Int");
+    std::string zero = builder.emitConstant("0", "Int");
+    std::string shouldContinue = builder.emitBinary(">", currentCount, zero, "Bool");
     builder.emitBranchIfFalse(shouldContinue, endLabel);
 
     builder.emitLabel(bodyLabel);
     body->lowerToIR(builder);
-    std::string countBeforeDecrement = builder.emitLoad(counterSymbol);
-    std::string one = builder.emitConstant("1");
-    std::string decrementedCount = builder.emitBinary("-", countBeforeDecrement, one);
-    builder.emitStore(counterSymbol, decrementedCount);
+    std::string countBeforeDecrement = builder.emitLoad(counterSymbol, "Int");
+    std::string one = builder.emitConstant("1", "Int");
+    std::string decrementedCount = builder.emitBinary("-", countBeforeDecrement, one, "Int");
+    builder.emitStore(counterSymbol, decrementedCount, "Int");
     builder.emitJump(conditionLabel);
 
     builder.emitLabel(endLabel);
-    return builder.emitConstant("0");
+    return builder.emitConstant("0", "Unit");
 }
 
 FunctionDefNode::FunctionDefNode(
@@ -763,7 +795,7 @@ void IdentifierNode::validateSemantics(CompilerContext& context) {
 }
 
 std::string IdentifierNode::lowerToIR(IRBuilder& builder) const {
-    return builder.emitLoad(symbolName);
+    return builder.emitLoad(symbolName, type);
 }
 
 VarDeclNode::VarDeclNode(std::string n, std::string symbol, std::unique_ptr<ASTNode> init, bool mut)
@@ -780,7 +812,7 @@ void VarDeclNode::validateSemantics(CompilerContext& context) {
 
 std::string VarDeclNode::lowerToIR(IRBuilder& builder) const {
     std::string value = initializer->lowerToIR(builder);
-    builder.emitStore(symbolName, value);
+    builder.emitStore(symbolName, value, const_cast<ASTNode*>(initializer.get())->getType());
     return value;
 }
 
@@ -815,6 +847,6 @@ void AssignmentNode::validateSemantics(CompilerContext& context) {
 
 std::string AssignmentNode::lowerToIR(IRBuilder& builder) const {
     std::string loweredValue = value->lowerToIR(builder);
-    builder.emitStore(symbolName, loweredValue);
+    builder.emitStore(symbolName, loweredValue, targetType);
     return loweredValue;
 }
