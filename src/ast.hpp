@@ -11,6 +11,7 @@ public:
     virtual ~ASTNode() = default;
     virtual void generateASM(std::ofstream& out, CompilerContext& context) = 0;
     virtual std::string getType() = 0;
+    virtual void allocateLocals(int& nextOffset) { (void) nextOffset; }
 };
 
 class ProgramNode : public ASTNode {
@@ -64,6 +65,7 @@ public:
     IfNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode> thenBranch, std::unique_ptr<ASTNode> elseBranch);
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
+    void allocateLocals(int& nextOffset) override;
 };
 
 class BlockNode : public ASTNode {
@@ -72,6 +74,7 @@ public:
     BlockNode(std::vector<std::unique_ptr<ASTNode>> exprs);
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
+    void allocateLocals(int& nextOffset) override;
 };
 
 class WhileNode : public ASTNode {
@@ -81,6 +84,7 @@ public:
     WhileNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode> body);
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
+    void allocateLocals(int& nextOffset) override;
 };
 
 class ForNode : public ASTNode {
@@ -90,6 +94,7 @@ public:
     ForNode(std::unique_ptr<ASTNode> count, std::unique_ptr<ASTNode> body);
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
+    void allocateLocals(int& nextOffset) override;
 };
 
 class FunctionDefNode : public ASTNode {
@@ -104,8 +109,10 @@ public:
 
 class IdentifierNode : public ASTNode {
     std::string name;
+    std::string symbolName;
+    std::string type;
 public:
-    IdentifierNode(std::string n);
+    IdentifierNode(std::string n, std::string symbol, std::string resolvedType);
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     const std::string& getName() const { return name; }
@@ -113,19 +120,23 @@ public:
 
 class VarDeclNode : public ASTNode {
     std::string name;
+    std::string symbolName;
     std::unique_ptr<ASTNode> initializer;
     bool isMutable;
+    int offsetFromRbp = 0;
 public:
-    VarDeclNode(std::string n, std::unique_ptr<ASTNode> init, bool mut);
+    VarDeclNode(std::string n, std::string symbol, std::unique_ptr<ASTNode> init, bool mut);
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
+    void allocateLocals(int& nextOffset) override;
 };
 
 class AssignmentNode : public ASTNode {
     std::string name;
+    std::string symbolName;
     std::unique_ptr<ASTNode> value;
 public:
-    AssignmentNode(std::string n, std::unique_ptr<ASTNode> v);
+    AssignmentNode(std::string n, std::string symbol, std::unique_ptr<ASTNode> v);
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
 };

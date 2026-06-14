@@ -70,8 +70,9 @@ Le projet dispose désormais d’une cible `make all-tests` qui exécute tous le
 make all-tests
 ```
 
-Chaque test est considéré comme réussi si le résultat correspond à l’attente :
-- tests normaux (`tests/*.nabla`) doivent renvoyer `0`
-- tests d’erreur dont le nom contient `error` ou `fail` doivent renvoyer une erreur non nulle
+Chaque test normal possède un fichier voisin `<nom>.expected` contenant le code de
+sortie attendu. La cible compile puis exécute le programme et compare son code de
+sortie à cette valeur. Les tests d’erreur dont le nom contient `error` ou `fail`
+doivent échouer pendant la compilation.
 
 La cible affiche `PASS` ou `FAIL` pour chaque fichier de test et renvoie `1` si un test donne un résultat inattendu.

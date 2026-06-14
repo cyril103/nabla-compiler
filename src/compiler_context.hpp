@@ -17,5 +17,4 @@ struct CompilerContext {
         std::string type;
     };
     std::map<std::string, SymbolInfo> localVars;
-    int localStackSize = 0; // bytes allocated for locals (grows by 8)
 };

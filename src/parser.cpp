@@ -121,6 +121,7 @@ std::unique_ptr<ASTNode> Parser::parseWhileExpression() {
 }
 
 std::unique_ptr<ASTNode> Parser::parseBlock() {
+    localScopes.emplace_back();
     std::vector<std::unique_ptr<ASTNode>> expressions;
     while (peek().type != TokenType::RBRACE) {
         expressions.push_back(parseStatement());
@@ -128,6 +129,7 @@ std::unique_ptr<ASTNode> Parser::parseBlock() {
     if (expressions.empty()) {
         throw std::runtime_error("à la ligne " + std::to_string(peek().line) + " : bloc vide non autorisé");
     }
+    localScopes.pop_back();
     if (expressions.size() == 1) {
         return std::move(expressions[0]);
     }
@@ -141,7 +143,15 @@ std::unique_ptr<ASTNode> Parser::parseStatement() {
         std::string name = consume(TokenType::IDENTIFIER, "Nom de variable attendu").value;
         consume(TokenType::EQUAL, "Initialisation requise pour 'val'/'var'");
         auto init = parseExpression();
-        return std::make_unique<VarDeclNode>(name, std::move(init), isMutable);
+        if (localScopes.empty()) {
+            throw std::runtime_error("Déclaration locale hors d'un bloc: " + name);
+        }
+        if (localScopes.back().count(name)) {
+            throw std::runtime_error("Variable déjà déclarée dans cette portée: " + name);
+        }
+        std::string symbolName = name + "#" + std::to_string(nextSymbolId++);
+        localScopes.back()[name] = {symbolName, init->getType()};
+        return std::make_unique<VarDeclNode>(name, symbolName, std::move(init), isMutable);
     }
     if (peek().type == TokenType::IDENTIFIER) {
         // possible assignment
@@ -150,7 +160,9 @@ std::unique_ptr<ASTNode> Parser::parseStatement() {
             std::string name = consume(TokenType::IDENTIFIER, "").value;
             consume(TokenType::EQUAL, "");
             auto rhs = parseExpression();
-            return std::make_unique<AssignmentNode>(name, std::move(rhs));
+            const ParsedSymbol* symbol = findLocal(name);
+            return std::make_unique<AssignmentNode>(
+                name, symbol ? symbol->internalName : name, std::move(rhs));
         }
     }
     return parseExpression();
@@ -204,10 +216,13 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
     }
     if (peek().type == TokenType::IDENTIFIER) {
         std::string name = consume(TokenType::IDENTIFIER, "").value;
+        if (const ParsedSymbol* symbol = findLocal(name)) {
+            return std::make_unique<IdentifierNode>(name, symbol->internalName, symbol->type);
+        }
         if (!currentParsingClass.empty() && context.classLayouts[currentParsingClass].count(name)) {
             return std::make_unique<FieldAccessNode>(currentParsingClass, name);
         }
-        return std::make_unique<IdentifierNode>(name);
+        return std::make_unique<IdentifierNode>(name, name, "Int");
     }
     throw std::runtime_error("à la ligne " + std::to_string(peek().line) + " : expression primaire invalide '" + peek().value + "'");
 }
@@ -271,4 +286,12 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
     auto body = parseBlock();
     consume(TokenType::RBRACE, "");
     return std::make_unique<FunctionDefNode>(clName, name, std::move(body));
+}
+
+const Parser::ParsedSymbol* Parser::findLocal(const std::string& name) const {
+    for (auto scope = localScopes.rbegin(); scope != localScopes.rend(); ++scope) {
+        auto symbol = scope->find(name);
+        if (symbol != scope->end()) return &symbol->second;
+    }
+    return nullptr;
 }

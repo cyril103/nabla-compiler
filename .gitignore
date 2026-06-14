@@ -7,7 +7,7 @@ nablac
 *_tmp.o
 
 # Legacy test executables (in case some remain in repo root)
-test_*
+/test_*
 
 # macOS
 .DS_Store

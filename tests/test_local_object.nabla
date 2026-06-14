@@ -1,0 +1,10 @@
+class A() {
+    def run(): Int = {
+        42
+    }
+}
+
+def main(): Int = {
+    val a = new A()
+    a.run()
+}

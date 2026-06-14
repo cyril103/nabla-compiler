@@ -55,6 +55,11 @@ void IfNode::generateASM(std::ofstream& out, CompilerContext& context) {
     out << ".L_endif_" << labelId << ":\n";
 }
 
+void IfNode::allocateLocals(int& nextOffset) {
+    thenBranch->allocateLocals(nextOffset);
+    elseBranch->allocateLocals(nextOffset);
+}
+
 BlockNode::BlockNode(std::vector<std::unique_ptr<ASTNode>> exprs)
     : expressions(std::move(exprs)) {}
 
@@ -65,6 +70,12 @@ std::string BlockNode::getType() {
 void BlockNode::generateASM(std::ofstream& out, CompilerContext& context) {
     for (const auto& expr : expressions) {
         if (expr) expr->generateASM(out, context);
+    }
+}
+
+void BlockNode::allocateLocals(int& nextOffset) {
+    for (const auto& expr : expressions) {
+        if (expr) expr->allocateLocals(nextOffset);
     }
 }
 
@@ -85,6 +96,10 @@ void WhileNode::generateASM(std::ofstream& out, CompilerContext& context) {
     out << "    jmp .L_while_cond_" << labelId << "\n";
     out << ".L_while_end_" << labelId << ":\n";
     out << "    mov rax, 1\n";
+}
+
+void WhileNode::allocateLocals(int& nextOffset) {
+    body->allocateLocals(nextOffset);
 }
 
 ForNode::ForNode(std::unique_ptr<ASTNode> count, std::unique_ptr<ASTNode> body)
@@ -112,6 +127,10 @@ void ForNode::generateASM(std::ofstream& out, CompilerContext& context) {
     out << "    mov rax, 1\n";
 }
 
+void ForNode::allocateLocals(int& nextOffset) {
+    body->allocateLocals(nextOffset);
+}
+
 FunctionDefNode::FunctionDefNode(std::string clName, std::string name, std::unique_ptr<ASTNode> body)
     : className(std::move(clName)), name(std::move(name)), body(std::move(body)) {}
 
@@ -127,14 +146,18 @@ void IntNode::generateASM(std::ofstream& out, CompilerContext& context) {
 
 void NewNode::generateASM(std::ofstream& out, CompilerContext& context) {
     out << "    ; --- Instanciation new " << className << " ---\n";
-    out << "    mov rbx, [heap_pointer]\n    push rbx\n    mov qword [rbx], 0\n";
+    int objectSize = 8 + static_cast<int>(args.size()) * 8;
+    out << "    mov rbx, [heap_pointer]\n"
+        << "    add qword [heap_pointer], " << objectSize << "\n"
+        << "    push rbx\n"
+        << "    mov qword [rbx], 0\n";
     int offset = 8;
     for (const auto& arg : args) {
         arg->generateASM(out, context);
-        out << "    mov rbx, [heap_pointer]\n    mov [rbx + " << offset << "], rax\n";
+        out << "    mov rbx, [rsp]\n    mov [rbx + " << offset << "], rax\n";
         offset += 8;
     }
-    out << "    add qword [heap_pointer], " << offset << "\n    pop rax\n";
+    out << "    pop rax\n";
 }
 
 void MethodCallNode::generateASM(std::ofstream& out, CompilerContext& context) {
@@ -190,21 +213,23 @@ void FunctionDefNode::generateASM(std::ofstream& out, CompilerContext& context) 
     if (!className.empty()) out << className << "_method_" << name << ":\n";
     else out << name << ":\n";
     out << "    push rbp\n    mov rbp, rsp\n";
-    // reset local symbol table for the function
     context.localVars.clear();
-    context.localStackSize = 0;
+    int localStackSize = 0;
+    if (body) body->allocateLocals(localStackSize);
+    if (localStackSize > 0) out << "    sub rsp, " << localStackSize << "\n";
     if (body) body->generateASM(out, context);
     out << "    mov rsp, rbp\n    pop rbp\n    ret\n\n";
 }
 
-IdentifierNode::IdentifierNode(std::string n) : name(std::move(n)) {}
+IdentifierNode::IdentifierNode(std::string n, std::string symbol, std::string resolvedType)
+    : name(std::move(n)), symbolName(std::move(symbol)), type(std::move(resolvedType)) {}
 
 std::string IdentifierNode::getType() {
-    return "Int";
+    return type;
 }
 
 void IdentifierNode::generateASM(std::ofstream& out, CompilerContext& context) {
-    auto it = context.localVars.find(name);
+    auto it = context.localVars.find(symbolName);
     if (it == context.localVars.end()) {
         throw std::runtime_error("Variable non déclarée: " + name);
     }
@@ -212,8 +237,8 @@ void IdentifierNode::generateASM(std::ofstream& out, CompilerContext& context) {
     out << "    mov rax, [rbp - " << offset << "]\n";
 }
 
-VarDeclNode::VarDeclNode(std::string n, std::unique_ptr<ASTNode> init, bool mut)
-    : name(std::move(n)), initializer(std::move(init)), isMutable(mut) {}
+VarDeclNode::VarDeclNode(std::string n, std::string symbol, std::unique_ptr<ASTNode> init, bool mut)
+    : name(std::move(n)), symbolName(std::move(symbol)), initializer(std::move(init)), isMutable(mut) {}
 
 std::string VarDeclNode::getType() {
     return initializer ? initializer->getType() : "Unit";
@@ -221,25 +246,25 @@ std::string VarDeclNode::getType() {
 
 void VarDeclNode::generateASM(std::ofstream& out, CompilerContext& context) {
     if (!initializer) throw std::runtime_error("Initialisateur requis pour la declaration de variable: " + name);
-    // generate initializer into rax
     initializer->generateASM(out, context);
-    // allocate 8 bytes on stack
-    out << "    sub rsp, 8\n";
-    context.localStackSize += 8;
-    int offset = context.localStackSize;
-    context.localVars[name] = { offset, isMutable, initializer->getType() };
-    out << "    mov [rbp - " << offset << "], rax\n";
+    context.localVars[symbolName] = { offsetFromRbp, isMutable, initializer->getType() };
+    out << "    mov [rbp - " << offsetFromRbp << "], rax\n";
 }
 
-AssignmentNode::AssignmentNode(std::string n, std::unique_ptr<ASTNode> v)
-    : name(std::move(n)), value(std::move(v)) {}
+void VarDeclNode::allocateLocals(int& nextOffset) {
+    nextOffset += 8;
+    offsetFromRbp = nextOffset;
+}
+
+AssignmentNode::AssignmentNode(std::string n, std::string symbol, std::unique_ptr<ASTNode> v)
+    : name(std::move(n)), symbolName(std::move(symbol)), value(std::move(v)) {}
 
 std::string AssignmentNode::getType() {
     return value ? value->getType() : "Unit";
 }
 
 void AssignmentNode::generateASM(std::ofstream& out, CompilerContext& context) {
-    auto it = context.localVars.find(name);
+    auto it = context.localVars.find(symbolName);
     if (it == context.localVars.end()) throw std::runtime_error("Affectation sur variable non déclarée: " + name);
     if (!it->second.isMutable) throw std::runtime_error("Impossible d'affecter à une 'val' immuable: " + name);
     value->generateASM(out, context);

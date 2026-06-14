@@ -1,0 +1,15 @@
+class A() {
+    def run(): Int = {
+        1
+    }
+}
+
+class Pair(a: Int, b: Int) {
+    def run(): Int = {
+        b
+    }
+}
+
+def main(): Int = {
+    (new Pair(new A(), 42)).run()
+}

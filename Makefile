@@ -29,29 +29,38 @@ all-tests: nablac
 	for testfile in tests/*.nabla; do \
 		echo "===== $$testfile ====="; \
 		NABLA_BUILD_DIR=$(BUILD_DIR) $(BUILD_DIR)/nablac --keep-temp "$$testfile" >/dev/null 2>&1; \
-		status=$$?; \
+		compile_status=$$?; \
 		case "$$testfile" in \
 			*error*|*fail*) \
-				expected=1; \
+				if [ $$compile_status -ne 0 ]; then \
+					echo "${GREEN}PASS (expected compilation failure):${NC} $$testfile"; \
+				else \
+					echo "${RED}FAIL:${NC} $$testfile (expected compilation failure but succeeded)"; \
+					all_status=1; \
+				fi; \
 				;; \
 			*) \
-				expected=0; \
+				expected_file=$${testfile%.nabla}.expected; \
+				if [ $$compile_status -ne 0 ]; then \
+					echo "${RED}FAIL:${NC} $$testfile (compilation status=$$compile_status)"; \
+					all_status=1; \
+				elif [ ! -f "$$expected_file" ]; then \
+					echo "${RED}FAIL:${NC} $$testfile (missing $$expected_file)"; \
+					all_status=1; \
+				else \
+					executable=$(BUILD_DIR)/$$(basename "$$testfile" .nabla); \
+					"$$executable" >/dev/null 2>&1; \
+					run_status=$$?; \
+					expected=$$(tr -d '[:space:]' < "$$expected_file"); \
+					if [ "$$run_status" = "$$expected" ]; then \
+						echo "${GREEN}PASS:${NC} $$testfile (exit=$$run_status)"; \
+					else \
+						echo "${RED}FAIL:${NC} $$testfile (exit=$$run_status, expected=$$expected)"; \
+						all_status=1; \
+					fi; \
+				fi; \
 				;; \
 		esac; \
-		if [ $$status -eq $$expected ]; then \
-			if [ $$expected -eq 0 ]; then \
-				echo "${GREEN}PASS:${NC} $$testfile"; \
-			else \
-				echo "${GREEN}PASS (expected failure):${NC} $$testfile"; \
-			fi; \
-		else \
-			if [ $$expected -eq 0 ]; then \
-				echo "${RED}FAIL:${NC} $$testfile (status=$$status)"; \
-			else \
-				echo "${RED}FAIL:${NC} $$testfile (expected failure but succeeded)"; \
-			fi; \
-			all_status=1; \
-		fi; \
 		echo; \
 	done; \
 	exit $$all_status

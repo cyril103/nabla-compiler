@@ -3,6 +3,7 @@
 #include "lexer.hpp"
 #include "ast.hpp"
 #include <filesystem>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -18,6 +19,12 @@ private:
     CompilerContext& context;
     std::filesystem::path currentFile;
     std::string currentParsingClass;
+    struct ParsedSymbol {
+        std::string internalName;
+        std::string type;
+    };
+    std::vector<std::map<std::string, ParsedSymbol>> localScopes;
+    int nextSymbolId = 0;
 
     Token peek() const;
     Token consume(TokenType expected, const std::string& err);
@@ -36,4 +43,5 @@ private:
     std::unique_ptr<ASTNode> parseBlock();
     std::unique_ptr<ASTNode> parseStatement();
     std::unique_ptr<ASTNode> parseFunctionDef(std::string clName);
+    const ParsedSymbol* findLocal(const std::string& name) const;
 };
