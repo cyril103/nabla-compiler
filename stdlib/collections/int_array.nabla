@@ -144,6 +144,15 @@ def intArrayIndexOf(xs: IntArray, expected: Int): Int = {
     found
 }
 
+def intArrayIndexOfOption(xs: IntArray, expected: Int): OptionInt = {
+    val index = intArrayIndexOf(xs, expected)
+    if index == 0 - 1 {
+        optionIntNone()
+    } else {
+        optionIntSome(index)
+    }
+}
+
 def intArrayCount(xs: IntArray, predicate: (Int) => Bool): Int = {
     var index = 0
     var total = 0
@@ -407,6 +416,10 @@ class ArrayInt(values: IntArray) {
 
     def indexOf(expected: Int): Int = {
         intArrayIndexOf(values, expected)
+    }
+
+    def indexOfOption(expected: Int): OptionInt = {
+        intArrayIndexOfOption(values, expected)
     }
 
     def count(predicate: (Int) => Bool): Int = {

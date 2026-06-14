@@ -74,7 +74,7 @@ Le pipeline implemente actuellement :
   `intArrayFilter` et la facade objet `ArrayInt` avec `map`, `filter`,
   `fold`, `foreach`, `exists`, `forall`, `contains`, `size`, `isEmpty` et
   `nonEmpty`, `head`, `last`, `append`, `prepend`, `reverse`, `concat`,
-  `take`, `drop`, `slice`, `indexOf`, `count`, `find`, `min`, `max`,
+  `take`, `drop`, `slice`, `indexOf`, `indexOfOption`, `count`, `find`, `min`, `max`,
   `getOption`, `headOption` et `lastOption`, avec predicats booleens;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
@@ -190,6 +190,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `ArrayInt.take` et `ArrayInt.drop` avec bornes clampees.
 - [x] Ajouter `ArrayInt.slice` avec bornes clampees.
 - [x] Ajouter `ArrayInt.indexOf` et `ArrayInt.count`.
+- [x] Ajouter `ArrayInt.indexOfOption`.
 - [x] Ajouter `OptionInt` puis `ArrayInt.min` et `ArrayInt.max`.
 - [x] Ajouter `ArrayInt.getOption`, `headOption`, `lastOption` et `find`.
 
@@ -214,7 +215,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout des acces optionnels et de `ArrayInt.find`.
+- Prochain commit - Ajouter `OptionInt` combinators (`map`, `filter`, `orElse`).
+- `7057c14` - Ajouter les accès optionnels et `ArrayInt.find` avec `OptionInt`.
 - `813100b` - Ajout de `OptionInt` et des bornes `ArrayInt`.
 - `3b6760f` - Ajout de `ArrayInt.indexOf` et `ArrayInt.count`.
 - `faaa691` - Ajout de `ArrayInt.slice`.
@@ -280,5 +282,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter `ArrayInt.indexOfOption` ou commencer une version plus generale
-d'`Option` lorsque les generiques seront disponibles.
+Ajouter `OptionInt.map`, `OptionInt.filter` et `OptionInt.orElse` pour
+approfondir l'API fonctionnelle des options.
