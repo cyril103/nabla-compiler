@@ -1,0 +1,5 @@
+def main(): Int = {
+    var value = 20
+    value = value + 22
+    value
+}

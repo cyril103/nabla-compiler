@@ -1,4 +1,6 @@
 #include "ast.hpp"
+#include "ir.hpp"
+#include <algorithm>
 
 namespace {
 const std::vector<std::string> GLOBAL_ARGUMENT_REGISTERS = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
@@ -40,6 +42,10 @@ void popArguments(std::ofstream& out, const std::vector<std::string>& registers,
 }
 }
 
+std::string ASTNode::lowerToIR(IRBuilder& builder) const {
+    builder.unsupported(location, "ce nœud AST");
+}
+
 std::string ProgramNode::getType() {
     return "Unit";
 }
@@ -54,6 +60,13 @@ void ProgramNode::validateSemantics(CompilerContext& context) {
     }
 }
 
+std::string ProgramNode::lowerToIR(IRBuilder& builder) const {
+    for (const auto& element : elements) {
+        if (element) element->lowerToIR(builder);
+    }
+    return "";
+}
+
 IntNode::IntNode(std::string val) : value(std::move(val)) {}
 
 std::string IntNode::getType() {
@@ -62,6 +75,10 @@ std::string IntNode::getType() {
 
 void IntNode::validateSemantics(CompilerContext& context) {
     (void) context;
+}
+
+std::string IntNode::lowerToIR(IRBuilder& builder) const {
+    return builder.emitConstant(value);
 }
 
 NewNode::NewNode(std::string clName, std::vector<std::unique_ptr<ASTNode>> arguments)
@@ -143,6 +160,21 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
     resolvedType = methodIt->second.returnType;
 }
 
+std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
+    if (receiver->getType() != "Int" || arguments.size() != 1) {
+        builder.unsupported(location, "l'appel de méthode '" + methodName + "'");
+    }
+    const std::vector<std::string> supported = {
+        "+", "-", "*", "/", "==", "!=", "<", ">", "<=", ">="
+    };
+    if (std::find(supported.begin(), supported.end(), methodName) == supported.end()) {
+        builder.unsupported(location, "la méthode Int." + methodName);
+    }
+    std::string left = receiver->lowerToIR(builder);
+    std::string right = arguments[0]->lowerToIR(builder);
+    return builder.emitBinary(methodName, left, right);
+}
+
 FunctionCallNode::FunctionCallNode(std::string functionName, std::vector<std::unique_ptr<ASTNode>> args)
     : name(std::move(functionName)), arguments(std::move(args)) {}
 
@@ -158,6 +190,12 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
     }
     validateArguments(name, arguments, function->second.parameters, location);
     resolvedType = function->second.returnType;
+}
+
+std::string FunctionCallNode::lowerToIR(IRBuilder& builder) const {
+    std::vector<std::string> loweredArguments;
+    for (const auto& argument : arguments) loweredArguments.push_back(argument->lowerToIR(builder));
+    return builder.emitCall(name, loweredArguments);
 }
 
 FieldAccessNode::FieldAccessNode(std::string clName, std::string field, std::string fieldType)
@@ -231,6 +269,14 @@ void BlockNode::validateSemantics(CompilerContext& context) {
     for (const auto& expr : expressions) {
         if (expr) expr->validateSemantics(context);
     }
+}
+
+std::string BlockNode::lowerToIR(IRBuilder& builder) const {
+    std::string result;
+    for (const auto& expression : expressions) {
+        if (expression) result = expression->lowerToIR(builder);
+    }
+    return result;
 }
 
 WhileNode::WhileNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode> body)
@@ -328,6 +374,21 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
             "Type de retour invalide pour '" + name + "': '" + returnType +
             "' attendu, '" + body->getType() + "' reçu");
     }
+}
+
+std::string FunctionDefNode::lowerToIR(IRBuilder& builder) const {
+    if (!className.empty()) builder.unsupported(location, "les méthodes");
+    std::vector<IRParameter> irParameters;
+    for (const auto& parameter : parameters) {
+        irParameters.push_back({parameter.name, parameter.type});
+    }
+    builder.beginFunction(name, irParameters, returnType);
+    for (const auto& parameter : parameters) {
+        builder.bindParameter(parameter.symbolName, parameter.name);
+    }
+    std::string result = body->lowerToIR(builder);
+    builder.endFunction(result);
+    return "";
 }
 
 void IntNode::generateASM(std::ofstream& out, CompilerContext& context) {
@@ -465,6 +526,10 @@ void IdentifierNode::validateSemantics(CompilerContext& context) {
     type = symbol->second;
 }
 
+std::string IdentifierNode::lowerToIR(IRBuilder& builder) const {
+    return builder.emitLoad(symbolName);
+}
+
 VarDeclNode::VarDeclNode(std::string n, std::string symbol, std::unique_ptr<ASTNode> init, bool mut)
     : name(std::move(n)), symbolName(std::move(symbol)), initializer(std::move(init)), isMutable(mut) {}
 
@@ -487,6 +552,12 @@ void VarDeclNode::allocateLocals(int& nextOffset) {
 void VarDeclNode::validateSemantics(CompilerContext& context) {
     initializer->validateSemantics(context);
     context.semanticSymbolTypes[symbolName] = initializer->getType();
+}
+
+std::string VarDeclNode::lowerToIR(IRBuilder& builder) const {
+    std::string value = initializer->lowerToIR(builder);
+    builder.emitStore(symbolName, value);
+    return value;
 }
 
 AssignmentNode::AssignmentNode(
@@ -525,4 +596,10 @@ void AssignmentNode::validateSemantics(CompilerContext& context) {
             "Affectation invalide pour '" + name + "': type '" + targetType +
             "' attendu, '" + value->getType() + "' reçu");
     }
+}
+
+std::string AssignmentNode::lowerToIR(IRBuilder& builder) const {
+    std::string loweredValue = value->lowerToIR(builder);
+    builder.emitStore(symbolName, loweredValue);
+    return loweredValue;
 }

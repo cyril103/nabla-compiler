@@ -3,6 +3,7 @@
 #include "ast.hpp"
 #include "parser.hpp"
 #include "semantic_analyzer.hpp"
+#include "ir.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -24,7 +25,7 @@ static std::filesystem::path findProjectRoot(const std::filesystem::path& start)
 }
 
 static void printUsage(const char* programName) {
-    std::cerr << "Usage: " << programName << " [--keep-asm|--keep-temp] <fichier.nabla>\n";
+    std::cerr << "Usage: " << programName << " [--keep-asm|--keep-temp|--emit-ir] <fichier.nabla>\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -32,6 +33,7 @@ int main(int argc, char* argv[]) {
 
     bool keepAsm = false;
     bool keepTemp = false;
+    bool emitIR = false;
     std::string sourcePath;
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
@@ -40,6 +42,8 @@ int main(int argc, char* argv[]) {
         } else if (arg == "--keep-temp") {
             keepAsm = true;
             keepTemp = true;
+        } else if (arg == "--emit-ir") {
+            emitIR = true;
         } else if (arg == "--help" || arg == "-h") {
             printUsage(argv[0]);
             return 0;
@@ -83,6 +87,11 @@ int main(int argc, char* argv[]) {
         auto globalAST = parser.parseProgram();
         SemanticAnalyzer semanticAnalyzer(context);
         semanticAnalyzer.analyze(*globalAST);
+        if (emitIR) {
+            IRBuilder irBuilder;
+            std::cout << irBuilder.build(*globalAST).format();
+            return 0;
+        }
 
         std::ofstream asmFile(asmFilename);
         globalAST->generateASM(asmFile, context);

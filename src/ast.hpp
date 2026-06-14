@@ -6,6 +6,8 @@
 #include <fstream>
 #include <map>
 
+class IRBuilder;
+
 class ASTNode {
 public:
     virtual ~ASTNode() = default;
@@ -13,6 +15,7 @@ public:
     virtual std::string getType() = 0;
     virtual void allocateLocals(int& nextOffset) { (void) nextOffset; }
     virtual void validateSemantics(CompilerContext& context) = 0;
+    virtual std::string lowerToIR(IRBuilder& builder) const;
     void setLocation(SourceLocation sourceLocation) { location = std::move(sourceLocation); }
     const SourceLocation& getLocation() const { return location; }
 
@@ -32,6 +35,7 @@ public:
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
 };
 
 class IntNode : public ASTNode {
@@ -41,6 +45,7 @@ public:
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
 };
 
 class NewNode : public ASTNode {
@@ -63,6 +68,7 @@ public:
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
 };
 
 class FunctionCallNode : public ASTNode {
@@ -74,6 +80,7 @@ public:
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
 };
 
 class FieldAccessNode : public ASTNode {
@@ -108,6 +115,7 @@ public:
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void allocateLocals(int& nextOffset) override;
     void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
 };
 
 class WhileNode : public ASTNode {
@@ -154,6 +162,7 @@ public:
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
 };
 
 class IdentifierNode : public ASTNode {
@@ -165,6 +174,7 @@ public:
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
     const std::string& getName() const { return name; }
 };
 
@@ -180,6 +190,7 @@ public:
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void allocateLocals(int& nextOffset) override;
     void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
 };
 
 class AssignmentNode : public ASTNode {
@@ -193,4 +204,5 @@ public:
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
 };

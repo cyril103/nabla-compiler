@@ -45,6 +45,8 @@ Le pipeline implemente actuellement :
 - analyse semantique des classes, constructeurs, methodes, types de retour et
   affectations;
 - diagnostics uniformes avec fichier, ligne, colonne et phase du compilateur;
+- IR textuelle pour les fonctions globales, entiers, variables, affectations,
+  operations binaires et appels de fonctions globales;
 - generation directe d'assembleur x86-64;
 - tests de compilation et d'execution via `make all-tests`.
 
@@ -52,7 +54,8 @@ Limites importantes :
 
 - les fonctions globales sont limitees a 6 parametres et les methodes a 5,
   conformement a la convention d'appel actuelle;
-- il n'existe pas encore de representation intermediaire entre AST et ASM;
+- l'IR ne couvre pas encore les objets, methodes, branchements et boucles;
+- l'assembleur est encore genere directement depuis l'AST;
 - le tas est fixe et ne possede ni verification de depassement ni ramasse-miettes;
 - les binaires historiques sous `build/` sont encore suivis par Git.
 
@@ -75,7 +78,7 @@ Executer avant chaque commit :
 ```bash
 make all-tests
 g++ -std=c++17 -Wall -Wextra -Werror \
-  src/main.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp \
+  src/main.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp src/ir.cpp \
   -o /tmp/nablac-werror
 git diff --check
 ```
@@ -102,8 +105,8 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ### P1 - Representation Intermediaire
 
-- [ ] Definir une IR minimale independante de l'AST.
-- [ ] Abaisser l'AST semantiquement valide vers l'IR.
+- [x] Definir une IR minimale independante de l'AST.
+- [ ] Abaisser tout l'AST semantiquement valide vers l'IR.
 - [ ] Deplacer l'allocation de pile et les conventions d'appel vers le backend.
 - [ ] Generer l'assembleur uniquement depuis l'IR.
 
@@ -130,8 +133,9 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout des diagnostics sources uniformes, de `CompilerError`
-  et des tests de diagnostics exacts.
+- Prochain commit - Ajout de l'IR minimale, de `--emit-ir` et des snapshots IR.
+- `8b7be03` - Ajout des diagnostics sources uniformes, de `CompilerError` et des
+  tests de diagnostics exacts.
 - `1062f09` - Ajout des parametres de fonctions et methodes, appels globaux,
   validation des arguments et convention d'appel x86-64.
 - `93b942f` - Ajout de `AGENTS.md`, des conventions de contribution et de la
@@ -143,5 +147,5 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Introduire une representation intermediaire minimale entre l'AST semantiquement
-valide et la generation d'assembleur.
+Etendre l'IR avec des blocs de base, des branchements et des boucles, puis
+migrer leur generation assembleur vers le backend IR.

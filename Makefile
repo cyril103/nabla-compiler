@@ -6,9 +6,9 @@ BIN := $(BUILD_DIR)/$(notdir $(basename $(SRC)))
 
 all: nablac
 
-nablac: src/main.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp src/lexer.hpp src/ast.hpp src/parser.hpp src/semantic_analyzer.hpp src/compiler_context.hpp src/compiler_error.hpp
+nablac: src/main.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp src/ir.cpp src/lexer.hpp src/ast.hpp src/parser.hpp src/semantic_analyzer.hpp src/ir.hpp src/compiler_context.hpp src/compiler_error.hpp
 	@mkdir -p $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) src/main.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp -o $(BUILD_DIR)/nablac
+	$(CXX) $(CXXFLAGS) src/main.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp src/ir.cpp -o $(BUILD_DIR)/nablac
 
 test: nablac
 	@mkdir -p $(BUILD_DIR)
@@ -71,6 +71,20 @@ all-tests: nablac
 					else \
 						echo "${RED}FAIL:${NC} $$testfile (exit=$$run_status, expected=$$expected)"; \
 						all_status=1; \
+					fi; \
+					expected_ir=$${testfile%.nabla}.ir; \
+					if [ -f "$$expected_ir" ]; then \
+						actual_ir=$(BUILD_DIR)/$$(basename "$$testfile" .nabla).ir; \
+						NABLA_BUILD_DIR=$(BUILD_DIR) $(BUILD_DIR)/nablac --emit-ir "$$testfile" >"$$actual_ir" 2>&1; \
+						ir_status=$$?; \
+						if [ $$ir_status -eq 0 ] && cmp -s "$$actual_ir" "$$expected_ir"; then \
+							echo "${GREEN}PASS (IR snapshot):${NC} $$testfile"; \
+						else \
+							echo "${RED}FAIL:${NC} $$testfile (IR snapshot mismatch)"; \
+							diff -u "$$expected_ir" "$$actual_ir" || true; \
+							all_status=1; \
+						fi; \
+						rm -f "$$actual_ir"; \
 					fi; \
 				fi; \
 				;; \

@@ -57,6 +57,23 @@ Le projet se compile avec GNU C++17 et le `Makefile` expose des cibles pratiques
 - `make debug` : exécute `nablac --keep-asm` sur la source par défaut, conserve le fichier assembleur `<basename>_tmp.asm`, puis lance le binaire
 - `make clean` : supprime `nablac` et le binaire généré par le test
 
+Le compilateur peut aussi afficher sa représentation intermédiaire textuelle :
+
+```bash
+build/nablac --emit-ir tests/test_function_parameters.nabla
+```
+
+```text
+function add(%a: Int, %b: Int) -> Int
+  %0 = + %a, %b
+  return %0
+```
+
+Cette première IR couvre les fonctions globales, entiers, variables,
+affectations, opérations binaires et appels de fonctions globales. Les objets,
+méthodes et constructions de contrôle restent pour le moment générés
+directement depuis l'AST.
+
 ### Personnaliser le fichier source
 
 Le `Makefile` supporte une variable `SRC` pour choisir le fichier Nabla à compiler :
@@ -107,6 +124,7 @@ sortie attendu. La cible compile puis exécute le programme et compare son code 
 sortie à cette valeur. Les tests d’erreur dont le nom contient `error` ou `fail`
 doivent échouer pendant la compilation. Lorsqu'un fichier voisin
 `<nom>.diagnostic` existe, le message d'erreur normalisé doit également
-correspondre exactement.
+correspondre exactement. Lorsqu'un fichier voisin `<nom>.ir` existe, la sortie
+de `nablac --emit-ir` est elle aussi comparée exactement au snapshot.
 
 La cible affiche `PASS` ou `FAIL` pour chaque fichier de test et renvoie `1` si un test donne un résultat inattendu.
