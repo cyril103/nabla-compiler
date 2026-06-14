@@ -260,7 +260,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Ajouter l'inference des arguments de type des fonctions generiques,
+- `1a10139` - Ajouter l'inference des arguments de type des fonctions generiques,
   y compris le typage progressif des lambdas en argument.
 - `5b33e25` - Ajouter les fonctions generiques explicites comme `identity[T]`,
   appelees avec `identity[Int](...)`, et la substitution de `T` dans les
