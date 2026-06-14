@@ -1,0 +1,19 @@
+def intArraySum(xs: IntArray): Int = {
+    var index = 0
+    var total = 0
+    while (index < xs.length()) {
+        total = total + xs.get(index)
+        index = index + 1
+    }
+    total
+}
+
+def intArrayFill(size: Int, value: Int): IntArray = {
+    val xs = new IntArray(size)
+    var index = 0
+    while (index < size) {
+        xs.set(index, value)
+        index = index + 1
+    }
+    xs
+}

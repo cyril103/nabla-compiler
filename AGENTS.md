@@ -36,6 +36,7 @@ Le pipeline implemente actuellement :
 - tokenisation et parsing des classes, imports, fonctions et methodes avec
   parametres,
   expressions arithmetiques, comparaisons, `if`, `while`, `for`, `val` et `var`;
+- identifiants et chemins d'import avec lettres, chiffres et `_`;
 - resolution des imports relatifs, depuis la racine projet et depuis `stdlib/`,
   avec protection contre les cycles;
 - objets avec champs de constructeur et appels de methodes parametres;
@@ -44,6 +45,8 @@ Le pipeline implemente actuellement :
 - entiers immediats avec pointer tagging et litteraux `String`;
 - affichage console de `String` via la primitive globale `print`;
 - premier module de bibliotheque standard `io` avec `println`;
+- premier module de bibliotheque standard `collections.int_array` avec
+  `intArraySum` et `intArrayFill`;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -145,10 +148,12 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter une integration continue.
 - [ ] Ajouter des tests unitaires du lexer, parser et analyseur semantique.
 - [x] Ajouter une racine `stdlib/` importable.
+- [x] Ajouter un premier module de collections dans `stdlib/`.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout d'une racine `stdlib/` et du module `io`.
+- Prochain commit - Ajout du module `collections.int_array`.
+- `9d1cab5` - Ajout d'une racine `stdlib/` et du module `io`.
 - `e0e611a` - Ajout de la collection native `IntArray`.
 - `b2996ad` - Ajout des litteraux `String`.
 - `92650b3` - Ajout de la primitive console `print`.
@@ -181,5 +186,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter `stdlib/math.nabla` et des helpers autour de `IntArray`, puis formaliser
-`Unit`, `Int`, `String`, `IntArray` et les types de classes.
+Ajouter `stdlib/math.nabla`, puis formaliser `Unit`, `Int`, `String`,
+`IntArray` et les types de classes.

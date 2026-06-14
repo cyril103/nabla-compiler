@@ -105,9 +105,9 @@ public:
                 continue;
             }
 
-            if (std::isalpha(static_cast<unsigned char>(current))) {
+            if (isIdentifierStart(current)) {
                 std::string ident;
-                while (index < src.size() && std::isalnum(static_cast<unsigned char>(src[index]))) {
+                while (index < src.size() && isIdentifierPart(src[index])) {
                     ident += src[index];
                     advance();
                 }
@@ -155,6 +155,14 @@ private:
 
     bool nextIs(char expected) const {
         return index + 1 < src.size() && src[index + 1] == expected;
+    }
+
+    bool isIdentifierStart(char c) const {
+        return std::isalpha(static_cast<unsigned char>(c)) || c == '_';
+    }
+
+    bool isIdentifierPart(char c) const {
+        return std::isalnum(static_cast<unsigned char>(c)) || c == '_';
     }
 
     void advance() {
