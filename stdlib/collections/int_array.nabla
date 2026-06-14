@@ -393,6 +393,34 @@ def intArrayNested(values: IntArray, boundaries: IntArray): ArrayIntNested = {
     new ArrayIntNested(values, boundaries)
 }
 
+def intArrayGrouped(values: IntArray, groupSize: Int): ArrayIntNested = {
+    if groupSize <= 0 {
+        intArrayNested(values, new IntArray(1))
+    } else {
+        val total = values.length()
+        var rows = total / groupSize
+        if rows * groupSize == total {
+            rows
+        } else {
+            rows = rows + 1
+        }
+        val boundaries = new IntArray(rows + 1)
+        boundaries.set(0, 0)
+        var index = 0
+        var boundary = groupSize
+        while (index < rows) {
+            if boundary > total {
+                boundaries.set(index + 1, total)
+            } else {
+                boundaries.set(index + 1, boundary)
+            }
+            index = index + 1
+            boundary = boundary + groupSize
+        }
+        intArrayNested(values, boundaries)
+    }
+}
+
 class ArrayInt(values: IntArray) {
     def length(): Int = {
         values.length()
@@ -504,6 +532,10 @@ class ArrayInt(values: IntArray) {
 
     def zipWithIndex(): ArrayIntWithIndex = {
         intArrayZipWithIndex(values)
+    }
+
+    def grouped(groupSize: Int): ArrayIntNested = {
+        intArrayGrouped(values, groupSize)
     }
 
     def fold(initial: Int, combine: (Int, Int) => Int): Int = {
@@ -629,6 +661,29 @@ class ArrayIntNested(values: IntArray, boundaries: IntArray) {
 
     def flatten(): ArrayInt = {
         new ArrayInt(values)
+    }
+
+    def rowSize(index: Int): Int = {
+        boundaries.get(index + 1) - boundaries.get(index)
+    }
+
+    def mapRows(transform: (ArrayInt) => ArrayInt): ArrayIntNested = {
+        val rowCount = this.rowCount()
+        if rowCount == 0 {
+            intArrayNested(values, new IntArray(1))
+        } else {
+            var index = 0
+            var flattenResult = new IntArray(0)
+            val transformedBoundaries = new IntArray(rowCount + 1)
+            transformedBoundaries.set(0, 0)
+            while (index < rowCount) {
+                val transformedRow = transform(this.row(index))
+                flattenResult = intArrayConcat(flattenResult, transformedRow.raw())
+                transformedBoundaries.set(index + 1, flattenResult.length())
+                index = index + 1
+            }
+            intArrayNested(flattenResult, transformedBoundaries)
+        }
     }
 }
 

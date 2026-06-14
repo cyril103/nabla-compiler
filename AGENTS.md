@@ -77,7 +77,8 @@ Le pipeline implemente actuellement :
   `take`, `drop`, `slice`, `indexOf`, `indexOfOption`, `count`, `find`, `min`, `max`,
   `getOption`, `headOption`, `lastOption`, `takeWhile`, `dropWhile`,
   `takeRight`, `dropRight`, `span`, `partition`, `flatMap`,
-  `zipWithIndex`, `ArrayIntNested` et `ArrayIntNested.flatten()`,
+  `zipWithIndex`, `grouped`, `ArrayIntNested`, `ArrayIntNested.flatten()`,
+  `ArrayIntNested.rowSize` et `ArrayIntNested.mapRows`.
   avec predicats booleens;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
@@ -201,6 +202,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `ArrayInt.partition` et `ArrayInt.flatMap`.
 - [x] Ajouter `ArrayInt.zipWithIndex`.
 - [x] Ajouter `ArrayIntNested` et `ArrayIntNested.flatten()`.
+- [x] Ajouter `ArrayInt.grouped`, `ArrayIntNested.rowSize` et
+  `ArrayIntNested.mapRows` pour une API imbriquee de collections imbriquees.
 
 ### P2 - Runtime Et Objets
 
@@ -287,6 +290,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `94eeecf` - Ajouter `ArrayInt.takeRight`, `ArrayInt.dropRight` et `ArrayInt.span`.
 - `1bc9417` - Ajouter `ArrayInt.zipWithIndex`, `ArrayInt.partition`,
   `ArrayInt.flatMap` et `ArrayIntNested.flatten()`.
+- `baacd10` - Ajouter `ArrayInt.grouped`, `ArrayIntNested.rowSize` et
+  `ArrayIntNested.mapRows`.
 - `1062f09` - Ajout des parametres de fonctions et methodes, appels globaux,
   validation des arguments et convention d'appel x86-64.
 - `93b942f` - Ajout de `AGENTS.md`, des conventions de contribution et de la
@@ -298,6 +303,6 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter une collection imbriquée de premier ordre (`ArrayInt[][]` ou une
-abstraction dédiée) pour exprimer `flatten` dans une API plus naturelle,
-et documenter son usage dans la stdlib.
+Etendre `ArrayIntNested` avec des opérations en mode lignes (p. ex.
+`filterRows`, `mapRows` stable) et documenter des exemples d'usage dans un
+exemple de guide stdlib.

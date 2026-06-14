@@ -1,0 +1,12 @@
+import collections.int_array
+
+def main(): Int = {
+    val xs = new ArrayInt(new IntArray(3))
+    val grouped = xs.grouped(0)
+
+    if grouped.rowCount() == 0 && grouped.isEmpty() {
+        42
+    } else {
+        1
+    }
+}

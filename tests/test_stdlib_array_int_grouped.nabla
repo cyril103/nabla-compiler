@@ -1,0 +1,29 @@
+import collections.int_array
+
+def main(): Int = {
+    val xs = new ArrayInt(new IntArray(6))
+    xs.raw().set(0, 1)
+    xs.raw().set(1, 2)
+    xs.raw().set(2, 3)
+    xs.raw().set(3, 4)
+    xs.raw().set(4, 5)
+    xs.raw().set(5, 6)
+
+    val grouped = xs.grouped(4)
+    val first = grouped.row(0)
+    val second = grouped.row(1)
+
+    if grouped.rowCount() == 2 &&
+        grouped.rowSize(0) == 4 &&
+        grouped.rowSize(1) == 2 &&
+        first.size() == 4 &&
+        first.get(0) == 1 &&
+        first.get(3) == 4 &&
+        second.size() == 2 &&
+        second.get(0) == 5 &&
+        second.get(1) == 6 {
+        42
+    } else {
+        1
+    }
+}

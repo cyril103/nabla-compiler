@@ -1,0 +1,44 @@
+import collections.int_array
+
+def main(): Int = {
+    val values = new IntArray(6)
+    values.set(0, 1)
+    values.set(1, 2)
+    values.set(2, 3)
+    values.set(3, 4)
+    values.set(4, 5)
+    values.set(5, 6)
+
+    val boundaries = new IntArray(3)
+    boundaries.set(0, 0)
+    boundaries.set(1, 2)
+    boundaries.set(2, 6)
+    val nested = new ArrayIntNested(values, boundaries)
+
+    val mapped = nested.mapRows(row => {
+        val doubled = new IntArray(row.size())
+        var index = 0
+        while (index < row.size()) {
+            doubled.set(index, row.get(index) * 2)
+            index = index + 1
+        }
+        new ArrayInt(doubled)
+    })
+
+    val flattened = mapped.flatten()
+    if mapped.rowCount() == 2 &&
+        mapped.rowSize(0) == 2 &&
+        mapped.rowSize(1) == 4 &&
+        mapped.row(0).get(0) == 2 &&
+        mapped.row(0).get(1) == 4 &&
+        mapped.row(1).get(0) == 6 &&
+        mapped.row(1).get(1) == 8 &&
+        mapped.row(1).get(2) == 10 &&
+        mapped.row(1).get(3) == 12 &&
+        flattened.size() == 6 &&
+        flattened.get(3) == 8 {
+        42
+    } else {
+        1
+    }
+}
