@@ -331,7 +331,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Ajouter les appels de methodes communs sur receveur generique
+- `a0db6bb` - Ajouter les appels de methodes communs sur receveur generique
   `Array[T]`, avec specialisation vers les facades concretes et lambdas
   generiques specialisees.
 - `c34468f` - Ajouter `arrayMap[T]` et `arrayForeach[T]` comme operations communes
