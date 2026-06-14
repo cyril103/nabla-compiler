@@ -56,6 +56,7 @@ public:
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
 };
 
 class MethodCallNode : public ASTNode {
@@ -92,6 +93,7 @@ public:
     std::string getType() override;
     void generateASM(std::ofstream& out, CompilerContext& context) override;
     void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
 };
 
 class IfNode : public ASTNode {

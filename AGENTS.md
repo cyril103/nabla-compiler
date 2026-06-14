@@ -46,7 +46,8 @@ Le pipeline implemente actuellement :
   affectations;
 - diagnostics uniformes avec fichier, ligne, colonne et phase du compilateur;
 - IR textuelle pour les fonctions globales, entiers, variables, affectations,
-  operations binaires, appels de fonctions globales, `if`, `while` et `for`;
+  operations binaires, appels de fonctions globales, `if`, `while`, `for`,
+  objets et methodes;
 - generation directe d'assembleur x86-64;
 - tests de compilation et d'execution via `make all-tests`.
 
@@ -54,7 +55,6 @@ Limites importantes :
 
 - les fonctions globales sont limitees a 6 parametres et les methodes a 5,
   conformement a la convention d'appel actuelle;
-- l'IR ne couvre pas encore les objets et methodes;
 - l'assembleur est encore genere directement depuis l'AST;
 - le tas est fixe et ne possede ni verification de depassement ni ramasse-miettes;
 - les binaires historiques sous `build/` sont encore suivis par Git.
@@ -106,8 +106,9 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 ### P1 - Representation Intermediaire
 
 - [x] Definir une IR minimale independante de l'AST.
-- [ ] Abaisser tout l'AST semantiquement valide vers l'IR.
+- [x] Abaisser tout l'AST semantiquement valide vers l'IR.
 - [x] Representer les branchements et boucles dans l'IR.
+- [x] Representer les objets, champs et appels de methodes dans l'IR.
 - [ ] Deplacer l'allocation de pile et les conventions d'appel vers le backend.
 - [ ] Generer l'assembleur uniquement depuis l'IR.
 
@@ -134,7 +135,8 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout du controle de flux `if`/`while`/`for` dans l'IR.
+- Prochain commit - Ajout des objets, champs et appels de methodes dans l'IR.
+- `f38e0a6` - Ajout du controle de flux `if`/`while`/`for` dans l'IR.
 - `1dcff81` - Ajout de l'IR minimale, de `--emit-ir` et des snapshots IR.
 - `8b7be03` - Ajout des diagnostics sources uniformes, de `CompilerError` et des
   tests de diagnostics exacts.
@@ -149,5 +151,5 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Etendre l'IR aux objets et methodes, puis commencer la migration de la
-generation assembleur vers le backend IR.
+Completer les dernieres operations runtime dans l'IR, puis commencer la
+migration de la generation assembleur vers le backend IR.

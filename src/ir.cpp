@@ -11,6 +11,10 @@ std::string join(const std::vector<std::string>& values, const std::string& sepa
     }
     return out.str();
 }
+
+std::string qualifiedMember(const std::string& className, const std::string& memberName) {
+    return className + "." + memberName;
+}
 }
 
 std::string IRProgram::format() const {
@@ -36,6 +40,15 @@ std::string IRProgram::format() const {
                     break;
                 case IROpcode::Call:
                     out << "call " << instruction.operation << "(" << join(instruction.operands, ", ") << ")";
+                    break;
+                case IROpcode::MethodCall:
+                    out << "call_method " << instruction.operation << "(" << join(instruction.operands, ", ") << ")";
+                    break;
+                case IROpcode::NewObject:
+                    out << "new " << instruction.operation << "(" << join(instruction.operands, ", ") << ")";
+                    break;
+                case IROpcode::FieldLoad:
+                    out << "field " << instruction.operands[0] << ", " << instruction.operation;
                     break;
                 case IROpcode::Load:
                     out << "load @" << instruction.operands[0];
@@ -78,6 +91,7 @@ void IRBuilder::beginFunction(
     program.functions.push_back({name, parameters, returnType, {}});
     currentFunction = &program.functions.back();
     parameterValues.clear();
+    thisValue.clear();
     nextValueId = 0;
     nextLabelId = 0;
     nextTemporarySymbolId = 0;
@@ -104,6 +118,33 @@ std::string IRBuilder::emitBinary(
 std::string IRBuilder::emitCall(const std::string& name, const std::vector<std::string>& arguments) {
     std::string result = nextValue();
     emit({IROpcode::Call, result, name, arguments});
+    return result;
+}
+
+std::string IRBuilder::emitMethodCall(
+    const std::string& className, const std::string& methodName, const std::string& receiver,
+    const std::vector<std::string>& arguments) {
+    std::vector<std::string> operands = {receiver};
+    operands.insert(operands.end(), arguments.begin(), arguments.end());
+    std::string result = nextValue();
+    emit({IROpcode::MethodCall, result, qualifiedMember(className, methodName), operands});
+    return result;
+}
+
+std::string IRBuilder::emitNewObject(
+    const std::string& className, const std::vector<std::string>& arguments) {
+    std::string result = nextValue();
+    emit({IROpcode::NewObject, result, className, arguments});
+    return result;
+}
+
+std::string IRBuilder::emitFieldLoad(
+    const SourceLocation& location, const std::string& className, const std::string& fieldName) {
+    if (thisValue.empty()) {
+        unsupported(location, "l'accès au champ '" + qualifiedMember(className, fieldName) + "'");
+    }
+    std::string result = nextValue();
+    emit({IROpcode::FieldLoad, result, qualifiedMember(className, fieldName), {thisValue}});
     return result;
 }
 
@@ -147,6 +188,10 @@ void IRBuilder::emitJump(const std::string& targetLabel) {
 
 void IRBuilder::bindParameter(const std::string& symbol, const std::string& parameterName) {
     parameterValues[symbol] = "%" + parameterName;
+}
+
+void IRBuilder::bindThis() {
+    thisValue = "%this";
 }
 
 [[noreturn]] void IRBuilder::unsupported(

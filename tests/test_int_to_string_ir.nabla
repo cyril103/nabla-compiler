@@ -1,0 +1,9 @@
+class Formatter() {
+    def text(): String = {
+        42.toString()
+    }
+}
+
+def main(): Int = {
+    0
+}

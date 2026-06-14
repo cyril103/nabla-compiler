@@ -9,6 +9,9 @@ enum class IROpcode {
     Constant,
     Binary,
     Call,
+    MethodCall,
+    NewObject,
+    FieldLoad,
     Load,
     Store,
     Label,
@@ -54,6 +57,12 @@ public:
     std::string emitBinary(
         const std::string& operation, const std::string& left, const std::string& right);
     std::string emitCall(const std::string& name, const std::vector<std::string>& arguments);
+    std::string emitMethodCall(
+        const std::string& className, const std::string& methodName, const std::string& receiver,
+        const std::vector<std::string>& arguments);
+    std::string emitNewObject(const std::string& className, const std::vector<std::string>& arguments);
+    std::string emitFieldLoad(
+        const SourceLocation& location, const std::string& className, const std::string& fieldName);
     std::string emitLoad(const std::string& symbol);
     void emitStore(const std::string& symbol, const std::string& value);
     std::string emitPhi(const std::string& left, const std::string& right);
@@ -63,12 +72,14 @@ public:
     void emitBranchIfFalse(const std::string& condition, const std::string& targetLabel);
     void emitJump(const std::string& targetLabel);
     void bindParameter(const std::string& symbol, const std::string& parameterName);
+    void bindThis();
     [[noreturn]] void unsupported(const SourceLocation& location, const std::string& feature) const;
 
 private:
     IRProgram program;
     IRFunction* currentFunction = nullptr;
     std::map<std::string, std::string> parameterValues;
+    std::string thisValue;
     int nextValueId = 0;
     int nextLabelId = 0;
     int nextTemporarySymbolId = 0;

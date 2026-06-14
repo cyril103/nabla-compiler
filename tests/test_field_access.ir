@@ -1,0 +1,11 @@
+function Counter.run(%this: Counter) -> Int
+  %0 = field %this, Counter.value
+  %1 = const 1
+  %2 = + %0, %1
+  return %2
+
+function main() -> Int
+  %0 = const 10
+  %1 = new Counter(%0)
+  %2 = call_method Counter.run(%1)
+  return %2

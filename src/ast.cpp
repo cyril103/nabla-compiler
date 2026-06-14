@@ -110,6 +110,12 @@ void NewNode::validateSemantics(CompilerContext& context) {
     }
 }
 
+std::string NewNode::lowerToIR(IRBuilder& builder) const {
+    std::vector<std::string> loweredArguments;
+    for (const auto& argument : args) loweredArguments.push_back(argument->lowerToIR(builder));
+    return builder.emitNewObject(className, loweredArguments);
+}
+
 MethodCallNode::MethodCallNode(
     std::unique_ptr<ASTNode> rec, std::string method, std::vector<std::unique_ptr<ASTNode>> args)
     : receiver(std::move(rec)), methodName(std::move(method)), arguments(std::move(args)) {}
@@ -161,18 +167,33 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
 }
 
 std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
-    if (receiver->getType() != "Int" || arguments.size() != 1) {
-        builder.unsupported(location, "l'appel de méthode '" + methodName + "'");
+    const std::string receiverType = receiver->getType();
+    if (receiverType == "Int") {
+        if (methodName == "toString") {
+            if (!arguments.empty()) {
+                builder.unsupported(location, "l'appel de méthode Int.toString");
+            }
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            return builder.emitMethodCall("Int", "toString", loweredReceiver, {});
+        }
+        const std::vector<std::string> supported = {
+            "+", "-", "*", "/", "==", "!=", "<", ">", "<=", ">="
+        };
+        if (std::find(supported.begin(), supported.end(), methodName) == supported.end()) {
+            builder.unsupported(location, "la méthode Int." + methodName);
+        }
+        if (arguments.size() != 1) {
+            builder.unsupported(location, "l'appel de méthode '" + methodName + "'");
+        }
+        std::string left = receiver->lowerToIR(builder);
+        std::string right = arguments[0]->lowerToIR(builder);
+        return builder.emitBinary(methodName, left, right);
     }
-    const std::vector<std::string> supported = {
-        "+", "-", "*", "/", "==", "!=", "<", ">", "<=", ">="
-    };
-    if (std::find(supported.begin(), supported.end(), methodName) == supported.end()) {
-        builder.unsupported(location, "la méthode Int." + methodName);
-    }
-    std::string left = receiver->lowerToIR(builder);
-    std::string right = arguments[0]->lowerToIR(builder);
-    return builder.emitBinary(methodName, left, right);
+
+    std::string loweredReceiver = receiver->lowerToIR(builder);
+    std::vector<std::string> loweredArguments;
+    for (const auto& argument : arguments) loweredArguments.push_back(argument->lowerToIR(builder));
+    return builder.emitMethodCall(receiverType, methodName, loweredReceiver, loweredArguments);
 }
 
 FunctionCallNode::FunctionCallNode(std::string functionName, std::vector<std::unique_ptr<ASTNode>> args)
@@ -207,6 +228,10 @@ std::string FieldAccessNode::getType() {
 
 void FieldAccessNode::validateSemantics(CompilerContext& context) {
     (void) context;
+}
+
+std::string FieldAccessNode::lowerToIR(IRBuilder& builder) const {
+    return builder.emitFieldLoad(location, className, fieldName);
 }
 
 IfNode::IfNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode> thenBranch, std::unique_ptr<ASTNode> elseBranch)
@@ -436,12 +461,18 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
 }
 
 std::string FunctionDefNode::lowerToIR(IRBuilder& builder) const {
-    if (!className.empty()) builder.unsupported(location, "les méthodes");
     std::vector<IRParameter> irParameters;
+    if (!className.empty()) {
+        irParameters.push_back({"this", className});
+    }
     for (const auto& parameter : parameters) {
         irParameters.push_back({parameter.name, parameter.type});
     }
-    builder.beginFunction(name, irParameters, returnType);
+    const std::string functionName = className.empty() ? name : className + "." + name;
+    builder.beginFunction(functionName, irParameters, returnType);
+    if (!className.empty()) {
+        builder.bindThis();
+    }
     for (const auto& parameter : parameters) {
         builder.bindParameter(parameter.symbolName, parameter.name);
     }
