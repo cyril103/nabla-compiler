@@ -160,8 +160,12 @@ Limites importantes :
   generique; `Array[T]` est valide dans les signatures generiques utilisateur
   et se specialise correctement quand `T` devient concret, avec une premiere
   surface de methodes communes, mais les operations non communes comme `sum`,
-  `countTrue`, `filter`, `fold` ou `flatMap` restent specialisees ou a ajouter; la
-  monomorphisation complete des classes generiques reste a faire;
+  `countTrue`, `filter`, `fold` ou `flatMap` restent specialisees ou a ajouter;
+  l'objectif retenu est de conserver les tableaux primitifs specialises et
+  d'ajouter un fallback generique `ObjectArray` / `ArrayObject[T]` pour les
+  autres types (`String`, objets, `Array[Array[Int]]`, etc.); la
+  monomorphisation complete des classes generiques et le stockage generique
+  restent a faire;
 - le tas est fixe et possede une verification de depassement, mais pas de
   ramasse-miettes;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
@@ -305,8 +309,19 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter les appels de methodes sur receveur generique `Array[T]` dans les
   corps generiques pour `size`, `length`, `isEmpty`, `nonEmpty`, `get`, `set`,
   `map` et `foreach`.
-- [ ] Etendre `Array[T]` vers plus d'operations (`filter`, `fold`, `flatMap`) ou
-  definir un vrai stockage generique pour les types non specialises.
+- [ ] Definir la representation generique `Any` / slot runtime commune pour les
+  valeurs stockees dans une collection generique.
+- [ ] Ajouter une collection native `ObjectArray` stockant des slots/pointeurs
+  generiques.
+- [ ] Ajouter la facade standard `ArrayObject[T]` pour les types non specialises,
+  avec `length`, `size`, `get`, `set`, `map` et `foreach`.
+- [ ] Etendre les aliases standard pour choisir automatiquement :
+  `Array[Int] -> ArrayInt`, `Array[Long] -> ArrayLong`,
+  `Array[Bool] -> ArrayBool`, sinon `Array[T] -> ArrayObject[T]`.
+- [ ] Ajouter les tests de vraie genericite `Array[String]`,
+  `Array[Array[Int]]`, `Array[Option[String]]` et tableaux d'objets.
+- [ ] Etendre `Array[T]` vers plus d'operations (`filter`, `fold`, `flatMap`)
+  une fois le fallback generique stabilise.
 
 ### P2 - Runtime Et Objets
 
@@ -457,6 +472,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Etendre la facade `Array[T]` avec `filter`, `fold` et eventuellement `flatMap`
-sur les types specialises, puis evaluer le modele de stockage necessaire pour
-supporter `Array[String]` et les tableaux d'objets.
+Construire le fallback de vraie genericite pour le chemin retenu :
+specialisations primitives conservees (`ArrayInt`, `ArrayLong`, `ArrayBool`) +
+`ObjectArray` / `ArrayObject[T]` pour tous les autres types. La premiere tranche
+devrait formaliser `Any` ou un slot runtime generique, puis ajouter les tests
+cibles `Array[String]` et `Array[Array[Int]]`.
