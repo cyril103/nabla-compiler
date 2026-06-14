@@ -1,0 +1,14 @@
+class TextPair(first: String, second: String) {
+    def firstLength(): Int = {
+        first.length()
+    }
+
+    def secondLength(): Int = {
+        second.length()
+    }
+}
+
+def main(): Int = {
+    val pair = new TextPair(42.toString(), 7.toString())
+    pair.firstLength()
+}

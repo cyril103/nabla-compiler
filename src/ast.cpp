@@ -130,6 +130,14 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         }
         semanticError("méthode inconnue: Int." + methodName);
     }
+    if (receiverType == "String") {
+        if (methodName == "length") {
+            if (!arguments.empty()) semanticError("la méthode String.length n'accepte aucun argument");
+            resolvedType = "Int";
+            return;
+        }
+        semanticError("méthode inconnue: String." + methodName);
+    }
 
     auto classIt = context.classes.find(receiverType);
     if (classIt == context.classes.end()) {
@@ -165,6 +173,13 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         std::string left = receiver->lowerToIR(builder);
         std::string right = arguments[0]->lowerToIR(builder);
         return builder.emitBinary(methodName, left, right);
+    }
+    if (receiverType == "String") {
+        if (methodName != "length" || !arguments.empty()) {
+            builder.unsupported(location, "la méthode String." + methodName);
+        }
+        std::string loweredReceiver = receiver->lowerToIR(builder);
+        return builder.emitMethodCall("String", "length", loweredReceiver, {});
     }
 
     std::string loweredReceiver = receiver->lowerToIR(builder);

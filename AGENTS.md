@@ -126,7 +126,7 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 - [ ] Verifier les depassements du tas.
 - [ ] Definir et utiliser de vraies vtables ou retirer leur emplacement reserve.
 - [x] Extraire le runtime ASM commun du backend IR.
-- [ ] Stabiliser la representation de `String`.
+- [x] Stabiliser la representation de `String`.
 - [ ] Choisir une strategie memoire a long terme.
 
 ### P3 - Outillage
@@ -138,7 +138,8 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout de l'integration continue GitHub Actions.
+- Prochain commit - Stabilisation de la representation runtime de `String`.
+- `0af02cd` - Ajout de l'integration continue GitHub Actions.
 - `b1a6938` - Extraction du runtime ASM commun du backend IR.
 - `ed879e1` - Retrait des binaires historiques suivis sous `build/`.
 - `63c286e` - Structuration de la frame et de la convention d'appel du backend
@@ -165,5 +166,5 @@ le nom contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Stabiliser la representation runtime de `String`, puis verifier les
-depassements du tas.
+Verifier les depassements du tas, puis choisir une strategie memoire a long
+terme.

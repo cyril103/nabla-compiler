@@ -321,6 +321,10 @@ private:
 
         if (className == "Int" && methodName == "toString") {
             out << "    call Int_method_toString\n";
+        } else if (className == "String" && methodName == "length") {
+            out << "    mov rax, [rdi + 8]\n";
+            out << "    shl rax, 1\n";
+            out << "    or rax, 1\n";
         } else {
             out << "    call " << asmFunctionName(instruction.operation) << "\n";
         }
