@@ -245,7 +245,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `TBD` - Ajouter la syntaxe de types parametres `Option[Int]` et `Array[Int]`
+- `6fd4884` - Ajouter la syntaxe de types parametres `Option[Int]` et `Array[Int]`
   avec canonisation vers `OptionInt` et `ArrayInt`.
 - `94b4440` - Ajouter `Float` et `Double`, les litteraux decimaux, l'IR typee, les
   operations SSE et les tests positifs et negatifs associes.
