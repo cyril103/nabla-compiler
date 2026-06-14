@@ -18,6 +18,16 @@ def intArrayFill(size: Int, value: Int): IntArray = {
     xs
 }
 
+def intArrayRange(size: Int): IntArray = {
+    val xs = new IntArray(size)
+    var index = 0
+    while (index < size) {
+        xs.set(index, index)
+        index = index + 1
+    }
+    xs
+}
+
 def intArrayMap(xs: IntArray, f: IntUnaryFn): IntArray = {
     val mapped = new IntArray(xs.length())
     var index = 0
@@ -91,6 +101,15 @@ class ArrayInt(values: IntArray) {
         intArrayFold(values, initial, combine)
     }
 
+    def foreach(f: IntUnaryFn): Int = {
+        var index = 0
+        while (index < values.length()) {
+            f(values.get(index))
+            index = index + 1
+        }
+        0
+    }
+
     def raw(): IntArray = {
         values
     }
@@ -98,4 +117,8 @@ class ArrayInt(values: IntArray) {
 
 def arrayIntFill(size: Int, value: Int): ArrayInt = {
     new ArrayInt(intArrayFill(size, value))
+}
+
+def arrayIntRange(size: Int): ArrayInt = {
+    new ArrayInt(intArrayRange(size))
 }

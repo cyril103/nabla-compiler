@@ -50,8 +50,9 @@ Le pipeline implemente actuellement :
 - affichage console de `String` via la primitive globale `print`;
 - premier module de bibliotheque standard `io` avec `println`;
 - premier module de bibliotheque standard `collections.int_array` avec
-  `intArraySum`, `intArrayFill`, `intArrayMap`, `intArrayFilter` et la facade
-  objet `ArrayInt` avec `map`, `filter` et `fold`;
+  `intArraySum`, `intArrayFill`, `intArrayRange`, `intArrayMap`,
+  `intArrayFilter` et la facade objet `ArrayInt` avec `map`, `filter`,
+  `fold` et `foreach`;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -139,6 +140,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [ ] Generaliser `IntUnaryFn` vers des types fonction complets.
 - [x] Ajouter `IntBinaryFn` pour `fold` et operations binaires de collections.
 - [x] Ajouter les lambdas sans capture pour `IntUnaryFn`.
+- [x] Ajouter `arrayIntRange` et `ArrayInt.foreach` comme premiers parcours
+  fonctionnels de collection.
 - [ ] Ajouter les closures avec capture.
 
 ### P2 - Runtime Et Objets
@@ -162,7 +165,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- Prochain commit - Ajout de `IntBinaryFn` et `ArrayInt.fold`.
+- Prochain commit - Ajout de `arrayIntRange` et `ArrayInt.foreach`.
+- `51cba13` - Ajout de `IntBinaryFn` et `ArrayInt.fold`.
 - `fa730c6` - Ajout de `ArrayInt.filter`.
 - `209119f` - Ajout des fonctions valeurs `IntUnaryFn`, de `intArrayMap` et de
   la facade objet `ArrayInt`.
@@ -200,4 +204,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ajouter les closures avec capture, puis generaliser les types fonction.
+Formaliser `Unit` pour les fonctions a effet comme `foreach`, puis ajouter les
+closures avec capture et generaliser les types fonction.
