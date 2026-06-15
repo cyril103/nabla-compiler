@@ -403,6 +403,8 @@ Le module `io` expose les helpers recommandes pour les entrees/sorties :
 - `writeTextFile(path: String, content: String): Int`
 - `appendTextFile(path: String, content: String): Int`
 - `deleteTextFile(path: String): Bool`
+- `renameTextFile(from: String, to: String): Bool`
+- `createDirectory(path: String): Bool`
 - `pathExists(path: String): Bool`
 
 ```nabla
@@ -419,7 +421,8 @@ def main(): Int = {
 
 Les primitives globales `print(value: String)`, `readLine(): String`,
 `readFile(path: String): String`, `writeFile(path: String, content: String): Int`,
-`appendFile(path: String, content: String): Int`, `deleteFile(path: String): Bool`
+`appendFile(path: String, content: String): Int`, `deleteFile(path: String): Bool`,
+`renameFile(path: String, to: String): Bool`, `createDir(path: String): Bool`
 et `fileExists(path: String): Bool`
 existent aussi, mais le module `io` est l'interface recommandee.
 
@@ -454,6 +457,9 @@ Conventions actuelles :
 - `appendTextFile` cree le fichier si besoin puis ajoute le contenu a la fin.
 - `deleteTextFile` supprime un fichier et retourne `false` si la suppression
   echoue.
+- `renameTextFile` renomme `from` vers `to` et renvoie `true` en cas de
+  reussite.
+- `createDirectory` cree un repertoire et renvoie `true` en cas de succes.
 - `writeTextFile` et `appendTextFile` retournent le nombre d'octets ecrits.
 - Une valeur negative indique une erreur de syscall Linux. Nabla n'a pas encore
   de type `Result` ni d'abstraction `errno`.

@@ -584,6 +584,10 @@ private:
             out << "    call Runtime_fileExists\n";
         } else if (instruction.operation == "deleteFile") {
             out << "    call Runtime_deleteFile\n";
+        } else if (instruction.operation == "renameFile") {
+            out << "    call Runtime_renameFile\n";
+        } else if (instruction.operation == "createDir") {
+            out << "    call Runtime_createDir\n";
         } else if (instruction.operation == "parseInt") {
             out << "    call Runtime_stringToInt\n";
         } else if (instruction.operation == "timeSeed") {

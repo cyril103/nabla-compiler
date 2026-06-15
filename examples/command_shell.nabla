@@ -3,7 +3,7 @@ import collections.array
 import strings
 
 def printHelp(): Unit = {
-    println("commands: add A B | repeat TEXT N | len TEXT | cat PATH | write PATH TEXT... | append PATH TEXT... | rm PATH | exists PATH | help | quit")
+    println("commands: add A B | repeat TEXT N | len TEXT | cat PATH | write PATH TEXT... | append PATH TEXT... | rm PATH | rename FROM TO | mkdir PATH | exists PATH | help | quit")
 }
 
 def commandName(parts: ArrayObject[String]): String = {
@@ -111,6 +111,30 @@ def runRm(parts: ArrayObject[String]): Unit = {
     }
 }
 
+def runRename(parts: ArrayObject[String]): Unit = {
+    match parts.size() {
+        3 => {
+            match renameTextFile(parts.get(1), parts.get(2)) {
+                true => println("renamed")
+                _ => println("not renamed")
+            }
+        }
+        _ => println("usage: rename FROM TO")
+    }
+}
+
+def runMkdir(parts: ArrayObject[String]): Unit = {
+    match parts.size() {
+        2 => {
+            match createDirectory(parts.get(1)) {
+                true => println("created")
+                _ => println("not created")
+            }
+        }
+        _ => println("usage: mkdir PATH")
+    }
+}
+
 def runKnownCommand(command: String, parts: ArrayObject[String]): Unit = {
     match command {
         "help" => printHelp()
@@ -121,6 +145,8 @@ def runKnownCommand(command: String, parts: ArrayObject[String]): Unit = {
         "write" => runWrite(parts)
         "append" => runAppend(parts)
         "rm" => runRm(parts)
+        "rename" => runRename(parts)
+        "mkdir" => runMkdir(parts)
         "exists" => runExists(parts)
         _ => println("unknown command: " + command)
     }

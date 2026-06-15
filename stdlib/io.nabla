@@ -18,6 +18,14 @@ def appendTextFile(path: String, content: String): Int = {
     appendFile(path, content)
 }
 
+def renameTextFile(from: String, to: String): Bool = {
+    renameFile(from, to)
+}
+
+def createDirectory(path: String): Bool = {
+    createDir(path)
+}
+
 def deleteTextFile(path: String): Bool = {
     deleteFile(path)
 }

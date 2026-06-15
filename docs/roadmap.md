@@ -18,6 +18,8 @@ pour reprendre facilement apres une pause.
   - `writeTextFile`
   - `appendTextFile`
   - `deleteTextFile`
+  - `renameTextFile`
+  - `createDirectory`
   - `pathExists`
 - Exemple principal `examples/command_shell.nabla` utilise maintenant `match`,
   les commandes fichier, et sert de vitrine pour l'ergonomie du langage,
@@ -39,17 +41,12 @@ pour reprendre facilement apres une pause.
      pour `ArrayObject[String]`.
    - Verifie avec `make test SRC=tests/test_array_object_string_mk_string.nabla`.
 
-3. Ajouter de petites operations fichiers complementaires.
-   - `renameFile(from, to): Bool`
-   - eventuellement `createDir(path): Bool`
-   - garder les retours simples (`Bool`) tant que Nabla n'a pas de `Result`.
-
-4. Ameliorer `match` V2.
+3. Ameliorer `match` V2.
    - Gardes de branches, par exemple `_ if condition => ...`.
    - Eventuellement motifs de constantes nommees plus tard.
    - Garder la V1 actuelle simple : litteraux + `_`.
 
-5. Nettoyer les diagnostics autour de `match` et `else if`.
+4. Nettoyer les diagnostics autour de `match` et `else if`.
    - Messages plus specifiques pour les branches manquantes.
    - Tests d'erreur pour branche apres `_`.
 

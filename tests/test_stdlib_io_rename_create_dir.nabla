@@ -1,0 +1,28 @@
+import io
+
+def main(): Int = {
+    val dir = "build/nabla_io_test_dir"
+    val source = dir + "/source.txt"
+    val target = dir + "/renamed.txt"
+    val createdOrExists = pathExists(dir) || createDirectory(dir)
+    val written = writeTextFile(source, "ok")
+    val renamed = renameFile(source, target)
+    val moved = readTextFile(target)
+    val sourceMissing = !pathExists(source)
+    val targetExists = pathExists(target)
+    val deletedTarget = deleteTextFile(target)
+    val deletedAgain = deleteTextFile(target)
+
+    if createdOrExists &&
+       written == 2 &&
+       renamed &&
+       moved == "ok" &&
+       sourceMissing &&
+       targetExists &&
+       deletedTarget &&
+       !deletedAgain {
+        42
+    } else {
+        1
+    }
+}

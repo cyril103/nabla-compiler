@@ -129,12 +129,13 @@ Le pipeline implemente actuellement :
 - lecture/ecriture de fichiers texte via `readFile`, `writeFile`,
   `appendFile`, `deleteFile`, `fileExists` et les wrappers `io.readTextFile` /
   `io.writeTextFile` / `io.appendTextFile` / `io.deleteTextFile` /
-  `io.pathExists`;
+  `io.renameTextFile` / `io.createDirectory` / `io.pathExists`;
 - parsing decimal de `String` vers `Int` via `parseInt(value)`;
 - module standard `strings` avec `words(text)` pour decouper une ligne en
   tokens separes par des espaces en ignorant les segments vides;
 - premier module de bibliotheque standard `io` avec `println`, `input` et les
-  wrappers `io.readTextFile`, `io.writeTextFile`, `io.appendTextFile` et
+  wrappers `io.readTextFile`, `io.writeTextFile`, `io.appendTextFile`,
+  `io.deleteTextFile`, `io.renameTextFile` et `io.createDirectory` /
   `io.pathExists`;
 - module de bibliotheque standard `util` avec `randomSeed`, `randomInt`,
   `randomIntRange`, `randomIntInRange`, `RandomChoiceResult`,
@@ -479,6 +480,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter les tests de vraie genericite `Array[String]`,
   `Array[Array[Int]]`, `Array[Option[String]]` et tableaux d'objets utilisateur.
 - [x] Etendre le fallback `ArrayObject[T]` vers `filter`, `fold` et `flatMap`.
+- [x] Ajouter les primitives `renameFile(from, to)` et `createDir(path)`.
+- [x] Exposer `io.renameTextFile` et `io.createDirectory`.
 
 ### P2 - Runtime Et Objets
 
@@ -613,6 +616,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `io.readTextFile` / `io.writeTextFile`.
 - `local` - Ajouter `fileExists`, `appendFile` et les wrappers
   `io.pathExists` / `io.appendTextFile`.
+- `local` - Ajouter `renameFile(from, to)` et `createDir(path)` avec wrappers
+  `io.renameTextFile` et `io.createDirectory`.
 - `local` - Documenter les conventions actuelles de l'IO fichier.
 - `local` - Ajouter la facade standard `arrayFold[T]` / `arrayFold[T, U]`.
 - `local` - Completer `arrayFlatMap[T]` pour toutes les facades primitives.
@@ -773,10 +778,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Poursuivre la suite outillée autour du runtime et du shell :
+Poursuivre la suite outillée autour du matching :
 
-- Ajouter des operations complementaires `renameFile(from, to)` et
-  `createDir(path)` sur l'I/O texte.
 - Raffiner la version V2 de `match` (garde par branche, motifs nommes si
   pertinents).
 - Completer le travail de diagnostics autour du pattern matching.

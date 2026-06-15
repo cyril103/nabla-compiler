@@ -1012,6 +1012,8 @@ std::string FunctionCallNode::getType() {
     if (name == "appendFile") return "Int";
     if (name == "fileExists") return "Bool";
     if (name == "deleteFile") return "Bool";
+    if (name == "renameFile") return "Bool";
+    if (name == "createDir") return "Bool";
     if (name == "parseInt") return "Int";
     if (name == "timeSeed") return "Int";
     return resolvedType;
@@ -1111,6 +1113,38 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
             throw CompilerError(
                 ErrorKind::Semantic, arguments[0]->getLocation(),
                 "deleteFile, paramètre 'path': type 'String' attendu, '" +
+                arguments[0]->getType() + "' reçu");
+        }
+        resolvedType = "Bool";
+        return;
+    }
+    if (name == "renameFile") {
+        if (arguments.size() != 2) {
+            semanticError("renameFile: 2 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
+        }
+        if (arguments[0]->getType() != "String") {
+            throw CompilerError(
+                ErrorKind::Semantic, arguments[0]->getLocation(),
+                "renameFile, paramètre 'from': type 'String' attendu, '" +
+                arguments[0]->getType() + "' reçu");
+        }
+        if (arguments[1]->getType() != "String") {
+            throw CompilerError(
+                ErrorKind::Semantic, arguments[1]->getLocation(),
+                "renameFile, paramètre 'to': type 'String' attendu, '" +
+                arguments[1]->getType() + "' reçu");
+        }
+        resolvedType = "Bool";
+        return;
+    }
+    if (name == "createDir") {
+        if (arguments.size() != 1) {
+            semanticError("createDir: 1 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
+        }
+        if (arguments[0]->getType() != "String") {
+            throw CompilerError(
+                ErrorKind::Semantic, arguments[0]->getLocation(),
+                "createDir, paramètre 'path': type 'String' attendu, '" +
                 arguments[0]->getType() + "' reçu");
         }
         resolvedType = "Bool";

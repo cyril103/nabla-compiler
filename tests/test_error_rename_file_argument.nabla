@@ -1,0 +1,7 @@
+def main(): Int = {
+    if renameFile("build/nabla_file.txt", 42) {
+        42
+    } else {
+        1
+    }
+}

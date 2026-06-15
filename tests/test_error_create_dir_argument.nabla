@@ -1,0 +1,7 @@
+def main(): Int = {
+    if createDir(42) {
+        42
+    } else {
+        1
+    }
+}
