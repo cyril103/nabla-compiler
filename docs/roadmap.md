@@ -41,14 +41,10 @@ pour reprendre facilement apres une pause.
      pour `ArrayObject[String]`.
    - Verifie avec `make test SRC=tests/test_array_object_string_mk_string.nabla`.
 
-3. Ameliorer `match` V2.
-   - Gardes de branches, par exemple `_ if condition => ...`.
-   - Eventuellement motifs de constantes nommees plus tard.
-   - Garder la V1 actuelle simple : litteraux + `_`.
-
-4. Nettoyer les diagnostics autour de `match` et `else if`.
-   - Messages plus specifiques pour les branches manquantes.
-   - Tests d'erreur pour branche apres `_`.
+3. Finaliser `match` V2.
+   - Ajouter les gardes de branche (`motif if condition`).
+   - Valider les gardes de type `Bool`.
+   - Ajouter des diagnostics dédiés pour la branche finale `_`.
 
 ## Pistes Plus Larges
 

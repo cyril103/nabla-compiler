@@ -247,6 +247,7 @@ public:
     struct Branch {
         bool isWildcard;
         std::unique_ptr<ASTNode> pattern;
+        std::unique_ptr<ASTNode> guard;
         std::unique_ptr<ASTNode> body;
         SourceLocation location;
     };

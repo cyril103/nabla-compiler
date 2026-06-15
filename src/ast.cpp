@@ -1440,6 +1440,12 @@ void MatchNode::validateSemantics(CompilerContext& context) {
     if (branches.empty()) {
         semanticError("match sans branches");
     }
+    if (!branches.back().isWildcard) {
+        semanticError("branche '_' finale attendue dans un match");
+    }
+    if (branches.back().guard) {
+        semanticError("la branche '_' finale ne peut pas avoir de garde");
+    }
     bool sawWildcard = false;
     for (const auto& branch : branches) {
         if (sawWildcard) {
@@ -1456,6 +1462,14 @@ void MatchNode::validateSemantics(CompilerContext& context) {
                     ErrorKind::Semantic, branch.pattern->getLocation(),
                     "motif de match: type '" + scrutineeType + "' attendu, '" +
                     branch.pattern->getType() + "' reçu");
+            }
+        }
+        if (branch.guard) {
+            branch.guard->validateSemantics(context);
+            if (branch.guard->getType() != "Bool") {
+                throw CompilerError(
+                    ErrorKind::Semantic, branch.guard->getLocation(),
+                    "la garde d'une branche de match doit être de type Bool");
             }
         }
         branch.body->validateSemantics(context);
@@ -1478,23 +1492,26 @@ std::string MatchNode::lowerToIR(IRBuilder& builder) const {
     std::string endLabel = builder.makeLabel("match.end");
     std::string scrutineeValue = scrutinee->lowerToIR(builder);
     std::vector<std::string> branchValues;
-    std::vector<std::string> nextLabels;
 
     for (size_t i = 0; i < branches.size(); ++i) {
         const auto& branch = branches[i];
+        const bool hasNextBranch = (i + 1) < branches.size();
+        std::string nextLabel = hasNextBranch ? builder.makeLabel("match.next") : endLabel;
         if (!branch.isWildcard) {
-            std::string nextLabel = builder.makeLabel("match.next");
             std::string patternValue = branch.pattern->lowerToIR(builder);
             std::string condition = scrutineeType == "String"
                 ? builder.emitMethodCall("String", "==", scrutineeValue, {patternValue}, "Bool")
                 : builder.emitBinary("==", scrutineeValue, patternValue, "Bool");
             builder.emitBranchIfFalse(condition, nextLabel);
-            nextLabels.push_back(nextLabel);
+        }
+        if (branch.guard) {
+            std::string guardValue = branch.guard->lowerToIR(builder);
+            builder.emitBranchIfFalse(guardValue, nextLabel);
         }
         branchValues.push_back(branch.body->lowerToIR(builder));
         builder.emitJump(endLabel);
-        if (!branch.isWildcard) {
-            builder.emitLabel(nextLabels.back());
+        if (hasNextBranch) {
+            builder.emitLabel(nextLabel);
         }
     }
 

@@ -193,18 +193,18 @@ std::unique_ptr<ASTNode> Parser::parseMatchExpression() {
     bool sawWildcard = false;
     while (peek().type != TokenType::RBRACE) {
         Token branchToken = peek();
+        if (sawWildcard) {
+            throw CompilerError(
+                ErrorKind::Parser, branchToken.location,
+                "aucune branche n'est autorisée après '_' dans un match");
+        }
         bool isWildcard = false;
         std::unique_ptr<ASTNode> pattern;
+        std::unique_ptr<ASTNode> guard;
         if (peek().type == TokenType::IDENTIFIER && peek().value == "_") {
             consume(TokenType::IDENTIFIER, "");
             isWildcard = true;
-            sawWildcard = true;
         } else {
-            if (sawWildcard) {
-                throw CompilerError(
-                    ErrorKind::Parser, branchToken.location,
-                    "aucune branche n'est autorisée après '_' dans un match");
-            }
             if (peek().type == TokenType::INT_LITERAL) {
                 Token token = consume(TokenType::INT_LITERAL, "");
                 pattern = located(std::make_unique<IntNode>(token.value), token.location);
@@ -235,6 +235,10 @@ std::unique_ptr<ASTNode> Parser::parseMatchExpression() {
                     "motif de match invalide: littéral ou '_' attendu");
             }
         }
+        if (peek().type == TokenType::KW_IF) {
+            consume(TokenType::KW_IF, "");
+            guard = parseExpression();
+        }
         consume(TokenType::FAT_ARROW, "'=>' attendu après le motif de match");
         std::unique_ptr<ASTNode> body;
         if (peek().type == TokenType::LBRACE) {
@@ -244,7 +248,10 @@ std::unique_ptr<ASTNode> Parser::parseMatchExpression() {
         } else {
             body = parseExpression();
         }
-        branches.push_back({isWildcard, std::move(pattern), std::move(body), branchToken.location});
+        if (isWildcard && !guard) {
+            sawWildcard = true;
+        }
+        branches.push_back({isWildcard, std::move(pattern), std::move(guard), std::move(body), branchToken.location});
     }
     consume(TokenType::RBRACE, "Fin du bloc 'match' attendue");
     if (branches.empty()) {

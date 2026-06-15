@@ -1,0 +1,13 @@
+
+
+def classify(value: Int): Int = {
+    match value {
+        1 if value > 1 => 10
+        1 if value == 1 => 20
+        _ => 30
+    }
+}
+
+def main(): Int = {
+    classify(0) + classify(1) + classify(2)
+}

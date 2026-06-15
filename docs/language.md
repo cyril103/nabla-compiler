@@ -159,7 +159,8 @@ def sumTo(limit: Int): Int = {
 
 `match` compare une expression a des motifs litteraux avec `==`. Les motifs
 supportes sont les litteraux `Int`, `Long`, `Float`, `Double`, `Bool`, `String`
-et `Char`, plus la branche finale obligatoire `_`.
+et `Char`, et peut aussi ajouter une garde de branche avec `if`.
+La branche finale obligatoire reste `_`.
 
 ```nabla
 def commandCode(command: String): Int = {
@@ -167,6 +168,18 @@ def commandCode(command: String): Int = {
         "add" => 1
         "quit" => 2
         _ => 0
+    }
+}
+```
+
+On peut aussi filtrer une branche avec une garde booléenne :
+
+```nabla
+def isEvenOrDefault(value: Int): Int = {
+    match value {
+        1 => 10
+        2 if value > 1 => 20
+        _ => 99
     }
 }
 ```
