@@ -1,0 +1,37 @@
+def reverseInt(value: Int): Int = {
+    var remaining = value
+    var reversed = 0
+
+    while remaining > 0 {
+        reversed = reversed * 10 + remaining % 10
+        remaining = remaining / 10
+    }
+
+    reversed
+}
+
+def isPalindrome(value: Int): Bool = {
+    value == reverseInt(value)
+}
+
+def main(): Int = {
+    var largest = 0
+    var left = 100
+
+    while left < 1000 {
+        var right = left
+        while right < 1000 {
+            val product = left * right
+            if product > largest && isPalindrome(product) {
+                largest = product
+            } else {
+                largest = largest
+            }
+            right = right + 1
+        }
+        left = left + 1
+    }
+
+    print(largest.toString())
+    0
+}
