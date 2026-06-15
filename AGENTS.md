@@ -436,6 +436,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `local` - Ajouter `String.repeat(count)`.
 - `local` - Ajouter `String.trim`.
 - `local` - Ajouter `String.split(separator)`.
+- `local` - Ajouter `examples/command_shell.nabla` pour demontrer
+  `readLine`, `trim`, `split`, `repeat` et `toInt`.
 - `local` - Ajouter `String.indexOf` et `String.contains`.
 - `local` - Ajouter `String.+` et `mkString` pour `ArrayInt`, `ArrayLong`,
   `ArrayBool` et `Array[String]`.

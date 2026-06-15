@@ -1,0 +1,91 @@
+import io
+import collections.array
+
+def printHelp(): Unit = {
+    println("commands: add A B | repeat TEXT N | len TEXT | help | quit")
+}
+
+def commandName(line: String): String = {
+    val parts = line.trim().split(" ")
+    if parts.isEmpty() {
+        ""
+    } else {
+        parts.get(0)
+    }
+}
+
+def runAdd(parts: ArrayObject[String]): Unit = {
+    if parts.size() == 3 {
+        val left = parts.get(1).toInt()
+        val right = parts.get(2).toInt()
+        println((left + right).toString())
+    } else {
+        println("usage: add A B")
+    }
+}
+
+def runRepeat(parts: ArrayObject[String]): Unit = {
+    if parts.size() == 3 {
+        println(parts.get(1).repeat(parts.get(2).toInt()))
+    } else {
+        println("usage: repeat TEXT N")
+    }
+}
+
+def runLen(parts: ArrayObject[String]): Unit = {
+    if parts.size() == 2 {
+        println(parts.get(1).length().toString())
+    } else {
+        println("usage: len TEXT")
+    }
+}
+
+def runCommand(line: String): Bool = {
+    val cleaned = line.trim()
+    val parts = cleaned.split(" ")
+    val command = commandName(cleaned)
+
+    if command == "" {
+        false
+    } else {
+        if command == "quit" {
+            false
+        } else {
+            if command == "help" {
+                printHelp()
+                true
+            } else {
+                if command == "add" {
+                    runAdd(parts)
+                    true
+                } else {
+                    if command == "repeat" {
+                        runRepeat(parts)
+                        true
+                    } else {
+                        if command == "len" {
+                            runLen(parts)
+                            true
+                        } else {
+                            println("unknown command: " + command)
+                            true
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+def main(): Int = {
+    println("Nabla command shell")
+    printHelp()
+
+    var running = true
+    while (running) {
+        print("> ")
+        running = runCommand(input())
+    }
+
+    42
+}
