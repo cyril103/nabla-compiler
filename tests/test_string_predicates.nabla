@@ -9,7 +9,11 @@ def main(): Int = {
        text.startsWith("nab") &&
        text.startsWith("") &&
        !text.startsWith("lab") &&
-       !text.startsWith("nabla!") {
+       !text.startsWith("nabla!") &&
+       text.endsWith("bla") &&
+       text.endsWith("") &&
+       !text.endsWith("lab") &&
+       !text.endsWith("!nabla") {
         42
     } else {
         1

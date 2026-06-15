@@ -107,7 +107,7 @@ Le pipeline implemente actuellement :
 - chaines `String` stockees comme buffers de bytes, avec `length` et
   `charAt(index): Char`, `toCharArray(): ArrayObject[Char]`, `toInt`,
   `substring(from, until)`, `indexOf`, `contains`, `isEmpty`, `nonEmpty`,
-  `startsWith`, `+`, `==` et `!=`;
+  `startsWith`, `endsWith`, `+`, `==` et `!=`;
 - jointure texte de tableaux via `ArrayInt` / `ArrayLong` /
   `ArrayBool.mkString(separator)` et `arrayMkString[Int/Long/Bool/String]`;
 - affichage console de `String` via la primitive globale `print`;
@@ -286,7 +286,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter les booleens et typer les conditions en `Bool`.
 - [x] Ajouter `Char` ASCII, les litteraux de caractere et `String.charAt`.
 - [x] Ajouter `String.==` et `String.!=` byte-based.
-- [x] Ajouter `String.isEmpty`, `nonEmpty` et `startsWith`.
+- [x] Ajouter `String.isEmpty`, `nonEmpty`, `startsWith` et `endsWith`.
 - [x] Ajouter `String.toInt` et `parseInt`.
 - [x] Ajouter `String.toCharArray` vers `ArrayObject[Char]`.
 - [x] Ajouter `String.substring(from, until)`.
@@ -425,7 +425,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 - `local` - Ajouter `Char` ASCII et `String.charAt(index): Char`.
 - `local` - Ajouter `String.==` et `String.!=`.
-- `local` - Ajouter `String.isEmpty`, `nonEmpty` et `startsWith`.
+- `local` - Ajouter `String.isEmpty`, `nonEmpty`, `startsWith` et `endsWith`.
 - `local` - Ajouter `String.toInt` et `parseInt(value)`.
 - `local` - Ajouter `String.toCharArray(): ArrayObject[Char]`.
 - `local` - Ajouter `String.substring(from, until)`.

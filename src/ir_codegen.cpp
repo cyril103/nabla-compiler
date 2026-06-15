@@ -817,6 +817,8 @@ private:
             }
         } else if (className == "String" && methodName == "startsWith") {
             out << "    call Runtime_stringStartsWith\n";
+        } else if (className == "String" && methodName == "endsWith") {
+            out << "    call Runtime_stringEndsWith\n";
         } else if (className == "String" && methodName == "indexOf") {
             out << "    call Runtime_stringIndexOf\n";
         } else if (className == "String" && methodName == "contains") {

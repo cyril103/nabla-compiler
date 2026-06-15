@@ -1,0 +1,1 @@
+tests/test_error_string_ends_with_type.nabla:2:22: semantic error: la méthode String.endsWith attend un argument de type String
