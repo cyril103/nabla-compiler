@@ -79,6 +79,9 @@ Collections et types standard :
 Les chaines et caracteres sont actuellement byte-based/ASCII pour les operations
 de longueur, indexation et decoupe.
 
+Les types numeriques supportent `+`, `-`, `*`, `/` et les comparaisons. Le
+reste de division `%` est disponible pour `Int` et `Long`.
+
 ## Variables
 
 `val` declare une valeur non reassignee. `var` declare une variable mutable.

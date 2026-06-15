@@ -9,7 +9,8 @@ bool isComparisonMethod(const std::string& methodName) {
 }
 
 bool isArithmeticMethod(const std::string& methodName) {
-    return methodName == "+" || methodName == "-" || methodName == "*" || methodName == "/";
+    return methodName == "+" || methodName == "-" || methodName == "*" || methodName == "/" ||
+           methodName == "%";
 }
 
 bool isIntegerType(const std::string& type) {
@@ -428,6 +429,9 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
     if (isNumericType(receiverType)) {
         const bool binaryMethod = isArithmeticMethod(methodName) || isComparisonMethod(methodName);
         if (binaryMethod) {
+            if (methodName == "%" && !isIntegerType(receiverType)) {
+                semanticError("méthode inconnue: " + receiverType + "." + methodName);
+            }
             if (arguments.size() != 1) {
                 semanticError("la méthode " + receiverType + "." + methodName + " attend un argument");
             }
@@ -737,7 +741,7 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
             return builder.emitMethodCall(receiverType, "toString", loweredReceiver, {}, "String");
         }
         const std::vector<std::string> supported = {
-            "+", "-", "*", "/", "==", "!=", "<", ">", "<=", ">="
+            "+", "-", "*", "/", "%", "==", "!=", "<", ">", "<=", ">="
         };
         if (std::find(supported.begin(), supported.end(), methodName) == supported.end()) {
             builder.unsupported(location, "la méthode " + receiverType + "." + methodName);

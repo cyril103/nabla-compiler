@@ -945,7 +945,8 @@ std::unique_ptr<ASTNode> Parser::parseUnary() {
 
 std::unique_ptr<ASTNode> Parser::parseMultiplicative() {
     auto expr = parseUnary();
-    while (peek().type == TokenType::STAR || peek().type == TokenType::SLASH) {
+    while (peek().type == TokenType::STAR || peek().type == TokenType::SLASH ||
+           peek().type == TokenType::PERCENT) {
         Token op = tokens[index++];
         auto right = parseUnary();
         std::vector<std::unique_ptr<ASTNode>> arguments;
@@ -1216,6 +1217,7 @@ std::vector<std::string> Parser::expectedArgumentTypesForMethodCall(
     if (receiverType == "Int" || receiverType == "Long" || receiverType == "Float" || receiverType == "Double") {
         const bool binaryMethod =
             methodName == "+" || methodName == "-" || methodName == "*" || methodName == "/" ||
+            ((receiverType == "Int" || receiverType == "Long") && methodName == "%") ||
             methodName == "==" || methodName == "!=" || methodName == "<" || methodName == ">" ||
             methodName == "<=" || methodName == ">=";
         if (binaryMethod) return {receiverType};

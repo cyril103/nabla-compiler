@@ -97,6 +97,7 @@ Le pipeline implemente actuellement :
   `Bool`;
 - operateurs booleens `&&`, `||` et `!`, avec court-circuit pour `&&` et
   `||`;
+- operateur reste de division `%` pour `Int` et `Long`;
 - collection native `IntArray` avec `length`, `get` et `set`;
 - collection native `LongArray` avec `length`, `get` et `set`;
 - collection native `FloatArray` avec `length`, `get` et `set`;
@@ -311,6 +312,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `ArrayBool` et `Array[String]`.
 - [x] Ajouter les operateurs booleens `&&`, `||` et `!`.
 - [x] Ajouter le court-circuit pour `&&` et `||`.
+- [x] Ajouter le reste de division `%` pour `Int` et `Long`.
 - [ ] Ajouter les champs et methodes herites si l'heritage est retenu.
 - [ ] Valider les types des branches, boucles et operateurs de facon uniforme.
 - [x] Ajouter une premiere syntaxe de types parametres pour `Option[Int]` et
@@ -456,6 +458,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `6751bd6` - Montrer l'I/O fichier dans `examples/command_shell.nabla`.
 - `290fbab` - Lire les fichiers texte complets.
 - `17b184f` - Documenter les helpers d'I/O texte.
+- `local` - Ajouter l'operateur `%` pour `Int` et `Long`, avec tests Project
+  Euler 1 imperatif et `ArrayInt.range/filter/sum`.
 - `local` - Ajouter `Char` ASCII et `String.charAt(index): Char`.
 - `local` - Ajouter `String.==` et `String.!=`.
 - `local` - Ajouter `String.isEmpty`, `nonEmpty`, `startsWith` et `endsWith`.

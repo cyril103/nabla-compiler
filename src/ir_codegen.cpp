@@ -349,6 +349,8 @@ private:
             out << "    sar rax, 1\n    sar rbx, 1\n    imul rax, rbx\n    shl rax, 1\n    or rax, 1\n";
         } else if (op == "/") {
             out << "    sar rax, 1\n    sar rbx, 1\n    cqo\n    idiv rbx\n    shl rax, 1\n    or rax, 1\n";
+        } else if (op == "%") {
+            out << "    sar rax, 1\n    sar rbx, 1\n    cqo\n    idiv rbx\n    mov rax, rdx\n    shl rax, 1\n    or rax, 1\n";
         } else if (op == "==" || op == "!=" || op == "<" || op == ">" || op == "<=" || op == ">=") {
             out << "    sar rax, 1\n    sar rbx, 1\n    cmp rax, rbx\n";
             if (op == "==") out << "    sete al\n";
