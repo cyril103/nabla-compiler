@@ -136,7 +136,7 @@ Le pipeline implemente actuellement :
   `any`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
 - module de bibliotheque standard `collections.array` comme point d'entree
   commun pour les tableaux specialises, avec `arrayFill[T]`, `arrayMap[T]`,
-  `arrayMap[T, U]`, `arrayFlatMap[T]`, `arrayFlatMap[T, U]` et
+  `arrayMap[T, U]`, `arrayFilter[T]`, `arrayFlatMap[T]`, `arrayFlatMap[T, U]` et
   `arrayForeach[T]` resolus vers les specialisations `ArrayInt`, `ArrayLong`,
   `ArrayFloat`, `ArrayDouble` ou `ArrayBool` pour `T = Int`, `Long`, `Float`,
   `Double` ou `Bool`, et vers `ArrayObject[T]` pour les types concrets non
@@ -178,7 +178,7 @@ Limites importantes :
   facade specialisee vers `ArrayFloat`; `Array[Double]` reste une facade
   specialisee vers `ArrayDouble`; `Array[Bool]` reste une facade specialisee
   vers `ArrayBool`; `arrayFill[T]`, `arrayMap[T]`, `arrayMap[T, U]`,
-  `arrayFlatMap[T]`, `arrayFlatMap[T, U]` et `arrayForeach[T]` sont des
+  `arrayFilter[T]`, `arrayFlatMap[T]`, `arrayFlatMap[T, U]` et `arrayForeach[T]` sont des
   fonctions standard generiques specialisees pour `Int`, `Long`, `Float`,
   `Double` et `Bool`, mais pas encore une implementation unique de tableau
   generique; `arrayMap[Primitive, U]`, `arrayFlatMap[Primitive, U]`,
@@ -355,6 +355,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `ArrayObject[T].flatMap[U]`.
 - [x] Etendre `ArrayObject[T].map` en `map[U]`.
 - [x] Ajouter `arrayMap[Primitive, U]` vers `ArrayObject[U]`.
+- [x] Ajouter `arrayFilter[T]`.
 - [x] Ajouter `arrayFlatMap[T]` et `arrayFlatMap[T, U]`.
 - [x] Ajouter `mapObject[U]` sur les facades primitives.
 - [x] Ajouter `flatMapObject[U]` sur les facades primitives.
@@ -393,6 +394,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Ajouter la facade standard `arrayFilter[T]`.
 - `local` - Factoriser le routage des aliases standards de tableaux dans
   `compiler_context.hpp`.
 - `local` - Ajouter la facade standard `arrayFlatMap[T]` / `arrayFlatMap[T, U]`.

@@ -1,0 +1,49 @@
+import collections.array
+
+def keepInt(value: Int): Bool = {
+    value > 0
+}
+
+def keepLong(value: Long): Bool = {
+    value > 2L
+}
+
+def keepFloat(value: Float): Bool = {
+    value > 1.0F
+}
+
+def keepDouble(value: Double): Bool = {
+    value > 1.0
+}
+
+def keepBool(value: Bool): Bool = {
+    value
+}
+
+def keepWord(value: String): Bool = {
+    value.length() > 2
+}
+
+def main(): Int = {
+    val ints = arrayFilter[Int](arrayIntRange(3), keepInt)
+    val longs = arrayFilter[Long](arrayFill[Long](2, 4L), keepLong)
+    val floats = arrayFilter[Float](arrayFill[Float](2, 1.5F), keepFloat)
+    val doubles = arrayFilter[Double](arrayFill[Double](2, 2.5), keepDouble)
+    val bools = arrayFilter[Bool](arrayFill[Bool](3, true), keepBool)
+    val words = arrayFill[String](3, "hi")
+    words.set(1, "hello")
+    val longWords = arrayFilter[String](words, keepWord)
+
+    if ints.size() == 2 &&
+       ints.sum() == 3 &&
+       longs.size() == 2 &&
+       floats.size() == 2 &&
+       doubles.size() == 2 &&
+       bools.countTrue() == 3 &&
+       longWords.size() == 1 &&
+       longWords.get(0).length() == 5 {
+        42
+    } else {
+        1
+    }
+}

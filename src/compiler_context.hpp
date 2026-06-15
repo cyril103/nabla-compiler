@@ -89,6 +89,11 @@ inline const std::vector<StdlibFunctionAlias>& stdlibFunctionAliases() {
         {"arrayMap", {"Float"}, "arrayFloatMap"},
         {"arrayMap", {"Double"}, "arrayDoubleMap"},
         {"arrayMap", {"Bool"}, "arrayBoolMap"},
+        {"arrayFilter", {"Int"}, "arrayIntFilter"},
+        {"arrayFilter", {"Long"}, "arrayLongFilter"},
+        {"arrayFilter", {"Float"}, "arrayFloatFilter"},
+        {"arrayFilter", {"Double"}, "arrayDoubleFilter"},
+        {"arrayFilter", {"Bool"}, "arrayBoolFilter"},
         {"arrayFlatMap", {"Int"}, "arrayIntFlatMap"},
         {"arrayForeach", {"Int"}, "arrayIntForeach"},
         {"arrayForeach", {"Long"}, "arrayLongForeach"},
@@ -138,6 +143,7 @@ inline std::optional<std::string> resolveStdlibFunctionAlias(
     if (typeArguments.size() == 1 && !isPrimitiveArrayElementType(typeArguments[0])) {
         if (name == "arrayFill") return "objectArrayFill";
         if (name == "arrayMap") return "objectArrayMapSame";
+        if (name == "arrayFilter") return "objectArrayFilter";
         if (name == "arrayForeach") return "objectArrayForeach";
     }
     if (typeArguments.size() == 2 && !isPrimitiveArrayElementType(typeArguments[0])) {

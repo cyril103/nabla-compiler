@@ -742,6 +742,10 @@ def arrayIntFlatMap(xs: ArrayInt, transform: (Int) => ArrayInt): ArrayInt = {
     xs.flatMap(transform)
 }
 
+def arrayIntFilter(xs: ArrayInt, predicate: (Int) => Bool): ArrayInt = {
+    xs.filter(predicate)
+}
+
 def arrayIntMapObject[T, U](xs: ArrayInt, f: (Int) => U): ArrayObject[U] = {
     intArrayMapObject[U](xs.raw(), f)
 }
