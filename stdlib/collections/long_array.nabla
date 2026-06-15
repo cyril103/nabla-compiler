@@ -1,4 +1,5 @@
 import collections.object_array
+import util
 
 def longArrayFill(size: Int, value: Long): LongArray = {
     val xs = new LongArray(size)
@@ -130,6 +131,27 @@ def longArrayFilter(xs: LongArray, predicate: (Long) => Bool): LongArray = {
     filtered
 }
 
+def longArrayShuffle(xs: LongArray, state: RandomState): LongArray = {
+    val shuffled = new LongArray(xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        shuffled.set(index, xs.get(index))
+        index = index + 1
+    }
+    var cursor = state
+    index = xs.length() - 1
+    while (index > 0) {
+        val selected = randomIntRange(cursor, 0, index)
+        val j = selected.value()
+        val left = shuffled.get(index)
+        shuffled.set(index, shuffled.get(j))
+        shuffled.set(j, left)
+        cursor = selected.state()
+        index = index - 1
+    }
+    shuffled
+}
+
 def longArrayFold(xs: LongArray, initial: Long, combine: (Long, Long) => Long): Long = {
     var index = 0
     var accumulator = initial
@@ -193,6 +215,10 @@ class ArrayLong(values: LongArray) {
         new ArrayLong(longArrayFilter(values, predicate))
     }
 
+    def shuffle(state: RandomState): ArrayLong = {
+        new ArrayLong(longArrayShuffle(values, state))
+    }
+
     def fold(initial: Long, combine: (Long, Long) => Long): Long = {
         longArrayFold(values, initial, combine)
     }
@@ -212,6 +238,10 @@ class ArrayLong(values: LongArray) {
 
 def arrayLongFill(size: Int, value: Long): ArrayLong = {
     new ArrayLong(longArrayFill(size, value))
+}
+
+def arrayLongShuffle(xs: ArrayLong, state: RandomState): ArrayLong = {
+    xs.shuffle(state)
 }
 
 def arrayLongMap(xs: ArrayLong, f: (Long) => Long): ArrayLong = {

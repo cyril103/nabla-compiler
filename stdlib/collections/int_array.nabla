@@ -1,5 +1,6 @@
 import core.option_int
 import collections.object_array
+import util
 
 def intClamp(value: Int, minimum: Int, maximum: Int): Int = {
     if value < minimum {
@@ -70,6 +71,27 @@ def intArrayRangeUntil(start: Int, until: Int): IntArray = {
         index = index + 1
     }
     xs
+}
+
+def intArrayShuffle(xs: IntArray, state: RandomState): IntArray = {
+    val shuffled = new IntArray(xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        shuffled.set(index, xs.get(index))
+        index = index + 1
+    }
+    var cursor = state
+    index = xs.length() - 1
+    while (index > 0) {
+        val selected = randomIntRange(cursor, 0, index)
+        val j = selected.value()
+        val left = shuffled.get(index)
+        shuffled.set(index, shuffled.get(j))
+        shuffled.set(j, left)
+        cursor = selected.state()
+        index = index - 1
+    }
+    shuffled
 }
 
 class RangeInt(startValue: Int, untilValue: Int) {
@@ -901,6 +923,10 @@ class ArrayInt(values: IntArray) {
         new ArrayInt(intArrayReverse(values))
     }
 
+    def shuffle(state: RandomState): ArrayInt = {
+        new ArrayInt(intArrayShuffle(values, state))
+    }
+
     def concat(other: ArrayInt): ArrayInt = {
         new ArrayInt(intArrayConcat(values, other.raw()))
     }
@@ -1148,6 +1174,10 @@ def arrayIntRange(size: Int): ArrayInt = {
 
 def arrayIntRangeUntil(start: Int, until: Int): ArrayInt = {
     new ArrayInt(intArrayRangeUntil(start, until))
+}
+
+def arrayIntShuffle(xs: ArrayInt, state: RandomState): ArrayInt = {
+    xs.shuffle(state)
 }
 
 def intRangeUntil(start: Int, until: Int): RangeInt = {

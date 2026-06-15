@@ -1,4 +1,5 @@
 import collections.object_array
+import util
 
 def boolArrayFill(size: Int, value: Bool): BoolArray = {
     val xs = new BoolArray(size)
@@ -170,6 +171,27 @@ def boolArrayFilter(xs: BoolArray, predicate: (Bool) => Bool): BoolArray = {
     filtered
 }
 
+def boolArrayShuffle(xs: BoolArray, state: RandomState): BoolArray = {
+    val shuffled = new BoolArray(xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        shuffled.set(index, xs.get(index))
+        index = index + 1
+    }
+    var cursor = state
+    index = xs.length() - 1
+    while (index > 0) {
+        val selected = randomIntRange(cursor, 0, index)
+        val j = selected.value()
+        val left = shuffled.get(index)
+        shuffled.set(index, shuffled.get(j))
+        shuffled.set(j, left)
+        cursor = selected.state()
+        index = index - 1
+    }
+    shuffled
+}
+
 def boolArrayFold(xs: BoolArray, initial: Bool, combine: (Bool, Bool) => Bool): Bool = {
     var index = 0
     var accumulator = initial
@@ -241,6 +263,10 @@ class ArrayBool(values: BoolArray) {
         new ArrayBool(boolArrayFilter(values, predicate))
     }
 
+    def shuffle(state: RandomState): ArrayBool = {
+        new ArrayBool(boolArrayShuffle(values, state))
+    }
+
     def fold(initial: Bool, combine: (Bool, Bool) => Bool): Bool = {
         boolArrayFold(values, initial, combine)
     }
@@ -284,6 +310,10 @@ def arrayBoolFlatMap(xs: ArrayBool, transform: (Bool) => ArrayBool): ArrayBool =
 
 def arrayBoolFilter(xs: ArrayBool, predicate: (Bool) => Bool): ArrayBool = {
     xs.filter(predicate)
+}
+
+def arrayBoolShuffle(xs: ArrayBool, state: RandomState): ArrayBool = {
+    xs.shuffle(state)
 }
 
 def arrayBoolFold(xs: ArrayBool, initial: Bool, combine: (Bool, Bool) => Bool): Bool = {

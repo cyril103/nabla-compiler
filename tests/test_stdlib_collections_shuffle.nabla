@@ -1,0 +1,118 @@
+import collections.bool_array
+import collections.double_array
+import collections.float_array
+import collections.long_array
+import collections.int_array
+import collections.object_array
+import util
+
+
+def intShuffleOk(): Bool = {
+    val source = new ArrayInt(new IntArray(5))
+    source.raw().set(0, 1)
+    source.raw().set(1, 2)
+    source.raw().set(2, 3)
+    source.raw().set(3, 4)
+    source.raw().set(4, 5)
+
+    val shuffled = source.shuffle(randomSeed(123))
+    shuffled.get(0) == 3 &&
+    shuffled.get(1) == 2 &&
+    shuffled.get(2) == 4 &&
+    shuffled.get(3) == 1 &&
+    shuffled.get(4) == 5
+}
+
+def longShuffleOk(): Bool = {
+    val source = new ArrayLong(new LongArray(5))
+    source.raw().set(0, 10L)
+    source.raw().set(1, 20L)
+    source.raw().set(2, 30L)
+    source.raw().set(3, 40L)
+    source.raw().set(4, 50L)
+
+    val shuffled = source.shuffle(randomSeed(123))
+    shuffled.get(0) == 30L &&
+    shuffled.get(1) == 20L &&
+    shuffled.get(2) == 40L &&
+    shuffled.get(3) == 10L &&
+    shuffled.get(4) == 50L
+}
+
+def floatShuffleOk(): Bool = {
+    val source = new ArrayFloat(new FloatArray(5))
+    source.raw().set(0, 1.0F)
+    source.raw().set(1, 2.0F)
+    source.raw().set(2, 3.0F)
+    source.raw().set(3, 4.0F)
+    source.raw().set(4, 5.0F)
+
+    val shuffled = source.shuffle(randomSeed(123))
+    shuffled.get(0) == 3.0F &&
+    shuffled.get(1) == 2.0F &&
+    shuffled.get(2) == 4.0F &&
+    shuffled.get(3) == 1.0F &&
+    shuffled.get(4) == 5.0F
+}
+
+def doubleShuffleOk(): Bool = {
+    val source = new ArrayDouble(new DoubleArray(5))
+    source.raw().set(0, 1.0)
+    source.raw().set(1, 2.0)
+    source.raw().set(2, 3.0)
+    source.raw().set(3, 4.0)
+    source.raw().set(4, 5.0)
+
+    val shuffled = source.shuffle(randomSeed(123))
+    shuffled.get(0) == 3.0 &&
+    shuffled.get(1) == 2.0 &&
+    shuffled.get(2) == 4.0 &&
+    shuffled.get(3) == 1.0 &&
+    shuffled.get(4) == 5.0
+}
+
+def boolShuffleOk(): Bool = {
+    val source = new ArrayBool(new BoolArray(5))
+    source.raw().set(0, true)
+    source.raw().set(1, false)
+    source.raw().set(2, true)
+    source.raw().set(3, false)
+    source.raw().set(4, true)
+
+    val shuffled = source.shuffle(randomSeed(123))
+    shuffled.get(0) &&
+    !shuffled.get(1) &&
+    !shuffled.get(2) &&
+    shuffled.get(3) &&
+    shuffled.get(4)
+}
+
+def objectShuffleOk(): Bool = {
+    val values = new ObjectArray[String](5)
+    values.set(0, "a")
+    values.set(1, "b")
+    values.set(2, "c")
+    values.set(3, "d")
+    values.set(4, "e")
+    val source = new ArrayObject[String](values)
+
+    val shuffled = objectArrayShuffle(source, randomSeed(123))
+    shuffled.get(0) == "c" &&
+    shuffled.get(1) == "b" &&
+    shuffled.get(2) == "d" &&
+    shuffled.get(3) == "a" &&
+    shuffled.get(4) == "e"
+}
+
+def main(): Int = {
+    if intShuffleOk() &&
+       longShuffleOk() &&
+       floatShuffleOk() &&
+       doubleShuffleOk() &&
+       boolShuffleOk() &&
+       objectShuffleOk() {
+        42
+    } else {
+        1
+    }
+}

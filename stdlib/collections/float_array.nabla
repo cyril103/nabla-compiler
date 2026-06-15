@@ -1,4 +1,5 @@
 import collections.object_array
+import util
 
 def floatArrayFill(size: Int, value: Float): FloatArray = {
     val xs = new FloatArray(size)
@@ -106,6 +107,27 @@ def floatArrayFilter(xs: FloatArray, predicate: (Float) => Bool): FloatArray = {
     filtered
 }
 
+def floatArrayShuffle(xs: FloatArray, state: RandomState): FloatArray = {
+    val shuffled = new FloatArray(xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        shuffled.set(index, xs.get(index))
+        index = index + 1
+    }
+    var cursor = state
+    index = xs.length() - 1
+    while (index > 0) {
+        val selected = randomIntRange(cursor, 0, index)
+        val j = selected.value()
+        val left = shuffled.get(index)
+        shuffled.set(index, shuffled.get(j))
+        shuffled.set(j, left)
+        cursor = selected.state()
+        index = index - 1
+    }
+    shuffled
+}
+
 def floatArrayFold(xs: FloatArray, initial: Float, combine: (Float, Float) => Float): Float = {
     var index = 0
     var accumulator = initial
@@ -161,6 +183,10 @@ class ArrayFloat(values: FloatArray) {
         new ArrayFloat(floatArrayFilter(values, predicate))
     }
 
+    def shuffle(state: RandomState): ArrayFloat = {
+        new ArrayFloat(floatArrayShuffle(values, state))
+    }
+
     def fold(initial: Float, combine: (Float, Float) => Float): Float = {
         floatArrayFold(values, initial, combine)
     }
@@ -180,6 +206,10 @@ class ArrayFloat(values: FloatArray) {
 
 def arrayFloatFill(size: Int, value: Float): ArrayFloat = {
     new ArrayFloat(floatArrayFill(size, value))
+}
+
+def arrayFloatShuffle(xs: ArrayFloat, state: RandomState): ArrayFloat = {
+    xs.shuffle(state)
 }
 
 def arrayFloatMap(xs: ArrayFloat, f: (Float) => Float): ArrayFloat = {

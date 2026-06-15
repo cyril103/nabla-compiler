@@ -1,4 +1,5 @@
 import collections.object_array
+import util
 
 def doubleArrayFill(size: Int, value: Double): DoubleArray = {
     val xs = new DoubleArray(size)
@@ -106,6 +107,27 @@ def doubleArrayFilter(xs: DoubleArray, predicate: (Double) => Bool): DoubleArray
     filtered
 }
 
+def doubleArrayShuffle(xs: DoubleArray, state: RandomState): DoubleArray = {
+    val shuffled = new DoubleArray(xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        shuffled.set(index, xs.get(index))
+        index = index + 1
+    }
+    var cursor = state
+    index = xs.length() - 1
+    while (index > 0) {
+        val selected = randomIntRange(cursor, 0, index)
+        val j = selected.value()
+        val left = shuffled.get(index)
+        shuffled.set(index, shuffled.get(j))
+        shuffled.set(j, left)
+        cursor = selected.state()
+        index = index - 1
+    }
+    shuffled
+}
+
 def doubleArrayFold(xs: DoubleArray, initial: Double, combine: (Double, Double) => Double): Double = {
     var index = 0
     var accumulator = initial
@@ -161,6 +183,10 @@ class ArrayDouble(values: DoubleArray) {
         new ArrayDouble(doubleArrayFilter(values, predicate))
     }
 
+    def shuffle(state: RandomState): ArrayDouble = {
+        new ArrayDouble(doubleArrayShuffle(values, state))
+    }
+
     def fold(initial: Double, combine: (Double, Double) => Double): Double = {
         doubleArrayFold(values, initial, combine)
     }
@@ -180,6 +206,10 @@ class ArrayDouble(values: DoubleArray) {
 
 def arrayDoubleFill(size: Int, value: Double): ArrayDouble = {
     new ArrayDouble(doubleArrayFill(size, value))
+}
+
+def arrayDoubleShuffle(xs: ArrayDouble, state: RandomState): ArrayDouble = {
+    xs.shuffle(state)
 }
 
 def arrayDoubleMap(xs: ArrayDouble, f: (Double) => Double): ArrayDouble = {

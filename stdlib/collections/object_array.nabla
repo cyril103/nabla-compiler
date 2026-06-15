@@ -1,3 +1,5 @@
+import util
+
 def objectArrayFill[T](size: Int, value: T): ArrayObject[T] = {
     val xs = new ObjectArray[T](size)
     var index = 0
@@ -14,6 +16,10 @@ def objectArrayMap[T, U](xs: ArrayObject[T], f: (T) => U): ArrayObject[U] = {
 
 def objectArrayMapSame[T](xs: ArrayObject[T], f: (T) => T): ArrayObject[T] = {
     xs.map[T](f)
+}
+
+def objectArrayShuffle[T](xs: ArrayObject[T], state: RandomState): ArrayObject[T] = {
+    xs.shuffle(state)
 }
 
 def objectArrayForeach[T](xs: ArrayObject[T], f: (T) => Unit): Unit = {
@@ -69,6 +75,27 @@ class ArrayObject[T](values: ObjectArray[T]) {
 
     def set(index: Int, value: T): Unit = {
         values.set(index, value)
+    }
+
+    def shuffle(state: RandomState): ArrayObject[T] = {
+        val shuffled = new ObjectArray[T](values.length())
+        var index = 0
+        while (index < values.length()) {
+            shuffled.set(index, values.get(index))
+            index = index + 1
+        }
+        var cursor = state
+        index = values.length() - 1
+        while (index > 0) {
+            val selected = randomIntRange(cursor, 0, index)
+            val j = selected.value()
+            val left = shuffled.get(index)
+            shuffled.set(index, shuffled.get(j))
+            shuffled.set(j, left)
+            cursor = selected.state()
+            index = index - 1
+        }
+        new ArrayObject[T](shuffled)
     }
 
     def map[U](f: (T) => U): ArrayObject[U] = {

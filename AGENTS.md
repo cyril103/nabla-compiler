@@ -162,7 +162,7 @@ Le pipeline implemente actuellement :
   `getOption`, `headOption`, `lastOption`, `takeWhile`, `dropWhile`,
   `takeRight`, `dropRight`, `span`, `partition`, `flatMap`,
   `zipWithIndex`, `grouped`, `ArrayIntNested`, `ArrayIntNested.flatten()`,
-  `ArrayIntNested.rowSize` et `ArrayIntNested.mapRows`.
+  `ArrayIntNested.rowSize`, `ArrayIntNested.mapRows` et `shuffle`.
   avec predicats booleens;
 - plage lazy specialisee `RangeInt` via `intRangeUntil(start, until)`, avec
   `size`, `isEmpty`, `nonEmpty`, `foreach`, `fold`, `exists`, `forall`,
@@ -170,17 +170,23 @@ Le pipeline implemente actuellement :
 - module de bibliotheque standard `collections.long_array` avec `ArrayLong`,
   `longArrayFill`, `longArraySum`, `longArrayMap`, `arrayLongFill`, `map`,
   `flatMap`, `foreach`, `sum`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et
-  `raw`;
+  `raw` et `shuffle`;
 - module de bibliotheque standard `collections.float_array` avec `ArrayFloat`,
   `floatArrayFill`, `floatArrayMap`, `arrayFloatFill`, `map`, `flatMap`,
-  `foreach`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
+  `foreach`, `size`, `isEmpty`, `nonEmpty`, `get`, `set`, `raw` et
+  `shuffle`;
 - module de bibliotheque standard `collections.double_array` avec `ArrayDouble`,
   `doubleArrayFill`, `doubleArrayMap`, `arrayDoubleFill`, `map`, `flatMap`,
-  `foreach`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
+  `foreach`, `size`, `isEmpty`, `nonEmpty`, `get`, `set`, `raw` et
+  `shuffle`;
 - module de bibliotheque standard `collections.bool_array` avec `ArrayBool`,
   `boolArrayFill`, `boolArrayCountTrue`, `boolArrayAll`, `boolArrayAny`,
   `boolArrayMap`, `arrayBoolFill`, `map`, `flatMap`, `foreach`, `countTrue`,
-  `all`, `any`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
+  `all`, `any`, `size`, `isEmpty`, `nonEmpty`, `get`, `set`, `raw` et
+  `shuffle`;
+- module de bibliotheque standard `collections.object_array` avec `ObjectArray[T]`,
+  `ArrayObject[T]`, `objectArrayShuffle` et
+  `ArrayObject[T].shuffle`.
 - module de bibliotheque standard `collections.array` comme point d'entree
   commun pour les tableaux specialises, avec `arrayFill[T]`, `arrayMap[T]`,
   `arrayMap[T, U]`, `arrayFilter[T]`, `arrayFold[T]`, `arrayFold[T, U]`,
@@ -486,6 +492,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter une collection native `FloatArray`.
 - [x] Ajouter une collection native `DoubleArray`.
 - [x] Ajouter une collection native `BoolArray`.
+- [x] Ajouter `shuffle` sur `ArrayInt`, `ArrayLong`, `ArrayFloat`, `ArrayDouble`
+  et `ArrayBool` via le generateur pseudo-aléatoire `util`.
 
 ### P3 - Outillage
 
@@ -502,6 +510,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   langage.
 
 ## Journal Des Jalons
+- `local` - Ajouter `shuffle` aux facades de collection `ArrayInt`,
+  `ArrayLong`, `ArrayFloat`, `ArrayDouble`, `ArrayBool` et
+  `ArrayObject[T]`.
+
 - `local` - Etendre la bibliotheque standard `math` avec constantes `pi`,
   conversion degrés/radians et `hypotenuse`.
 
