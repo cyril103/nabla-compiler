@@ -1,0 +1,65 @@
+def objectArrayFill[T](size: Int, value: T): ArrayObject[T] = {
+    val xs = new ObjectArray[T](size)
+    var index = 0
+    while (index < size) {
+        xs.set(index, value)
+        index = index + 1
+    }
+    new ArrayObject[T](xs)
+}
+
+def objectArrayMap[T](xs: ArrayObject[T], f: (T) => T): ArrayObject[T] = {
+    xs.map(f)
+}
+
+def objectArrayForeach[T](xs: ArrayObject[T], f: (T) => Unit): Unit = {
+    xs.foreach(f)
+}
+
+class ArrayObject[T](values: ObjectArray[T]) {
+    def length(): Int = {
+        values.length()
+    }
+
+    def size(): Int = {
+        values.length()
+    }
+
+    def isEmpty(): Bool = {
+        values.length() == 0
+    }
+
+    def nonEmpty(): Bool = {
+        values.length() != 0
+    }
+
+    def get(index: Int): T = {
+        values.get(index)
+    }
+
+    def set(index: Int, value: T): Unit = {
+        values.set(index, value)
+    }
+
+    def map(f: (T) => T): ArrayObject[T] = {
+        val mapped = new ObjectArray[T](values.length())
+        var index = 0
+        while (index < values.length()) {
+            mapped.set(index, f(values.get(index)))
+            index = index + 1
+        }
+        new ArrayObject[T](mapped)
+    }
+
+    def foreach(f: (T) => Unit): Unit = {
+        var index = 0
+        while (index < values.length()) {
+            f(values.get(index))
+            index = index + 1
+        }
+    }
+
+    def raw(): ObjectArray[T] = {
+        values
+    }
+}

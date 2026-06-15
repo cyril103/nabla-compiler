@@ -101,6 +101,30 @@ std::string IRProgram::format() const {
                 case IROpcode::LongArraySet:
                     out << "long_array_set " << join(instruction.operands, ", ");
                     break;
+                case IROpcode::NewFloatArray:
+                    out << "new_float_array " << instruction.operands[0];
+                    break;
+                case IROpcode::FloatArrayLength:
+                    out << "float_array_length " << instruction.operands[0];
+                    break;
+                case IROpcode::FloatArrayGet:
+                    out << "float_array_get " << join(instruction.operands, ", ");
+                    break;
+                case IROpcode::FloatArraySet:
+                    out << "float_array_set " << join(instruction.operands, ", ");
+                    break;
+                case IROpcode::NewDoubleArray:
+                    out << "new_double_array " << instruction.operands[0];
+                    break;
+                case IROpcode::DoubleArrayLength:
+                    out << "double_array_length " << instruction.operands[0];
+                    break;
+                case IROpcode::DoubleArrayGet:
+                    out << "double_array_get " << join(instruction.operands, ", ");
+                    break;
+                case IROpcode::DoubleArraySet:
+                    out << "double_array_set " << join(instruction.operands, ", ");
+                    break;
                 case IROpcode::NewBoolArray:
                     out << "new_bool_array " << instruction.operands[0];
                     break;
@@ -112,6 +136,18 @@ std::string IRProgram::format() const {
                     break;
                 case IROpcode::BoolArraySet:
                     out << "bool_array_set " << join(instruction.operands, ", ");
+                    break;
+                case IROpcode::NewObjectArray:
+                    out << "new_object_array " << instruction.operands[0];
+                    break;
+                case IROpcode::ObjectArrayLength:
+                    out << "object_array_length " << instruction.operands[0];
+                    break;
+                case IROpcode::ObjectArrayGet:
+                    out << "object_array_get " << join(instruction.operands, ", ");
+                    break;
+                case IROpcode::ObjectArraySet:
+                    out << "object_array_set " << join(instruction.operands, ", ");
                     break;
                 case IROpcode::FieldLoad:
                     out << "field " << instruction.operands[0] << ", " << instruction.operation;
@@ -384,6 +420,56 @@ std::string IRBuilder::emitLongArraySet(
     return result;
 }
 
+std::string IRBuilder::emitNewFloatArray(const std::string& size) {
+    std::string result = nextValue();
+    emit({IROpcode::NewFloatArray, result, "FloatArray", "", {size}});
+    return result;
+}
+
+std::string IRBuilder::emitFloatArrayLength(const std::string& receiver) {
+    std::string result = nextValue();
+    emit({IROpcode::FloatArrayLength, result, "Int", "", {receiver}});
+    return result;
+}
+
+std::string IRBuilder::emitFloatArrayGet(const std::string& receiver, const std::string& index) {
+    std::string result = nextValue();
+    emit({IROpcode::FloatArrayGet, result, "Float", "", {receiver, index}});
+    return result;
+}
+
+std::string IRBuilder::emitFloatArraySet(
+    const std::string& receiver, const std::string& index, const std::string& value) {
+    std::string result = nextValue();
+    emit({IROpcode::FloatArraySet, result, "Unit", "", {receiver, index, value}});
+    return result;
+}
+
+std::string IRBuilder::emitNewDoubleArray(const std::string& size) {
+    std::string result = nextValue();
+    emit({IROpcode::NewDoubleArray, result, "DoubleArray", "", {size}});
+    return result;
+}
+
+std::string IRBuilder::emitDoubleArrayLength(const std::string& receiver) {
+    std::string result = nextValue();
+    emit({IROpcode::DoubleArrayLength, result, "Int", "", {receiver}});
+    return result;
+}
+
+std::string IRBuilder::emitDoubleArrayGet(const std::string& receiver, const std::string& index) {
+    std::string result = nextValue();
+    emit({IROpcode::DoubleArrayGet, result, "Double", "", {receiver, index}});
+    return result;
+}
+
+std::string IRBuilder::emitDoubleArraySet(
+    const std::string& receiver, const std::string& index, const std::string& value) {
+    std::string result = nextValue();
+    emit({IROpcode::DoubleArraySet, result, "Unit", "", {receiver, index, value}});
+    return result;
+}
+
 std::string IRBuilder::emitNewBoolArray(const std::string& size) {
     std::string result = nextValue();
     emit({IROpcode::NewBoolArray, result, "BoolArray", "", {size}});
@@ -406,6 +492,32 @@ std::string IRBuilder::emitBoolArraySet(
     const std::string& receiver, const std::string& index, const std::string& value) {
     std::string result = nextValue();
     emit({IROpcode::BoolArraySet, result, "Unit", "", {receiver, index, value}});
+    return result;
+}
+
+std::string IRBuilder::emitNewObjectArray(const std::string& size, const std::string& elementType) {
+    std::string result = nextValue();
+    emit({IROpcode::NewObjectArray, result, formatParameterizedType("ObjectArray", {elementType}), "", {size}});
+    return result;
+}
+
+std::string IRBuilder::emitObjectArrayLength(const std::string& receiver) {
+    std::string result = nextValue();
+    emit({IROpcode::ObjectArrayLength, result, "Int", "", {receiver}});
+    return result;
+}
+
+std::string IRBuilder::emitObjectArrayGet(
+    const std::string& receiver, const std::string& index, const std::string& elementType) {
+    std::string result = nextValue();
+    emit({IROpcode::ObjectArrayGet, result, elementType, "", {receiver, index}});
+    return result;
+}
+
+std::string IRBuilder::emitObjectArraySet(
+    const std::string& receiver, const std::string& index, const std::string& value) {
+    std::string result = nextValue();
+    emit({IROpcode::ObjectArraySet, result, "Unit", "", {receiver, index, value}});
     return result;
 }
 

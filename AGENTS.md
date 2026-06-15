@@ -55,10 +55,12 @@ Le pipeline implemente actuellement :
   vraie classe generique standard;
 - facade generique standard limitee pour `Array[T]` dans les signatures
   generiques utilisateur, avec inference de `T` depuis les specialisations
-  concretes `ArrayInt`, `ArrayLong` et `ArrayBool`;
+  concretes `ArrayInt`, `ArrayLong`, `ArrayFloat`, `ArrayDouble` et
+  `ArrayBool`;
 - appels de methodes communs sur la facade generique `Array[T]` dans les corps
-  generiques, specialises vers `ArrayInt`, `ArrayLong` ou `ArrayBool` pour
-  `length`, `size`, `isEmpty`, `nonEmpty`, `get`, `set`, `map` et `foreach`;
+  generiques, specialises vers `ArrayInt`, `ArrayLong`, `ArrayFloat`,
+  `ArrayDouble` ou `ArrayBool` pour `length`, `size`, `isEmpty`, `nonEmpty`,
+  `get`, `set`, `map` et `foreach`;
 - declarations de classes generiques simples comme `Box[T]`, instanciables avec
   `Box[Int]` ou `Box[String]`, avec substitution des champs, retours de methodes
   et types fonction comme `(T) => T`;
@@ -96,6 +98,8 @@ Le pipeline implemente actuellement :
   `||`;
 - collection native `IntArray` avec `length`, `get` et `set`;
 - collection native `LongArray` avec `length`, `get` et `set`;
+- collection native `FloatArray` avec `length`, `get` et `set`;
+- collection native `DoubleArray` avec `length`, `get` et `set`;
 - collection native `BoolArray` avec `length`, `get` et `set`;
 - entiers immediats `Int` et `Long` avec pointer tagging, litteraux decimaux
   `Float` / `Double` portes par l'IR typee et litteraux `String`;
@@ -120,14 +124,25 @@ Le pipeline implemente actuellement :
 - module de bibliotheque standard `collections.long_array` avec `ArrayLong`,
   `longArrayFill`, `longArraySum`, `longArrayMap`, `arrayLongFill`, `map`,
   `foreach`, `sum`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
+- module de bibliotheque standard `collections.float_array` avec `ArrayFloat`,
+  `floatArrayFill`, `floatArrayMap`, `arrayFloatFill`, `map`, `foreach`,
+  `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
+- module de bibliotheque standard `collections.double_array` avec `ArrayDouble`,
+  `doubleArrayFill`, `doubleArrayMap`, `arrayDoubleFill`, `map`, `foreach`,
+  `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
 - module de bibliotheque standard `collections.bool_array` avec `ArrayBool`,
   `boolArrayFill`, `boolArrayCountTrue`, `boolArrayAll`, `boolArrayAny`,
   `boolArrayMap`, `arrayBoolFill`, `map`, `foreach`, `countTrue`, `all`,
   `any`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
 - module de bibliotheque standard `collections.array` comme point d'entree
   commun pour les tableaux specialises, avec `arrayFill[T]`, `arrayMap[T]` et
-  `arrayForeach[T]` resolus vers les specialisations `ArrayInt`, `ArrayLong` ou
-  `ArrayBool` pour `T = Int`, `Long` ou `Bool`;
+  `arrayForeach[T]` resolus vers les specialisations `ArrayInt`, `ArrayLong`,
+  `ArrayFloat`, `ArrayDouble` ou `ArrayBool` pour `T = Int`, `Long`, `Float`,
+  `Double` ou `Bool`, et vers `ArrayObject[T]` pour les types concrets non
+  specialises comme `String` et `Array[Int]`;
+- collection native `ObjectArray[T]` stockant des slots runtime de 64 bits, avec
+  facade standard `ArrayObject[T]`, `objectArrayFill[T]`, `objectArrayMap[T]`
+  et `objectArrayForeach[T]`;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -153,19 +168,22 @@ Limites importantes :
   `identity[Int]` sont utilisables comme valeurs, mais les fonctions generiques
   ne sont pas encore des valeurs vraiment polymorphes;
   `Array[Int]` reste une facade specialisee vers `ArrayInt`; `Array[Long]`
-  reste une facade specialisee vers `ArrayLong`; `Array[Bool]` reste une
-  facade specialisee vers `ArrayBool`; `arrayFill[T]`, `arrayMap[T]` et
-  `arrayForeach[T]` sont des fonctions standard generiques specialisees pour
-  `Int`, `Long` et `Bool`, mais pas encore une implementation unique de tableau
+  reste une facade specialisee vers `ArrayLong`; `Array[Float]` reste une
+  facade specialisee vers `ArrayFloat`; `Array[Double]` reste une facade
+  specialisee vers `ArrayDouble`; `Array[Bool]` reste une facade specialisee
+  vers `ArrayBool`; `arrayFill[T]`, `arrayMap[T]` et `arrayForeach[T]` sont des
+  fonctions standard generiques specialisees pour `Int`, `Long`, `Float`,
+  `Double` et `Bool`, mais pas encore une implementation unique de tableau
   generique; `Array[T]` est valide dans les signatures generiques utilisateur
   et se specialise correctement quand `T` devient concret, avec une premiere
   surface de methodes communes, mais les operations non communes comme `sum`,
   `countTrue`, `filter`, `fold` ou `flatMap` restent specialisees ou a ajouter;
   l'objectif retenu est de conserver les tableaux primitifs specialises et
-  d'ajouter un fallback generique `ObjectArray` / `ArrayObject[T]` pour les
-  autres types (`String`, objets, `Array[Array[Int]]`, etc.); la
-  monomorphisation complete des classes generiques et le stockage generique
-  restent a faire;
+  d'ajouter un fallback generique `ObjectArray[T]` / `ArrayObject[T]` pour les
+  autres types; le premier fallback couvre `String` et `Array[Array[Int]]`,
+  tandis que les tests de tableaux d'objets utilisateur, `Array[Option[String]]`
+  et les operations avancees restent a faire; la monomorphisation complete des
+  classes generiques reste a durcir;
 - le tas est fixe et possede une verification de depassement, mais pas de
   ramasse-miettes;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
@@ -301,25 +319,31 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `ArrayInt.grouped`, `ArrayIntNested.rowSize` et
   `ArrayIntNested.mapRows` pour une API imbriquee de collections imbriquees.
 - [x] Ajouter `collections.array` et `arrayFill[T]` comme premiere API commune
-  pour `Array[Int]`, `Array[Long]` et `Array[Bool]`.
+  pour `Array[Int]`, `Array[Long]`, `Array[Float]`, `Array[Double]` et
+  `Array[Bool]`.
 - [x] Ajouter `arrayMap[T]` et `arrayForeach[T]` comme operations generiques
-  standard specialisees pour `Array[Int]`, `Array[Long]` et `Array[Bool]`.
+  standard specialisees pour `Array[Int]`, `Array[Long]`, `Array[Float]`,
+  `Array[Double]` et `Array[Bool]`.
 - [x] Autoriser `Array[T]` dans les signatures generiques utilisateur et inferer
-  `T` depuis `ArrayInt`, `ArrayLong` et `ArrayBool`.
+  `T` depuis `ArrayInt`, `ArrayLong`, `ArrayFloat`, `ArrayDouble` et
+  `ArrayBool`.
 - [x] Ajouter les appels de methodes sur receveur generique `Array[T]` dans les
   corps generiques pour `size`, `length`, `isEmpty`, `nonEmpty`, `get`, `set`,
   `map` et `foreach`.
-- [ ] Definir la representation generique `Any` / slot runtime commune pour les
+- [x] Definir la representation generique `Any` / slot runtime commune pour les
   valeurs stockees dans une collection generique.
-- [ ] Ajouter une collection native `ObjectArray` stockant des slots/pointeurs
+- [x] Ajouter une collection native `ObjectArray` stockant des slots/pointeurs
   generiques.
-- [ ] Ajouter la facade standard `ArrayObject[T]` pour les types non specialises,
+- [x] Ajouter la facade standard `ArrayObject[T]` pour les types non specialises,
   avec `length`, `size`, `get`, `set`, `map` et `foreach`.
-- [ ] Etendre les aliases standard pour choisir automatiquement :
+- [x] Etendre les aliases standard pour choisir automatiquement :
   `Array[Int] -> ArrayInt`, `Array[Long] -> ArrayLong`,
+  `Array[Float] -> ArrayFloat`, `Array[Double] -> ArrayDouble`,
   `Array[Bool] -> ArrayBool`, sinon `Array[T] -> ArrayObject[T]`.
-- [ ] Ajouter les tests de vraie genericite `Array[String]`,
-  `Array[Array[Int]]`, `Array[Option[String]]` et tableaux d'objets.
+- [x] Ajouter les tests de vraie genericite `Array[String]` et
+  `Array[Array[Int]]`.
+- [ ] Ajouter les tests de vraie genericite `Array[Option[String]]` et tableaux
+  d'objets utilisateur.
 - [ ] Etendre `Array[T]` vers plus d'operations (`filter`, `fold`, `flatMap`)
   une fois le fallback generique stabilise.
 
@@ -333,6 +357,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter une primitive d'affichage console pour `String`.
 - [x] Ajouter une premiere collection native `IntArray`.
 - [x] Ajouter une collection native `LongArray`.
+- [x] Ajouter une collection native `FloatArray`.
+- [x] Ajouter une collection native `DoubleArray`.
 - [x] Ajouter une collection native `BoolArray`.
 
 ### P3 - Outillage
@@ -346,6 +372,12 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Ajouter `FloatArray` / `DoubleArray`, les facades `ArrayFloat` /
+  `ArrayDouble` et les alias `Array[Float]` / `Array[Double]` dans
+  `collections.array`.
+- `local` - Ajouter le fallback `ObjectArray[T]` / `ArrayObject[T]` pour
+  `Array[String]` et `Array[Array[Int]]`, avec specialisation IR des methodes
+  generiques et alias `arrayFill/map/foreach` vers la facade objet.
 - `a0db6bb` - Ajouter les appels de methodes communs sur receveur generique
   `Array[T]`, avec specialisation vers les facades concretes et lambdas
   generiques specialisees.
@@ -472,8 +504,6 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Construire le fallback de vraie genericite pour le chemin retenu :
-specialisations primitives conservees (`ArrayInt`, `ArrayLong`, `ArrayBool`) +
-`ObjectArray` / `ArrayObject[T]` pour tous les autres types. La premiere tranche
-devrait formaliser `Any` ou un slot runtime generique, puis ajouter les tests
-cibles `Array[String]` et `Array[Array[Int]]`.
+Durcir le fallback de vraie genericite en ajoutant les tests et corrections pour
+`Array[Option[String]]`, les tableaux d'objets utilisateur, puis les operations
+communes suivantes (`filter`, `fold`, `flatMap`) sur `ArrayObject[T]`.

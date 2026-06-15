@@ -1,3 +1,6 @@
 import collections.int_array
 import collections.long_array
+import collections.float_array
+import collections.double_array
 import collections.bool_array
+import collections.object_array

@@ -1,0 +1,27 @@
+import collections.array
+
+def sameArray[T](xs: Array[T]): Array[T] = {
+    xs.map(value => value)
+}
+
+def firstOf[T](xs: Array[T]): T = {
+    xs.get(0)
+}
+
+def touch(value: String): Unit = {
+    while false {
+        value.length()
+    }
+}
+
+def main(): Int = {
+    val words = sameArray(arrayFill[String](3, "hi"))
+    words.foreach(touch)
+    if words.size() == 3 &&
+       firstOf(words).length() == 2 &&
+       words.get(1).length() == 2 {
+        42
+    } else {
+        1
+    }
+}

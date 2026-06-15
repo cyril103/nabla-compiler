@@ -1,0 +1,28 @@
+import collections.array
+
+def touchFloat(value: Float): Unit = {
+    while false {
+        value == 0.0F
+    }
+}
+
+def touchDouble(value: Double): Unit = {
+    while false {
+        value == 0.0
+    }
+}
+
+def main(): Int = {
+    val floats = arrayMap[Float](arrayFill[Float](2, 1.5F), value => value + 1.0F)
+    val doubles = arrayMap[Double](arrayFill[Double](3, 2.5), value => value + 0.5)
+    floats.foreach(touchFloat)
+    doubles.foreach(touchDouble)
+    if floats.size() == 2 &&
+       floats.get(0) == 2.5F &&
+       doubles.size() == 3 &&
+       doubles.get(1) == 3.0 {
+        42
+    } else {
+        1
+    }
+}

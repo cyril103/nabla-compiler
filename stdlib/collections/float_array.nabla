@@ -1,0 +1,73 @@
+def floatArrayFill(size: Int, value: Float): FloatArray = {
+    val xs = new FloatArray(size)
+    var index = 0
+    while (index < size) {
+        xs.set(index, value)
+        index = index + 1
+    }
+    xs
+}
+
+def floatArrayMap(xs: FloatArray, f: (Float) => Float): FloatArray = {
+    val mapped = new FloatArray(xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        mapped.set(index, f(xs.get(index)))
+        index = index + 1
+    }
+    mapped
+}
+
+class ArrayFloat(values: FloatArray) {
+    def length(): Int = {
+        values.length()
+    }
+
+    def size(): Int = {
+        values.length()
+    }
+
+    def isEmpty(): Bool = {
+        values.length() == 0
+    }
+
+    def nonEmpty(): Bool = {
+        values.length() != 0
+    }
+
+    def get(index: Int): Float = {
+        values.get(index)
+    }
+
+    def set(index: Int, value: Float): Unit = {
+        values.set(index, value)
+    }
+
+    def map(f: (Float) => Float): ArrayFloat = {
+        new ArrayFloat(floatArrayMap(values, f))
+    }
+
+    def foreach(f: (Float) => Unit): Unit = {
+        var index = 0
+        while (index < values.length()) {
+            f(values.get(index))
+            index = index + 1
+        }
+    }
+
+    def raw(): FloatArray = {
+        values
+    }
+}
+
+def arrayFloatFill(size: Int, value: Float): ArrayFloat = {
+    new ArrayFloat(floatArrayFill(size, value))
+}
+
+def arrayFloatMap(xs: ArrayFloat, f: (Float) => Float): ArrayFloat = {
+    xs.map(f)
+}
+
+def arrayFloatForeach(xs: ArrayFloat, f: (Float) => Unit): Unit = {
+    xs.foreach(f)
+}

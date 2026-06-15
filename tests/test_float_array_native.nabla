@@ -1,0 +1,12 @@
+def main(): Int = {
+    val xs = new FloatArray(2)
+    xs.set(0, 1.5F)
+    xs.set(1, 2.5F)
+    if xs.length() == 2 &&
+       xs.get(0) == 1.5F &&
+       xs.get(1) == 2.5F {
+        42
+    } else {
+        1
+    }
+}

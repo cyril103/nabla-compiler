@@ -1,7 +1,7 @@
 import collections.int_array
 
-def values(): Array[String] = {
-    new ArrayInt(new IntArray(0))
+def values(): Matrix[Int] = {
+    0
 }
 
 def main(): Int = {

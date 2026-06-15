@@ -1,0 +1,5 @@
+def main(): Int = {
+    val xs = new DoubleArray(1)
+    xs.set(0, 1.0F)
+    0
+}

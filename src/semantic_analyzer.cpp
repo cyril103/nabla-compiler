@@ -71,14 +71,19 @@ void SemanticAnalyzer::validateDeclaredTypes() const {
 bool SemanticAnalyzer::isKnownType(const std::string& type) const {
     if (type == "Int" || type == "Long" || type == "Float" || type == "Double" || type == "Bool" ||
         type == "String" || type == "Unit" || type == "IntArray" || type == "LongArray" ||
-        type == "BoolArray" || isFunctionTypeName(type)) {
+        type == "FloatArray" || type == "DoubleArray" || type == "BoolArray" ||
+        isFunctionTypeName(type)) {
         return true;
+    }
+    auto parameterizedType = parameterizedTypeFromName(type);
+    if (parameterizedType && parameterizedType->first == "ObjectArray" &&
+        parameterizedType->second.size() == 1) {
+        return isKnownType(parameterizedType->second[0]);
     }
     auto classIt = context.classes.find(type);
     if (classIt != context.classes.end()) return classIt->second.typeParameters.empty();
     auto substitution = genericSubstitutionFor(context, type);
     if (!substitution) return false;
-    auto parameterizedType = parameterizedTypeFromName(type);
     if (!parameterizedType) return false;
     for (const auto& argument : parameterizedType->second) {
         if (!isKnownType(argument)) return false;
@@ -99,6 +104,9 @@ bool SemanticAnalyzer::isKnownTypeInScope(
     auto parameterizedType = parameterizedTypeFromName(type);
     if (parameterizedType) {
         const auto& [baseName, arguments] = *parameterizedType;
+        if (baseName == "ObjectArray" && arguments.size() == 1) {
+            return isKnownTypeInScope(arguments[0], typeParameters);
+        }
         auto classIt = context.classes.find(baseName);
         if (classIt == context.classes.end()) {
             if (!isStdlibTypeAliasFamily(baseName, arguments.size())) return false;

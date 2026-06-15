@@ -80,7 +80,8 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
                 typeParameterToken.value == "Float" || typeParameterToken.value == "Double" ||
                 typeParameterToken.value == "Bool" || typeParameterToken.value == "String" ||
                 typeParameterToken.value == "Unit" || typeParameterToken.value == "IntArray" ||
-                typeParameterToken.value == "LongArray" || typeParameterToken.value == "BoolArray") {
+                typeParameterToken.value == "LongArray" || typeParameterToken.value == "FloatArray" ||
+                typeParameterToken.value == "DoubleArray" || typeParameterToken.value == "BoolArray") {
                 throw CompilerError(
                     ErrorKind::Parser, typeParameterToken.location,
                     "paramètre de type invalide: " + typeParameterToken.value);
@@ -591,9 +592,12 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             std::vector<std::string> functionTypeArguments = typeArguments;
             if (!initialSymbol) {
                 if (auto alias = resolveStdlibFunctionAlias(name, typeArguments)) {
-                    if (context.functions.count(*alias)) {
+                    auto aliasFunction = context.functions.find(*alias);
+                    if (aliasFunction != context.functions.end()) {
                         functionLookupName = *alias;
-                        functionTypeArguments.clear();
+                        if (aliasFunction->second.typeParameters.empty()) {
+                            functionTypeArguments.clear();
+                        }
                     }
                 } else if (isStdlibFunctionAliasName(name) && !typeArguments.empty()) {
                     throw CompilerError(
@@ -901,7 +905,8 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
                 typeParameterToken.value == "Float" || typeParameterToken.value == "Double" ||
                 typeParameterToken.value == "Bool" || typeParameterToken.value == "String" ||
                 typeParameterToken.value == "Unit" || typeParameterToken.value == "IntArray" ||
-                typeParameterToken.value == "LongArray" || typeParameterToken.value == "BoolArray") {
+                typeParameterToken.value == "LongArray" || typeParameterToken.value == "FloatArray" ||
+                typeParameterToken.value == "DoubleArray" || typeParameterToken.value == "BoolArray") {
                 throw CompilerError(
                     ErrorKind::Parser, typeParameterToken.location,
                     "paramètre de type invalide: " + typeParameterToken.value);
@@ -1106,9 +1111,26 @@ std::vector<std::string> Parser::expectedArgumentTypesForMethodCall(
         if (methodName == "set") return {"Int", "Long"};
         return {};
     }
+    if (receiverType == "FloatArray") {
+        if (methodName == "get") return {"Int"};
+        if (methodName == "set") return {"Int", "Float"};
+        return {};
+    }
+    if (receiverType == "DoubleArray") {
+        if (methodName == "get") return {"Int"};
+        if (methodName == "set") return {"Int", "Double"};
+        return {};
+    }
     if (receiverType == "BoolArray") {
         if (methodName == "get") return {"Int"};
         if (methodName == "set") return {"Int", "Bool"};
+        return {};
+    }
+    if (auto parameterizedType = parameterizedTypeFromName(receiverType);
+        parameterizedType && parameterizedType->first == "ObjectArray" &&
+        parameterizedType->second.size() == 1) {
+        if (methodName == "get") return {"Int"};
+        if (methodName == "set") return {"Int", parameterizedType->second[0]};
         return {};
     }
     const std::string classLookupName = genericBaseName(receiverType);

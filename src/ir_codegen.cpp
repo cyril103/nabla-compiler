@@ -235,6 +235,30 @@ private:
             case IROpcode::LongArraySet:
                 emitLongArraySet(instruction);
                 break;
+            case IROpcode::NewFloatArray:
+                emitNewFloatArray(instruction);
+                break;
+            case IROpcode::FloatArrayLength:
+                emitFloatArrayLength(instruction);
+                break;
+            case IROpcode::FloatArrayGet:
+                emitFloatArrayGet(instruction);
+                break;
+            case IROpcode::FloatArraySet:
+                emitFloatArraySet(instruction);
+                break;
+            case IROpcode::NewDoubleArray:
+                emitNewDoubleArray(instruction);
+                break;
+            case IROpcode::DoubleArrayLength:
+                emitDoubleArrayLength(instruction);
+                break;
+            case IROpcode::DoubleArrayGet:
+                emitDoubleArrayGet(instruction);
+                break;
+            case IROpcode::DoubleArraySet:
+                emitDoubleArraySet(instruction);
+                break;
             case IROpcode::NewBoolArray:
                 emitNewBoolArray(instruction);
                 break;
@@ -246,6 +270,18 @@ private:
                 break;
             case IROpcode::BoolArraySet:
                 emitBoolArraySet(instruction);
+                break;
+            case IROpcode::NewObjectArray:
+                emitNewObjectArray(instruction);
+                break;
+            case IROpcode::ObjectArrayLength:
+                emitObjectArrayLength(instruction);
+                break;
+            case IROpcode::ObjectArrayGet:
+                emitObjectArrayGet(instruction);
+                break;
+            case IROpcode::ObjectArraySet:
+                emitObjectArraySet(instruction);
                 break;
             case IROpcode::FieldLoad:
                 emitFieldLoad(instruction);
@@ -598,7 +634,19 @@ private:
         emitNewNativeArray(instruction);
     }
 
+    void emitNewFloatArray(const IRInstruction& instruction) {
+        emitNewNativeArray(instruction);
+    }
+
+    void emitNewDoubleArray(const IRInstruction& instruction) {
+        emitNewNativeArray(instruction);
+    }
+
     void emitNewBoolArray(const IRInstruction& instruction) {
+        emitNewNativeArray(instruction);
+    }
+
+    void emitNewObjectArray(const IRInstruction& instruction) {
         emitNewNativeArray(instruction);
     }
 
@@ -626,7 +674,19 @@ private:
         emitNativeArrayLength(instruction);
     }
 
+    void emitFloatArrayLength(const IRInstruction& instruction) {
+        emitNativeArrayLength(instruction);
+    }
+
+    void emitDoubleArrayLength(const IRInstruction& instruction) {
+        emitNativeArrayLength(instruction);
+    }
+
     void emitBoolArrayLength(const IRInstruction& instruction) {
+        emitNativeArrayLength(instruction);
+    }
+
+    void emitObjectArrayLength(const IRInstruction& instruction) {
         emitNativeArrayLength(instruction);
     }
 
@@ -646,7 +706,19 @@ private:
         emitNativeArrayGet(instruction);
     }
 
+    void emitFloatArrayGet(const IRInstruction& instruction) {
+        emitNativeArrayGet(instruction);
+    }
+
+    void emitDoubleArrayGet(const IRInstruction& instruction) {
+        emitNativeArrayGet(instruction);
+    }
+
     void emitBoolArrayGet(const IRInstruction& instruction) {
+        emitNativeArrayGet(instruction);
+    }
+
+    void emitObjectArrayGet(const IRInstruction& instruction) {
         emitNativeArrayGet(instruction);
     }
 
@@ -668,7 +740,19 @@ private:
         emitNativeArraySet(instruction);
     }
 
+    void emitFloatArraySet(const IRInstruction& instruction) {
+        emitNativeArraySet(instruction);
+    }
+
+    void emitDoubleArraySet(const IRInstruction& instruction) {
+        emitNativeArraySet(instruction);
+    }
+
     void emitBoolArraySet(const IRInstruction& instruction) {
+        emitNativeArraySet(instruction);
+    }
+
+    void emitObjectArraySet(const IRInstruction& instruction) {
         emitNativeArraySet(instruction);
     }
 

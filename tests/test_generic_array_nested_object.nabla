@@ -1,0 +1,19 @@
+import collections.array
+
+def firstRow(rows: Array[Array[Int]]): Array[Int] = {
+    rows.get(0)
+}
+
+def main(): Int = {
+    val row = arrayFill[Int](2, 21)
+    val rows = arrayFill[Array[Int]](2, row)
+    val first = firstRow(rows)
+    if rows.size() == 2 &&
+       first.size() == 2 &&
+       first.get(0) == 21 &&
+       rows.get(1).get(1) == 21 {
+        42
+    } else {
+        1
+    }
+}

@@ -1,0 +1,73 @@
+def doubleArrayFill(size: Int, value: Double): DoubleArray = {
+    val xs = new DoubleArray(size)
+    var index = 0
+    while (index < size) {
+        xs.set(index, value)
+        index = index + 1
+    }
+    xs
+}
+
+def doubleArrayMap(xs: DoubleArray, f: (Double) => Double): DoubleArray = {
+    val mapped = new DoubleArray(xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        mapped.set(index, f(xs.get(index)))
+        index = index + 1
+    }
+    mapped
+}
+
+class ArrayDouble(values: DoubleArray) {
+    def length(): Int = {
+        values.length()
+    }
+
+    def size(): Int = {
+        values.length()
+    }
+
+    def isEmpty(): Bool = {
+        values.length() == 0
+    }
+
+    def nonEmpty(): Bool = {
+        values.length() != 0
+    }
+
+    def get(index: Int): Double = {
+        values.get(index)
+    }
+
+    def set(index: Int, value: Double): Unit = {
+        values.set(index, value)
+    }
+
+    def map(f: (Double) => Double): ArrayDouble = {
+        new ArrayDouble(doubleArrayMap(values, f))
+    }
+
+    def foreach(f: (Double) => Unit): Unit = {
+        var index = 0
+        while (index < values.length()) {
+            f(values.get(index))
+            index = index + 1
+        }
+    }
+
+    def raw(): DoubleArray = {
+        values
+    }
+}
+
+def arrayDoubleFill(size: Int, value: Double): ArrayDouble = {
+    new ArrayDouble(doubleArrayFill(size, value))
+}
+
+def arrayDoubleMap(xs: ArrayDouble, f: (Double) => Double): ArrayDouble = {
+    xs.map(f)
+}
+
+def arrayDoubleForeach(xs: ArrayDouble, f: (Double) => Unit): Unit = {
+    xs.foreach(f)
+}

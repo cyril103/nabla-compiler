@@ -70,6 +70,8 @@ inline const std::vector<StdlibTypeAlias>& stdlibTypeAliases() {
     static const std::vector<StdlibTypeAlias> aliases = {
         {"Array", {"Int"}, "ArrayInt"},
         {"Array", {"Long"}, "ArrayLong"},
+        {"Array", {"Float"}, "ArrayFloat"},
+        {"Array", {"Double"}, "ArrayDouble"},
         {"Array", {"Bool"}, "ArrayBool"},
     };
     return aliases;
@@ -79,12 +81,18 @@ inline const std::vector<StdlibFunctionAlias>& stdlibFunctionAliases() {
     static const std::vector<StdlibFunctionAlias> aliases = {
         {"arrayFill", {"Int"}, "arrayIntFill"},
         {"arrayFill", {"Long"}, "arrayLongFill"},
+        {"arrayFill", {"Float"}, "arrayFloatFill"},
+        {"arrayFill", {"Double"}, "arrayDoubleFill"},
         {"arrayFill", {"Bool"}, "arrayBoolFill"},
         {"arrayMap", {"Int"}, "arrayIntMap"},
         {"arrayMap", {"Long"}, "arrayLongMap"},
+        {"arrayMap", {"Float"}, "arrayFloatMap"},
+        {"arrayMap", {"Double"}, "arrayDoubleMap"},
         {"arrayMap", {"Bool"}, "arrayBoolMap"},
         {"arrayForeach", {"Int"}, "arrayIntForeach"},
         {"arrayForeach", {"Long"}, "arrayLongForeach"},
+        {"arrayForeach", {"Float"}, "arrayFloatForeach"},
+        {"arrayForeach", {"Double"}, "arrayDoubleForeach"},
         {"arrayForeach", {"Bool"}, "arrayBoolForeach"},
     };
     return aliases;
@@ -94,6 +102,14 @@ inline std::optional<std::string> resolveStdlibFunctionAlias(
     const std::string& name, const std::vector<std::string>& typeArguments) {
     for (const auto& alias : stdlibFunctionAliases()) {
         if (alias.name == name && alias.typeArguments == typeArguments) return alias.resolvedName;
+    }
+    if (typeArguments.size() == 1 &&
+        typeArguments[0] != "Int" && typeArguments[0] != "Long" &&
+        typeArguments[0] != "Float" && typeArguments[0] != "Double" &&
+        typeArguments[0] != "Bool") {
+        if (name == "arrayFill") return "objectArrayFill";
+        if (name == "arrayMap") return "objectArrayMap";
+        if (name == "arrayForeach") return "objectArrayForeach";
     }
     return std::nullopt;
 }
@@ -229,10 +245,25 @@ inline std::string resolveStdlibTypeAlias(const std::string& type) {
     for (const auto& alias : stdlibTypeAliases()) {
         if (alias.baseName == baseName && alias.arguments == arguments) return alias.resolvedName;
     }
+    if (baseName == "Array" && arguments.size() == 1) {
+        const bool concreteArgument =
+            arguments[0] == "Int" || arguments[0] == "Long" || arguments[0] == "Float" ||
+            arguments[0] == "Double" || arguments[0] == "Bool" || arguments[0] == "String" ||
+            arguments[0] == "Unit" || arguments[0] == "IntArray" || arguments[0] == "LongArray" ||
+            arguments[0] == "FloatArray" || arguments[0] == "DoubleArray" ||
+            arguments[0] == "BoolArray" || arguments[0] == "ArrayInt" ||
+            arguments[0] == "ArrayLong" || arguments[0] == "ArrayFloat" ||
+            arguments[0] == "ArrayDouble" || arguments[0] == "ArrayBool" ||
+            functionTypeFromName(arguments[0]).has_value() ||
+            parameterizedTypeFromName(arguments[0]).has_value();
+        if (!concreteArgument) return type;
+        return formatParameterizedType("ArrayObject", arguments);
+    }
     return type;
 }
 
 inline bool isStdlibTypeAliasFamily(const std::string& baseName, size_t arity) {
+    if (baseName == "Array" && arity == 1) return true;
     for (const auto& alias : stdlibTypeAliases()) {
         if (alias.baseName == baseName && alias.arguments.size() == arity) return true;
     }
@@ -242,6 +273,11 @@ inline bool isStdlibTypeAliasFamily(const std::string& baseName, size_t arity) {
 inline std::optional<StdlibTypeAlias> stdlibTypeAliasForResolvedName(const std::string& resolvedName) {
     for (const auto& alias : stdlibTypeAliases()) {
         if (alias.resolvedName == resolvedName) return alias;
+    }
+    auto parameterizedType = parameterizedTypeFromName(resolvedName);
+    if (parameterizedType && parameterizedType->first == "ArrayObject" &&
+        parameterizedType->second.size() == 1) {
+        return StdlibTypeAlias{"Array", parameterizedType->second, resolvedName};
     }
     return std::nullopt;
 }
@@ -389,7 +425,21 @@ inline bool inferTypeArgumentsFromTypes(
             }
             return true;
         }
-        if (expectedParameterized->first != actualParameterized->first) return false;
+        if (expectedParameterized->first != actualParameterized->first) {
+            auto alias = stdlibTypeAliasForResolvedName(actualType);
+            if (!alias || alias->baseName != expectedParameterized->first ||
+                alias->arguments.size() != expectedParameterized->second.size()) {
+                return false;
+            }
+            for (size_t i = 0; i < expectedParameterized->second.size(); ++i) {
+                if (!inferTypeArgumentsFromTypes(
+                        expectedParameterized->second[i], alias->arguments[i],
+                        typeParameters, substitution)) {
+                    return false;
+                }
+            }
+            return true;
+        }
         if (expectedParameterized->second.size() != actualParameterized->second.size()) return false;
         for (size_t i = 0; i < expectedParameterized->second.size(); ++i) {
             if (!inferTypeArgumentsFromTypes(

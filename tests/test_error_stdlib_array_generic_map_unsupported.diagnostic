@@ -1,1 +1,1 @@
-tests/test_error_stdlib_array_generic_map_unsupported.nabla:5:5: parser error: la fonction standard générique 'arrayMap' ne supporte pas ces arguments de type
+tests/test_error_stdlib_array_generic_map_unsupported.nabla:5:22: semantic error: objectArrayMap, paramètre 'xs': type 'ArrayObject[String]' attendu, 'ArrayInt' reçu

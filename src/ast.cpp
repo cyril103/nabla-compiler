@@ -27,15 +27,29 @@ bool isBoolBinaryMethod(const std::string& methodName) {
 bool isKnownBuiltinType(const std::string& type) {
     return type == "Int" || type == "Long" || type == "Float" || type == "Double" || type == "Bool" ||
            type == "String" || type == "Unit" || type == "IntArray" || type == "LongArray" ||
-           type == "BoolArray";
+           type == "FloatArray" || type == "DoubleArray" || type == "BoolArray";
+}
+
+bool isObjectArrayType(const std::string& type) {
+    auto parameterizedType = parameterizedTypeFromName(type);
+    return parameterizedType && parameterizedType->first == "ObjectArray" &&
+           parameterizedType->second.size() == 1;
 }
 
 bool isNativeArrayType(const std::string& type) {
-    return type == "IntArray" || type == "LongArray" || type == "BoolArray";
+    return type == "IntArray" || type == "LongArray" || type == "FloatArray" ||
+           type == "DoubleArray" || type == "BoolArray" || isObjectArrayType(type);
 }
 
 std::string nativeArrayElementType(const std::string& type) {
+    if (auto parameterizedType = parameterizedTypeFromName(type);
+        parameterizedType && parameterizedType->first == "ObjectArray" &&
+        parameterizedType->second.size() == 1) {
+        return parameterizedType->second[0];
+    }
     if (type == "LongArray") return "Long";
+    if (type == "FloatArray") return "Float";
+    if (type == "DoubleArray") return "Double";
     if (type == "BoolArray") return "Bool";
     return "Int";
 }
@@ -50,6 +64,10 @@ bool isKnownTypeInContext(const std::string& type, const CompilerContext& contex
     if (!substitution) {
         if (!parameterizedType) return false;
         const auto& [baseName, arguments] = *parameterizedType;
+        if (baseName == "ObjectArray" && arguments.size() == 1) {
+            return isKnownTypeInContext(arguments[0], context) ||
+                   isTypeParameterName(arguments[0], context.semanticTypeParameters);
+        }
         if (!isStdlibTypeAliasFamily(baseName, arguments.size())) return false;
         for (const auto& argument : arguments) {
             if (!isTypeParameterName(argument, context.semanticTypeParameters)) return false;
@@ -339,7 +357,10 @@ std::string NewNode::lowerToIR(IRBuilder& builder) const {
     for (const auto& argument : args) loweredArguments.push_back(argument->lowerToIR(builder));
     if (className == "IntArray") return builder.emitNewIntArray(loweredArguments[0]);
     if (className == "LongArray") return builder.emitNewLongArray(loweredArguments[0]);
+    if (className == "FloatArray") return builder.emitNewFloatArray(loweredArguments[0]);
+    if (className == "DoubleArray") return builder.emitNewDoubleArray(loweredArguments[0]);
     if (className == "BoolArray") return builder.emitNewBoolArray(loweredArguments[0]);
+    if (isObjectArrayType(className)) return builder.emitNewObjectArray(loweredArguments[0], nativeArrayElementType(className));
     return builder.emitNewObject(className, loweredArguments);
 }
 
@@ -563,13 +584,26 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
     if (isNativeArrayType(receiverType)) {
         std::string loweredReceiver = receiver->lowerToIR(builder);
         if (methodName == "length" && arguments.empty()) {
+            if (isObjectArrayType(receiverType)) return builder.emitObjectArrayLength(loweredReceiver);
             if (receiverType == "BoolArray") return builder.emitBoolArrayLength(loweredReceiver);
+            if (receiverType == "DoubleArray") return builder.emitDoubleArrayLength(loweredReceiver);
+            if (receiverType == "FloatArray") return builder.emitFloatArrayLength(loweredReceiver);
             if (receiverType == "LongArray") return builder.emitLongArrayLength(loweredReceiver);
             return builder.emitIntArrayLength(loweredReceiver);
         }
         if (methodName == "get" && arguments.size() == 1) {
+            if (isObjectArrayType(receiverType)) {
+                return builder.emitObjectArrayGet(
+                    loweredReceiver, arguments[0]->lowerToIR(builder), nativeArrayElementType(receiverType));
+            }
             if (receiverType == "BoolArray") {
                 return builder.emitBoolArrayGet(loweredReceiver, arguments[0]->lowerToIR(builder));
+            }
+            if (receiverType == "DoubleArray") {
+                return builder.emitDoubleArrayGet(loweredReceiver, arguments[0]->lowerToIR(builder));
+            }
+            if (receiverType == "FloatArray") {
+                return builder.emitFloatArrayGet(loweredReceiver, arguments[0]->lowerToIR(builder));
             }
             if (receiverType == "LongArray") {
                 return builder.emitLongArrayGet(loweredReceiver, arguments[0]->lowerToIR(builder));
@@ -577,8 +611,20 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
             return builder.emitIntArrayGet(loweredReceiver, arguments[0]->lowerToIR(builder));
         }
         if (methodName == "set" && arguments.size() == 2) {
+            if (isObjectArrayType(receiverType)) {
+                return builder.emitObjectArraySet(
+                    loweredReceiver, arguments[0]->lowerToIR(builder), arguments[1]->lowerToIR(builder));
+            }
             if (receiverType == "BoolArray") {
                 return builder.emitBoolArraySet(
+                    loweredReceiver, arguments[0]->lowerToIR(builder), arguments[1]->lowerToIR(builder));
+            }
+            if (receiverType == "DoubleArray") {
+                return builder.emitDoubleArraySet(
+                    loweredReceiver, arguments[0]->lowerToIR(builder), arguments[1]->lowerToIR(builder));
+            }
+            if (receiverType == "FloatArray") {
+                return builder.emitFloatArraySet(
                     loweredReceiver, arguments[0]->lowerToIR(builder), arguments[1]->lowerToIR(builder));
             }
             if (receiverType == "LongArray") {
@@ -595,6 +641,16 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         std::string loweredReceiver = receiver->lowerToIR(builder);
         std::vector<std::string> loweredArguments;
         for (const auto& argument : arguments) loweredArguments.push_back(argument->lowerToIR(builder));
+        const std::string activeReceiverBase = genericBaseName(activeReceiverType);
+        if (activeReceiverBase != activeReceiverType) {
+            std::vector<std::string> argumentTypes;
+            for (const auto& argument : arguments) {
+                argumentTypes.push_back(builder.substituteActiveType(argument->getType()));
+            }
+            builder.registerMethodSpecialization(
+                activeReceiverType, activeReceiverBase, methodName, {},
+                argumentTypes, builder.substituteActiveType(resolvedType));
+        }
         return builder.emitMethodCall(
             activeReceiverType, methodName, loweredReceiver, loweredArguments,
             builder.substituteActiveType(resolvedType));
@@ -604,7 +660,10 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
     std::vector<std::string> loweredArguments;
     for (const auto& argument : arguments) loweredArguments.push_back(argument->lowerToIR(builder));
     std::vector<std::string> argumentTypes;
-    for (const auto& argument : arguments) argumentTypes.push_back(argument->getType());
+    for (const auto& argument : arguments) {
+        argumentTypes.push_back(builder.substituteActiveType(argument->getType()));
+    }
+    const std::string concreteReceiverType = builder.substituteActiveType(receiverType);
     std::vector<std::string> concreteTypeArguments;
     for (const auto& typeArgument : resolvedTypeArguments) {
         concreteTypeArguments.push_back(builder.substituteActiveType(typeArgument));
@@ -613,13 +672,13 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         ? methodName
         : formatParameterizedType(methodName, concreteTypeArguments);
     const std::string concreteReturnType = builder.substituteActiveType(resolvedType);
-    if ((!concreteTypeArguments.empty() || receiverType != resolvedOwnerType) && !resolvedOwnerType.empty()) {
+    if ((!concreteTypeArguments.empty() || concreteReceiverType != resolvedOwnerType) && !resolvedOwnerType.empty()) {
         builder.registerMethodSpecialization(
-            receiverType, resolvedOwnerType, methodName, concreteTypeArguments,
+            concreteReceiverType, resolvedOwnerType, methodName, concreteTypeArguments,
             argumentTypes, concreteReturnType);
     }
     return builder.emitMethodCall(
-        receiverType,
+        concreteReceiverType,
         concreteMethodName, loweredReceiver, loweredArguments, concreteReturnType);
 }
 

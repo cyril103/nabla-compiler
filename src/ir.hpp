@@ -23,10 +23,22 @@ enum class IROpcode {
     LongArrayLength,
     LongArrayGet,
     LongArraySet,
+    NewFloatArray,
+    FloatArrayLength,
+    FloatArrayGet,
+    FloatArraySet,
+    NewDoubleArray,
+    DoubleArrayLength,
+    DoubleArrayGet,
+    DoubleArraySet,
     NewBoolArray,
     BoolArrayLength,
     BoolArrayGet,
     BoolArraySet,
+    NewObjectArray,
+    ObjectArrayLength,
+    ObjectArrayGet,
+    ObjectArraySet,
     FieldLoad,
     Load,
     Store,
@@ -107,10 +119,26 @@ public:
     std::string emitLongArrayGet(const std::string& receiver, const std::string& index);
     std::string emitLongArraySet(
         const std::string& receiver, const std::string& index, const std::string& value);
+    std::string emitNewFloatArray(const std::string& size);
+    std::string emitFloatArrayLength(const std::string& receiver);
+    std::string emitFloatArrayGet(const std::string& receiver, const std::string& index);
+    std::string emitFloatArraySet(
+        const std::string& receiver, const std::string& index, const std::string& value);
+    std::string emitNewDoubleArray(const std::string& size);
+    std::string emitDoubleArrayLength(const std::string& receiver);
+    std::string emitDoubleArrayGet(const std::string& receiver, const std::string& index);
+    std::string emitDoubleArraySet(
+        const std::string& receiver, const std::string& index, const std::string& value);
     std::string emitNewBoolArray(const std::string& size);
     std::string emitBoolArrayLength(const std::string& receiver);
     std::string emitBoolArrayGet(const std::string& receiver, const std::string& index);
     std::string emitBoolArraySet(
+        const std::string& receiver, const std::string& index, const std::string& value);
+    std::string emitNewObjectArray(const std::string& size, const std::string& elementType);
+    std::string emitObjectArrayLength(const std::string& receiver);
+    std::string emitObjectArrayGet(
+        const std::string& receiver, const std::string& index, const std::string& elementType);
+    std::string emitObjectArraySet(
         const std::string& receiver, const std::string& index, const std::string& value);
     std::string emitFieldLoad(
         const SourceLocation& location, const std::string& className, const std::string& fieldName,
