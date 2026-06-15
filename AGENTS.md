@@ -131,6 +131,11 @@ Le pipeline implemente actuellement :
 - module standard `strings` avec `words(text)` pour decouper une ligne en
   tokens separes par des espaces en ignorant les segments vides;
 - premier module de bibliotheque standard `io` avec `println`, `input` et les
+  wrappers `io.readTextFile`, `io.writeTextFile`, `io.appendTextFile` et
+  `io.pathExists`;
+- module de bibliotheque standard `util` avec `randomSeed`, `randomInt`,
+  `randomIntRange` et `randomBool` pour une API pseudo-aléatoire
+  deterministe basée sur une seed;
 - module de bibliotheque standard `math` avec `absInt`, `absLong`, `absFloat`,
   `absDouble`, `absDiffInt`, `absDiffLong`, `absDiffFloat`,
   `absDiffDouble`, `maxInt`, `maxLong`, `maxFloat`, `maxDouble`, `minInt`,
@@ -143,7 +148,6 @@ Le pipeline implemente actuellement :
   `twoPiDouble`, `degreesToRadiansFloat`, `radiansToDegreesFloat`,
   `degreesToRadiansDouble`, `radiansToDegreesDouble`, `hypotenuseFloat`,
   `hypotenuseDouble`.
-  wrappers d'I/O fichiers texte;
 - module de bibliotheque standard `core.option_int` avec `OptionInt`,
   `optionIntSome`, `optionIntNone`, `map`, `filter` et `orElse`;
 - module de bibliotheque standard `core.option` avec `Option[T]`, `optionSome`,
@@ -318,6 +322,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `isEven`, `isOdd`, `isBetween`, `gcd`/`lcm` pour `Long`, `absDiff`,
   `pow` pour `Float` et `Double`, `isClose`, `sqrt`, constantes `pi`
   (approximatives) et conversions degrés/radians.
+- [x] Ajouter le module standard `util` avec `randomSeed`, `randomInt`,
+  `randomIntRange` et `randomBool` pour une API pseudo-aléatoire
+  deterministe.
 
 - [ ] Formaliser `Int`, `Bool`, `Char`, `String`, `IntArray`, les types fonction canoniques et
   les types de classes.
@@ -495,6 +502,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 ## Journal Des Jalons
 - `local` - Etendre la bibliotheque standard `math` avec constantes `pi`,
   conversion degrés/radians et `hypotenuse`.
+
+- `local` - Ajouter le module standard `util` (pseudo-random deterministic)
+  et le test `test_stdlib_util_random`.
 
 - `local` - Ajouter les tests Project Euler 10 imperatif et fonctionnel, avec
   `Int.toLong` et `RangeInt.foldLong`.

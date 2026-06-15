@@ -1,0 +1,26 @@
+import util
+
+def main(): Int = {
+    val seed = randomSeed(123456789)
+    val first = randomInt(seed)
+    val second = randomInt(first.state())
+    val bounded = randomIntRange(second.state(), 10, 20)
+    val coin = randomBool(bounded.state())
+
+    val negativeSeed = randomInt(randomSeed(-1))
+    val negativeBounded = randomIntRange(randomSeed(-1), 0, 4)
+
+    if first.value() == 295234770 &&
+       first.state().seed() == 295234770 &&
+       second.value() == 465300796 &&
+       bounded.value() == 20 &&
+       bounded.state().seed() == 1475666158 &&
+       coin.value() &&
+       negativeSeed.value() == 1043980747 &&
+       negativeBounded.value() == 2 &&
+       randomIntRange(randomSeed(7), 5, 5).value() == 5 {
+        42
+    } else {
+        1
+    }
+}
