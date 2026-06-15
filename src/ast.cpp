@@ -395,6 +395,7 @@ std::string MethodCallNode::getType() {
     }
     if (receiverType == "String") {
         if (isBoolBinaryMethod(methodName)) return "Bool";
+        if (methodName == "isEmpty" || methodName == "nonEmpty" || methodName == "startsWith") return "Bool";
         if (methodName == "length") return "Int";
         if (methodName == "charAt") return "Char";
     }
@@ -450,6 +451,25 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
                 throw CompilerError(
                     ErrorKind::Semantic, arguments[0]->getLocation(),
                     "la méthode String." + methodName + " attend un argument de type String");
+            }
+            resolvedType = "Bool";
+            return;
+        }
+        if (methodName == "isEmpty" || methodName == "nonEmpty") {
+            if (!arguments.empty()) {
+                semanticError("la méthode String." + methodName + " n'accepte aucun argument");
+            }
+            resolvedType = "Bool";
+            return;
+        }
+        if (methodName == "startsWith") {
+            if (arguments.size() != 1) {
+                semanticError("la méthode String.startsWith attend un argument");
+            }
+            if (arguments[0]->getType() != "String") {
+                throw CompilerError(
+                    ErrorKind::Semantic, arguments[0]->getLocation(),
+                    "la méthode String.startsWith attend un argument de type String");
             }
             resolvedType = "Bool";
             return;
@@ -629,6 +649,15 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
             std::string loweredReceiver = receiver->lowerToIR(builder);
             std::string loweredArgument = arguments[0]->lowerToIR(builder);
             return builder.emitMethodCall("String", methodName, loweredReceiver, {loweredArgument}, "Bool");
+        }
+        if ((methodName == "isEmpty" || methodName == "nonEmpty") && arguments.empty()) {
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            return builder.emitMethodCall("String", methodName, loweredReceiver, {}, "Bool");
+        }
+        if (methodName == "startsWith" && arguments.size() == 1) {
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            std::string loweredPrefix = arguments[0]->lowerToIR(builder);
+            return builder.emitMethodCall("String", "startsWith", loweredReceiver, {loweredPrefix}, "Bool");
         }
         if (methodName == "length" && arguments.empty()) {
             std::string loweredReceiver = receiver->lowerToIR(builder);

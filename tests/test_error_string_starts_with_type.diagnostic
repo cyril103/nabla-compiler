@@ -1,0 +1,1 @@
+tests/test_error_string_starts_with_type.nabla:2:24: semantic error: la méthode String.startsWith attend un argument de type String

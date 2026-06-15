@@ -783,6 +783,18 @@ private:
             out << "    mov rax, [rdi + 8]\n";
             out << "    shl rax, 1\n";
             out << "    or rax, 1\n";
+        } else if (className == "String" && methodName == "isEmpty") {
+            out << "    cmp qword [rdi + 8], 0\n";
+            out << "    sete al\n";
+            out << "    movzx rax, al\n";
+            out << "    shl rax, 1\n";
+            out << "    or rax, 1\n";
+        } else if (className == "String" && methodName == "nonEmpty") {
+            out << "    cmp qword [rdi + 8], 0\n";
+            out << "    setne al\n";
+            out << "    movzx rax, al\n";
+            out << "    shl rax, 1\n";
+            out << "    or rax, 1\n";
         } else if (className == "String" && methodName == "charAt") {
             out << "    mov rax, rsi\n";
             out << "    sar rax, 1\n";
@@ -799,6 +811,8 @@ private:
             if (methodName == "!=") {
                 out << "    xor rax, 2\n";
             }
+        } else if (className == "String" && methodName == "startsWith") {
+            out << "    call Runtime_stringStartsWith\n";
         } else {
             out << "    call " << asmFunctionName(instruction.operation) << "\n";
         }

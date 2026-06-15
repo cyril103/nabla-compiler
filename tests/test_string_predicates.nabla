@@ -1,0 +1,17 @@
+def main(): Int = {
+    val empty = ""
+    val text = "nabla"
+
+    if empty.isEmpty() &&
+       !empty.nonEmpty() &&
+       text.nonEmpty() &&
+       !text.isEmpty() &&
+       text.startsWith("nab") &&
+       text.startsWith("") &&
+       !text.startsWith("lab") &&
+       !text.startsWith("nabla!") {
+        42
+    } else {
+        1
+    }
+}
