@@ -817,6 +817,8 @@ private:
             out << "    call Runtime_stringStartsWith\n";
         } else if (className == "String" && methodName == "toInt") {
             out << "    call Runtime_stringToInt\n";
+        } else if (className == "String" && methodName == "toCharArray") {
+            out << "    call Runtime_stringToCharArray\n";
         } else {
             out << "    call " << asmFunctionName(instruction.operation) << "\n";
         }

@@ -397,6 +397,7 @@ std::string MethodCallNode::getType() {
         if (isBoolBinaryMethod(methodName)) return "Bool";
         if (methodName == "isEmpty" || methodName == "nonEmpty" || methodName == "startsWith") return "Bool";
         if (methodName == "toInt") return "Int";
+        if (methodName == "toCharArray") return "ArrayObject[Char]";
         if (methodName == "length") return "Int";
         if (methodName == "charAt") return "Char";
     }
@@ -480,6 +481,13 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
                 semanticError("la méthode String.toInt n'accepte aucun argument");
             }
             resolvedType = "Int";
+            return;
+        }
+        if (methodName == "toCharArray") {
+            if (!arguments.empty()) {
+                semanticError("la méthode String.toCharArray n'accepte aucun argument");
+            }
+            resolvedType = "ArrayObject[Char]";
             return;
         }
         if (methodName == "length") {
@@ -670,6 +678,10 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         if (methodName == "toInt" && arguments.empty()) {
             std::string loweredReceiver = receiver->lowerToIR(builder);
             return builder.emitMethodCall("String", "toInt", loweredReceiver, {}, "Int");
+        }
+        if (methodName == "toCharArray" && arguments.empty()) {
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            return builder.emitMethodCall("String", "toCharArray", loweredReceiver, {}, "ArrayObject[Char]");
         }
         if (methodName == "length" && arguments.empty()) {
             std::string loweredReceiver = receiver->lowerToIR(builder);

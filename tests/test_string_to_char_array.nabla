@@ -1,0 +1,28 @@
+import collections.array
+
+def sameChar(value: Char): Char = {
+    value
+}
+
+def score(chars: Array[Char]): Int = {
+    val mapped = chars.map(sameChar)
+    if chars.size() == 5 &&
+       mapped.get(0) == 'n' &&
+       mapped.get(1) == 'a' &&
+       mapped.get(4) == 'a' {
+        41
+    } else {
+        0
+    }
+}
+
+def main(): Int = {
+    val chars = "nabla".toCharArray()
+    val empty = "".toCharArray()
+
+    if empty.isEmpty() {
+        score(chars) + 1
+    } else {
+        1
+    }
+}
