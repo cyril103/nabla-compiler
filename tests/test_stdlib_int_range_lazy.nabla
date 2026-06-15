@@ -1,0 +1,25 @@
+import collections.int_array
+
+def main(): Int = {
+    intRangeUntil(2, 5).foreach(value => {
+        while false {
+            value
+        }
+    })
+
+    val folded = intRangeUntil(1, 5).fold(1, (total, value) => total * value)
+    val mappedMax = intRangeUntil(1, 5)
+        .map(value => value * value)
+        .max()
+        .getOrElse(0)
+    val emptyMax = intRangeUntil(5, 2).max().getOrElse(42)
+
+    if folded == 24 &&
+       mappedMax == 16 &&
+       emptyMax == 42 &&
+       intRangeUntil(5, 2).isEmpty() {
+        42
+    } else {
+        1
+    }
+}

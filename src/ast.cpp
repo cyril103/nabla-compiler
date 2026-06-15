@@ -1254,6 +1254,47 @@ std::string FunctionValueCallNode::lowerToIR(IRBuilder& builder) const {
     return builder.emitIndirectCall(loweredFunction, loweredArguments, resolvedType);
 }
 
+FunctionExpressionCallNode::FunctionExpressionCallNode(
+    std::string functionName, std::unique_ptr<ASTNode> functionExpression,
+    std::vector<std::unique_ptr<ASTNode>> args, std::string initialResolvedType)
+    : name(std::move(functionName)), callee(std::move(functionExpression)), arguments(std::move(args)),
+      resolvedType(std::move(initialResolvedType)) {}
+
+std::string FunctionExpressionCallNode::getType() {
+    return resolvedType;
+}
+
+void FunctionExpressionCallNode::validateSemantics(CompilerContext& context) {
+    callee->validateSemantics(context);
+    for (const auto& argument : arguments) argument->validateSemantics(context);
+    auto functionType = functionTypeFromName(callee->getType());
+    if (!functionType) {
+        semanticError("la valeur '" + name + "' n'est pas appelable");
+    }
+    const size_t expectedArgumentCount = functionType->parameterTypes.size();
+    if (arguments.size() != expectedArgumentCount) {
+        semanticError(
+            callee->getType() + ": " + std::to_string(expectedArgumentCount) +
+            " argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
+    }
+    resolvedType = functionType->returnType;
+    for (size_t i = 0; i < arguments.size(); ++i) {
+        if (arguments[i]->getType() != functionType->parameterTypes[i]) {
+            throw CompilerError(
+                ErrorKind::Semantic, arguments[i]->getLocation(),
+                callee->getType() + ", paramètre: type '" + functionType->parameterTypes[i] +
+                "' attendu, '" + arguments[i]->getType() + "' reçu");
+        }
+    }
+}
+
+std::string FunctionExpressionCallNode::lowerToIR(IRBuilder& builder) const {
+    std::string loweredFunction = callee->lowerToIR(builder);
+    std::vector<std::string> loweredArguments;
+    for (const auto& argument : arguments) loweredArguments.push_back(argument->lowerToIR(builder));
+    return builder.emitIndirectCall(loweredFunction, loweredArguments, resolvedType);
+}
+
 FieldAccessNode::FieldAccessNode(std::string clName, std::string field, std::string fieldType)
     : className(std::move(clName)), fieldName(std::move(field)), type(std::move(fieldType)) {}
 

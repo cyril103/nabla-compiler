@@ -263,6 +263,9 @@ def main(): Int = {
 }
 ```
 
+Les champs de classe de type fonction peuvent aussi etre appeles depuis les
+methodes de la classe.
+
 ## Chaines
 
 Operations disponibles sur `String` :
@@ -339,6 +342,21 @@ Operations courantes :
 `collections.int_array` expose aussi `arrayIntRange(size)` pour produire
 `0..size-1` et `arrayIntRangeUntil(start, until)` pour produire une plage
 `start..until-1`.
+
+`intRangeUntil(start, until)` produit une plage `Int` paresseuse. Ses operations
+`foreach`, `fold`, `map` et `max` evitent de construire un `IntArray`
+intermediaire pour les parcours simples.
+
+```nabla
+import collections.int_array
+
+def main(): Int = {
+    intRangeUntil(1, 5)
+        .map(value => value * value)
+        .max()
+        .getOrElse(0)
+}
+```
 
 `Array[Int]`, `Array[Long]`, `Array[Float]`, `Array[Double]` et `Array[Bool]`
 sont specialises vers des facades primitives. Les autres types passent par

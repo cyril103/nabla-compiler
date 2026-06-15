@@ -72,6 +72,103 @@ def intArrayRangeUntil(start: Int, until: Int): IntArray = {
     xs
 }
 
+class RangeInt(startValue: Int, untilValue: Int) {
+    def size(): Int = {
+        if untilValue > startValue {
+            untilValue - startValue
+        } else {
+            0
+        }
+    }
+
+    def isEmpty(): Bool = {
+        untilValue <= startValue
+    }
+
+    def nonEmpty(): Bool = {
+        untilValue > startValue
+    }
+
+    def foreach(f: (Int) => Unit): Unit = {
+        var value = startValue
+        while value < untilValue {
+            f(value)
+            value = value + 1
+        }
+    }
+
+    def fold(initial: Int, combine: (Int, Int) => Int): Int = {
+        var value = startValue
+        var accumulator = initial
+        while value < untilValue {
+            accumulator = combine(accumulator, value)
+            value = value + 1
+        }
+        accumulator
+    }
+
+    def max(): OptionInt = {
+        if untilValue <= startValue {
+            optionIntNone()
+        } else {
+            var value = startValue + 1
+            var current = startValue
+            while value < untilValue {
+                if value > current {
+                    current = value
+                } else {
+                    current
+                }
+                value = value + 1
+            }
+            optionIntSome(current)
+        }
+    }
+
+    def map(f: (Int) => Int): RangeIntMapped = {
+        new RangeIntMapped(startValue, untilValue, f)
+    }
+}
+
+class RangeIntMapped(startValue: Int, untilValue: Int, transform: (Int) => Int) {
+    def foreach(f: (Int) => Unit): Unit = {
+        var value = startValue
+        while value < untilValue {
+            f(transform(value))
+            value = value + 1
+        }
+    }
+
+    def fold(initial: Int, combine: (Int, Int) => Int): Int = {
+        var value = startValue
+        var accumulator = initial
+        while value < untilValue {
+            accumulator = combine(accumulator, transform(value))
+            value = value + 1
+        }
+        accumulator
+    }
+
+    def max(): OptionInt = {
+        if untilValue <= startValue {
+            optionIntNone()
+        } else {
+            var value = startValue + 1
+            var current = transform(startValue)
+            while value < untilValue {
+                val mapped = transform(value)
+                if mapped > current {
+                    current = mapped
+                } else {
+                    current
+                }
+                value = value + 1
+            }
+            optionIntSome(current)
+        }
+    }
+}
+
 def intArrayMap(xs: IntArray, f: (Int) => Int): IntArray = {
     val mapped = new IntArray(xs.length())
     var index = 0
@@ -805,4 +902,8 @@ def arrayIntRange(size: Int): ArrayInt = {
 
 def arrayIntRangeUntil(start: Int, until: Int): ArrayInt = {
     new ArrayInt(intArrayRangeUntil(start, until))
+}
+
+def intRangeUntil(start: Int, until: Int): RangeInt = {
+    new RangeInt(start, until)
 }

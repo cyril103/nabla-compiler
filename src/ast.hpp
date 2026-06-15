@@ -196,6 +196,20 @@ public:
     std::string lowerToIR(IRBuilder& builder) const override;
 };
 
+class FunctionExpressionCallNode : public ASTNode {
+    std::string name;
+    std::unique_ptr<ASTNode> callee;
+    std::vector<std::unique_ptr<ASTNode>> arguments;
+    std::string resolvedType = "Int";
+public:
+    FunctionExpressionCallNode(
+        std::string functionName, std::unique_ptr<ASTNode> functionExpression,
+        std::vector<std::unique_ptr<ASTNode>> args, std::string initialResolvedType = "Int");
+    std::string getType() override;
+    void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
+};
+
 class FieldAccessNode : public ASTNode {
     std::string className;
     std::string fieldName;

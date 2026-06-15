@@ -85,6 +85,7 @@ Le pipeline implemente actuellement :
 - lambdas et appels indirects avec plusieurs parametres, dans les limites de la
   convention d'appel actuelle;
 - closures testees avec parametres, captures et retours non limites a `Int`;
+- champs de type fonction appelables depuis les methodes de leur classe;
 - inference du type du parametre pour les lambdas mono-parametre en position
   d'argument, par exemple `xs.map(value => { value + 1 })`;
 - lambdas mono-expression inferees en argument, par exemple
@@ -144,6 +145,8 @@ Le pipeline implemente actuellement :
   `zipWithIndex`, `grouped`, `ArrayIntNested`, `ArrayIntNested.flatten()`,
   `ArrayIntNested.rowSize` et `ArrayIntNested.mapRows`.
   avec predicats booleens;
+- plage lazy specialisee `RangeInt` via `intRangeUntil(start, until)`, avec
+  `size`, `isEmpty`, `nonEmpty`, `foreach`, `fold`, `map` et `max`;
 - module de bibliotheque standard `collections.long_array` avec `ArrayLong`,
   `longArrayFill`, `longArraySum`, `longArrayMap`, `arrayLongFill`, `map`,
   `flatMap`, `foreach`, `sum`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et
@@ -185,7 +188,7 @@ Le pipeline implemente actuellement :
 - backend ASM par defaut depuis l'IR couvrant la suite positive actuelle
   (fonctions, variables, controle de flux, imports, objets et methodes);
 - tests de compilation et d'execution via `make all-tests`.
-- tests Project Euler 1 a 7 comme banc progressif pour exercer le langage et la
+- tests Project Euler 1 a 8 comme banc progressif pour exercer le langage et la
   bibliotheque standard.
 
 Limites importantes :
@@ -351,6 +354,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter la syntaxe de types fonction parenthesee pour les aliases actuels.
 - [x] Autoriser les lambdas a plus de deux parametres.
 - [x] Autoriser les types fonction en position de retour.
+- [x] Autoriser l'appel des champs de type fonction depuis les methodes de
+  classe.
 - [x] Retirer les aliases historiques `IntUnaryFn`, `IntConsumerFn` et
   `IntBinaryFn`.
 - [x] Ajouter `IntBinaryFn` pour `fold` et operations binaires de collections.
@@ -359,6 +364,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `arrayIntRange` et `ArrayInt.foreach` comme premiers parcours
   fonctionnels de collection.
 - [x] Ajouter `arrayIntRangeUntil(start, until)` pour les plages `Int` bornees.
+- [x] Ajouter `intRangeUntil(start, until)` comme premiere plage `Int` lazy.
 - [x] Ajouter les closures avec capture par valeur pour les lambdas `Int`.
 - [x] Generaliser les closures aux types fonction complets.
 - [x] Ajouter l'inference simple des types de parametres de lambda.
@@ -470,6 +476,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `6751bd6` - Montrer l'I/O fichier dans `examples/command_shell.nabla`.
 - `290fbab` - Lire les fichiers texte complets.
 - `17b184f` - Documenter les helpers d'I/O texte.
+- `local` - Ajouter `RangeInt` lazy et l'utiliser dans la variante collections
+  de Project Euler 8.
+- `local` - Autoriser l'appel des champs de type fonction depuis les methodes.
+- `local` - Ajouter les tests Project Euler 8 imperatif et collections.
 - `local` - Typer les branches `if` heterogenes comme `Unit` et simplifier le
   test Project Euler 7.
 - `local` - Ajouter un test Project Euler 7 avec recherche du 10001e nombre

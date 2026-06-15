@@ -694,6 +694,8 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             std::vector<std::string> expectedArgumentTypes;
             auto [initialSymbol, initialScopeIndex] = findLocalWithScope(name);
             (void) initialScopeIndex;
+            std::string fieldFunctionType;
+            std::string fieldOwnerType;
             if (initialSymbol && !typeArguments.empty()) {
                 throw CompilerError(
                     ErrorKind::Parser, nameToken.location,
@@ -732,6 +734,19 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     }
                 }
             }
+            if (!initialSymbol && !currentParsingClass.empty() &&
+                context.classLayouts[currentParsingClass].count(name)) {
+                for (const auto& field : context.classes[currentParsingClass].fields) {
+                    if (field.name == name) {
+                        if (auto functionType = functionTypeFromName(field.type)) {
+                            fieldFunctionType = field.type;
+                            fieldOwnerType = currentParsingClass;
+                            expectedArgumentTypes = functionType->parameterTypes;
+                        }
+                        break;
+                    }
+                }
+            }
             consume(TokenType::LPAREN, "");
             std::vector<std::unique_ptr<ASTNode>> arguments;
             auto namedFunction = context.functions.find(functionLookupName);
@@ -748,9 +763,20 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     captureIfNeeded(name, *symbol, scopeIndex);
                     return located(
                         std::make_unique<FunctionValueCallNode>(
-                            name, symbol->internalName, std::move(arguments), functionType->returnType),
+                        name, symbol->internalName, std::move(arguments), functionType->returnType),
                         nameToken.location);
                 }
+            }
+            if (!fieldFunctionType.empty()) {
+                auto functionType = functionTypeFromName(fieldFunctionType);
+                auto fieldAccess = located(
+                    std::make_unique<FieldAccessNode>(fieldOwnerType, name, fieldFunctionType),
+                    nameToken.location);
+                return located(
+                    std::make_unique<FunctionExpressionCallNode>(
+                        name, std::move(fieldAccess), std::move(arguments),
+                        functionType ? functionType->returnType : "Int"),
+                    nameToken.location);
             }
             std::string initialReturnType = "Int";
             auto function = context.functions.find(functionLookupName);
