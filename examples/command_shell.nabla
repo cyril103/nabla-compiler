@@ -6,8 +6,7 @@ def printHelp(): Unit = {
     println("commands: add A B | repeat TEXT N | len TEXT | cat PATH | write PATH TEXT | append PATH TEXT | rm PATH | exists PATH | help | quit")
 }
 
-def commandName(line: String): String = {
-    val parts = words(line)
+def commandName(parts: ArrayObject[String]): String = {
     if parts.isEmpty() {
         ""
     } else {
@@ -96,51 +95,30 @@ def runRm(parts: ArrayObject[String]): Unit = {
     }
 }
 
+def runKnownCommand(command: String, parts: ArrayObject[String]): Unit = {
+    match command {
+        "help" => printHelp()
+        "add" => runAdd(parts)
+        "repeat" => runRepeat(parts)
+        "len" => runLen(parts)
+        "cat" => runCat(parts)
+        "write" => runWrite(parts)
+        "append" => runAppend(parts)
+        "rm" => runRm(parts)
+        "exists" => runExists(parts)
+        _ => println("unknown command: " + command)
+    }
+}
+
 def runCommand(line: String): Bool = {
     val parts = words(line)
-    val command = commandName(line)
+    val command = commandName(parts)
 
     match command {
         "" => false
         "quit" => false
-        "help" => {
-            printHelp()
-            true
-        }
-        "add" => {
-            runAdd(parts)
-            true
-        }
-        "repeat" => {
-            runRepeat(parts)
-            true
-        }
-        "len" => {
-            runLen(parts)
-            true
-        }
-        "cat" => {
-            runCat(parts)
-            true
-        }
-        "write" => {
-            runWrite(parts)
-            true
-        }
-        "append" => {
-            runAppend(parts)
-            true
-        }
-        "rm" => {
-            runRm(parts)
-            true
-        }
-        "exists" => {
-            runExists(parts)
-            true
-        }
         _ => {
-            println("unknown command: " + command)
+            runKnownCommand(command, parts)
             true
         }
     }
