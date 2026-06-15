@@ -37,6 +37,10 @@ def randomSeed(seed: Int): RandomState = {
     new RandomState(seed)
 }
 
+def randomSeedNow(): RandomState = {
+    randomSeed(timeSeed())
+}
+
 def randomInt(state: RandomState): RandomIntResult = {
     val nextSeed = randomStep(state.seed())
     new RandomIntResult(nextSeed, new RandomState(nextSeed))

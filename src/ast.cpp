@@ -1013,6 +1013,7 @@ std::string FunctionCallNode::getType() {
     if (name == "fileExists") return "Bool";
     if (name == "deleteFile") return "Bool";
     if (name == "parseInt") return "Int";
+    if (name == "timeSeed") return "Int";
     return resolvedType;
 }
 
@@ -1124,6 +1125,13 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
                 ErrorKind::Semantic, arguments[0]->getLocation(),
                 "parseInt, paramètre 'value': type 'String' attendu, '" +
                 arguments[0]->getType() + "' reçu");
+        }
+        resolvedType = "Int";
+        return;
+    }
+    if (name == "timeSeed") {
+        if (!arguments.empty()) {
+            semanticError("timeSeed: 0 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
         }
         resolvedType = "Int";
         return;

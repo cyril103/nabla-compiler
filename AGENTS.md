@@ -134,7 +134,7 @@ Le pipeline implemente actuellement :
   wrappers `io.readTextFile`, `io.writeTextFile`, `io.appendTextFile` et
   `io.pathExists`;
 - module de bibliotheque standard `util` avec `randomSeed`, `randomInt`,
-  `randomIntRange` et `randomBool` pour une API pseudo-aléatoire
+  `randomIntRange`, `randomBool` et `randomSeedNow` pour une API pseudo-aléatoire
   deterministe basée sur une seed;
 - module de bibliotheque standard `math` avec `absInt`, `absLong`, `absFloat`,
   `absDouble`, `absDiffInt`, `absDiffLong`, `absDiffFloat`,
@@ -325,6 +325,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter le module standard `util` avec `randomSeed`, `randomInt`,
   `randomIntRange` et `randomBool` pour une API pseudo-aléatoire
   deterministe.
+- [x] Ajouter `randomSeedNow()` au module standard `util`, basé sur une source de
+  timestamp en runtime pour initialiser un générateur avec une seed temporelle.
 
 - [ ] Formaliser `Int`, `Bool`, `Char`, `String`, `IntArray`, les types fonction canoniques et
   les types de classes.
@@ -505,6 +507,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 - `local` - Ajouter le module standard `util` (pseudo-random deterministic)
   et le test `test_stdlib_util_random`.
+- `local` - Ajouter `randomSeedNow()` en `stdlib/util` via `timeSeed` pour une seed
+  temporelle de départ.
 
 - `local` - Ajouter les tests Project Euler 10 imperatif et fonctionnel, avec
   `Int.toLong` et `RangeInt.foldLong`.

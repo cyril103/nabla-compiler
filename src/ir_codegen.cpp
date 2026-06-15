@@ -573,6 +573,8 @@ private:
             out << "    call Runtime_deleteFile\n";
         } else if (instruction.operation == "parseInt") {
             out << "    call Runtime_stringToInt\n";
+        } else if (instruction.operation == "timeSeed") {
+            out << "    call Runtime_timeSeed\n";
         } else {
             out << "    call " << asmFunctionName(instruction.operation) << "\n";
         }

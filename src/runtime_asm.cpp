@@ -17,6 +17,15 @@ void emit(std::ostream& out) {
         << "    shr rdi, 1\n"
         << "    mov rax, 60\n"
         << "    syscall\n\n";
+    out << "Runtime_timeSeed:\n"
+        << "    rdtsc\n"
+        << "    shl rdx, 32\n"
+        << "    or rax, rdx\n"
+        << "    mov rbx, 2147483647\n"
+        << "    and rax, rbx\n"
+        << "    shl rax, 1\n"
+        << "    or rax, 1\n"
+        << "    ret\n\n";
     out << "Runtime_initHeap:\n"
         << "    mov rax, 9\n"
         << "    xor rdi, rdi\n"

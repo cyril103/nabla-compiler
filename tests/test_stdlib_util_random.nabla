@@ -2,6 +2,8 @@ import util
 
 def main(): Int = {
     val seed = randomSeed(123456789)
+    val nowSeedFirst = randomSeedNow()
+    val nowSeedSecond = randomSeedNow()
     val first = randomInt(seed)
     val second = randomInt(first.state())
     val bounded = randomIntRange(second.state(), 10, 20)
@@ -12,6 +14,7 @@ def main(): Int = {
 
     if first.value() == 295234770 &&
        first.state().seed() == 295234770 &&
+       nowSeedFirst.seed() != nowSeedSecond.seed() &&
        second.value() == 465300796 &&
        bounded.value() == 20 &&
        bounded.state().seed() == 1475666158 &&
