@@ -413,6 +413,7 @@ std::string MethodCallNode::getType() {
         if (methodName == "length") return "Int";
         if (methodName == "get") return nativeArrayElementType(receiverType);
     }
+    if (receiverType == "ArrayObject[String]" && methodName == "mkString") return "String";
     return resolvedType;
 }
 
@@ -585,6 +586,18 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             return;
         }
         semanticError("méthode inconnue: " + receiverType + "." + methodName);
+    }
+    if (receiverType == "ArrayObject[String]" && methodName == "mkString") {
+        if (arguments.size() != 1) {
+            semanticError("la méthode Array[String].mkString attend un argument");
+        }
+        if (arguments[0]->getType() != "String") {
+            throw CompilerError(
+                ErrorKind::Semantic, arguments[0]->getLocation(),
+                "la méthode Array[String].mkString attend un séparateur de type String");
+        }
+        resolvedType = "String";
+        return;
     }
     if (auto signature = stdlibTypeAliasMethodSignature(receiverType, methodName)) {
         if (!typeArguments.empty()) {
@@ -784,6 +797,13 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
                 loweredReceiver, arguments[0]->lowerToIR(builder), arguments[1]->lowerToIR(builder));
         }
         builder.unsupported(location, "la méthode " + receiverType + "." + methodName);
+    }
+    if (receiverType == "ArrayObject[String]" && methodName == "mkString" && arguments.size() == 1) {
+        std::string loweredReceiver = receiver->lowerToIR(builder);
+        std::string loweredSeparator = arguments[0]->lowerToIR(builder);
+        builder.registerFunctionSpecialization("objectStringArrayMkString", {"String"}, "String");
+        return builder.emitCall(
+            "objectStringArrayMkString[String]", {loweredReceiver, loweredSeparator}, "String");
     }
     const std::string activeReceiverType = builder.substituteActiveType(receiverType);
     if (activeReceiverType != receiverType && stdlibTypeAliasMethodSignature(receiverType, methodName)) {

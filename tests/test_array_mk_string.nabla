@@ -5,7 +5,7 @@ def main(): Int = {
     val words = arrayFill[String](3, "go")
     val left = numbers.mkString(",")
     val viaAlias = arrayMkString[Int](numbers, "-")
-    val right = arrayMkString[String](words, "|")
+    val right = words.mkString("|")
 
     if left == "1,2,3" &&
        viaAlias == "1-2-3" &&
