@@ -4,12 +4,14 @@ def main(): Int = {
     val path = "build/nabla_file_io_test.txt"
     val content = "nabla\nfiles"
     val written = writeTextFile(path, content)
+    val appended = appendTextFile(path, "\nmore")
     val loaded = readTextFile(path)
 
     if written == content.length() &&
+       appended == 5 &&
        fileExists(path) &&
        pathExists(path) &&
-       loaded == content &&
+       loaded == content + "\nmore" &&
        !fileExists("build/nabla_missing_file_exists_test.txt") &&
        readTextFile("build/nabla_missing_file.txt").isEmpty() {
         42

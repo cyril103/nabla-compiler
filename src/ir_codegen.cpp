@@ -490,6 +490,8 @@ private:
             out << "    call Runtime_readFile\n";
         } else if (instruction.operation == "writeFile") {
             out << "    call Runtime_writeFile\n";
+        } else if (instruction.operation == "appendFile") {
+            out << "    call Runtime_appendFile\n";
         } else if (instruction.operation == "fileExists") {
             out << "    call Runtime_fileExists\n";
         } else if (instruction.operation == "parseInt") {

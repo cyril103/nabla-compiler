@@ -969,6 +969,7 @@ std::string FunctionCallNode::getType() {
     if (name == "readLine") return "String";
     if (name == "readFile") return "String";
     if (name == "writeFile") return "Int";
+    if (name == "appendFile") return "Int";
     if (name == "fileExists") return "Bool";
     if (name == "parseInt") return "Int";
     return resolvedType;
@@ -1023,6 +1024,25 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
             throw CompilerError(
                 ErrorKind::Semantic, arguments[1]->getLocation(),
                 "writeFile, paramètre 'content': type 'String' attendu, '" +
+                arguments[1]->getType() + "' reçu");
+        }
+        resolvedType = "Int";
+        return;
+    }
+    if (name == "appendFile") {
+        if (arguments.size() != 2) {
+            semanticError("appendFile: 2 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
+        }
+        if (arguments[0]->getType() != "String") {
+            throw CompilerError(
+                ErrorKind::Semantic, arguments[0]->getLocation(),
+                "appendFile, paramètre 'path': type 'String' attendu, '" +
+                arguments[0]->getType() + "' reçu");
+        }
+        if (arguments[1]->getType() != "String") {
+            throw CompilerError(
+                ErrorKind::Semantic, arguments[1]->getLocation(),
+                "appendFile, paramètre 'content': type 'String' attendu, '" +
                 arguments[1]->getType() + "' reçu");
         }
         resolvedType = "Int";

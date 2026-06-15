@@ -1,0 +1,1 @@
+tests/test_error_append_file_argument.nabla:2:33: semantic error: appendFile, paramètre 'content': type 'String' attendu, 'Int' reçu
