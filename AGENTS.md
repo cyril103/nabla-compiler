@@ -221,8 +221,8 @@ Le pipeline implemente actuellement :
 - backend ASM par defaut depuis l'IR couvrant la suite positive actuelle
   (fonctions, variables, controle de flux, imports, objets et methodes);
 - tests de compilation et d'execution via `make all-tests`.
-- tests Project Euler 1 a 10 comme banc progressif pour exercer le langage et la
-  bibliotheque standard.
+- examples Project Euler 1 a 10 (`examples/euler1.nabla` ... `examples/euler10_functional.nabla`)
+  comme banc progressif pour exercer le langage et la bibliotheque standard.
 
 Limites importantes :
 
