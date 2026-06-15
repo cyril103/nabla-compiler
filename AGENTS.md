@@ -399,7 +399,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Extraire le runtime ASM commun du backend IR.
 - [x] Stabiliser la representation de `String`.
 - [x] Ajouter `String.charAt(index): Char` sur la representation byte-based.
-- [ ] Choisir une strategie memoire a long terme.
+- [ ] Choisir une strategie memoire a long terme: heap structure, header
+  d'objet, liberation des objets non references et eventuel GC mark-and-sweep.
 - [x] Ajouter une primitive d'affichage console pour `String`.
 - [x] Ajouter une primitive d'entree console `readLine(): String`.
 - [x] Ajouter une premiere collection native `IntArray`.
