@@ -47,6 +47,13 @@ nabla-compiler/
 │       └── Math.nabla     # Sous-module Nabla importé dynamiquement
 ├── Makefile           # Automatisation de la compilation du projet
 └── .gitignore         # Fichiers et binaires temporaires à ignorer
+```
+
+## Documentation du langage
+
+Une première documentation utilisateur du langage est disponible ici :
+
+- [docs/language.md](docs/language.md)
 
 ## 🛠️ Compilation et usage
 

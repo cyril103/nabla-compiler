@@ -426,6 +426,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [ ] Ajouter des tests unitaires du lexer, parser et analyseur semantique.
 - [x] Ajouter une racine `stdlib/` importable.
 - [x] Ajouter un premier module de collections dans `stdlib/`.
+- [x] Ajouter une premiere documentation utilisateur du langage.
 
 ## Journal Des Jalons
 
@@ -442,6 +443,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `readLine`, `trim`, `split`, `repeat` et `toInt`.
 - `local` - Ajouter `strings.words(text)` et l'utiliser dans
   `examples/command_shell.nabla`.
+- `local` - Ajouter `docs/language.md` comme premiere documentation utilisateur
+  du langage.
 - `local` - Ajouter `String.indexOf` et `String.contains`.
 - `local` - Ajouter `String.+` et `mkString` pour `ArrayInt`, `ArrayLong`,
   `ArrayBool` et `Array[String]`.
