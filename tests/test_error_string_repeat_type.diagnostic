@@ -1,0 +1,1 @@
+tests/test_error_string_repeat_type.nabla:2:20: semantic error: la méthode String.repeat attend un nombre de répétitions de type Int

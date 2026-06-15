@@ -400,7 +400,7 @@ std::string MethodCallNode::getType() {
             methodName == "endsWith" || methodName == "contains") return "Bool";
         if (methodName == "toInt") return "Int";
         if (methodName == "toCharArray") return "ArrayObject[Char]";
-        if (methodName == "substring") return "String";
+        if (methodName == "substring" || methodName == "repeat") return "String";
         if (methodName == "length" || methodName == "indexOf") return "Int";
         if (methodName == "charAt") return "Char";
     }
@@ -531,6 +531,18 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
                 throw CompilerError(
                     ErrorKind::Semantic, arguments[1]->getLocation(),
                     "la méthode String.substring attend un index de fin de type Int");
+            }
+            resolvedType = "String";
+            return;
+        }
+        if (methodName == "repeat") {
+            if (arguments.size() != 1) {
+                semanticError("la méthode String.repeat attend un argument");
+            }
+            if (arguments[0]->getType() != "Int") {
+                throw CompilerError(
+                    ErrorKind::Semantic, arguments[0]->getLocation(),
+                    "la méthode String.repeat attend un nombre de répétitions de type Int");
             }
             resolvedType = "String";
             return;
@@ -758,6 +770,11 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
             std::string loweredUntil = arguments[1]->lowerToIR(builder);
             return builder.emitMethodCall(
                 "String", "substring", loweredReceiver, {loweredFrom, loweredUntil}, "String");
+        }
+        if (methodName == "repeat" && arguments.size() == 1) {
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            std::string loweredCount = arguments[0]->lowerToIR(builder);
+            return builder.emitMethodCall("String", "repeat", loweredReceiver, {loweredCount}, "String");
         }
         if (methodName == "length" && arguments.empty()) {
             std::string loweredReceiver = receiver->lowerToIR(builder);

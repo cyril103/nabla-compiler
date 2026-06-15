@@ -1,0 +1,10 @@
+def main(): Int = {
+    if "na".repeat(3) == "nanana" &&
+       "x".repeat(0) == "" &&
+       "".repeat(5) == "" &&
+       "go".repeat(1) == "go" {
+        42
+    } else {
+        1
+    }
+}

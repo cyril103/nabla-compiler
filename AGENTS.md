@@ -106,7 +106,7 @@ Le pipeline implemente actuellement :
   litteraux `String`;
 - chaines `String` stockees comme buffers de bytes, avec `length` et
   `charAt(index): Char`, `toCharArray(): ArrayObject[Char]`, `toInt`,
-  `substring(from, until)`, `indexOf`, `contains`, `isEmpty`, `nonEmpty`,
+  `substring(from, until)`, `repeat(count)`, `indexOf`, `contains`, `isEmpty`, `nonEmpty`,
   `startsWith`, `endsWith`, `+`, `==` et `!=`;
 - jointure texte de tableaux via `ArrayInt` / `ArrayLong` /
   `ArrayBool.mkString(separator)` et `arrayMkString[Int/Long/Bool/String]`;
@@ -290,6 +290,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `String.toInt` et `parseInt`.
 - [x] Ajouter `String.toCharArray` vers `ArrayObject[Char]`.
 - [x] Ajouter `String.substring(from, until)`.
+- [x] Ajouter `String.repeat(count)`.
 - [x] Ajouter `String.indexOf` et `String.contains`.
 - [x] Ajouter `String.+` et `mkString` pour `ArrayInt`, `ArrayLong`,
   `ArrayBool` et `Array[String]`.
@@ -429,6 +430,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `local` - Ajouter `String.toInt` et `parseInt(value)`.
 - `local` - Ajouter `String.toCharArray(): ArrayObject[Char]`.
 - `local` - Ajouter `String.substring(from, until)`.
+- `local` - Ajouter `String.repeat(count)`.
 - `local` - Ajouter `String.indexOf` et `String.contains`.
 - `local` - Ajouter `String.+` et `mkString` pour `ArrayInt`, `ArrayLong`,
   `ArrayBool` et `Array[String]`.
