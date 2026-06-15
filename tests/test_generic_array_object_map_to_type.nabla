@@ -1,0 +1,39 @@
+import collections.array
+import collections.object_array
+
+class Score(value: Int) {
+    def points(): Int = {
+        value
+    }
+}
+
+def stringify(value: Int): String = {
+    "score"
+}
+
+def main(): Int = {
+    val words = arrayFill[String](3, "hi")
+    words.set(1, "hello")
+    val lengths = words.map[Int](word => word.length())
+    val lengthsViaFunction = arrayMap[String, Int](words, word => word.length())
+
+    val rawNumbers = objectArrayFill[Int](2, 7)
+    rawNumbers.set(1, 9)
+    val labels = rawNumbers.map[String](stringify)
+
+    val scores = arrayFill[Score](2, new Score(10))
+    scores.set(1, new Score(32))
+    val points = scores.map[Int](score => score.points())
+
+    if lengths.size() == 3 &&
+       lengths.get(0) == 2 &&
+       lengths.get(1) == 5 &&
+       lengthsViaFunction.get(2) == 2 &&
+       labels.get(1).length() == 5 &&
+       points.get(0) == 10 &&
+       points.get(1) == 32 {
+        42
+    } else {
+        1
+    }
+}

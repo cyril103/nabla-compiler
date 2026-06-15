@@ -8,8 +8,12 @@ def objectArrayFill[T](size: Int, value: T): ArrayObject[T] = {
     new ArrayObject[T](xs)
 }
 
-def objectArrayMap[T](xs: ArrayObject[T], f: (T) => T): ArrayObject[T] = {
-    xs.map(f)
+def objectArrayMap[T, U](xs: ArrayObject[T], f: (T) => U): ArrayObject[U] = {
+    xs.map[U](f)
+}
+
+def objectArrayMapSame[T](xs: ArrayObject[T], f: (T) => T): ArrayObject[T] = {
+    xs.map[T](f)
 }
 
 def objectArrayForeach[T](xs: ArrayObject[T], f: (T) => Unit): Unit = {
@@ -22,6 +26,10 @@ def objectArrayFilter[T](xs: ArrayObject[T], predicate: (T) => Bool): ArrayObjec
 
 def objectArrayFold[T, U](xs: ArrayObject[T], initial: U, combine: (U, T) => U): U = {
     xs.fold[U](initial, combine)
+}
+
+def objectArrayFlatMap[T, U](xs: ArrayObject[T], transform: (T) => ArrayObject[U]): ArrayObject[U] = {
+    xs.flatMap[U](transform)
 }
 
 class ArrayObject[T](values: ObjectArray[T]) {
@@ -49,14 +57,14 @@ class ArrayObject[T](values: ObjectArray[T]) {
         values.set(index, value)
     }
 
-    def map(f: (T) => T): ArrayObject[T] = {
-        val mapped = new ObjectArray[T](values.length())
+    def map[U](f: (T) => U): ArrayObject[U] = {
+        val mapped = new ObjectArray[U](values.length())
         var index = 0
         while (index < values.length()) {
             mapped.set(index, f(values.get(index)))
             index = index + 1
         }
-        new ArrayObject[T](mapped)
+        new ArrayObject[U](mapped)
     }
 
     def filter(predicate: (T) => Bool): ArrayObject[T] = {
@@ -95,6 +103,30 @@ class ArrayObject[T](values: ObjectArray[T]) {
             index = index + 1
         }
         accumulator
+    }
+
+    def flatMap[U](transform: (T) => ArrayObject[U]): ArrayObject[U] = {
+        var index = 0
+        var total = 0
+        while (index < values.length()) {
+            total = total + transform(values.get(index)).size()
+            index = index + 1
+        }
+
+        val flattened = new ObjectArray[U](total)
+        index = 0
+        var output = 0
+        while (index < values.length()) {
+            val mapped = transform(values.get(index))
+            var inner = 0
+            while (inner < mapped.size()) {
+                flattened.set(output, mapped.get(inner))
+                output = output + 1
+                inner = inner + 1
+            }
+            index = index + 1
+        }
+        new ArrayObject[U](flattened)
     }
 
     def foreach(f: (T) => Unit): Unit = {

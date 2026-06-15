@@ -108,8 +108,14 @@ inline std::optional<std::string> resolveStdlibFunctionAlias(
         typeArguments[0] != "Float" && typeArguments[0] != "Double" &&
         typeArguments[0] != "Bool") {
         if (name == "arrayFill") return "objectArrayFill";
-        if (name == "arrayMap") return "objectArrayMap";
+        if (name == "arrayMap") return "objectArrayMapSame";
         if (name == "arrayForeach") return "objectArrayForeach";
+    }
+    if (typeArguments.size() == 2 &&
+        typeArguments[0] != "Int" && typeArguments[0] != "Long" &&
+        typeArguments[0] != "Float" && typeArguments[0] != "Double" &&
+        typeArguments[0] != "Bool") {
+        if (name == "arrayMap") return "objectArrayMap";
     }
     return std::nullopt;
 }

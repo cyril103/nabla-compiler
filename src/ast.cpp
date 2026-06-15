@@ -641,19 +641,34 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         std::string loweredReceiver = receiver->lowerToIR(builder);
         std::vector<std::string> loweredArguments;
         for (const auto& argument : arguments) loweredArguments.push_back(argument->lowerToIR(builder));
+        std::vector<std::string> concreteTypeArguments;
+        for (const auto& typeArgument : resolvedTypeArguments) {
+            concreteTypeArguments.push_back(builder.substituteActiveType(typeArgument));
+        }
+        const std::string concreteReturnType = builder.substituteActiveType(resolvedType);
         const std::string activeReceiverBase = genericBaseName(activeReceiverType);
+        if (concreteTypeArguments.empty() && activeReceiverBase == "ArrayObject" && methodName == "map") {
+            auto parameterizedReturnType = parameterizedTypeFromName(concreteReturnType);
+            if (parameterizedReturnType && parameterizedReturnType->first == "ArrayObject" &&
+                parameterizedReturnType->second.size() == 1) {
+                concreteTypeArguments.push_back(parameterizedReturnType->second[0]);
+            }
+        }
+        const std::string loweredMethodName = concreteTypeArguments.empty()
+            ? methodName
+            : formatParameterizedType(methodName, concreteTypeArguments);
         if (activeReceiverBase != activeReceiverType) {
             std::vector<std::string> argumentTypes;
             for (const auto& argument : arguments) {
                 argumentTypes.push_back(builder.substituteActiveType(argument->getType()));
             }
             builder.registerMethodSpecialization(
-                activeReceiverType, activeReceiverBase, methodName, {},
-                argumentTypes, builder.substituteActiveType(resolvedType));
+                activeReceiverType, activeReceiverBase, methodName, concreteTypeArguments,
+                argumentTypes, concreteReturnType);
         }
         return builder.emitMethodCall(
-            activeReceiverType, methodName, loweredReceiver, loweredArguments,
-            builder.substituteActiveType(resolvedType));
+            activeReceiverType, loweredMethodName, loweredReceiver, loweredArguments,
+            concreteReturnType);
     }
 
     std::string loweredReceiver = receiver->lowerToIR(builder);
