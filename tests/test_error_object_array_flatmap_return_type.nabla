@@ -1,0 +1,5 @@
+import collections.array
+
+def main(): Int = {
+    arrayFill[String](2, "x").flatMap[Int](value => arrayFill[String](1, value)).size()
+}

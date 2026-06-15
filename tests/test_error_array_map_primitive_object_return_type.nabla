@@ -1,0 +1,5 @@
+import collections.array
+
+def main(): Int = {
+    arrayMap[Int, String](arrayIntRange(2), value => value + 1).size()
+}
