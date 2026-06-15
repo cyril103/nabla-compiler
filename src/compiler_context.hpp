@@ -99,54 +99,56 @@ inline const std::vector<StdlibFunctionAlias>& stdlibFunctionAliases() {
     return aliases;
 }
 
+inline bool isPrimitiveArrayElementType(const std::string& type) {
+    return type == "Int" || type == "Long" || type == "Float" ||
+           type == "Double" || type == "Bool";
+}
+
+inline std::optional<std::string> primitiveArrayAliasPrefix(const std::string& type) {
+    if (type == "Int") return "arrayInt";
+    if (type == "Long") return "arrayLong";
+    if (type == "Float") return "arrayFloat";
+    if (type == "Double") return "arrayDouble";
+    if (type == "Bool") return "arrayBool";
+    return std::nullopt;
+}
+
+inline std::optional<std::string> resolvePrimitiveArrayMapAlias(
+    const std::vector<std::string>& typeArguments) {
+    if (typeArguments.size() != 2) return std::nullopt;
+    auto prefix = primitiveArrayAliasPrefix(typeArguments[0]);
+    if (!prefix) return std::nullopt;
+    if (typeArguments[0] == typeArguments[1]) return *prefix + "Map";
+    return *prefix + "MapObject";
+}
+
+inline std::optional<std::string> resolvePrimitiveArrayFlatMapAlias(
+    const std::vector<std::string>& typeArguments) {
+    if (typeArguments.size() != 2) return std::nullopt;
+    auto prefix = primitiveArrayAliasPrefix(typeArguments[0]);
+    if (!prefix) return std::nullopt;
+    return *prefix + "FlatMapObject";
+}
+
 inline std::optional<std::string> resolveStdlibFunctionAlias(
     const std::string& name, const std::vector<std::string>& typeArguments) {
     for (const auto& alias : stdlibFunctionAliases()) {
         if (alias.name == name && alias.typeArguments == typeArguments) return alias.resolvedName;
     }
-    if (typeArguments.size() == 1 &&
-        typeArguments[0] != "Int" && typeArguments[0] != "Long" &&
-        typeArguments[0] != "Float" && typeArguments[0] != "Double" &&
-        typeArguments[0] != "Bool") {
+    if (typeArguments.size() == 1 && !isPrimitiveArrayElementType(typeArguments[0])) {
         if (name == "arrayFill") return "objectArrayFill";
         if (name == "arrayMap") return "objectArrayMapSame";
         if (name == "arrayForeach") return "objectArrayForeach";
     }
-    if (typeArguments.size() == 2 &&
-        typeArguments[0] != "Int" && typeArguments[0] != "Long" &&
-        typeArguments[0] != "Float" && typeArguments[0] != "Double" &&
-        typeArguments[0] != "Bool") {
+    if (typeArguments.size() == 2 && !isPrimitiveArrayElementType(typeArguments[0])) {
         if (name == "arrayMap") return "objectArrayMap";
         if (name == "arrayFlatMap") return "objectArrayFlatMap";
     }
     if (name == "arrayMap" && typeArguments.size() == 2) {
-        if (typeArguments[0] == "Int") {
-            if (typeArguments[1] == "Int") return "arrayIntMap";
-            return "arrayIntMapObject";
-        }
-        if (typeArguments[0] == "Long") {
-            if (typeArguments[1] == "Long") return "arrayLongMap";
-            return "arrayLongMapObject";
-        }
-        if (typeArguments[0] == "Float") {
-            if (typeArguments[1] == "Float") return "arrayFloatMap";
-            return "arrayFloatMapObject";
-        }
-        if (typeArguments[0] == "Double") {
-            if (typeArguments[1] == "Double") return "arrayDoubleMap";
-            return "arrayDoubleMapObject";
-        }
-        if (typeArguments[0] == "Bool") {
-            if (typeArguments[1] == "Bool") return "arrayBoolMap";
-            return "arrayBoolMapObject";
-        }
+        if (auto alias = resolvePrimitiveArrayMapAlias(typeArguments)) return alias;
     }
     if (name == "arrayFlatMap" && typeArguments.size() == 2) {
-        if (typeArguments[0] == "Int") return "arrayIntFlatMapObject";
-        if (typeArguments[0] == "Long") return "arrayLongFlatMapObject";
-        if (typeArguments[0] == "Float") return "arrayFloatFlatMapObject";
-        if (typeArguments[0] == "Double") return "arrayDoubleFlatMapObject";
-        if (typeArguments[0] == "Bool") return "arrayBoolFlatMapObject";
+        if (auto alias = resolvePrimitiveArrayFlatMapAlias(typeArguments)) return alias;
     }
     return std::nullopt;
 }

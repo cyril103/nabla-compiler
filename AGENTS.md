@@ -393,6 +393,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Factoriser le routage des aliases standards de tableaux dans
+  `compiler_context.hpp`.
 - `local` - Ajouter la facade standard `arrayFlatMap[T]` / `arrayFlatMap[T, U]`.
 - `local` - Refaire `examples/student_scores.nabla` comme exemple vitrine de
   `Array[Student]`, `map[U]`, `filter`, `fold[U]`, `flatMap[U]` et
