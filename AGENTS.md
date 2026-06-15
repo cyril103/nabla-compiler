@@ -104,7 +104,8 @@ Le pipeline implemente actuellement :
 - entiers immediats `Int` et `Long` avec pointer tagging, litteraux decimaux
   `Float` / `Double` portes par l'IR typee et litteraux `String`;
 - affichage console de `String` via la primitive globale `print`;
-- premier module de bibliotheque standard `io` avec `println`;
+- lecture console de `String` via la primitive globale `readLine`;
+- premier module de bibliotheque standard `io` avec `println` et `input`;
 - module de bibliotheque standard `core.option_int` avec `OptionInt`,
   `optionIntSome`, `optionIntNone`, `map`, `filter` et `orElse`;
 - module de bibliotheque standard `core.option` avec `Option[T]`, `optionSome`,
@@ -382,6 +383,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Stabiliser la representation de `String`.
 - [ ] Choisir une strategie memoire a long terme.
 - [x] Ajouter une primitive d'affichage console pour `String`.
+- [x] Ajouter une primitive d'entree console `readLine(): String`.
 - [x] Ajouter une premiere collection native `IntArray`.
 - [x] Ajouter une collection native `LongArray`.
 - [x] Ajouter une collection native `FloatArray`.
@@ -399,6 +401,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Ajouter la primitive d'entree console `readLine(): String` et
+  `io.input()`.
 - `local` - Ajouter la facade standard `arrayFold[T]` / `arrayFold[T, U]`.
 - `local` - Completer `arrayFlatMap[T]` pour toutes les facades primitives.
 - `local` - Ajouter la facade standard `arrayFilter[T]`.

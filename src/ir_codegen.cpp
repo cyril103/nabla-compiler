@@ -484,6 +484,8 @@ private:
         }
         if (instruction.operation == "print") {
             out << "    call Runtime_print\n";
+        } else if (instruction.operation == "readLine") {
+            out << "    call Runtime_readLine\n";
         } else {
             out << "    call " << asmFunctionName(instruction.operation) << "\n";
         }

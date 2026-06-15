@@ -1,3 +1,7 @@
 def println(value: String): Unit = {
     print(value)
 }
+
+def input(): String = {
+    readLine()
+}

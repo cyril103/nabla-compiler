@@ -1,0 +1,8 @@
+def main(): Int = {
+    val value = readLine()
+    if value.length() == 0 {
+        42
+    } else {
+        1
+    }
+}

@@ -705,6 +705,7 @@ FunctionCallNode::FunctionCallNode(
 
 std::string FunctionCallNode::getType() {
     if (name == "print") return "Unit";
+    if (name == "readLine") return "String";
     return resolvedType;
 }
 
@@ -721,6 +722,13 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
                 arguments[0]->getType() + "' reçu");
         }
         resolvedType = "Unit";
+        return;
+    }
+    if (name == "readLine") {
+        if (!arguments.empty()) {
+            semanticError("readLine: 0 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
+        }
+        resolvedType = "String";
         return;
     }
     auto function = context.functions.find(name);

@@ -1,0 +1,9 @@
+import io
+
+def main(): Int = {
+    if input().length() == 0 {
+        42
+    } else {
+        1
+    }
+}
