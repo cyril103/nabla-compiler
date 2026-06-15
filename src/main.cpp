@@ -8,6 +8,8 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <sys/wait.h>
+#include <unistd.h>
 #include <string>
 #include <vector>
 
@@ -27,6 +29,32 @@ static std::filesystem::path findProjectRoot(const std::filesystem::path& start)
 
 static void printUsage(const char* programName) {
     std::cerr << "Usage: " << programName << " [--keep-asm|--keep-temp|--emit-ir|--backend-ir] <fichier.nabla>\n";
+}
+
+int runCommand(const std::vector<std::string>& args) {
+    std::vector<char*> cArgs;
+    cArgs.reserve(args.size() + 1);
+    for (const auto& arg : args) cArgs.push_back(const_cast<char*>(arg.c_str()));
+    cArgs.push_back(nullptr);
+
+    pid_t pid = fork();
+    if (pid == -1) {
+        return 1;
+    }
+
+    if (pid == 0) {
+        execvp(cArgs[0], cArgs.data());
+        _exit(127);
+    }
+
+    int status = 0;
+    if (waitpid(pid, &status, 0) == -1) {
+        return 1;
+    }
+    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+        return 1;
+    }
+    return 0;
 }
 
 int main(int argc, char* argv[]) {
@@ -105,9 +133,10 @@ int main(int argc, char* argv[]) {
         IRCodeGenerator().generateASM(irProgram, context, asmFile);
         asmFile.close();
 
-        std::string nasmCmd = "nasm -f elf64 " + asmFilename + " -o " + objFilename;
-        std::string ldCmd = "ld " + objFilename + " -o " + exePath;
-        if (std::system(nasmCmd.c_str()) != 0 || std::system(ldCmd.c_str()) != 0) return 1;
+        if (runCommand({"nasm", "-f", "elf64", asmFilename, "-o", objFilename}) != 0 ||
+            runCommand({"ld", objFilename, "-o", exePath}) != 0) {
+            return 1;
+        }
 
         if (!keepTemp) {
             std::remove(objFilename.c_str());

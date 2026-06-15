@@ -105,6 +105,9 @@ Le pipeline implemente actuellement :
 - operateur unaire `-` pour les types numeriques (`Int`, `Long`, `Float`,
   `Double`) ;
 - operateur reste de division `%` pour `Int` et `Long`;
+- invocation NASM/ld via `fork` + `execvp` (sans `std::system`) pour limiter
+  l'injection shell,
+  et vérifications runtime renforcées pour `parseInt`/division par zéro.
 - collection native `IntArray` avec `length`, `get` et `set`;
 - collection native `LongArray` avec `length`, `get` et `set`;
 - collection native `FloatArray` avec `length`, `get` et `set`;
@@ -515,6 +518,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   langage.
 
 ## Journal Des Jalons
+- `local` - Durcir la compilation backend : passage `std::system` -> `fork` +
+  `execvp` dans `main.cpp`, ajout de contrôle division par zéro en codegen `/` et
+  `%`, et contrôles d'overflow/limites runtime pour `parseInt` + parsing +/-.
+
 - `local` - Ajouter `shuffle` aux facades de collection `ArrayInt`,
   `ArrayLong`, `ArrayFloat`, `ArrayDouble`, `ArrayBool` et
   `ArrayObject[T]`.

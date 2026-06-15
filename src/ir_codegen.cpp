@@ -3,6 +3,7 @@
 #include "runtime_asm.hpp"
 #include <algorithm>
 #include <cctype>
+#include <climits>
 #include <map>
 #include <ostream>
 #include <set>
@@ -38,7 +39,19 @@ std::pair<std::string, std::string> splitQualifiedMember(const std::string& name
 }
 
 long long boxedInt(const std::string& value) {
-    return (std::stoll(value) << 1) | 1;
+    long long parsed = 0;
+    try {
+        parsed = std::stoll(value);
+    } catch (...) {
+        codegenError("entier constant invalide ou trop grand: " + value);
+    }
+
+    constexpr long long kMaxBoxedInt = (1LL << 62) - 1;
+    constexpr long long kMinBoxedInt = -(1LL << 62);
+    if (parsed > kMaxBoxedInt || parsed < kMinBoxedInt) {
+        codegenError("entier constant hors de la plage Int: " + value);
+    }
+    return (parsed << 1) | 1;
 }
 
 std::string asmDataBytes(const std::string& value) {
@@ -421,9 +434,9 @@ private:
         } else if (op == "*") {
             out << "    sar rax, 1\n    sar rbx, 1\n    imul rax, rbx\n    shl rax, 1\n    or rax, 1\n";
         } else if (op == "/") {
-            out << "    sar rax, 1\n    sar rbx, 1\n    cqo\n    idiv rbx\n    shl rax, 1\n    or rax, 1\n";
+            out << "    sar rax, 1\n    sar rbx, 1\n    test rbx, rbx\n    je Runtime_division_by_zero\n    cqo\n    idiv rbx\n    shl rax, 1\n    or rax, 1\n";
         } else if (op == "%") {
-            out << "    sar rax, 1\n    sar rbx, 1\n    cqo\n    idiv rbx\n    mov rax, rdx\n    shl rax, 1\n    or rax, 1\n";
+            out << "    sar rax, 1\n    sar rbx, 1\n    test rbx, rbx\n    je Runtime_division_by_zero\n    cqo\n    idiv rbx\n    mov rax, rdx\n    shl rax, 1\n    or rax, 1\n";
         } else if (op == "==" || op == "!=" || op == "<" || op == ">" || op == "<=" || op == ">=") {
             out << "    sar rax, 1\n    sar rbx, 1\n    cmp rax, rbx\n";
             if (op == "==") out << "    sete al\n";
