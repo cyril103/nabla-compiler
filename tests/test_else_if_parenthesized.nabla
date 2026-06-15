@@ -1,0 +1,9 @@
+def main(): Int = {
+    if (false) {
+        1
+    } else if (true) {
+        42
+    } else {
+        2
+    }
+}

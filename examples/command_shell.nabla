@@ -90,53 +90,35 @@ def runCommand(line: String): Bool = {
 
     if command == "" {
         false
+    } else if command == "quit" {
+        false
+    } else if command == "help" {
+        printHelp()
+        true
+    } else if command == "add" {
+        runAdd(parts)
+        true
+    } else if command == "repeat" {
+        runRepeat(parts)
+        true
+    } else if command == "len" {
+        runLen(parts)
+        true
+    } else if command == "cat" {
+        runCat(parts)
+        true
+    } else if command == "write" {
+        runWrite(parts)
+        true
+    } else if command == "append" {
+        runAppend(parts)
+        true
+    } else if command == "exists" {
+        runExists(parts)
+        true
     } else {
-        if command == "quit" {
-            false
-        } else {
-            if command == "help" {
-                printHelp()
-                true
-            } else {
-                if command == "add" {
-                    runAdd(parts)
-                    true
-                } else {
-                    if command == "repeat" {
-                        runRepeat(parts)
-                        true
-                    } else {
-                        if command == "len" {
-                            runLen(parts)
-                            true
-                        } else {
-                            if command == "cat" {
-                                runCat(parts)
-                                true
-                            } else {
-                                if command == "write" {
-                                    runWrite(parts)
-                                    true
-                                } else {
-                                    if command == "append" {
-                                        runAppend(parts)
-                                        true
-                                    } else {
-                                        if command == "exists" {
-                                            runExists(parts)
-                                            true
-                                        } else {
-                                            println("unknown command: " + command)
-                                            true
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        println("unknown command: " + command)
+        true
     }
 }
 

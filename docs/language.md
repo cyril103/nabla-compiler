@@ -119,10 +119,14 @@ def greet(name: String): Unit = {
 ## Controle De Flux
 
 `if` est une expression : les deux branches doivent produire un type compatible.
+Les chaines `else if` sont acceptees, mais une branche finale `else` reste
+obligatoire.
 
 ```nabla
 def max(left: Int, right: Int): Int = {
     if left > right {
+        left
+    } else if left == right {
         left
     } else {
         right

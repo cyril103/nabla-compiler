@@ -173,9 +173,14 @@ std::unique_ptr<ASTNode> Parser::parseIfExpression() {
     auto thenBranch = parseBlock();
     consume(TokenType::RBRACE, "Fin du bloc 'then' attendue");
     consume(TokenType::KW_ELSE, "mot-clé 'else' attendu");
-    consume(TokenType::LBRACE, "Bloc 'else' attendu après 'else'");
-    auto elseBranch = parseBlock();
-    consume(TokenType::RBRACE, "Fin du bloc 'else' attendue");
+    std::unique_ptr<ASTNode> elseBranch;
+    if (peek().type == TokenType::KW_IF) {
+        elseBranch = parseIfExpression();
+    } else {
+        consume(TokenType::LBRACE, "Bloc 'else' attendu après 'else'");
+        elseBranch = parseBlock();
+        consume(TokenType::RBRACE, "Fin du bloc 'else' attendue");
+    }
     return located(std::make_unique<IfNode>(std::move(condition), std::move(thenBranch), std::move(elseBranch)), start.location);
 }
 

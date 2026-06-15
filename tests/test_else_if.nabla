@@ -1,0 +1,15 @@
+def classify(value: Int): Int = {
+    if value < 0 {
+        1
+    } else if value == 0 {
+        2
+    } else if value < 10 {
+        3
+    } else {
+        4
+    }
+}
+
+def main(): Int = {
+    classify(0) + classify(7) + classify(10) + 33
+}
