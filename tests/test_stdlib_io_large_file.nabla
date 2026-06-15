@@ -1,0 +1,17 @@
+import io
+
+def main(): Int = {
+    val path = "build/nabla_large_file_io_test.txt"
+    val chunk = "0123456789"
+    val content = chunk.repeat(500)
+    val written = writeTextFile(path, content)
+    val loaded = readTextFile(path)
+
+    if written == 5000 &&
+       loaded.length() == 5000 &&
+       loaded == content {
+        42
+    } else {
+        1
+    }
+}

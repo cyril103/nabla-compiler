@@ -380,7 +380,7 @@ def main(): Int = {
 
 Conventions actuelles :
 
-- `readTextFile` lit jusqu'a 4096 octets dans cette premiere version.
+- `readTextFile` lit le fichier texte complet dans le tas Nabla.
 - Si un fichier ne peut pas etre ouvert ou lu, `readTextFile` retourne une
   chaine vide.
 - `pathExists` et `fileExists` permettent de distinguer un fichier absent d'un
@@ -390,6 +390,7 @@ Conventions actuelles :
 - `writeTextFile` et `appendTextFile` retournent le nombre d'octets ecrits.
 - Une valeur negative indique une erreur de syscall Linux. Nabla n'a pas encore
   de type `Result` ni d'abstraction `errno`.
+- Les fichiers tres volumineux peuvent epuiser le tas statique du runtime.
 - Les dossiers parents ne sont pas crees automatiquement.
 
 ## Module `strings`
