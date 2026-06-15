@@ -65,6 +65,43 @@ def alive(grid: IntArray): Int = {
     intArraySum(grid)
 }
 
+def renderCell(value: Int): String = {
+    if value == 1 {
+        "#"
+    } else {
+        "."
+    }
+}
+
+def renderRow(grid: IntArray, width: Int, y: Int): String = {
+    var x = 0
+    var row = ""
+    while (x < width) {
+        row = row + renderCell(grid.get(cellIndex(width, x, y)))
+        x = x + 1
+    }
+    row
+}
+
+def renderGrid(grid: IntArray, width: Int, height: Int): String = {
+    var y = 0
+    var text = ""
+    while (y < height) {
+        if y == 0 {
+            text = renderRow(grid, width, y)
+        } else {
+            text = text + "\n" + renderRow(grid, width, y)
+        }
+        y = y + 1
+    }
+    text
+}
+
+def printGrid(title: String, grid: IntArray, width: Int, height: Int): Unit = {
+    println(title)
+    println(renderGrid(grid, width, height))
+}
+
 def isVerticalBlinker(grid: IntArray, width: Int): Bool = {
     grid.get(cellIndex(width, 2, 1)) == 1 &&
     grid.get(cellIndex(width, 2, 2)) == 1 &&
@@ -91,10 +128,9 @@ def main(): Int = {
     val first = step(grid, width, height)
     val second = step(first, width, height)
 
-    println("Game of Life: blinker")
-    println("tick 0: vertical")
-    println("tick 1: horizontal")
-    println("tick 2: vertical")
+    printGrid("tick 0", grid, width, height)
+    printGrid("tick 1", first, width, height)
+    printGrid("tick 2", second, width, height)
 
     if isVerticalBlinker(grid, width) &&
        isHorizontalBlinker(first, width) &&
