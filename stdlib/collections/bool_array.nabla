@@ -52,6 +52,28 @@ def boolArrayAny(xs: BoolArray): Bool = {
     any
 }
 
+def boolToString(value: Bool): String = {
+    if value {
+        "true"
+    } else {
+        "false"
+    }
+}
+
+def boolArrayMkString(xs: BoolArray, separator: String): String = {
+    var index = 0
+    var result = ""
+    while (index < xs.length()) {
+        if index == 0 {
+            result = boolToString(xs.get(index))
+        } else {
+            result = result + separator + boolToString(xs.get(index))
+        }
+        index = index + 1
+    }
+    result
+}
+
 def boolArrayMap(xs: BoolArray, f: (Bool) => Bool): BoolArray = {
     val mapped = new BoolArray(xs.length())
     var index = 0
@@ -195,6 +217,10 @@ class ArrayBool(values: BoolArray) {
         boolArrayAny(values)
     }
 
+    def mkString(separator: String): String = {
+        boolArrayMkString(values, separator)
+    }
+
     def map(f: (Bool) => Bool): ArrayBool = {
         new ArrayBool(boolArrayMap(values, f))
     }
@@ -238,6 +264,10 @@ def arrayBoolFill(size: Int, value: Bool): ArrayBool = {
 
 def arrayBoolMap(xs: ArrayBool, f: (Bool) => Bool): ArrayBool = {
     xs.map(f)
+}
+
+def arrayBoolMkString[T](xs: ArrayBool, separator: String): String = {
+    xs.mkString(separator)
 }
 
 def arrayBoolMapObject[T, U](xs: ArrayBool, f: (Bool) => U): ArrayObject[U] = {

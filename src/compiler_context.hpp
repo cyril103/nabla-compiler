@@ -95,6 +95,8 @@ inline const std::vector<StdlibFunctionAlias>& stdlibFunctionAliases() {
         {"arrayFilter", {"Double"}, "arrayDoubleFilter"},
         {"arrayFilter", {"Bool"}, "arrayBoolFilter"},
         {"arrayMkString", {"Int"}, "arrayIntMkString"},
+        {"arrayMkString", {"Long"}, "arrayLongMkString"},
+        {"arrayMkString", {"Bool"}, "arrayBoolMkString"},
         {"arrayFold", {"Int"}, "arrayIntFold"},
         {"arrayFold", {"Long"}, "arrayLongFold"},
         {"arrayFold", {"Float"}, "arrayFloatFold"},

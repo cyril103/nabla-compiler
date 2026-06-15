@@ -20,6 +20,20 @@ def longArraySum(xs: LongArray): Long = {
     total
 }
 
+def longArrayMkString(xs: LongArray, separator: String): String = {
+    var index = 0
+    var result = ""
+    while (index < xs.length()) {
+        if index == 0 {
+            result = xs.get(index).toString()
+        } else {
+            result = result + separator + xs.get(index).toString()
+        }
+        index = index + 1
+    }
+    result
+}
+
 def longArrayMap(xs: LongArray, f: (Long) => Long): LongArray = {
     val mapped = new LongArray(xs.length())
     var index = 0
@@ -155,6 +169,10 @@ class ArrayLong(values: LongArray) {
         longArraySum(values)
     }
 
+    def mkString(separator: String): String = {
+        longArrayMkString(values, separator)
+    }
+
     def map(f: (Long) => Long): ArrayLong = {
         new ArrayLong(longArrayMap(values, f))
     }
@@ -198,6 +216,10 @@ def arrayLongFill(size: Int, value: Long): ArrayLong = {
 
 def arrayLongMap(xs: ArrayLong, f: (Long) => Long): ArrayLong = {
     xs.map(f)
+}
+
+def arrayLongMkString[T](xs: ArrayLong, separator: String): String = {
+    xs.mkString(separator)
 }
 
 def arrayLongMapObject[T, U](xs: ArrayLong, f: (Long) => U): ArrayObject[U] = {

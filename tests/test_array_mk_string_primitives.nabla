@@ -1,0 +1,21 @@
+import collections.array
+
+def flip(value: Bool): Bool = {
+    !value
+}
+
+def main(): Int = {
+    val longs = arrayFill[Long](3, 7L)
+    val bools = arrayFill[Bool](3, true)
+    bools.set(1, false)
+    val flipped = bools.map(flip)
+
+    if longs.mkString(":") == "7:7:7" &&
+       arrayMkString[Long](longs, "|") == "7|7|7" &&
+       bools.mkString(",") == "true,false,true" &&
+       arrayMkString[Bool](flipped, "/") == "false/true/false" {
+        42
+    } else {
+        1
+    }
+}
