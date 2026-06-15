@@ -54,6 +54,7 @@ nabla-compiler/
 Une première documentation utilisateur du langage est disponible ici :
 
 - [docs/language.md](docs/language.md)
+- [docs/roadmap.md](docs/roadmap.md)
 
 ## Support éditeur
 

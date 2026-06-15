@@ -35,7 +35,8 @@ Le pipeline implemente actuellement :
 
 - tokenisation et parsing des classes, imports, fonctions et methodes avec
   parametres,
-  expressions arithmetiques, comparaisons, `if`, `while`, `for`, `val` et `var`;
+  expressions arithmetiques, comparaisons, `if`, `else if`, `match`, `while`,
+  `for`, `val` et `var`;
 - identifiants et chemins d'import avec lettres, chiffres et `_`;
 - resolution des imports relatifs, depuis la racine projet et depuis `stdlib/`,
   avec protection contre les cycles;
@@ -114,12 +115,14 @@ Le pipeline implemente actuellement :
 - affichage console de `String` via la primitive globale `print`;
 - lecture console de `String` via la primitive globale `readLine`;
 - lecture/ecriture de fichiers texte via `readFile`, `writeFile`,
-  `appendFile`, `fileExists` et les wrappers `io.readTextFile` /
-  `io.writeTextFile` / `io.appendTextFile` / `io.pathExists`;
+  `appendFile`, `deleteFile`, `fileExists` et les wrappers `io.readTextFile` /
+  `io.writeTextFile` / `io.appendTextFile` / `io.deleteTextFile` /
+  `io.pathExists`;
 - parsing decimal de `String` vers `Int` via `parseInt(value)`;
 - module standard `strings` avec `words(text)` pour decouper une ligne en
   tokens separes par des espaces en ignorant les segments vides;
-- premier module de bibliotheque standard `io` avec `println` et `input`;
+- premier module de bibliotheque standard `io` avec `println`, `input` et les
+  wrappers d'I/O fichiers texte;
 - module de bibliotheque standard `core.option_int` avec `OptionInt`,
   `optionIntSome`, `optionIntNone`, `map`, `filter` et `orElse`;
 - module de bibliotheque standard `core.option` avec `Option[T]`, `optionSome`,
@@ -172,8 +175,8 @@ Le pipeline implemente actuellement :
   affectations;
 - diagnostics uniformes avec fichier, ligne, colonne et phase du compilateur;
 - IR textuelle pour les fonctions globales, entiers, variables, affectations,
-  operations binaires, appels de fonctions globales, `if`, `while`, `for`,
-  objets et methodes;
+  operations binaires, appels de fonctions globales, `if`, `match`, `while`,
+  `for`, objets et methodes;
 - backend ASM par defaut depuis l'IR couvrant la suite positive actuelle
   (fonctions, variables, controle de flux, imports, objets et methodes);
 - tests de compilation et d'execution via `make all-tests`.
@@ -222,6 +225,8 @@ Limites importantes :
 - le tas est fixe et possede une verification de depassement, mais pas de
   ramasse-miettes;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
+- `match` est volontairement limite aux motifs litteraux et a la branche finale
+  `_`; les gardes de branches ne sont pas encore supportees;
 
 ## Invariants D'Architecture
 
@@ -290,6 +295,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   generation SSE.
 - [x] Formaliser `Unit` pour les fonctions a effet et les boucles.
 - [x] Ajouter les booleens et typer les conditions en `Bool`.
+- [x] Ajouter `else if`.
+- [x] Ajouter `match` V1 avec motifs litteraux et branche finale `_`.
 - [x] Ajouter `Char` ASCII, les litteraux de caractere et `String.charAt`.
 - [x] Ajouter `String.==` et `String.!=` byte-based.
 - [x] Ajouter `String.isEmpty`, `nonEmpty`, `startsWith` et `endsWith`.
@@ -417,6 +424,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter une primitive d'entree console `readLine(): String`.
 - [x] Ajouter une premiere lecture/ecriture de fichiers texte.
 - [x] Ajouter verification d'existence et append pour fichiers texte.
+- [x] Lire les fichiers texte complets au lieu d'un bloc fixe.
+- [x] Ajouter suppression de fichiers texte.
 - [x] Documenter les conventions d'erreur actuelles de l'IO fichier.
 - [x] Ajouter une premiere collection native `IntArray`.
 - [x] Ajouter une collection native `LongArray`.
@@ -433,9 +442,20 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter une racine `stdlib/` importable.
 - [x] Ajouter un premier module de collections dans `stdlib/`.
 - [x] Ajouter une premiere documentation utilisateur du langage.
+- [x] Ajouter une roadmap de reprise dans `docs/roadmap.md`.
+- [x] Ajouter un support Vim minimal pour `*.nabla`.
 
 ## Journal Des Jalons
 
+- `e28f460` - Ajouter un support Vim minimal pour `*.nabla`.
+- `f6bdacb` - Utiliser `match` dans les handlers de `examples/command_shell.nabla`.
+- `4eb09e3` - Simplifier le dispatch de `examples/command_shell.nabla`.
+- `40f2e17` - Ajouter les expressions `match` avec motifs litteraux et `_`.
+- `3419402` - Ajouter `deleteFile` / `io.deleteTextFile` et la commande `rm`.
+- `ea2a09e` - Ajouter les expressions `else if`.
+- `6751bd6` - Montrer l'I/O fichier dans `examples/command_shell.nabla`.
+- `290fbab` - Lire les fichiers texte complets.
+- `17b184f` - Documenter les helpers d'I/O texte.
 - `local` - Ajouter `Char` ASCII et `String.charAt(index): Char`.
 - `local` - Ajouter `String.==` et `String.!=`.
 - `local` - Ajouter `String.isEmpty`, `nonEmpty`, `startsWith` et `endsWith`.
@@ -620,6 +640,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Factoriser les surfaces communes des collections specialisees et commencer a
-aligner les facades primitives avec les operations du fallback objet lorsque
-c'est pertinent.
+Ameliorer `examples/command_shell.nabla` pour permettre `write PATH TEXT` et
+`append PATH TEXT` avec un texte contenant des espaces. La piste privilegiee est
+d'exposer ou renforcer `mkString` / `drop` sur les tableaux de strings, puis
+d'utiliser `parts.drop(2).mkString(" ")` dans le shell.
