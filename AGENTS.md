@@ -146,7 +146,8 @@ Le pipeline implemente actuellement :
   `ArrayIntNested.rowSize` et `ArrayIntNested.mapRows`.
   avec predicats booleens;
 - plage lazy specialisee `RangeInt` via `intRangeUntil(start, until)`, avec
-  `size`, `isEmpty`, `nonEmpty`, `foreach`, `fold`, `map` et `max`;
+  `size`, `isEmpty`, `nonEmpty`, `foreach`, `fold`, `exists`, `forall`,
+  `count`, `find`, `filter`, `map` et `max`;
 - module de bibliotheque standard `collections.long_array` avec `ArrayLong`,
   `longArrayFill`, `longArraySum`, `longArrayMap`, `arrayLongFill`, `map`,
   `flatMap`, `foreach`, `sum`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et
@@ -366,6 +367,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   fonctionnels de collection.
 - [x] Ajouter `arrayIntRangeUntil(start, until)` pour les plages `Int` bornees.
 - [x] Ajouter `intRangeUntil(start, until)` comme premiere plage `Int` lazy.
+- [x] Ajouter `exists`, `forall`, `count`, `find` et `filter` lazy sur
+  `RangeInt`.
 - [x] Ajouter les closures avec capture par valeur pour les lambdas `Int`.
 - [x] Generaliser les closures aux types fonction complets.
 - [x] Ajouter l'inference simple des types de parametres de lambda.
@@ -469,7 +472,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `local` - Remplacer le tas statique de 64 KiB par un tas runtime `mmap` de
+- `local` - Etendre `RangeInt` avec `exists`, `forall`, `count`, `find` et
+  `filter` lazy.
+- `66299f2` - Remplacer le tas statique de 64 KiB par un tas runtime `mmap` de
   8 MiB avec allocations alignees et un test positif au-dessus de 64 KiB.
 - `e28f460` - Ajouter un support Vim minimal pour `*.nabla`.
 - `f6bdacb` - Utiliser `match` dans les handlers de `examples/command_shell.nabla`.

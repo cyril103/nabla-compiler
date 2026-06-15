@@ -1,0 +1,26 @@
+import collections.int_array
+
+def main(): Int = {
+    val range = intRangeUntil(1, 10)
+    val evenSum = range
+        .filter(value => value % 2 == 0)
+        .fold(0, (total, value) => total + value)
+    val firstLarge = range.find(value => value > 6).getOrElse(0)
+    val filteredMax = range
+        .filter(value => value < 8)
+        .map(value => value * value)
+        .max()
+        .getOrElse(0)
+
+    if range.exists(value => value == 7) &&
+       range.forall(value => value < 10) &&
+       range.count(value => value % 3 == 0) == 3 &&
+       intRangeUntil(5, 5).filter(value => value == 5).max().isEmpty() &&
+       evenSum == 20 &&
+       firstLarge == 7 &&
+       filteredMax == 49 {
+        42
+    } else {
+        1
+    }
+}

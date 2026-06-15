@@ -107,6 +107,62 @@ class RangeInt(startValue: Int, untilValue: Int) {
         accumulator
     }
 
+    def exists(predicate: (Int) => Bool): Bool = {
+        var value = startValue
+        var found = false
+        while value < untilValue && !found {
+            if predicate(value) {
+                found = true
+            } else {
+                found
+            }
+            value = value + 1
+        }
+        found
+    }
+
+    def forall(predicate: (Int) => Bool): Bool = {
+        var value = startValue
+        var all = true
+        while value < untilValue && all {
+            if predicate(value) {
+                all
+            } else {
+                all = false
+            }
+            value = value + 1
+        }
+        all
+    }
+
+    def count(predicate: (Int) => Bool): Int = {
+        var value = startValue
+        var total = 0
+        while value < untilValue {
+            if predicate(value) {
+                total = total + 1
+            } else {
+                total
+            }
+            value = value + 1
+        }
+        total
+    }
+
+    def find(predicate: (Int) => Bool): OptionInt = {
+        var value = startValue
+        var found = optionIntNone()
+        while value < untilValue && found.isEmpty() {
+            if predicate(value) {
+                found = optionIntSome(value)
+            } else {
+                found
+            }
+            value = value + 1
+        }
+        found
+    }
+
     def max(): OptionInt = {
         if untilValue <= startValue {
             optionIntNone()
@@ -127,6 +183,10 @@ class RangeInt(startValue: Int, untilValue: Int) {
 
     def map(f: (Int) => Int): RangeIntMapped = {
         new RangeIntMapped(startValue, untilValue, f)
+    }
+
+    def filter(predicate: (Int) => Bool): RangeIntFiltered = {
+        new RangeIntFiltered(startValue, untilValue, predicate)
     }
 }
 
@@ -166,6 +226,168 @@ class RangeIntMapped(startValue: Int, untilValue: Int, transform: (Int) => Int) 
             }
             optionIntSome(current)
         }
+    }
+}
+
+class RangeIntFiltered(startValue: Int, untilValue: Int, predicate: (Int) => Bool) {
+    def foreach(f: (Int) => Unit): Unit = {
+        var value = startValue
+        while value < untilValue {
+            if predicate(value) {
+                f(value)
+            } else {
+                value
+            }
+            value = value + 1
+        }
+    }
+
+    def fold(initial: Int, combine: (Int, Int) => Int): Int = {
+        var value = startValue
+        var accumulator = initial
+        while value < untilValue {
+            if predicate(value) {
+                accumulator = combine(accumulator, value)
+            } else {
+                accumulator
+            }
+            value = value + 1
+        }
+        accumulator
+    }
+
+    def exists(nextPredicate: (Int) => Bool): Bool = {
+        var value = startValue
+        var found = false
+        while value < untilValue && !found {
+            if predicate(value) && nextPredicate(value) {
+                found = true
+            } else {
+                found
+            }
+            value = value + 1
+        }
+        found
+    }
+
+    def forall(nextPredicate: (Int) => Bool): Bool = {
+        var value = startValue
+        var all = true
+        while value < untilValue && all {
+            if predicate(value) {
+                if nextPredicate(value) {
+                    all
+                } else {
+                    all = false
+                }
+            } else {
+                all
+            }
+            value = value + 1
+        }
+        all
+    }
+
+    def count(): Int = {
+        var value = startValue
+        var total = 0
+        while value < untilValue {
+            if predicate(value) {
+                total = total + 1
+            } else {
+                total
+            }
+            value = value + 1
+        }
+        total
+    }
+
+    def find(nextPredicate: (Int) => Bool): OptionInt = {
+        var value = startValue
+        var found = optionIntNone()
+        while value < untilValue && found.isEmpty() {
+            if predicate(value) && nextPredicate(value) {
+                found = optionIntSome(value)
+            } else {
+                found
+            }
+            value = value + 1
+        }
+        found
+    }
+
+    def max(): OptionInt = {
+        var value = startValue
+        var current = optionIntNone()
+        while value < untilValue {
+            if predicate(value) {
+                if current.isEmpty() || value > current.getOrElse(value) {
+                    current = optionIntSome(value)
+                } else {
+                    current
+                }
+            } else {
+                current
+            }
+            value = value + 1
+        }
+        current
+    }
+
+    def map(f: (Int) => Int): RangeIntFilteredMapped = {
+        new RangeIntFilteredMapped(startValue, untilValue, predicate, f)
+    }
+}
+
+class RangeIntFilteredMapped(
+    startValue: Int,
+    untilValue: Int,
+    predicate: (Int) => Bool,
+    transform: (Int) => Int
+) {
+    def foreach(f: (Int) => Unit): Unit = {
+        var value = startValue
+        while value < untilValue {
+            if predicate(value) {
+                f(transform(value))
+            } else {
+                value
+            }
+            value = value + 1
+        }
+    }
+
+    def fold(initial: Int, combine: (Int, Int) => Int): Int = {
+        var value = startValue
+        var accumulator = initial
+        while value < untilValue {
+            if predicate(value) {
+                accumulator = combine(accumulator, transform(value))
+            } else {
+                accumulator
+            }
+            value = value + 1
+        }
+        accumulator
+    }
+
+    def max(): OptionInt = {
+        var value = startValue
+        var current = optionIntNone()
+        while value < untilValue {
+            if predicate(value) {
+                val mapped = transform(value)
+                if current.isEmpty() || mapped > current.getOrElse(mapped) {
+                    current = optionIntSome(mapped)
+                } else {
+                    current
+                }
+            } else {
+                current
+            }
+            value = value + 1
+        }
+        current
     }
 }
 
