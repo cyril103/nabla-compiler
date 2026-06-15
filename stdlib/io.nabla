@@ -18,6 +18,10 @@ def appendTextFile(path: String, content: String): Int = {
     appendFile(path, content)
 }
 
+def deleteTextFile(path: String): Bool = {
+    deleteFile(path)
+}
+
 def pathExists(path: String): Bool = {
     fileExists(path)
 }

@@ -3,7 +3,7 @@ import collections.array
 import strings
 
 def printHelp(): Unit = {
-    println("commands: add A B | repeat TEXT N | len TEXT | cat PATH | write PATH TEXT | append PATH TEXT | exists PATH | help | quit")
+    println("commands: add A B | repeat TEXT N | len TEXT | cat PATH | write PATH TEXT | append PATH TEXT | rm PATH | exists PATH | help | quit")
 }
 
 def commandName(line: String): String = {
@@ -84,6 +84,18 @@ def runExists(parts: ArrayObject[String]): Unit = {
     }
 }
 
+def runRm(parts: ArrayObject[String]): Unit = {
+    if parts.size() == 2 {
+        if deleteTextFile(parts.get(1)) {
+            println("deleted")
+        } else {
+            println("not deleted")
+        }
+    } else {
+        println("usage: rm PATH")
+    }
+}
+
 def runCommand(line: String): Bool = {
     val parts = words(line)
     val command = commandName(line)
@@ -112,6 +124,9 @@ def runCommand(line: String): Bool = {
         true
     } else if command == "append" {
         runAppend(parts)
+        true
+    } else if command == "rm" {
+        runRm(parts)
         true
     } else if command == "exists" {
         runExists(parts)

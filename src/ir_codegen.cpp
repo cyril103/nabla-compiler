@@ -494,6 +494,8 @@ private:
             out << "    call Runtime_appendFile\n";
         } else if (instruction.operation == "fileExists") {
             out << "    call Runtime_fileExists\n";
+        } else if (instruction.operation == "deleteFile") {
+            out << "    call Runtime_deleteFile\n";
         } else if (instruction.operation == "parseInt") {
             out << "    call Runtime_stringToInt\n";
         } else {

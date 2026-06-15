@@ -1,0 +1,20 @@
+import io
+
+def main(): Int = {
+    val path = "build/nabla_delete_file_test.txt"
+    val written = writeTextFile(path, "remove me")
+    val existedBefore = pathExists(path)
+    val deleted = deleteTextFile(path)
+    val missingAfter = !pathExists(path)
+    val deletedAgain = deleteTextFile(path)
+
+    if written == 9 &&
+       existedBefore &&
+       deleted &&
+       missingAfter &&
+       !deletedAgain {
+        42
+    } else {
+        1
+    }
+}

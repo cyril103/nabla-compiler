@@ -1,0 +1,7 @@
+def main(): Int = {
+    if deleteFile(42) {
+        42
+    } else {
+        1
+    }
+}

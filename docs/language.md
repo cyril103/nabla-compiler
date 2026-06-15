@@ -344,6 +344,7 @@ Le module `io` expose les helpers recommandes pour les entrees/sorties :
 - `readTextFile(path: String): String`
 - `writeTextFile(path: String, content: String): Int`
 - `appendTextFile(path: String, content: String): Int`
+- `deleteTextFile(path: String): Bool`
 - `pathExists(path: String): Bool`
 
 ```nabla
@@ -360,7 +361,8 @@ def main(): Int = {
 
 Les primitives globales `print(value: String)`, `readLine(): String`,
 `readFile(path: String): String`, `writeFile(path: String, content: String): Int`,
-`appendFile(path: String, content: String): Int` et `fileExists(path: String): Bool`
+`appendFile(path: String, content: String): Int`, `deleteFile(path: String): Bool`
+et `fileExists(path: String): Bool`
 existent aussi, mais le module `io` est l'interface recommandee.
 
 Lecture et ecriture de fichiers texte :
@@ -372,9 +374,10 @@ def main(): Int = {
     val written = writeTextFile("build/message.txt", "hello")
     val appended = appendTextFile("build/message.txt", "\nagain")
     val loaded = readTextFile("build/message.txt")
+    val deleted = deleteTextFile("build/message.txt")
 
     if written == 5 && appended == 6 && pathExists("build/message.txt") &&
-       loaded == "hello\nagain" {
+       loaded == "hello\nagain" && deleted && !pathExists("build/message.txt") {
         42
     } else {
         1
@@ -391,6 +394,8 @@ Conventions actuelles :
   fichier vide.
 - `writeTextFile` cree ou tronque le fichier.
 - `appendTextFile` cree le fichier si besoin puis ajoute le contenu a la fin.
+- `deleteTextFile` supprime un fichier et retourne `false` si la suppression
+  echoue.
 - `writeTextFile` et `appendTextFile` retournent le nombre d'octets ecrits.
 - Une valeur negative indique une erreur de syscall Linux. Nabla n'a pas encore
   de type `Result` ni d'abstraction `errno`.

@@ -971,6 +971,7 @@ std::string FunctionCallNode::getType() {
     if (name == "writeFile") return "Int";
     if (name == "appendFile") return "Int";
     if (name == "fileExists") return "Bool";
+    if (name == "deleteFile") return "Bool";
     if (name == "parseInt") return "Int";
     return resolvedType;
 }
@@ -1056,6 +1057,19 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
             throw CompilerError(
                 ErrorKind::Semantic, arguments[0]->getLocation(),
                 "fileExists, paramètre 'path': type 'String' attendu, '" +
+                arguments[0]->getType() + "' reçu");
+        }
+        resolvedType = "Bool";
+        return;
+    }
+    if (name == "deleteFile") {
+        if (arguments.size() != 1) {
+            semanticError("deleteFile: 1 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
+        }
+        if (arguments[0]->getType() != "String") {
+            throw CompilerError(
+                ErrorKind::Semantic, arguments[0]->getLocation(),
+                "deleteFile, paramètre 'path': type 'String' attendu, '" +
                 arguments[0]->getType() + "' reçu");
         }
         resolvedType = "Bool";

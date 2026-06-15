@@ -1,0 +1,1 @@
+tests/test_error_delete_file_argument.nabla:2:19: semantic error: deleteFile, paramètre 'path': type 'String' attendu, 'Int' reçu

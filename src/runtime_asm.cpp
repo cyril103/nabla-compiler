@@ -225,6 +225,18 @@ void emit(std::ostream& out) {
         << ".L_file_exists_false:\n"
         << "    mov rax, 1\n"
         << "    ret\n\n";
+    out << "Runtime_deleteFile:\n"
+        << "    call Runtime_copyPathToCString\n"
+        << "    mov rdi, rax\n"
+        << "    mov rax, 87\n"
+        << "    syscall\n"
+        << "    cmp rax, 0\n"
+        << "    jne .L_delete_file_false\n"
+        << "    mov rax, 3\n"
+        << "    ret\n"
+        << ".L_delete_file_false:\n"
+        << "    mov rax, 1\n"
+        << "    ret\n\n";
     out << "Runtime_stringEquals:\n"
         << "    mov rax, [rdi + 8]\n"
         << "    cmp rax, [rsi + 8]\n"
