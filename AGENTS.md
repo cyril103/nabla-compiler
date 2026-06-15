@@ -269,9 +269,10 @@ Limites importantes :
   alignees sur 8 octets et verification de depassement, mais pas de
   ramasse-miettes;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
-- `match` supporte désormais les motifs litteraux et des gardes de branche de la forme
-  `motif if condition` ainsi que la branche finale `_` (avec ou sans garde selon la
-  position; la branche finale `_` ne peut pas porter de garde).
+- `match` supporte désormais les motifs litteraux, les motifs nommes (`identifiant`)
+  et des gardes de branche de la forme `motif if condition`, ainsi que la branche
+  finale `_` (avec ou sans garde selon la position; la branche finale `_` ne peut
+  pas porter de garde).
 
 ## Invariants D'Architecture
 
@@ -622,6 +623,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `local` - Documenter les conventions actuelles de l'IO fichier.
 - `local` - Ajouter les gardes de branche dans `match` (`motif if condition`),
   avec validation de type Bool pour la garde et diagnostics dédiés.
+- `local` - Ajouter les motifs nommes (`identifiant`) pour capturer la valeur dans
+  le corps d'une branche.
 - `local` - Ajouter la facade standard `arrayFold[T]` / `arrayFold[T, U]`.
 - `local` - Completer `arrayFlatMap[T]` pour toutes les facades primitives.
 - `local` - Ajouter la facade standard `arrayFilter[T]`.
@@ -783,5 +786,5 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 Poursuivre la suite outillée autour du matching :
 
-- Finaliser le nettoyage des diagnostics autour du pattern matching (messages dédiés,
-  cas limites, exhaustivité).
+- Finaliser le nettoyage des diagnostics autour du pattern matching, notamment pour
+  les motifs nommes.

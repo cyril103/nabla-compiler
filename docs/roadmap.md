@@ -42,7 +42,8 @@ pour reprendre facilement apres une pause.
    - Verifie avec `make test SRC=tests/test_array_object_string_mk_string.nabla`.
 
 3. Finaliser `match` V2.
-   - Ajouter les gardes de branche (`motif if condition`).
+   - Ajouter les motifs nommes (`nom`), pour capturer la valeur scannée.
+   - Compléter les gardes de branche (`motif if condition`).
    - Valider les gardes de type `Bool`.
    - Ajouter des diagnostics dédiés pour la branche finale `_`.
 

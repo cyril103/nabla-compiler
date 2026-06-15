@@ -1,0 +1,11 @@
+def classify(value: Int): Int = {
+    match value {
+        value if value > 1 => value + 1
+        value if value == 1 => value
+        _ => 0
+    }
+}
+
+def main(): Int = {
+    classify(0) + classify(1) + classify(2)
+}

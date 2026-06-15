@@ -246,8 +246,10 @@ class MatchNode : public ASTNode {
 public:
     struct Branch {
         bool isWildcard;
+        bool isNamedPattern;
         std::unique_ptr<ASTNode> pattern;
         std::unique_ptr<ASTNode> guard;
+        std::string boundSymbol;
         std::unique_ptr<ASTNode> body;
         SourceLocation location;
     };

@@ -199,11 +199,19 @@ std::unique_ptr<ASTNode> Parser::parseMatchExpression() {
                 "aucune branche n'est autorisée après '_' dans un match");
         }
         bool isWildcard = false;
+        bool isNamedPattern = false;
+        std::string boundSymbol;
         std::unique_ptr<ASTNode> pattern;
         std::unique_ptr<ASTNode> guard;
         if (peek().type == TokenType::IDENTIFIER && peek().value == "_") {
             consume(TokenType::IDENTIFIER, "");
             isWildcard = true;
+        } else if (peek().type == TokenType::IDENTIFIER) {
+            Token token = consume(TokenType::IDENTIFIER, "Nom de variable attendu dans le motif");
+            isNamedPattern = true;
+            boundSymbol = token.value + "#" + std::to_string(nextSymbolId++);
+            localScopes.emplace_back();
+            localScopes.back()[token.value] = {boundSymbol, "Unit", false};
         } else {
             if (peek().type == TokenType::INT_LITERAL) {
                 Token token = consume(TokenType::INT_LITERAL, "");
@@ -232,7 +240,7 @@ std::unique_ptr<ASTNode> Parser::parseMatchExpression() {
             } else {
                 throw CompilerError(
                     ErrorKind::Parser, peek().location,
-                    "motif de match invalide: littéral ou '_' attendu");
+                    "motif de match invalide: littéral, identifiant ou '_' attendu");
             }
         }
         if (peek().type == TokenType::KW_IF) {
@@ -248,10 +256,13 @@ std::unique_ptr<ASTNode> Parser::parseMatchExpression() {
         } else {
             body = parseExpression();
         }
+        if (isNamedPattern) {
+            localScopes.pop_back();
+        }
         if (isWildcard && !guard) {
             sawWildcard = true;
         }
-        branches.push_back({isWildcard, std::move(pattern), std::move(guard), std::move(body), branchToken.location});
+        branches.push_back({isWildcard, isNamedPattern, std::move(pattern), std::move(guard), boundSymbol, std::move(body), branchToken.location});
     }
     consume(TokenType::RBRACE, "Fin du bloc 'match' attendue");
     if (branches.empty()) {

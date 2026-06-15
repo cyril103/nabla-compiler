@@ -1456,13 +1456,25 @@ void MatchNode::validateSemantics(CompilerContext& context) {
         if (branch.isWildcard) {
             sawWildcard = true;
         } else {
-            branch.pattern->validateSemantics(context);
-            if (branch.pattern->getType() != scrutineeType) {
-                throw CompilerError(
-                    ErrorKind::Semantic, branch.pattern->getLocation(),
-                    "motif de match: type '" + scrutineeType + "' attendu, '" +
-                    branch.pattern->getType() + "' reçu");
+            if (!branch.isNamedPattern) {
+                branch.pattern->validateSemantics(context);
+                if (branch.pattern->getType() != scrutineeType) {
+                    throw CompilerError(
+                        ErrorKind::Semantic, branch.pattern->getLocation(),
+                        "motif de match: type '" + scrutineeType + "' attendu, '" +
+                        branch.pattern->getType() + "' reçu");
+                }
             }
+        }
+        bool hadSymbol = false;
+        std::string savedType;
+        if (branch.isNamedPattern) {
+            auto existing = context.semanticSymbolTypes.find(branch.boundSymbol);
+            if (existing != context.semanticSymbolTypes.end()) {
+                hadSymbol = true;
+                savedType = existing->second;
+            }
+            context.semanticSymbolTypes[branch.boundSymbol] = scrutineeType;
         }
         if (branch.guard) {
             branch.guard->validateSemantics(context);
@@ -1473,6 +1485,13 @@ void MatchNode::validateSemantics(CompilerContext& context) {
             }
         }
         branch.body->validateSemantics(context);
+        if (branch.isNamedPattern) {
+            if (hadSymbol) {
+                context.semanticSymbolTypes[branch.boundSymbol] = savedType;
+            } else {
+                context.semanticSymbolTypes.erase(branch.boundSymbol);
+            }
+        }
     }
     if (!sawWildcard) {
         semanticError("branche '_' finale attendue dans un match");
@@ -1497,7 +1516,9 @@ std::string MatchNode::lowerToIR(IRBuilder& builder) const {
         const auto& branch = branches[i];
         const bool hasNextBranch = (i + 1) < branches.size();
         std::string nextLabel = hasNextBranch ? builder.makeLabel("match.next") : endLabel;
-        if (!branch.isWildcard) {
+        if (branch.isNamedPattern) {
+            builder.emitStore(branch.boundSymbol, scrutineeValue, scrutineeType);
+        } else if (!branch.isWildcard) {
             std::string patternValue = branch.pattern->lowerToIR(builder);
             std::string condition = scrutineeType == "String"
                 ? builder.emitMethodCall("String", "==", scrutineeValue, {patternValue}, "Bool")
