@@ -1,0 +1,21 @@
+class Left() {
+    def value(): Int = {
+        10
+    }
+}
+
+class Right() {
+    def value(): Int = {
+        20
+    }
+}
+
+class Both extends Left with Right() {
+    def value(): Int = {
+        30
+    }
+}
+
+def main(): Int = {
+    (new Both()).value()
+}

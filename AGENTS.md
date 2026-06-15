@@ -356,7 +356,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Résoudre les méthodes héritées dans la hiérarchie (`resolveClassMethodInHierarchy`).
 - [x] Valider l'existence et l'arité des parents, et détecter les cycles.
 - [x] Ajouter la classe racine implicite `Any` pour les classes sans parent explicite.
-- [ ] Ajouter la résolution de conflits de membres dupliqués entre parent et mixins.
+- [x] Ajouter la résolution de conflits de membres dupliqués entre parent et mixins.
 
 - [ ] Formaliser `Int`, `Bool`, `Char`, `String`, `IntArray`, les types fonction canoniques et
   les types de classes.
@@ -542,9 +542,11 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 ## Journal Des Jalons
 - `local` - Ajouter le support de l'héritage (`extends` + `with`) sur les classes:
   parent explicite, mixins, résolution hiérarchique des méthodes, validation des
-  parents inconnus/argumentation et détection de cycles, classe racine `Any`.
+  parents inconnus/argumentation et détection de cycles, classe racine `Any`, et
+  détection de conflits de méthodes héritées entre mixins/parent.
   - Tests: `test_inheritance_simple`, `test_inheritance_multiple`,
-    `test_error_inheritance_unknown_parent`, `test_error_inheritance_cycle`.
+    `test_error_inheritance_unknown_parent`, `test_error_inheritance_cycle`,
+    `test_error_inheritance_mixin_conflict`.
 
 - `local` - Durcir la compilation backend : passage `std::system` -> `fork` +
   `execvp` dans `main.cpp`, ajout de contrôle division par zéro en codegen `/` et

@@ -265,6 +265,8 @@ class Worker extends Person with CanWork(nameValue: String, ageValue: Int) {
 
 La resolution des methodes suit une recherche dans la classe courante, puis dans
 le parent puis les mixins dans l'ordre d'énonciation (`with`).
+Quand une même méthode existe dans plusieurs parents/mixins sans redéfinition
+dans la classe courante, une erreur de conflit d'héritage est levée.
 
 Quand une classe n'indique pas de parent, une classe racine implicite `Any` est
 ajoutee pour uniformiser le modele objet et les futures extensions.

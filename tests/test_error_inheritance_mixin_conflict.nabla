@@ -1,0 +1,18 @@
+class Left() {
+    def label(): String = {
+        "left"
+    }
+}
+
+class Right() {
+    def label(): String = {
+        "right"
+    }
+}
+
+class Both extends Left with Right() {
+}
+
+def main(): Int = {
+    0
+}

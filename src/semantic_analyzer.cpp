@@ -1,5 +1,52 @@
 #include "semantic_analyzer.hpp"
 
+namespace {
+
+using MethodOwnerMap = std::map<std::string, std::string>;
+using ParentMethodProviders = std::map<std::string, std::set<std::string>>;
+
+std::string formatMethodProviders(const std::set<std::string>& providers) {
+    std::string message;
+    bool first = true;
+    for (const auto& provider : providers) {
+        if (!first) message += ", ";
+        message += provider;
+        first = false;
+    }
+    return message;
+}
+
+void collectVisibleMethodsInHierarchy(
+    const CompilerContext& context, const std::string& receiverType,
+    std::map<std::string, std::string> substitution,
+    std::set<std::string>& visiting,
+    MethodOwnerMap& visibleMethods) {
+    const std::string classLookupName = genericBaseName(receiverType);
+    if (visiting.count(classLookupName)) return;
+
+    auto classIt = context.classes.find(classLookupName);
+    if (classIt == context.classes.end()) return;
+
+    if (auto classGenericSubstitution = genericSubstitutionFor(context, receiverType)) {
+        substitution = *classGenericSubstitution;
+    }
+
+    for (const auto& [methodName, _] : classIt->second.methods) {
+        if (!visibleMethods.count(methodName)) {
+            visibleMethods.emplace(methodName, classLookupName);
+        }
+    }
+
+    visiting.insert(classLookupName);
+    for (const auto& parentType : classIt->second.parentTypes) {
+        const std::string concreteParentType = substituteType(parentType, substitution);
+        collectVisibleMethodsInHierarchy(context, concreteParentType, substitution, visiting, visibleMethods);
+    }
+    visiting.erase(classLookupName);
+}
+
+}
+
 SemanticAnalyzer::SemanticAnalyzer(CompilerContext& context) : context(context) {}
 
 void SemanticAnalyzer::analyze(ProgramNode& program) {
@@ -10,6 +57,7 @@ void SemanticAnalyzer::analyze(ProgramNode& program) {
 void SemanticAnalyzer::validateDeclaredTypes() {
     ensureAnyRootType();
     validateParentTypes();
+    validateInheritanceCycles();
 
     for (const auto& [className, classInfo] : context.classes) {
         for (const auto& field : classInfo.fields) {
@@ -68,12 +116,41 @@ void SemanticAnalyzer::validateDeclaredTypes() {
         if (!isKnownTypeInScope(signature.returnType, signature.typeParameters)) {
             throw CompilerError(
                 ErrorKind::Semantic, signature.returnTypeLocation,
-                "type de retour inconnu '" + signature.returnType + "' pour la fonction '" +
-                functionName + "'");
+                    "type de retour inconnu '" + signature.returnType + "' pour la fonction '" +
+                    functionName + "'");
         }
     }
 
-    validateInheritanceCycles();
+    for (const auto& [className, classInfo] : context.classes) {
+        if (className == "Any") continue;
+        if (classInfo.parentTypes.empty()) continue;
+
+        ParentMethodProviders inheritedProviders;
+        std::set<std::string> ownMethods;
+        for (const auto& methodEntry : classInfo.methods) {
+            ownMethods.insert(methodEntry.first);
+        }
+        for (const auto& parentType : classInfo.parentTypes) {
+            MethodOwnerMap visibleMethods;
+            std::map<std::string, std::string> substitution;
+            std::set<std::string> visiting;
+            const std::string concreteParentType = substituteType(parentType, substitution);
+            collectVisibleMethodsInHierarchy(
+                context, concreteParentType, substitution, visiting, visibleMethods);
+            for (const auto& [methodName, ownerClass] : visibleMethods) {
+                if (ownMethods.count(methodName)) continue;
+                inheritedProviders[methodName].insert(ownerClass);
+            }
+        }
+        for (const auto& [methodName, providers] : inheritedProviders) {
+            if (providers.size() <= 1) continue;
+            throw CompilerError(
+                ErrorKind::Semantic, classInfo.location,
+                "conflit d'héritage pour la méthode '" + methodName +
+                "' dans la classe '" + className + "': plusieurs définitions dans [" +
+                formatMethodProviders(providers) + "]");
+        }
+    }
 }
 
 void SemanticAnalyzer::ensureAnyRootType() {
