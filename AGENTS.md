@@ -140,7 +140,7 @@ Le pipeline implemente actuellement :
   `ArrayInt`, `ArrayLong`, `ArrayFloat`, `ArrayDouble` ou `ArrayBool` pour
   `T = Int`, `Long`, `Float`, `Double` ou `Bool`, et vers `ArrayObject[T]`
   pour les types concrets non specialises comme `String` et `Array[Int]`;
-  `arrayMap[Primitive, U]` et les methodes `mapObject[U]` produisent
+  `arrayMap[Primitive, U]`, `mapObject[U]` et `flatMapObject[U]` produisent
   `ArrayObject[U]` quand la sortie ne reste pas dans la meme primitive
   specialisee;
 - collection native `ObjectArray[T]` stockant des slots runtime de 64 bits, avec
@@ -178,8 +178,9 @@ Limites importantes :
   vers `ArrayBool`; `arrayFill[T]`, `arrayMap[T]`, `arrayMap[T, U]` et
   `arrayForeach[T]` sont des fonctions standard generiques specialisees pour
   `Int`, `Long`, `Float`, `Double` et `Bool`, mais pas encore une
-  implementation unique de tableau generique; `arrayMap[Primitive, U]` et
-  `mapObject[U]` peuvent mapper une facade primitive vers `ArrayObject[U]`;
+  implementation unique de tableau generique; `arrayMap[Primitive, U]`,
+  `mapObject[U]` et `flatMapObject[U]` peuvent mapper une facade primitive
+  vers `ArrayObject[U]`;
   `Array[T]` est valide dans les
   signatures generiques utilisateur et se specialise correctement quand `T`
   devient concret, avec une premiere surface de methodes communes; `map[U]`
@@ -352,6 +353,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Etendre `ArrayObject[T].map` en `map[U]`.
 - [x] Ajouter `arrayMap[Primitive, U]` vers `ArrayObject[U]`.
 - [x] Ajouter `mapObject[U]` sur les facades primitives.
+- [x] Ajouter `flatMapObject[U]` sur les facades primitives.
 - [x] Ajouter `filter` et `fold` sur `ArrayLong`, `ArrayFloat`,
   `ArrayDouble` et `ArrayBool`.
 - [x] Etendre les aliases standard pour choisir automatiquement :
@@ -387,6 +389,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Ajouter `flatMapObject[U]` sur les facades primitives avec wrappers
+  top-level.
 - `local` - Ajouter `mapObject[U]` sur les facades primitives et autoriser la
   specialisation IR des methodes generiques sur classes non generiques.
 - `local` - Ajouter `filter` et `fold` aux facades primitives `Long`, `Float`,

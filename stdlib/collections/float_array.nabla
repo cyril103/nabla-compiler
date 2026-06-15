@@ -30,6 +30,30 @@ def floatArrayMapObject[U](xs: FloatArray, f: (Float) => U): ArrayObject[U] = {
     new ArrayObject[U](mapped)
 }
 
+def floatArrayFlatMapObject[U](xs: FloatArray, transform: (Float) => ArrayObject[U]): ArrayObject[U] = {
+    var index = 0
+    var total = 0
+    while (index < xs.length()) {
+        total = total + transform(xs.get(index)).size()
+        index = index + 1
+    }
+
+    val flattened = new ObjectArray[U](total)
+    index = 0
+    var output = 0
+    while (index < xs.length()) {
+        val mapped = transform(xs.get(index))
+        var inner = 0
+        while (inner < mapped.size()) {
+            flattened.set(output, mapped.get(inner))
+            output = output + 1
+            inner = inner + 1
+        }
+        index = index + 1
+    }
+    new ArrayObject[U](flattened)
+}
+
 def floatArrayFilter(xs: FloatArray, predicate: (Float) => Bool): FloatArray = {
     var index = 0
     var kept = 0
@@ -101,6 +125,10 @@ class ArrayFloat(values: FloatArray) {
         floatArrayMapObject[U](values, f)
     }
 
+    def flatMapObject[U](transform: (Float) => ArrayObject[U]): ArrayObject[U] = {
+        floatArrayFlatMapObject[U](values, transform)
+    }
+
     def filter(predicate: (Float) => Bool): ArrayFloat = {
         new ArrayFloat(floatArrayFilter(values, predicate))
     }
@@ -132,6 +160,10 @@ def arrayFloatMap(xs: ArrayFloat, f: (Float) => Float): ArrayFloat = {
 
 def arrayFloatMapObject[T, U](xs: ArrayFloat, f: (Float) => U): ArrayObject[U] = {
     floatArrayMapObject[U](xs.raw(), f)
+}
+
+def arrayFloatFlatMapObject[T, U](xs: ArrayFloat, transform: (Float) => ArrayObject[U]): ArrayObject[U] = {
+    floatArrayFlatMapObject[U](xs.raw(), transform)
 }
 
 def arrayFloatFilter(xs: ArrayFloat, predicate: (Float) => Bool): ArrayFloat = {

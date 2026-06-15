@@ -1,0 +1,58 @@
+import collections.array
+import core.option
+
+def intWords(value: Int): ArrayObject[String] = {
+    val words = arrayFill[String](2, "i")
+    words.set(1, "int")
+    words
+}
+
+def longWords(value: Long): ArrayObject[String] = {
+    val words = arrayFill[String](1, "long")
+    words
+}
+
+def floatWords(value: Float): ArrayObject[String] = {
+    val words = arrayFill[String](2, "f")
+    words.set(1, "float")
+    words
+}
+
+def doubleWords(value: Double): ArrayObject[String] = {
+    val words = arrayFill[String](1, "double")
+    words
+}
+
+def boolWords(value: Bool): ArrayObject[Option[String]] = {
+    val words = arrayFill[Option[String]](2, optionSome("yes"))
+    if value {
+        words.set(1, optionSome("true"))
+    } else {
+        words.set(1, optionNone("false"))
+    }
+    words
+}
+
+def main(): Int = {
+    val ints = arrayIntRange(2).flatMapObject[String](intWords)
+    val longs = arrayLongFlatMapObject[Long, String](arrayFill[Long](2, 4L), longWords)
+    val floats = arrayFill[Float](1, 1.5F).flatMapObject[String](floatWords)
+    val doubles = arrayDoubleFlatMapObject[Double, String](arrayFill[Double](2, 2.5), doubleWords)
+    val bools = arrayFill[Bool](1, true).flatMapObject[Option[String]](boolWords)
+
+    if ints.size() == 4 &&
+       ints.get(1).length() == 3 &&
+       ints.get(3).length() == 3 &&
+       longs.size() == 2 &&
+       longs.get(0).length() == 4 &&
+       floats.size() == 2 &&
+       floats.get(1).length() == 5 &&
+       doubles.size() == 2 &&
+       doubles.get(1).length() == 6 &&
+       bools.size() == 2 &&
+       bools.get(1).getOrElse("x").length() == 4 {
+        42
+    } else {
+        1
+    }
+}

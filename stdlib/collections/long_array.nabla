@@ -40,6 +40,30 @@ def longArrayMapObject[U](xs: LongArray, f: (Long) => U): ArrayObject[U] = {
     new ArrayObject[U](mapped)
 }
 
+def longArrayFlatMapObject[U](xs: LongArray, transform: (Long) => ArrayObject[U]): ArrayObject[U] = {
+    var index = 0
+    var total = 0
+    while (index < xs.length()) {
+        total = total + transform(xs.get(index)).size()
+        index = index + 1
+    }
+
+    val flattened = new ObjectArray[U](total)
+    index = 0
+    var output = 0
+    while (index < xs.length()) {
+        val mapped = transform(xs.get(index))
+        var inner = 0
+        while (inner < mapped.size()) {
+            flattened.set(output, mapped.get(inner))
+            output = output + 1
+            inner = inner + 1
+        }
+        index = index + 1
+    }
+    new ArrayObject[U](flattened)
+}
+
 def longArrayFilter(xs: LongArray, predicate: (Long) => Bool): LongArray = {
     var index = 0
     var kept = 0
@@ -115,6 +139,10 @@ class ArrayLong(values: LongArray) {
         longArrayMapObject[U](values, f)
     }
 
+    def flatMapObject[U](transform: (Long) => ArrayObject[U]): ArrayObject[U] = {
+        longArrayFlatMapObject[U](values, transform)
+    }
+
     def filter(predicate: (Long) => Bool): ArrayLong = {
         new ArrayLong(longArrayFilter(values, predicate))
     }
@@ -146,6 +174,10 @@ def arrayLongMap(xs: ArrayLong, f: (Long) => Long): ArrayLong = {
 
 def arrayLongMapObject[T, U](xs: ArrayLong, f: (Long) => U): ArrayObject[U] = {
     longArrayMapObject[U](xs.raw(), f)
+}
+
+def arrayLongFlatMapObject[T, U](xs: ArrayLong, transform: (Long) => ArrayObject[U]): ArrayObject[U] = {
+    longArrayFlatMapObject[U](xs.raw(), transform)
 }
 
 def arrayLongFilter(xs: ArrayLong, predicate: (Long) => Bool): ArrayLong = {
