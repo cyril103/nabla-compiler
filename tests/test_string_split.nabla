@@ -1,0 +1,30 @@
+import collections.array
+
+def main(): Int = {
+    val command = "set 3 4".split(" ")
+    val repeated = "a,,b,".split(",")
+    val chars = "abc".split("")
+    val missing = "nabla".split("/")
+    val empty = "".split(",")
+
+    if command.size() == 3 &&
+       command.get(0) == "set" &&
+       command.get(1).toInt() == 3 &&
+       command.get(2).toInt() == 4 &&
+       command.mkString("|") == "set|3|4" &&
+       repeated.size() == 4 &&
+       repeated.get(0) == "a" &&
+       repeated.get(1) == "" &&
+       repeated.get(2) == "b" &&
+       repeated.get(3) == "" &&
+       chars.size() == 3 &&
+       chars.mkString("-") == "a-b-c" &&
+       missing.size() == 1 &&
+       missing.get(0) == "nabla" &&
+       empty.size() == 1 &&
+       empty.get(0) == "" {
+        42
+    } else {
+        1
+    }
+}

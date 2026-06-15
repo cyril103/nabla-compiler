@@ -400,6 +400,7 @@ std::string MethodCallNode::getType() {
             methodName == "endsWith" || methodName == "contains") return "Bool";
         if (methodName == "toInt") return "Int";
         if (methodName == "toCharArray") return "ArrayObject[Char]";
+        if (methodName == "split") return "ArrayObject[String]";
         if (methodName == "substring" || methodName == "repeat" || methodName == "trim") return "String";
         if (methodName == "length" || methodName == "indexOf") return "Int";
         if (methodName == "charAt") return "Char";
@@ -516,6 +517,18 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
                 semanticError("la méthode String.toCharArray n'accepte aucun argument");
             }
             resolvedType = "ArrayObject[Char]";
+            return;
+        }
+        if (methodName == "split") {
+            if (arguments.size() != 1) {
+                semanticError("la méthode String.split attend un argument");
+            }
+            if (arguments[0]->getType() != "String") {
+                throw CompilerError(
+                    ErrorKind::Semantic, arguments[0]->getLocation(),
+                    "la méthode String.split attend un séparateur de type String");
+            }
+            resolvedType = "ArrayObject[String]";
             return;
         }
         if (methodName == "substring") {
@@ -770,6 +783,12 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         if (methodName == "toCharArray" && arguments.empty()) {
             std::string loweredReceiver = receiver->lowerToIR(builder);
             return builder.emitMethodCall("String", "toCharArray", loweredReceiver, {}, "ArrayObject[Char]");
+        }
+        if (methodName == "split" && arguments.size() == 1) {
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            std::string loweredSeparator = arguments[0]->lowerToIR(builder);
+            return builder.emitMethodCall(
+                "String", "split", loweredReceiver, {loweredSeparator}, "ArrayObject[String]");
         }
         if (methodName == "substring" && arguments.size() == 2) {
             std::string loweredReceiver = receiver->lowerToIR(builder);

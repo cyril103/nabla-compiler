@@ -1,0 +1,1 @@
+tests/test_error_string_split_type.nabla:2:19: semantic error: la méthode String.split attend un séparateur de type String
