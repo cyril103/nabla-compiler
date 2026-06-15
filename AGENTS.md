@@ -113,8 +113,9 @@ Le pipeline implemente actuellement :
   `ArrayBool.mkString(separator)` et `arrayMkString[Int/Long/Bool/String]`;
 - affichage console de `String` via la primitive globale `print`;
 - lecture console de `String` via la primitive globale `readLine`;
-- lecture/ecriture de fichiers texte via `readFile`, `writeFile` et les
-  wrappers `io.readTextFile` / `io.writeTextFile`;
+- lecture/ecriture de fichiers texte via `readFile`, `writeFile`,
+  `fileExists` et les wrappers `io.readTextFile` / `io.writeTextFile` /
+  `io.pathExists`;
 - parsing decimal de `String` vers `Int` via `parseInt(value)`;
 - module standard `strings` avec `words(text)` pour decouper une ligne en
   tokens separes par des espaces en ignorant les segments vides;

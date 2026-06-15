@@ -13,3 +13,7 @@ def readTextFile(path: String): String = {
 def writeTextFile(path: String, content: String): Int = {
     writeFile(path, content)
 }
+
+def pathExists(path: String): Bool = {
+    fileExists(path)
+}

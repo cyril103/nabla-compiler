@@ -7,7 +7,10 @@ def main(): Int = {
     val loaded = readTextFile(path)
 
     if written == content.length() &&
+       fileExists(path) &&
+       pathExists(path) &&
        loaded == content &&
+       !fileExists("build/nabla_missing_file_exists_test.txt") &&
        readTextFile("build/nabla_missing_file.txt").isEmpty() {
         42
     } else {

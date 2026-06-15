@@ -969,6 +969,7 @@ std::string FunctionCallNode::getType() {
     if (name == "readLine") return "String";
     if (name == "readFile") return "String";
     if (name == "writeFile") return "Int";
+    if (name == "fileExists") return "Bool";
     if (name == "parseInt") return "Int";
     return resolvedType;
 }
@@ -1025,6 +1026,19 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
                 arguments[1]->getType() + "' reçu");
         }
         resolvedType = "Int";
+        return;
+    }
+    if (name == "fileExists") {
+        if (arguments.size() != 1) {
+            semanticError("fileExists: 1 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
+        }
+        if (arguments[0]->getType() != "String") {
+            throw CompilerError(
+                ErrorKind::Semantic, arguments[0]->getLocation(),
+                "fileExists, paramètre 'path': type 'String' attendu, '" +
+                arguments[0]->getType() + "' reçu");
+        }
+        resolvedType = "Bool";
         return;
     }
     if (name == "parseInt") {
