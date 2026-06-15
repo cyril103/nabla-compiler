@@ -738,6 +738,10 @@ def arrayIntMap(xs: ArrayInt, f: (Int) => Int): ArrayInt = {
     xs.map(f)
 }
 
+def arrayIntFlatMap(xs: ArrayInt, transform: (Int) => ArrayInt): ArrayInt = {
+    xs.flatMap(transform)
+}
+
 def arrayIntMapObject[T, U](xs: ArrayInt, f: (Int) => U): ArrayObject[U] = {
     intArrayMapObject[U](xs.raw(), f)
 }

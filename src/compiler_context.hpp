@@ -89,6 +89,7 @@ inline const std::vector<StdlibFunctionAlias>& stdlibFunctionAliases() {
         {"arrayMap", {"Float"}, "arrayFloatMap"},
         {"arrayMap", {"Double"}, "arrayDoubleMap"},
         {"arrayMap", {"Bool"}, "arrayBoolMap"},
+        {"arrayFlatMap", {"Int"}, "arrayIntFlatMap"},
         {"arrayForeach", {"Int"}, "arrayIntForeach"},
         {"arrayForeach", {"Long"}, "arrayLongForeach"},
         {"arrayForeach", {"Float"}, "arrayFloatForeach"},
@@ -116,6 +117,7 @@ inline std::optional<std::string> resolveStdlibFunctionAlias(
         typeArguments[0] != "Float" && typeArguments[0] != "Double" &&
         typeArguments[0] != "Bool") {
         if (name == "arrayMap") return "objectArrayMap";
+        if (name == "arrayFlatMap") return "objectArrayFlatMap";
     }
     if (name == "arrayMap" && typeArguments.size() == 2) {
         if (typeArguments[0] == "Int") {
@@ -138,6 +140,13 @@ inline std::optional<std::string> resolveStdlibFunctionAlias(
             if (typeArguments[1] == "Bool") return "arrayBoolMap";
             return "arrayBoolMapObject";
         }
+    }
+    if (name == "arrayFlatMap" && typeArguments.size() == 2) {
+        if (typeArguments[0] == "Int") return "arrayIntFlatMapObject";
+        if (typeArguments[0] == "Long") return "arrayLongFlatMapObject";
+        if (typeArguments[0] == "Float") return "arrayFloatFlatMapObject";
+        if (typeArguments[0] == "Double") return "arrayDoubleFlatMapObject";
+        if (typeArguments[0] == "Bool") return "arrayBoolFlatMapObject";
     }
     return std::nullopt;
 }

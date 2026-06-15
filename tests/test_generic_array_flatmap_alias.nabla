@@ -1,0 +1,46 @@
+import collections.array
+import core.option
+
+def duplicateInt(value: Int): ArrayInt = {
+    val values = arrayFill[Int](2, value)
+    values
+}
+
+def intWords(value: Int): ArrayObject[String] = {
+    val words = arrayFill[String](2, "int")
+    words.set(1, "value")
+    words
+}
+
+def longWords(value: Long): ArrayObject[String] = {
+    val words = arrayFill[String](1, "long")
+    words
+}
+
+def wordOptions(value: String): ArrayObject[Option[String]] = {
+    val values = arrayFill[Option[String]](2, optionSome(value))
+    values.set(1, optionNone("missing"))
+    values
+}
+
+def main(): Int = {
+    val ints = arrayFlatMap[Int](arrayIntRange(2), duplicateInt)
+    val intWordsResult = arrayFlatMap[Int, String](arrayIntRange(1), intWords)
+    val longWordsResult = arrayFlatMap[Long, String](arrayFill[Long](2, 4L), longWords)
+    val words = arrayFill[String](1, "hi")
+    val wordOptionsResult = arrayFlatMap[String, Option[String]](words, wordOptions)
+
+    if ints.size() == 4 &&
+       ints.sum() == 2 &&
+       intWordsResult.size() == 2 &&
+       intWordsResult.get(1).length() == 5 &&
+       longWordsResult.size() == 2 &&
+       longWordsResult.get(0).length() == 4 &&
+       wordOptionsResult.size() == 2 &&
+       wordOptionsResult.get(0).getOrElse("x").length() == 2 &&
+       wordOptionsResult.get(1).isEmpty() {
+        42
+    } else {
+        1
+    }
+}
