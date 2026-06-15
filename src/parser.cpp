@@ -131,15 +131,19 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
     context.classes[className].location = classToken.location;
     if (peek().type == TokenType::KW_EXTENDS) {
         consume(TokenType::KW_EXTENDS, "");
-        while (true) {
-            auto [parentType, parentTypeLocation] = parseType("Type de parent attendu");
-            (void) parentTypeLocation;
-            context.classes[className].parentTypes.push_back(parentType);
-            if (peek().type == TokenType::COMMA) {
-                consume(TokenType::COMMA, "");
-            } else {
-                break;
-            }
+        auto [baseParentType, baseParentTypeLocation] = parseType("Type de parent attendu");
+        (void) baseParentTypeLocation;
+        context.classes[className].parentTypes.push_back(baseParentType);
+        if (peek().type == TokenType::COMMA) {
+            throw CompilerError(
+                ErrorKind::Parser, peek().location,
+                "syntaxe d'héritage multiple supprimée: utilisez 'with' pour les mixins");
+        }
+        while (peek().type == TokenType::KW_WITH) {
+            consume(TokenType::KW_WITH, "");
+            auto [mixinType, mixinTypeLocation] = parseType("Type de mixin attendu");
+            (void) mixinTypeLocation;
+            context.classes[className].parentTypes.push_back(mixinType);
         }
     }
     currentParsingClass = className;

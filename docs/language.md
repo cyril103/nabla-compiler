@@ -225,7 +225,8 @@ def main(): Int = {
 
 ## Héritage
 
-Une classe peut heriter d'autres classes via une clause `extends` optionnelle.
+Une classe peut heriter d'une classe base via une clause `extends` optionnelle,
+et composer sa hiérarchie via des mixins avec `with`.
 
 ```nabla
 class Entity(nameValue: String) {
@@ -234,7 +235,7 @@ class Entity(nameValue: String) {
     }
 }
 
-class Person(nameValue: String, ageValue: Int) extends Entity {
+class Person extends Entity(nameValue: String, ageValue: Int) {
     def age(): Int = {
         ageValue
     }
@@ -248,11 +249,22 @@ def main(): Int = {
         0
     }
 }
+
+class CanWork() {
+    def canWork(): Bool = {
+        true
+    }
+}
+
+class Worker extends Person with CanWork(nameValue: String, ageValue: Int) {
+    def title(): String = {
+        "eng"
+    }
+}
 ```
 
 La resolution des methodes suit une recherche dans la classe courante, puis dans
-les parents dans l'ordre de la liste `extends`. Plusieurs parents sont donc
-autorises (`mixin`) quand il n'y a pas de conflit de noms.
+le parent puis les mixins dans l'ordre d'énonciation (`with`).
 
 Quand une classe n'indique pas de parent, une classe racine implicite `Any` est
 ajoutee pour uniformiser le modele objet et les futures extensions.

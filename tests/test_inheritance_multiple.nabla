@@ -10,7 +10,7 @@ class Right() {
     }
 }
 
-class Both extends Left, Right() {
+class Both extends Left with Right() {
 }
 
 def main(): Int = {

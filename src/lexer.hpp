@@ -7,7 +7,7 @@
 
 enum class TokenType {
     KW_DEF, KW_CLASS, KW_NEW, KW_IMPORT, KW_IF, KW_ELSE, KW_MATCH, KW_WHILE, KW_FOR, KW_VAL, KW_VAR, KW_THIS,
-    KW_EXTENDS,
+    KW_EXTENDS, KW_WITH,
     KW_TRUE, KW_FALSE,
     IDENTIFIER, LPAREN, RPAREN, LBRACKET, RBRACKET, COLON, EQUAL, LBRACE, RBRACE, COMMA, DOT,
     INT_LITERAL, LONG_LITERAL, FLOAT_LITERAL, DOUBLE_LITERAL, STRING_LITERAL, CHAR_LITERAL,
@@ -176,6 +176,7 @@ public:
                 else if (ident == "while") type = TokenType::KW_WHILE;
                 else if (ident == "for") type = TokenType::KW_FOR;
                 else if (ident == "extends") type = TokenType::KW_EXTENDS;
+                else if (ident == "with") type = TokenType::KW_WITH;
                 else if (ident == "val") type = TokenType::KW_VAL;
                 else if (ident == "var") type = TokenType::KW_VAR;
                 else if (ident == "this") type = TokenType::KW_THIS;

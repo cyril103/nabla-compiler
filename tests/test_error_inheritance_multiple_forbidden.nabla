@@ -1,0 +1,12 @@
+class Left() {
+}
+
+class Right() {
+}
+
+class Both extends Left, Right() {
+}
+
+def main(): Int = {
+    0
+}
