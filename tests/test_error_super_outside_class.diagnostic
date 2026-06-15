@@ -1,0 +1,1 @@
+tests/test_error_super_outside_class.nabla:2:5: parser error: 'super' non autorisé en dehors d'une méthode de classe

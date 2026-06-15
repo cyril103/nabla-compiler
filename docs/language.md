@@ -270,6 +270,26 @@ chaîne d'héritage transitive.
 Quand une même méthode existe dans plusieurs parents/mixins sans redéfinition
 dans la classe courante, une erreur de conflit d'héritage est levée.
 
+Dans une méthode, `super` permet d'appeler un membre de la classe parente directe.
+
+```nabla
+class Base() {
+    def label(): String = {
+        "base"
+    }
+}
+
+class Child extends Base() {
+    def label(): String = {
+        "child"
+    }
+
+    def baseLabel(): String = {
+        super.label()
+    }
+}
+```
+
 Quand une classe n'indique pas de parent, une classe racine implicite `Any` est
 ajoutee pour uniformiser le modele objet et les futures extensions.
 

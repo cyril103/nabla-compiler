@@ -1,0 +1,26 @@
+class Base() {
+    def answer(): Int = {
+        10
+    }
+}
+
+class Mid() {
+    def answer(): Int = {
+        20
+    }
+}
+
+class Child extends Mid() {
+    def answer(): Int = {
+        30
+    }
+
+    def inheritedAnswer(): Int = {
+        super.answer()
+    }
+}
+
+def main(): Int = {
+    val child = new Child()
+    child.answer() + child.inheritedAnswer()
+}

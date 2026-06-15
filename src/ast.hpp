@@ -133,6 +133,15 @@ public:
     std::string lowerToIR(IRBuilder& builder) const override;
 };
 
+class SuperNode : public ASTNode {
+    std::string parentType;
+public:
+    explicit SuperNode(std::string type);
+    std::string getType() override;
+    void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
+};
+
 class MethodCallNode : public ASTNode {
     std::unique_ptr<ASTNode> receiver;
     std::string methodName;

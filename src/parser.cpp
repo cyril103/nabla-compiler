@@ -707,6 +707,21 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                 thisToken.value, "this", thisType),
             thisToken.location);
     }
+    if (peek().type == TokenType::KW_SUPER) {
+        if (currentParsingClass.empty()) {
+            throw CompilerError(ErrorKind::Parser, peek().location, "'super' non autorisé en dehors d'une méthode de classe");
+        }
+        Token superToken = consume(TokenType::KW_SUPER, "'super' invalide");
+        const auto classIt = context.classes.find(currentParsingClass);
+        if (classIt == context.classes.end() || classIt->second.parentTypes.empty()) {
+            throw CompilerError(
+                ErrorKind::Parser, superToken.location,
+                "'super' non autorisé dans une classe sans parent explicite");
+        }
+        return located(
+            std::make_unique<SuperNode>(classIt->second.parentTypes[0]),
+            superToken.location);
+    }
     if (peek().type == TokenType::IDENTIFIER) {
         Token nameToken = consume(TokenType::IDENTIFIER, "");
         std::string name = nameToken.value;

@@ -217,6 +217,7 @@ Le pipeline implemente actuellement :
 - support de l'héritage de méthodes via `extends` + `with` (un parent explicite
   puis mixins), avec validation des parents, détection de conflits de méthodes
   héritées et détection de cycles;
+- appel direct de la méthode parente immédiate via le mot-clé `super`;
 - diagnostics uniformes avec fichier, ligne, colonne et phase du compilateur;
 - IR textuelle pour les fonctions globales, entiers, variables, affectations,
   operations binaires, appels de fonctions globales, `if`, `match`, `while`,
@@ -358,6 +359,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Valider l'existence et l'arité des parents, et détecter les cycles.
 - [x] Ajouter la classe racine implicite `Any` pour les classes sans parent explicite.
 - [x] Ajouter la résolution de conflits de membres dupliqués entre parent et mixins.
+- [x] Ajouter `super` pour appeler une méthode de la classe parente immédiate.
 
 - [ ] Formaliser `Int`, `Bool`, `Char`, `String`, `IntArray`, les types fonction canoniques et
   les types de classes.
@@ -550,6 +552,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `test_error_inheritance_unknown_parent`, `test_error_inheritance_cycle`,
     `test_error_inheritance_mixin_conflict`,
     `test_error_inheritance_mixin_conflict_transitive`.
+- `local` - Ajouter `super` pour appeler explicitement la méthode de la classe
+  parente directe (`super.method(...)`) et contourner les redéfinitions de la
+  classe courante.
+  - Tests: `test_inheritance_super`, `test_error_super_outside_class`.
 
 - `local` - Durcir la compilation backend : passage `std::system` -> `fork` +
   `execvp` dans `main.cpp`, ajout de contrôle division par zéro en codegen `/` et

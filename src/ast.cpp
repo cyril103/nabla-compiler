@@ -400,6 +400,25 @@ std::string NewNode::lowerToIR(IRBuilder& builder) const {
     return builder.emitNewObject(className, loweredArguments);
 }
 
+SuperNode::SuperNode(std::string type) : parentType(std::move(type)) {}
+
+std::string SuperNode::getType() {
+    return parentType;
+}
+
+void SuperNode::validateSemantics(CompilerContext& context) {
+    if (parentType.empty()) {
+        semanticError("super non supporté dans une classe sans parent explicite");
+    }
+    if (context.semanticSymbolTypes.find("this") == context.semanticSymbolTypes.end()) {
+        semanticError("'super' non autorisé en dehors d'une méthode de classe");
+    }
+}
+
+std::string SuperNode::lowerToIR(IRBuilder& builder) const {
+    return builder.emitLoad("this", builder.substituteActiveType(parentType));
+}
+
 MethodCallNode::MethodCallNode(
     std::unique_ptr<ASTNode> rec, std::string method, std::vector<std::unique_ptr<ASTNode>> args,
     std::vector<std::string> genericTypeArguments,
