@@ -1,0 +1,48 @@
+import collections.array
+
+def duplicateLong(value: Long): ArrayLong = {
+    val values = arrayFill[Long](2, value)
+    values.set(1, value + 1L)
+    values
+}
+
+def duplicateFloat(value: Float): ArrayFloat = {
+    val values = arrayFill[Float](2, value)
+    values.set(1, value + 0.5F)
+    values
+}
+
+def duplicateDouble(value: Double): ArrayDouble = {
+    val values = arrayFill[Double](2, value)
+    values.set(1, value + 0.25)
+    values
+}
+
+def duplicateBool(value: Bool): ArrayBool = {
+    val values = arrayFill[Bool](2, value)
+    values.set(1, !value)
+    values
+}
+
+def main(): Int = {
+    val longs = arrayFlatMap[Long](arrayFill[Long](2, 4L), duplicateLong)
+    val floats = arrayFlatMap[Float](arrayFill[Float](2, 1.5F), duplicateFloat)
+    val doubles = arrayFlatMap[Double](arrayFill[Double](2, 2.5), duplicateDouble)
+    val bools = arrayFlatMap[Bool](arrayFill[Bool](2, true), duplicateBool)
+
+    if longs.size() == 4 &&
+       longs.get(0) == 4L &&
+       longs.get(1) == 5L &&
+       floats.size() == 4 &&
+       floats.get(0) == 1.5F &&
+       floats.get(1) == 2.0F &&
+       doubles.size() == 4 &&
+       doubles.get(0) == 2.5 &&
+       doubles.get(1) == 2.75 &&
+       bools.size() == 4 &&
+       bools.countTrue() == 2 {
+        42
+    } else {
+        1
+    }
+}

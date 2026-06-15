@@ -123,17 +123,18 @@ Le pipeline implemente actuellement :
   avec predicats booleens;
 - module de bibliotheque standard `collections.long_array` avec `ArrayLong`,
   `longArrayFill`, `longArraySum`, `longArrayMap`, `arrayLongFill`, `map`,
-  `foreach`, `sum`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
+  `flatMap`, `foreach`, `sum`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et
+  `raw`;
 - module de bibliotheque standard `collections.float_array` avec `ArrayFloat`,
-  `floatArrayFill`, `floatArrayMap`, `arrayFloatFill`, `map`, `foreach`,
-  `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
+  `floatArrayFill`, `floatArrayMap`, `arrayFloatFill`, `map`, `flatMap`,
+  `foreach`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
 - module de bibliotheque standard `collections.double_array` avec `ArrayDouble`,
-  `doubleArrayFill`, `doubleArrayMap`, `arrayDoubleFill`, `map`, `foreach`,
-  `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
+  `doubleArrayFill`, `doubleArrayMap`, `arrayDoubleFill`, `map`, `flatMap`,
+  `foreach`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
 - module de bibliotheque standard `collections.bool_array` avec `ArrayBool`,
   `boolArrayFill`, `boolArrayCountTrue`, `boolArrayAll`, `boolArrayAny`,
-  `boolArrayMap`, `arrayBoolFill`, `map`, `foreach`, `countTrue`, `all`,
-  `any`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
+  `boolArrayMap`, `arrayBoolFill`, `map`, `flatMap`, `foreach`, `countTrue`,
+  `all`, `any`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
 - module de bibliotheque standard `collections.array` comme point d'entree
   commun pour les tableaux specialises, avec `arrayFill[T]`, `arrayMap[T]`,
   `arrayMap[T, U]`, `arrayFilter[T]`, `arrayFlatMap[T]`, `arrayFlatMap[T, U]` et
@@ -357,6 +358,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `arrayMap[Primitive, U]` vers `ArrayObject[U]`.
 - [x] Ajouter `arrayFilter[T]`.
 - [x] Ajouter `arrayFlatMap[T]` et `arrayFlatMap[T, U]`.
+- [x] Completer `arrayFlatMap[T]` pour `Long`, `Float`, `Double` et `Bool`.
 - [x] Ajouter `mapObject[U]` sur les facades primitives.
 - [x] Ajouter `flatMapObject[U]` sur les facades primitives.
 - [x] Ajouter `filter` et `fold` sur `ArrayLong`, `ArrayFloat`,
@@ -394,6 +396,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Completer `arrayFlatMap[T]` pour toutes les facades primitives.
 - `local` - Ajouter la facade standard `arrayFilter[T]`.
 - `local` - Factoriser le routage des aliases standards de tableaux dans
   `compiler_context.hpp`.

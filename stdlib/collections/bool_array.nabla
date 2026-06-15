@@ -96,6 +96,30 @@ def boolArrayFlatMapObject[U](xs: BoolArray, transform: (Bool) => ArrayObject[U]
     new ArrayObject[U](flattened)
 }
 
+def boolArrayFlatMap(xs: BoolArray, transform: (Bool) => ArrayBool): BoolArray = {
+    var index = 0
+    var total = 0
+    while (index < xs.length()) {
+        total = total + transform(xs.get(index)).size()
+        index = index + 1
+    }
+
+    val flattened = new BoolArray(total)
+    index = 0
+    var output = 0
+    while (index < xs.length()) {
+        val mapped = transform(xs.get(index))
+        var inner = 0
+        while (inner < mapped.size()) {
+            flattened.set(output, mapped.get(inner))
+            output = output + 1
+            inner = inner + 1
+        }
+        index = index + 1
+    }
+    flattened
+}
+
 def boolArrayFilter(xs: BoolArray, predicate: (Bool) => Bool): BoolArray = {
     var index = 0
     var kept = 0
@@ -183,6 +207,10 @@ class ArrayBool(values: BoolArray) {
         boolArrayFlatMapObject[U](values, transform)
     }
 
+    def flatMap(transform: (Bool) => ArrayBool): ArrayBool = {
+        new ArrayBool(boolArrayFlatMap(values, transform))
+    }
+
     def filter(predicate: (Bool) => Bool): ArrayBool = {
         new ArrayBool(boolArrayFilter(values, predicate))
     }
@@ -218,6 +246,10 @@ def arrayBoolMapObject[T, U](xs: ArrayBool, f: (Bool) => U): ArrayObject[U] = {
 
 def arrayBoolFlatMapObject[T, U](xs: ArrayBool, transform: (Bool) => ArrayObject[U]): ArrayObject[U] = {
     boolArrayFlatMapObject[U](xs.raw(), transform)
+}
+
+def arrayBoolFlatMap(xs: ArrayBool, transform: (Bool) => ArrayBool): ArrayBool = {
+    xs.flatMap(transform)
 }
 
 def arrayBoolFilter(xs: ArrayBool, predicate: (Bool) => Bool): ArrayBool = {
