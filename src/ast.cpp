@@ -399,6 +399,7 @@ std::string MethodCallNode::getType() {
         if (methodName == "isEmpty" || methodName == "nonEmpty" || methodName == "startsWith") return "Bool";
         if (methodName == "toInt") return "Int";
         if (methodName == "toCharArray") return "ArrayObject[Char]";
+        if (methodName == "substring") return "String";
         if (methodName == "length") return "Int";
         if (methodName == "charAt") return "Char";
     }
@@ -502,6 +503,23 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
                 semanticError("la méthode String.toCharArray n'accepte aucun argument");
             }
             resolvedType = "ArrayObject[Char]";
+            return;
+        }
+        if (methodName == "substring") {
+            if (arguments.size() != 2) {
+                semanticError("la méthode String.substring attend deux arguments");
+            }
+            if (arguments[0]->getType() != "Int") {
+                throw CompilerError(
+                    ErrorKind::Semantic, arguments[0]->getLocation(),
+                    "la méthode String.substring attend un index de début de type Int");
+            }
+            if (arguments[1]->getType() != "Int") {
+                throw CompilerError(
+                    ErrorKind::Semantic, arguments[1]->getLocation(),
+                    "la méthode String.substring attend un index de fin de type Int");
+            }
+            resolvedType = "String";
             return;
         }
         if (methodName == "length") {
@@ -713,6 +731,13 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         if (methodName == "toCharArray" && arguments.empty()) {
             std::string loweredReceiver = receiver->lowerToIR(builder);
             return builder.emitMethodCall("String", "toCharArray", loweredReceiver, {}, "ArrayObject[Char]");
+        }
+        if (methodName == "substring" && arguments.size() == 2) {
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            std::string loweredFrom = arguments[0]->lowerToIR(builder);
+            std::string loweredUntil = arguments[1]->lowerToIR(builder);
+            return builder.emitMethodCall(
+                "String", "substring", loweredReceiver, {loweredFrom, loweredUntil}, "String");
         }
         if (methodName == "length" && arguments.empty()) {
             std::string loweredReceiver = receiver->lowerToIR(builder);

@@ -1,0 +1,15 @@
+def main(): Int = {
+    val text = "nabla"
+    val middle = text.substring(1, 4)
+    val empty = text.substring(2, 2)
+    val full = text.substring(0, text.length())
+
+    if middle == "abl" &&
+       empty.isEmpty() &&
+       full == text &&
+       ("run 12").substring(4, 6).toInt() == 12 {
+        42
+    } else {
+        1
+    }
+}

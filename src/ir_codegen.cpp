@@ -821,6 +821,8 @@ private:
             out << "    call Runtime_stringToInt\n";
         } else if (className == "String" && methodName == "toCharArray") {
             out << "    call Runtime_stringToCharArray\n";
+        } else if (className == "String" && methodName == "substring") {
+            out << "    call Runtime_stringSubstring\n";
         } else {
             out << "    call " << asmFunctionName(instruction.operation) << "\n";
         }
