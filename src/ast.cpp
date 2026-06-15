@@ -1283,10 +1283,11 @@ void IfNode::validateSemantics(CompilerContext& context) {
     if (condition->getType() != "Bool") {
         semanticError("la condition d'un 'if' doit être de type Bool");
     }
-    if (thenBranch->getType() != elseBranch->getType()) {
-        semanticError("les branches d'un 'if' doivent avoir le même type");
+    if (thenBranch->getType() == elseBranch->getType()) {
+        resolvedType = thenBranch->getType();
+    } else {
+        resolvedType = "Unit";
     }
-    resolvedType = thenBranch->getType();
 }
 
 std::string IfNode::lowerToIR(IRBuilder& builder) const {
@@ -1301,6 +1302,9 @@ std::string IfNode::lowerToIR(IRBuilder& builder) const {
     std::string elseValue = elseBranch->lowerToIR(builder);
     builder.emitJump(endLabel);
     builder.emitLabel(endLabel);
+    if (resolvedType == "Unit") {
+        return builder.emitConstant("0", "Unit");
+    }
     return builder.emitPhi(thenValue, elseValue, resolvedType);
 }
 

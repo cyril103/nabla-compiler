@@ -1,0 +1,33 @@
+def isPrime(value: Int): Bool = {
+    var prime = value >= 2
+    var divisor = 2
+
+    while prime && divisor * divisor <= value {
+        if value % divisor == 0 {
+            prime = false
+        } else {
+            divisor = divisor + 1
+        }
+    }
+
+    prime
+}
+
+def main(): Int = {
+    var count = 0
+    var candidate = 1
+    var prime = 2
+
+    while count < 10001 {
+        candidate = candidate + 1
+        if isPrime(candidate) {
+            count = count + 1
+            prime = candidate
+        } else {
+            prime = prime
+        }
+    }
+
+    print(prime.toString())
+    0
+}

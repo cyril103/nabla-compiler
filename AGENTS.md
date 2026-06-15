@@ -97,6 +97,8 @@ Le pipeline implemente actuellement :
 - types `Bool`, `Unit`, `Long`, `Float` et `Double` formalises; les
   comparaisons retournent `Bool` et les conditions `if` / `while` attendent
   `Bool`;
+- expressions `if` typees avec le type commun des branches, ou `Unit` quand les
+  branches ont des types differents et servent d'effets de bord;
 - operateurs booleens `&&`, `||` et `!`, avec court-circuit pour `&&` et
   `||`;
 - operateur reste de division `%` pour `Int` et `Long`;
@@ -183,7 +185,7 @@ Le pipeline implemente actuellement :
 - backend ASM par defaut depuis l'IR couvrant la suite positive actuelle
   (fonctions, variables, controle de flux, imports, objets et methodes);
 - tests de compilation et d'execution via `make all-tests`.
-- tests Project Euler 1 a 6 comme banc progressif pour exercer le langage et la
+- tests Project Euler 1 a 7 comme banc progressif pour exercer le langage et la
   bibliotheque standard.
 
 Limites importantes :
@@ -302,6 +304,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Formaliser `Unit` pour les fonctions a effet et les boucles.
 - [x] Ajouter les booleens et typer les conditions en `Bool`.
 - [x] Ajouter `else if`.
+- [x] Typer les branches `if` heterogenes comme `Unit` pour les usages a effets
+  de bord.
 - [x] Ajouter `match` V1 avec motifs litteraux et branche finale `_`.
 - [x] Ajouter `Char` ASCII, les litteraux de caractere et `String.charAt`.
 - [x] Ajouter `String.==` et `String.!=` byte-based.
@@ -466,6 +470,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `6751bd6` - Montrer l'I/O fichier dans `examples/command_shell.nabla`.
 - `290fbab` - Lire les fichiers texte complets.
 - `17b184f` - Documenter les helpers d'I/O texte.
+- `local` - Typer les branches `if` heterogenes comme `Unit` et simplifier le
+  test Project Euler 7.
+- `local` - Ajouter un test Project Euler 7 avec recherche du 10001e nombre
+  premier.
 - `local` - Ajouter l'optimisation backend des appels recursifs terminaux et
   l'utiliser dans le `gcd` de Project Euler 5.
 - `local` - Ajouter un test Project Euler 6 avec `arrayIntRangeUntil`, `map` et

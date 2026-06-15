@@ -125,9 +125,11 @@ def greet(name: String): Unit = {
 
 ## Controle De Flux
 
-`if` est une expression : les deux branches doivent produire un type compatible.
-Les chaines `else if` sont acceptees, mais une branche finale `else` reste
-obligatoire.
+`if` est une expression : quand les deux branches produisent le meme type, ce
+type devient celui du `if`. Quand les branches produisent deux types differents,
+le `if` est type `Unit`, ce qui permet de l'utiliser naturellement pour des
+effets de bord. Les chaines `else if` sont acceptees, mais une branche finale
+`else` reste obligatoire.
 
 ```nabla
 def max(left: Int, right: Int): Int = {
