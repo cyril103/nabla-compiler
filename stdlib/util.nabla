@@ -24,6 +24,16 @@ class RandomBoolResult(valueValue: Bool, stateValue: RandomState) {
     }
 }
 
+class RandomChoiceResult[T](valueValue: T, stateValue: RandomState) {
+    def value(): T = {
+        valueValue
+    }
+
+    def state(): RandomState = {
+        stateValue
+    }
+}
+
 def randomStep(seed: Int): Int = {
     val mixed = (seed * 1103515245 + 12345) % 2147483647
     if mixed < 0 {
@@ -41,9 +51,17 @@ def randomSeedNow(): RandomState = {
     randomSeed(timeSeed())
 }
 
+def randomSeedTime(): RandomState = {
+    randomSeedNow()
+}
+
 def randomInt(state: RandomState): RandomIntResult = {
     val nextSeed = randomStep(state.seed())
     new RandomIntResult(nextSeed, new RandomState(nextSeed))
+}
+
+def randomIntInRange(state: RandomState, minimum: Int, maximum: Int): RandomIntResult = {
+    randomIntRange(state, minimum, maximum)
 }
 
 def randomIntRange(state: RandomState, minimum: Int, maximum: Int): RandomIntResult = {

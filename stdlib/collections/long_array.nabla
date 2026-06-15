@@ -152,6 +152,15 @@ def longArrayShuffle(xs: LongArray, state: RandomState): LongArray = {
     shuffled
 }
 
+def longArrayRandomChoice(xs: LongArray, state: RandomState, default: Long): RandomChoiceResult[Long] = {
+    if xs.length() == 0 {
+        new RandomChoiceResult[Long](default, state)
+    } else {
+        val selected = randomIntInRange(state, 0, xs.length() - 1)
+        new RandomChoiceResult[Long](xs.get(selected.value()), selected.state())
+    }
+}
+
 def longArrayFold(xs: LongArray, initial: Long, combine: (Long, Long) => Long): Long = {
     var index = 0
     var accumulator = initial
@@ -219,6 +228,10 @@ class ArrayLong(values: LongArray) {
         new ArrayLong(longArrayShuffle(values, state))
     }
 
+    def randomChoice(state: RandomState, default: Long): RandomChoiceResult[Long] = {
+        longArrayRandomChoice(values, state, default)
+    }
+
     def fold(initial: Long, combine: (Long, Long) => Long): Long = {
         longArrayFold(values, initial, combine)
     }
@@ -242,6 +255,10 @@ def arrayLongFill(size: Int, value: Long): ArrayLong = {
 
 def arrayLongShuffle(xs: ArrayLong, state: RandomState): ArrayLong = {
     xs.shuffle(state)
+}
+
+def arrayLongRandomChoice(xs: ArrayLong, state: RandomState, default: Long): RandomChoiceResult[Long] = {
+    xs.randomChoice(state, default)
 }
 
 def arrayLongMap(xs: ArrayLong, f: (Long) => Long): ArrayLong = {

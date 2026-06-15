@@ -22,6 +22,15 @@ def objectArrayShuffle[T](xs: ArrayObject[T], state: RandomState): ArrayObject[T
     xs.shuffle(state)
 }
 
+def objectArrayRandomChoice[T](xs: ArrayObject[T], state: RandomState, default: T): RandomChoiceResult[T] = {
+    if xs.length() == 0 {
+        new RandomChoiceResult[T](default, state)
+    } else {
+        val selected = randomIntInRange(state, 0, xs.length() - 1)
+        new RandomChoiceResult[T](xs.get(selected.value()), selected.state())
+    }
+}
+
 def objectArrayForeach[T](xs: ArrayObject[T], f: (T) => Unit): Unit = {
     xs.foreach(f)
 }
@@ -96,6 +105,15 @@ class ArrayObject[T](values: ObjectArray[T]) {
             index = index - 1
         }
         new ArrayObject[T](shuffled)
+    }
+
+    def randomChoice(state: RandomState, default: T): RandomChoiceResult[T] = {
+        if values.length() == 0 {
+            new RandomChoiceResult[T](default, state)
+        } else {
+            val selected = randomIntInRange(state, 0, values.length() - 1)
+            new RandomChoiceResult[T](values.get(selected.value()), selected.state())
+        }
     }
 
     def map[U](f: (T) => U): ArrayObject[U] = {

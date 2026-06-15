@@ -128,6 +128,15 @@ def doubleArrayShuffle(xs: DoubleArray, state: RandomState): DoubleArray = {
     shuffled
 }
 
+def doubleArrayRandomChoice(xs: DoubleArray, state: RandomState, default: Double): RandomChoiceResult[Double] = {
+    if xs.length() == 0 {
+        new RandomChoiceResult[Double](default, state)
+    } else {
+        val selected = randomIntInRange(state, 0, xs.length() - 1)
+        new RandomChoiceResult[Double](xs.get(selected.value()), selected.state())
+    }
+}
+
 def doubleArrayFold(xs: DoubleArray, initial: Double, combine: (Double, Double) => Double): Double = {
     var index = 0
     var accumulator = initial
@@ -187,6 +196,10 @@ class ArrayDouble(values: DoubleArray) {
         new ArrayDouble(doubleArrayShuffle(values, state))
     }
 
+    def randomChoice(state: RandomState, default: Double): RandomChoiceResult[Double] = {
+        doubleArrayRandomChoice(values, state, default)
+    }
+
     def fold(initial: Double, combine: (Double, Double) => Double): Double = {
         doubleArrayFold(values, initial, combine)
     }
@@ -210,6 +223,10 @@ def arrayDoubleFill(size: Int, value: Double): ArrayDouble = {
 
 def arrayDoubleShuffle(xs: ArrayDouble, state: RandomState): ArrayDouble = {
     xs.shuffle(state)
+}
+
+def arrayDoubleRandomChoice(xs: ArrayDouble, state: RandomState, default: Double): RandomChoiceResult[Double] = {
+    xs.randomChoice(state, default)
 }
 
 def arrayDoubleMap(xs: ArrayDouble, f: (Double) => Double): ArrayDouble = {

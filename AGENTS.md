@@ -134,7 +134,8 @@ Le pipeline implemente actuellement :
   wrappers `io.readTextFile`, `io.writeTextFile`, `io.appendTextFile` et
   `io.pathExists`;
 - module de bibliotheque standard `util` avec `randomSeed`, `randomInt`,
-  `randomIntRange`, `randomBool` et `randomSeedNow` pour une API pseudo-aléatoire
+  `randomIntRange`, `randomIntInRange`, `RandomChoiceResult`,
+  `randomBool`, `randomSeedNow` et `randomSeedTime` pour une API pseudo-aléatoire
   deterministe basée sur une seed;
 - module de bibliotheque standard `math` avec `absInt`, `absLong`, `absFloat`,
   `absDouble`, `absDiffInt`, `absDiffLong`, `absDiffFloat`,
@@ -331,6 +332,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter le module standard `util` avec `randomSeed`, `randomInt`,
   `randomIntRange` et `randomBool` pour une API pseudo-aléatoire
   deterministe.
+- [x] Etendre `util` avec `randomIntInRange`,
+  `RandomChoiceResult` et `randomSeedTime()`, puis exposer `randomChoice`
+  sur `ArrayInt`, `LongArray`, `FloatArray`, `DoubleArray`, `BoolArray` et
+  `ArrayObject[T]`.
 - [x] Ajouter `randomSeedNow()` au module standard `util`, basé sur une source de
   timestamp en runtime pour initialiser un générateur avec une seed temporelle.
 
@@ -521,6 +526,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   et le test `test_stdlib_util_random`.
 - `local` - Ajouter `randomSeedNow()` en `stdlib/util` via `timeSeed` pour une seed
   temporelle de départ.
+- `local` - Etendre `stdlib/util` avec `randomInt(min, max)`, `randomSeedTime()`,
+  `RandomChoiceResult` et `*Array.randomChoice(...)` avec fallback `default` sur
+  les tableaux `Int`, `Long`, `Float`, `Double`, `Bool` et `Object`.
 
 - `local` - Ajouter les tests Project Euler 10 imperatif et fonctionnel, avec
   `Int.toLong` et `RangeInt.foldLong`.

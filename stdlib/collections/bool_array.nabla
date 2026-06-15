@@ -192,6 +192,15 @@ def boolArrayShuffle(xs: BoolArray, state: RandomState): BoolArray = {
     shuffled
 }
 
+def boolArrayRandomChoice(xs: BoolArray, state: RandomState, default: Bool): RandomChoiceResult[Bool] = {
+    if xs.length() == 0 {
+        new RandomChoiceResult[Bool](default, state)
+    } else {
+        val selected = randomIntInRange(state, 0, xs.length() - 1)
+        new RandomChoiceResult[Bool](xs.get(selected.value()), selected.state())
+    }
+}
+
 def boolArrayFold(xs: BoolArray, initial: Bool, combine: (Bool, Bool) => Bool): Bool = {
     var index = 0
     var accumulator = initial
@@ -267,6 +276,10 @@ class ArrayBool(values: BoolArray) {
         new ArrayBool(boolArrayShuffle(values, state))
     }
 
+    def randomChoice(state: RandomState, default: Bool): RandomChoiceResult[Bool] = {
+        boolArrayRandomChoice(values, state, default)
+    }
+
     def fold(initial: Bool, combine: (Bool, Bool) => Bool): Bool = {
         boolArrayFold(values, initial, combine)
     }
@@ -314,6 +327,10 @@ def arrayBoolFilter(xs: ArrayBool, predicate: (Bool) => Bool): ArrayBool = {
 
 def arrayBoolShuffle(xs: ArrayBool, state: RandomState): ArrayBool = {
     xs.shuffle(state)
+}
+
+def arrayBoolRandomChoice(xs: ArrayBool, state: RandomState, default: Bool): RandomChoiceResult[Bool] = {
+    xs.randomChoice(state, default)
 }
 
 def arrayBoolFold(xs: ArrayBool, initial: Bool, combine: (Bool, Bool) => Bool): Bool = {

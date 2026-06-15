@@ -1,22 +1,56 @@
 import util
+import collections.int_array
+import collections.object_array
 
 def main(): Int = {
     val seed = randomSeed(123456789)
-    val nowSeedFirst = randomSeedNow()
-    val nowSeedSecond = randomSeedNow()
+    val seedWithAlias = randomSeedTime()
     val first = randomInt(seed)
     val second = randomInt(first.state())
+    val boundedWithRange = randomIntInRange(second.state(), 10, 12)
     val bounded = randomIntRange(second.state(), 10, 20)
     val coin = randomBool(bounded.state())
+    val boundedSingle = randomIntInRange(second.state(), 12, 20)
+    val equalRange = randomIntInRange(second.state(), 12, 12)
+    val boundedDegenerate = randomIntInRange(second.state(), 5, 5)
+
+    val sampleInts = intArrayFill(3, 0)
+    sampleInts.set(0, 10)
+    sampleInts.set(1, 20)
+    sampleInts.set(2, 30)
+    val sampleIntFacade = new ArrayInt(sampleInts)
+    val intChoiceTop = intArrayRandomChoice(sampleInts, randomSeed(1), -1)
+    val intChoiceFacade = arrayIntRandomChoice(sampleIntFacade, randomSeed(1), -1)
+    val intChoiceMethod = sampleIntFacade.randomChoice(randomSeed(1), -1)
+
+    val sampleObjects = objectArrayFill[String](3, "")
+    sampleObjects.set(0, "a")
+    sampleObjects.set(1, "b")
+    sampleObjects.set(2, "c")
+    val objectFallback = "fallback"
+    val objectChoiceTop = objectArrayRandomChoice[String](sampleObjects, randomSeed(11), objectFallback)
+    val objectChoiceMethod = sampleObjects.randomChoice(randomSeed(11), "fallback")
+    val objectChoiceEmpty = objectArrayRandomChoice[String](objectArrayFill[String](0, ""), randomSeed(11), objectFallback)
 
     val negativeSeed = randomInt(randomSeed(-1))
     val negativeBounded = randomIntRange(randomSeed(-1), 0, 4)
 
     if first.value() == 295234770 &&
        first.state().seed() == 295234770 &&
-       nowSeedFirst.seed() != nowSeedSecond.seed() &&
+       seedWithAlias.seed() >= 0 &&
        second.value() == 465300796 &&
+       boundedWithRange.value() == 11 &&
        bounded.value() == 20 &&
+       boundedSingle.value() == 16 &&
+       equalRange.value() == 12 &&
+       boundedDegenerate.value() == 5 &&
+       intChoiceTop.value() == 10 &&
+       intChoiceFacade.value() == 10 &&
+       intChoiceMethod.value() == 10 &&
+       objectChoiceTop.value() == "b" &&
+       objectChoiceMethod.value() == "b" &&
+       objectChoiceTop.state().seed() == objectChoiceMethod.state().seed() &&
+       objectChoiceEmpty.value() == "fallback" &&
        bounded.state().seed() == 1475666158 &&
        coin.value() &&
        negativeSeed.value() == 1043980747 &&

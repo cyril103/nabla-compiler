@@ -94,6 +94,15 @@ def intArrayShuffle(xs: IntArray, state: RandomState): IntArray = {
     shuffled
 }
 
+def intArrayRandomChoice(xs: IntArray, state: RandomState, default: Int): RandomChoiceResult[Int] = {
+    if xs.length() == 0 {
+        new RandomChoiceResult[Int](default, state)
+    } else {
+        val selected = randomIntInRange(state, 0, xs.length() - 1)
+        new RandomChoiceResult[Int](xs.get(selected.value()), selected.state())
+    }
+}
+
 class RangeInt(startValue: Int, untilValue: Int) {
     def size(): Int = {
         if untilValue > startValue {
@@ -927,6 +936,10 @@ class ArrayInt(values: IntArray) {
         new ArrayInt(intArrayShuffle(values, state))
     }
 
+    def randomChoice(state: RandomState, default: Int): RandomChoiceResult[Int] = {
+        intArrayRandomChoice(values, state, default)
+    }
+
     def concat(other: ArrayInt): ArrayInt = {
         new ArrayInt(intArrayConcat(values, other.raw()))
     }
@@ -1178,6 +1191,10 @@ def arrayIntRangeUntil(start: Int, until: Int): ArrayInt = {
 
 def arrayIntShuffle(xs: ArrayInt, state: RandomState): ArrayInt = {
     xs.shuffle(state)
+}
+
+def arrayIntRandomChoice(xs: ArrayInt, state: RandomState, default: Int): RandomChoiceResult[Int] = {
+    xs.randomChoice(state, default)
 }
 
 def intRangeUntil(start: Int, until: Int): RangeInt = {

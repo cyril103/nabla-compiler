@@ -128,6 +128,15 @@ def floatArrayShuffle(xs: FloatArray, state: RandomState): FloatArray = {
     shuffled
 }
 
+def floatArrayRandomChoice(xs: FloatArray, state: RandomState, default: Float): RandomChoiceResult[Float] = {
+    if xs.length() == 0 {
+        new RandomChoiceResult[Float](default, state)
+    } else {
+        val selected = randomIntInRange(state, 0, xs.length() - 1)
+        new RandomChoiceResult[Float](xs.get(selected.value()), selected.state())
+    }
+}
+
 def floatArrayFold(xs: FloatArray, initial: Float, combine: (Float, Float) => Float): Float = {
     var index = 0
     var accumulator = initial
@@ -187,6 +196,10 @@ class ArrayFloat(values: FloatArray) {
         new ArrayFloat(floatArrayShuffle(values, state))
     }
 
+    def randomChoice(state: RandomState, default: Float): RandomChoiceResult[Float] = {
+        floatArrayRandomChoice(values, state, default)
+    }
+
     def fold(initial: Float, combine: (Float, Float) => Float): Float = {
         floatArrayFold(values, initial, combine)
     }
@@ -210,6 +223,10 @@ def arrayFloatFill(size: Int, value: Float): ArrayFloat = {
 
 def arrayFloatShuffle(xs: ArrayFloat, state: RandomState): ArrayFloat = {
     xs.shuffle(state)
+}
+
+def arrayFloatRandomChoice(xs: ArrayFloat, state: RandomState, default: Float): RandomChoiceResult[Float] = {
+    xs.randomChoice(state, default)
 }
 
 def arrayFloatMap(xs: ArrayFloat, f: (Float) => Float): ArrayFloat = {
