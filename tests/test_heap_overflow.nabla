@@ -1,6 +1,4 @@
 def main(): Int = {
-    for 1400 {
-        42.toString()
-    }
+    val tooLarge = new IntArray(2000000)
     0
 }

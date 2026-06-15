@@ -232,7 +232,8 @@ Limites importantes :
   `Array[Option[String]]` et les tableaux d'objets utilisateur, tandis que les
   operations avancees restent a faire; la monomorphisation complete des classes
   generiques reste a durcir;
-- le tas est fixe et possede une verification de depassement, mais pas de
+- le runtime initialise un tas de 8 MiB par `mmap`, avec allocations bump
+  alignees sur 8 octets et verification de depassement, mais pas de
   ramasse-miettes;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
 - `match` est volontairement limite aux motifs litteraux et a la branche finale
@@ -432,6 +433,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 ### P2 - Runtime Et Objets
 
 - [x] Verifier les depassements du tas.
+- [x] Initialiser le tas runtime via `mmap` et aligner les allocations bump.
 - [ ] Definir et utiliser de vraies vtables ou retirer leur emplacement reserve.
 - [x] Extraire le runtime ASM commun du backend IR.
 - [x] Stabiliser la representation de `String`.
@@ -467,6 +469,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Remplacer le tas statique de 64 KiB par un tas runtime `mmap` de
+  8 MiB avec allocations alignees et un test positif au-dessus de 64 KiB.
 - `e28f460` - Ajouter un support Vim minimal pour `*.nabla`.
 - `f6bdacb` - Utiliser `match` dans les handlers de `examples/command_shell.nabla`.
 - `4eb09e3` - Simplifier le dispatch de `examples/command_shell.nabla`.
