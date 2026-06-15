@@ -1,0 +1,1 @@
+tests/test_error_unary_minus_not_numeric.nabla:2:5: semantic error: l'opérateur '-' attend une expression de type numérique

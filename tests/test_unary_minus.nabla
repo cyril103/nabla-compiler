@@ -1,0 +1,5 @@
+def main(): Int = {
+    val negative = -42
+    val offset = -(3 + 2)
+    100 - negative - offset
+}

@@ -966,6 +966,10 @@ std::unique_ptr<ASTNode> Parser::parseUnary() {
         Token op = consume(TokenType::BANG, "");
         return located(std::make_unique<NotNode>(parseUnary()), op.location);
     }
+    if (peek().type == TokenType::MINUS) {
+        Token op = consume(TokenType::MINUS, "");
+        return located(std::make_unique<UnaryMinusNode>(parseUnary()), op.location);
+    }
     return parsePostfix();
 }
 

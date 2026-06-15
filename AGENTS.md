@@ -102,6 +102,8 @@ Le pipeline implemente actuellement :
   branches ont des types differents et servent d'effets de bord;
 - operateurs booleens `&&`, `||` et `!`, avec court-circuit pour `&&` et
   `||`;
+- operateur unaire `-` pour les types numeriques (`Int`, `Long`, `Float`,
+  `Double`) ;
 - operateur reste de division `%` pour `Int` et `Long`;
 - collection native `IntArray` avec `length`, `get` et `set`;
 - collection native `LongArray` avec `length`, `get` et `set`;
@@ -326,6 +328,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `String.+` et `mkString` pour `ArrayInt`, `ArrayLong`,
   `ArrayBool` et `Array[String]`.
 - [x] Ajouter les operateurs booleens `&&`, `||` et `!`.
+- [x] Ajouter l'opérateur unaire `-` pour les types numériques.
 - [x] Ajouter le court-circuit pour `&&` et `||`.
 - [x] Ajouter le reste de division `%` pour `Int` et `Long`.
 - [x] Ajouter la conversion `Int.toLong`.
@@ -487,6 +490,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `40f2e17` - Ajouter les expressions `match` avec motifs litteraux et `_`.
 - `3419402` - Ajouter `deleteFile` / `io.deleteTextFile` et la commande `rm`.
 - `ea2a09e` - Ajouter les expressions `else if`.
+- `local` - Ajouter l'opérateur unaire `-` pour les types numériques et les
+  tests correspondants (`test_unary_minus`, `test_error_unary_minus_not_numeric`).
 - `6751bd6` - Montrer l'I/O fichier dans `examples/command_shell.nabla`.
 - `290fbab` - Lire les fichiers texte complets.
 - `17b184f` - Documenter les helpers d'I/O texte.

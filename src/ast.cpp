@@ -234,6 +234,27 @@ std::string NotNode::lowerToIR(IRBuilder& builder) const {
     return builder.emitBinary("==", loweredExpression, falseValue, "Bool");
 }
 
+UnaryMinusNode::UnaryMinusNode(std::unique_ptr<ASTNode> expr) : expression(std::move(expr)) {}
+
+std::string UnaryMinusNode::getType() {
+    return expression->getType();
+}
+
+void UnaryMinusNode::validateSemantics(CompilerContext& context) {
+    expression->validateSemantics(context);
+    const std::string operandType = expression->getType();
+    if (!isNumericType(operandType)) {
+        semanticError("l'opérateur '-' attend une expression de type numérique");
+    }
+}
+
+std::string UnaryMinusNode::lowerToIR(IRBuilder& builder) const {
+    std::string loweredExpression = expression->lowerToIR(builder);
+    const std::string operandType = expression->getType();
+    std::string zero = builder.emitConstant("0", operandType);
+    return builder.emitBinary("-", zero, loweredExpression, operandType);
+}
+
 LogicalNode::LogicalNode(
     std::string op, std::unique_ptr<ASTNode> leftExpr, std::unique_ptr<ASTNode> rightExpr)
     : operation(std::move(op)), left(std::move(leftExpr)), right(std::move(rightExpr)) {}
