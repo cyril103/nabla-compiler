@@ -1,0 +1,15 @@
+import collections.array
+
+
+def main(): Int = {
+    val words = arrayFill[String](3, "go")
+    val asMethod = words.mkString("|")
+    val asFacade = arrayMkString[String](words, ",")
+    val asConcreteFacade = objectArrayMkString(words, ",")
+
+    if asMethod == "go|go|go" && asFacade == "go,go,go" && asConcreteFacade == "go,go,go" {
+        42
+    } else {
+        1
+    }
+}

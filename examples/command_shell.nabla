@@ -3,7 +3,7 @@ import collections.array
 import strings
 
 def printHelp(): Unit = {
-    println("commands: add A B | repeat TEXT N | len TEXT | cat PATH | write PATH TEXT | append PATH TEXT | rm PATH | exists PATH | help | quit")
+    println("commands: add A B | repeat TEXT N | len TEXT | cat PATH | write PATH TEXT... | append PATH TEXT... | rm PATH | exists PATH | help | quit")
 }
 
 def commandName(parts: ArrayObject[String]): String = {
@@ -51,23 +51,39 @@ def runCat(parts: ArrayObject[String]): Unit = {
     }
 }
 
-def runWrite(parts: ArrayObject[String]): Unit = {
-    match parts.size() {
-        3 => {
-            val written = writeTextFile(parts.get(1), parts.get(2))
-            println("written: " + written.toString())
+def joinFrom(parts: ArrayObject[String], start: Int): String = {
+    var index = start
+    var result = ""
+    while (index < parts.size()) {
+        if index == start {
+            result = parts.get(index)
+        } else {
+            result = result + " " + parts.get(index)
         }
-        _ => println("usage: write PATH TEXT")
+        index = index + 1
+    }
+    result
+}
+
+def runWrite(parts: ArrayObject[String]): Unit = {
+    if parts.size() >= 3 {
+        val path = parts.get(1)
+        val text = joinFrom(parts, 2)
+        val written = writeTextFile(path, text)
+        println("written: " + written.toString())
+    } else {
+        println("usage: write PATH TEXT...")
     }
 }
 
 def runAppend(parts: ArrayObject[String]): Unit = {
-    match parts.size() {
-        3 => {
-            val written = appendTextFile(parts.get(1), parts.get(2))
-            println("appended: " + written.toString())
-        }
-        _ => println("usage: append PATH TEXT")
+    if parts.size() >= 3 {
+        val path = parts.get(1)
+        val text = joinFrom(parts, 2)
+        val written = appendTextFile(path, text)
+        println("appended: " + written.toString())
+    } else {
+        println("usage: append PATH TEXT...")
     }
 }
 

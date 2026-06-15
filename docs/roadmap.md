@@ -20,7 +20,8 @@ pour reprendre facilement apres une pause.
   - `deleteTextFile`
   - `pathExists`
 - Exemple principal `examples/command_shell.nabla` utilise maintenant `match`,
-  les commandes fichier, et sert de vitrine pour l'ergonomie du langage.
+  les commandes fichier, et sert de vitrine pour l'ergonomie du langage,
+  notamment `write` / `append` avec texte multi-mots.
 - Support Vim minimal disponible dans `editor/vim`.
 - Suite `make all-tests` verte au moment de cette mise a jour.
 
@@ -29,14 +30,14 @@ pour reprendre facilement apres une pause.
 1. Ameliorer l'ecriture de texte avec espaces dans `command_shell`.
    - Probleme actuel : `write PATH TEXT` et `append PATH TEXT` ne gerent qu'un
      token de texte.
-   - Piste : ajouter un helper stdlib pour reconstruire une sous-liste de mots,
-     par exemple `drop(2).mkString(" ")`, ou une fonction string dediee.
+   - Realise : `parts.drop(2).mkString(" ")` via `joinFrom` dans
+     `examples/command_shell.nabla`.
+   - Verifie avec `make test SRC=examples/command_shell.nabla`.
 
 2. Exposer/renforcer `mkString` pour les tableaux de strings.
-   - Verifier ce qui existe deja cote runtime/stdlib.
-   - Rendre l'API accessible depuis `ArrayObject[String]` ou la facade
-     generique si possible.
-   - Ajouter des tests sur `ArrayObject[String].mkString`.
+   - Realise : `objectArrayMkString` + alias compat `objectStringArrayMkString`
+     pour `ArrayObject[String]`.
+   - Verifie avec `make test SRC=tests/test_array_object_string_mk_string.nabla`.
 
 3. Ajouter de petites operations fichiers complementaires.
    - `renameFile(from, to): Bool`

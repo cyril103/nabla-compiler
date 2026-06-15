@@ -189,8 +189,8 @@ Le pipeline implemente actuellement :
   `all`, `any`, `size`, `isEmpty`, `nonEmpty`, `get`, `set`, `raw` et
   `shuffle`;
 - module de bibliotheque standard `collections.object_array` avec `ObjectArray[T]`,
-  `ArrayObject[T]`, `objectArrayShuffle` et
-  `ArrayObject[T].shuffle`.
+  `ArrayObject[T]`, `objectArrayShuffle`, `objectArrayMkString`,
+  `objectStringArrayMkString` (compatibilité) et `ArrayObject[T].shuffle`.
 - module de bibliotheque standard `collections.array` comme point d'entree
   commun pour les tableaux specialises, avec `arrayFill[T]`, `arrayMap[T]`,
   `arrayMap[T, U]`, `arrayFilter[T]`, `arrayFold[T]`, `arrayFold[T, U]`,
@@ -207,6 +207,8 @@ Le pipeline implemente actuellement :
   facade standard `ArrayObject[T]`, `objectArrayFill[T]`,
   `objectArrayMap[T, U]`, `objectArrayFilter[T]`, `objectArrayFold[T, U]`,
   `objectArrayFlatMap[T, U]` et `objectArrayForeach[T]`;
+- `examples/command_shell.nabla` accepte désormais `write` et `append` avec un
+  texte complet pouvant contenir des espaces.
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -516,6 +518,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter un support Vim minimal pour `*.nabla`.
 - [x] Ajouter des tests Project Euler progressifs pour guider les extensions du
   langage.
+- [x] Ajouter le support `write` / `append` multi-mots dans
+  `examples/command_shell.nabla`.
+- [x] Exposer `objectArrayMkString` et l'alias compat
+  `objectStringArrayMkString` pour `ArrayObject[String]`.
 
 ## Journal Des Jalons
 - `local` - Durcir la compilation backend : passage `std::system` -> `fork` +
@@ -546,6 +552,12 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `e28f460` - Ajouter un support Vim minimal pour `*.nabla`.
 - `f6bdacb` - Utiliser `match` dans les handlers de `examples/command_shell.nabla`.
 - `4eb09e3` - Simplifier le dispatch de `examples/command_shell.nabla`.
+- `local` - Ajouter le support `write` / `append` multi-mots dans
+  `examples/command_shell.nabla`.
+  - Tests: `make test SRC=examples/command_shell.nabla` via scénario manuel.
+- `local` - Exposer `objectArrayMkString` + alias compat
+  `objectStringArrayMkString` pour `ArrayObject[String]`.
+  - Tests: `make test SRC=tests/test_array_object_string_mk_string.nabla`.
 - `40f2e17` - Ajouter les expressions `match` avec motifs litteraux et `_`.
 - `3419402` - Ajouter `deleteFile` / `io.deleteTextFile` et la commande `rm`.
 - `ea2a09e` - Ajouter les expressions `else if`.
@@ -761,7 +773,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Ameliorer `examples/command_shell.nabla` pour permettre `write PATH TEXT` et
-`append PATH TEXT` avec un texte contenant des espaces. La piste privilegiee est
-d'exposer ou renforcer `mkString` / `drop` sur les tableaux de strings, puis
-d'utiliser `parts.drop(2).mkString(" ")` dans le shell.
+Poursuivre la suite outillée autour du runtime et du shell :
+
+- Ajouter des operations complementaires `renameFile(from, to)` et
+  `createDir(path)` sur l'I/O texte.
+- Raffiner la version V2 de `match` (garde par branche, motifs nommes si
+  pertinents).
+- Completer le travail de diagnostics autour du pattern matching.
