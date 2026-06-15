@@ -65,13 +65,23 @@ def randomIntInRange(state: RandomState, minimum: Int, maximum: Int): RandomIntR
 }
 
 def randomIntRange(state: RandomState, minimum: Int, maximum: Int): RandomIntResult = {
+    val lower = if maximum < minimum {
+        maximum
+    } else {
+        minimum
+    }
+    val upper = if maximum < minimum {
+        minimum
+    } else {
+        maximum
+    }
     val generated = randomInt(state)
-    val rangeSize = maximum - minimum + 1
+    val rangeSize = upper - lower + 1
     if rangeSize <= 0 {
-        new RandomIntResult(minimum, generated.state())
+        new RandomIntResult(lower, generated.state())
     } else {
         val offset = generated.value() % rangeSize
-        new RandomIntResult(minimum + offset, generated.state())
+        new RandomIntResult(lower + offset, generated.state())
     }
 }
 
