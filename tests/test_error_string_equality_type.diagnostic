@@ -1,0 +1,1 @@
+tests/test_error_string_equality_type.nabla:2:14: semantic error: la méthode String.== attend un argument de type String

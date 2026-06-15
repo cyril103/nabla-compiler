@@ -794,6 +794,11 @@ private:
             out << "    movzx rax, byte [rbx + rax]\n";
             out << "    shl rax, 1\n";
             out << "    or rax, 1\n";
+        } else if (className == "String" && (methodName == "==" || methodName == "!=")) {
+            out << "    call Runtime_stringEquals\n";
+            if (methodName == "!=") {
+                out << "    xor rax, 2\n";
+            }
         } else {
             out << "    call " << asmFunctionName(instruction.operation) << "\n";
         }

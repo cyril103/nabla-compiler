@@ -1,0 +1,11 @@
+def main(): Int = {
+    val same = "yes" == "yes"
+    val different = "yes" != "no"
+    val sameLengthDifferent = "yes" != "yet"
+
+    if same && different && sameLengthDifferent {
+        42
+    } else {
+        1
+    }
+}

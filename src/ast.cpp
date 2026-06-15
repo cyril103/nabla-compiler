@@ -394,6 +394,7 @@ std::string MethodCallNode::getType() {
         return receiverType;
     }
     if (receiverType == "String") {
+        if (isBoolBinaryMethod(methodName)) return "Bool";
         if (methodName == "length") return "Int";
         if (methodName == "charAt") return "Char";
     }
@@ -441,6 +442,18 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         semanticError("méthode inconnue: " + receiverType + "." + methodName);
     }
     if (receiverType == "String") {
+        if (isBoolBinaryMethod(methodName)) {
+            if (arguments.size() != 1) {
+                semanticError("la méthode String." + methodName + " attend un argument");
+            }
+            if (arguments[0]->getType() != "String") {
+                throw CompilerError(
+                    ErrorKind::Semantic, arguments[0]->getLocation(),
+                    "la méthode String." + methodName + " attend un argument de type String");
+            }
+            resolvedType = "Bool";
+            return;
+        }
         if (methodName == "length") {
             if (!arguments.empty()) semanticError("la méthode String.length n'accepte aucun argument");
             resolvedType = "Int";
@@ -612,6 +625,11 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         return builder.emitBinary(methodName, left, right, isComparisonMethod(methodName) ? "Bool" : receiverType);
     }
     if (receiverType == "String") {
+        if (isBoolBinaryMethod(methodName) && arguments.size() == 1) {
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            std::string loweredArgument = arguments[0]->lowerToIR(builder);
+            return builder.emitMethodCall("String", methodName, loweredReceiver, {loweredArgument}, "Bool");
+        }
         if (methodName == "length" && arguments.empty()) {
             std::string loweredReceiver = receiver->lowerToIR(builder);
             return builder.emitMethodCall("String", "length", loweredReceiver, {}, "Int");

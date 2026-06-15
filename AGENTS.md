@@ -105,7 +105,7 @@ Le pipeline implemente actuellement :
   `Float` / `Double` portes par l'IR typee, litteraux `Char` ASCII et
   litteraux `String`;
 - chaines `String` stockees comme buffers de bytes, avec `length` et
-  `charAt(index): Char`;
+  `charAt(index): Char`, `==` et `!=`;
 - affichage console de `String` via la primitive globale `print`;
 - lecture console de `String` via la primitive globale `readLine`;
 - premier module de bibliotheque standard `io` avec `println` et `input`;
@@ -280,6 +280,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Formaliser `Unit` pour les fonctions a effet et les boucles.
 - [x] Ajouter les booleens et typer les conditions en `Bool`.
 - [x] Ajouter `Char` ASCII, les litteraux de caractere et `String.charAt`.
+- [x] Ajouter `String.==` et `String.!=` byte-based.
 - [x] Ajouter les operateurs booleens `&&`, `||` et `!`.
 - [x] Ajouter le court-circuit pour `&&` et `||`.
 - [ ] Ajouter les champs et methodes herites si l'heritage est retenu.
@@ -410,6 +411,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 ## Journal Des Jalons
 
 - `local` - Ajouter `Char` ASCII et `String.charAt(index): Char`.
+- `local` - Ajouter `String.==` et `String.!=`.
 - `local` - Ajouter la primitive d'entree console `readLine(): String` et
   `io.input()`.
 - `local` - Ajouter la facade standard `arrayFold[T]` / `arrayFold[T, U]`.
