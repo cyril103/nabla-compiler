@@ -1,0 +1,9 @@
+class Child extends MissingParent() {
+    def answer(): Int = {
+        42
+    }
+}
+
+def main(): Int = {
+    (new Child()).answer()
+}

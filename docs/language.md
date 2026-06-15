@@ -223,6 +223,40 @@ def main(): Int = {
 
 `this` est disponible implicitement dans les methodes.
 
+## Héritage
+
+Une classe peut heriter d'autres classes via une clause `extends` optionnelle.
+
+```nabla
+class Entity(nameValue: String) {
+    def name(): String = {
+        nameValue
+    }
+}
+
+class Person(nameValue: String, ageValue: Int) extends Entity {
+    def age(): Int = {
+        ageValue
+    }
+}
+
+def main(): Int = {
+    val person = new Person("Ada", 19)
+    if person.name() == "Ada" {
+        person.age()
+    } else {
+        0
+    }
+}
+```
+
+La resolution des methodes suit une recherche dans la classe courante, puis dans
+les parents dans l'ordre de la liste `extends`. Plusieurs parents sont donc
+autorises (`mixin`) quand il n'y a pas de conflit de noms.
+
+Quand une classe n'indique pas de parent, une classe racine implicite `Any` est
+ajoutee pour uniformiser le modele objet et les futures extensions.
+
 ## Generiques
 
 Les fonctions et classes peuvent etre parametrees par type.

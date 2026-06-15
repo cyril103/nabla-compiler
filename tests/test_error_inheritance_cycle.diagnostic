@@ -1,0 +1,1 @@
+tests/test_error_inheritance_cycle.nabla:1:1: semantic error: cycle d'héritage détecté impliquant la classe 'A'

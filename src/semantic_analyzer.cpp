@@ -1,4 +1,5 @@
 #include "semantic_analyzer.hpp"
+
 SemanticAnalyzer::SemanticAnalyzer(CompilerContext& context) : context(context) {}
 
 void SemanticAnalyzer::analyze(ProgramNode& program) {
@@ -6,13 +7,17 @@ void SemanticAnalyzer::analyze(ProgramNode& program) {
     program.validateSemantics(context);
 }
 
-void SemanticAnalyzer::validateDeclaredTypes() const {
+void SemanticAnalyzer::validateDeclaredTypes() {
+    ensureAnyRootType();
+    validateParentTypes();
+
     for (const auto& [className, classInfo] : context.classes) {
         for (const auto& field : classInfo.fields) {
             if (!isKnownTypeInScope(field.type, classInfo.typeParameters)) {
                 throw CompilerError(
                     ErrorKind::Semantic, field.location,
-                    "type inconnu '" + field.type + "' pour le champ '" + className + "." + field.name + "'");
+                    "type inconnu '" + field.type + "' pour le champ '" +
+                    className + "." + field.name + "'");
             }
         }
         for (const auto& [methodName, signature] : classInfo.methods) {
@@ -22,7 +27,8 @@ void SemanticAnalyzer::validateDeclaredTypes() const {
             if (signature.parameters.size() > 5) {
                 throw CompilerError(
                     ErrorKind::Semantic, signature.location,
-                    "la méthode '" + className + "." + methodName + "' dépasse la limite de 5 paramètres");
+                    "la méthode '" + className + "." + methodName +
+                    "' dépasse la limite de 5 paramètres");
             }
             for (const auto& parameter : signature.parameters) {
                 if (!isKnownTypeInScope(parameter.type, methodTypeParameters)) {
@@ -66,13 +72,84 @@ void SemanticAnalyzer::validateDeclaredTypes() const {
                 functionName + "'");
         }
     }
+
+    validateInheritanceCycles();
+}
+
+void SemanticAnalyzer::ensureAnyRootType() {
+    if (context.classes.count("Any") > 0) return;
+    context.classes["Any"] = {};
+    context.classes["Any"].location = {"<built-in>", 1, 1};
+}
+
+void SemanticAnalyzer::validateParentTypes() const {
+    for (const auto& [className, classInfo] : context.classes) {
+        if (className == "Any") continue;
+        std::set<std::string> seenParents;
+        for (const auto& parentType : classInfo.parentTypes) {
+            auto parentParameterization = parameterizedTypeFromName(parentType);
+            const std::string parentName =
+                parentParameterization ? parentParameterization->first : parentType;
+            auto parentIt = context.classes.find(parentName);
+            if (parentIt == context.classes.end()) {
+                throw CompilerError(
+                    ErrorKind::Semantic, classInfo.location,
+                    "classe parente inconnue '" + parentName + "' pour la classe '" + className + "'");
+            }
+            const std::size_t expectedArguments = parentIt->second.typeParameters.size();
+            const std::size_t actualArguments = parentParameterization ? parentParameterization->second.size() : 0;
+            if (expectedArguments != actualArguments) {
+                throw CompilerError(
+                    ErrorKind::Semantic, classInfo.location,
+                    "la classe parente '" + parentName + "' de la classe '" + className +
+                        "' attend " + std::to_string(expectedArguments) + " argument(s) de type");
+            }
+            if (!seenParents.insert(parentType).second) {
+                throw CompilerError(
+                    ErrorKind::Semantic, classInfo.location,
+                    "la classe '" + className + "' déclare le parent '" + parentType + "' en doublon");
+            }
+        }
+    }
+}
+
+bool SemanticAnalyzer::hasInheritanceCycle(
+    const std::string& className, std::set<std::string>& visiting,
+    std::set<std::string>& done) const {
+    if (done.count(className)) return false;
+    if (visiting.count(className)) return true;
+
+    auto classIt = context.classes.find(className);
+    if (classIt == context.classes.end()) return false;
+
+    visiting.insert(className);
+    for (const auto& parentType : classIt->second.parentTypes) {
+        const std::string parentBaseName = genericBaseName(parentType);
+        if (hasInheritanceCycle(parentBaseName, visiting, done)) return true;
+    }
+    visiting.erase(className);
+    done.insert(className);
+    return false;
+}
+
+void SemanticAnalyzer::validateInheritanceCycles() const {
+    std::set<std::string> visiting;
+    std::set<std::string> done;
+    for (const auto& [className, classInfo] : context.classes) {
+        if (className == "Any") continue;
+        if (hasInheritanceCycle(className, visiting, done)) {
+            throw CompilerError(
+                ErrorKind::Semantic, classInfo.location,
+                "cycle d'héritage détecté impliquant la classe '" + className + "'");
+        }
+    }
 }
 
 bool SemanticAnalyzer::isKnownType(const std::string& type) const {
-    if (type == "Int" || type == "Long" || type == "Float" || type == "Double" || type == "Bool" ||
-        type == "Char" || type == "String" || type == "Unit" || type == "IntArray" || type == "LongArray" ||
-        type == "FloatArray" || type == "DoubleArray" || type == "BoolArray" ||
-        isFunctionTypeName(type)) {
+    if (type == "Int" || type == "Long" || type == "Float" || type == "Double" ||
+        type == "Bool" || type == "Char" || type == "String" || type == "Unit" ||
+        type == "Any" || type == "IntArray" || type == "LongArray" || type == "FloatArray" ||
+        type == "DoubleArray" || type == "BoolArray" || isFunctionTypeName(type)) {
         return true;
     }
     auto parameterizedType = parameterizedTypeFromName(type);

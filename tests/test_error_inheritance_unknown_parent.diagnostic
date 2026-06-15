@@ -1,0 +1,1 @@
+tests/test_error_inheritance_unknown_parent.nabla:1:1: semantic error: classe parente inconnue 'MissingParent' pour la classe 'Child'

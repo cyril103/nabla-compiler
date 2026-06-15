@@ -214,6 +214,8 @@ Le pipeline implemente actuellement :
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
   affectations;
+- support de l'héritage de méthodes via `extends` (mono et multiple) avec
+  validation des parents et détection de cycles;
 - diagnostics uniformes avec fichier, ligne, colonne et phase du compilateur;
 - IR textuelle pour les fonctions globales, entiers, variables, affectations,
   operations binaires, appels de fonctions globales, `if`, `match`, `while`,
@@ -347,6 +349,14 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `ArrayObject[T]`.
 - [x] Ajouter `randomSeedNow()` au module standard `util`, basé sur une source de
   timestamp en runtime pour initialiser un générateur avec une seed temporelle.
+
+### P2 - Héritage Et Mixins
+
+- [x] Ajouter la syntaxe `class X extends A, B`.
+- [x] Résoudre les méthodes héritées dans la hiérarchie (`resolveClassMethodInHierarchy`).
+- [x] Valider l'existence et l'arité des parents, et détecter les cycles.
+- [x] Ajouter la classe racine implicite `Any` pour les classes sans parent explicite.
+- [ ] Ajouter la résolution de conflits de membres dupliqués en cas de multi-héritage.
 
 - [ ] Formaliser `Int`, `Bool`, `Char`, `String`, `IntArray`, les types fonction canoniques et
   les types de classes.
@@ -530,6 +540,12 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `objectStringArrayMkString` pour `ArrayObject[String]`.
 
 ## Journal Des Jalons
+- `local` - Ajouter le support de l'héritage (`extends`) sur les classes: parsing
+  d'une liste de parents, résolution hiérarchique des méthodes, validation des
+  parents inconnus/argumentation et détection de cycles, classe racine `Any`.
+  - Tests: `test_inheritance_simple`, `test_inheritance_multiple`,
+    `test_error_inheritance_unknown_parent`, `test_error_inheritance_cycle`.
+
 - `local` - Durcir la compilation backend : passage `std::system` -> `fork` +
   `execvp` dans `main.cpp`, ajout de contrôle division par zéro en codegen `/` et
   `%`, et contrôles d'overflow/limites runtime pour `parseInt` + parsing +/-.

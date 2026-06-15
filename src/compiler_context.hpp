@@ -38,6 +38,7 @@ struct CompilerContext {
     struct ClassInfo {
         std::vector<FieldInfo> fields;
         std::map<std::string, FunctionSignature> methods;
+        std::vector<std::string> parentTypes;
         std::vector<std::string> typeParameters;
         SourceLocation location;
     };
@@ -368,6 +369,45 @@ inline std::string genericBaseName(const std::string& type) {
     return parameterizedType->first;
 }
 
+struct ClassMethodLookupResult {
+    const CompilerContext::FunctionSignature* signature = nullptr;
+    std::string ownerClassName;
+    std::map<std::string, std::string> classSubstitution;
+};
+
+inline std::map<std::string, std::string> classTypeTemplateSubstitution(
+    const CompilerContext& context, const std::string& classType) {
+    auto parameterizedType = parameterizedTypeFromName(classType);
+    std::string className = classType;
+    std::vector<std::string> arguments;
+    if (parameterizedType) {
+        className = parameterizedType->first;
+        arguments = parameterizedType->second;
+    }
+    auto classIt = context.classes.find(className);
+    if (classIt == context.classes.end()) return {};
+
+    const auto& typeParameters = classIt->second.typeParameters;
+    if (typeParameters.empty()) return {};
+
+    if (arguments.empty()) {
+        std::map<std::string, std::string> substitution;
+        for (const auto& typeParameter : typeParameters) {
+            substitution[typeParameter] = typeParameter;
+        }
+        return substitution;
+    }
+    if (typeParameters.size() != arguments.size()) {
+        return {};
+    }
+
+    std::map<std::string, std::string> substitution;
+    for (size_t i = 0; i < typeParameters.size(); ++i) {
+        substitution[typeParameters[i]] = arguments[i];
+    }
+    return substitution;
+}
+
 inline bool isTypeParameterName(const std::string& type, const std::vector<std::string>& typeParameters) {
     for (const auto& typeParameter : typeParameters) {
         if (type == typeParameter) return true;
@@ -433,6 +473,42 @@ inline std::string substituteType(
     }
 
     return type;
+}
+
+inline std::optional<ClassMethodLookupResult> resolveClassMethodInHierarchy(
+    const CompilerContext& context, const std::string& receiverType,
+    const std::string& methodName, std::set<std::string> visited) {
+    const std::string classLookupName = genericBaseName(receiverType);
+    if (visited.count(classLookupName)) return std::nullopt;
+    visited.insert(classLookupName);
+
+    auto classIt = context.classes.find(classLookupName);
+    if (classIt == context.classes.end()) return std::nullopt;
+
+    std::map<std::string, std::string> classSubstitution;
+    if (auto genericSubstitution = genericSubstitutionFor(context, receiverType)) {
+        classSubstitution = *genericSubstitution;
+    }
+
+    auto methodIt = classIt->second.methods.find(methodName);
+    if (methodIt != classIt->second.methods.end()) {
+        return ClassMethodLookupResult{
+            &methodIt->second, classLookupName, classSubstitution};
+    }
+
+    for (const auto& parentType : classIt->second.parentTypes) {
+        const std::string concreteParentType = substituteType(parentType, classSubstitution);
+        if (auto method = resolveClassMethodInHierarchy(context, concreteParentType, methodName, visited)) {
+            return method;
+        }
+    }
+    return std::nullopt;
+}
+
+inline std::optional<ClassMethodLookupResult> resolveClassMethodInHierarchy(
+    const CompilerContext& context, const std::string& receiverType,
+    const std::string& methodName) {
+    return resolveClassMethodInHierarchy(context, receiverType, methodName, {});
 }
 
 inline std::optional<std::string> resolveActiveStdlibTypeAlias(

@@ -1,0 +1,12 @@
+class Parent() {
+    def answer(): Int = {
+        42
+    }
+}
+
+class Child extends Parent() {
+}
+
+def main(): Int = {
+    (new Child()).answer()
+}

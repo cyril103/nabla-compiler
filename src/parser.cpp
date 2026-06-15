@@ -129,6 +129,19 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
     }
     context.classes[className].typeParameters = typeParameters;
     context.classes[className].location = classToken.location;
+    if (peek().type == TokenType::KW_EXTENDS) {
+        consume(TokenType::KW_EXTENDS, "");
+        while (true) {
+            auto [parentType, parentTypeLocation] = parseType("Type de parent attendu");
+            (void) parentTypeLocation;
+            context.classes[className].parentTypes.push_back(parentType);
+            if (peek().type == TokenType::COMMA) {
+                consume(TokenType::COMMA, "");
+            } else {
+                break;
+            }
+        }
+    }
     currentParsingClass = className;
     auto previousTypeParameters = currentFunctionTypeParameters;
     currentFunctionTypeParameters = typeParameters;
@@ -909,7 +922,6 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
         auto expectedArgumentTypes = expectedArgumentTypesForMethodCall(receiverType, method);
         std::string initialReturnType = "Int";
         std::string initialOwnerType = genericBaseName(receiverType);
-        auto classIt = context.classes.find(initialOwnerType);
         const CompilerContext::FunctionSignature* methodSignature = nullptr;
         std::optional<CompilerContext::FunctionSignature> stdlibMethodSignature;
         std::map<std::string, std::string> classSubstitution;
@@ -923,23 +935,18 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
                 expectedArgumentTypes.push_back(parameter.type);
             }
         }
-        if (classIt != context.classes.end()) {
-            auto methodIt = classIt->second.methods.find(method);
-            if (methodIt != classIt->second.methods.end()) {
-                methodSignature = &methodIt->second;
-                std::map<std::string, std::string> substitution;
-                if (auto genericSubstitution = genericSubstitutionFor(context, receiverType)) {
-                    substitution = *genericSubstitution;
-                    classSubstitution = *genericSubstitution;
-                }
-                if (auto methodSubstitution = genericFunctionSubstitutionFor(methodIt->second, typeArguments)) {
-                    substitution.insert(methodSubstitution->begin(), methodSubstitution->end());
-                }
-                initialReturnType = substituteType(methodIt->second.returnType, substitution);
-                expectedArgumentTypes.clear();
-                for (const auto& parameter : methodIt->second.parameters) {
-                    expectedArgumentTypes.push_back(substituteType(parameter.type, substitution));
-                }
+        if (auto methodLookup = resolveClassMethodInHierarchy(context, receiverType, method)) {
+            methodSignature = methodLookup->signature;
+            initialOwnerType = methodLookup->ownerClassName;
+            classSubstitution = methodLookup->classSubstitution;
+            std::map<std::string, std::string> substitution = methodLookup->classSubstitution;
+            if (auto methodSubstitution = genericFunctionSubstitutionFor(*methodLookup->signature, typeArguments)) {
+                substitution.insert(methodSubstitution->begin(), methodSubstitution->end());
+            }
+            initialReturnType = substituteType(methodLookup->signature->returnType, substitution);
+            expectedArgumentTypes.clear();
+            for (const auto& parameter : methodLookup->signature->parameters) {
+                expectedArgumentTypes.push_back(substituteType(parameter.type, substitution));
             }
         }
         consume(TokenType::LPAREN, "");
@@ -1303,8 +1310,6 @@ std::vector<std::string> Parser::expectedArgumentTypesForMethodCall(
         if (methodName == "set") return {"Int", parameterizedType->second[0]};
         return {};
     }
-    const std::string classLookupName = genericBaseName(receiverType);
-    auto classIt = context.classes.find(classLookupName);
     if (auto signature = stdlibTypeAliasMethodSignature(receiverType, methodName)) {
         std::vector<std::string> expectedTypes;
         for (const auto& parameter : signature->parameters) {
@@ -1312,15 +1317,12 @@ std::vector<std::string> Parser::expectedArgumentTypesForMethodCall(
         }
         return expectedTypes;
     }
-    if (classIt == context.classes.end()) return {};
-    auto methodIt = classIt->second.methods.find(methodName);
-    if (methodIt == classIt->second.methods.end()) return {};
-    std::map<std::string, std::string> substitution;
-    if (auto genericSubstitution = genericSubstitutionFor(context, receiverType)) {
-        substitution = *genericSubstitution;
-    }
+    auto methodLookup = resolveClassMethodInHierarchy(context, receiverType, methodName);
+    if (!methodLookup || !methodLookup->signature) return {};
+    const auto& methodSignature = *methodLookup->signature;
+    std::map<std::string, std::string> substitution = methodLookup->classSubstitution;
     std::vector<std::string> expectedTypes;
-    for (const auto& parameter : methodIt->second.parameters) {
+    for (const auto& parameter : methodSignature.parameters) {
         expectedTypes.push_back(substituteType(parameter.type, substitution));
     }
     return expectedTypes;

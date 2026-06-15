@@ -711,28 +711,29 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
     if (classIt == context.classes.end()) {
         semanticError("type receveur inconnu pour l'appel de méthode: " + receiverType);
     }
-    std::map<std::string, std::string> substitution;
-    if (auto genericSubstitution = genericSubstitutionFor(context, receiverType)) {
-        substitution = *genericSubstitution;
-    } else if (!classIt->second.typeParameters.empty()) {
+    if (!genericSubstitutionFor(context, receiverType) && !classIt->second.typeParameters.empty()) {
         semanticError(
             "classe générique '" + classLookupName + "' utilisée sans arguments de type");
     }
-    auto methodIt = classIt->second.methods.find(methodName);
-    if (methodIt == classIt->second.methods.end()) {
+
+    auto methodLookup = resolveClassMethodInHierarchy(context, receiverType, methodName);
+    if (!methodLookup || !methodLookup->signature) {
         semanticError("méthode inconnue: " + receiverType + "." + methodName);
     }
-    if (methodIt->second.typeParameters.empty()) {
+    auto& methodSignature = *methodLookup->signature;
+
+    std::map<std::string, std::string> substitution = methodLookup->classSubstitution;
+    if (methodSignature.typeParameters.empty()) {
         if (!typeArguments.empty()) {
             semanticError("la méthode '" + receiverType + "." + methodName + "' n'accepte pas d'arguments de type");
         }
         resolvedTypeArguments.clear();
     } else {
-        auto methodSubstitution = genericFunctionSubstitutionFor(methodIt->second, typeArguments);
+        auto methodSubstitution = genericFunctionSubstitutionFor(methodSignature, typeArguments);
         if (!methodSubstitution && typeArguments.empty()) {
             std::vector<std::string> actualArgumentTypes;
             for (const auto& argument : arguments) actualArgumentTypes.push_back(argument->getType());
-            CompilerContext::FunctionSignature substitutedSignature = methodIt->second;
+            CompilerContext::FunctionSignature substitutedSignature = methodSignature;
             for (auto& parameter : substitutedSignature.parameters) {
                 parameter.type = substituteType(parameter.type, substitution);
             }
@@ -748,15 +749,15 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             }
             semanticError(
                 "la méthode générique '" + receiverType + "." + methodName + "' attend " +
-                std::to_string(methodIt->second.typeParameters.size()) + " argument(s) de type");
+                std::to_string(methodSignature.typeParameters.size()) + " argument(s) de type");
         }
         substitution.insert(methodSubstitution->begin(), methodSubstitution->end());
-        resolvedTypeArguments = orderedTypeArguments(methodIt->second.typeParameters, *methodSubstitution);
+        resolvedTypeArguments = orderedTypeArguments(methodSignature.typeParameters, *methodSubstitution);
     }
-    auto parameters = substituteParameters(methodIt->second.parameters, substitution);
+    auto parameters = substituteParameters(methodSignature.parameters, substitution);
     validateArguments(receiverType + "." + methodName, arguments, parameters, location);
-    resolvedType = substituteType(methodIt->second.returnType, substitution);
-    resolvedOwnerType = classLookupName;
+    resolvedType = substituteType(methodSignature.returnType, substitution);
+    resolvedOwnerType = methodLookup->ownerClassName;
 }
 
 std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
@@ -988,13 +989,25 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         ? methodName
         : formatParameterizedType(methodName, concreteTypeArguments);
     const std::string concreteReturnType = builder.substituteActiveType(resolvedType);
-    if ((!concreteTypeArguments.empty() || concreteReceiverType != resolvedOwnerType) && !resolvedOwnerType.empty()) {
+    const bool receiverBaseChanged = !resolvedOwnerType.empty() &&
+        genericBaseName(concreteReceiverType) != genericBaseName(resolvedOwnerType);
+    const bool shouldRegisterMethodSpecialization =
+        !resolvedOwnerType.empty() && ( !concreteTypeArguments.empty() || concreteReceiverType != resolvedOwnerType );
+    const bool shouldSpecializeAsConcreteClass =
+        shouldRegisterMethodSpecialization && !receiverBaseChanged;
+    if (shouldRegisterMethodSpecialization) {
+        const std::string concreteClassName =
+            shouldSpecializeAsConcreteClass ? concreteReceiverType : resolvedOwnerType;
         builder.registerMethodSpecialization(
-            concreteReceiverType, resolvedOwnerType, methodName, concreteTypeArguments,
+            concreteClassName, resolvedOwnerType, methodName, concreteTypeArguments,
             argumentTypes, concreteReturnType);
     }
+    const std::string methodOwnerType =
+        shouldSpecializeAsConcreteClass || resolvedOwnerType.empty()
+            ? concreteReceiverType
+            : resolvedOwnerType;
     return builder.emitMethodCall(
-        concreteReceiverType,
+        methodOwnerType,
         concreteMethodName, loweredReceiver, loweredArguments, concreteReturnType);
 }
 
