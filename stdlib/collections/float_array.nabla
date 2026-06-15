@@ -30,6 +30,44 @@ def floatArrayMapObject[U](xs: FloatArray, f: (Float) => U): ArrayObject[U] = {
     new ArrayObject[U](mapped)
 }
 
+def floatArrayFilter(xs: FloatArray, predicate: (Float) => Bool): FloatArray = {
+    var index = 0
+    var kept = 0
+    while (index < xs.length()) {
+        if predicate(xs.get(index)) {
+            kept = kept + 1
+        } else {
+            kept
+        }
+        index = index + 1
+    }
+
+    val filtered = new FloatArray(kept)
+    index = 0
+    var output = 0
+    while (index < xs.length()) {
+        val value = xs.get(index)
+        if predicate(value) {
+            filtered.set(output, value)
+            output = output + 1
+        } else {
+            output
+        }
+        index = index + 1
+    }
+    filtered
+}
+
+def floatArrayFold(xs: FloatArray, initial: Float, combine: (Float, Float) => Float): Float = {
+    var index = 0
+    var accumulator = initial
+    while (index < xs.length()) {
+        accumulator = combine(accumulator, xs.get(index))
+        index = index + 1
+    }
+    accumulator
+}
+
 class ArrayFloat(values: FloatArray) {
     def length(): Int = {
         values.length()
@@ -59,6 +97,14 @@ class ArrayFloat(values: FloatArray) {
         new ArrayFloat(floatArrayMap(values, f))
     }
 
+    def filter(predicate: (Float) => Bool): ArrayFloat = {
+        new ArrayFloat(floatArrayFilter(values, predicate))
+    }
+
+    def fold(initial: Float, combine: (Float, Float) => Float): Float = {
+        floatArrayFold(values, initial, combine)
+    }
+
     def foreach(f: (Float) => Unit): Unit = {
         var index = 0
         while (index < values.length()) {
@@ -82,6 +128,14 @@ def arrayFloatMap(xs: ArrayFloat, f: (Float) => Float): ArrayFloat = {
 
 def arrayFloatMapObject[T, U](xs: ArrayFloat, f: (Float) => U): ArrayObject[U] = {
     floatArrayMapObject[U](xs.raw(), f)
+}
+
+def arrayFloatFilter(xs: ArrayFloat, predicate: (Float) => Bool): ArrayFloat = {
+    xs.filter(predicate)
+}
+
+def arrayFloatFold(xs: ArrayFloat, initial: Float, combine: (Float, Float) => Float): Float = {
+    xs.fold(initial, combine)
 }
 
 def arrayFloatForeach(xs: ArrayFloat, f: (Float) => Unit): Unit = {

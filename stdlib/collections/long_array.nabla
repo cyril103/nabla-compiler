@@ -40,6 +40,44 @@ def longArrayMapObject[U](xs: LongArray, f: (Long) => U): ArrayObject[U] = {
     new ArrayObject[U](mapped)
 }
 
+def longArrayFilter(xs: LongArray, predicate: (Long) => Bool): LongArray = {
+    var index = 0
+    var kept = 0
+    while (index < xs.length()) {
+        if predicate(xs.get(index)) {
+            kept = kept + 1
+        } else {
+            kept
+        }
+        index = index + 1
+    }
+
+    val filtered = new LongArray(kept)
+    index = 0
+    var output = 0
+    while (index < xs.length()) {
+        val value = xs.get(index)
+        if predicate(value) {
+            filtered.set(output, value)
+            output = output + 1
+        } else {
+            output
+        }
+        index = index + 1
+    }
+    filtered
+}
+
+def longArrayFold(xs: LongArray, initial: Long, combine: (Long, Long) => Long): Long = {
+    var index = 0
+    var accumulator = initial
+    while (index < xs.length()) {
+        accumulator = combine(accumulator, xs.get(index))
+        index = index + 1
+    }
+    accumulator
+}
+
 class ArrayLong(values: LongArray) {
     def length(): Int = {
         values.length()
@@ -73,6 +111,14 @@ class ArrayLong(values: LongArray) {
         new ArrayLong(longArrayMap(values, f))
     }
 
+    def filter(predicate: (Long) => Bool): ArrayLong = {
+        new ArrayLong(longArrayFilter(values, predicate))
+    }
+
+    def fold(initial: Long, combine: (Long, Long) => Long): Long = {
+        longArrayFold(values, initial, combine)
+    }
+
     def foreach(f: (Long) => Unit): Unit = {
         var index = 0
         while (index < values.length()) {
@@ -96,6 +142,14 @@ def arrayLongMap(xs: ArrayLong, f: (Long) => Long): ArrayLong = {
 
 def arrayLongMapObject[T, U](xs: ArrayLong, f: (Long) => U): ArrayObject[U] = {
     longArrayMapObject[U](xs.raw(), f)
+}
+
+def arrayLongFilter(xs: ArrayLong, predicate: (Long) => Bool): ArrayLong = {
+    xs.filter(predicate)
+}
+
+def arrayLongFold(xs: ArrayLong, initial: Long, combine: (Long, Long) => Long): Long = {
+    xs.fold(initial, combine)
 }
 
 def arrayLongForeach(xs: ArrayLong, f: (Long) => Unit): Unit = {

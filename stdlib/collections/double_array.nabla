@@ -30,6 +30,44 @@ def doubleArrayMapObject[U](xs: DoubleArray, f: (Double) => U): ArrayObject[U] =
     new ArrayObject[U](mapped)
 }
 
+def doubleArrayFilter(xs: DoubleArray, predicate: (Double) => Bool): DoubleArray = {
+    var index = 0
+    var kept = 0
+    while (index < xs.length()) {
+        if predicate(xs.get(index)) {
+            kept = kept + 1
+        } else {
+            kept
+        }
+        index = index + 1
+    }
+
+    val filtered = new DoubleArray(kept)
+    index = 0
+    var output = 0
+    while (index < xs.length()) {
+        val value = xs.get(index)
+        if predicate(value) {
+            filtered.set(output, value)
+            output = output + 1
+        } else {
+            output
+        }
+        index = index + 1
+    }
+    filtered
+}
+
+def doubleArrayFold(xs: DoubleArray, initial: Double, combine: (Double, Double) => Double): Double = {
+    var index = 0
+    var accumulator = initial
+    while (index < xs.length()) {
+        accumulator = combine(accumulator, xs.get(index))
+        index = index + 1
+    }
+    accumulator
+}
+
 class ArrayDouble(values: DoubleArray) {
     def length(): Int = {
         values.length()
@@ -59,6 +97,14 @@ class ArrayDouble(values: DoubleArray) {
         new ArrayDouble(doubleArrayMap(values, f))
     }
 
+    def filter(predicate: (Double) => Bool): ArrayDouble = {
+        new ArrayDouble(doubleArrayFilter(values, predicate))
+    }
+
+    def fold(initial: Double, combine: (Double, Double) => Double): Double = {
+        doubleArrayFold(values, initial, combine)
+    }
+
     def foreach(f: (Double) => Unit): Unit = {
         var index = 0
         while (index < values.length()) {
@@ -82,6 +128,14 @@ def arrayDoubleMap(xs: ArrayDouble, f: (Double) => Double): ArrayDouble = {
 
 def arrayDoubleMapObject[T, U](xs: ArrayDouble, f: (Double) => U): ArrayObject[U] = {
     doubleArrayMapObject[U](xs.raw(), f)
+}
+
+def arrayDoubleFilter(xs: ArrayDouble, predicate: (Double) => Bool): ArrayDouble = {
+    xs.filter(predicate)
+}
+
+def arrayDoubleFold(xs: ArrayDouble, initial: Double, combine: (Double, Double) => Double): Double = {
+    xs.fold(initial, combine)
 }
 
 def arrayDoubleForeach(xs: ArrayDouble, f: (Double) => Unit): Unit = {

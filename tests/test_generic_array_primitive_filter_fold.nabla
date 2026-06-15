@@ -1,0 +1,64 @@
+import collections.array
+
+def keepLong(value: Long): Bool = {
+    value > 2L
+}
+
+def addLong(left: Long, right: Long): Long = {
+    left + right
+}
+
+def keepFloat(value: Float): Bool = {
+    value > 1.0F
+}
+
+def addFloat(left: Float, right: Float): Float = {
+    left + right
+}
+
+def keepDouble(value: Double): Bool = {
+    value > 1.0
+}
+
+def addDouble(left: Double, right: Double): Double = {
+    left + right
+}
+
+def keepBool(value: Bool): Bool = {
+    value
+}
+
+def both(left: Bool, right: Bool): Bool = {
+    left && right
+}
+
+def main(): Int = {
+    val longs = arrayFill[Long](3, 4L)
+    val keptLongs = longs.filter(keepLong)
+    val longTotal = arrayLongFold(keptLongs, 1L, addLong)
+
+    val floats = arrayFill[Float](2, 1.5F)
+    val keptFloats = arrayFloatFilter(floats, keepFloat)
+    val floatTotal = keptFloats.fold(1.0F, addFloat)
+
+    val doubles = arrayFill[Double](2, 2.5)
+    val keptDoubles = doubles.filter(keepDouble)
+    val doubleTotal = arrayDoubleFold(keptDoubles, 1.0, addDouble)
+
+    val bools = arrayFill[Bool](3, true)
+    val keptBools = arrayBoolFilter(bools, keepBool)
+    val boolTotal = keptBools.fold(true, both)
+
+    if keptLongs.size() == 3 &&
+       longTotal == 13L &&
+       keptFloats.size() == 2 &&
+       floatTotal > 3.9F &&
+       keptDoubles.size() == 2 &&
+       doubleTotal > 5.9 &&
+       keptBools.countTrue() == 3 &&
+       boolTotal {
+        42
+    } else {
+        1
+    }
+}

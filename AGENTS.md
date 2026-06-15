@@ -181,10 +181,11 @@ Limites importantes :
   mapper une facade primitive vers `ArrayObject[U]`; `Array[T]` est valide dans les
   signatures generiques utilisateur et se specialise correctement quand `T`
   devient concret, avec une premiere surface de methodes communes; `map[U]`
-  existe sur `ArrayObject[T]`; `filter` existe sur `ArrayInt` et
-  `ArrayObject[T]`, tandis que les operations non communes comme `sum`,
-  `countTrue` restent specialisees ou a ajouter; `fold[U]` et `flatMap[U]`
-  existent sur `ArrayObject[T]`;
+  existe sur `ArrayObject[T]`; `filter` existe sur les facades primitives et
+  `ArrayObject[T]`, tandis que les operations non communes comme `sum` ou
+  `countTrue` restent specialisees; `fold` existe sur les facades primitives
+  avec accumulateur du meme type, et `fold[U]` / `flatMap[U]` existent sur
+  `ArrayObject[T]`;
   l'objectif retenu est de conserver les tableaux primitifs specialises et
   d'ajouter un fallback generique `ObjectArray[T]` / `ArrayObject[T]` pour les
   autres types; le premier fallback couvre `String`, `Array[Array[Int]]`,
@@ -348,6 +349,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `ArrayObject[T].flatMap[U]`.
 - [x] Etendre `ArrayObject[T].map` en `map[U]`.
 - [x] Ajouter `arrayMap[Primitive, U]` vers `ArrayObject[U]`.
+- [x] Ajouter `filter` et `fold` sur `ArrayLong`, `ArrayFloat`,
+  `ArrayDouble` et `ArrayBool`.
 - [x] Etendre les aliases standard pour choisir automatiquement :
   `Array[Int] -> ArrayInt`, `Array[Long] -> ArrayLong`,
   `Array[Float] -> ArrayFloat`, `Array[Double] -> ArrayDouble`,
@@ -381,6 +384,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Ajouter `filter` et `fold` aux facades primitives `Long`, `Float`,
+  `Double` et `Bool`.
 - `local` - Ajouter les ponts `arrayMap[Primitive, U]` vers `ArrayObject[U]`
   pour `Int`, `Long`, `Float`, `Double` et `Bool`.
 - `local` - Etendre `ArrayObject[T].map` en `map[U]` et propager les

@@ -72,6 +72,44 @@ def boolArrayMapObject[U](xs: BoolArray, f: (Bool) => U): ArrayObject[U] = {
     new ArrayObject[U](mapped)
 }
 
+def boolArrayFilter(xs: BoolArray, predicate: (Bool) => Bool): BoolArray = {
+    var index = 0
+    var kept = 0
+    while (index < xs.length()) {
+        if predicate(xs.get(index)) {
+            kept = kept + 1
+        } else {
+            kept
+        }
+        index = index + 1
+    }
+
+    val filtered = new BoolArray(kept)
+    index = 0
+    var output = 0
+    while (index < xs.length()) {
+        val value = xs.get(index)
+        if predicate(value) {
+            filtered.set(output, value)
+            output = output + 1
+        } else {
+            output
+        }
+        index = index + 1
+    }
+    filtered
+}
+
+def boolArrayFold(xs: BoolArray, initial: Bool, combine: (Bool, Bool) => Bool): Bool = {
+    var index = 0
+    var accumulator = initial
+    while (index < xs.length()) {
+        accumulator = combine(accumulator, xs.get(index))
+        index = index + 1
+    }
+    accumulator
+}
+
 class ArrayBool(values: BoolArray) {
     def length(): Int = {
         values.length()
@@ -113,6 +151,14 @@ class ArrayBool(values: BoolArray) {
         new ArrayBool(boolArrayMap(values, f))
     }
 
+    def filter(predicate: (Bool) => Bool): ArrayBool = {
+        new ArrayBool(boolArrayFilter(values, predicate))
+    }
+
+    def fold(initial: Bool, combine: (Bool, Bool) => Bool): Bool = {
+        boolArrayFold(values, initial, combine)
+    }
+
     def foreach(f: (Bool) => Unit): Unit = {
         var index = 0
         while (index < values.length()) {
@@ -136,6 +182,14 @@ def arrayBoolMap(xs: ArrayBool, f: (Bool) => Bool): ArrayBool = {
 
 def arrayBoolMapObject[T, U](xs: ArrayBool, f: (Bool) => U): ArrayObject[U] = {
     boolArrayMapObject[U](xs.raw(), f)
+}
+
+def arrayBoolFilter(xs: ArrayBool, predicate: (Bool) => Bool): ArrayBool = {
+    xs.filter(predicate)
+}
+
+def arrayBoolFold(xs: ArrayBool, initial: Bool, combine: (Bool, Bool) => Bool): Bool = {
+    xs.fold(initial, combine)
 }
 
 def arrayBoolForeach(xs: ArrayBool, f: (Bool) => Unit): Unit = {
