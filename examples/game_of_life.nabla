@@ -1,0 +1,106 @@
+import io
+import collections.int_array
+
+def cellIndex(width: Int, x: Int, y: Int): Int = {
+    y * width + x
+}
+
+def inBounds(width: Int, height: Int, x: Int, y: Int): Bool = {
+    x >= 0 && y >= 0 && x < width && y < height
+}
+
+def getCell(grid: IntArray, width: Int, height: Int, x: Int, y: Int): Int = {
+    if inBounds(width, height, x, y) {
+        grid.get(cellIndex(width, x, y))
+    } else {
+        0
+    }
+}
+
+def liveNeighbors(grid: IntArray, width: Int, height: Int, x: Int, y: Int): Int = {
+    getCell(grid, width, height, x - 1, y - 1) +
+    getCell(grid, width, height, x, y - 1) +
+    getCell(grid, width, height, x + 1, y - 1) +
+    getCell(grid, width, height, x - 1, y) +
+    getCell(grid, width, height, x + 1, y) +
+    getCell(grid, width, height, x - 1, y + 1) +
+    getCell(grid, width, height, x, y + 1) +
+    getCell(grid, width, height, x + 1, y + 1)
+}
+
+def nextCell(grid: IntArray, width: Int, height: Int, x: Int, y: Int): Int = {
+    val alive = getCell(grid, width, height, x, y)
+    val neighbors = liveNeighbors(grid, width, height, x, y)
+
+    if alive == 1 {
+        if neighbors == 2 || neighbors == 3 {
+            1
+        } else {
+            0
+        }
+    } else {
+        if neighbors == 3 {
+            1
+        } else {
+            0
+        }
+    }
+}
+
+def step(grid: IntArray, width: Int, height: Int): IntArray = {
+    val next = intArrayFill(width * height, 0)
+    var y = 0
+    while (y < height) {
+        var x = 0
+        while (x < width) {
+            next.set(cellIndex(width, x, y), nextCell(grid, width, height, x, y))
+            x = x + 1
+        }
+        y = y + 1
+    }
+    next
+}
+
+def alive(grid: IntArray): Int = {
+    intArraySum(grid)
+}
+
+def isVerticalBlinker(grid: IntArray, width: Int): Bool = {
+    grid.get(cellIndex(width, 2, 1)) == 1 &&
+    grid.get(cellIndex(width, 2, 2)) == 1 &&
+    grid.get(cellIndex(width, 2, 3)) == 1 &&
+    alive(grid) == 3
+}
+
+def isHorizontalBlinker(grid: IntArray, width: Int): Bool = {
+    grid.get(cellIndex(width, 1, 2)) == 1 &&
+    grid.get(cellIndex(width, 2, 2)) == 1 &&
+    grid.get(cellIndex(width, 3, 2)) == 1 &&
+    alive(grid) == 3
+}
+
+def main(): Int = {
+    val width = 5
+    val height = 5
+    val grid = intArrayFill(width * height, 0)
+
+    grid.set(cellIndex(width, 2, 1), 1)
+    grid.set(cellIndex(width, 2, 2), 1)
+    grid.set(cellIndex(width, 2, 3), 1)
+
+    val first = step(grid, width, height)
+    val second = step(first, width, height)
+
+    println("Game of Life: blinker")
+    println("tick 0: vertical")
+    println("tick 1: horizontal")
+    println("tick 2: vertical")
+
+    if isVerticalBlinker(grid, width) &&
+       isHorizontalBlinker(first, width) &&
+       isVerticalBlinker(second, width) {
+        42
+    } else {
+        1
+    }
+}
