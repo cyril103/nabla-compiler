@@ -486,6 +486,10 @@ private:
             out << "    call Runtime_print\n";
         } else if (instruction.operation == "readLine") {
             out << "    call Runtime_readLine\n";
+        } else if (instruction.operation == "readFile") {
+            out << "    call Runtime_readFile\n";
+        } else if (instruction.operation == "writeFile") {
+            out << "    call Runtime_writeFile\n";
         } else if (instruction.operation == "parseInt") {
             out << "    call Runtime_stringToInt\n";
         } else {

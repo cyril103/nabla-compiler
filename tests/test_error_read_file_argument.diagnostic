@@ -1,0 +1,1 @@
+tests/test_error_read_file_argument.nabla:2:14: semantic error: readFile, paramètre 'path': type 'String' attendu, 'Int' reçu

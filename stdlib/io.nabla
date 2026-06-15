@@ -5,3 +5,11 @@ def println(value: String): Unit = {
 def input(): String = {
     readLine()
 }
+
+def readTextFile(path: String): String = {
+    readFile(path)
+}
+
+def writeTextFile(path: String, content: String): Int = {
+    writeFile(path, content)
+}

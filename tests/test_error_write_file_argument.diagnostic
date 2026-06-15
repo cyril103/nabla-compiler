@@ -1,0 +1,1 @@
+tests/test_error_write_file_argument.nabla:2:32: semantic error: writeFile, paramètre 'content': type 'String' attendu, 'Int' reçu

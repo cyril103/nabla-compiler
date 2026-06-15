@@ -1,0 +1,3 @@
+def main(): Int = {
+    writeFile("build/out.txt", 42)
+}

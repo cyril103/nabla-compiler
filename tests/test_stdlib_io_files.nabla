@@ -1,0 +1,16 @@
+import io
+
+def main(): Int = {
+    val path = "build/nabla_file_io_test.txt"
+    val content = "nabla\nfiles"
+    val written = writeTextFile(path, content)
+    val loaded = readTextFile(path)
+
+    if written == content.length() &&
+       loaded == content &&
+       readTextFile("build/nabla_missing_file.txt").isEmpty() {
+        42
+    } else {
+        1
+    }
+}

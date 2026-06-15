@@ -333,7 +333,7 @@ Operations courantes :
 
 ## Entree Et Sortie
 
-Le module `io` expose `println` et `input`.
+Le module `io` expose `println`, `input`, `readTextFile` et `writeTextFile`.
 
 ```nabla
 import io
@@ -349,6 +349,27 @@ def main(): Int = {
 
 Les primitives globales `print(value: String)` et `readLine(): String`
 existent aussi, mais le module `io` est l'interface recommandee.
+
+Lecture et ecriture de fichiers texte :
+
+```nabla
+import io
+
+def main(): Int = {
+    val written = writeTextFile("build/message.txt", "hello")
+    val loaded = readTextFile("build/message.txt")
+
+    if written == 5 && loaded == "hello" {
+        42
+    } else {
+        1
+    }
+}
+```
+
+`readTextFile` lit jusqu'a 4096 octets dans cette premiere version. Si le
+fichier ne peut pas etre ouvert, elle retourne une chaine vide. `writeTextFile`
+cree ou tronque le fichier et retourne le nombre d'octets ecrits.
 
 ## Module `strings`
 

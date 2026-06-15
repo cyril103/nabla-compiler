@@ -113,6 +113,8 @@ Le pipeline implemente actuellement :
   `ArrayBool.mkString(separator)` et `arrayMkString[Int/Long/Bool/String]`;
 - affichage console de `String` via la primitive globale `print`;
 - lecture console de `String` via la primitive globale `readLine`;
+- lecture/ecriture de fichiers texte via `readFile`, `writeFile` et les
+  wrappers `io.readTextFile` / `io.writeTextFile`;
 - parsing decimal de `String` vers `Int` via `parseInt(value)`;
 - module standard `strings` avec `words(text)` pour decouper une ligne en
   tokens separes par des espaces en ignorant les segments vides;
@@ -412,6 +414,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   d'objet, liberation des objets non references et eventuel GC mark-and-sweep.
 - [x] Ajouter une primitive d'affichage console pour `String`.
 - [x] Ajouter une primitive d'entree console `readLine(): String`.
+- [x] Ajouter une premiere lecture/ecriture de fichiers texte.
 - [x] Ajouter une premiere collection native `IntArray`.
 - [x] Ajouter une collection native `LongArray`.
 - [x] Ajouter une collection native `FloatArray`.
@@ -450,6 +453,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `ArrayBool` et `Array[String]`.
 - `local` - Ajouter la primitive d'entree console `readLine(): String` et
   `io.input()`.
+- `local` - Ajouter `readFile`, `writeFile` et les wrappers
+  `io.readTextFile` / `io.writeTextFile`.
 - `local` - Ajouter la facade standard `arrayFold[T]` / `arrayFold[T, U]`.
 - `local` - Completer `arrayFlatMap[T]` pour toutes les facades primitives.
 - `local` - Ajouter la facade standard `arrayFilter[T]`.

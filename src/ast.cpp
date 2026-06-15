@@ -967,6 +967,8 @@ FunctionCallNode::FunctionCallNode(
 std::string FunctionCallNode::getType() {
     if (name == "print") return "Unit";
     if (name == "readLine") return "String";
+    if (name == "readFile") return "String";
+    if (name == "writeFile") return "Int";
     if (name == "parseInt") return "Int";
     return resolvedType;
 }
@@ -991,6 +993,38 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
             semanticError("readLine: 0 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
         }
         resolvedType = "String";
+        return;
+    }
+    if (name == "readFile") {
+        if (arguments.size() != 1) {
+            semanticError("readFile: 1 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
+        }
+        if (arguments[0]->getType() != "String") {
+            throw CompilerError(
+                ErrorKind::Semantic, arguments[0]->getLocation(),
+                "readFile, paramètre 'path': type 'String' attendu, '" +
+                arguments[0]->getType() + "' reçu");
+        }
+        resolvedType = "String";
+        return;
+    }
+    if (name == "writeFile") {
+        if (arguments.size() != 2) {
+            semanticError("writeFile: 2 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
+        }
+        if (arguments[0]->getType() != "String") {
+            throw CompilerError(
+                ErrorKind::Semantic, arguments[0]->getLocation(),
+                "writeFile, paramètre 'path': type 'String' attendu, '" +
+                arguments[0]->getType() + "' reçu");
+        }
+        if (arguments[1]->getType() != "String") {
+            throw CompilerError(
+                ErrorKind::Semantic, arguments[1]->getLocation(),
+                "writeFile, paramètre 'content': type 'String' attendu, '" +
+                arguments[1]->getType() + "' reçu");
+        }
+        resolvedType = "Int";
         return;
     }
     if (name == "parseInt") {
