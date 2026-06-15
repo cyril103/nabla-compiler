@@ -1,0 +1,1 @@
+tests/test_error_match_named_pattern_scope_leak.nabla:6:5: semantic error: variable non déclarée: value

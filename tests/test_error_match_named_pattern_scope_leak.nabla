@@ -1,0 +1,7 @@
+def main(): Int = {
+    match 1 {
+        value => value
+        _ => 0
+    }
+    value
+}

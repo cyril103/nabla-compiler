@@ -163,6 +163,7 @@ def sumTo(limit: Int): Int = {
 - un motif nommé (ex. `valeur`) qui capture la valeur courante;
 - un motif `_` final.
 Le motif peut aussi être suivi d'une garde booléenne avec `if`.
+La variable nommée est locale à la branche et ne sort pas du `match`.
 
 ```nabla
 def commandCode(command: String): Int = {

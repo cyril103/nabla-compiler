@@ -1,0 +1,8 @@
+def main(): Int = {
+    val value = 100
+    match 2 {
+        value if value > 50 => value + 1
+        value => value
+        _ => 0
+    }
+}

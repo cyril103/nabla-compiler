@@ -271,8 +271,9 @@ Limites importantes :
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
 - `match` supporte désormais les motifs litteraux, les motifs nommes (`identifiant`)
   et des gardes de branche de la forme `motif if condition`, ainsi que la branche
-  finale `_` (avec ou sans garde selon la position; la branche finale `_` ne peut
-  pas porter de garde).
+  finale `_` (avec ou sans garde selon la position; la branche finale `_` ne
+  peut pas porter de garde). Les motifs nommes sont locaux à la branche et ne
+  fuient pas hors de l'expression `match`.
 
 ## Invariants D'Architecture
 
@@ -625,6 +626,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   avec validation de type Bool pour la garde et diagnostics dédiés.
 - `local` - Ajouter les motifs nommes (`identifiant`) pour capturer la valeur dans
   le corps d'une branche.
+- `local` - Valider la portée des motifs nommes en ajoutant des tests
+  positifs/négatifs (`test_match_named_pattern_scoped`,
+  `test_error_match_named_pattern_scope_leak`) pour confirmer l'isolation
+  de portée.
 - `local` - Ajouter la facade standard `arrayFold[T]` / `arrayFold[T, U]`.
 - `local` - Completer `arrayFlatMap[T]` pour toutes les facades primitives.
 - `local` - Ajouter la facade standard `arrayFilter[T]`.
