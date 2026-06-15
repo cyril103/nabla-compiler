@@ -333,8 +333,14 @@ Operations courantes :
 
 ## Entree Et Sortie
 
-Le module `io` expose `println`, `input`, `readTextFile`, `writeTextFile`,
-`appendTextFile` et `pathExists`.
+Le module `io` expose les helpers recommandes pour les entrees/sorties :
+
+- `println(value: String): Unit`
+- `input(): String`
+- `readTextFile(path: String): String`
+- `writeTextFile(path: String, content: String): Int`
+- `appendTextFile(path: String, content: String): Int`
+- `pathExists(path: String): Bool`
 
 ```nabla
 import io
@@ -348,7 +354,9 @@ def main(): Int = {
 }
 ```
 
-Les primitives globales `print(value: String)` et `readLine(): String`
+Les primitives globales `print(value: String)`, `readLine(): String`,
+`readFile(path: String): String`, `writeFile(path: String, content: String): Int`,
+`appendFile(path: String, content: String): Int` et `fileExists(path: String): Bool`
 existent aussi, mais le module `io` est l'interface recommandee.
 
 Lecture et ecriture de fichiers texte :
@@ -375,7 +383,8 @@ Conventions actuelles :
 - `readTextFile` lit jusqu'a 4096 octets dans cette premiere version.
 - Si un fichier ne peut pas etre ouvert ou lu, `readTextFile` retourne une
   chaine vide.
-- `pathExists` permet de distinguer un fichier absent d'un fichier vide.
+- `pathExists` et `fileExists` permettent de distinguer un fichier absent d'un
+  fichier vide.
 - `writeTextFile` cree ou tronque le fichier.
 - `appendTextFile` cree le fichier si besoin puis ajoute le contenu a la fin.
 - `writeTextFile` et `appendTextFile` retournent le nombre d'octets ecrits.
