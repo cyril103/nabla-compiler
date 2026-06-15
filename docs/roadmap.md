@@ -8,6 +8,8 @@ pour reprendre facilement apres une pause.
 - Backend natif Linux x86_64 via assembleur, avec backend IR utilise par defaut.
 - Typage statique avec fonctions, methodes, classes, generiques simples et lambdas.
 - Controle de flux : `if` expression, `else if`, `match`, `while`, `for`.
+- Support de l'héritage objet avec `extends` + `with` (mixins), classe racine
+  implicite `Any`, détection de cycles / conflits et appel `super`.
 - Standard library deja utile :
   - collections typées et facade `Array[T]`
   - `Option[T]`
@@ -29,23 +31,22 @@ pour reprendre facilement apres une pause.
 
 ## Priorites Prochaine Session
 
-1. Ameliorer l'ecriture de texte avec espaces dans `command_shell`.
-   - Probleme actuel : `write PATH TEXT` et `append PATH TEXT` ne gerent qu'un
-     token de texte.
-   - Realise : `parts.drop(2).mkString(" ")` via `joinFrom` dans
-     `examples/command_shell.nabla`.
-   - Verifie avec `make test SRC=examples/command_shell.nabla`.
-
-2. Exposer/renforcer `mkString` pour les tableaux de strings.
-   - Realise : `objectArrayMkString` + alias compat `objectStringArrayMkString`
-     pour `ArrayObject[String]`.
-   - Verifie avec `make test SRC=tests/test_array_object_string_mk_string.nabla`.
-
-3. Finaliser `match` V2.
-   - Ajouter les motifs nommes (`nom`), pour capturer la valeur scannée.
-   - Compléter les gardes de branche (`motif if condition`).
-   - Valider les gardes de type `Bool`.
-   - Ajouter des diagnostics dédiés pour la branche finale `_`.
+1. Finaliser la sémantique d'héritage.
+   - Valider la résolution des champs hérités et les conflits de noms entre
+     champs/méthodes.
+   - Ajouter une erreur explicite quand un membre est ambigu.
+2. Consolider le système `super`.
+   - Confirmer les cas `super` dans chaînes de mixins / héritage.
+   - Définir règles et tests pour les masquages explicites.
+3. Formaliser la classe `Any`.
+   - Documenter ses propriétés de base et son usage implicite dans les classes.
+   - Valider les invariants `Any` côté sémantique + codegen.
+4. Revenir sur le chantier `match` avancé.
+   - Finaliser les motifs nommés et les gardes (`motif if condition`).
+   - Ajouter des diagnostics propres pour les erreurs de portée/typage des gardes.
+5. Ajouter des tests “mélange” héritage + autres fonctionnalités.
+   - Cas de régression couvrant `super`, champs hérités, shadowing contrôlé
+     et conflit translatif.
 
 ## Pistes Plus Larges
 

@@ -360,6 +360,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter la classe racine implicite `Any` pour les classes sans parent explicite.
 - [x] Ajouter la résolution de conflits de membres dupliqués entre parent et mixins.
 - [x] Ajouter `super` pour appeler une méthode de la classe parente immédiate.
+- [ ] Formaliser la résolution des membres hérités (champs + ordre de résolution) pour supprimer les ambiguïtés restantes.
 
 - [ ] Formaliser `Int`, `Bool`, `Char`, `String`, `IntArray`, les types fonction canoniques et
   les types de classes.
@@ -543,6 +544,12 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `objectStringArrayMkString` pour `ArrayObject[String]`.
 
 ## Journal Des Jalons
+- `712c2c5` - Etendre l'héritage par mixins avec résolution hiérarchique, détection de conflits et support de `super` pour la classe parente directe.
+  - Fichiers / tests associés: `lexer.hpp`, `parser.cpp`, `ast.hpp`, `ast.cpp`,
+    `semantic_analyzer.cpp`, `compiler_context.hpp`, `docs/language.md`,
+    `tests/test_inheritance_super.nabla`, `tests/test_error_super_outside_class.nabla`,
+    `tests/test_inheritance_mixin_override.nabla`,
+    `tests/test_error_inheritance_mixin_conflict_transitive.nabla`.
 - `local` - Ajouter le support de l'héritage (`extends` + `with`) sur les classes:
   parent explicite, mixins, résolution hiérarchique des méthodes, validation des
   parents inconnus/argumentation et détection de cycles, classe racine `Any`, et
