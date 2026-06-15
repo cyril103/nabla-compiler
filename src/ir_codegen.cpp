@@ -486,6 +486,8 @@ private:
             out << "    call Runtime_print\n";
         } else if (instruction.operation == "readLine") {
             out << "    call Runtime_readLine\n";
+        } else if (instruction.operation == "parseInt") {
+            out << "    call Runtime_stringToInt\n";
         } else {
             out << "    call " << asmFunctionName(instruction.operation) << "\n";
         }
@@ -813,6 +815,8 @@ private:
             }
         } else if (className == "String" && methodName == "startsWith") {
             out << "    call Runtime_stringStartsWith\n";
+        } else if (className == "String" && methodName == "toInt") {
+            out << "    call Runtime_stringToInt\n";
         } else {
             out << "    call " << asmFunctionName(instruction.operation) << "\n";
         }

@@ -396,6 +396,7 @@ std::string MethodCallNode::getType() {
     if (receiverType == "String") {
         if (isBoolBinaryMethod(methodName)) return "Bool";
         if (methodName == "isEmpty" || methodName == "nonEmpty" || methodName == "startsWith") return "Bool";
+        if (methodName == "toInt") return "Int";
         if (methodName == "length") return "Int";
         if (methodName == "charAt") return "Char";
     }
@@ -472,6 +473,13 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
                     "la méthode String.startsWith attend un argument de type String");
             }
             resolvedType = "Bool";
+            return;
+        }
+        if (methodName == "toInt") {
+            if (!arguments.empty()) {
+                semanticError("la méthode String.toInt n'accepte aucun argument");
+            }
+            resolvedType = "Int";
             return;
         }
         if (methodName == "length") {
@@ -659,6 +667,10 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
             std::string loweredPrefix = arguments[0]->lowerToIR(builder);
             return builder.emitMethodCall("String", "startsWith", loweredReceiver, {loweredPrefix}, "Bool");
         }
+        if (methodName == "toInt" && arguments.empty()) {
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            return builder.emitMethodCall("String", "toInt", loweredReceiver, {}, "Int");
+        }
         if (methodName == "length" && arguments.empty()) {
             std::string loweredReceiver = receiver->lowerToIR(builder);
             return builder.emitMethodCall("String", "length", loweredReceiver, {}, "Int");
@@ -813,6 +825,7 @@ FunctionCallNode::FunctionCallNode(
 std::string FunctionCallNode::getType() {
     if (name == "print") return "Unit";
     if (name == "readLine") return "String";
+    if (name == "parseInt") return "Int";
     return resolvedType;
 }
 
@@ -836,6 +849,19 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
             semanticError("readLine: 0 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
         }
         resolvedType = "String";
+        return;
+    }
+    if (name == "parseInt") {
+        if (arguments.size() != 1) {
+            semanticError("parseInt: 1 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
+        }
+        if (arguments[0]->getType() != "String") {
+            throw CompilerError(
+                ErrorKind::Semantic, arguments[0]->getLocation(),
+                "parseInt, paramètre 'value': type 'String' attendu, '" +
+                arguments[0]->getType() + "' reçu");
+        }
+        resolvedType = "Int";
         return;
     }
     auto function = context.functions.find(name);

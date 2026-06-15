@@ -1,0 +1,3 @@
+def main(): Int = {
+    "40".toInt() + parseInt("7") + parseInt("-5")
+}
