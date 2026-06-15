@@ -1,0 +1,14 @@
+def classify(value: Int): String = {
+    match value {
+        0 => "zero"
+        1 => {
+            val label = "one"
+            label
+        }
+        _ => "many"
+    }
+}
+
+def main(): Int = {
+    classify(1).length() + classify(7).length() + 35
+}

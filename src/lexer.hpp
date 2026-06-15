@@ -6,7 +6,7 @@
 #include <vector>
 
 enum class TokenType {
-    KW_DEF, KW_CLASS, KW_NEW, KW_IMPORT, KW_IF, KW_ELSE, KW_WHILE, KW_FOR, KW_VAL, KW_VAR, KW_THIS,
+    KW_DEF, KW_CLASS, KW_NEW, KW_IMPORT, KW_IF, KW_ELSE, KW_MATCH, KW_WHILE, KW_FOR, KW_VAL, KW_VAR, KW_THIS,
     KW_TRUE, KW_FALSE,
     IDENTIFIER, LPAREN, RPAREN, LBRACKET, RBRACKET, COLON, EQUAL, LBRACE, RBRACE, COMMA, DOT,
     INT_LITERAL, LONG_LITERAL, FLOAT_LITERAL, DOUBLE_LITERAL, STRING_LITERAL, CHAR_LITERAL,
@@ -170,6 +170,7 @@ public:
                 else if (ident == "import") type = TokenType::KW_IMPORT;
                 else if (ident == "if") type = TokenType::KW_IF;
                 else if (ident == "else") type = TokenType::KW_ELSE;
+                else if (ident == "match") type = TokenType::KW_MATCH;
                 else if (ident == "while") type = TokenType::KW_WHILE;
                 else if (ident == "for") type = TokenType::KW_FOR;
                 else if (ident == "val") type = TokenType::KW_VAL;

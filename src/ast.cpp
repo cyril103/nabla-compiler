@@ -1300,6 +1300,81 @@ std::string IfNode::lowerToIR(IRBuilder& builder) const {
     return builder.emitPhi(thenValue, elseValue, resolvedType);
 }
 
+MatchNode::MatchNode(std::unique_ptr<ASTNode> value, std::vector<Branch> matchBranches)
+    : scrutinee(std::move(value)), branches(std::move(matchBranches)) {}
+
+std::string MatchNode::getType() {
+    return resolvedType;
+}
+
+void MatchNode::validateSemantics(CompilerContext& context) {
+    scrutinee->validateSemantics(context);
+    scrutineeType = scrutinee->getType();
+    if (branches.empty()) {
+        semanticError("match sans branches");
+    }
+    bool sawWildcard = false;
+    for (const auto& branch : branches) {
+        if (sawWildcard) {
+            throw CompilerError(
+                ErrorKind::Semantic, branch.location,
+                "aucune branche n'est autorisée après '_' dans un match");
+        }
+        if (branch.isWildcard) {
+            sawWildcard = true;
+        } else {
+            branch.pattern->validateSemantics(context);
+            if (branch.pattern->getType() != scrutineeType) {
+                throw CompilerError(
+                    ErrorKind::Semantic, branch.pattern->getLocation(),
+                    "motif de match: type '" + scrutineeType + "' attendu, '" +
+                    branch.pattern->getType() + "' reçu");
+            }
+        }
+        branch.body->validateSemantics(context);
+    }
+    if (!sawWildcard) {
+        semanticError("branche '_' finale attendue dans un match");
+    }
+    const std::string branchType = branches.front().body->getType();
+    for (const auto& branch : branches) {
+        if (branch.body->getType() != branchType) {
+            throw CompilerError(
+                ErrorKind::Semantic, branch.body->getLocation(),
+                "les branches d'un match doivent avoir le même type");
+        }
+    }
+    resolvedType = branchType;
+}
+
+std::string MatchNode::lowerToIR(IRBuilder& builder) const {
+    std::string endLabel = builder.makeLabel("match.end");
+    std::string scrutineeValue = scrutinee->lowerToIR(builder);
+    std::vector<std::string> branchValues;
+    std::vector<std::string> nextLabels;
+
+    for (size_t i = 0; i < branches.size(); ++i) {
+        const auto& branch = branches[i];
+        if (!branch.isWildcard) {
+            std::string nextLabel = builder.makeLabel("match.next");
+            std::string patternValue = branch.pattern->lowerToIR(builder);
+            std::string condition = scrutineeType == "String"
+                ? builder.emitMethodCall("String", "==", scrutineeValue, {patternValue}, "Bool")
+                : builder.emitBinary("==", scrutineeValue, patternValue, "Bool");
+            builder.emitBranchIfFalse(condition, nextLabel);
+            nextLabels.push_back(nextLabel);
+        }
+        branchValues.push_back(branch.body->lowerToIR(builder));
+        builder.emitJump(endLabel);
+        if (!branch.isWildcard) {
+            builder.emitLabel(nextLabels.back());
+        }
+    }
+
+    builder.emitLabel(endLabel);
+    return builder.emitPhi(branchValues, resolvedType);
+}
+
 BlockNode::BlockNode(std::vector<std::unique_ptr<ASTNode>> exprs)
     : expressions(std::move(exprs)) {}
 

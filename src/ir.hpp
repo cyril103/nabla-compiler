@@ -146,6 +146,7 @@ public:
     std::string emitLoad(const std::string& symbol, const std::string& type = "Int");
     void emitStore(const std::string& symbol, const std::string& value, const std::string& type = "Int");
     std::string emitPhi(const std::string& left, const std::string& right, const std::string& type = "Int");
+    std::string emitPhi(const std::vector<std::string>& values, const std::string& type = "Int");
     void pushTypeSubstitution(const std::map<std::string, std::string>& substitution);
     void popTypeSubstitution();
     std::string substituteActiveType(const std::string& type) const;

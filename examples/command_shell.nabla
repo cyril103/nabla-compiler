@@ -100,40 +100,49 @@ def runCommand(line: String): Bool = {
     val parts = words(line)
     val command = commandName(line)
 
-    if command == "" {
-        false
-    } else if command == "quit" {
-        false
-    } else if command == "help" {
-        printHelp()
-        true
-    } else if command == "add" {
-        runAdd(parts)
-        true
-    } else if command == "repeat" {
-        runRepeat(parts)
-        true
-    } else if command == "len" {
-        runLen(parts)
-        true
-    } else if command == "cat" {
-        runCat(parts)
-        true
-    } else if command == "write" {
-        runWrite(parts)
-        true
-    } else if command == "append" {
-        runAppend(parts)
-        true
-    } else if command == "rm" {
-        runRm(parts)
-        true
-    } else if command == "exists" {
-        runExists(parts)
-        true
-    } else {
-        println("unknown command: " + command)
-        true
+    match command {
+        "" => false
+        "quit" => false
+        "help" => {
+            printHelp()
+            true
+        }
+        "add" => {
+            runAdd(parts)
+            true
+        }
+        "repeat" => {
+            runRepeat(parts)
+            true
+        }
+        "len" => {
+            runLen(parts)
+            true
+        }
+        "cat" => {
+            runCat(parts)
+            true
+        }
+        "write" => {
+            runWrite(parts)
+            true
+        }
+        "append" => {
+            runAppend(parts)
+            true
+        }
+        "rm" => {
+            runRm(parts)
+            true
+        }
+        "exists" => {
+            runExists(parts)
+            true
+        }
+        _ => {
+            println("unknown command: " + command)
+            true
+        }
     }
 }
 

@@ -554,6 +554,12 @@ std::string IRBuilder::emitPhi(const std::string& left, const std::string& right
     return result;
 }
 
+std::string IRBuilder::emitPhi(const std::vector<std::string>& values, const std::string& type) {
+    std::string result = nextValue();
+    emit({IROpcode::Phi, result, substituteActiveType(type), "", values});
+    return result;
+}
+
 void IRBuilder::pushTypeSubstitution(const std::map<std::string, std::string>& substitution) {
     typeSubstitutionStack.push_back(activeTypeSubstitution);
     activeTypeSubstitution = substitution;

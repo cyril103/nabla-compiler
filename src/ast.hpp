@@ -219,6 +219,28 @@ public:
     std::string lowerToIR(IRBuilder& builder) const override;
 };
 
+class MatchNode : public ASTNode {
+public:
+    struct Branch {
+        bool isWildcard;
+        std::unique_ptr<ASTNode> pattern;
+        std::unique_ptr<ASTNode> body;
+        SourceLocation location;
+    };
+
+private:
+    std::unique_ptr<ASTNode> scrutinee;
+    std::vector<Branch> branches;
+    std::string resolvedType = "Int";
+    std::string scrutineeType = "Int";
+
+public:
+    MatchNode(std::unique_ptr<ASTNode> value, std::vector<Branch> matchBranches);
+    std::string getType() override;
+    void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
+};
+
 class BlockNode : public ASTNode {
     std::vector<std::unique_ptr<ASTNode>> expressions;
 public:

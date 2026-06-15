@@ -1,0 +1,11 @@
+def score(command: String): Int = {
+    match command {
+        "add" => 10
+        "quit" => 20
+        _ => 12
+    }
+}
+
+def main(): Int = {
+    score("add") + score("missing") + 20
+}

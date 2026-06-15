@@ -148,6 +148,33 @@ def sumTo(limit: Int): Int = {
 }
 ```
 
+`match` compare une expression a des motifs litteraux avec `==`. Les motifs
+supportes sont les litteraux `Int`, `Long`, `Float`, `Double`, `Bool`, `String`
+et `Char`, plus la branche finale obligatoire `_`.
+
+```nabla
+def commandCode(command: String): Int = {
+    match command {
+        "add" => 1
+        "quit" => 2
+        _ => 0
+    }
+}
+```
+
+Toutes les branches d'un `match` doivent produire le meme type. Une branche peut
+aussi utiliser un bloc :
+
+```nabla
+match value {
+    1 => {
+        val label = "one"
+        label.length()
+    }
+    _ => 0
+}
+```
+
 ## Classes
 
 Une classe declare ses champs dans le constructeur primaire.

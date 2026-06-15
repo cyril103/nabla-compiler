@@ -184,6 +184,78 @@ std::unique_ptr<ASTNode> Parser::parseIfExpression() {
     return located(std::make_unique<IfNode>(std::move(condition), std::move(thenBranch), std::move(elseBranch)), start.location);
 }
 
+std::unique_ptr<ASTNode> Parser::parseMatchExpression() {
+    Token start = consume(TokenType::KW_MATCH, "");
+    auto scrutinee = parseExpression();
+    consume(TokenType::LBRACE, "Bloc 'match' attendu après l'expression");
+
+    std::vector<MatchNode::Branch> branches;
+    bool sawWildcard = false;
+    while (peek().type != TokenType::RBRACE) {
+        Token branchToken = peek();
+        bool isWildcard = false;
+        std::unique_ptr<ASTNode> pattern;
+        if (peek().type == TokenType::IDENTIFIER && peek().value == "_") {
+            consume(TokenType::IDENTIFIER, "");
+            isWildcard = true;
+            sawWildcard = true;
+        } else {
+            if (sawWildcard) {
+                throw CompilerError(
+                    ErrorKind::Parser, branchToken.location,
+                    "aucune branche n'est autorisée après '_' dans un match");
+            }
+            if (peek().type == TokenType::INT_LITERAL) {
+                Token token = consume(TokenType::INT_LITERAL, "");
+                pattern = located(std::make_unique<IntNode>(token.value), token.location);
+            } else if (peek().type == TokenType::LONG_LITERAL) {
+                Token token = consume(TokenType::LONG_LITERAL, "");
+                pattern = located(std::make_unique<LongNode>(token.value), token.location);
+            } else if (peek().type == TokenType::DOUBLE_LITERAL) {
+                Token token = consume(TokenType::DOUBLE_LITERAL, "");
+                pattern = located(std::make_unique<DoubleNode>(token.value), token.location);
+            } else if (peek().type == TokenType::FLOAT_LITERAL) {
+                Token token = consume(TokenType::FLOAT_LITERAL, "");
+                pattern = located(std::make_unique<FloatNode>(token.value), token.location);
+            } else if (peek().type == TokenType::KW_TRUE) {
+                Token token = consume(TokenType::KW_TRUE, "");
+                pattern = located(std::make_unique<BoolNode>(true), token.location);
+            } else if (peek().type == TokenType::KW_FALSE) {
+                Token token = consume(TokenType::KW_FALSE, "");
+                pattern = located(std::make_unique<BoolNode>(false), token.location);
+            } else if (peek().type == TokenType::STRING_LITERAL) {
+                Token token = consume(TokenType::STRING_LITERAL, "");
+                pattern = located(std::make_unique<StringNode>(token.value), token.location);
+            } else if (peek().type == TokenType::CHAR_LITERAL) {
+                Token token = consume(TokenType::CHAR_LITERAL, "");
+                pattern = located(std::make_unique<CharNode>(token.value), token.location);
+            } else {
+                throw CompilerError(
+                    ErrorKind::Parser, peek().location,
+                    "motif de match invalide: littéral ou '_' attendu");
+            }
+        }
+        consume(TokenType::FAT_ARROW, "'=>' attendu après le motif de match");
+        std::unique_ptr<ASTNode> body;
+        if (peek().type == TokenType::LBRACE) {
+            consume(TokenType::LBRACE, "");
+            body = parseBlock();
+            consume(TokenType::RBRACE, "Fin du bloc de branche match attendue");
+        } else {
+            body = parseExpression();
+        }
+        branches.push_back({isWildcard, std::move(pattern), std::move(body), branchToken.location});
+    }
+    consume(TokenType::RBRACE, "Fin du bloc 'match' attendue");
+    if (branches.empty()) {
+        throw CompilerError(ErrorKind::Parser, start.location, "match sans branches");
+    }
+    if (!branches.back().isWildcard) {
+        throw CompilerError(ErrorKind::Parser, branches.back().location, "branche '_' finale attendue dans un match");
+    }
+    return located(std::make_unique<MatchNode>(std::move(scrutinee), std::move(branches)), start.location);
+}
+
 std::unique_ptr<ASTNode> Parser::parseWhileExpression() {
     Token start = consume(TokenType::KW_WHILE, "");
     if (peek().type == TokenType::LPAREN) {
@@ -520,6 +592,9 @@ std::unique_ptr<ASTNode> Parser::parseInferredLambdaExpression(const std::string
 std::unique_ptr<ASTNode> Parser::parsePrimary() {
     if (peek().type == TokenType::KW_IF) {
         return parseIfExpression();
+    }
+    if (peek().type == TokenType::KW_MATCH) {
+        return parseMatchExpression();
     }
     if (peek().type == TokenType::KW_WHILE) {
         return parseWhileExpression();

@@ -45,6 +45,7 @@ private:
     void parseImport(std::unique_ptr<ProgramNode>& currentProgram);
     void parseClassDefinition(std::unique_ptr<ProgramNode>& program);
     std::unique_ptr<ASTNode> parseIfExpression();
+    std::unique_ptr<ASTNode> parseMatchExpression();
     std::unique_ptr<ASTNode> parseWhileExpression();
     std::unique_ptr<ASTNode> parseForExpression();
     bool startsLambdaExpression() const;

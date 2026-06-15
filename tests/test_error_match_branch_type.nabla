@@ -1,0 +1,6 @@
+def main(): Int = {
+    match "x" {
+        "x" => 1
+        _ => "no"
+    }
+}
