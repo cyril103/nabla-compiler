@@ -102,7 +102,10 @@ Le pipeline implemente actuellement :
 - collection native `DoubleArray` avec `length`, `get` et `set`;
 - collection native `BoolArray` avec `length`, `get` et `set`;
 - entiers immediats `Int` et `Long` avec pointer tagging, litteraux decimaux
-  `Float` / `Double` portes par l'IR typee et litteraux `String`;
+  `Float` / `Double` portes par l'IR typee, litteraux `Char` ASCII et
+  litteraux `String`;
+- chaines `String` stockees comme buffers de bytes, avec `length` et
+  `charAt(index): Char`;
 - affichage console de `String` via la primitive globale `print`;
 - lecture console de `String` via la primitive globale `readLine`;
 - premier module de bibliotheque standard `io` avec `println` et `input`;
@@ -171,6 +174,9 @@ Limites importantes :
 - `Float` et `Double` couvrent les litteraux, operations, comparaisons,
   fonctions, lambdas, champs et collections specialisees, mais pas encore
   `toString`;
+- `String` et `Char` sont actuellement byte-based/ASCII pour les operations de
+  longueur et d'indexation; les bytes UTF-8 sont conserves pour l'affichage et
+  l'entree, mais `length` ne compte pas encore les code points Unicode;
 - la genericite actuelle couvre `Option[T]`, les fonctions generiques
   monomorphisees et les methodes de classes generiques specialisees avec
   inference des arguments de type; les references explicites comme
@@ -265,7 +271,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ### P2 - Systeme De Types
 
-- [ ] Formaliser `Int`, `Bool`, `String`, `IntArray`, les types fonction canoniques et
+- [ ] Formaliser `Int`, `Bool`, `Char`, `String`, `IntArray`, les types fonction canoniques et
   les types de classes.
 - [x] Ajouter `Long` avec litteraux suffixes `L`, arithmetique, comparaisons,
   fonctions, champs et `toString`.
@@ -273,6 +279,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   generation SSE.
 - [x] Formaliser `Unit` pour les fonctions a effet et les boucles.
 - [x] Ajouter les booleens et typer les conditions en `Bool`.
+- [x] Ajouter `Char` ASCII, les litteraux de caractere et `String.charAt`.
 - [x] Ajouter les operateurs booleens `&&`, `||` et `!`.
 - [x] Ajouter le court-circuit pour `&&` et `||`.
 - [ ] Ajouter les champs et methodes herites si l'heritage est retenu.
@@ -381,6 +388,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [ ] Definir et utiliser de vraies vtables ou retirer leur emplacement reserve.
 - [x] Extraire le runtime ASM commun du backend IR.
 - [x] Stabiliser la representation de `String`.
+- [x] Ajouter `String.charAt(index): Char` sur la representation byte-based.
 - [ ] Choisir une strategie memoire a long terme.
 - [x] Ajouter une primitive d'affichage console pour `String`.
 - [x] Ajouter une primitive d'entree console `readLine(): String`.
@@ -401,6 +409,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Ajouter `Char` ASCII et `String.charAt(index): Char`.
 - `local` - Ajouter la primitive d'entree console `readLine(): String` et
   `io.input()`.
 - `local` - Ajouter la facade standard `arrayFold[T]` / `arrayFold[T, U]`.

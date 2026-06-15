@@ -303,7 +303,8 @@ inline std::string resolveStdlibTypeAlias(const std::string& type) {
     if (baseName == "Array" && arguments.size() == 1) {
         const bool concreteArgument =
             arguments[0] == "Int" || arguments[0] == "Long" || arguments[0] == "Float" ||
-            arguments[0] == "Double" || arguments[0] == "Bool" || arguments[0] == "String" ||
+            arguments[0] == "Double" || arguments[0] == "Bool" || arguments[0] == "Char" ||
+            arguments[0] == "String" ||
             arguments[0] == "Unit" || arguments[0] == "IntArray" || arguments[0] == "LongArray" ||
             arguments[0] == "FloatArray" || arguments[0] == "DoubleArray" ||
             arguments[0] == "BoolArray" || arguments[0] == "ArrayInt" ||

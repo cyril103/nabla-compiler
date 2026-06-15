@@ -1,0 +1,4 @@
+def main(): Int = {
+    val value = "hi".charAt(2)
+    1
+}

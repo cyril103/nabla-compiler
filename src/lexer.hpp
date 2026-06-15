@@ -9,7 +9,7 @@ enum class TokenType {
     KW_DEF, KW_CLASS, KW_NEW, KW_IMPORT, KW_IF, KW_ELSE, KW_WHILE, KW_FOR, KW_VAL, KW_VAR, KW_THIS,
     KW_TRUE, KW_FALSE,
     IDENTIFIER, LPAREN, RPAREN, LBRACKET, RBRACKET, COLON, EQUAL, LBRACE, RBRACE, COMMA, DOT,
-    INT_LITERAL, LONG_LITERAL, FLOAT_LITERAL, DOUBLE_LITERAL, STRING_LITERAL,
+    INT_LITERAL, LONG_LITERAL, FLOAT_LITERAL, DOUBLE_LITERAL, STRING_LITERAL, CHAR_LITERAL,
     PLUS, MINUS, STAR, SLASH, BANG, AND_AND, OR_OR, FAT_ARROW, EQEQ, NEQ, LT, GT, LTE, GTE, EOF_TOKEN
 };
 
@@ -122,6 +122,38 @@ public:
                 }
                 advance();
                 tokens.push_back({TokenType::STRING_LITERAL, value, start});
+                continue;
+            }
+            if (current == '\'') {
+                advance();
+                if (index >= src.size() || src[index] == '\n' || src[index] == '\'') {
+                    throw CompilerError(ErrorKind::Lexer, start, "caractère littéral invalide");
+                }
+                unsigned char value = 0;
+                if (src[index] == '\\') {
+                    advance();
+                    if (index >= src.size()) {
+                        throw CompilerError(ErrorKind::Lexer, start, "caractère littéral non terminé");
+                    }
+                    char escaped = src[index];
+                    if (escaped == 'n') value = '\n';
+                    else if (escaped == '\'') value = '\'';
+                    else if (escaped == '\\') value = '\\';
+                    else {
+                        throw CompilerError(
+                            ErrorKind::Lexer, location(),
+                            "échappement inconnu '\\" + std::string(1, escaped) + "'");
+                    }
+                    advance();
+                } else {
+                    value = static_cast<unsigned char>(src[index]);
+                    advance();
+                }
+                if (index >= src.size() || src[index] != '\'') {
+                    throw CompilerError(ErrorKind::Lexer, start, "caractère littéral non terminé");
+                }
+                advance();
+                tokens.push_back({TokenType::CHAR_LITERAL, std::to_string(static_cast<int>(value)), start});
                 continue;
             }
 

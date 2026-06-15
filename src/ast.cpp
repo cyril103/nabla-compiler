@@ -26,7 +26,7 @@ bool isBoolBinaryMethod(const std::string& methodName) {
 
 bool isKnownBuiltinType(const std::string& type) {
     return type == "Int" || type == "Long" || type == "Float" || type == "Double" || type == "Bool" ||
-           type == "String" || type == "Unit" || type == "IntArray" || type == "LongArray" ||
+           type == "Char" || type == "String" || type == "Unit" || type == "IntArray" || type == "LongArray" ||
            type == "FloatArray" || type == "DoubleArray" || type == "BoolArray";
 }
 
@@ -299,6 +299,20 @@ std::string StringNode::lowerToIR(IRBuilder& builder) const {
     return builder.emitStringLiteral(value);
 }
 
+CharNode::CharNode(std::string val) : value(std::move(val)) {}
+
+std::string CharNode::getType() {
+    return "Char";
+}
+
+void CharNode::validateSemantics(CompilerContext& context) {
+    (void) context;
+}
+
+std::string CharNode::lowerToIR(IRBuilder& builder) const {
+    return builder.emitConstant(value, "Char");
+}
+
 NewNode::NewNode(std::string clName, std::vector<std::unique_ptr<ASTNode>> arguments)
     : className(std::move(clName)), args(std::move(arguments)) {}
 
@@ -381,6 +395,10 @@ std::string MethodCallNode::getType() {
     }
     if (receiverType == "String") {
         if (methodName == "length") return "Int";
+        if (methodName == "charAt") return "Char";
+    }
+    if (receiverType == "Char") {
+        if (isBoolBinaryMethod(methodName)) return "Bool";
     }
     if (receiverType == "Bool") {
         if (isBoolBinaryMethod(methodName)) return "Bool";
@@ -428,7 +446,34 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             resolvedType = "Int";
             return;
         }
+        if (methodName == "charAt") {
+            if (arguments.size() != 1) {
+                semanticError("la méthode String.charAt attend un argument");
+            }
+            if (arguments[0]->getType() != "Int") {
+                throw CompilerError(
+                    ErrorKind::Semantic, arguments[0]->getLocation(),
+                    "la méthode String.charAt attend un index de type Int");
+            }
+            resolvedType = "Char";
+            return;
+        }
         semanticError("méthode inconnue: String." + methodName);
+    }
+    if (receiverType == "Char") {
+        if (isBoolBinaryMethod(methodName)) {
+            if (arguments.size() != 1) {
+                semanticError("la méthode Char." + methodName + " attend un argument");
+            }
+            if (arguments[0]->getType() != "Char") {
+                throw CompilerError(
+                    ErrorKind::Semantic, arguments[0]->getLocation(),
+                    "la méthode Char." + methodName + " attend un argument de type Char");
+            }
+            resolvedType = "Bool";
+            return;
+        }
+        semanticError("méthode inconnue: Char." + methodName);
     }
     if (receiverType == "Bool") {
         if (isBoolBinaryMethod(methodName)) {
@@ -567,11 +612,26 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         return builder.emitBinary(methodName, left, right, isComparisonMethod(methodName) ? "Bool" : receiverType);
     }
     if (receiverType == "String") {
-        if (methodName != "length" || !arguments.empty()) {
+        if (methodName == "length" && arguments.empty()) {
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            return builder.emitMethodCall("String", "length", loweredReceiver, {}, "Int");
+        }
+        if (methodName == "charAt" && arguments.size() == 1) {
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            std::string loweredIndex = arguments[0]->lowerToIR(builder);
+            return builder.emitMethodCall("String", "charAt", loweredReceiver, {loweredIndex}, "Char");
+        }
+        {
             builder.unsupported(location, "la méthode String." + methodName);
         }
-        std::string loweredReceiver = receiver->lowerToIR(builder);
-        return builder.emitMethodCall("String", "length", loweredReceiver, {}, "Int");
+    }
+    if (receiverType == "Char") {
+        if (!isBoolBinaryMethod(methodName) || arguments.size() != 1) {
+            builder.unsupported(location, "la méthode Char." + methodName);
+        }
+        std::string left = receiver->lowerToIR(builder);
+        std::string right = arguments[0]->lowerToIR(builder);
+        return builder.emitBinary(methodName, left, right, "Bool");
     }
     if (receiverType == "Bool") {
         if (!isBoolBinaryMethod(methodName) || arguments.size() != 1) {

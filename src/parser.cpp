@@ -5,7 +5,7 @@
 namespace {
 bool isBuiltinTypeName(const std::string& type) {
     return type == "Int" || type == "Long" || type == "Float" || type == "Double" ||
-           type == "Bool" || type == "String" || type == "Unit" || type == "IntArray" ||
+           type == "Bool" || type == "Char" || type == "String" || type == "Unit" || type == "IntArray" ||
            type == "LongArray" || type == "FloatArray" || type == "DoubleArray" ||
            type == "BoolArray";
 }
@@ -101,7 +101,8 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
             Token typeParameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre de type attendu");
             if (typeParameterToken.value == "Int" || typeParameterToken.value == "Long" ||
                 typeParameterToken.value == "Float" || typeParameterToken.value == "Double" ||
-                typeParameterToken.value == "Bool" || typeParameterToken.value == "String" ||
+                typeParameterToken.value == "Bool" || typeParameterToken.value == "Char" ||
+                typeParameterToken.value == "String" ||
                 typeParameterToken.value == "Unit" || typeParameterToken.value == "IntArray" ||
                 typeParameterToken.value == "LongArray" || typeParameterToken.value == "FloatArray" ||
                 typeParameterToken.value == "DoubleArray" || typeParameterToken.value == "BoolArray") {
@@ -563,6 +564,10 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         Token token = consume(TokenType::STRING_LITERAL, "");
         return located(std::make_unique<StringNode>(token.value), token.location);
     }
+    if (peek().type == TokenType::CHAR_LITERAL) {
+        Token token = consume(TokenType::CHAR_LITERAL, "");
+        return located(std::make_unique<CharNode>(token.value), token.location);
+    }
     if (peek().type == TokenType::KW_NEW) {
         Token start = consume(TokenType::KW_NEW, "");
         auto [clName, typeLocation] = parseType("Nom de classe attendu après 'new'");
@@ -929,7 +934,8 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
             Token typeParameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre de type attendu");
             if (typeParameterToken.value == "Int" || typeParameterToken.value == "Long" ||
                 typeParameterToken.value == "Float" || typeParameterToken.value == "Double" ||
-                typeParameterToken.value == "Bool" || typeParameterToken.value == "String" ||
+                typeParameterToken.value == "Bool" || typeParameterToken.value == "Char" ||
+                typeParameterToken.value == "String" ||
                 typeParameterToken.value == "Unit" || typeParameterToken.value == "IntArray" ||
                 typeParameterToken.value == "LongArray" || typeParameterToken.value == "FloatArray" ||
                 typeParameterToken.value == "DoubleArray" || typeParameterToken.value == "BoolArray") {

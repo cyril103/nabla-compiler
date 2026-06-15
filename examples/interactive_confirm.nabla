@@ -1,0 +1,18 @@
+import io
+
+def isYes(answer: String): Bool = {
+    answer.length() > 0 && answer.charAt(0) == 'y'
+}
+
+def main(): Int = {
+    println("Continue? y/n")
+    val answer = input()
+
+    if isYes(answer) {
+        println("Continuing.")
+        42
+    } else {
+        println("Stopped.")
+        1
+    }
+}

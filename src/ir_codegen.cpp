@@ -783,6 +783,17 @@ private:
             out << "    mov rax, [rdi + 8]\n";
             out << "    shl rax, 1\n";
             out << "    or rax, 1\n";
+        } else if (className == "String" && methodName == "charAt") {
+            out << "    mov rax, rsi\n";
+            out << "    sar rax, 1\n";
+            out << "    cmp rax, 0\n";
+            out << "    jl Runtime_bounds_error\n";
+            out << "    cmp rax, [rdi + 8]\n";
+            out << "    jge Runtime_bounds_error\n";
+            out << "    mov rbx, [rdi + 16]\n";
+            out << "    movzx rax, byte [rbx + rax]\n";
+            out << "    shl rax, 1\n";
+            out << "    or rax, 1\n";
         } else {
             out << "    call " << asmFunctionName(instruction.operation) << "\n";
         }
