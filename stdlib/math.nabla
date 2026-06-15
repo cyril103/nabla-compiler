@@ -150,6 +150,46 @@ def isCloseDouble(left: Double, right: Double, epsilon: Double): Bool = {
     absDiffDouble(left, right) < epsilon
 }
 
+def piFloat(): Float = {
+    3.1415927F
+}
+
+def twoPiFloat(): Float = {
+    6.2831855F
+}
+
+def piDouble(): Double = {
+    3.141592653589793
+}
+
+def twoPiDouble(): Double = {
+    6.283185307179586
+}
+
+def degreesToRadiansFloat(degrees: Float): Float = {
+    (degrees * piFloat()) / 180.0F
+}
+
+def radiansToDegreesFloat(radians: Float): Float = {
+    (radians / piFloat()) * 180.0F
+}
+
+def degreesToRadiansDouble(degrees: Double): Double = {
+    (degrees * piDouble()) / 180.0
+}
+
+def radiansToDegreesDouble(radians: Double): Double = {
+    (radians / piDouble()) * 180.0
+}
+
+def hypotenuseFloat(opposite: Float, adjacent: Float): Float = {
+    sqrtFloat((opposite * opposite) + (adjacent * adjacent))
+}
+
+def hypotenuseDouble(opposite: Double, adjacent: Double): Double = {
+    sqrtDouble((opposite * opposite) + (adjacent * adjacent))
+}
+
 def signInt(value: Int): Int = {
     if value < 0 {
         -1

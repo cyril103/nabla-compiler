@@ -5,6 +5,16 @@ def main(): Int = {
        absLong(-42L) == 42L &&
        absFloat(-2.5F) == 2.5F &&
        absDouble(-2.5) == 2.5 &&
+       isCloseFloat(piFloat(), 3.1415927F, 0.000001F) &&
+       isCloseDouble(piDouble(), 3.141592653589793, 0.000000000000001) &&
+       isCloseFloat(twoPiFloat(), 6.2831855F, 0.000001F) &&
+       isCloseDouble(twoPiDouble(), 6.283185307179586, 0.000000000000001) &&
+       isCloseFloat(degreesToRadiansFloat(180.0F), piFloat(), 0.000001F) &&
+       isCloseFloat(radiansToDegreesFloat(piFloat()), 180.0F, 0.000001F) &&
+       isCloseDouble(degreesToRadiansDouble(180.0), piDouble(), 0.000000000000001) &&
+       isCloseDouble(radiansToDegreesDouble(piDouble()), 180.0, 0.000000000000001) &&
+       isCloseFloat(hypotenuseFloat(3.0F, 4.0F), 5.0F, 0.000001F) &&
+       isCloseDouble(hypotenuseDouble(3.0, 4.0), 5.0, 0.000000000000001) &&
        clampInt(-3, 0, 10) == 0 &&
        clampLong(-3L, 0L, 10L) == 0L &&
        clampFloat(-3.0F, 0.0F, 10.0F) == 0.0F &&
