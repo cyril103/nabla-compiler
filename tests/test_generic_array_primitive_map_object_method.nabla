@@ -1,0 +1,55 @@
+import collections.array
+import core.option
+
+def intLabel(value: Int): String = {
+    "int"
+}
+
+def longLabel(value: Long): String = {
+    "long"
+}
+
+def floatLabel(value: Float): String = {
+    "float"
+}
+
+def doubleLabel(value: Double): String = {
+    "double"
+}
+
+def boolLabel(value: Bool): String = {
+    if value {
+        "true"
+    } else {
+        "false"
+    }
+}
+
+def maybeFlag(value: Bool): Option[String] = {
+    if value {
+        optionSome("yes")
+    } else {
+        optionNone("no")
+    }
+}
+
+def main(): Int = {
+    val ints = arrayIntRange(2).mapObject[String](intLabel)
+    val longs = arrayFill[Long](1, 5L).mapObject[String](longLabel)
+    val floats = arrayFill[Float](1, 1.5F).mapObject[String](floatLabel)
+    val doubles = arrayFill[Double](1, 2.5).mapObject[String](doubleLabel)
+    val bools = arrayFill[Bool](2, true).mapObject[String](boolLabel)
+    val maybeBools = arrayFill[Bool](1, true).mapObject[Option[String]](maybeFlag)
+
+    if ints.size() == 2 &&
+       ints.get(0).length() == 3 &&
+       longs.get(0).length() == 4 &&
+       floats.get(0).length() == 5 &&
+       doubles.get(0).length() == 6 &&
+       bools.get(1).length() == 4 &&
+       maybeBools.get(0).getOrElse("x").length() == 3 {
+        42
+    } else {
+        1
+    }
+}

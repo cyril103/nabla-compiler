@@ -111,6 +111,10 @@ class ArrayLong(values: LongArray) {
         new ArrayLong(longArrayMap(values, f))
     }
 
+    def mapObject[U](f: (Long) => U): ArrayObject[U] = {
+        longArrayMapObject[U](values, f)
+    }
+
     def filter(predicate: (Long) => Bool): ArrayLong = {
         new ArrayLong(longArrayFilter(values, predicate))
     }

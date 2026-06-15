@@ -97,6 +97,10 @@ class ArrayFloat(values: FloatArray) {
         new ArrayFloat(floatArrayMap(values, f))
     }
 
+    def mapObject[U](f: (Float) => U): ArrayObject[U] = {
+        floatArrayMapObject[U](values, f)
+    }
+
     def filter(predicate: (Float) => Bool): ArrayFloat = {
         new ArrayFloat(floatArrayFilter(values, predicate))
     }

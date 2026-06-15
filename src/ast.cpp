@@ -1117,9 +1117,15 @@ std::string FunctionDefNode::lowerSpecializedMethodToIR(
     IRBuilder& builder, const std::string& concreteClassName,
     const std::vector<std::string>& concreteMethodTypeArguments) const {
     auto parameterizedType = parameterizedTypeFromName(concreteClassName);
-    if (!parameterizedType || parameterizedType->first != className ||
-        parameterizedType->second.size() != ownerTypeParameters.size()) {
-        builder.unsupported(location, "la spécialisation de méthode " + concreteClassName + "." + name);
+    if (ownerTypeParameters.empty()) {
+        if (concreteClassName != className) {
+            builder.unsupported(location, "la spécialisation de méthode " + concreteClassName + "." + name);
+        }
+    } else {
+        if (!parameterizedType || parameterizedType->first != className ||
+            parameterizedType->second.size() != ownerTypeParameters.size()) {
+            builder.unsupported(location, "la spécialisation de méthode " + concreteClassName + "." + name);
+        }
     }
     if (concreteMethodTypeArguments.size() != typeParameters.size()) {
         builder.unsupported(location, "la spécialisation de méthode " + concreteClassName + "." + name);
@@ -1127,8 +1133,10 @@ std::string FunctionDefNode::lowerSpecializedMethodToIR(
 
     std::map<std::string, std::string> substitution;
     substitution[className] = concreteClassName;
-    for (size_t i = 0; i < ownerTypeParameters.size(); ++i) {
-        substitution[ownerTypeParameters[i]] = parameterizedType->second[i];
+    if (parameterizedType) {
+        for (size_t i = 0; i < ownerTypeParameters.size(); ++i) {
+            substitution[ownerTypeParameters[i]] = parameterizedType->second[i];
+        }
     }
     for (size_t i = 0; i < typeParameters.size(); ++i) {
         substitution[typeParameters[i]] = concreteMethodTypeArguments[i];

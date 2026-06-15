@@ -481,6 +481,10 @@ class ArrayInt(values: IntArray) {
         new ArrayInt(intArrayMap(values, f))
     }
 
+    def mapObject[U](f: (Int) => U): ArrayObject[U] = {
+        intArrayMapObject[U](values, f)
+    }
+
     def filter(predicate: (Int) => Bool): ArrayInt = {
         new ArrayInt(intArrayFilter(values, predicate))
     }

@@ -151,6 +151,10 @@ class ArrayBool(values: BoolArray) {
         new ArrayBool(boolArrayMap(values, f))
     }
 
+    def mapObject[U](f: (Bool) => U): ArrayObject[U] = {
+        boolArrayMapObject[U](values, f)
+    }
+
     def filter(predicate: (Bool) => Bool): ArrayBool = {
         new ArrayBool(boolArrayFilter(values, predicate))
     }
