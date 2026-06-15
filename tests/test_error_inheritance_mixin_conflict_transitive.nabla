@@ -1,0 +1,26 @@
+class BaseLeft() {
+    def label(): String = {
+        "left"
+    }
+}
+
+class BaseRight() {
+    def label(): String = {
+        "right"
+    }
+}
+
+class Left extends BaseLeft() {
+}
+
+class Right extends BaseRight() {
+}
+
+class LeftLeaf extends Left() {
+}
+
+class RightLeaf extends Right() {
+}
+
+class Both extends LeftLeaf with RightLeaf() {
+}

@@ -215,7 +215,8 @@ Le pipeline implemente actuellement :
 - analyse semantique des classes, constructeurs, methodes, types de retour et
   affectations;
 - support de l'héritage de méthodes via `extends` + `with` (un parent explicite
-  puis mixins), avec validation des parents et détection de cycles;
+  puis mixins), avec validation des parents, détection de conflits de méthodes
+  héritées et détection de cycles;
 - diagnostics uniformes avec fichier, ligne, colonne et phase du compilateur;
 - IR textuelle pour les fonctions globales, entiers, variables, affectations,
   operations binaires, appels de fonctions globales, `if`, `match`, `while`,
@@ -543,10 +544,12 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `local` - Ajouter le support de l'héritage (`extends` + `with`) sur les classes:
   parent explicite, mixins, résolution hiérarchique des méthodes, validation des
   parents inconnus/argumentation et détection de cycles, classe racine `Any`, et
-  détection de conflits de méthodes héritées entre mixins/parent.
+  détection de conflits de méthodes héritées entre mixins/parent (directs et
+  transitatifs).
   - Tests: `test_inheritance_simple`, `test_inheritance_multiple`,
     `test_error_inheritance_unknown_parent`, `test_error_inheritance_cycle`,
-    `test_error_inheritance_mixin_conflict`.
+    `test_error_inheritance_mixin_conflict`,
+    `test_error_inheritance_mixin_conflict_transitive`.
 
 - `local` - Durcir la compilation backend : passage `std::system` -> `fork` +
   `execvp` dans `main.cpp`, ajout de contrôle division par zéro en codegen `/` et

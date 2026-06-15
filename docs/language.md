@@ -264,7 +264,9 @@ class Worker extends Person with CanWork(nameValue: String, ageValue: Int) {
 ```
 
 La resolution des methodes suit une recherche dans la classe courante, puis dans
-le parent puis les mixins dans l'ordre d'énonciation (`with`).
+le parent puis les mixins dans l'ordre d'énonciation (`with`). Les conflits
+de méthodes sont détectés également quand une méthode ambiguë provient d'une
+chaîne d'héritage transitive.
 Quand une même méthode existe dans plusieurs parents/mixins sans redéfinition
 dans la classe courante, une erreur de conflit d'héritage est levée.
 

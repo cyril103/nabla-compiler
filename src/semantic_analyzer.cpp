@@ -2,7 +2,7 @@
 
 namespace {
 
-using MethodOwnerMap = std::map<std::string, std::string>;
+using MethodOwnerMap = std::map<std::string, std::set<std::string>>;
 using ParentMethodProviders = std::map<std::string, std::set<std::string>>;
 
 std::string formatMethodProviders(const std::set<std::string>& providers) {
@@ -32,8 +32,8 @@ void collectVisibleMethodsInHierarchy(
     }
 
     for (const auto& [methodName, _] : classIt->second.methods) {
-        if (!visibleMethods.count(methodName)) {
-            visibleMethods.emplace(methodName, classLookupName);
+        if (visibleMethods[methodName].empty()) {
+            visibleMethods[methodName].insert(classLookupName);
         }
     }
 
@@ -137,9 +137,9 @@ void SemanticAnalyzer::validateDeclaredTypes() {
             const std::string concreteParentType = substituteType(parentType, substitution);
             collectVisibleMethodsInHierarchy(
                 context, concreteParentType, substitution, visiting, visibleMethods);
-            for (const auto& [methodName, ownerClass] : visibleMethods) {
+            for (const auto& [methodName, ownerClasses] : visibleMethods) {
                 if (ownMethods.count(methodName)) continue;
-                inheritedProviders[methodName].insert(ownerClass);
+                inheritedProviders[methodName].insert(ownerClasses.begin(), ownerClasses.end());
             }
         }
         for (const auto& [methodName, providers] : inheritedProviders) {
