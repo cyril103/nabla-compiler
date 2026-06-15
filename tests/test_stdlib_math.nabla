@@ -5,22 +5,52 @@ def main(): Int = {
        absLong(-42L) == 42L &&
        absFloat(-2.5F) == 2.5F &&
        absDouble(-2.5) == 2.5 &&
+       clampInt(-3, 0, 10) == 0 &&
+       clampLong(-3L, 0L, 10L) == 0L &&
+       clampFloat(-3.0F, 0.0F, 10.0F) == 0.0F &&
+       clampDouble(-3.0, 0.0, 10.0) == 0.0 &&
        maxInt(1, 2) == 2 &&
        minInt(1, 2) == 1 &&
-       clampInt(15, 0, 10) == 10 &&
-       clampInt(-3, 0, 10) == 0 &&
        clampInt(7, 0, 10) == 7 &&
        signInt(-7) == -1 &&
        signInt(0) == 0 &&
        signInt(7) == 1 &&
+       signFloat(-7.0F) == -1.0F &&
+       signFloat(0.0F) == 0.0F &&
+       signFloat(7.0F) == 1.0F &&
+       signDouble(-7.0) == -1.0 &&
+       signDouble(0.0) == 0.0 &&
+       signDouble(7.0) == 1.0 &&
+       isEvenInt(2) &&
+       !isEvenInt(3) &&
+       isOddInt(3) &&
+       !isOddInt(2) &&
+       isEvenLong(2L) &&
+       !isEvenLong(3L) &&
+       isOddLong(3L) &&
+       !isOddLong(2L) &&
+       isBetweenInt(5, 0, 10) &&
+       !isBetweenInt(11, 0, 10) &&
+       isBetweenLong(5L, 0L, 10L) &&
+       !isBetweenLong(11L, 0L, 10L) &&
+        signInt(-7) == -1 &&
+        signInt(0) == 0 &&
+        signInt(7) == 1 &&
        gcdInt(84, 30) == 6 &&
-       lcmInt(7, 6) == 42 &&
-       powInt(2, 8) == 256 &&
-       powInt(2, 0) == 1 &&
-       powInt(2, -1) == 0 &&
+       gcdLong(-84L, 30L) == 6L &&
+       lcmLong(7L, 6L) == 42L &&
+        lcmInt(7, 6) == 42 &&
+        powInt(2, 8) == 256 &&
+        powInt(2, 0) == 1 &&
+        powInt(2, -1) == 0 &&
+       absDiffInt(3, 7) == 4 &&
+       absDiffLong(3L, 7L) == 4L &&
+       absDiffFloat(2.5F, 5.0F) == 2.5F &&
+       absDiffDouble(2.5, 5.0) == 2.5 &&
        factorialInt(6) == 720 &&
        maxDouble(3.0, 2.5) == 3.0 &&
        minDouble(-1.0, 2.0) == -1.0 &&
+       clampInt(15, 0, 10) == 10 &&
        signLong(-7L) == -1L &&
        signLong(0L) == 0L &&
        signLong(7L) == 1L {

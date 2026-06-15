@@ -131,7 +131,7 @@ Le pipeline implemente actuellement :
 - module standard `strings` avec `words(text)` pour decouper une ligne en
   tokens separes par des espaces en ignorant les segments vides;
 - premier module de bibliotheque standard `io` avec `println`, `input` et les
-- module de bibliotheque standard `math` avec `absInt`, `absLong`, `absFloat`, `absDouble`, `maxInt`, `maxLong`, `maxFloat`, `maxDouble`, `minInt`, `minLong`, `minFloat`, `minDouble`, `clampInt`, `signInt`, `signLong`, `gcdInt`, `lcmInt`, `powInt` et `factorialInt`.
+- module de bibliotheque standard `math` avec `absInt`, `absLong`, `absFloat`, `absDouble`, `maxInt`, `maxLong`, `maxFloat`, `maxDouble`, `minInt`, `minLong`, `minFloat`, `minDouble`, `clampInt`, `clampLong`, `clampFloat`, `clampDouble`, `signInt`, `signLong`, `signFloat`, `signDouble`, `isEvenInt`, `isOddInt`, `isEvenLong`, `isOddLong`, `isBetweenInt`, `isBetweenLong`, `gcdInt`, `lcmInt`, `gcdLong`, `lcmLong`, `powInt`, `factorialInt`, `absDiffInt`, `absDiffLong`, `absDiffFloat` et `absDiffDouble`.
   wrappers d'I/O fichiers texte;
 - module de bibliotheque standard `core.option_int` avec `OptionInt`,
   `optionIntSome`, `optionIntNone`, `map`, `filter` et `orElse`;
@@ -303,7 +303,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Optimiser les appels recursifs terminaux directs en sauts backend.
 
 ### P2 - Systeme De Types
-- [x] Ajouter la bibliotheque standard `math` de base avec `abs`, `max`, `min`, `clamp`, `sign`, `gcd`, `lcm`, `pow` et `factorial`.
+- [x] Etendre la bibliotheque standard `math` avec `clamp`, `sign`, predicates
+  `isEven`, `isOdd`, `isBetween`, `gcd`/`lcm` pour `Long`, et `absDiff`.
 
 - [ ] Formaliser `Int`, `Bool`, `Char`, `String`, `IntArray`, les types fonction canoniques et
   les types de classes.
@@ -479,7 +480,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   langage.
 
 ## Journal Des Jalons
-- `local` - Ajouter le module standard `math` avec `abs`, `max`, `min`, `clamp`, `sign`, `gcd`, `lcm`, `pow` et `factorial`.
+- `local` - Etendre la bibliotheque standard `math` (`clamp`, `sign`, `isEven`, `isOdd`,
+  `isBetween`, `gcdLong`, `lcmLong`, `absDiff`).
 
 - `local` - Ajouter les tests Project Euler 10 imperatif et fonctionnel, avec
   `Int.toLong` et `RangeInt.foldLong`.

@@ -106,6 +106,42 @@ def clampInt(value: Int, minimum: Int, maximum: Int): Int = {
     }
 }
 
+def clampLong(value: Long, minimum: Long, maximum: Long): Long = {
+    if value < minimum {
+        minimum
+    } else {
+        if value > maximum {
+            maximum
+        } else {
+            value
+        }
+    }
+}
+
+def clampFloat(value: Float, minimum: Float, maximum: Float): Float = {
+    if value < minimum {
+        minimum
+    } else {
+        if value > maximum {
+            maximum
+        } else {
+            value
+        }
+    }
+}
+
+def clampDouble(value: Double, minimum: Double, maximum: Double): Double = {
+    if value < minimum {
+        minimum
+    } else {
+        if value > maximum {
+            maximum
+        } else {
+            value
+        }
+    }
+}
+
 def signInt(value: Int): Int = {
     if value < 0 {
         -1
@@ -126,10 +162,65 @@ def signLong(value: Long): Long = {
     }
 }
 
+def signFloat(value: Float): Float = {
+    if value < 0.0F {
+        -1.0F
+    } else if value > 0.0F {
+        1.0F
+    } else {
+        0.0F
+    }
+}
+
+def signDouble(value: Double): Double = {
+    if value < 0.0 {
+        -1.0
+    } else if value > 0.0 {
+        1.0
+    } else {
+        0.0
+    }
+}
+
+def isEvenInt(value: Int): Bool = {
+    value % 2 == 0
+}
+
+def isOddInt(value: Int): Bool = {
+    value % 2 != 0
+}
+
+def isEvenLong(value: Long): Bool = {
+    value % 2L == 0L
+}
+
+def isOddLong(value: Long): Bool = {
+    value % 2L != 0L
+}
+
+def isBetweenInt(value: Int, minimum: Int, maximum: Int): Bool = {
+    value >= minimum && value <= maximum
+}
+
+def isBetweenLong(value: Long, minimum: Long, maximum: Long): Bool = {
+    value >= minimum && value <= maximum
+}
+
 def gcdInt(left: Int, right: Int): Int = {
     var x = absInt(left)
     var y = absInt(right)
     while y != 0 {
+        val remainder = x % y
+        x = y
+        y = remainder
+    }
+    x
+}
+
+def gcdLong(left: Long, right: Long): Long = {
+    var x = absLong(left)
+    var y = absLong(right)
+    while y != 0L {
         val remainder = x % y
         x = y
         y = remainder
@@ -144,6 +235,39 @@ def lcmInt(left: Int, right: Int): Int = {
     } else {
         (absInt(left) / divisor) * absInt(right)
     }
+}
+
+def lcmLong(left: Long, right: Long): Long = {
+    val divisor = gcdLong(left, right)
+    if divisor == 0L {
+        0L
+    } else {
+        (absLong(left) / divisor) * absLong(right)
+    }
+}
+
+def absDiffInt(left: Int, right: Int): Int = {
+    if left < right {
+        right - left
+    } else {
+        left - right
+    }
+}
+
+def absDiffLong(left: Long, right: Long): Long = {
+    if left < right {
+        right - left
+    } else {
+        left - right
+    }
+}
+
+def absDiffFloat(left: Float, right: Float): Float = {
+    absFloat(left - right)
+}
+
+def absDiffDouble(left: Double, right: Double): Double = {
+    absDouble(left - right)
 }
 
 def powInt(base: Int, exponent: Int): Int = {
