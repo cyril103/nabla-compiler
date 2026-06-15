@@ -1,5 +1,16 @@
 import io
 import collections.array
+import core.option
+
+class Student(nameValue: String, scoreValue: Int) {
+    def name(): String = {
+        nameValue
+    }
+
+    def score(): Int = {
+        scoreValue
+    }
+}
 
 def sizeOf[T](values: Array[T]): Int = {
     values.size()
@@ -13,66 +24,98 @@ def identityMap[T](values: Array[T]): Array[T] = {
     values.map(value => value)
 }
 
-def passed(score: Int): Bool = {
-    score >= 10
+def passed(student: Student): Bool = {
+    student.score() >= 10
 }
 
-def bonus(score: Int): Int = {
-    score + 2
+def excellent(student: Student): Bool = {
+    student.score() >= 18
 }
 
-def printScore(value: Int): Unit = {
-    print(value.toString())
+def printString(value: String): Unit = {
+    print(value)
     print(" ")
 }
 
-def printScores(title: String, scores: Array[Int]): Unit = {
+def printNames(title: String, names: ArrayObject[String]): Unit = {
     println(title)
-    scores.foreach(value => printScore(value))
+    names.foreach(name => printString(name))
     println("")
 }
 
-def printOptionInt(title: String, value: OptionInt): Unit = {
+def printOptionString(title: String, value: Option[String]): Unit = {
     print(title)
     if value.isEmpty() {
         println("none")
     } else {
-        println(value.getOrElse(0).toString())
+        println(value.getOrElse("none"))
     }
 }
 
-def report(scores: Array[Int]): Int = {
-    val adjusted = identityMap(scores.map(score => bonus(score)))
-    val passing = adjusted.filter(score => passed(score))
-    val failed = adjusted.filter(score => !passed(score))
-    val total = adjusted.fold(0, (accumulator, score) => accumulator + score)
-    val average = total / adjusted.size()
-    val firstScore = firstOf(adjusted)
+def scoreBand(student: Student): String = {
+    if excellent(student) {
+        "excellent"
+    } else {
+        if passed(student) {
+            "passing"
+        } else {
+            "retry"
+        }
+    }
+}
+
+def studentBadges(student: Student): ArrayObject[Option[String]] = {
+    val badges = arrayFill[Option[String]](2, optionSome(student.name()))
+    if excellent(student) {
+        badges.set(1, optionSome("honors"))
+    } else {
+        badges.set(1, optionNone("badge"))
+    }
+    badges
+}
+
+def indexLabel(index: Int): String = {
+    "student"
+}
+
+def report(students: Array[Student]): Int = {
+    val roster = identityMap(students)
+    val passing = roster.filter(student => passed(student))
+    val excellentStudents = roster.filter(student => excellent(student))
+    val passingNames = passing.map[String](student => student.name())
+    val bands = roster.map[String](scoreBand)
+    val badges = roster.flatMap[Option[String]](studentBadges)
+    val indexLabels = arrayIntRange(roster.size()).mapObject[String](indexLabel)
+    val total = roster.fold[Int](0, (accumulator, student) => accumulator + student.score())
+    val firstStudent = firstOf(roster)
+    val firstBadge = badges.get(1)
 
     println("Nabla student score report")
-    printScores("adjusted scores:", adjusted)
-    printScores("passing scores:", passing)
-    printScores("failed scores:", failed)
+    printNames("passing students:", passingNames)
+    printNames("score bands:", bands)
+    printNames("index labels:", indexLabels)
     print("class size: ")
-    println(sizeOf(adjusted).toString())
-    print("first adjusted score: ")
-    println(firstScore.toString())
+    println(sizeOf(roster).toString())
+    print("first student: ")
+    println(firstStudent.name())
     print("total: ")
     println(total.toString())
-    print("average: ")
-    println(average.toString())
     print("passing count: ")
     println(passing.size().toString())
-    printOptionInt("minimum: ", adjusted.min())
-    printOptionInt("maximum: ", adjusted.max())
-    printOptionInt("first excellent score: ", adjusted.find(score => score >= 18))
+    print("excellent count: ")
+    println(excellentStudents.size().toString())
+    printOptionString("first badge: ", firstBadge)
 
-    if passing.size() == 5 &&
-       failed.size() == 3 &&
-       total == 96 &&
-       average == 12 &&
-       firstScore == 5 &&
-       adjusted.max().getOrElse(0) == 19 {
+    if passing.size() == 3 &&
+       excellentStudents.size() == 1 &&
+       passingNames.get(0).length() == 3 &&
+       bands.get(1).length() == 5 &&
+       badges.size() == 8 &&
+       badges.get(1).getOrElse("x").length() == 6 &&
+       badges.get(3).isEmpty() &&
+       indexLabels.size() == 4 &&
+       total == 52 &&
+       firstStudent.name().length() == 3 {
         42
     } else {
         1
@@ -80,7 +123,14 @@ def report(scores: Array[Int]): Int = {
 }
 
 def main(): Int = {
-    val raw = arrayIntRange(8)
-    val scores = raw.map(score => score * 2 + 3)
-    report(scores)
+    val ada = new Student("Ada", 19)
+    val bob = new Student("Bob", 8)
+    val cy = new Student("Cy", 12)
+    val dee = new Student("Dee", 13)
+
+    val students = arrayFill[Student](4, ada)
+    students.set(1, bob)
+    students.set(2, cy)
+    students.set(3, dee)
+    report(students)
 }

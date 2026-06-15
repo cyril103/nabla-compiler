@@ -389,6 +389,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Refaire `examples/student_scores.nabla` comme exemple vitrine de
+  `Array[Student]`, `map[U]`, `filter`, `fold[U]`, `flatMap[U]` et
+  `mapObject[U]`.
 - `local` - Ajouter `flatMapObject[U]` sur les facades primitives avec wrappers
   top-level.
 - `local` - Ajouter `mapObject[U]` sur les facades primitives et autoriser la
