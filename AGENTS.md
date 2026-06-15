@@ -188,7 +188,7 @@ Le pipeline implemente actuellement :
 - backend ASM par defaut depuis l'IR couvrant la suite positive actuelle
   (fonctions, variables, controle de flux, imports, objets et methodes);
 - tests de compilation et d'execution via `make all-tests`.
-- tests Project Euler 1 a 8 comme banc progressif pour exercer le langage et la
+- tests Project Euler 1 a 9 comme banc progressif pour exercer le langage et la
   bibliotheque standard.
 
 Limites importantes :
@@ -476,6 +476,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `6751bd6` - Montrer l'I/O fichier dans `examples/command_shell.nabla`.
 - `290fbab` - Lire les fichiers texte complets.
 - `17b184f` - Documenter les helpers d'I/O texte.
+- `local` - Ajouter les tests Project Euler 9 imperatif et fonctionnel.
 - `local` - Ajouter `RangeInt` lazy et l'utiliser dans la variante collections
   de Project Euler 8.
 - `local` - Autoriser l'appel des champs de type fonction depuis les methodes.

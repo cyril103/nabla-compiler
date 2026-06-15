@@ -1,0 +1,32 @@
+import collections.int_array
+
+def productForPair(a: Int, b: Int): Int = {
+    val c = 1000 - a - b
+    if a < b && b < c && a * a + b * b == c * c {
+        a * b * c
+    } else {
+        0
+    }
+}
+
+def productForA(a: Int): Int = {
+    var b = a + 1
+    var product = 0
+
+    while b < 1000 - a && product == 0 {
+        product = productForPair(a, b)
+        b = b + 1
+    }
+
+    product
+}
+
+def main(): Int = {
+    val product = intRangeUntil(1, 1000)
+        .map(a => productForA(a))
+        .max()
+        .getOrElse(0)
+
+    print(product.toString())
+    0
+}

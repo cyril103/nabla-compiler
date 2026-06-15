@@ -1,0 +1,21 @@
+def main(): Int = {
+    var a = 1
+    var product = 0
+
+    while a < 1000 && product == 0 {
+        var b = a + 1
+        while b < 1000 && product == 0 {
+            val c = 1000 - a - b
+            if a * a + b * b == c * c {
+                product = a * b * c
+            } else {
+                product = product
+            }
+            b = b + 1
+        }
+        a = a + 1
+    }
+
+    print(product.toString())
+    0
+}
