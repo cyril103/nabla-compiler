@@ -106,8 +106,8 @@ Le pipeline implemente actuellement :
   litteraux `String`;
 - chaines `String` stockees comme buffers de bytes, avec `length` et
   `charAt(index): Char`, `toCharArray(): ArrayObject[Char]`, `toInt`,
-  `substring(from, until)`, `isEmpty`, `nonEmpty`, `startsWith`, `+`, `==`
-  et `!=`;
+  `substring(from, until)`, `indexOf`, `contains`, `isEmpty`, `nonEmpty`,
+  `startsWith`, `+`, `==` et `!=`;
 - jointure texte de tableaux via `ArrayInt` / `ArrayLong` /
   `ArrayBool.mkString(separator)` et `arrayMkString[Int/Long/Bool/String]`;
 - affichage console de `String` via la primitive globale `print`;
@@ -290,6 +290,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `String.toInt` et `parseInt`.
 - [x] Ajouter `String.toCharArray` vers `ArrayObject[Char]`.
 - [x] Ajouter `String.substring(from, until)`.
+- [x] Ajouter `String.indexOf` et `String.contains`.
 - [x] Ajouter `String.+` et `mkString` pour `ArrayInt`, `ArrayLong`,
   `ArrayBool` et `Array[String]`.
 - [x] Ajouter les operateurs booleens `&&`, `||` et `!`.
@@ -428,6 +429,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `local` - Ajouter `String.toInt` et `parseInt(value)`.
 - `local` - Ajouter `String.toCharArray(): ArrayObject[Char]`.
 - `local` - Ajouter `String.substring(from, until)`.
+- `local` - Ajouter `String.indexOf` et `String.contains`.
 - `local` - Ajouter `String.+` et `mkString` pour `ArrayInt`, `ArrayLong`,
   `ArrayBool` et `Array[String]`.
 - `local` - Ajouter la primitive d'entree console `readLine(): String` et

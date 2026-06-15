@@ -1,0 +1,15 @@
+def main(): Int = {
+    val text = "nabla language"
+
+    if text.indexOf("nab") == 0 &&
+       text.indexOf("la") == 3 &&
+       text.indexOf("language") == 6 &&
+       text.indexOf("") == 0 &&
+       text.indexOf("scala") == 0 - 1 &&
+       text.contains("lang") &&
+       !text.contains("rust") {
+        42
+    } else {
+        1
+    }
+}

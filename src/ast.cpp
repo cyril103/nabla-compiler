@@ -396,11 +396,12 @@ std::string MethodCallNode::getType() {
     if (receiverType == "String") {
         if (methodName == "+") return "String";
         if (isBoolBinaryMethod(methodName)) return "Bool";
-        if (methodName == "isEmpty" || methodName == "nonEmpty" || methodName == "startsWith") return "Bool";
+        if (methodName == "isEmpty" || methodName == "nonEmpty" || methodName == "startsWith" ||
+            methodName == "contains") return "Bool";
         if (methodName == "toInt") return "Int";
         if (methodName == "toCharArray") return "ArrayObject[Char]";
         if (methodName == "substring") return "String";
-        if (methodName == "length") return "Int";
+        if (methodName == "length" || methodName == "indexOf") return "Int";
         if (methodName == "charAt") return "Char";
     }
     if (receiverType == "Char") {
@@ -489,6 +490,18 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
                     "la méthode String.startsWith attend un argument de type String");
             }
             resolvedType = "Bool";
+            return;
+        }
+        if (methodName == "indexOf" || methodName == "contains") {
+            if (arguments.size() != 1) {
+                semanticError("la méthode String." + methodName + " attend un argument");
+            }
+            if (arguments[0]->getType() != "String") {
+                throw CompilerError(
+                    ErrorKind::Semantic, arguments[0]->getLocation(),
+                    "la méthode String." + methodName + " attend un argument de type String");
+            }
+            resolvedType = methodName == "contains" ? "Bool" : "Int";
             return;
         }
         if (methodName == "toInt") {
@@ -723,6 +736,13 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
             std::string loweredReceiver = receiver->lowerToIR(builder);
             std::string loweredPrefix = arguments[0]->lowerToIR(builder);
             return builder.emitMethodCall("String", "startsWith", loweredReceiver, {loweredPrefix}, "Bool");
+        }
+        if ((methodName == "indexOf" || methodName == "contains") && arguments.size() == 1) {
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            std::string loweredNeedle = arguments[0]->lowerToIR(builder);
+            return builder.emitMethodCall(
+                "String", methodName, loweredReceiver, {loweredNeedle},
+                methodName == "contains" ? "Bool" : "Int");
         }
         if (methodName == "toInt" && arguments.empty()) {
             std::string loweredReceiver = receiver->lowerToIR(builder);

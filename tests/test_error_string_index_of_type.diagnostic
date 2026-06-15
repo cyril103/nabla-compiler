@@ -1,0 +1,1 @@
+tests/test_error_string_index_of_type.nabla:2:21: semantic error: la méthode String.indexOf attend un argument de type String

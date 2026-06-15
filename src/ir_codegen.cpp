@@ -817,6 +817,15 @@ private:
             }
         } else if (className == "String" && methodName == "startsWith") {
             out << "    call Runtime_stringStartsWith\n";
+        } else if (className == "String" && methodName == "indexOf") {
+            out << "    call Runtime_stringIndexOf\n";
+        } else if (className == "String" && methodName == "contains") {
+            out << "    call Runtime_stringIndexOf\n";
+            out << "    cmp rax, -1\n";
+            out << "    setne al\n";
+            out << "    movzx rax, al\n";
+            out << "    shl rax, 1\n";
+            out << "    or rax, 1\n";
         } else if (className == "String" && methodName == "toInt") {
             out << "    call Runtime_stringToInt\n";
         } else if (className == "String" && methodName == "toCharArray") {
