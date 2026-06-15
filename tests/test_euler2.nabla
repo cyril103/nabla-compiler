@@ -1,0 +1,20 @@
+def main(): Int = {
+    var previous = 1
+    var current = 2
+    var total = 0
+
+    while current <= 4000000 {
+        if current % 2 == 0 {
+            total = total + current
+        } else {
+            total = total
+        }
+
+        val next = previous + current
+        previous = current
+        current = next
+    }
+
+    print(total.toString())
+    0
+}

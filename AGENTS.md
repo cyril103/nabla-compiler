@@ -458,6 +458,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `6751bd6` - Montrer l'I/O fichier dans `examples/command_shell.nabla`.
 - `290fbab` - Lire les fichiers texte complets.
 - `17b184f` - Documenter les helpers d'I/O texte.
+- `local` - Ajouter un test Project Euler 2 avec Fibonacci imperatif et
+  verification stdout.
 - `local` - Ajouter l'operateur `%` pour `Int` et `Long`, avec tests Project
   Euler 1 imperatif et `ArrayInt.range/filter/sum`.
 - `local` - Ajouter `Char` ASCII et `String.charAt(index): Char`.
