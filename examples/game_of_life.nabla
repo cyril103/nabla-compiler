@@ -102,6 +102,31 @@ def printGrid(title: String, grid: IntArray, width: Int, height: Int): Unit = {
     println(renderGrid(grid, width, height))
 }
 
+def generationCount(answer: String): Int = {
+    if answer.isEmpty() {
+        2
+    } else {
+        val requested = answer.toInt()
+        if requested < 0 {
+            0
+        } else {
+            requested
+        }
+    }
+}
+
+def printGenerations(initial: IntArray, width: Int, height: Int, count: Int): IntArray = {
+    var generation = 0
+    var current = initial
+    printGrid("tick 0", current, width, height)
+    while (generation < count) {
+        generation = generation + 1
+        current = step(current, width, height)
+        printGrid("tick " + generation.toString(), current, width, height)
+    }
+    current
+}
+
 def isVerticalBlinker(grid: IntArray, width: Int): Bool = {
     grid.get(cellIndex(width, 2, 1)) == 1 &&
     grid.get(cellIndex(width, 2, 2)) == 1 &&
@@ -125,12 +150,13 @@ def main(): Int = {
     grid.set(cellIndex(width, 2, 2), 1)
     grid.set(cellIndex(width, 2, 3), 1)
 
+    println("Game of Life: blinker")
+    println("How many generations? Empty input keeps 2.")
+    val generations = generationCount(input())
+    printGenerations(grid, width, height, generations)
+
     val first = step(grid, width, height)
     val second = step(first, width, height)
-
-    printGrid("tick 0", grid, width, height)
-    printGrid("tick 1", first, width, height)
-    printGrid("tick 2", second, width, height)
 
     if isVerticalBlinker(grid, width) &&
        isHorizontalBlinker(first, width) &&

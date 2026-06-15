@@ -4,7 +4,7 @@
 namespace RuntimeASM {
 void emit(std::ostream& out) {
     out << "section .data\n"
-        << "    global_heap: times 4096 db 0\n"
+        << "    global_heap: times 65536 db 0\n"
         << "    global_heap_end:\n"
         << "    heap_pointer: dq global_heap\n"
         << "    newline: db 10\n\n";

@@ -1,5 +1,5 @@
 def main(): Int = {
-    for 80 {
+    for 1400 {
         42.toString()
     }
     0
