@@ -142,6 +142,14 @@ def clampDouble(value: Double, minimum: Double, maximum: Double): Double = {
     }
 }
 
+def isCloseFloat(left: Float, right: Float, epsilon: Float): Bool = {
+    absDiffFloat(left, right) < epsilon
+}
+
+def isCloseDouble(left: Double, right: Double, epsilon: Double): Bool = {
+    absDiffDouble(left, right) < epsilon
+}
+
 def signInt(value: Int): Int = {
     if value < 0 {
         -1
@@ -284,6 +292,34 @@ def powInt(base: Int, exponent: Int): Int = {
     }
 }
 
+def powFloat(base: Float, exponent: Int): Float = {
+    if exponent < 0 {
+        0.0F
+    } else {
+        var result = 1.0F
+        var current = 0
+        while current < exponent {
+            result = result * base
+            current = current + 1
+        }
+        result
+    }
+}
+
+def powDouble(base: Double, exponent: Int): Double = {
+    if exponent < 0 {
+        0.0
+    } else {
+        var result = 1.0
+        var current = 0
+        while current < exponent {
+            result = result * base
+            current = current + 1
+        }
+        result
+    }
+}
+
 def factorialInt(value: Int): Int = {
     if value < 0 {
         0
@@ -295,5 +331,37 @@ def factorialInt(value: Int): Int = {
             current = current + 1
         }
         result
+    }
+}
+
+def sqrtFloat(value: Float): Float = {
+    if value < 0.0F {
+        -1.0F
+    } else if value == 0.0F {
+        0.0F
+    } else {
+        var guess = value
+        var i = 0
+        while i < 16 {
+            guess = (guess + value / guess) * 0.5F
+            i = i + 1
+        }
+        guess
+    }
+}
+
+def sqrtDouble(value: Double): Double = {
+    if value < 0.0 {
+        -1.0
+    } else if value == 0.0 {
+        0.0
+    } else {
+        var guess = value
+        var i = 0
+        while i < 16 {
+            guess = (guess + value / guess) * 0.5
+            i = i + 1
+        }
+        guess
     }
 }

@@ -131,7 +131,15 @@ Le pipeline implemente actuellement :
 - module standard `strings` avec `words(text)` pour decouper une ligne en
   tokens separes par des espaces en ignorant les segments vides;
 - premier module de bibliotheque standard `io` avec `println`, `input` et les
-- module de bibliotheque standard `math` avec `absInt`, `absLong`, `absFloat`, `absDouble`, `maxInt`, `maxLong`, `maxFloat`, `maxDouble`, `minInt`, `minLong`, `minFloat`, `minDouble`, `clampInt`, `clampLong`, `clampFloat`, `clampDouble`, `signInt`, `signLong`, `signFloat`, `signDouble`, `isEvenInt`, `isOddInt`, `isEvenLong`, `isOddLong`, `isBetweenInt`, `isBetweenLong`, `gcdInt`, `lcmInt`, `gcdLong`, `lcmLong`, `powInt`, `factorialInt`, `absDiffInt`, `absDiffLong`, `absDiffFloat` et `absDiffDouble`.
+- module de bibliotheque standard `math` avec `absInt`, `absLong`, `absFloat`,
+  `absDouble`, `absDiffInt`, `absDiffLong`, `absDiffFloat`, `absDiffDouble`,
+  `maxInt`, `maxLong`, `maxFloat`, `maxDouble`, `minInt`, `minLong`,
+  `minFloat`, `minDouble`, `clampInt`, `clampLong`, `clampFloat`,
+  `clampDouble`, `signInt`, `signLong`, `signFloat`, `signDouble`,
+  `isEvenInt`, `isOddInt`, `isEvenLong`, `isOddLong`, `isBetweenInt`,
+  `isBetweenLong`, `gcdInt`, `lcmInt`, `gcdLong`, `lcmLong`, `powInt`,
+  `powFloat`, `powDouble`, `factorialInt`, `isCloseFloat`, `isCloseDouble`,
+  `sqrtFloat`, `sqrtDouble`.
   wrappers d'I/O fichiers texte;
 - module de bibliotheque standard `core.option_int` avec `OptionInt`,
   `optionIntSome`, `optionIntNone`, `map`, `filter` et `orElse`;
@@ -304,7 +312,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ### P2 - Systeme De Types
 - [x] Etendre la bibliotheque standard `math` avec `clamp`, `sign`, predicates
-  `isEven`, `isOdd`, `isBetween`, `gcd`/`lcm` pour `Long`, et `absDiff`.
+  `isEven`, `isOdd`, `isBetween`, `gcd`/`lcm` pour `Long`, `absDiff`,
+  `pow` pour `Float` et `Double`, `isClose` et `sqrt`.
 
 - [ ] Formaliser `Int`, `Bool`, `Char`, `String`, `IntArray`, les types fonction canoniques et
   les types de classes.
@@ -480,8 +489,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   langage.
 
 ## Journal Des Jalons
-- `local` - Etendre la bibliotheque standard `math` (`clamp`, `sign`, `isEven`, `isOdd`,
-  `isBetween`, `gcdLong`, `lcmLong`, `absDiff`).
+- `local` - Etendre la bibliotheque standard `math` avec `pow` pour flottants,
+  `sqrt` et comparaisons de proximité `isClose`.
 
 - `local` - Ajouter les tests Project Euler 10 imperatif et fonctionnel, avec
   `Int.toLong` et `RangeInt.foldLong`.
