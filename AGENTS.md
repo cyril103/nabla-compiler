@@ -92,6 +92,8 @@ Le pipeline implemente actuellement :
 - inference des types de parametres pour lambdas multi-parametres en argument,
   par exemple `xs.fold(0, (acc, value) => acc + value)`;
 - types fonction imbriques en retour, par exemple `(Int) => ((Int) => Int)`;
+- optimisation backend des appels recursifs terminaux directs, y compris dans
+  une branche `if` qui alimente le retour de fonction;
 - types `Bool`, `Unit`, `Long`, `Float` et `Double` formalises; les
   comparaisons retournent `Bool` et les conditions `if` / `while` attendent
   `Bool`;
@@ -285,6 +287,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Couvrir le backend ASM depuis IR pour tout le langage actuel.
 - [x] Generer l'assembleur par defaut depuis l'IR.
 - [x] Supprimer l'ancien code de generation directe depuis l'AST.
+- [x] Optimiser les appels recursifs terminaux directs en sauts backend.
 
 ### P2 - Systeme De Types
 
@@ -349,6 +352,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `IntConsumerFn` pour les fonctions `Int => Unit`.
 - [x] Ajouter `arrayIntRange` et `ArrayInt.foreach` comme premiers parcours
   fonctionnels de collection.
+- [x] Ajouter `arrayIntRangeUntil(start, until)` pour les plages `Int` bornees.
 - [x] Ajouter les closures avec capture par valeur pour les lambdas `Int`.
 - [x] Generaliser les closures aux types fonction complets.
 - [x] Ajouter l'inference simple des types de parametres de lambda.
@@ -458,6 +462,11 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `6751bd6` - Montrer l'I/O fichier dans `examples/command_shell.nabla`.
 - `290fbab` - Lire les fichiers texte complets.
 - `17b184f` - Documenter les helpers d'I/O texte.
+- `local` - Ajouter l'optimisation backend des appels recursifs terminaux et
+  l'utiliser dans le `gcd` de Project Euler 5.
+- `local` - Ajouter `arrayIntRangeUntil(start, until)` et simplifier la
+  variante `fold` de Project Euler 5.
+- `local` - Ajouter les tests Project Euler 5 imperatif et `fold`.
 - `local` - Ajouter un test Project Euler 4 avec palindrome numerique et
   boucles imbriquees.
 - `local` - Ajouter un test Project Euler 3 avec factorisation `Long`.

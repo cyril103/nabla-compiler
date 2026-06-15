@@ -1,0 +1,12 @@
+def countDown(value: Int, total: Int): Int = {
+    if value == 0 {
+        total
+    } else {
+        countDown(value - 1, total + 1)
+    }
+}
+
+def main(): Int = {
+    print(countDown(100000, 0).toString())
+    0
+}

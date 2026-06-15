@@ -1,0 +1,14 @@
+import collections.int_array
+
+def main(): Int = {
+    val values = arrayIntRangeUntil(2, 5)
+    val empty = arrayIntRangeUntil(5, 2)
+
+    if values.mkString(",") == "2,3,4" &&
+       values.sum() == 9 &&
+       empty.size() == 0 {
+        42
+    } else {
+        1
+    }
+}

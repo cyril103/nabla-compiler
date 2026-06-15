@@ -118,7 +118,16 @@ public:
         for (size_t i = 0; i < function.parameters.size(); ++i) {
             storeRegister("%" + function.parameters[i].name, callingConvention.globalArgumentRegisters[i]);
         }
-        for (const auto& instruction : function.instructions) emitInstruction(instruction);
+        out << tailEntryLabel() << ":\n";
+        for (size_t i = 0; i < function.instructions.size();) {
+            if (isTailRecursiveCallAt(i)) {
+                emitTailRecursiveCall(function.instructions[i]);
+                i += 2;
+                continue;
+            }
+            emitInstruction(function.instructions[i]);
+            ++i;
+        }
         out << "\n";
     }
 
@@ -132,6 +141,10 @@ private:
     std::map<std::string, std::string> valueTypes;
     std::map<std::string, int> emittedIncomingJumps;
     int nextIndirectCallId = 0;
+
+    std::string tailEntryLabel() const {
+        return "L_tail_entry_" + asmSymbolPart(function.name);
+    }
 
     void collectPhiLabels() {
         for (size_t i = 0; i < function.instructions.size(); ++i) {
@@ -313,6 +326,60 @@ private:
             case IROpcode::Phi:
                 break;
         }
+    }
+
+    bool isTailRecursiveCallAt(size_t index) const {
+        if (index + 1 >= function.instructions.size()) return false;
+        const IRInstruction& call = function.instructions[index];
+        if (call.opcode != IROpcode::Call || call.operation != function.name) return false;
+        if (call.operands.size() != function.parameters.size()) return false;
+
+        const IRInstruction& next = function.instructions[index + 1];
+        if (next.opcode == IROpcode::Return) {
+            return next.operands.size() == 1 && next.operands[0] == call.result;
+        }
+        if (next.opcode != IROpcode::Jump || next.operands.size() != 1) return false;
+        return jumpTargetReturnsCallResult(next.operands[0], call.result);
+    }
+
+    bool jumpTargetReturnsCallResult(const std::string& targetLabel, const std::string& callResult) const {
+        for (size_t i = 0; i < function.instructions.size(); ++i) {
+            const IRInstruction& label = function.instructions[i];
+            if (label.opcode != IROpcode::Label || label.operands.empty() ||
+                label.operands[0] != targetLabel) {
+                continue;
+            }
+
+            size_t next = i + 1;
+            std::string returningPhi;
+            while (next < function.instructions.size() &&
+                   function.instructions[next].opcode == IROpcode::Phi) {
+                const IRInstruction& phi = function.instructions[next];
+                if (std::find(phi.operands.begin(), phi.operands.end(), callResult) != phi.operands.end()) {
+                    returningPhi = phi.result;
+                }
+                ++next;
+            }
+            return !returningPhi.empty() &&
+                   next < function.instructions.size() &&
+                   function.instructions[next].opcode == IROpcode::Return &&
+                   function.instructions[next].operands.size() == 1 &&
+                   function.instructions[next].operands[0] == returningPhi;
+        }
+        return false;
+    }
+
+    void emitTailRecursiveCall(const IRInstruction& instruction) {
+        if (instruction.operands.size() > callingConvention.globalArgumentRegisters.size()) {
+            codegenError("appel tail-rec IR avec plus de 6 arguments");
+        }
+        for (size_t i = 0; i < instruction.operands.size(); ++i) {
+            loadValue(instruction.operands[i], callingConvention.globalArgumentRegisters[i]);
+        }
+        for (size_t i = 0; i < instruction.operands.size(); ++i) {
+            storeRegister("%" + function.parameters[i].name, callingConvention.globalArgumentRegisters[i]);
+        }
+        out << "    jmp " << tailEntryLabel() << "\n";
     }
 
     void emitPhiTransfers(const std::string& targetLabel) {

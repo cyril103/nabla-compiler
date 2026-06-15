@@ -57,6 +57,21 @@ def intArrayRange(size: Int): IntArray = {
     xs
 }
 
+def intArrayRangeUntil(start: Int, until: Int): IntArray = {
+    val size = if until > start {
+        until - start
+    } else {
+        0
+    }
+    val xs = new IntArray(size)
+    var index = 0
+    while (index < size) {
+        xs.set(index, start + index)
+        index = index + 1
+    }
+    xs
+}
+
 def intArrayMap(xs: IntArray, f: (Int) => Int): IntArray = {
     val mapped = new IntArray(xs.length())
     var index = 0
@@ -786,4 +801,8 @@ def arrayIntForeach(xs: ArrayInt, f: (Int) => Unit): Unit = {
 
 def arrayIntRange(size: Int): ArrayInt = {
     new ArrayInt(intArrayRange(size))
+}
+
+def arrayIntRangeUntil(start: Int, until: Int): ArrayInt = {
+    new ArrayInt(intArrayRangeUntil(start, until))
 }

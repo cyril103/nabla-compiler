@@ -1,0 +1,29 @@
+def gcd(left: Int, right: Int): Int = {
+    var a = left
+    var b = right
+
+    while b != 0 {
+        val next = a % b
+        a = b
+        b = next
+    }
+
+    a
+}
+
+def lcm(left: Int, right: Int): Int = {
+    (left / gcd(left, right)) * right
+}
+
+def main(): Int = {
+    var value = 1
+    var divisor = 2
+
+    while divisor <= 20 {
+        value = lcm(value, divisor)
+        divisor = divisor + 1
+    }
+
+    print(value.toString())
+    0
+}

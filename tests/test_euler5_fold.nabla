@@ -1,0 +1,25 @@
+import collections.int_array
+
+def gcdTail(left: Int, right: Int): Int = {
+    if right == 0 {
+        left
+    } else {
+        gcdTail(right, left % right)
+    }
+}
+
+def gcd(left: Int, right: Int): Int = {
+    gcdTail(left, right)
+}
+
+def lcm(left: Int, right: Int): Int = {
+    (left / gcd(left, right)) * right
+}
+
+def main(): Int = {
+    val value = arrayIntRangeUntil(1, 21)
+        .fold(1, (accumulator, divisor) => lcm(accumulator, divisor))
+
+    print(value.toString())
+    0
+}

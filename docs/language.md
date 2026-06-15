@@ -109,6 +109,10 @@ def main(): Int = {
 }
 ```
 
+Les appels recursifs directs en position terminale sont optimises en boucle par
+le backend. Cela couvre notamment les branches `if` qui retournent directement
+la valeur de l'appel recursif.
+
 `Unit` sert aux fonctions a effet.
 
 ```nabla
@@ -329,6 +333,10 @@ Operations courantes :
 - `flatMap`
 - `foreach`
 - `mkString(separator)` pour les tableaux de `Int`, `Long`, `Bool` et `String`
+
+`collections.int_array` expose aussi `arrayIntRange(size)` pour produire
+`0..size-1` et `arrayIntRangeUntil(start, until)` pour produire une plage
+`start..until-1`.
 
 `Array[Int]`, `Array[Long]`, `Array[Float]`, `Array[Double]` et `Array[Bool]`
 sont specialises vers des facades primitives. Les autres types passent par
