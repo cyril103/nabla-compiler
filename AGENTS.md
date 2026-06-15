@@ -183,6 +183,8 @@ Le pipeline implemente actuellement :
 - backend ASM par defaut depuis l'IR couvrant la suite positive actuelle
   (fonctions, variables, controle de flux, imports, objets et methodes);
 - tests de compilation et d'execution via `make all-tests`.
+- tests Project Euler 1 a 6 comme banc progressif pour exercer le langage et la
+  bibliotheque standard.
 
 Limites importantes :
 
@@ -450,6 +452,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter une premiere documentation utilisateur du langage.
 - [x] Ajouter une roadmap de reprise dans `docs/roadmap.md`.
 - [x] Ajouter un support Vim minimal pour `*.nabla`.
+- [x] Ajouter des tests Project Euler progressifs pour guider les extensions du
+  langage.
 
 ## Journal Des Jalons
 
@@ -464,6 +468,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `17b184f` - Documenter les helpers d'I/O texte.
 - `local` - Ajouter l'optimisation backend des appels recursifs terminaux et
   l'utiliser dans le `gcd` de Project Euler 5.
+- `local` - Ajouter un test Project Euler 6 avec `arrayIntRangeUntil`, `map` et
+  `sum`.
 - `local` - Ajouter `arrayIntRangeUntil(start, until)` et simplifier la
   variante `fold` de Project Euler 5.
 - `local` - Ajouter les tests Project Euler 5 imperatif et `fold`.
