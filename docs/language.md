@@ -370,11 +370,18 @@ def main(): Int = {
 }
 ```
 
-`readTextFile` lit jusqu'a 4096 octets dans cette premiere version. Si le
-fichier ne peut pas etre ouvert, elle retourne une chaine vide. `pathExists`
-permet de distinguer un fichier absent d'un fichier vide. `writeTextFile` cree
-ou tronque le fichier. `appendTextFile` cree le fichier si besoin puis ajoute le
-contenu a la fin. Les deux fonctions retournent le nombre d'octets ecrits.
+Conventions actuelles :
+
+- `readTextFile` lit jusqu'a 4096 octets dans cette premiere version.
+- Si un fichier ne peut pas etre ouvert ou lu, `readTextFile` retourne une
+  chaine vide.
+- `pathExists` permet de distinguer un fichier absent d'un fichier vide.
+- `writeTextFile` cree ou tronque le fichier.
+- `appendTextFile` cree le fichier si besoin puis ajoute le contenu a la fin.
+- `writeTextFile` et `appendTextFile` retournent le nombre d'octets ecrits.
+- Une valeur negative indique une erreur de syscall Linux. Nabla n'a pas encore
+  de type `Result` ni d'abstraction `errno`.
+- Les dossiers parents ne sont pas crees automatiquement.
 
 ## Module `strings`
 

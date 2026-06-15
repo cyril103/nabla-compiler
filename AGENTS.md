@@ -416,6 +416,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter une primitive d'affichage console pour `String`.
 - [x] Ajouter une primitive d'entree console `readLine(): String`.
 - [x] Ajouter une premiere lecture/ecriture de fichiers texte.
+- [x] Ajouter verification d'existence et append pour fichiers texte.
+- [x] Documenter les conventions d'erreur actuelles de l'IO fichier.
 - [x] Ajouter une premiere collection native `IntArray`.
 - [x] Ajouter une collection native `LongArray`.
 - [x] Ajouter une collection native `FloatArray`.
@@ -456,6 +458,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `io.input()`.
 - `local` - Ajouter `readFile`, `writeFile` et les wrappers
   `io.readTextFile` / `io.writeTextFile`.
+- `local` - Ajouter `fileExists`, `appendFile` et les wrappers
+  `io.pathExists` / `io.appendTextFile`.
+- `local` - Documenter les conventions actuelles de l'IO fichier.
 - `local` - Ajouter la facade standard `arrayFold[T]` / `arrayFold[T, U]`.
 - `local` - Completer `arrayFlatMap[T]` pour toutes les facades primitives.
 - `local` - Ajouter la facade standard `arrayFilter[T]`.
