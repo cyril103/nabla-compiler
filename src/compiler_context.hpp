@@ -117,6 +117,28 @@ inline std::optional<std::string> resolveStdlibFunctionAlias(
         typeArguments[0] != "Bool") {
         if (name == "arrayMap") return "objectArrayMap";
     }
+    if (name == "arrayMap" && typeArguments.size() == 2) {
+        if (typeArguments[0] == "Int") {
+            if (typeArguments[1] == "Int") return "arrayIntMap";
+            return "arrayIntMapObject";
+        }
+        if (typeArguments[0] == "Long") {
+            if (typeArguments[1] == "Long") return "arrayLongMap";
+            return "arrayLongMapObject";
+        }
+        if (typeArguments[0] == "Float") {
+            if (typeArguments[1] == "Float") return "arrayFloatMap";
+            return "arrayFloatMapObject";
+        }
+        if (typeArguments[0] == "Double") {
+            if (typeArguments[1] == "Double") return "arrayDoubleMap";
+            return "arrayDoubleMapObject";
+        }
+        if (typeArguments[0] == "Bool") {
+            if (typeArguments[1] == "Bool") return "arrayBoolMap";
+            return "arrayBoolMapObject";
+        }
+    }
     return std::nullopt;
 }
 

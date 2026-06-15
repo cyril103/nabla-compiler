@@ -1,0 +1,59 @@
+import collections.array
+import core.option
+
+def intLabel(value: Int): String = {
+    "int"
+}
+
+def longLabel(value: Long): String = {
+    "long"
+}
+
+def floatLabel(value: Float): String = {
+    "float"
+}
+
+def doubleLabel(value: Double): String = {
+    "double"
+}
+
+def boolLabel(value: Bool): String = {
+    if value {
+        "true"
+    } else {
+        "false"
+    }
+}
+
+def maybePositive(value: Int): Option[String] = {
+    if value > 0 {
+        optionSome("positive")
+    } else {
+        optionNone("zero")
+    }
+}
+
+def main(): Int = {
+    val ints = arrayIntRange(2)
+    val explicitSame = arrayMap[Int, Int](ints, value => value + 1)
+    val intLabels = arrayMap[Int, String](ints, intLabel)
+    val maybeLabels = arrayMap[Int, Option[String]](ints, maybePositive)
+
+    val longs = arrayMap[Long, String](arrayFill[Long](1, 4L), longLabel)
+    val floats = arrayMap[Float, String](arrayFill[Float](1, 1.5F), floatLabel)
+    val doubles = arrayMap[Double, String](arrayFill[Double](1, 2.5), doubleLabel)
+    val bools = arrayMap[Bool, String](arrayFill[Bool](2, false), boolLabel)
+
+    if explicitSame.sum() == 3 &&
+       intLabels.get(0).length() == 3 &&
+       intLabels.get(1).length() == 3 &&
+       maybeLabels.get(1).getOrElse("x").length() == 8 &&
+       longs.get(0).length() == 4 &&
+       floats.get(0).length() == 5 &&
+       doubles.get(0).length() == 6 &&
+       bools.get(0).length() == 5 {
+        42
+    } else {
+        1
+    }
+}

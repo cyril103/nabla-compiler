@@ -140,6 +140,8 @@ Le pipeline implemente actuellement :
   `ArrayInt`, `ArrayLong`, `ArrayFloat`, `ArrayDouble` ou `ArrayBool` pour
   `T = Int`, `Long`, `Float`, `Double` ou `Bool`, et vers `ArrayObject[T]`
   pour les types concrets non specialises comme `String` et `Array[Int]`;
+  `arrayMap[Primitive, U]` produit `ArrayObject[U]` quand la sortie ne reste pas
+  dans la meme primitive specialisee;
 - collection native `ObjectArray[T]` stockant des slots runtime de 64 bits, avec
   facade standard `ArrayObject[T]`, `objectArrayFill[T]`,
   `objectArrayMap[T, U]`, `objectArrayFilter[T]`, `objectArrayFold[T, U]`,
@@ -175,7 +177,8 @@ Limites importantes :
   vers `ArrayBool`; `arrayFill[T]`, `arrayMap[T]`, `arrayMap[T, U]` et
   `arrayForeach[T]` sont des fonctions standard generiques specialisees pour
   `Int`, `Long`, `Float`, `Double` et `Bool`, mais pas encore une
-  implementation unique de tableau generique; `Array[T]` est valide dans les
+  implementation unique de tableau generique; `arrayMap[Primitive, U]` peut
+  mapper une facade primitive vers `ArrayObject[U]`; `Array[T]` est valide dans les
   signatures generiques utilisateur et se specialise correctement quand `T`
   devient concret, avec une premiere surface de methodes communes; `map[U]`
   existe sur `ArrayObject[T]`; `filter` existe sur `ArrayInt` et
@@ -344,6 +347,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `ArrayObject[T].fold[U]`.
 - [x] Ajouter `ArrayObject[T].flatMap[U]`.
 - [x] Etendre `ArrayObject[T].map` en `map[U]`.
+- [x] Ajouter `arrayMap[Primitive, U]` vers `ArrayObject[U]`.
 - [x] Etendre les aliases standard pour choisir automatiquement :
   `Array[Int] -> ArrayInt`, `Array[Long] -> ArrayLong`,
   `Array[Float] -> ArrayFloat`, `Array[Double] -> ArrayDouble`,
@@ -377,6 +381,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Ajouter les ponts `arrayMap[Primitive, U]` vers `ArrayObject[U]`
+  pour `Int`, `Long`, `Float`, `Double` et `Bool`.
 - `local` - Etendre `ArrayObject[T].map` en `map[U]` et propager les
   specialisations de methodes generiques via les aliases `Array[T]`.
 - `local` - Ajouter `ArrayObject[T].flatMap[U]` et le tester avec `String` et

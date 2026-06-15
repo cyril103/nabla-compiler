@@ -1,3 +1,5 @@
+import collections.object_array
+
 def boolArrayFill(size: Int, value: Bool): BoolArray = {
     val xs = new BoolArray(size)
     var index = 0
@@ -60,6 +62,16 @@ def boolArrayMap(xs: BoolArray, f: (Bool) => Bool): BoolArray = {
     mapped
 }
 
+def boolArrayMapObject[U](xs: BoolArray, f: (Bool) => U): ArrayObject[U] = {
+    val mapped = new ObjectArray[U](xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        mapped.set(index, f(xs.get(index)))
+        index = index + 1
+    }
+    new ArrayObject[U](mapped)
+}
+
 class ArrayBool(values: BoolArray) {
     def length(): Int = {
         values.length()
@@ -120,6 +132,10 @@ def arrayBoolFill(size: Int, value: Bool): ArrayBool = {
 
 def arrayBoolMap(xs: ArrayBool, f: (Bool) => Bool): ArrayBool = {
     xs.map(f)
+}
+
+def arrayBoolMapObject[T, U](xs: ArrayBool, f: (Bool) => U): ArrayObject[U] = {
+    boolArrayMapObject[U](xs.raw(), f)
 }
 
 def arrayBoolForeach(xs: ArrayBool, f: (Bool) => Unit): Unit = {

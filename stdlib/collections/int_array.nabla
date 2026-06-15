@@ -1,4 +1,5 @@
 import core.option_int
+import collections.object_array
 
 def intClamp(value: Int, minimum: Int, maximum: Int): Int = {
     if value < minimum {
@@ -50,6 +51,16 @@ def intArrayMap(xs: IntArray, f: (Int) => Int): IntArray = {
         index = index + 1
     }
     mapped
+}
+
+def intArrayMapObject[U](xs: IntArray, f: (Int) => U): ArrayObject[U] = {
+    val mapped = new ObjectArray[U](xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        mapped.set(index, f(xs.get(index)))
+        index = index + 1
+    }
+    new ArrayObject[U](mapped)
 }
 
 def intArrayFilter(xs: IntArray, predicate: (Int) => Bool): IntArray = {
@@ -693,6 +704,10 @@ def arrayIntFill(size: Int, value: Int): ArrayInt = {
 
 def arrayIntMap(xs: ArrayInt, f: (Int) => Int): ArrayInt = {
     xs.map(f)
+}
+
+def arrayIntMapObject[T, U](xs: ArrayInt, f: (Int) => U): ArrayObject[U] = {
+    intArrayMapObject[U](xs.raw(), f)
 }
 
 def arrayIntForeach(xs: ArrayInt, f: (Int) => Unit): Unit = {

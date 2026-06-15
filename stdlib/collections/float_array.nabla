@@ -1,3 +1,5 @@
+import collections.object_array
+
 def floatArrayFill(size: Int, value: Float): FloatArray = {
     val xs = new FloatArray(size)
     var index = 0
@@ -16,6 +18,16 @@ def floatArrayMap(xs: FloatArray, f: (Float) => Float): FloatArray = {
         index = index + 1
     }
     mapped
+}
+
+def floatArrayMapObject[U](xs: FloatArray, f: (Float) => U): ArrayObject[U] = {
+    val mapped = new ObjectArray[U](xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        mapped.set(index, f(xs.get(index)))
+        index = index + 1
+    }
+    new ArrayObject[U](mapped)
 }
 
 class ArrayFloat(values: FloatArray) {
@@ -66,6 +78,10 @@ def arrayFloatFill(size: Int, value: Float): ArrayFloat = {
 
 def arrayFloatMap(xs: ArrayFloat, f: (Float) => Float): ArrayFloat = {
     xs.map(f)
+}
+
+def arrayFloatMapObject[T, U](xs: ArrayFloat, f: (Float) => U): ArrayObject[U] = {
+    floatArrayMapObject[U](xs.raw(), f)
 }
 
 def arrayFloatForeach(xs: ArrayFloat, f: (Float) => Unit): Unit = {

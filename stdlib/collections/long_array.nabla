@@ -1,3 +1,5 @@
+import collections.object_array
+
 def longArrayFill(size: Int, value: Long): LongArray = {
     val xs = new LongArray(size)
     var index = 0
@@ -26,6 +28,16 @@ def longArrayMap(xs: LongArray, f: (Long) => Long): LongArray = {
         index = index + 1
     }
     mapped
+}
+
+def longArrayMapObject[U](xs: LongArray, f: (Long) => U): ArrayObject[U] = {
+    val mapped = new ObjectArray[U](xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        mapped.set(index, f(xs.get(index)))
+        index = index + 1
+    }
+    new ArrayObject[U](mapped)
 }
 
 class ArrayLong(values: LongArray) {
@@ -80,6 +92,10 @@ def arrayLongFill(size: Int, value: Long): ArrayLong = {
 
 def arrayLongMap(xs: ArrayLong, f: (Long) => Long): ArrayLong = {
     xs.map(f)
+}
+
+def arrayLongMapObject[T, U](xs: ArrayLong, f: (Long) => U): ArrayObject[U] = {
+    longArrayMapObject[U](xs.raw(), f)
 }
 
 def arrayLongForeach(xs: ArrayLong, f: (Long) => Unit): Unit = {
