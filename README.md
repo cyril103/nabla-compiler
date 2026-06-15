@@ -55,6 +55,20 @@ Une première documentation utilisateur du langage est disponible ici :
 
 - [docs/language.md](docs/language.md)
 
+## Support éditeur
+
+Un support Vim minimal est disponible dans [editor/vim](editor/vim). Pour
+l'installer localement :
+
+```bash
+mkdir -p ~/.vim/ftdetect ~/.vim/syntax
+cp editor/vim/ftdetect/nabla.vim ~/.vim/ftdetect/
+cp editor/vim/syntax/nabla.vim ~/.vim/syntax/
+```
+
+Les fichiers `*.nabla` seront ensuite detectes avec `filetype=nabla` et une
+coloration syntaxique de base.
+
 ## 🛠️ Compilation et usage
 
 Le projet se compile avec GNU C++17 et le `Makefile` expose des cibles pratiques :
