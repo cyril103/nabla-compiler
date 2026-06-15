@@ -1,0 +1,23 @@
+def main(): Int = {
+    var remaining = 600851475143L
+    var factor = 2L
+    var largest = 1L
+
+    while factor * factor <= remaining {
+        if remaining % factor == 0L {
+            largest = factor
+            remaining = remaining / factor
+        } else {
+            factor = factor + 1L
+        }
+    }
+
+    if remaining > largest {
+        largest = remaining
+    } else {
+        largest = largest
+    }
+
+    print(largest.toString())
+    0
+}
