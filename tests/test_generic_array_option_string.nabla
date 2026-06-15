@@ -1,0 +1,22 @@
+import collections.array
+import core.option
+
+def firstDefined(values: Array[Option[String]]): String = {
+    values.get(0).getOrElse("missing")
+}
+
+def main(): Int = {
+    val some = optionSome("hello")
+    val none = optionNone("fallback")
+    val values = arrayFill[Option[String]](3, some)
+    values.set(1, none)
+
+    if values.size() == 3 &&
+       firstDefined(values).length() == 5 &&
+       values.get(1).getOrElse("fallback").length() == 8 &&
+       values.map(value => value).get(2).getOrElse("x").length() == 5 {
+        42
+    } else {
+        1
+    }
+}

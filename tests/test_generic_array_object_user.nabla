@@ -1,0 +1,36 @@
+import collections.array
+
+class Student(nameValue: String, scoreValue: Int) {
+    def name(): String = {
+        nameValue
+    }
+
+    def score(): Int = {
+        scoreValue
+    }
+}
+
+def bestScore(values: Array[Student]): Int = {
+    values.get(0).score()
+}
+
+def firstOf[T](values: Array[T]): T = {
+    values.get(0)
+}
+
+def main(): Int = {
+    val ada = new Student("Ada", 21)
+    val bob = new Student("Bob", 20)
+    val students = arrayFill[Student](2, ada)
+    students.set(1, bob)
+
+    if students.size() == 2 &&
+       bestScore(students) == 21 &&
+       firstOf(students).score() == 21 &&
+       students.get(1).name().length() == 3 &&
+       students.map(student => student).get(0).name().length() == 3 {
+        42
+    } else {
+        1
+    }
+}

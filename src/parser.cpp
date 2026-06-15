@@ -2,6 +2,29 @@
 #include <fstream>
 #include <sstream>
 
+namespace {
+bool isBuiltinTypeName(const std::string& type) {
+    return type == "Int" || type == "Long" || type == "Float" || type == "Double" ||
+           type == "Bool" || type == "String" || type == "Unit" || type == "IntArray" ||
+           type == "LongArray" || type == "FloatArray" || type == "DoubleArray" ||
+           type == "BoolArray";
+}
+
+bool isKnownConcreteTypeName(const std::string& type, const CompilerContext& context) {
+    if (isBuiltinTypeName(type) || functionTypeFromName(type)) return true;
+    auto parameterizedType = parameterizedTypeFromName(type);
+    if (parameterizedType) {
+        const auto& [baseName, arguments] = *parameterizedType;
+        if (!isKnownConcreteTypeName(baseName, context)) return false;
+        for (const auto& argument : arguments) {
+            if (!isKnownConcreteTypeName(argument, context)) return false;
+        }
+        return true;
+    }
+    return context.classes.find(type) != context.classes.end();
+}
+}
+
 Parser::Parser(const std::vector<Token>& tokens, CompilerContext& ctx, const std::filesystem::path& currentFile)
     : tokens(tokens), index(0), context(ctx), currentFile(currentFile), currentParsingClass("") {}
 
@@ -106,6 +129,8 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
     context.classes[className].typeParameters = typeParameters;
     context.classes[className].location = classToken.location;
     currentParsingClass = className;
+    auto previousTypeParameters = currentFunctionTypeParameters;
+    currentFunctionTypeParameters = typeParameters;
     consume(TokenType::LPAREN, "");
     int offset = 8;
     while (peek().type != TokenType::RPAREN) {
@@ -130,6 +155,7 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
         }
         consume(TokenType::RBRACE, "");
     }
+    currentFunctionTypeParameters = previousTypeParameters;
     currentParsingClass.clear();
 }
 
@@ -1003,7 +1029,15 @@ std::pair<std::string, SourceLocation> Parser::parseType(const std::string& expe
             consume(TokenType::RBRACKET, "']' attendu après les arguments génériques");
             typeName = formatParameterizedType(typeName, typeArguments);
         }
-        return {canonicalTypeName(typeName), typeToken.location};
+        std::string canonicalType = canonicalTypeName(typeName);
+        auto parameterizedType = parameterizedTypeFromName(canonicalType);
+        if (parameterizedType && parameterizedType->first == "Array" &&
+            parameterizedType->second.size() == 1 &&
+            !isTypeParameterName(parameterizedType->second[0], currentFunctionTypeParameters) &&
+            isKnownConcreteTypeName(parameterizedType->second[0], context)) {
+            canonicalType = formatParameterizedType("ArrayObject", parameterizedType->second);
+        }
+        return {canonicalType, typeToken.location};
     }
     if (peek().type != TokenType::LPAREN) {
         throw CompilerError(ErrorKind::Parser, peek().location, expectedMessage + " (reçu '" + peek().value + "')");

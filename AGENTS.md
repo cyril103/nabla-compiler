@@ -180,10 +180,10 @@ Limites importantes :
   `countTrue`, `filter`, `fold` ou `flatMap` restent specialisees ou a ajouter;
   l'objectif retenu est de conserver les tableaux primitifs specialises et
   d'ajouter un fallback generique `ObjectArray[T]` / `ArrayObject[T]` pour les
-  autres types; le premier fallback couvre `String` et `Array[Array[Int]]`,
-  tandis que les tests de tableaux d'objets utilisateur, `Array[Option[String]]`
-  et les operations avancees restent a faire; la monomorphisation complete des
-  classes generiques reste a durcir;
+  autres types; le premier fallback couvre `String`, `Array[Array[Int]]`,
+  `Array[Option[String]]` et les tableaux d'objets utilisateur, tandis que les
+  operations avancees restent a faire; la monomorphisation complete des classes
+  generiques reste a durcir;
 - le tas est fixe et possede une verification de depassement, mais pas de
   ramasse-miettes;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
@@ -340,10 +340,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `Array[Int] -> ArrayInt`, `Array[Long] -> ArrayLong`,
   `Array[Float] -> ArrayFloat`, `Array[Double] -> ArrayDouble`,
   `Array[Bool] -> ArrayBool`, sinon `Array[T] -> ArrayObject[T]`.
-- [x] Ajouter les tests de vraie genericite `Array[String]` et
-  `Array[Array[Int]]`.
-- [ ] Ajouter les tests de vraie genericite `Array[Option[String]]` et tableaux
-  d'objets utilisateur.
+- [x] Ajouter les tests de vraie genericite `Array[String]`,
+  `Array[Array[Int]]`, `Array[Option[String]]` et tableaux d'objets utilisateur.
 - [ ] Etendre `Array[T]` vers plus d'operations (`filter`, `fold`, `flatMap`)
   une fois le fallback generique stabilise.
 
@@ -375,6 +373,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `local` - Ajouter `FloatArray` / `DoubleArray`, les facades `ArrayFloat` /
   `ArrayDouble` et les alias `Array[Float]` / `Array[Double]` dans
   `collections.array`.
+- `local` - Durcir le fallback `ArrayObject[T]` avec `Array[Option[String]]` et
+  les tableaux d'objets utilisateur, y compris l'inference vers `Array[T]`.
 - `local` - Ajouter le fallback `ObjectArray[T]` / `ArrayObject[T]` pour
   `Array[String]` et `Array[Array[Int]]`, avec specialisation IR des methodes
   generiques et alias `arrayFill/map/foreach` vers la facade objet.
@@ -504,6 +504,6 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Durcir le fallback de vraie genericite en ajoutant les tests et corrections pour
-`Array[Option[String]]`, les tableaux d'objets utilisateur, puis les operations
-communes suivantes (`filter`, `fold`, `flatMap`) sur `ArrayObject[T]`.
+Etendre le fallback de vraie genericite avec les operations communes suivantes
+(`filter`, `fold`, `flatMap`) sur `ArrayObject[T]`, puis factoriser les surfaces
+communes des collections specialisees si la duplication devient trop couteuse.

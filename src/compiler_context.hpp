@@ -358,10 +358,18 @@ inline std::string substituteType(
     auto parameterizedType = parameterizedTypeFromName(type);
     if (parameterizedType) {
         auto [baseName, arguments] = *parameterizedType;
+        bool anyArgumentChanged = false;
         for (auto& argument : arguments) {
+            const std::string originalArgument = argument;
             argument = substituteType(argument, substitution);
+            anyArgumentChanged = anyArgumentChanged || argument != originalArgument;
         }
-        return canonicalTypeName(formatParameterizedType(baseName, arguments));
+        const std::string substitutedType = canonicalTypeName(formatParameterizedType(baseName, arguments));
+        if (substitutedType == formatParameterizedType(baseName, arguments) &&
+            baseName == "Array" && arguments.size() == 1 && anyArgumentChanged) {
+            return formatParameterizedType("ArrayObject", arguments);
+        }
+        return substitutedType;
     }
 
     return type;
