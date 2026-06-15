@@ -836,6 +836,8 @@ private:
             out << "    call Runtime_stringSubstring\n";
         } else if (className == "String" && methodName == "repeat") {
             out << "    call Runtime_stringRepeat\n";
+        } else if (className == "String" && methodName == "trim") {
+            out << "    call Runtime_stringTrim\n";
         } else {
             out << "    call " << asmFunctionName(instruction.operation) << "\n";
         }

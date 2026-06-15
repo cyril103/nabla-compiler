@@ -1,0 +1,11 @@
+def main(): Int = {
+    if "  nabla  ".trim() == "nabla" &&
+       "nabla".trim() == "nabla" &&
+       "     ".trim() == "" &&
+       "".trim() == "" &&
+       "  na bla  ".trim() == "na bla" {
+        42
+    } else {
+        1
+    }
+}

@@ -400,7 +400,7 @@ std::string MethodCallNode::getType() {
             methodName == "endsWith" || methodName == "contains") return "Bool";
         if (methodName == "toInt") return "Int";
         if (methodName == "toCharArray") return "ArrayObject[Char]";
-        if (methodName == "substring" || methodName == "repeat") return "String";
+        if (methodName == "substring" || methodName == "repeat" || methodName == "trim") return "String";
         if (methodName == "length" || methodName == "indexOf") return "Int";
         if (methodName == "charAt") return "Char";
     }
@@ -543,6 +543,13 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
                 throw CompilerError(
                     ErrorKind::Semantic, arguments[0]->getLocation(),
                     "la méthode String.repeat attend un nombre de répétitions de type Int");
+            }
+            resolvedType = "String";
+            return;
+        }
+        if (methodName == "trim") {
+            if (!arguments.empty()) {
+                semanticError("la méthode String.trim n'accepte aucun argument");
             }
             resolvedType = "String";
             return;
@@ -775,6 +782,10 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
             std::string loweredReceiver = receiver->lowerToIR(builder);
             std::string loweredCount = arguments[0]->lowerToIR(builder);
             return builder.emitMethodCall("String", "repeat", loweredReceiver, {loweredCount}, "String");
+        }
+        if (methodName == "trim" && arguments.empty()) {
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            return builder.emitMethodCall("String", "trim", loweredReceiver, {}, "String");
         }
         if (methodName == "length" && arguments.empty()) {
             std::string loweredReceiver = receiver->lowerToIR(builder);

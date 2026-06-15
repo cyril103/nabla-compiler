@@ -1,0 +1,1 @@
+tests/test_error_string_trim_argument.nabla:2:13: semantic error: la méthode String.trim n'accepte aucun argument
