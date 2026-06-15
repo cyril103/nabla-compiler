@@ -1,0 +1,42 @@
+def isPrime(value: Long): Bool = {
+    if value < 2L {
+        false
+    } else {
+        if value == 2L {
+            true
+        } else {
+            if value % 2L == 0L {
+                false
+            } else {
+                var divisor = 3L
+                var prime = true
+                while divisor * divisor <= value && prime {
+                    if value % divisor == 0L {
+                        prime = false
+                    } else {
+                        prime
+                    }
+                    divisor = divisor + 2L
+                }
+                prime
+            }
+        }
+    }
+}
+
+def main(): Int = {
+    var value = 2L
+    var total = 0L
+
+    while value < 2000000L {
+        if isPrime(value) {
+            total = total + value
+        } else {
+            total
+        }
+        value = value + 1L
+    }
+
+    print(total.toString())
+    0
+}

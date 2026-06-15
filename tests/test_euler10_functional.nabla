@@ -1,0 +1,36 @@
+import collections.int_array
+
+def isPrime(value: Int): Bool = {
+    if value < 2 {
+        false
+    } else {
+        if value == 2 {
+            true
+        } else {
+            if value % 2 == 0 {
+                false
+            } else {
+                var divisor = 3
+                var prime = true
+                while divisor * divisor <= value && prime {
+                    if value % divisor == 0 {
+                        prime = false
+                    } else {
+                        prime
+                    }
+                    divisor = divisor + 2
+                }
+                prime
+            }
+        }
+    }
+}
+
+def main(): Int = {
+    val total = intRangeUntil(2, 2000000)
+        .filter(value => isPrime(value))
+        .foldLong(0L, (sum, value) => sum + value.toLong())
+
+    print(total.toString())
+    0
+}

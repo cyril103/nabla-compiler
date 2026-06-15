@@ -107,6 +107,16 @@ class RangeInt(startValue: Int, untilValue: Int) {
         accumulator
     }
 
+    def foldLong(initial: Long, combine: (Long, Int) => Long): Long = {
+        var value = startValue
+        var accumulator = initial
+        while value < untilValue {
+            accumulator = combine(accumulator, value)
+            value = value + 1
+        }
+        accumulator
+    }
+
     def exists(predicate: (Int) => Bool): Bool = {
         var value = startValue
         var found = false
@@ -243,6 +253,20 @@ class RangeIntFiltered(startValue: Int, untilValue: Int, predicate: (Int) => Boo
     }
 
     def fold(initial: Int, combine: (Int, Int) => Int): Int = {
+        var value = startValue
+        var accumulator = initial
+        while value < untilValue {
+            if predicate(value) {
+                accumulator = combine(accumulator, value)
+            } else {
+                accumulator
+            }
+            value = value + 1
+        }
+        accumulator
+    }
+
+    def foldLong(initial: Long, combine: (Long, Int) => Long): Long = {
         var value = startValue
         var accumulator = initial
         while value < untilValue {

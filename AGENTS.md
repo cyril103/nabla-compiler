@@ -109,7 +109,8 @@ Le pipeline implemente actuellement :
 - collection native `DoubleArray` avec `length`, `get` et `set`;
 - collection native `BoolArray` avec `length`, `get` et `set`;
 - entiers immediats `Int` et `Long` avec pointer tagging, litteraux decimaux
-  `Float` / `Double` portes par l'IR typee, litteraux `Char` ASCII et
+  `Float` / `Double` portes par l'IR typee, conversion `Int.toLong`,
+  litteraux `Char` ASCII et
   litteraux `String`;
 - chaines `String` stockees comme buffers de bytes, avec `length` et
   `charAt(index): Char`, `toCharArray(): ArrayObject[Char]`, `toInt`,
@@ -147,7 +148,7 @@ Le pipeline implemente actuellement :
   avec predicats booleens;
 - plage lazy specialisee `RangeInt` via `intRangeUntil(start, until)`, avec
   `size`, `isEmpty`, `nonEmpty`, `foreach`, `fold`, `exists`, `forall`,
-  `count`, `find`, `filter`, `map` et `max`;
+  `count`, `find`, `filter`, `map`, `max` et `foldLong`;
 - module de bibliotheque standard `collections.long_array` avec `ArrayLong`,
   `longArrayFill`, `longArraySum`, `longArrayMap`, `arrayLongFill`, `map`,
   `flatMap`, `foreach`, `sum`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et
@@ -189,7 +190,7 @@ Le pipeline implemente actuellement :
 - backend ASM par defaut depuis l'IR couvrant la suite positive actuelle
   (fonctions, variables, controle de flux, imports, objets et methodes);
 - tests de compilation et d'execution via `make all-tests`.
-- tests Project Euler 1 a 9 comme banc progressif pour exercer le langage et la
+- tests Project Euler 1 a 10 comme banc progressif pour exercer le langage et la
   bibliotheque standard.
 
 Limites importantes :
@@ -327,6 +328,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter les operateurs booleens `&&`, `||` et `!`.
 - [x] Ajouter le court-circuit pour `&&` et `||`.
 - [x] Ajouter le reste de division `%` pour `Int` et `Long`.
+- [x] Ajouter la conversion `Int.toLong`.
 - [ ] Ajouter les champs et methodes herites si l'heritage est retenu.
 - [ ] Valider les types des branches, boucles et operateurs de facon uniforme.
 - [x] Ajouter une premiere syntaxe de types parametres pour `Option[Int]` et
@@ -369,6 +371,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `intRangeUntil(start, until)` comme premiere plage `Int` lazy.
 - [x] Ajouter `exists`, `forall`, `count`, `find` et `filter` lazy sur
   `RangeInt`.
+- [x] Ajouter `RangeInt.foldLong` pour accumuler une plage `Int` vers `Long`.
 - [x] Ajouter les closures avec capture par valeur pour les lambdas `Int`.
 - [x] Generaliser les closures aux types fonction complets.
 - [x] Ajouter l'inference simple des types de parametres de lambda.
@@ -472,7 +475,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
-- `local` - Etendre `RangeInt` avec `exists`, `forall`, `count`, `find` et
+- `local` - Ajouter les tests Project Euler 10 imperatif et fonctionnel, avec
+  `Int.toLong` et `RangeInt.foldLong`.
+- `1b3be08` - Etendre `RangeInt` avec `exists`, `forall`, `count`, `find` et
   `filter` lazy.
 - `66299f2` - Remplacer le tas statique de 64 KiB par un tas runtime `mmap` de
   8 MiB avec allocations alignees et un test positif au-dessus de 64 KiB.

@@ -391,6 +391,7 @@ std::string MethodCallNode::getType() {
     const std::string receiverType = receiver->getType();
     if (isNumericType(receiverType)) {
         if (isIntegerType(receiverType) && methodName == "toString") return "String";
+        if (receiverType == "Int" && methodName == "toLong") return "Long";
         if (isComparisonMethod(methodName)) return "Bool";
         return receiverType;
     }
@@ -449,6 +450,13 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
                 semanticError("la méthode " + receiverType + ".toString n'accepte aucun argument");
             }
             resolvedType = "String";
+            return;
+        }
+        if (receiverType == "Int" && methodName == "toLong") {
+            if (!arguments.empty()) {
+                semanticError("la méthode Int.toLong n'accepte aucun argument");
+            }
+            resolvedType = "Long";
             return;
         }
         semanticError("méthode inconnue: " + receiverType + "." + methodName);
@@ -739,6 +747,13 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
             }
             std::string loweredReceiver = receiver->lowerToIR(builder);
             return builder.emitMethodCall(receiverType, "toString", loweredReceiver, {}, "String");
+        }
+        if (receiverType == "Int" && methodName == "toLong") {
+            if (!arguments.empty()) {
+                builder.unsupported(location, "l'appel de méthode Int.toLong");
+            }
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            return builder.emitMethodCall("Int", "toLong", loweredReceiver, {}, "Long");
         }
         const std::vector<std::string> supported = {
             "+", "-", "*", "/", "%", "==", "!=", "<", ">", "<=", ">="
