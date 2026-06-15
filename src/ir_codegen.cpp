@@ -51,6 +51,12 @@ std::string asmDataBytes(const std::string& value) {
     return out.str();
 }
 
+std::string normalizeFloatConstant(const std::string& value) {
+    if (value.find('.') != std::string::npos) return value;
+    if (value.find('e') != std::string::npos || value.find('E') != std::string::npos) return value;
+    return value + ".0";
+}
+
 std::string asmSymbolPart(const std::string& value) {
     std::string result;
     for (char c : value) {
@@ -438,7 +444,7 @@ private:
             const std::string label = "nabla_double_" + asmSymbolPart(function.name) + "_" +
                                       asmSymbolPart(instruction.result);
             out << "section .data\n";
-            out << label << ": dq __float64__(" << instruction.operands[0] << ")\n";
+            out << label << ": dq __float64__(" << normalizeFloatConstant(instruction.operands[0]) << ")\n";
             out << "section .text\n";
             out << "    mov rax, [" << label << "]\n";
             storeRegister(instruction.result, "rax");
@@ -448,7 +454,7 @@ private:
             const std::string label = "nabla_float_" + asmSymbolPart(function.name) + "_" +
                                       asmSymbolPart(instruction.result);
             out << "section .data\n";
-            out << label << ": dd __float32__(" << instruction.operands[0] << ")\n";
+            out << label << ": dd __float32__(" << normalizeFloatConstant(instruction.operands[0]) << ")\n";
             out << "section .text\n";
             out << "    xor rax, rax\n";
             out << "    mov eax, [" << label << "]\n";

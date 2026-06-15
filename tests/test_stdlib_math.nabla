@@ -1,0 +1,31 @@
+import math
+
+def main(): Int = {
+    if absInt(-42) == 42 &&
+       absLong(-42L) == 42L &&
+       absFloat(-2.5F) == 2.5F &&
+       absDouble(-2.5) == 2.5 &&
+       maxInt(1, 2) == 2 &&
+       minInt(1, 2) == 1 &&
+       clampInt(15, 0, 10) == 10 &&
+       clampInt(-3, 0, 10) == 0 &&
+       clampInt(7, 0, 10) == 7 &&
+       signInt(-7) == -1 &&
+       signInt(0) == 0 &&
+       signInt(7) == 1 &&
+       gcdInt(84, 30) == 6 &&
+       lcmInt(7, 6) == 42 &&
+       powInt(2, 8) == 256 &&
+       powInt(2, 0) == 1 &&
+       powInt(2, -1) == 0 &&
+       factorialInt(6) == 720 &&
+       maxDouble(3.0, 2.5) == 3.0 &&
+       minDouble(-1.0, 2.0) == -1.0 &&
+       signLong(-7L) == -1L &&
+       signLong(0L) == 0L &&
+       signLong(7L) == 1L {
+        42
+    } else {
+        1
+    }
+}
