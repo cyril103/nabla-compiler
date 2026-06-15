@@ -137,11 +137,12 @@ Le pipeline implemente actuellement :
   `all`, `any`, `size`, `isEmpty`, `nonEmpty`, `get`, `set` et `raw`;
 - module de bibliotheque standard `collections.array` comme point d'entree
   commun pour les tableaux specialises, avec `arrayFill[T]`, `arrayMap[T]`,
-  `arrayMap[T, U]`, `arrayFilter[T]`, `arrayFlatMap[T]`, `arrayFlatMap[T, U]` et
-  `arrayForeach[T]` resolus vers les specialisations `ArrayInt`, `ArrayLong`,
-  `ArrayFloat`, `ArrayDouble` ou `ArrayBool` pour `T = Int`, `Long`, `Float`,
-  `Double` ou `Bool`, et vers `ArrayObject[T]` pour les types concrets non
-  specialises comme `String` et `Array[Int]`;
+  `arrayMap[T, U]`, `arrayFilter[T]`, `arrayFold[T]`, `arrayFold[T, U]`,
+  `arrayFlatMap[T]`, `arrayFlatMap[T, U]` et `arrayForeach[T]` resolus vers les
+  specialisations `ArrayInt`, `ArrayLong`, `ArrayFloat`, `ArrayDouble` ou
+  `ArrayBool` pour `T = Int`, `Long`, `Float`, `Double` ou `Bool`, et vers
+  `ArrayObject[T]` pour les types concrets non specialises comme `String` et
+  `Array[Int]`;
   `arrayMap[Primitive, U]`, `arrayFlatMap[Primitive, U]`, `mapObject[U]` et
   `flatMapObject[U]` produisent
   `ArrayObject[U]` quand la sortie ne reste pas dans la meme primitive
@@ -179,10 +180,11 @@ Limites importantes :
   facade specialisee vers `ArrayFloat`; `Array[Double]` reste une facade
   specialisee vers `ArrayDouble`; `Array[Bool]` reste une facade specialisee
   vers `ArrayBool`; `arrayFill[T]`, `arrayMap[T]`, `arrayMap[T, U]`,
-  `arrayFilter[T]`, `arrayFlatMap[T]`, `arrayFlatMap[T, U]` et `arrayForeach[T]` sont des
-  fonctions standard generiques specialisees pour `Int`, `Long`, `Float`,
-  `Double` et `Bool`, mais pas encore une implementation unique de tableau
-  generique; `arrayMap[Primitive, U]`, `arrayFlatMap[Primitive, U]`,
+  `arrayFilter[T]`, `arrayFold[T]`, `arrayFold[T, U]`, `arrayFlatMap[T]`,
+  `arrayFlatMap[T, U]` et `arrayForeach[T]` sont des fonctions standard
+  generiques specialisees pour `Int`, `Long`, `Float`, `Double` et `Bool`, mais
+  pas encore une implementation unique de tableau generique;
+  `arrayMap[Primitive, U]`, `arrayFlatMap[Primitive, U]`,
   `mapObject[U]` et `flatMapObject[U]` peuvent mapper une facade primitive
   vers `ArrayObject[U]`;
   `Array[T]` est valide dans les
@@ -357,6 +359,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Etendre `ArrayObject[T].map` en `map[U]`.
 - [x] Ajouter `arrayMap[Primitive, U]` vers `ArrayObject[U]`.
 - [x] Ajouter `arrayFilter[T]`.
+- [x] Ajouter `arrayFold[T]` et `arrayFold[T, U]`.
 - [x] Ajouter `arrayFlatMap[T]` et `arrayFlatMap[T, U]`.
 - [x] Completer `arrayFlatMap[T]` pour `Long`, `Float`, `Double` et `Bool`.
 - [x] Ajouter `mapObject[U]` sur les facades primitives.
@@ -396,6 +399,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Ajouter la facade standard `arrayFold[T]` / `arrayFold[T, U]`.
 - `local` - Completer `arrayFlatMap[T]` pour toutes les facades primitives.
 - `local` - Ajouter la facade standard `arrayFilter[T]`.
 - `local` - Factoriser le routage des aliases standards de tableaux dans

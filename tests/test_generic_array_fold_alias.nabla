@@ -1,0 +1,48 @@
+import collections.array
+
+def addInt(left: Int, right: Int): Int = {
+    left + right
+}
+
+def addLong(left: Long, right: Long): Long = {
+    left + right
+}
+
+def addFloat(left: Float, right: Float): Float = {
+    left + right
+}
+
+def addDouble(left: Double, right: Double): Double = {
+    left + right
+}
+
+def both(left: Bool, right: Bool): Bool = {
+    left && right
+}
+
+def totalLength(total: Int, word: String): Int = {
+    total + word.length()
+}
+
+def main(): Int = {
+    val ints = arrayFold[Int](arrayIntRange(4), 1, addInt)
+    val longs = arrayFold[Long](arrayFill[Long](2, 4L), 1L, addLong)
+    val floats = arrayFold[Float](arrayFill[Float](2, 1.5F), 1.0F, addFloat)
+    val doubles = arrayFold[Double](arrayFill[Double](2, 2.5), 1.0, addDouble)
+    val bools = arrayFold[Bool](arrayFill[Bool](3, true), true, both)
+
+    val words = arrayFill[String](3, "hi")
+    words.set(1, "hello")
+    val length = arrayFold[String, Int](words, 0, totalLength)
+
+    if ints == 7 &&
+       longs == 9L &&
+       floats > 3.9F &&
+       doubles > 5.9 &&
+       bools &&
+       length == 9 {
+        42
+    } else {
+        1
+    }
+}

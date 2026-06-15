@@ -746,6 +746,10 @@ def arrayIntFilter(xs: ArrayInt, predicate: (Int) => Bool): ArrayInt = {
     xs.filter(predicate)
 }
 
+def arrayIntFold(xs: ArrayInt, initial: Int, combine: (Int, Int) => Int): Int = {
+    xs.fold(initial, combine)
+}
+
 def arrayIntMapObject[T, U](xs: ArrayInt, f: (Int) => U): ArrayObject[U] = {
     intArrayMapObject[U](xs.raw(), f)
 }
