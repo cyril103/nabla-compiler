@@ -394,6 +394,7 @@ std::string MethodCallNode::getType() {
         return receiverType;
     }
     if (receiverType == "String") {
+        if (methodName == "+") return "String";
         if (isBoolBinaryMethod(methodName)) return "Bool";
         if (methodName == "isEmpty" || methodName == "nonEmpty" || methodName == "startsWith") return "Bool";
         if (methodName == "toInt") return "Int";
@@ -445,6 +446,18 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         semanticError("méthode inconnue: " + receiverType + "." + methodName);
     }
     if (receiverType == "String") {
+        if (methodName == "+") {
+            if (arguments.size() != 1) {
+                semanticError("la méthode String.+ attend un argument");
+            }
+            if (arguments[0]->getType() != "String") {
+                throw CompilerError(
+                    ErrorKind::Semantic, arguments[0]->getLocation(),
+                    "la méthode String.+ attend un argument de type String");
+            }
+            resolvedType = "String";
+            return;
+        }
         if (isBoolBinaryMethod(methodName)) {
             if (arguments.size() != 1) {
                 semanticError("la méthode String." + methodName + " attend un argument");
@@ -661,6 +674,11 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         return builder.emitBinary(methodName, left, right, isComparisonMethod(methodName) ? "Bool" : receiverType);
     }
     if (receiverType == "String") {
+        if (methodName == "+" && arguments.size() == 1) {
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            std::string loweredArgument = arguments[0]->lowerToIR(builder);
+            return builder.emitMethodCall("String", "+", loweredReceiver, {loweredArgument}, "String");
+        }
         if (isBoolBinaryMethod(methodName) && arguments.size() == 1) {
             std::string loweredReceiver = receiver->lowerToIR(builder);
             std::string loweredArgument = arguments[0]->lowerToIR(builder);

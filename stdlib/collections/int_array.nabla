@@ -23,6 +23,20 @@ def intArraySum(xs: IntArray): Int = {
     total
 }
 
+def intArrayMkString(xs: IntArray, separator: String): String = {
+    var index = 0
+    var result = ""
+    while (index < xs.length()) {
+        if index == 0 {
+            result = xs.get(index).toString()
+        } else {
+            result = result + separator + xs.get(index).toString()
+        }
+        index = index + 1
+    }
+    result
+}
+
 def intArrayFill(size: Int, value: Int): IntArray = {
     val xs = new IntArray(size)
     var index = 0
@@ -501,6 +515,10 @@ class ArrayInt(values: IntArray) {
         intArraySum(values)
     }
 
+    def mkString(separator: String): String = {
+        intArrayMkString(values, separator)
+    }
+
     def map(f: (Int) => Int): ArrayInt = {
         new ArrayInt(intArrayMap(values, f))
     }
@@ -736,6 +754,10 @@ def arrayIntFill(size: Int, value: Int): ArrayInt = {
 
 def arrayIntMap(xs: ArrayInt, f: (Int) => Int): ArrayInt = {
     xs.map(f)
+}
+
+def arrayIntMkString[T](xs: ArrayInt, separator: String): String = {
+    xs.mkString(separator)
 }
 
 def arrayIntFlatMap(xs: ArrayInt, transform: (Int) => ArrayInt): ArrayInt = {

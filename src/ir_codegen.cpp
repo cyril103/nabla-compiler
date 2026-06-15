@@ -785,6 +785,8 @@ private:
             out << "    mov rax, [rdi + 8]\n";
             out << "    shl rax, 1\n";
             out << "    or rax, 1\n";
+        } else if (className == "String" && methodName == "+") {
+            out << "    call Runtime_stringConcat\n";
         } else if (className == "String" && methodName == "isEmpty") {
             out << "    cmp qword [rdi + 8], 0\n";
             out << "    sete al\n";

@@ -1,0 +1,3 @@
+def main(): Int = {
+    ("value: " + 42).length()
+}

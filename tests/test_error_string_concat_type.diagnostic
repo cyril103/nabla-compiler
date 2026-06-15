@@ -1,0 +1,1 @@
+tests/test_error_string_concat_type.nabla:2:18: semantic error: la méthode String.+ attend un argument de type String

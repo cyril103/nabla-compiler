@@ -32,6 +32,20 @@ def objectArrayFlatMap[T, U](xs: ArrayObject[T], transform: (T) => ArrayObject[U
     xs.flatMap[U](transform)
 }
 
+def objectStringArrayMkString[T](xs: ArrayObject[String], separator: String): String = {
+    var index = 0
+    var result = ""
+    while (index < xs.size()) {
+        if index == 0 {
+            result = xs.get(index)
+        } else {
+            result = result + separator + xs.get(index)
+        }
+        index = index + 1
+    }
+    result
+}
+
 class ArrayObject[T](values: ObjectArray[T]) {
     def length(): Int = {
         values.length()

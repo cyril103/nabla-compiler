@@ -106,7 +106,9 @@ Le pipeline implemente actuellement :
   litteraux `String`;
 - chaines `String` stockees comme buffers de bytes, avec `length` et
   `charAt(index): Char`, `toCharArray(): ArrayObject[Char]`, `toInt`,
-  `isEmpty`, `nonEmpty`, `startsWith`, `==` et `!=`;
+  `isEmpty`, `nonEmpty`, `startsWith`, `+`, `==` et `!=`;
+- jointure texte de tableaux via `ArrayInt.mkString(separator)` et
+  `arrayMkString[Int/String](values, separator)`;
 - affichage console de `String` via la primitive globale `print`;
 - lecture console de `String` via la primitive globale `readLine`;
 - parsing decimal de `String` vers `Int` via `parseInt(value)`;
@@ -286,6 +288,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `String.isEmpty`, `nonEmpty` et `startsWith`.
 - [x] Ajouter `String.toInt` et `parseInt`.
 - [x] Ajouter `String.toCharArray` vers `ArrayObject[Char]`.
+- [x] Ajouter `String.+` et `mkString` pour `ArrayInt` / `Array[String]`.
 - [x] Ajouter les operateurs booleens `&&`, `||` et `!`.
 - [x] Ajouter le court-circuit pour `&&` et `||`.
 - [ ] Ajouter les champs et methodes herites si l'heritage est retenu.
@@ -420,6 +423,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `local` - Ajouter `String.isEmpty`, `nonEmpty` et `startsWith`.
 - `local` - Ajouter `String.toInt` et `parseInt(value)`.
 - `local` - Ajouter `String.toCharArray(): ArrayObject[Char]`.
+- `local` - Ajouter `String.+` et `mkString` pour `ArrayInt` / `Array[String]`.
 - `local` - Ajouter la primitive d'entree console `readLine(): String` et
   `io.input()`.
 - `local` - Ajouter la facade standard `arrayFold[T]` / `arrayFold[T, U]`.
