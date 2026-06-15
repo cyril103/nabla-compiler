@@ -1,0 +1,9 @@
+import collections.array
+
+def stringNonEmpty(value: String): Bool = {
+    value.nonEmpty()
+}
+
+def words(text: String): ArrayObject[String] = {
+    text.trim().split(" ").filter(stringNonEmpty)
+}

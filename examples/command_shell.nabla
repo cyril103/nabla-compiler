@@ -1,12 +1,13 @@
 import io
 import collections.array
+import strings
 
 def printHelp(): Unit = {
     println("commands: add A B | repeat TEXT N | len TEXT | help | quit")
 }
 
 def commandName(line: String): String = {
-    val parts = line.trim().split(" ")
+    val parts = words(line)
     if parts.isEmpty() {
         ""
     } else {
@@ -41,9 +42,8 @@ def runLen(parts: ArrayObject[String]): Unit = {
 }
 
 def runCommand(line: String): Bool = {
-    val cleaned = line.trim()
-    val parts = cleaned.split(" ")
-    val command = commandName(cleaned)
+    val parts = words(line)
+    val command = commandName(line)
 
     if command == "" {
         false

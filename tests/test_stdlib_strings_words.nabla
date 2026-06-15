@@ -1,0 +1,23 @@
+import strings
+
+def main(): Int = {
+    val command = words("  add   2   40  ")
+    val empty = words("")
+    val spaces = words("     ")
+    val simple = words("one two")
+
+    if command.size() == 3 &&
+       command.get(0) == "add" &&
+       command.get(1).toInt() == 2 &&
+       command.get(2).toInt() == 40 &&
+       command.mkString("|") == "add|2|40" &&
+       empty.isEmpty() &&
+       spaces.isEmpty() &&
+       simple.size() == 2 &&
+       simple.get(0) == "one" &&
+       simple.get(1) == "two" {
+        42
+    } else {
+        1
+    }
+}

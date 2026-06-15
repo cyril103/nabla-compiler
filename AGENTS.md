@@ -114,6 +114,8 @@ Le pipeline implemente actuellement :
 - affichage console de `String` via la primitive globale `print`;
 - lecture console de `String` via la primitive globale `readLine`;
 - parsing decimal de `String` vers `Int` via `parseInt(value)`;
+- module standard `strings` avec `words(text)` pour decouper une ligne en
+  tokens separes par des espaces en ignorant les segments vides;
 - premier module de bibliotheque standard `io` avec `println` et `input`;
 - module de bibliotheque standard `core.option_int` avec `OptionInt`,
   `optionIntSome`, `optionIntNone`, `map`, `filter` et `orElse`;
@@ -438,6 +440,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `local` - Ajouter `String.split(separator)`.
 - `local` - Ajouter `examples/command_shell.nabla` pour demontrer
   `readLine`, `trim`, `split`, `repeat` et `toInt`.
+- `local` - Ajouter `strings.words(text)` et l'utiliser dans
+  `examples/command_shell.nabla`.
 - `local` - Ajouter `String.indexOf` et `String.contains`.
 - `local` - Ajouter `String.+` et `mkString` pour `ArrayInt`, `ArrayLong`,
   `ArrayBool` et `Array[String]`.
