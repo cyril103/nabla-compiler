@@ -1,0 +1,54 @@
+import collections.array
+import core.option
+
+class Student(nameValue: String, scoreValue: Int) {
+    def name(): String = {
+        nameValue
+    }
+
+    def score(): Int = {
+        scoreValue
+    }
+}
+
+def keepLonger(left: String, right: String): String = {
+    if left.length() >= right.length() {
+        left
+    } else {
+        right
+    }
+}
+
+def firstDefined(current: Option[String], next: Option[String]): Option[String] = {
+    if current.isDefined() {
+        current
+    } else {
+        next
+    }
+}
+
+def main(): Int = {
+    val ada = new Student("Ada", 21)
+    val bob = new Student("Bob", 20)
+    val students = arrayFill[Student](2, ada)
+    students.set(1, bob)
+    val totalScore = students.fold[Int](0, (total, student) => total + student.score())
+
+    val words = arrayFill[String](3, "hi")
+    words.set(1, "hello")
+    val longest = words.fold[String]("", keepLonger)
+
+    val none = optionNone("missing")
+    val some = optionSome("yes")
+    val options = arrayFill[Option[String]](2, none)
+    options.set(1, some)
+    val first = options.fold[Option[String]](none, firstDefined)
+
+    if totalScore == 41 &&
+       longest.length() == 5 &&
+       first.getOrElse("x").length() == 3 {
+        42
+    } else {
+        1
+    }
+}

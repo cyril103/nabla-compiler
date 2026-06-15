@@ -141,8 +141,9 @@ Le pipeline implemente actuellement :
   `Double` ou `Bool`, et vers `ArrayObject[T]` pour les types concrets non
   specialises comme `String` et `Array[Int]`;
 - collection native `ObjectArray[T]` stockant des slots runtime de 64 bits, avec
-  facade standard `ArrayObject[T]`, `objectArrayFill[T]`, `objectArrayMap[T]`
-  et `objectArrayForeach[T]`;
+  facade standard `ArrayObject[T]`, `objectArrayFill[T]`, `objectArrayMap[T]`,
+  `objectArrayFilter[T]`, `objectArrayFold[T, U]` et
+  `objectArrayForeach[T]`;
 - portees lexicales locales, mutabilite et allocation statique des emplacements
   de pile;
 - analyse semantique des classes, constructeurs, methodes, types de retour et
@@ -160,8 +161,8 @@ Limites importantes :
 - les fonctions globales sont limitees a 6 parametres et les methodes a 5,
   conformement a la convention d'appel actuelle;
 - `Float` et `Double` couvrent les litteraux, operations, comparaisons,
-  fonctions, lambdas et champs, mais pas encore `toString` ni les collections
-  specialisees;
+  fonctions, lambdas, champs et collections specialisees, mais pas encore
+  `toString`;
 - la genericite actuelle couvre `Option[T]`, les fonctions generiques
   monomorphisees et les methodes de classes generiques specialisees avec
   inference des arguments de type; les references explicites comme
@@ -176,8 +177,10 @@ Limites importantes :
   `Double` et `Bool`, mais pas encore une implementation unique de tableau
   generique; `Array[T]` est valide dans les signatures generiques utilisateur
   et se specialise correctement quand `T` devient concret, avec une premiere
-  surface de methodes communes, mais les operations non communes comme `sum`,
-  `countTrue`, `filter`, `fold` ou `flatMap` restent specialisees ou a ajouter;
+  surface de methodes communes; `filter` existe sur `ArrayInt` et
+  `ArrayObject[T]`, tandis que les operations non communes comme `sum`,
+  `countTrue` ou `flatMap` restent specialisees ou a ajouter; `fold[U]` existe
+  sur `ArrayObject[T]`;
   l'objectif retenu est de conserver les tableaux primitifs specialises et
   d'ajouter un fallback generique `ObjectArray[T]` / `ArrayObject[T]` pour les
   autres types; le premier fallback couvre `String`, `Array[Array[Int]]`,
@@ -336,13 +339,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   generiques.
 - [x] Ajouter la facade standard `ArrayObject[T]` pour les types non specialises,
   avec `length`, `size`, `get`, `set`, `map` et `foreach`.
+- [x] Ajouter `ArrayObject[T].filter`.
+- [x] Ajouter `ArrayObject[T].fold[U]`.
 - [x] Etendre les aliases standard pour choisir automatiquement :
   `Array[Int] -> ArrayInt`, `Array[Long] -> ArrayLong`,
   `Array[Float] -> ArrayFloat`, `Array[Double] -> ArrayDouble`,
   `Array[Bool] -> ArrayBool`, sinon `Array[T] -> ArrayObject[T]`.
 - [x] Ajouter les tests de vraie genericite `Array[String]`,
   `Array[Array[Int]]`, `Array[Option[String]]` et tableaux d'objets utilisateur.
-- [ ] Etendre `Array[T]` vers plus d'operations (`filter`, `fold`, `flatMap`)
+- [ ] Etendre `Array[T]` vers plus d'operations (`flatMap`)
   une fois le fallback generique stabilise.
 
 ### P2 - Runtime Et Objets
@@ -370,6 +375,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Ajouter `ArrayObject[T].fold[U]` et le tester avec accumulateurs
+  `Int`, `String` et `Option[String]`.
+- `local` - Ajouter `ArrayObject[T].filter` et le tester sur `String`,
+  `Option[String]` et objets utilisateur.
 - `local` - Ajouter `FloatArray` / `DoubleArray`, les facades `ArrayFloat` /
   `ArrayDouble` et les alias `Array[Float]` / `Array[Double]` dans
   `collections.array`.
@@ -504,6 +513,6 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Etendre le fallback de vraie genericite avec les operations communes suivantes
-(`filter`, `fold`, `flatMap`) sur `ArrayObject[T]`, puis factoriser les surfaces
-communes des collections specialisees si la duplication devient trop couteuse.
+Etendre le fallback de vraie genericite avec `flatMap` sur `ArrayObject[T]`,
+puis factoriser les surfaces communes des collections specialisees si la
+duplication devient trop couteuse.

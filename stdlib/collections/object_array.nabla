@@ -16,6 +16,14 @@ def objectArrayForeach[T](xs: ArrayObject[T], f: (T) => Unit): Unit = {
     xs.foreach(f)
 }
 
+def objectArrayFilter[T](xs: ArrayObject[T], predicate: (T) => Bool): ArrayObject[T] = {
+    xs.filter(predicate)
+}
+
+def objectArrayFold[T, U](xs: ArrayObject[T], initial: U, combine: (U, T) => U): U = {
+    xs.fold[U](initial, combine)
+}
+
 class ArrayObject[T](values: ObjectArray[T]) {
     def length(): Int = {
         values.length()
@@ -49,6 +57,44 @@ class ArrayObject[T](values: ObjectArray[T]) {
             index = index + 1
         }
         new ArrayObject[T](mapped)
+    }
+
+    def filter(predicate: (T) => Bool): ArrayObject[T] = {
+        var index = 0
+        var kept = 0
+        while (index < values.length()) {
+            if predicate(values.get(index)) {
+                kept = kept + 1
+            } else {
+                kept
+            }
+            index = index + 1
+        }
+
+        val filtered = new ObjectArray[T](kept)
+        index = 0
+        var output = 0
+        while (index < values.length()) {
+            val value = values.get(index)
+            if predicate(value) {
+                filtered.set(output, value)
+                output = output + 1
+            } else {
+                output
+            }
+            index = index + 1
+        }
+        new ArrayObject[T](filtered)
+    }
+
+    def fold[U](initial: U, combine: (U, T) => U): U = {
+        var index = 0
+        var accumulator = initial
+        while (index < values.length()) {
+            accumulator = combine(accumulator, values.get(index))
+            index = index + 1
+        }
+        accumulator
     }
 
     def foreach(f: (T) => Unit): Unit = {
