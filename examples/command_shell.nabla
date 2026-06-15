@@ -3,7 +3,7 @@ import collections.array
 import strings
 
 def printHelp(): Unit = {
-    println("commands: add A B | repeat TEXT N | len TEXT | help | quit")
+    println("commands: add A B | repeat TEXT N | len TEXT | cat PATH | write PATH TEXT | append PATH TEXT | exists PATH | help | quit")
 }
 
 def commandName(line: String): String = {
@@ -41,6 +41,49 @@ def runLen(parts: ArrayObject[String]): Unit = {
     }
 }
 
+def runCat(parts: ArrayObject[String]): Unit = {
+    if parts.size() == 2 {
+        val path = parts.get(1)
+        if pathExists(path) {
+            println(readTextFile(path))
+        } else {
+            println("missing: " + path)
+        }
+    } else {
+        println("usage: cat PATH")
+    }
+}
+
+def runWrite(parts: ArrayObject[String]): Unit = {
+    if parts.size() == 3 {
+        val written = writeTextFile(parts.get(1), parts.get(2))
+        println("written: " + written.toString())
+    } else {
+        println("usage: write PATH TEXT")
+    }
+}
+
+def runAppend(parts: ArrayObject[String]): Unit = {
+    if parts.size() == 3 {
+        val written = appendTextFile(parts.get(1), parts.get(2))
+        println("appended: " + written.toString())
+    } else {
+        println("usage: append PATH TEXT")
+    }
+}
+
+def runExists(parts: ArrayObject[String]): Unit = {
+    if parts.size() == 2 {
+        if pathExists(parts.get(1)) {
+            println("true")
+        } else {
+            println("false")
+        }
+    } else {
+        println("usage: exists PATH")
+    }
+}
+
 def runCommand(line: String): Bool = {
     val parts = words(line)
     val command = commandName(line)
@@ -67,8 +110,28 @@ def runCommand(line: String): Bool = {
                             runLen(parts)
                             true
                         } else {
-                            println("unknown command: " + command)
-                            true
+                            if command == "cat" {
+                                runCat(parts)
+                                true
+                            } else {
+                                if command == "write" {
+                                    runWrite(parts)
+                                    true
+                                } else {
+                                    if command == "append" {
+                                        runAppend(parts)
+                                        true
+                                    } else {
+                                        if command == "exists" {
+                                            runExists(parts)
+                                            true
+                                        } else {
+                                            println("unknown command: " + command)
+                                            true
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
