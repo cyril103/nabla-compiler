@@ -7,91 +7,91 @@ def printHelp(): Unit = {
 }
 
 def commandName(parts: ArrayObject[String]): String = {
-    if parts.isEmpty() {
-        ""
-    } else {
-        parts.get(0)
+    match parts.size() {
+        0 => ""
+        _ => parts.get(0)
     }
 }
 
 def runAdd(parts: ArrayObject[String]): Unit = {
-    if parts.size() == 3 {
-        val left = parts.get(1).toInt()
-        val right = parts.get(2).toInt()
-        println((left + right).toString())
-    } else {
-        println("usage: add A B")
+    match parts.size() {
+        3 => {
+            val left = parts.get(1).toInt()
+            val right = parts.get(2).toInt()
+            println((left + right).toString())
+        }
+        _ => println("usage: add A B")
     }
 }
 
 def runRepeat(parts: ArrayObject[String]): Unit = {
-    if parts.size() == 3 {
-        println(parts.get(1).repeat(parts.get(2).toInt()))
-    } else {
-        println("usage: repeat TEXT N")
+    match parts.size() {
+        3 => println(parts.get(1).repeat(parts.get(2).toInt()))
+        _ => println("usage: repeat TEXT N")
     }
 }
 
 def runLen(parts: ArrayObject[String]): Unit = {
-    if parts.size() == 2 {
-        println(parts.get(1).length().toString())
-    } else {
-        println("usage: len TEXT")
+    match parts.size() {
+        2 => println(parts.get(1).length().toString())
+        _ => println("usage: len TEXT")
     }
 }
 
 def runCat(parts: ArrayObject[String]): Unit = {
-    if parts.size() == 2 {
-        val path = parts.get(1)
-        if pathExists(path) {
-            println(readTextFile(path))
-        } else {
-            println("missing: " + path)
+    match parts.size() {
+        2 => {
+            val path = parts.get(1)
+            match pathExists(path) {
+                true => println(readTextFile(path))
+                _ => println("missing: " + path)
+            }
         }
-    } else {
-        println("usage: cat PATH")
+        _ => println("usage: cat PATH")
     }
 }
 
 def runWrite(parts: ArrayObject[String]): Unit = {
-    if parts.size() == 3 {
-        val written = writeTextFile(parts.get(1), parts.get(2))
-        println("written: " + written.toString())
-    } else {
-        println("usage: write PATH TEXT")
+    match parts.size() {
+        3 => {
+            val written = writeTextFile(parts.get(1), parts.get(2))
+            println("written: " + written.toString())
+        }
+        _ => println("usage: write PATH TEXT")
     }
 }
 
 def runAppend(parts: ArrayObject[String]): Unit = {
-    if parts.size() == 3 {
-        val written = appendTextFile(parts.get(1), parts.get(2))
-        println("appended: " + written.toString())
-    } else {
-        println("usage: append PATH TEXT")
+    match parts.size() {
+        3 => {
+            val written = appendTextFile(parts.get(1), parts.get(2))
+            println("appended: " + written.toString())
+        }
+        _ => println("usage: append PATH TEXT")
     }
 }
 
 def runExists(parts: ArrayObject[String]): Unit = {
-    if parts.size() == 2 {
-        if pathExists(parts.get(1)) {
-            println("true")
-        } else {
-            println("false")
+    match parts.size() {
+        2 => {
+            match pathExists(parts.get(1)) {
+                true => println("true")
+                _ => println("false")
+            }
         }
-    } else {
-        println("usage: exists PATH")
+        _ => println("usage: exists PATH")
     }
 }
 
 def runRm(parts: ArrayObject[String]): Unit = {
-    if parts.size() == 2 {
-        if deleteTextFile(parts.get(1)) {
-            println("deleted")
-        } else {
-            println("not deleted")
+    match parts.size() {
+        2 => {
+            match deleteTextFile(parts.get(1)) {
+                true => println("deleted")
+                _ => println("not deleted")
+            }
         }
-    } else {
-        println("usage: rm PATH")
+        _ => println("usage: rm PATH")
     }
 }
 
