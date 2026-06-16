@@ -7,6 +7,16 @@ class Student(name: String) {
     }
 }
 
+class ConstantHash(name: String, hashValue: Int) {
+    def hashCode(): Int = {
+        hashValue
+    }
+
+    def toString(): String = {
+        name
+    }
+}
+
 def sameValue[T](left: T, right: T): Bool = {
     left == right
 }
@@ -44,6 +54,27 @@ def main(): Int = {
     val studentsUnion = students.union(others)
     val studentsIntersect = students.intersect(others)
     val studentsDifference = students.difference(others)
+    val first = new ConstantHash("first", 3)
+    val second = new ConstantHash("second", 3)
+    val third = new ConstantHash("third", 3)
+    val collisionSet = setEmpty[ConstantHash]()
+        .add(first)
+        .add(second)
+        .add(first)
+        .add(third)
+    val collisionOther = setEmpty[ConstantHash]()
+        .add(second)
+        .add(new ConstantHash("fourth", 3))
+    val collisionUnion = collisionSet.union(collisionOther)
+    val collisionIntersect = collisionSet.intersect(collisionOther)
+    val collisionDifference = collisionSet.difference(collisionOther)
+    val collisionSource = new ObjectArray[ConstantHash](4)
+    collisionSource.set(0, first)
+    collisionSource.set(1, second)
+    collisionSource.set(2, first)
+    collisionSource.set(3, new ConstantHash("third", 3))
+    val collisionFromArray = setFromArray[ConstantHash](new ArrayObject[ConstantHash](collisionSource))
+    val collisionProbe = new ConstantHash("probe", 3)
 
     if numbers.size() == 3 &&
        fromArray.toString() == "[1, 3, 2]" &&
@@ -81,7 +112,14 @@ def main(): Int = {
         studentsFromArray.toString() == "[alice, bob, carol]" &&
         studentsFromArray.size() == 3 &&
         students.contains(alice) &&
-        sameValue(alice, students.toArray().get(0)) {
+        sameValue(alice, students.toArray().get(0)) &&
+        !collisionSet.contains(collisionProbe) &&
+        collisionSet.toString() == "[first, second, third]" &&
+        collisionUnion.toString() == "[first, second, third, fourth]" &&
+        collisionIntersect.toString() == "[second]" &&
+        collisionDifference.toString() == "[first, third]" &&
+        collisionFromArray.toString() == "[first, second, third]" &&
+        collisionFromArray.size() == 3 {
         0
     } else {
         1

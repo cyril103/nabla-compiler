@@ -1,10 +1,59 @@
 import collections.object_array
 
-def setContains[T](values: ArrayObject[T], expected: T): Bool = {
+def setIndexBucketCount[T](size: Int): Int = {
+    var capacity = 8
+    while capacity < size * 2 {
+        capacity = capacity * 2
+    }
+    capacity
+}
+
+def setBucketIndex[T](hashCode: Int, capacity: Int): Int = {
+    var index = hashCode % capacity
+    if index < 0 {
+        index = index + capacity
+    } else {
+        index
+    }
+    index
+}
+
+def setCreateBuckets[T](capacity: Int): ObjectArray[ArrayObject[T]] = {
+    val buckets = new ObjectArray[ArrayObject[T]](capacity)
     var index = 0
+    while index < capacity {
+        buckets.set(index, new ArrayObject[T](new ObjectArray[T](0)))
+        index = index + 1
+    }
+    buckets
+}
+
+def setBucketsFromValues[T](values: ArrayObject[T]): ObjectArray[ArrayObject[T]] = {
+    val buckets = setCreateBuckets[T](setIndexBucketCount[T](values.size()))
+    var index = 0
+    while index < values.size() {
+        val value = values.get(index)
+        val bucketIndex = setBucketIndex[T](value.hashCode(), buckets.length())
+        val bucket = buckets.get(bucketIndex)
+        buckets.set(bucketIndex, setAppend[T](bucket, value))
+        index = index + 1
+    }
+    buckets
+}
+
+def setInsertIntoBuckets[T](buckets: ObjectArray[ArrayObject[T]], value: T): Unit = {
+    val bucketIndex = setBucketIndex[T](value.hashCode(), buckets.length())
+    val bucket = buckets.get(bucketIndex)
+    buckets.set(bucketIndex, setAppend[T](bucket, value))
+}
+
+def setContainsFromBuckets[T](buckets: ObjectArray[ArrayObject[T]], expected: T): Bool = {
     var found = false
-    while index < values.size() && !found {
-        if values.get(index) == expected {
+    val bucketIndex = setBucketIndex[T](expected.hashCode(), buckets.length())
+    val bucket = buckets.get(bucketIndex)
+    var index = 0
+    while index < bucket.size() {
+        if bucket.get(index) == expected {
             found = true
         } else {
             found
@@ -12,6 +61,10 @@ def setContains[T](values: ArrayObject[T], expected: T): Bool = {
         index = index + 1
     }
     found
+}
+
+def setContains[T](values: ArrayObject[T], expected: T): Bool = {
+    setContainsFromBuckets[T](setBucketsFromValues[T](values), expected)
 }
 
 def setAppend[T](values: ArrayObject[T], value: T): ArrayObject[T] = {
@@ -26,55 +79,86 @@ def setAppend[T](values: ArrayObject[T], value: T): ArrayObject[T] = {
 }
 
 def setWithout[T](values: ArrayObject[T], expected: T): ArrayObject[T] = {
-    var index = 0
-    var removed = false
-    var kept = 0
-    while index < values.size() {
-        if values.get(index) == expected && !removed {
-            removed = true
-        } else {
-            kept = kept + 1
+    if !setContains[T](values, expected) {
+        values
+    } else {
+        var index = 0
+        var removed = false
+        var kept = 0
+        while index < values.size() {
+            if values.get(index) == expected && !removed {
+                removed = true
+            } else {
+                kept = kept + 1
+            }
+            index = index + 1
         }
-        index = index + 1
-    }
 
-    val filtered = new ObjectArray[T](kept)
-    index = 0
-    var output = 0
-    removed = false
-    while index < values.size() {
-        val value = values.get(index)
-        if value == expected && !removed {
-            removed = true
-        } else {
-            filtered.set(output, value)
-            output = output + 1
+        val filtered = new ObjectArray[T](kept)
+        index = 0
+        var output = 0
+        removed = false
+        while index < values.size() {
+            val value = values.get(index)
+            if value == expected && !removed {
+                removed = true
+            } else {
+                filtered.set(output, value)
+                output = output + 1
+            }
+            index = index + 1
         }
-        index = index + 1
+        new ArrayObject[T](filtered)
     }
-    new ArrayObject[T](filtered)
 }
 
 def setUnion[T](left: ArrayObject[T], right: ArrayObject[T]): ArrayObject[T] = {
-    var values = left
+    val leftBuckets = setBucketsFromValues[T](left)
+
     var index = 0
+    var kept = 0
     while index < right.size() {
-        val value = right.get(index)
-        if !setContains[T](values, value) {
-            values = setAppend[T](values, value)
+        if !setContainsFromBuckets[T](leftBuckets, right.get(index)) {
+            kept = kept + 1
         } else {
-            values
+            kept
         }
         index = index + 1
     }
-    values
+
+    if kept == 0 {
+        left
+    } else {
+        val union = new ObjectArray[T](left.size() + kept)
+        index = 0
+        var output = 0
+        while index < left.size() {
+            union.set(output, left.get(index))
+            output = output + 1
+            index = index + 1
+        }
+        index = 0
+        while index < right.size() {
+            val value = right.get(index)
+            if !setContainsFromBuckets[T](leftBuckets, value) {
+                union.set(output, value)
+                output = output + 1
+            } else {
+                output
+            }
+            index = index + 1
+        }
+        new ArrayObject[T](union)
+    }
 }
 
 def setIntersect[T](left: ArrayObject[T], right: ArrayObject[T]): ArrayObject[T] = {
+    val rightBuckets = setBucketsFromValues[T](right)
+
     var index = 0
     var kept = 0
     while index < left.size() {
-        if setContains[T](right, left.get(index)) {
+        if setContainsFromBuckets[T](rightBuckets, left.get(index)) {
             kept = kept + 1
         } else {
             kept
@@ -82,27 +166,35 @@ def setIntersect[T](left: ArrayObject[T], right: ArrayObject[T]): ArrayObject[T]
         index = index + 1
     }
 
-    val filtered = new ObjectArray[T](kept)
-    index = 0
-    var output = 0
-    while index < left.size() {
-        val value = left.get(index)
-        if setContains[T](right, value) {
-            filtered.set(output, value)
-            output = output + 1
-        } else {
-            output
+    if kept == 0 {
+        new ArrayObject[T](new ObjectArray[T](0))
+    } else if kept == left.size() {
+        left
+    } else {
+        val filtered = new ObjectArray[T](kept)
+        index = 0
+        var output = 0
+        while index < left.size() {
+            val value = left.get(index)
+            if setContainsFromBuckets[T](rightBuckets, value) {
+                filtered.set(output, value)
+                output = output + 1
+            } else {
+                output
+            }
+            index = index + 1
         }
-        index = index + 1
+        new ArrayObject[T](filtered)
     }
-    new ArrayObject[T](filtered)
 }
 
 def setDifference[T](left: ArrayObject[T], right: ArrayObject[T]): ArrayObject[T] = {
+    val rightBuckets = setBucketsFromValues[T](right)
+
     var index = 0
     var kept = 0
     while index < left.size() {
-        if !setContains[T](right, left.get(index)) {
+        if !setContainsFromBuckets[T](rightBuckets, left.get(index)) {
             kept = kept + 1
         } else {
             kept
@@ -110,30 +202,55 @@ def setDifference[T](left: ArrayObject[T], right: ArrayObject[T]): ArrayObject[T
         index = index + 1
     }
 
-    val filtered = new ObjectArray[T](kept)
-    index = 0
-    var output = 0
-    while index < left.size() {
-        val value = left.get(index)
-        if !setContains[T](right, value) {
-            filtered.set(output, value)
-            output = output + 1
-        } else {
-            output
+    if kept == left.size() {
+        left
+    } else if kept == 0 {
+        new ArrayObject[T](new ObjectArray[T](0))
+    } else {
+        val filtered = new ObjectArray[T](kept)
+        index = 0
+        var output = 0
+        while index < left.size() {
+            val value = left.get(index)
+            if !setContainsFromBuckets[T](rightBuckets, value) {
+                filtered.set(output, value)
+                output = output + 1
+            } else {
+                output
+            }
+            index = index + 1
         }
-        index = index + 1
+        new ArrayObject[T](filtered)
     }
-    new ArrayObject[T](filtered)
 }
 
 def setFromArray[T](values: ArrayObject[T]): Set[T] = {
-    var result = setEmpty[T]()
-    var index = 0
-    while index < values.size() {
-        result = result.add(values.get(index))
-        index = index + 1
+    if values.size() == 0 {
+        setEmpty[T]()
+    } else {
+        val buckets = setCreateBuckets[T](setIndexBucketCount[T](values.size()))
+        val uniqueValues = new ObjectArray[T](values.size())
+        var output = 0
+        var index = 0
+        while index < values.size() {
+            val value = values.get(index)
+            if !setContainsFromBuckets[T](buckets, value) {
+                uniqueValues.set(output, value)
+                output = output + 1
+                setInsertIntoBuckets[T](buckets, value)
+            } else {
+                output
+            }
+            index = index + 1
+        }
+        val deduped = new ObjectArray[T](output)
+        index = 0
+        while index < output {
+            deduped.set(index, uniqueValues.get(index))
+            index = index + 1
+        }
+        new Set[T](new ArrayObject[T](deduped))
     }
-    result
 }
 
 def setEmpty[T](): Set[T] = {

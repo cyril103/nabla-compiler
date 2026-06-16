@@ -194,7 +194,8 @@ Le pipeline implemente actuellement :
   `objectStringArrayMkString` (compatibilité) et `ArrayObject[T].shuffle`.
 - module de bibliotheque standard `collections.set` avec `Set[T]`, `setEmpty`,
   `add`, `remove`, `union`, `intersect`, `difference`, `setFromArray` et
-  `toString`.
+  `toString`, en utilisant un index de seaux hashés (`hashCode()`) pour des
+  opérations de présence à coût moyen réduit.
 - module de bibliotheque standard `collections.array` comme point d'entree
   commun pour les tableaux specialises, avec `arrayFill[T]`, `arrayMap[T]`,
   `arrayMap[T, U]`, `arrayFilter[T]`, `arrayFold[T]`, `arrayFold[T, U]`,
@@ -354,6 +355,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`union`, `intersect`, `difference`).
 - [x] Ajouter `setFromArray[T](values: ArrayObject[T]): Set[T]` pour la
   construction dédupliquante depuis un tableau source.
+- [x] Améliorer les opérations de `collections.set` (contains, set op, setFromArray)
+  avec un index hashé interne basé sur `hashCode()` pour réduire la complexité
+  moyenne des recherches de présence.
 - [x] Ajouter le module standard `util` avec `randomSeed`, `randomInt`,
   `randomIntRange` et `randomBool` pour une API pseudo-aléatoire
   deterministe.
@@ -570,6 +574,11 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   déduplication par ordre d’apparition dans la source, et tests associés.
   - Fichiers / tests associés: `stdlib/collections/set.nabla`,
     `tests/test_stdlib_set.nabla`, `docs/language.md`.
+- `local` - Utiliser `hashCode()` de `Any` dans `collections.set` pour améliorer
+  la complexité moyenne de `contains`, `union`, `intersect`, `difference` et
+  `setFromArray` tout en conservant l’égalité par `==` et l’ordre stable.
+  - Fichiers / tests associés: `stdlib/collections/set.nabla`,
+    `tests/test_stdlib_set.nabla`, `docs/language.md`, `AGENTS.md`.
 - `local` - Renforcer la résolution des membres hérités en cas d'ambiguïtés de type
   générique (`Holder[Int]` vs `Holder[String]`) et formaliser la racine `Any`
   implicite pour les classes sans `extends`.

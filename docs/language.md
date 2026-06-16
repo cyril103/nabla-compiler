@@ -451,7 +451,8 @@ sont specialises vers des facades primitives. Les autres types passent par
 `ArrayObject[T]`.
 
 Le module `collections.set` fournit une structure `Set[T]` immutable basée sur
-un tableau interne.
+un tableau interne, avec déduplication par `==` et table de hachage interne
+(`hashCode()`) pour des vérifications d’appartenance rapides en moyenne.
 
 ```nabla
 import collections.set
