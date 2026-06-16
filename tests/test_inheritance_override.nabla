@@ -1,0 +1,16 @@
+class Base() {
+    def value(): Int = {
+        1
+    }
+}
+
+class Child extends Base() {
+    override def value(): Int = {
+        2
+    }
+}
+
+def main(): Int = {
+    val child = new Child()
+    child.value()
+}

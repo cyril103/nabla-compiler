@@ -27,6 +27,7 @@ struct CompilerContext {
         std::vector<std::string> typeParameters;
         SourceLocation location;
         SourceLocation returnTypeLocation;
+        bool isOverride = false;
     };
 
     struct FieldInfo {

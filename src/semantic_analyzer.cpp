@@ -163,6 +163,25 @@ void SemanticAnalyzer::validateDeclaredTypes() {
                 "' dans la classe '" + className + "': plusieurs définitions dans [" +
                 formatMethodProviders(providers) + "]");
         }
+        for (const auto& [methodName, signature] : classInfo.methods) {
+            if (!signature.isOverride) continue;
+            bool hasInheritedMethod = false;
+            for (const auto& parentType : classInfo.parentTypes) {
+                const std::string concreteParentType = substituteType(parentType, classTypeSubstitution);
+                const auto inheritedCandidates = collectClassMethodLookupCandidates(
+                    context, concreteParentType, methodName);
+                if (!inheritedCandidates.empty()) {
+                    hasInheritedMethod = true;
+                    break;
+                }
+            }
+            if (!hasInheritedMethod) {
+                throw CompilerError(
+                    ErrorKind::Semantic, signature.location,
+                    "override invalide pour '" + className + "." + methodName +
+                    "' : aucune méthode héritée correspondante");
+            }
+        }
         for (const auto& [fieldName, providers] : inheritedFieldProviders) {
             if (providers.size() <= 1) continue;
             throw CompilerError(

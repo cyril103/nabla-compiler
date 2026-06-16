@@ -1,0 +1,10 @@
+class Child() {
+    override def value(): Int = {
+        1
+    }
+}
+
+def main(): Int = {
+    val child = new Child()
+    child.value()
+}

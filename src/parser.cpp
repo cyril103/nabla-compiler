@@ -220,7 +220,9 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
     if (peek().type == TokenType::LBRACE) {
         consume(TokenType::LBRACE, "");
         while (peek().type != TokenType::RBRACE) {
-            if (peek().type == TokenType::KW_DEF) program->elements.push_back(parseFunctionDef(className));
+            if (peek().type == TokenType::KW_OVERRIDE || peek().type == TokenType::KW_DEF) {
+                program->elements.push_back(parseFunctionDef(className));
+            }
             else throw CompilerError(ErrorKind::Parser, peek().location, "instruction inattendue dans la classe '" + peek().value + "'");
         }
         consume(TokenType::RBRACE, "");
@@ -1139,6 +1141,16 @@ std::unique_ptr<ASTNode> Parser::parseExpression() {
 }
 
 std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
+    bool isOverride = false;
+    if (peek().type == TokenType::KW_OVERRIDE) {
+        if (clName.empty()) {
+            throw CompilerError(
+                ErrorKind::Parser, peek().location,
+                "mot-clé 'override' uniquement autorisé dans une déclaration de méthode de classe");
+        }
+        consume(TokenType::KW_OVERRIDE, "");
+        isOverride = true;
+    }
     Token defToken = consume(TokenType::KW_DEF, "");
     Token nameToken = consume(TokenType::IDENTIFIER, "Nom de fonction attendu");
     std::string name = nameToken.value;
@@ -1198,7 +1210,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
     consume(TokenType::COLON, "");
     auto [returnType, returnTypeLocation] = parseType("Type de retour attendu");
     CompilerContext::FunctionSignature signature{
-        signatureParameters, returnType, typeParameters, defToken.location, returnTypeLocation};
+        signatureParameters, returnType, typeParameters, defToken.location, returnTypeLocation, isOverride};
     if (!clName.empty()) {
         if (context.classes[clName].methods.count(name)) {
             throw CompilerError(ErrorKind::Parser, nameToken.location, "méthode déjà déclarée dans '" + clName + "': " + name);

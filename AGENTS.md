@@ -292,8 +292,9 @@ Limites importantes :
   fonctionne mais requiert des conversions explicites qui nuisent à la lisibilité des
   cas d'usage réels; la résolution des champs et des méthodes héritées reste
   fonctionnelle mais sujette à friction dans des scénarios hétérogènes.
-- Le mot-clé `override` n'est pas encore nécessairement requis pour les
-  redéfinitions; il manque aussi un modèle plus lisible pour les constructeurs
+- Le mot-clé `override` est supporté pour marquer explicitement les
+  redéfinitions; son usage reste optionnel mais valide une cible héritée explicite.
+  Il manque encore un modèle plus lisible pour les constructeurs
   hérités (chaîne `super(...)` explicite, initialisation claire des champs
   parentaux). Ces zones sont la source principale de verbosité de l'exemple
   `workshop_set_inheritance.nabla`.
@@ -588,6 +589,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   de régression ciblés.
   - Fichiers / tests associés: `src/compiler_context.hpp`, `src/parser.hpp`,
     `src/parser.cpp`, `src/ast.cpp`, `tests/test_error_inheritance_generic_field_conflict.nabla`.
+- `local` - Implémenter le mot-clé `override` pour les méthodes de classes et
+  valider son usage lorsque la cible héritée est absente.
+  - Fichiers / tests associés: `src/compiler_context.hpp`, `src/lexer.hpp`,
+    `src/parser.cpp`, `src/semantic_analyzer.cpp`,
+    `tests/test_inheritance_override.nabla`,
+    `tests/test_error_override_no_match.nabla`,
+    `tests/test_error_override_missing_parent.nabla`.
 - `1c77da3` - Etendre `collections.set` avec des opérations d’ensemble
   immutables `union`, `intersect`, `difference`, et tests de régression.
   - Fichiers / tests associés: `stdlib/collections/set.nabla`,

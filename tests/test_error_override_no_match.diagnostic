@@ -1,0 +1,1 @@
+tests/test_error_override_no_match.nabla:8:14: semantic error: override invalide pour 'Child.value' : aucune méthode héritée correspondante
