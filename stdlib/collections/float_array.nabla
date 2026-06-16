@@ -166,15 +166,15 @@ class ArrayFloat(values: FloatArray) {
     }
 
     def size(): Int = {
-        arrayBaseSize[Float, FloatArray](values, floatArrayLength)
+        arrayBaseSize[FloatArray](values, floatArrayLength)
     }
 
     def isEmpty(): Bool = {
-        arrayBaseIsEmpty[Float, FloatArray](values, floatArrayLength)
+        arrayBaseIsEmpty[FloatArray](values, floatArrayLength)
     }
 
     def nonEmpty(): Bool = {
-        arrayBaseNonEmpty[Float, FloatArray](values, floatArrayLength)
+        arrayBaseNonEmpty[FloatArray](values, floatArrayLength)
     }
 
     def get(index: Int): Float = {
@@ -222,7 +222,7 @@ class ArrayFloat(values: FloatArray) {
     }
 
     def raw(): FloatArray = {
-        arrayBaseRaw[Float, FloatArray](values)
+        arrayBaseRaw[FloatArray](values)
     }
 }
 

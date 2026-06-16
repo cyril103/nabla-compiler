@@ -230,15 +230,15 @@ class ArrayBool(values: BoolArray) {
     }
 
     def size(): Int = {
-        arrayBaseSize[Bool, BoolArray](values, boolArrayLength)
+        arrayBaseSize[BoolArray](values, boolArrayLength)
     }
 
     def isEmpty(): Bool = {
-        arrayBaseIsEmpty[Bool, BoolArray](values, boolArrayLength)
+        arrayBaseIsEmpty[BoolArray](values, boolArrayLength)
     }
 
     def nonEmpty(): Bool = {
-        arrayBaseNonEmpty[Bool, BoolArray](values, boolArrayLength)
+        arrayBaseNonEmpty[BoolArray](values, boolArrayLength)
     }
 
     def get(index: Int): Bool = {
@@ -302,7 +302,7 @@ class ArrayBool(values: BoolArray) {
     }
 
     def raw(): BoolArray = {
-        arrayBaseRaw[Bool, BoolArray](values)
+        arrayBaseRaw[BoolArray](values)
     }
 }
 

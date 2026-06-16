@@ -84,15 +84,15 @@ class ArrayObject[T](values: ObjectArray[T]) {
     }
 
     def size(): Int = {
-        arrayBaseSize[T, ObjectArray[T]](values, objectArrayLength[T])
+        arrayBaseSize[ObjectArray[T]](values, objectArrayLength[T])
     }
 
     def isEmpty(): Bool = {
-        arrayBaseIsEmpty[T, ObjectArray[T]](values, objectArrayLength[T])
+        arrayBaseIsEmpty[ObjectArray[T]](values, objectArrayLength[T])
     }
 
     def nonEmpty(): Bool = {
-        arrayBaseNonEmpty[T, ObjectArray[T]](values, objectArrayLength[T])
+        arrayBaseNonEmpty[ObjectArray[T]](values, objectArrayLength[T])
     }
 
     def get(index: Int): T = {
@@ -204,6 +204,6 @@ class ArrayObject[T](values: ObjectArray[T]) {
     }
 
     def raw(): ObjectArray[T] = {
-        arrayBaseRaw[T, ObjectArray[T]](values)
+        arrayBaseRaw[ObjectArray[T]](values)
     }
 }

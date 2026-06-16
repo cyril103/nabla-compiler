@@ -878,15 +878,15 @@ class ArrayInt(values: IntArray) {
     }
 
     def size(): Int = {
-        arrayBaseSize[Int, IntArray](values, intArrayLength)
+        arrayBaseSize[IntArray](values, intArrayLength)
     }
 
     def isEmpty(): Bool = {
-        arrayBaseIsEmpty[Int, IntArray](values, intArrayLength)
+        arrayBaseIsEmpty[IntArray](values, intArrayLength)
     }
 
     def nonEmpty(): Bool = {
-        arrayBaseNonEmpty[Int, IntArray](values, intArrayLength)
+        arrayBaseNonEmpty[IntArray](values, intArrayLength)
     }
 
     def get(index: Int): Int = {
@@ -1054,7 +1054,7 @@ class ArrayInt(values: IntArray) {
     }
 
     def raw(): IntArray = {
-        arrayBaseRaw[Int, IntArray](values)
+        arrayBaseRaw[IntArray](values)
     }
 }
 

@@ -190,15 +190,15 @@ class ArrayLong(values: LongArray) {
     }
 
     def size(): Int = {
-        arrayBaseSize[Long, LongArray](values, longArrayLength)
+        arrayBaseSize[LongArray](values, longArrayLength)
     }
 
     def isEmpty(): Bool = {
-        arrayBaseIsEmpty[Long, LongArray](values, longArrayLength)
+        arrayBaseIsEmpty[LongArray](values, longArrayLength)
     }
 
     def nonEmpty(): Bool = {
-        arrayBaseNonEmpty[Long, LongArray](values, longArrayLength)
+        arrayBaseNonEmpty[LongArray](values, longArrayLength)
     }
 
     def get(index: Int): Long = {
@@ -254,7 +254,7 @@ class ArrayLong(values: LongArray) {
     }
 
     def raw(): LongArray = {
-        arrayBaseRaw[Long, LongArray](values)
+        arrayBaseRaw[LongArray](values)
     }
 }
 

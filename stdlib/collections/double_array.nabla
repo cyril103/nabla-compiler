@@ -166,15 +166,15 @@ class ArrayDouble(values: DoubleArray) {
     }
 
     def size(): Int = {
-        arrayBaseSize[Double, DoubleArray](values, doubleArrayLength)
+        arrayBaseSize[DoubleArray](values, doubleArrayLength)
     }
 
     def isEmpty(): Bool = {
-        arrayBaseIsEmpty[Double, DoubleArray](values, doubleArrayLength)
+        arrayBaseIsEmpty[DoubleArray](values, doubleArrayLength)
     }
 
     def nonEmpty(): Bool = {
-        arrayBaseNonEmpty[Double, DoubleArray](values, doubleArrayLength)
+        arrayBaseNonEmpty[DoubleArray](values, doubleArrayLength)
     }
 
     def get(index: Int): Double = {
@@ -222,7 +222,7 @@ class ArrayDouble(values: DoubleArray) {
     }
 
     def raw(): DoubleArray = {
-        arrayBaseRaw[Double, DoubleArray](values)
+        arrayBaseRaw[DoubleArray](values)
     }
 }
 
