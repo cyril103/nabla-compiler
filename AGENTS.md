@@ -192,6 +192,8 @@ Le pipeline implemente actuellement :
 - module de bibliotheque standard `collections.object_array` avec `ObjectArray[T]`,
   `ArrayObject[T]`, `objectArrayShuffle`, `objectArrayMkString`,
   `objectStringArrayMkString` (compatibilité) et `ArrayObject[T].shuffle`.
+- module de bibliotheque standard `collections.set` avec `Set[T]`, `setEmpty`,
+  `add`, `remove`, `union`, `intersect`, `difference` et `toString`.
 - module de bibliotheque standard `collections.array` comme point d'entree
   commun pour les tableaux specialises, avec `arrayFill[T]`, `arrayMap[T]`,
   `arrayMap[T, U]`, `arrayFilter[T]`, `arrayFold[T]`, `arrayFold[T, U]`,
@@ -347,6 +349,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `isEven`, `isOdd`, `isBetween`, `gcd`/`lcm` pour `Long`, `absDiff`,
   `pow` pour `Float` et `Double`, `isClose`, `sqrt`, constantes `pi`
   (approximatives) et conversions degrés/radians.
+- [x] Etendre `collections.set` avec des operations immutables
+  (`union`, `intersect`, `difference`).
 - [x] Ajouter le module standard `util` avec `randomSeed`, `randomInt`,
   `randomIntRange` et `randomBool` pour une API pseudo-aléatoire
   deterministe.
@@ -555,6 +559,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `objectStringArrayMkString` pour `ArrayObject[String]`.
 
 ## Journal Des Jalons
+- `1c77da3` - Etendre `collections.set` avec des opérations d’ensemble
+  immutables `union`, `intersect`, `difference`, et tests de régression.
+  - Fichiers / tests associés: `stdlib/collections/set.nabla`,
+    `tests/test_stdlib_set.nabla`, `tests/test_stdlib_set.expected`.
 - `local` - Renforcer la résolution des membres hérités en cas d'ambiguïtés de type
   générique (`Holder[Int]` vs `Holder[String]`) et formaliser la racine `Any`
   implicite pour les classes sans `extends`.

@@ -16,6 +16,8 @@ pour reprendre facilement apres une pause.
   backend runtime.
 - Standard library deja utile :
   - collections typées et facade `Array[T]`
+  - `collections.set` avec `Set[T]`, `add`, `remove`, `union`, `intersect`,
+    `difference`
   - `Option[T]`
   - operations `String`
   - I/O console et fichiers texte
