@@ -482,6 +482,18 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             resolvedType = methodName == "toString" ? "String" : "Int";
             return;
         }
+        if (methodName == "==" || methodName == "!=") {
+            if (arguments.size() != 1) {
+                semanticError("la méthode " + receiverType + "." + methodName + " attend un argument");
+            }
+            if (arguments[0]->getType() != receiverType) {
+                throw CompilerError(
+                    ErrorKind::Semantic, arguments[0]->getLocation(),
+                    "la méthode " + receiverType + "." + methodName + " attend un argument de type " + receiverType);
+            }
+            resolvedType = "Bool";
+            return;
+        }
         semanticError("méthode inconnue: " + receiverType + "." + methodName);
     }
     if (isNumericType(receiverType)) {
@@ -820,7 +832,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
 std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
     const std::string receiverType = receiver->getType();
     const std::string activeReceiverType = builder.substituteActiveType(receiverType);
-    if (receiverIsTypeParameter && receiverType == activeReceiverType) {
+    if (receiverIsTypeParameter) {
         if (methodName == "toString") {
             if (!arguments.empty()) {
                 builder.unsupported(location, "l'appel de méthode " + receiverType + ".toString");
@@ -834,6 +846,14 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
             }
             std::string loweredReceiver = receiver->lowerToIR(builder);
             return builder.emitMethodCall("Any", "hashCode", loweredReceiver, {}, "Int");
+        }
+        if (methodName == "==" || methodName == "!=") {
+            if (arguments.size() != 1) {
+                builder.unsupported(location, "l'appel de méthode " + receiverType + "." + methodName);
+            }
+            const std::string loweredReceiver = receiver->lowerToIR(builder);
+            const std::string loweredArgument = arguments[0]->lowerToIR(builder);
+            return builder.emitBinary(methodName, loweredReceiver, loweredArgument, "Bool");
         }
     }
     if (activeReceiverType == "String" && methodName == "toString" && arguments.empty()) {

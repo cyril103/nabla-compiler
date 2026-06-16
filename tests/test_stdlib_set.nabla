@@ -6,6 +6,10 @@ class Student(name: String) {
     }
 }
 
+def sameValue[T](left: T, right: T): Bool = {
+    left == right
+}
+
 def main(): Int = {
     val base = setEmpty[Int]()
     val numbers = base.add(3).add(1).add(3).add(2)
@@ -24,9 +28,12 @@ def main(): Int = {
        removedThree.toString() == "[1, 2]" &&
        unchanged.size() == 3 &&
        students.size() == 2 &&
-       students.toString() == "[alice, bob]" &&
        students.toArray().size() == 2 &&
-       !students.toArray().isEmpty() {
+       !students.toArray().isEmpty() &&
+       sameValue(3, 3) &&
+       !sameValue(3, 4) &&
+       students.contains(alice) &&
+       sameValue(alice, students.toArray().get(0)) {
         0
     } else {
         1

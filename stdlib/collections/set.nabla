@@ -4,7 +4,7 @@ def setContains[T](values: ArrayObject[T], expected: T): Bool = {
     var index = 0
     var found = false
     while index < values.size() && !found {
-        if values.get(index).toString() == expected.toString() {
+        if values.get(index) == expected {
             found = true
         } else {
             found
@@ -30,7 +30,7 @@ def setWithout[T](values: ArrayObject[T], expected: T): ArrayObject[T] = {
     var removed = false
     var kept = 0
     while index < values.size() {
-        if values.get(index).toString() == expected.toString() && !removed {
+        if values.get(index) == expected && !removed {
             removed = true
         } else {
             kept = kept + 1
@@ -44,7 +44,7 @@ def setWithout[T](values: ArrayObject[T], expected: T): ArrayObject[T] = {
     removed = false
     while index < values.size() {
         val value = values.get(index)
-        if value.toString() == expected.toString() && !removed {
+        if value == expected && !removed {
             removed = true
         } else {
             filtered.set(output, value)
