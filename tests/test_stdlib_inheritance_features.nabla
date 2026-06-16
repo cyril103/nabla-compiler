@@ -1,4 +1,5 @@
 import core.option_int
+import collections.int_array
 import util
 
 def main(): Int = {
@@ -12,11 +13,24 @@ def main(): Int = {
     val generatedValue = generated.value()
     val generatedState = generated.state().seed()
 
+    val baseRange = new RangeInt(1, 5)
+    val mappedRange = baseRange.map(value => value * 2)
+    val filteredRange = baseRange.filter(value => value % 2 == 0)
+    val mappedFilteredRange = filteredRange.map(value => value * 3)
+    val inheritedCount = baseRange.size() + mappedRange.size() + filteredRange.size() + mappedFilteredRange.size()
+
     if mapped.getOrElse(0) == 15
         && filtered.getOrElse(0) == 0
         && chained.getOrElse(0) == 10
         && generatedValue == 12345
-        && generatedState == 12345 {
+        && generatedState == 12345
+        && baseRange.nonEmpty()
+        && baseRange.size() == 4
+        && mappedRange.nonEmpty()
+        && filteredRange.isEmpty() == false
+        && mappedFilteredRange.nonEmpty()
+        && inheritedCount == 16
+    {
         42
     } else {
         99

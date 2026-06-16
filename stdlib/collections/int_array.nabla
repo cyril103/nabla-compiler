@@ -94,35 +94,38 @@ def intArrayRandomChoice(xs: IntArray, state: RandomState, default: Int): Random
     }
 }
 
-class RangeInt(startValue: Int, untilValue: Int) {
+class RangeIntBase(start: Int, until: Int) {
     def size(): Int = {
-        if untilValue > startValue {
-            untilValue - startValue
+        if until > start {
+            until - start
         } else {
             0
         }
     }
 
     def isEmpty(): Bool = {
-        untilValue <= startValue
+        until <= start
     }
 
     def nonEmpty(): Bool = {
-        untilValue > startValue
+        until > start
     }
+}
+
+class RangeInt extends RangeIntBase(start, until) {
 
     def foreach(f: (Int) => Unit): Unit = {
-        var value = startValue
-        while value < untilValue {
+        var value = start
+        while value < until {
             f(value)
             value = value + 1
         }
     }
 
     def fold(initial: Int, combine: (Int, Int) => Int): Int = {
-        var value = startValue
+        var value = start
         var accumulator = initial
-        while value < untilValue {
+        while value < until {
             accumulator = combine(accumulator, value)
             value = value + 1
         }
@@ -130,9 +133,9 @@ class RangeInt(startValue: Int, untilValue: Int) {
     }
 
     def foldLong(initial: Long, combine: (Long, Int) => Long): Long = {
-        var value = startValue
+        var value = start
         var accumulator = initial
-        while value < untilValue {
+        while value < until {
             accumulator = combine(accumulator, value)
             value = value + 1
         }
@@ -140,9 +143,9 @@ class RangeInt(startValue: Int, untilValue: Int) {
     }
 
     def exists(predicate: (Int) => Bool): Bool = {
-        var value = startValue
+        var value = start
         var found = false
-        while value < untilValue && !found {
+        while value < until && !found {
             if predicate(value) {
                 found = true
             } else {
@@ -154,9 +157,9 @@ class RangeInt(startValue: Int, untilValue: Int) {
     }
 
     def forall(predicate: (Int) => Bool): Bool = {
-        var value = startValue
+        var value = start
         var all = true
-        while value < untilValue && all {
+        while value < until && all {
             if predicate(value) {
                 all
             } else {
@@ -168,9 +171,9 @@ class RangeInt(startValue: Int, untilValue: Int) {
     }
 
     def count(predicate: (Int) => Bool): Int = {
-        var value = startValue
+        var value = start
         var total = 0
-        while value < untilValue {
+        while value < until {
             if predicate(value) {
                 total = total + 1
             } else {
@@ -182,9 +185,9 @@ class RangeInt(startValue: Int, untilValue: Int) {
     }
 
     def find(predicate: (Int) => Bool): OptionInt = {
-        var value = startValue
+        var value = start
         var found = optionIntNone()
-        while value < untilValue && found.isEmpty() {
+        while value < until && found.isEmpty() {
             if predicate(value) {
                 found = optionIntSome(value)
             } else {
@@ -196,12 +199,12 @@ class RangeInt(startValue: Int, untilValue: Int) {
     }
 
     def max(): OptionInt = {
-        if untilValue <= startValue {
+        if until <= start {
             optionIntNone()
         } else {
-            var value = startValue + 1
-            var current = startValue
-            while value < untilValue {
+            var value = start + 1
+            var current = start
+            while value < until {
                 if value > current {
                     current = value
                 } else {
@@ -214,27 +217,27 @@ class RangeInt(startValue: Int, untilValue: Int) {
     }
 
     def map(f: (Int) => Int): RangeIntMapped = {
-        new RangeIntMapped(startValue, untilValue, f)
+        new RangeIntMapped(start, until, f)
     }
 
     def filter(predicate: (Int) => Bool): RangeIntFiltered = {
-        new RangeIntFiltered(startValue, untilValue, predicate)
+        new RangeIntFiltered(start, until, predicate)
     }
 }
 
-class RangeIntMapped(startValue: Int, untilValue: Int, transform: (Int) => Int) {
+class RangeIntMapped extends RangeIntBase(start, until)(transform: (Int) => Int) {
     def foreach(f: (Int) => Unit): Unit = {
-        var value = startValue
-        while value < untilValue {
+        var value = start
+        while value < until {
             f(transform(value))
             value = value + 1
         }
     }
 
     def fold(initial: Int, combine: (Int, Int) => Int): Int = {
-        var value = startValue
+        var value = start
         var accumulator = initial
-        while value < untilValue {
+        while value < until {
             accumulator = combine(accumulator, transform(value))
             value = value + 1
         }
@@ -242,12 +245,12 @@ class RangeIntMapped(startValue: Int, untilValue: Int, transform: (Int) => Int) 
     }
 
     def max(): OptionInt = {
-        if untilValue <= startValue {
+        if until <= start {
             optionIntNone()
         } else {
-            var value = startValue + 1
-            var current = transform(startValue)
-            while value < untilValue {
+            var value = start + 1
+            var current = transform(start)
+            while value < until {
                 val mapped = transform(value)
                 if mapped > current {
                     current = mapped
@@ -261,10 +264,10 @@ class RangeIntMapped(startValue: Int, untilValue: Int, transform: (Int) => Int) 
     }
 }
 
-class RangeIntFiltered(startValue: Int, untilValue: Int, predicate: (Int) => Bool) {
+class RangeIntFiltered extends RangeIntBase(start, until)(predicate: (Int) => Bool) {
     def foreach(f: (Int) => Unit): Unit = {
-        var value = startValue
-        while value < untilValue {
+        var value = start
+        while value < until {
             if predicate(value) {
                 f(value)
             } else {
@@ -275,9 +278,9 @@ class RangeIntFiltered(startValue: Int, untilValue: Int, predicate: (Int) => Boo
     }
 
     def fold(initial: Int, combine: (Int, Int) => Int): Int = {
-        var value = startValue
+        var value = start
         var accumulator = initial
-        while value < untilValue {
+        while value < until {
             if predicate(value) {
                 accumulator = combine(accumulator, value)
             } else {
@@ -289,9 +292,9 @@ class RangeIntFiltered(startValue: Int, untilValue: Int, predicate: (Int) => Boo
     }
 
     def foldLong(initial: Long, combine: (Long, Int) => Long): Long = {
-        var value = startValue
+        var value = start
         var accumulator = initial
-        while value < untilValue {
+        while value < until {
             if predicate(value) {
                 accumulator = combine(accumulator, value)
             } else {
@@ -303,9 +306,9 @@ class RangeIntFiltered(startValue: Int, untilValue: Int, predicate: (Int) => Boo
     }
 
     def exists(nextPredicate: (Int) => Bool): Bool = {
-        var value = startValue
+        var value = start
         var found = false
-        while value < untilValue && !found {
+        while value < until && !found {
             if predicate(value) && nextPredicate(value) {
                 found = true
             } else {
@@ -317,9 +320,9 @@ class RangeIntFiltered(startValue: Int, untilValue: Int, predicate: (Int) => Boo
     }
 
     def forall(nextPredicate: (Int) => Bool): Bool = {
-        var value = startValue
+        var value = start
         var all = true
-        while value < untilValue && all {
+        while value < until && all {
             if predicate(value) {
                 if nextPredicate(value) {
                     all
@@ -335,9 +338,9 @@ class RangeIntFiltered(startValue: Int, untilValue: Int, predicate: (Int) => Boo
     }
 
     def count(): Int = {
-        var value = startValue
+        var value = start
         var total = 0
-        while value < untilValue {
+        while value < until {
             if predicate(value) {
                 total = total + 1
             } else {
@@ -349,9 +352,9 @@ class RangeIntFiltered(startValue: Int, untilValue: Int, predicate: (Int) => Boo
     }
 
     def find(nextPredicate: (Int) => Bool): OptionInt = {
-        var value = startValue
+        var value = start
         var found = optionIntNone()
-        while value < untilValue && found.isEmpty() {
+        while value < until && found.isEmpty() {
             if predicate(value) && nextPredicate(value) {
                 found = optionIntSome(value)
             } else {
@@ -363,9 +366,9 @@ class RangeIntFiltered(startValue: Int, untilValue: Int, predicate: (Int) => Boo
     }
 
     def max(): OptionInt = {
-        var value = startValue
+        var value = start
         var current = optionIntNone()
-        while value < untilValue {
+        while value < until {
             if predicate(value) {
                 if current.isEmpty() || value > current.getOrElse(value) {
                     current = optionIntSome(value)
@@ -381,19 +384,17 @@ class RangeIntFiltered(startValue: Int, untilValue: Int, predicate: (Int) => Boo
     }
 
     def map(f: (Int) => Int): RangeIntFilteredMapped = {
-        new RangeIntFilteredMapped(startValue, untilValue, predicate, f)
+        new RangeIntFilteredMapped(start, until, predicate, f)
     }
 }
 
-class RangeIntFilteredMapped(
-    startValue: Int,
-    untilValue: Int,
+class RangeIntFilteredMapped extends RangeIntBase(start, until)(
     predicate: (Int) => Bool,
     transform: (Int) => Int
 ) {
     def foreach(f: (Int) => Unit): Unit = {
-        var value = startValue
-        while value < untilValue {
+        var value = start
+        while value < until {
             if predicate(value) {
                 f(transform(value))
             } else {
@@ -404,9 +405,9 @@ class RangeIntFilteredMapped(
     }
 
     def fold(initial: Int, combine: (Int, Int) => Int): Int = {
-        var value = startValue
+        var value = start
         var accumulator = initial
-        while value < untilValue {
+        while value < until {
             if predicate(value) {
                 accumulator = combine(accumulator, transform(value))
             } else {
@@ -418,9 +419,9 @@ class RangeIntFilteredMapped(
     }
 
     def max(): OptionInt = {
-        var value = startValue
+        var value = start
         var current = optionIntNone()
-        while value < untilValue {
+        while value < until {
             if predicate(value) {
                 val mapped = transform(value)
                 if current.isEmpty() || mapped > current.getOrElse(mapped) {
