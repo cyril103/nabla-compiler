@@ -216,6 +216,30 @@ def boolArraySet(values: BoolArray, index: Int, value: Bool): Unit = {
 
 class ArrayBool extends ArrayPrimitiveBase[Bool, BoolArray](rawValues, lengthFn, getFn, setFn, toStringFn) {
 
+    override def length(): Int = {
+        arrayBaseSize[BoolArray](rawValues, lengthFn)
+    }
+
+    override def size(): Int = {
+        arrayBaseSize[BoolArray](rawValues, lengthFn)
+    }
+
+    override def isEmpty(): Bool = {
+        arrayBaseIsEmpty[BoolArray](rawValues, lengthFn)
+    }
+
+    override def nonEmpty(): Bool = {
+        arrayBaseNonEmpty[BoolArray](rawValues, lengthFn)
+    }
+
+    override def get(index: Int): Bool = {
+        arrayBaseGet[Bool, BoolArray](rawValues, index, getFn)
+    }
+
+    override def set(index: Int, value: Bool): Unit = {
+        arrayBaseSet[Bool, BoolArray](rawValues, index, value, setFn)
+    }
+
     def countTrue(): Int = {
         boolArrayCountTrue(rawValues)
     }
@@ -258,6 +282,22 @@ class ArrayBool extends ArrayPrimitiveBase[Bool, BoolArray](rawValues, lengthFn,
 
     def fold(initial: Bool, combine: (Bool, Bool) => Bool): Bool = {
         arrayBaseFold[Bool, Bool, BoolArray](rawValues, lengthFn, getFn, initial, combine)
+    }
+
+    override def raw(): BoolArray = {
+        arrayBaseRaw[BoolArray](rawValues)
+    }
+
+    override def mkString(separator: String): String = {
+        arrayBaseMkString[Bool, BoolArray](rawValues, lengthFn, getFn, separator, toStringFn)
+    }
+
+    override def toString(): String = {
+        arrayBaseToString[Bool, BoolArray](rawValues, lengthFn, getFn, toStringFn)
+    }
+
+    override def foreach(f: (Bool) => Unit): Unit = {
+        arrayBaseForeach[Bool, BoolArray](rawValues, lengthFn, getFn, f)
     }
 }
 

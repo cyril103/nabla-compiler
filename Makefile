@@ -143,6 +143,69 @@ all-tests: nablac
 	done; \
 	exit $$all_status
 
+examples-quick: nablac
+	@mkdir -p $(BUILD_DIR)/examples
+	@all_status=0; \
+	for testfile in examples/*.nabla; do \
+		echo "===== $$testfile ====="; \
+		NABLA_BUILD_DIR=$(BUILD_DIR) $(BUILD_DIR)/nablac "$$testfile" >/dev/null 2>&1; \
+		compile_status=$$?; \
+		if [ $$compile_status -ne 0 ]; then \
+			echo "FAIL: $$testfile (compilation status=$$compile_status)"; \
+			all_status=1; \
+		else \
+			echo "PASS: $$testfile"; \
+		fi; \
+		echo; \
+	done; \
+	exit $$all_status
+
+examples: nablac
+	@mkdir -p $(BUILD_DIR)/examples
+	@all_status=0; \
+	for testfile in examples/*.nabla; do \
+		echo "===== $$testfile ====="; \
+		executable=$(BUILD_DIR)/$$(basename "$$testfile" .nabla); \
+		NABLA_BUILD_DIR=$(BUILD_DIR) $(BUILD_DIR)/nablac "$$testfile" >/dev/null 2>&1; \
+		compile_status=$$?; \
+		if [ $$compile_status -ne 0 ]; then \
+			echo "FAIL: $$testfile (compilation status=$$compile_status)"; \
+			all_status=1; \
+		elif [ -f "$${testfile%.nabla}.expected" ]; then \
+			expected=$$(tr -d '[:space:]' < "$${testfile%.nabla}.expected"); \
+			stdout_file=$${testfile%.nabla}.stdout; \
+			actual_stdout=$(BUILD_DIR)/examples/$$(basename "$$testfile" .nabla).stdout; \
+			if [ -f "$$stdout_file" ]; then \
+				"$$executable" >"$$actual_stdout" 2>/dev/null; \
+			else \
+				"$$executable" >/dev/null 2>&1; \
+			fi; \
+			run_status=$$?; \
+			if [ "$$run_status" = "$$expected" ]; then \
+				echo "PASS: $$testfile (exit=$$run_status)"; \
+			else \
+				echo "FAIL: $$testfile (exit=$$run_status, expected=$$expected)"; \
+				all_status=1; \
+			fi; \
+			if [ -f "$$stdout_file" ]; then \
+				if cmp -s "$$actual_stdout" "$$stdout_file"; then \
+					echo "PASS (stdout): $$testfile"; \
+				else \
+					echo "FAIL (stdout): $$testfile"; \
+					diff -u "$$stdout_file" "$$actual_stdout" || true; \
+					all_status=1; \
+				fi; \
+				rm -f "$$actual_stdout"; \
+			fi; \
+		else \
+			echo "PASS (compiled): $$testfile (no expected files)"; \
+		fi; \
+		echo; \
+	done; \
+	exit $$all_status
+
+examples-full: examples
+
 debug: nablac
 	@mkdir -p $(BUILD_DIR)
 	NABLA_BUILD_DIR=$(BUILD_DIR) $(BUILD_DIR)/nablac --keep-asm $(SRC)
@@ -151,4 +214,4 @@ debug: nablac
 clean:
 	rm -rf $(BUILD_DIR) nablac
 
-.PHONY: all clean test debug all-tests
+.PHONY: all clean test debug all-tests examples examples-quick examples-full
