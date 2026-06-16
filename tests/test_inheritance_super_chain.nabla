@@ -1,0 +1,26 @@
+class Root() {
+    def value(): Int = {
+        10
+    }
+}
+
+class Mid extends Root() {
+    def value(): Int = {
+        super.value() + 1
+    }
+}
+
+class Child extends Mid() {
+    def value(): Int = {
+        super.value() + 1
+    }
+
+    def inheritedValue(): Int = {
+        super.value()
+    }
+}
+
+def main(): Int = {
+    val child = new Child()
+    child.value() + child.inheritedValue()
+}

@@ -1,0 +1,22 @@
+class Left() {
+    def value(): Int = {
+        10
+    }
+}
+
+class Right() {
+    def marker(): Int = {
+        20
+    }
+}
+
+class Child extends Left with Right() {
+    def inheritedValue(): Int = {
+        super.value()
+    }
+}
+
+def main(): Int = {
+    val child = new Child()
+    child.inheritedValue()
+}
