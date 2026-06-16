@@ -37,6 +37,39 @@ pour reprendre facilement apres une pause.
 
 ## Priorites Prochaine Session
 
+### Fil conducteur produit/langage
+
+La prochaine phase doit transformer Nabla de "langage qui compile beaucoup de
+cas" en "langage ou l'utilisateur sait naturellement quelle API employer".
+Le cap prioritaire est donc la coherence de surface, pas l'accumulation de
+features.
+
+- API publique cible : `Array[T]`, `Option[T]`, `Set[T]`, `String`, classes,
+  methodes, lambdas et modules standards documentes.
+- Details a cacher ou marquer internes : `IntArray`, `LongArray`,
+  `FloatArray`, `DoubleArray`, `BoolArray`, `ObjectArray[T]`,
+  `ArrayObject[T]`, helpers `arrayBase...` et fonctions specialisees de pont.
+- Runtime a formaliser : valeurs taggees `Int`/`Long`/`Bool`, valeurs raw
+  `Float`/`Double`, objets heap, tableaux natifs, slots nuls, conventions
+  d'erreur et limites memoire.
+- Typage a garder simple : sous-typage nominal pour les classes, generiques
+  invariants par defaut, conversions explicites ou helpers stdlib.
+- Documentation : la reference HTML doit devenir une doc utilisateur claire,
+  avec une separation visible entre API publique et helpers internes.
+
+Actions recommandees :
+
+1. Ajouter un check CI pour `make stdlib-docs`.
+2. Creer une courte specification vivante (`docs/spec.md` ou
+   `docs/internals.md`) pour types, runtime, IR et conventions de stdlib.
+3. Revoir la doc stdlib pour masquer ou signaler les helpers internes.
+4. Stabiliser `Array[T]`, `Option[T]` et `Set[T]` comme surfaces utilisateur
+   principales.
+5. Ajouter des exemples idiomatiques sans `IntArray` / `ObjectArray[T]` quand
+   une facade publique existe.
+6. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
+   surface n'est pas propre.
+
 ### Revue de code (16/06/2026, corrigée)
 
 - P2 — Représentation des `Bool` correcte dans les chemins actuels, mais trop implicite :

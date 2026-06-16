@@ -32,6 +32,48 @@ Source Nabla
   -> NASM + ld
 ```
 
+## Fil Conducteur
+
+Le projet a depasse le stade du compilateur jouet. Les prochaines evolutions
+doivent privilegier la coherence utilisateur, la lisibilite de la stdlib et la
+formalisation des conventions internes plutot que l'ajout rapide de nouvelles
+features visibles.
+
+Principes de direction :
+
+- preferer une API publique simple et uniforme : `Array[T]`, `Option[T]`,
+  `Set[T]`, `String`, classes, methodes, lambdas;
+- cacher progressivement les details d'implementation (`IntArray`,
+  `LongArray`, `ObjectArray[T]`, `ArrayObject[T]`, helpers `arrayBase...`,
+  fonctions specialisees internes) derriere des facades documentees;
+- maintenir les specialisations runtime comme optimisations internes, pas comme
+  concepts que l'utilisateur doit connaitre pour ecrire du code propre;
+- formaliser les conventions runtime avant de les propager : tagging de
+  `Int`/`Long`/`Bool`, valeurs raw de `Float`/`Double`, objets heap, tableaux
+  natifs, slots nuls et erreurs runtime;
+- continuer a supprimer les fallbacks implicites dans parser, semantique, IR et
+  backend au profit d'erreurs explicites;
+- garder des diagnostics orientes utilisateur, en evitant d'exposer les noms
+  internes quand une forme source plus claire existe;
+- considerer la documentation HTML de la stdlib comme une surface produit :
+  elle doit montrer les API publiques et masquer ou marquer les helpers
+  internes;
+- conserver un typage simple : sous-typage nominal pour les classes,
+  generiques invariants par defaut, conversions explicites ou fonctions stdlib
+  plutot que magie implicite.
+
+Priorites structurantes :
+
+1. Stabiliser l'API publique de `Array[T]`, `Option[T]` et `Set[T]`.
+2. Classer la stdlib en surface publique et modules/helpers internes.
+3. Ajouter une courte specification vivante (`docs/spec.md` ou
+   `docs/internals.md`) pour les types, le runtime et les regles de typage.
+4. Ajouter le check CI qui verifie que `make stdlib-docs` ne laisse aucun diff.
+5. Produire des exemples idiomatiques n'utilisant pas les API internes.
+6. Reporter les grosses nouvelles structures (`Result[T]`, `Map[K,V]`, GC,
+   variance avancee) tant que l'ergonomie des collections et options n'est pas
+   stabilisee.
+
 ## Etat Actuel
 
 Le pipeline implemente actuellement :
