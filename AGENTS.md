@@ -10,6 +10,9 @@ contribuent au compilateur Nabla.
 - Mettre a jour au minimum les sections `Etat Actuel`, `Feuille De Route` et
   `Journal Des Jalons` lorsque le changement les affecte.
 - Ne pas marquer une etape comme terminee sans tests automatises correspondants.
+- Regenerer la reference HTML avec `make stdlib-docs` quand une API publique de
+  `stdlib/`, un commentaire `///`, une directive `@signature` ou une directive
+  `@symbol` change, puis inclure le resultat `docs/stdlib/` dans le commit.
 
 ## Vision
 
@@ -577,6 +580,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter une racine `stdlib/` importable.
 - [x] Ajouter un premier module de collections dans `stdlib/`.
 - [x] Ajouter une premiere documentation utilisateur du langage.
+- [x] Ajouter une reference HTML de la stdlib generee depuis les commentaires
+  `///` publics.
+- [ ] Ajouter un check CI qui lance `make stdlib-docs` et echoue si la
+  generation laisse un diff non commite.
 - [x] Ajouter une roadmap de reprise dans `docs/roadmap.md`.
 - [x] Ajouter un support Vim minimal pour `*.nabla`.
 - [x] Ajouter des tests Project Euler progressifs pour guider les extensions du

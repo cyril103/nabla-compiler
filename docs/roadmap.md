@@ -60,6 +60,8 @@ Actions suggérées pour la suite :
 2. Ajouter une validation stricte de signature `override` avec substitutions de types.
 3. Corriger l’initialisation des tableaux natifs par type.
 4. Remplacer le fallback de type `Int` par un marqueur d’erreur explicite.
+5. Ajouter un check CI pour la reference HTML stdlib : lancer `make stdlib-docs`
+   et échouer si `docs/stdlib/` n'est pas à jour.
 
 1. Finaliser la sémantique d'héritage.
    - Valider la résolution des champs hérités et les conflits de noms entre
