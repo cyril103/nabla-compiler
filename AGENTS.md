@@ -287,6 +287,20 @@ Limites importantes :
   finale `_` (avec ou sans garde selon la position; la branche finale `_` ne
   peut pas porter de garde). Les motifs nommes sont locaux à la branche et ne
   fuient pas hors de l'expression `match`.
+- L'héritage rend les API de collections moins idiomatiques: la combinaison
+  `Set[Person]` avec des instances `Student` / `Instructor` / `Volunteer`
+  fonctionne mais requiert des conversions explicites qui nuisent à la lisibilité des
+  cas d'usage réels; la résolution des champs et des méthodes héritées reste
+  fonctionnelle mais sujette à friction dans des scénarios hétérogènes.
+- Le mot-clé `override` n'est pas encore nécessairement requis pour les
+  redéfinitions; il manque aussi un modèle plus lisible pour les constructeurs
+  hérités (chaîne `super(...)` explicite, initialisation claire des champs
+  parentaux). Ces zones sont la source principale de verbosité de l'exemple
+  `workshop_set_inheritance.nabla`.
+- Les collections basées sur `Any` gagneraient à mieux documenter la stratégie
+  d'égalité (`==`) + `hashCode()` dans les cas d'héritage, pour réduire
+  l'incertitude de comportement quand `Student`, `Instructor` et `Volunteer`
+  se croisent dans `Set` ou `ObjectArray`.
 
 ## Invariants D'Architecture
 
@@ -579,6 +593,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `setFromArray` tout en conservant l’égalité par `==` et l’ordre stable.
   - Fichiers / tests associés: `stdlib/collections/set.nabla`,
     `tests/test_stdlib_set.nabla`, `docs/language.md`, `AGENTS.md`.
+- `local` - Documenter les limites ergonomiques observées sur l'exemple
+  `examples/workshop_set_inheritance.nabla` :
+  - appel de constructeurs d'héritage trop verbeux,
+  - absence d'`override` explicite,
+  - frictions de typage dans `Set[Person]` avec sous-types.
+  - Fichiers / notes associés: `AGENTS.md`, `docs/roadmap.md`,
+    `examples/workshop_set_inheritance.nabla`.
 - `local` - Ajouter `examples/workshop_set_inheritance.nabla` montrant
   `collections.set` (avec `setFromArray`, `union`, `intersect`, `difference`) et
   l’héritage via `Person`, `Student`, `Instructor`, `Volunteer`.
@@ -877,7 +898,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Poursuivre la suite outillée autour du matching :
+Poursuivre la suite outillée autour de l’héritage et du matching :
 
 - Finaliser le nettoyage des diagnostics autour du pattern matching, notamment pour
   les motifs nommes.
+- Améliorer l’ergonomie d’héritage pour l’exemple de production:
+  constructeurs parentaux plus simples, prise en charge claire d’`override` et
+  friction réduite des collections d’objets polymorphes.

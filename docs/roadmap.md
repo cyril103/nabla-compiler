@@ -44,10 +44,19 @@ pour reprendre facilement apres une pause.
 2. Consolider le système `super`.
    - Confirmer les cas `super` dans chaînes de mixins / héritage.
    - Définir règles et tests pour les masquages explicites.
-3. Revenir sur le chantier `match` avancé.
+3. Améliorer l’ergonomie héritage/collisions de types.
+   - Simplifier les constructeurs d’héritage (appel parent depuis sous-classe).
+   - Introduire/valider `override` pour la redéfinition explicite.
+   - Rendre la résolution des champs/méthodes héritées plus prédictible dans les
+     exemples concrets.
+4. Revenir sur le chantier `match` avancé.
    - Finaliser les motifs nommés et les gardes (`motif if condition`).
    - Ajouter des diagnostics propres pour les erreurs de portée/typage des gardes.
-4. Ajouter des tests “mélange” héritage + autres fonctionnalités.
+5. Réduire la friction entre héritage et collections.
+   - Permettre `Set[Person]` et `ArrayObject[Person]` avec des instances
+     `Student`, `Instructor`, `Volunteer` sans contorsions de type.
+   - Documenter des motifs d’exemple pour utiliser ce cas facilement.
+6. Ajouter des tests “mélange” héritage + autres fonctionnalités.
    - Cas de régression couvrant `super`, champs hérités, shadowing contrôlé
      et conflit translatif.
 
