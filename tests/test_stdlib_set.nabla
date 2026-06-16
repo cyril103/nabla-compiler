@@ -2,17 +2,17 @@ import collections.set
 import collections.object_array
 
 class Student(name: String) {
-    def toString(): String = {
+    override def toString(): String = {
         name
     }
 }
 
 class ConstantHash(name: String, hashValue: Int) {
-    def hashCode(): Int = {
+    override def hashCode(): Int = {
         hashValue
     }
 
-    def toString(): String = {
+    override def toString(): String = {
         name
     }
 }

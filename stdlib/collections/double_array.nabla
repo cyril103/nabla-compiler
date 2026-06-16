@@ -189,7 +189,7 @@ class ArrayDouble(values: DoubleArray) {
         arrayBaseMkString[Double, DoubleArray](values, (items) => items.length(), (items, index) => items.get(index), separator, (value) => value.toString())
     }
 
-    def toString(): String = {
+    override def toString(): String = {
         arrayBaseToString[Double, DoubleArray](values, (items) => items.length(), (items, index) => items.get(index), (value) => value.toString())
     }
 

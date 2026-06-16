@@ -11,7 +11,7 @@ class Right() {
 }
 
 class Both extends Left with Right() {
-    def value(): Int = {
+    override def value(): Int = {
         30
     }
 }

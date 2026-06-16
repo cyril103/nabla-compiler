@@ -217,7 +217,7 @@ class ArrayObject[T](values: ObjectArray[T]) {
         )
     }
 
-    def toString(): String = {
+    override def toString(): String = {
         arrayBaseToString[T, ObjectArray[T]](
             values,
             (values) => values.length(),

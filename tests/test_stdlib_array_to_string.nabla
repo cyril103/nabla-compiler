@@ -6,7 +6,7 @@ import collections.double_array
 import collections.object_array
 
 class Student() {
-    def toString(): String = {
+    override def toString(): String = {
         "student"
     }
 }

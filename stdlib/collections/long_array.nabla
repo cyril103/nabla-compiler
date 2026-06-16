@@ -207,7 +207,7 @@ class ArrayLong(values: LongArray) {
         longArrayMkString(values, separator)
     }
 
-    def toString(): String = {
+    override def toString(): String = {
         arrayBaseToString[Long, LongArray](values, (values) => values.length(), (values, index) => values.get(index), (value) => value.toString())
     }
 

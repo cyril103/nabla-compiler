@@ -5,13 +5,13 @@ class Root() {
 }
 
 class Mid extends Root() {
-    def value(): Int = {
+    override def value(): Int = {
         super.value() + 1
     }
 }
 
 class Child extends Mid() {
-    def value(): Int = {
+    override def value(): Int = {
         super.value() + 1
     }
 

@@ -310,7 +310,7 @@ class Set[T](values: ArrayObject[T]) {
         values.mkString(separator)
     }
 
-    def toString(): String = {
+    override def toString(): String = {
         values.toString()
     }
 }

@@ -2,11 +2,11 @@ class Plain() {
 }
 
 class Person() {
-    def toString(): String = {
+    override def toString(): String = {
         "person"
     }
 
-    def hashCode(): Int = {
+    override def hashCode(): Int = {
         99
     }
 }
@@ -14,8 +14,8 @@ class Person() {
 def main(): Int = {
     val plain = new Plain()
     val identity = plain.toString() == plain.toString() && plain.hashCode() == plain.hashCode()
-    val override = new Person()
-    if override.toString() == "person" && override.hashCode() == 99 {
+    val overrideValue = new Person()
+    if overrideValue.toString() == "person" && overrideValue.hashCode() == 99 {
         if identity {
             0
         } else {

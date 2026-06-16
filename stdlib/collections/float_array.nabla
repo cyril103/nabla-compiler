@@ -189,7 +189,7 @@ class ArrayFloat(values: FloatArray) {
         arrayBaseMkString[Float, FloatArray](values, (items) => items.length(), (items, index) => items.get(index), separator, (value) => value.toString())
     }
 
-    def toString(): String = {
+    override def toString(): String = {
         arrayBaseToString[Float, FloatArray](values, (items) => items.length(), (items, index) => items.get(index), (value) => value.toString())
     }
 

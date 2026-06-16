@@ -11,7 +11,7 @@ class Mid() {
 }
 
 class Child extends Mid() {
-    def answer(): Int = {
+    override def answer(): Int = {
         30
     }
 

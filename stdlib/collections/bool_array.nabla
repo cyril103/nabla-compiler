@@ -255,7 +255,7 @@ class ArrayBool(values: BoolArray) {
         boolArrayMkString(values, separator)
     }
 
-    def toString(): String = {
+    override def toString(): String = {
         arrayBaseToString[Bool, BoolArray](values, (values) => values.length(), (values, index) => values.get(index), (value) => boolToString(value))
     }
 

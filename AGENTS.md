@@ -619,6 +619,23 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   - frictions de typage dans `Set[Person]` avec sous-types.
   - Fichiers / notes associés: `AGENTS.md`, `docs/roadmap.md`,
     `examples/workshop_set_inheritance.nabla`.
+- `local` - Mettre la stdlib/tests en conformité avec la règle
+  d’`override` obligatoire sur les méthodes héritées (`toString`, `hashCode`,
+  redéfinitions de `Any` et hiérarchies de base).
+  - Fichiers associés: `stdlib/collections/bool_array.nabla`,
+    `stdlib/collections/double_array.nabla`,
+    `stdlib/collections/float_array.nabla`,
+    `stdlib/collections/int_array.nabla`,
+    `stdlib/collections/long_array.nabla`,
+    `stdlib/collections/object_array.nabla`,
+    `stdlib/collections/set.nabla`,
+    `tests/test_any_base_methods.nabla`,
+    `tests/test_inheritance_mixin_override.nabla`,
+    `tests/test_inheritance_super.nabla`,
+    `tests/test_inheritance_super_chain.nabla`,
+    `tests/test_inheritance_super_with_mixin_override.nabla`,
+    `tests/test_stdlib_array_to_string.nabla`, `tests/test_stdlib_set.nabla`,
+    `examples/workshop_set_inheritance.nabla`.
 - `local` - Ajouter `examples/workshop_set_inheritance.nabla` montrant
   `collections.set` (avec `setFromArray`, `union`, `intersect`, `difference`) et
   l’héritage via `Person`, `Student`, `Instructor`, `Volunteer`.
