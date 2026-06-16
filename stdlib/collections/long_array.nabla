@@ -1,4 +1,5 @@
 import collections.object_array
+import collections.array_base
 import util
 
 def longArrayFill(size: Int, value: Long): LongArray = {
@@ -171,29 +172,50 @@ def longArrayFold(xs: LongArray, initial: Long, combine: (Long, Long) => Long): 
     accumulator
 }
 
+def longArrayLength(values: LongArray): Int = {
+    values.length()
+}
+
+def longArrayGet(values: LongArray, index: Int): Long = {
+    values.get(index)
+}
+
+def longArraySet(values: LongArray, index: Int, value: Long): Unit = {
+    values.set(index, value)
+}
+
+def longArrayBase(values: LongArray): ArrayBase[Long, LongArray] = {
+    new ArrayBase[Long, LongArray](
+        values,
+        longArrayLength,
+        longArrayGet,
+        longArraySet
+    )
+}
+
 class ArrayLong(values: LongArray) {
     def length(): Int = {
-        values.length()
+        longArrayBase(values).length()
     }
 
     def size(): Int = {
-        values.length()
+        longArrayBase(values).size()
     }
 
     def isEmpty(): Bool = {
-        values.length() == 0
+        longArrayBase(values).isEmpty()
     }
 
     def nonEmpty(): Bool = {
-        values.length() != 0
+        longArrayBase(values).nonEmpty()
     }
 
     def get(index: Int): Long = {
-        values.get(index)
+        longArrayBase(values).get(index)
     }
 
     def set(index: Int, value: Long): Unit = {
-        values.set(index, value)
+        longArrayBase(values).set(index, value)
     }
 
     def sum(): Long = {
@@ -233,19 +255,15 @@ class ArrayLong(values: LongArray) {
     }
 
     def fold(initial: Long, combine: (Long, Long) => Long): Long = {
-        longArrayFold(values, initial, combine)
+        longArrayBase(values).fold(initial, combine)
     }
 
     def foreach(f: (Long) => Unit): Unit = {
-        var index = 0
-        while (index < values.length()) {
-            f(values.get(index))
-            index = index + 1
-        }
+        longArrayBase(values).foreach(f)
     }
 
     def raw(): LongArray = {
-        values
+        longArrayBase(values).raw()
     }
 }
 

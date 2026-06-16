@@ -1,4 +1,5 @@
 import collections.object_array
+import collections.array_base
 import util
 
 def floatArrayFill(size: Int, value: Float): FloatArray = {
@@ -147,29 +148,50 @@ def floatArrayFold(xs: FloatArray, initial: Float, combine: (Float, Float) => Fl
     accumulator
 }
 
+def floatArrayLength(values: FloatArray): Int = {
+    values.length()
+}
+
+def floatArrayGet(values: FloatArray, index: Int): Float = {
+    values.get(index)
+}
+
+def floatArraySet(values: FloatArray, index: Int, value: Float): Unit = {
+    values.set(index, value)
+}
+
+def floatArrayBase(values: FloatArray): ArrayBase[Float, FloatArray] = {
+    new ArrayBase[Float, FloatArray](
+        values,
+        floatArrayLength,
+        floatArrayGet,
+        floatArraySet
+    )
+}
+
 class ArrayFloat(values: FloatArray) {
     def length(): Int = {
-        values.length()
+        floatArrayBase(values).length()
     }
 
     def size(): Int = {
-        values.length()
+        floatArrayBase(values).size()
     }
 
     def isEmpty(): Bool = {
-        values.length() == 0
+        floatArrayBase(values).isEmpty()
     }
 
     def nonEmpty(): Bool = {
-        values.length() != 0
+        floatArrayBase(values).nonEmpty()
     }
 
     def get(index: Int): Float = {
-        values.get(index)
+        floatArrayBase(values).get(index)
     }
 
     def set(index: Int, value: Float): Unit = {
-        values.set(index, value)
+        floatArrayBase(values).set(index, value)
     }
 
     def map(f: (Float) => Float): ArrayFloat = {
@@ -201,19 +223,15 @@ class ArrayFloat(values: FloatArray) {
     }
 
     def fold(initial: Float, combine: (Float, Float) => Float): Float = {
-        floatArrayFold(values, initial, combine)
+        floatArrayBase(values).fold(initial, combine)
     }
 
     def foreach(f: (Float) => Unit): Unit = {
-        var index = 0
-        while (index < values.length()) {
-            f(values.get(index))
-            index = index + 1
-        }
+        floatArrayBase(values).foreach(f)
     }
 
     def raw(): FloatArray = {
-        values
+        floatArrayBase(values).raw()
     }
 }
 

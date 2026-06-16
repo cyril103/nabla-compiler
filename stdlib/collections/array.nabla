@@ -1,3 +1,4 @@
+import collections.array_base
 import collections.int_array
 import collections.long_array
 import collections.float_array

@@ -1,5 +1,6 @@
 import core.option_int
 import collections.object_array
+import collections.array_base
 import util
 
 def intClamp(value: Int, minimum: Int, maximum: Int): Int = {
@@ -859,25 +860,46 @@ def intArrayGrouped(values: IntArray, groupSize: Int): ArrayIntNested = {
     }
 }
 
+def intArrayLength(values: IntArray): Int = {
+    values.length()
+}
+
+def intArrayGet(values: IntArray, index: Int): Int = {
+    values.get(index)
+}
+
+def intArraySet(values: IntArray, index: Int, value: Int): Unit = {
+    values.set(index, value)
+}
+
+def intArrayBase(values: IntArray): ArrayBase[Int, IntArray] = {
+    new ArrayBase[Int, IntArray](
+        values,
+        intArrayLength,
+        intArrayGet,
+        intArraySet
+    )
+}
+
 class ArrayInt(values: IntArray) {
     def length(): Int = {
-        values.length()
+        intArrayBase(values).length()
     }
 
     def size(): Int = {
-        values.length()
+        intArrayBase(values).size()
     }
 
     def isEmpty(): Bool = {
-        values.length() == 0
+        intArrayBase(values).isEmpty()
     }
 
     def nonEmpty(): Bool = {
-        values.length() != 0
+        intArrayBase(values).nonEmpty()
     }
 
     def get(index: Int): Int = {
-        values.get(index)
+        intArrayBase(values).get(index)
     }
 
     def getOption(index: Int): OptionInt = {
@@ -997,15 +1019,11 @@ class ArrayInt(values: IntArray) {
     }
 
     def fold(initial: Int, combine: (Int, Int) => Int): Int = {
-        intArrayFold(values, initial, combine)
+        intArrayBase(values).fold(initial, combine)
     }
 
     def foreach(f: (Int) => Unit): Unit = {
-        var index = 0
-        while (index < values.length()) {
-            f(values.get(index))
-            index = index + 1
-        }
+        intArrayBase(values).foreach(f)
     }
 
     def exists(predicate: (Int) => Bool): Bool = {
@@ -1045,7 +1063,7 @@ class ArrayInt(values: IntArray) {
     }
 
     def raw(): IntArray = {
-        values
+        intArrayBase(values).raw()
     }
 }
 

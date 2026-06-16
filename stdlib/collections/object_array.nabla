@@ -1,4 +1,5 @@
 import util
+import collections.array_base
 
 def objectArrayFill[T](size: Int, value: T): ArrayObject[T] = {
     val xs = new ObjectArray[T](size)
@@ -61,33 +62,54 @@ def objectArrayMkString(xs: ArrayObject[String], separator: String): String = {
     result
 }
 
+def objectArrayLength[T](xs: ObjectArray[T]): Int = {
+    xs.length()
+}
+
+def objectArrayGet[T](xs: ObjectArray[T], index: Int): T = {
+    xs.get(index)
+}
+
+def objectArraySet[T](xs: ObjectArray[T], index: Int, value: T): Unit = {
+    xs.set(index, value)
+}
+
+def objectArrayBase[T](values: ObjectArray[T]): ArrayBase[T, ObjectArray[T]] = {
+    new ArrayBase[T, ObjectArray[T]](
+        values,
+        objectArrayLength[T],
+        objectArrayGet[T],
+        objectArraySet[T]
+    )
+}
+
 def objectStringArrayMkString[T](xs: ArrayObject[String], separator: String): String = {
     objectArrayMkString(xs, separator)
 }
 
 class ArrayObject[T](values: ObjectArray[T]) {
     def length(): Int = {
-        values.length()
+        objectArrayBase(values).length()
     }
 
     def size(): Int = {
-        values.length()
+        objectArrayBase(values).size()
     }
 
     def isEmpty(): Bool = {
-        values.length() == 0
+        objectArrayBase(values).isEmpty()
     }
 
     def nonEmpty(): Bool = {
-        values.length() != 0
+        objectArrayBase(values).nonEmpty()
     }
 
     def get(index: Int): T = {
-        values.get(index)
+        objectArrayBase(values).get(index)
     }
 
     def set(index: Int, value: T): Unit = {
-        values.set(index, value)
+        objectArrayBase(values).set(index, value)
     }
 
     def shuffle(state: RandomState): ArrayObject[T] = {
@@ -159,13 +181,7 @@ class ArrayObject[T](values: ObjectArray[T]) {
     }
 
     def fold[U](initial: U, combine: (U, T) => U): U = {
-        var index = 0
-        var accumulator = initial
-        while (index < values.length()) {
-            accumulator = combine(accumulator, values.get(index))
-            index = index + 1
-        }
-        accumulator
+        objectArrayBase(values).fold[U](initial, combine)
     }
 
     def flatMap[U](transform: (T) => ArrayObject[U]): ArrayObject[U] = {
@@ -193,14 +209,10 @@ class ArrayObject[T](values: ObjectArray[T]) {
     }
 
     def foreach(f: (T) => Unit): Unit = {
-        var index = 0
-        while (index < values.length()) {
-            f(values.get(index))
-            index = index + 1
-        }
+        objectArrayBase(values).foreach(f)
     }
 
     def raw(): ObjectArray[T] = {
-        values
+        objectArrayBase(values).raw()
     }
 }

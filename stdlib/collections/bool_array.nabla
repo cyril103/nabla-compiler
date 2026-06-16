@@ -1,4 +1,5 @@
 import collections.object_array
+import collections.array_base
 import util
 
 def boolArrayFill(size: Int, value: Bool): BoolArray = {
@@ -211,29 +212,50 @@ def boolArrayFold(xs: BoolArray, initial: Bool, combine: (Bool, Bool) => Bool): 
     accumulator
 }
 
+def boolArrayLength(values: BoolArray): Int = {
+    values.length()
+}
+
+def boolArrayGet(values: BoolArray, index: Int): Bool = {
+    values.get(index)
+}
+
+def boolArraySet(values: BoolArray, index: Int, value: Bool): Unit = {
+    values.set(index, value)
+}
+
+def boolArrayBase(values: BoolArray): ArrayBase[Bool, BoolArray] = {
+    new ArrayBase[Bool, BoolArray](
+        values,
+        boolArrayLength,
+        boolArrayGet,
+        boolArraySet
+    )
+}
+
 class ArrayBool(values: BoolArray) {
     def length(): Int = {
-        values.length()
+        boolArrayBase(values).length()
     }
 
     def size(): Int = {
-        values.length()
+        boolArrayBase(values).size()
     }
 
     def isEmpty(): Bool = {
-        values.length() == 0
+        boolArrayBase(values).isEmpty()
     }
 
     def nonEmpty(): Bool = {
-        values.length() != 0
+        boolArrayBase(values).nonEmpty()
     }
 
     def get(index: Int): Bool = {
-        values.get(index)
+        boolArrayBase(values).get(index)
     }
 
     def set(index: Int, value: Bool): Unit = {
-        values.set(index, value)
+        boolArrayBase(values).set(index, value)
     }
 
     def countTrue(): Int = {
@@ -281,19 +303,15 @@ class ArrayBool(values: BoolArray) {
     }
 
     def fold(initial: Bool, combine: (Bool, Bool) => Bool): Bool = {
-        boolArrayFold(values, initial, combine)
+        boolArrayBase(values).fold(initial, combine)
     }
 
     def foreach(f: (Bool) => Unit): Unit = {
-        var index = 0
-        while (index < values.length()) {
-            f(values.get(index))
-            index = index + 1
-        }
+        boolArrayBase(values).foreach(f)
     }
 
     def raw(): BoolArray = {
-        values
+        boolArrayBase(values).raw()
     }
 }
 

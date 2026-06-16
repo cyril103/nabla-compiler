@@ -1,0 +1,52 @@
+class ArrayBase[Elem, Raw](
+    values: Raw,
+    lengthFn: (Raw) => Int,
+    getFn: (Raw, Int) => Elem,
+    setFn: (Raw, Int, Elem) => Unit
+) {
+    def length(): Int = {
+        lengthFn(values)
+    }
+
+    def size(): Int = {
+        this.length()
+    }
+
+    def isEmpty(): Bool = {
+        this.length() == 0
+    }
+
+    def nonEmpty(): Bool = {
+        this.length() != 0
+    }
+
+    def get(index: Int): Elem = {
+        getFn(values, index)
+    }
+
+    def set(index: Int, value: Elem): Unit = {
+        setFn(values, index, value)
+    }
+
+    def raw(): Raw = {
+        values
+    }
+
+    def foreach(f: (Elem) => Unit): Unit = {
+        var index = 0
+        while (index < this.length()) {
+            f(this.get(index))
+            index = index + 1
+        }
+    }
+
+    def fold[State](initial: State, combine: (State, Elem) => State): State = {
+        var index = 0
+        var accumulator = initial
+        while (index < this.length()) {
+            accumulator = combine(accumulator, this.get(index))
+            index = index + 1
+        }
+        accumulator
+    }
+}
