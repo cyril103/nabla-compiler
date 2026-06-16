@@ -838,7 +838,12 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
                 builder.unsupported(location, "l'appel de méthode " + receiverType + ".toString");
             }
             std::string loweredReceiver = receiver->lowerToIR(builder);
-            return builder.emitMethodCall("Any", "toString", loweredReceiver, {}, "String");
+            if (activeReceiverType == "String") {
+                return loweredReceiver;
+            }
+            const std::string stringMethodOwner =
+                activeReceiverType == receiverType ? "Any" : activeReceiverType;
+            return builder.emitMethodCall(stringMethodOwner, "toString", loweredReceiver, {}, "String");
         }
         if (methodName == "hashCode") {
             if (!arguments.empty()) {
