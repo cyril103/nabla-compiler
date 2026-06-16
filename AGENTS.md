@@ -367,6 +367,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `super` pour appeler une méthode de la classe parente immédiate.
 - [x] Consolider la résolution de `super` en présence de chaînes d'héritage et de
   mixins, avec diagnostic dédié pour l'utilisation de `super` sans parent.
+- [x] Formaliser l'héritage implicite depuis `Any` pour les classes sans parent
+  explicite.
+- [x] Formaliser la résolution des conflits hérités pour les champs et méthodes
+  provenant d'instances génériques distinctes du même ancêtre.
 - [x] Formaliser la résolution des membres hérités (champs + ordre de résolution) pour supprimer les ambiguïtés restantes.
 
 - [ ] Formaliser `Int`, `Bool`, `Char`, `String`, `IntArray`, les types fonction canoniques et
@@ -551,10 +555,16 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `objectStringArrayMkString` pour `ArrayObject[String]`.
 
 ## Journal Des Jalons
+- `local` - Renforcer la résolution des membres hérités en cas d'ambiguïtés de type
+  générique (`Holder[Int]` vs `Holder[String]`) et formaliser la racine `Any`
+  implicite pour les classes sans `extends`.
+  - Tests: `test_error_inheritance_generic_field_conflict.nabla`,
+    `test_error_inheritance_generic_method_conflict.nabla`.
 - `local` - Consolider la résolution `super` en présence de chaînes d'héritage,
   de mixins et d'erreur dédiée pour `super` sans parent explicite.
   - Tests: `test_inheritance_super_chain.nabla`,
     `test_inheritance_super_with_mixin.nabla`,
+    `test_inheritance_super_with_mixin_override.nabla`,
     `test_error_super_without_parent.nabla`.
 - `local` - Formaliser la résolution des membres hérités (champs + méthode) en
   présence de `extends` + `with`, détecter les conflits de champs translatifs et

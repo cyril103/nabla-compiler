@@ -39,6 +39,7 @@ struct CompilerContext {
         std::vector<FieldInfo> fields;
         std::map<std::string, FunctionSignature> methods;
         std::vector<std::string> parentTypes;
+        bool hasExplicitParent = false;
         std::vector<std::string> typeParameters;
         SourceLocation location;
     };
@@ -405,8 +406,9 @@ inline void collectVisibleFieldsInHierarchy(
         classSubstitution = *genericSubstitution;
     }
 
+    const std::string providerType = substituteType(receiverType, classSubstitution);
     for (const auto& field : classIt->second.fields) {
-        fieldOwners[field.name].insert(classLookupName);
+        fieldOwners[field.name].insert(providerType);
         if (!fieldTypes.count(field.name)) {
             fieldTypes[field.name] = substituteType(field.type, classSubstitution);
         }

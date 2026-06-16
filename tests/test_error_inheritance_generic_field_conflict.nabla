@@ -1,0 +1,7 @@
+class Holder[T](value: T)
+
+class Conflict extends Holder[Int] with Holder[String]()
+
+def main(): Int = {
+    0
+}

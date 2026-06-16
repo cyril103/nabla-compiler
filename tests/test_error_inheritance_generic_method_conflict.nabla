@@ -1,0 +1,7 @@
+class Holder[T](value: T) {
+    def value(v: T): T = {
+        v
+    }
+}
+
+class Conflict extends Holder[Int] with Holder[String]()

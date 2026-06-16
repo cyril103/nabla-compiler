@@ -32,9 +32,10 @@ void collectVisibleMethodsInHierarchy(
         substitution = *classGenericSubstitution;
     }
 
+    const std::string providerType = substituteType(receiverType, substitution);
     for (const auto& [methodName, _] : classIt->second.methods) {
         if (visibleMethods[methodName].empty()) {
-            visibleMethods[methodName].insert(classLookupName);
+            visibleMethods[methodName].insert(providerType);
         }
     }
 
@@ -124,11 +125,11 @@ void SemanticAnalyzer::validateDeclaredTypes() {
 
     for (const auto& [className, classInfo] : context.classes) {
         if (className == "Any") continue;
-        if (classInfo.parentTypes.empty()) continue;
 
         ParentMethodProviders inheritedProviders;
         ClassFieldOwnerMap inheritedFieldProviders;
         std::set<std::string> ownMethods;
+        const auto classTypeSubstitution = classTypeTemplateSubstitution(context, className);
         for (const auto& methodEntry : classInfo.methods) {
             ownMethods.insert(methodEntry.first);
         }
@@ -137,9 +138,9 @@ void SemanticAnalyzer::validateDeclaredTypes() {
         }
         for (const auto& parentType : classInfo.parentTypes) {
             MethodOwnerMap visibleMethods;
-            std::map<std::string, std::string> substitution;
+            std::map<std::string, std::string> substitution = classTypeSubstitution;
             std::set<std::string> visiting;
-            const std::string concreteParentType = substituteType(parentType, substitution);
+            const std::string concreteParentType = substituteType(parentType, classTypeSubstitution);
             collectVisibleMethodsInHierarchy(
                 context, concreteParentType, substitution, visiting, visibleMethods);
             for (const auto& [methodName, ownerClasses] : visibleMethods) {

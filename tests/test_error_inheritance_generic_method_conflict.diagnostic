@@ -1,0 +1,1 @@
+tests/test_error_inheritance_generic_method_conflict.nabla:7:1: semantic error: conflit d'héritage pour la méthode 'value' dans la classe 'Conflict': plusieurs définitions dans [Holder[Int], Holder[String]]

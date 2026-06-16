@@ -1,0 +1,1 @@
+tests/test_error_inheritance_generic_field_conflict.nabla:3:1: semantic error: conflit d'héritage pour le champ 'value' dans la classe 'Conflict': plusieurs définitions dans [Holder[Int], Holder[String]]

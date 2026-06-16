@@ -164,7 +164,9 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
     }
     context.classes[className].typeParameters = typeParameters;
     context.classes[className].location = classToken.location;
+    bool hasExplicitParent = false;
     if (peek().type == TokenType::KW_EXTENDS) {
+        hasExplicitParent = true;
         consume(TokenType::KW_EXTENDS, "");
         auto [baseParentType, baseParentTypeLocation] = parseType("Type de parent attendu");
         (void) baseParentTypeLocation;
@@ -180,6 +182,10 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
             (void) mixinTypeLocation;
             context.classes[className].parentTypes.push_back(mixinType);
         }
+    }
+    context.classes[className].hasExplicitParent = hasExplicitParent;
+    if (!hasExplicitParent && className != "Any") {
+        context.classes[className].parentTypes.push_back("Any");
     }
     currentParsingClass = className;
     auto previousTypeParameters = currentFunctionTypeParameters;
@@ -748,7 +754,8 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         }
         Token superToken = consume(TokenType::KW_SUPER, "'super' invalide");
         const auto classIt = context.classes.find(currentParsingClass);
-        if (classIt == context.classes.end() || classIt->second.parentTypes.empty()) {
+        if (classIt == context.classes.end() || classIt->second.parentTypes.empty() ||
+            !classIt->second.hasExplicitParent) {
             throw CompilerError(
                 ErrorKind::Parser, superToken.location,
                 "'super' non autorisé dans une classe sans parent explicite");
