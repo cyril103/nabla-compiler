@@ -852,7 +852,7 @@ void emit(std::ostream& out) {
         << "    ret\n\n";
     out << "Bool_method_toString:\n"
         << "    cmp rdi, 1\n"
-        << "    jne .L_bool_to_string_false\n"
+        << "    je .L_bool_to_string_false\n"
         << "    mov rdi, 28\n"
         << "    call Runtime_alloc\n"
         << "    mov qword [rax], 0\n"
@@ -911,7 +911,6 @@ void emit(std::ostream& out) {
         << "    call Int_method_toString\n"
         << "    mov r10, rax\n"
         << "    mov r13, [r10 + 8]\n"
-        << "    sar r13, 1\n"
         << "    cvtsi2sd xmm2, r14\n"
         << "    subsd xmm1, xmm2\n"
         << "    movq rax, xmm1\n"
