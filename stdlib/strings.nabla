@@ -1,9 +1,16 @@
+/// @module Strings
+/// Helpers pour travailler avec les chaines.
+
 import collections.array
 
+/// Indique si une chaine contient au moins un caractere.
 def stringNonEmpty(value: String): Bool = {
     value.nonEmpty()
 }
 
+/// Separe une chaine sur les espaces.
+///
+/// Les espaces de debut et de fin sont retires avant la separation.
 def words(text: String): ArrayObject[String] = {
     text.trim().split(" ").filter(stringNonEmpty)
 }

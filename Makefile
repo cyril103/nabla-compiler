@@ -206,6 +206,9 @@ examples: nablac
 
 examples-full: examples
 
+stdlib-docs:
+	tools/generate_stdlib_docs.py
+
 debug: nablac
 	@mkdir -p $(BUILD_DIR)
 	NABLA_BUILD_DIR=$(BUILD_DIR) $(BUILD_DIR)/nablac --keep-asm $(SRC)
@@ -214,4 +217,4 @@ debug: nablac
 clean:
 	rm -rf $(BUILD_DIR) nablac
 
-.PHONY: all clean test debug all-tests examples examples-quick examples-full
+.PHONY: all clean test debug all-tests examples examples-quick examples-full stdlib-docs

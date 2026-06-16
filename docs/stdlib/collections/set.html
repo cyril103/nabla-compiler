@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Set - Nabla stdlib</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header>
+    <a class="brand" href="../index.html">Nabla stdlib</a>
+    <span>Reference API publique</span>
+  </header>
+  <main>
+    <nav class="breadcrumb"><a href="../index.html">Modules</a> / collections.set</nav>
+    <section class="module-hero">
+      <p class="import">import collections.set</p>
+      <h1>Set</h1>
+      <p>Ensembles immuables avec valeurs uniques. Utiliser `SetEmpty[T]()` pour construire progressivement un ensemble, ou `SetFromArray[T](values)` pour dedupliquer un tableau. Les fonctions commencant par `set` restent disponibles pour compatibilite, mais ne sont pas l&#x27;API recommandee pour du code applicatif.</p>
+    </section>
+    <section class="entries">
+    <article class="entry" id="SetFromArray">
+      <div class="kind">def</div>
+      <h2>SetFromArray</h2>
+      <pre><code>def SetFromArray[T](values: Array[T]): Set[T]</code></pre>
+      <p>Deduplique un tableau en ensemble.</p>
+<p>Pour `Array[Int]`, `Array[Long]`, `Array[Float]`, `Array[Double]` et `Array[Bool]`, le compilateur redirige ce nom vers la specialisation adaptee. Pour les autres types, `Array[T]` est represente par `ArrayObject[T]`.</p>
+    </article>
+    <article class="entry" id="SetEmpty">
+      <div class="kind">def</div>
+      <h2>SetEmpty</h2>
+      <pre><code>def SetEmpty[T](): Set[T]</code></pre>
+      <p>Cree un ensemble vide.</p>
+    </article>
+    <article class="entry" id="Set">
+      <div class="kind">class</div>
+      <h2>Set</h2>
+      <pre><code>class Set[T]</code></pre>
+      <p>Ensemble immutable.</p>
+<p>Les operations comme `add`, `remove`, `union`, `intersect` et `difference` retournent un nouvel ensemble. L&#x27;instance d&#x27;origine n&#x27;est pas modifiee.</p>
+    </article>
+    </section>
+  </main>
+</body>
+</html>

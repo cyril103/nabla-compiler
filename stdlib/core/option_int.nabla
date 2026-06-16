@@ -1,5 +1,11 @@
+/// @module Option Int
+/// Variante specialisee de `Option[Int]`.
+/// Elle evite de fournir une valeur par defaut lors de la creation d'une option
+/// vide pour les entiers.
+
 import core.option
 
+/// Option specialisee pour `Int`.
 class OptionInt extends Option[Int](defined, value) {
     override def map(transform: (Int) => Int): OptionInt = {
         if defined {
@@ -34,10 +40,12 @@ class OptionInt extends Option[Int](defined, value) {
     }
 }
 
+/// Construit une option entiere contenant `value`.
 def optionIntSome(value: Int): OptionInt = {
     new OptionInt(true, value)
 }
 
+/// Construit une option entiere vide.
 def optionIntNone(): OptionInt = {
     new OptionInt(false, 0)
 }

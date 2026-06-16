@@ -1,0 +1,5 @@
+// Commentaire avant une declaration.
+def main(): Int = {
+    val value = 40 // commentaire apres une expression
+    value + 2
+}

@@ -1,3 +1,10 @@
+/// @module Option
+/// Valeur optionnelle generique.
+/// `Option[T]` represente soit une valeur presente, soit une absence. C'est le
+/// type a privilegier quand une operation peut ne rien produire sans que ce soit
+/// une erreur.
+
+/// Conteneur optionnel generique.
 class Option[T](defined: Bool, value: T) {
     def isDefined(): Bool = {
         defined
@@ -62,10 +69,14 @@ class Option[T](defined: Bool, value: T) {
     }
 }
 
+/// Construit une option contenant une valeur.
 def optionSome[T](value: T): Option[T] = {
     new Option[T](true, value)
 }
 
+/// Construit une option vide.
+///
+/// Le parametre `default` sert de valeur interne de secours pour le type `T`.
 def optionNone[T](default: T): Option[T] = {
     new Option[T](false, default)
 }

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Array - Nabla stdlib</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header>
+    <a class="brand" href="../index.html">Nabla stdlib</a>
+    <span>Reference API publique</span>
+  </header>
+  <main>
+    <nav class="breadcrumb"><a href="../index.html">Modules</a> / collections.array</nav>
+    <section class="module-hero">
+      <p class="import">import collections.array</p>
+      <h1>Array</h1>
+      <p>Tableaux generiques pour le code utilisateur. Importer `collections.array` donne acces a `Array[T]`, `ArrayFill[T]` et `ArrayRange`. Les types bas niveau comme `IntArray`, `ArrayInt`, `ObjectArray[T]` et `ArrayObject[T]` restent des details de stdlib dans les cas courants.</p>
+    </section>
+    <section class="entries">
+    <article class="entry" id="Array">
+      <div class="kind">class</div>
+      <h2>Array</h2>
+      <pre><code>class Array[T](size: Int)</code></pre>
+      <p>Tableau mutable de taille fixe.</p>
+<p>`Array[T]` est le nom public a utiliser. Le compilateur choisit la representation adaptee selon `T`.</p>
+    </article>
+    <article class="entry" id="ArrayFill">
+      <div class="kind">def</div>
+      <h2>ArrayFill</h2>
+      <pre><code>def ArrayFill[T](size: Int, value: T): Array[T]</code></pre>
+      <p>Cree un tableau rempli avec la meme valeur.</p>
+    </article>
+    <article class="entry" id="ArrayRange">
+      <div class="kind">def</div>
+      <h2>ArrayRange</h2>
+      <pre><code>def ArrayRange(size: Int): Array[Int]</code></pre>
+      <p>Cree un tableau d&#x27;entiers contenant `0, 1, ..., size - 1`.</p>
+    </article>
+    </section>
+  </main>
+</body>
+</html>

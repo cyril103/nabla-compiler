@@ -1,3 +1,9 @@
+/// @module Math
+/// Fonctions mathematiques courantes.
+/// Les noms gardent le type dans leur suffixe (`Int`, `Long`, `Float`,
+/// `Double`) tant que le langage ne dispose pas de surcharge utilisateur.
+
+/// Valeur absolue d'un entier.
 def absInt(value: Int): Int = {
     if value < 0 {
         -value
@@ -6,6 +12,7 @@ def absInt(value: Int): Int = {
     }
 }
 
+/// Valeur absolue d'un entier long.
 def absLong(value: Long): Long = {
     if value < 0L {
         -value
@@ -14,6 +21,7 @@ def absLong(value: Long): Long = {
     }
 }
 
+/// Valeur absolue d'un flottant simple precision.
 def absFloat(value: Float): Float = {
     if value < 0.0F {
         -value
@@ -22,6 +30,7 @@ def absFloat(value: Float): Float = {
     }
 }
 
+/// Valeur absolue d'un flottant double precision.
 def absDouble(value: Double): Double = {
     if value < 0.0 {
         -value
@@ -30,6 +39,7 @@ def absDouble(value: Double): Double = {
     }
 }
 
+/// Plus grande des deux valeurs entieres.
 def maxInt(left: Int, right: Int): Int = {
     if left > right {
         left
@@ -62,6 +72,7 @@ def maxDouble(left: Double, right: Double): Double = {
     }
 }
 
+/// Plus petite des deux valeurs entieres.
 def minInt(left: Int, right: Int): Int = {
     if left < right {
         left
@@ -94,6 +105,7 @@ def minDouble(left: Double, right: Double): Double = {
     }
 }
 
+/// Contraint une valeur entiere dans l'intervalle donne.
 def clampInt(value: Int, minimum: Int, maximum: Int): Int = {
     if value < minimum {
         minimum
@@ -230,10 +242,12 @@ def signDouble(value: Double): Double = {
     }
 }
 
+/// Indique si un entier est pair.
 def isEvenInt(value: Int): Bool = {
     value % 2 == 0
 }
 
+/// Indique si un entier est impair.
 def isOddInt(value: Int): Bool = {
     value % 2 != 0
 }
@@ -254,6 +268,7 @@ def isBetweenLong(value: Long, minimum: Long, maximum: Long): Bool = {
     value >= minimum && value <= maximum
 }
 
+/// Plus grand commun diviseur de deux entiers.
 def gcdInt(left: Int, right: Int): Int = {
     var x = absInt(left)
     var y = absInt(right)
@@ -276,6 +291,7 @@ def gcdLong(left: Long, right: Long): Long = {
     x
 }
 
+/// Plus petit commun multiple de deux entiers.
 def lcmInt(left: Int, right: Int): Int = {
     val divisor = gcdInt(left, right)
     if divisor == 0 {
@@ -318,6 +334,7 @@ def absDiffDouble(left: Double, right: Double): Double = {
     absDouble(left - right)
 }
 
+/// Puissance entiere positive.
 def powInt(base: Int, exponent: Int): Int = {
     if exponent < 0 {
         0

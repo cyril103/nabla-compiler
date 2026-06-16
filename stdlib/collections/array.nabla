@@ -1,3 +1,19 @@
+/// @module Array
+/// Tableaux generiques pour le code utilisateur.
+/// Importer `collections.array` donne acces a `Array[T]`, `ArrayFill[T]` et
+/// `ArrayRange`. Les types bas niveau comme `IntArray`, `ArrayInt`,
+/// `ObjectArray[T]` et `ArrayObject[T]` restent des details de stdlib dans les
+/// cas courants.
+
+/// @symbol class Array[T](size: Int)
+/// Tableau mutable de taille fixe.
+///
+/// `Array[T]` est le nom public a utiliser. Le compilateur choisit la
+/// representation adaptee selon `T`.
+
+/// @symbol def ArrayFill[T](size: Int, value: T): Array[T]
+/// Cree un tableau rempli avec la meme valeur.
+
 import collections.array_base
 import collections.int_array
 import collections.long_array
@@ -6,6 +22,8 @@ import collections.double_array
 import collections.bool_array
 import collections.object_array
 
+/// Cree un tableau d'entiers contenant `0, 1, ..., size - 1`.
+/// @signature def ArrayRange(size: Int): Array[Int]
 def ArrayRange(size: Int): ArrayInt = {
     arrayIntRange(size)
 }

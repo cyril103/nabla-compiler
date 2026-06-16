@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Option Int - Nabla stdlib</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header>
+    <a class="brand" href="../index.html">Nabla stdlib</a>
+    <span>Reference API publique</span>
+  </header>
+  <main>
+    <nav class="breadcrumb"><a href="../index.html">Modules</a> / core.option_int</nav>
+    <section class="module-hero">
+      <p class="import">import core.option_int</p>
+      <h1>Option Int</h1>
+      <p>Variante specialisee de `Option[Int]`. Elle evite de fournir une valeur par defaut lors de la creation d&#x27;une option vide pour les entiers.</p>
+    </section>
+    <section class="entries">
+    <article class="entry" id="OptionInt">
+      <div class="kind">class</div>
+      <h2>OptionInt</h2>
+      <pre><code>class OptionInt extends Option[Int](defined, value)</code></pre>
+      <p>Option specialisee pour `Int`.</p>
+    </article>
+    <article class="entry" id="optionIntSome">
+      <div class="kind">def</div>
+      <h2>optionIntSome</h2>
+      <pre><code>def optionIntSome(value: Int): OptionInt</code></pre>
+      <p>Construit une option entiere contenant `value`.</p>
+    </article>
+    <article class="entry" id="optionIntNone">
+      <div class="kind">def</div>
+      <h2>optionIntNone</h2>
+      <pre><code>def optionIntNone(): OptionInt</code></pre>
+      <p>Construit une option entiere vide.</p>
+    </article>
+    </section>
+  </main>
+</body>
+</html>

@@ -56,6 +56,15 @@ Une première documentation utilisateur du langage est disponible ici :
 - [docs/language.md](docs/language.md)
 - [docs/roadmap.md](docs/roadmap.md)
 
+La reference HTML de la bibliotheque standard se genere depuis les commentaires
+`///` places devant les declarations publiques :
+
+```bash
+make stdlib-docs
+```
+
+Le point d'entree genere est `docs/stdlib/index.html`.
+
 ## Support éditeur
 
 Un support Vim minimal est disponible dans [editor/vim](editor/vim). Pour

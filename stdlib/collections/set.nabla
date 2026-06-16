@@ -1,3 +1,10 @@
+/// @module Set
+/// Ensembles immuables avec valeurs uniques.
+/// Utiliser `SetEmpty[T]()` pour construire progressivement un ensemble, ou
+/// `SetFromArray[T](values)` pour dedupliquer un tableau. Les fonctions
+/// commencant par `set` restent disponibles pour compatibilite, mais ne sont
+/// pas l'API recommandee pour du code applicatif.
+
 import collections.object_array
 import collections.int_array
 import collections.long_array
@@ -312,10 +319,27 @@ def setEmpty[T](): Set[T] = {
     new Set[T](new ArrayObject[T](new ObjectArray[T](0)))
 }
 
+/// Deduplique un tableau en ensemble.
+/// @signature def SetFromArray[T](values: Array[T]): Set[T]
+///
+/// Pour `Array[Int]`, `Array[Long]`, `Array[Float]`, `Array[Double]` et
+/// `Array[Bool]`, le compilateur redirige ce nom vers la specialisation
+/// adaptee. Pour les autres types, `Array[T]` est represente par
+/// `ArrayObject[T]`.
+def SetFromArray[T](values: ArrayObject[T]): Set[T] = {
+    setFromArray[T](values)
+}
+
+/// Cree un ensemble vide.
 def SetEmpty[T](): Set[T] = {
     setEmpty[T]()
 }
 
+/// Ensemble immutable.
+/// @signature class Set[T]
+///
+/// Les operations comme `add`, `remove`, `union`, `intersect` et `difference`
+/// retournent un nouvel ensemble. L'instance d'origine n'est pas modifiee.
 class Set[T](values: ArrayObject[T]) {
     def size(): Int = {
         values.size()

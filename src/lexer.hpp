@@ -52,7 +52,14 @@ public:
             if (current == '+') { add(tokens, TokenType::PLUS, "+", start, 1); continue; }
             if (current == '-') { add(tokens, TokenType::MINUS, "-", start, 1); continue; }
             if (current == '*') { add(tokens, TokenType::STAR, "*", start, 1); continue; }
-            if (current == '/') { add(tokens, TokenType::SLASH, "/", start, 1); continue; }
+            if (current == '/') {
+                if (nextIs('/')) {
+                    while (index < src.size() && src[index] != '\n') advance();
+                    continue;
+                }
+                add(tokens, TokenType::SLASH, "/", start, 1);
+                continue;
+            }
             if (current == '%') { add(tokens, TokenType::PERCENT, "%", start, 1); continue; }
             if (current == '&') {
                 if (nextIs('&')) {
