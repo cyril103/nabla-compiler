@@ -37,6 +37,30 @@ pour reprendre facilement apres une pause.
 
 ## Priorites Prochaine Session
 
+### Revue de code (16/06/2026)
+
+- P0 — Incohérence de représentation des `Bool` entre composants sémantiques/codegen/runtime :
+  - `src/ast.cpp:215` émet `true` comme `1` et `false` comme `0`.
+  - `src/ir_codegen.cpp:338` teste le `Bool` par `cmp rax, 1` (branchement sur faux).
+  - `src/runtime_asm.cpp:853` considère `false` quand `rdi == 1`.
+  - Risque confirmé : inversion logique possible des conditions/logique booléenne selon le chemin.
+- P1 — Vérification incomplète de `override` :
+  - Le flag `override` est parsé et stocké (`src/parser.cpp:1252`) puis seules les règles de présence/supériorité sont contrôlées en semantique (`src/semantic_analyzer.cpp:205`).
+  - Aucune validation de compatibilité de signature (paramètres/retour/sous-types) avec la méthode héritée.
+- P1 — Initialisation des tableaux natifs par défaut à valeur fixe `1` :
+  - `src/ir_codegen.cpp:729` remplit chaque slot des tableaux natifs avec `1` sans tenir compte du type d’élément.
+  - Risque : objets, booléens et usages attendus peuvent observer une valeur neutre non définie/incohérente.
+- P2 — Fallback parser sur identifiant inconnu :
+  - `src/parser.cpp:1069` retourne un `IdentifierNode` de type par défaut `Int` pour les noms non résolus.
+  - Risque de diagnostics secondaires trompeurs lors de l’inférence/validation.
+
+Actions suggérées pour la suite :
+
+1. Unifier la représentation booléenne (tag/valeurs) entre parser/IR/codegen/runtime.
+2. Ajouter une validation stricte de signature `override` avec substitutions de types.
+3. Corriger l’initialisation des tableaux natifs par type.
+4. Remplacer le fallback de type `Int` par un marqueur d’erreur explicite.
+
 1. Finaliser la sémantique d'héritage.
    - Valider la résolution des champs hérités et les conflits de noms entre
      champs/méthodes.
