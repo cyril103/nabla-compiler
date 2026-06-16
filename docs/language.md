@@ -450,6 +450,39 @@ def main(): Int = {
 sont specialises vers des facades primitives. Les autres types passent par
 `ArrayObject[T]`.
 
+Le module `collections.set` fournit une structure `Set[T]` immutable basée sur
+un tableau interne.
+
+```nabla
+import collections.set
+
+def main(): Int = {
+    val numbers = setEmpty[Int]().add(3).add(1).add(3).add(2)
+    val more = setEmpty[Int]().add(2).add(4).add(1)
+    if numbers.union(more).toString() == "[3, 1, 2, 4]" &&
+       numbers.intersect(more).toString() == "[1, 2]" &&
+       numbers.difference(more).toString() == "[3]" {
+        42
+    } else {
+        1
+    }
+}
+```
+
+Operations utiles :
+
+- `size()`
+- `isEmpty()` / `nonEmpty()`
+- `contains(value: T): Bool`
+- `add(value: T): Set[T]`
+- `remove(value: T): Set[T]`
+- `union(other: Set[T]): Set[T]`
+- `intersect(other: Set[T]): Set[T]`
+- `difference(other: Set[T]): Set[T]`
+- `clear(): Set[T]`
+- `toArray(): ArrayObject[T]`
+- `toString(): String`
+
 ## Option
 
 Le module `core.option` fournit `Option[T]`.

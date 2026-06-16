@@ -55,6 +55,77 @@ def setWithout[T](values: ArrayObject[T], expected: T): ArrayObject[T] = {
     new ArrayObject[T](filtered)
 }
 
+def setUnion[T](left: ArrayObject[T], right: ArrayObject[T]): ArrayObject[T] = {
+    var values = left
+    var index = 0
+    while index < right.size() {
+        val value = right.get(index)
+        if !setContains[T](values, value) {
+            values = setAppend[T](values, value)
+        } else {
+            values
+        }
+        index = index + 1
+    }
+    values
+}
+
+def setIntersect[T](left: ArrayObject[T], right: ArrayObject[T]): ArrayObject[T] = {
+    var index = 0
+    var kept = 0
+    while index < left.size() {
+        if setContains[T](right, left.get(index)) {
+            kept = kept + 1
+        } else {
+            kept
+        }
+        index = index + 1
+    }
+
+    val filtered = new ObjectArray[T](kept)
+    index = 0
+    var output = 0
+    while index < left.size() {
+        val value = left.get(index)
+        if setContains[T](right, value) {
+            filtered.set(output, value)
+            output = output + 1
+        } else {
+            output
+        }
+        index = index + 1
+    }
+    new ArrayObject[T](filtered)
+}
+
+def setDifference[T](left: ArrayObject[T], right: ArrayObject[T]): ArrayObject[T] = {
+    var index = 0
+    var kept = 0
+    while index < left.size() {
+        if !setContains[T](right, left.get(index)) {
+            kept = kept + 1
+        } else {
+            kept
+        }
+        index = index + 1
+    }
+
+    val filtered = new ObjectArray[T](kept)
+    index = 0
+    var output = 0
+    while index < left.size() {
+        val value = left.get(index)
+        if !setContains[T](right, value) {
+            filtered.set(output, value)
+            output = output + 1
+        } else {
+            output
+        }
+        index = index + 1
+    }
+    new ArrayObject[T](filtered)
+}
+
 def setEmpty[T](): Set[T] = {
     new Set[T](new ArrayObject[T](new ObjectArray[T](0)))
 }
@@ -86,6 +157,18 @@ class Set[T](values: ArrayObject[T]) {
 
     def remove(value: T): Set[T] = {
         new Set[T](setWithout[T](values, value))
+    }
+
+    def union(other: Set[T]): Set[T] = {
+        new Set[T](setUnion[T](values, other.toArray()))
+    }
+
+    def intersect(other: Set[T]): Set[T] = {
+        new Set[T](setIntersect[T](values, other.toArray()))
+    }
+
+    def difference(other: Set[T]): Set[T] = {
+        new Set[T](setDifference[T](values, other.toArray()))
     }
 
     def clear(): Set[T] = {

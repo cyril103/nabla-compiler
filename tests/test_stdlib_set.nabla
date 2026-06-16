@@ -13,12 +13,23 @@ def sameValue[T](left: T, right: T): Bool = {
 def main(): Int = {
     val base = setEmpty[Int]()
     val numbers = base.add(3).add(1).add(3).add(2)
+    val otherNumbers = base.add(2).add(4).add(1)
     val removedThree = numbers.remove(3)
     val unchanged = numbers.remove(99)
+    val unionedNumbers = numbers.union(otherNumbers)
+    val intersectedNumbers = numbers.intersect(otherNumbers)
+    val differenceNumbers = numbers.difference(otherNumbers)
+    val unionedWithEmpty = numbers.union(base)
+    val emptyDifference = base.difference(numbers)
+    val differenceFromEmpty = numbers.difference(base)
 
     val alice = new Student("alice")
     val bob = new Student("bob")
     val students = setEmpty[Student]().add(alice).add(bob).add(alice)
+    val others = setEmpty[Student]().add(bob).add(alice)
+    val studentsUnion = students.union(others)
+    val studentsIntersect = students.intersect(others)
+    val studentsDifference = students.difference(others)
 
     if numbers.size() == 3 &&
        numbers.contains(1) &&
@@ -27,12 +38,22 @@ def main(): Int = {
        removedThree.size() == 2 &&
        removedThree.toString() == "[1, 2]" &&
        unchanged.size() == 3 &&
+       unionedNumbers.toString() == "[3, 1, 2, 4]" &&
+       intersectedNumbers.toString() == "[1, 2]" &&
+       differenceNumbers.toString() == "[3]" &&
+       unionedWithEmpty.toString() == "[3, 1, 2]" &&
+       emptyDifference.toString() == "[]" &&
+       differenceFromEmpty.toString() == "[3, 1, 2]" &&
+       numbers.toString() == "[3, 1, 2]" &&
        students.size() == 2 &&
        students.toArray().size() == 2 &&
        !students.toArray().isEmpty() &&
        sameValue(3, 3) &&
        !sameValue(3, 4) &&
-       students.contains(alice) &&
+       studentsUnion.toString() == "[alice, bob]" &&
+       studentsIntersect.toString() == "[alice, bob]" &&
+       studentsDifference.toString() == "[]" &&
+        students.contains(alice) &&
        sameValue(alice, students.toArray().get(0)) {
         0
     } else {
