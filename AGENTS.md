@@ -579,6 +579,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `setFromArray` tout en conservant l’égalité par `==` et l’ordre stable.
   - Fichiers / tests associés: `stdlib/collections/set.nabla`,
     `tests/test_stdlib_set.nabla`, `docs/language.md`, `AGENTS.md`.
+- `local` - Ajouter `examples/workshop_set_inheritance.nabla` montrant
+  `collections.set` (avec `setFromArray`, `union`, `intersect`, `difference`) et
+  l’héritage via `Person`, `Student`, `Instructor`, `Volunteer`.
 - `local` - Renforcer la résolution des membres hérités en cas d'ambiguïtés de type
   générique (`Holder[Int]` vs `Holder[String]`) et formaliser la racine `Any`
   implicite pour les classes sans `extends`.

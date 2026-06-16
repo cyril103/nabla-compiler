@@ -1,0 +1,111 @@
+import io
+import collections.object_array
+import collections.set
+
+class Person(nameValue: String) {
+    def name(): String = {
+        nameValue
+    }
+
+    def role(): String = {
+        "Person"
+    }
+}
+
+class Student extends Person() {
+    def role(): String = {
+        "Student"
+    }
+
+    def toString(): String = {
+        nameValue + " [Student]"
+    }
+}
+
+class Instructor extends Person() {
+    def role(): String = {
+        "Instructor"
+    }
+
+    def toString(): String = {
+        nameValue + " [Instructor]"
+    }
+}
+
+class Volunteer extends Person() {
+    def role(): String = {
+        "Volunteer"
+    }
+
+    def toString(): String = {
+        nameValue + " [Volunteer]"
+    }
+}
+
+def show(label: String, values: Set[Student]): Unit = {
+    println(label + values.toString())
+}
+
+def main(): Int = {
+    val alice = new Student("Alice")
+    val bob = new Student("Bob")
+    val claire = new Student("Claire")
+    val frank = new Student("Frank")
+    val eve = new Student("Eve")
+    val gina = new Student("Gina")
+    val mentor = new Instructor("Bob")
+    val helper = new Volunteer("Gina")
+
+    val morningSource = new ObjectArray[Student](6)
+    morningSource.set(0, alice)
+    morningSource.set(1, bob)
+    morningSource.set(2, claire)
+    morningSource.set(3, alice)
+    morningSource.set(4, eve)
+    morningSource.set(5, gina)
+
+    val eveningSource = new ObjectArray[Student](6)
+    eveningSource.set(0, bob)
+    eveningSource.set(1, eve)
+    eveningSource.set(2, frank)
+    eveningSource.set(3, claire)
+    eveningSource.set(4, new Student("Bob"))
+    eveningSource.set(5, alice)
+
+    val morning = setFromArray[Student](new ArrayObject[Student](morningSource))
+    val evening = setFromArray[Student](new ArrayObject[Student](eveningSource))
+    val morningSnapshot = morning.toString()
+
+    val all = morning.union(evening)
+    val both = morning.intersect(evening)
+    val onlyMorning = morning.difference(evening)
+    val onlyEvening = evening.difference(morning)
+    val withTrainer = morning.add(new Student("Hugo"))
+    val withoutEve = withTrainer.remove(eve)
+
+    println("Inheritance check: " + mentor.role() + ", " + helper.role())
+    show("Morning     = ", morning)
+    show("Evening     = ", evening)
+    show("Union       = ", all)
+    show("Intersect   = ", both)
+    show("Only morning= ", onlyMorning)
+    show("Only evening= ", onlyEvening)
+    show("After add   = ", withTrainer)
+    show("After remove= ", withoutEve)
+
+    if mentor.role() == "Instructor" &&
+       helper.role() == "Volunteer" &&
+       morning.toString() == morningSnapshot &&
+       morning.contains(eve) &&
+       evening.contains(frank) &&
+       all.size() == 7 &&
+       both.size() == 4 &&
+       onlyMorning.size() == 1 &&
+       onlyEvening.size() == 2 &&
+       withTrainer.size() == 6 &&
+       withoutEve.size() == 5 {
+        0
+    } else {
+        1
+    }
+}
