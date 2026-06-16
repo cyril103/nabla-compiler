@@ -578,8 +578,16 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `examples/command_shell.nabla`.
 - [x] Exposer `objectArrayMkString` et l'alias compat
   `objectStringArrayMkString` pour `ArrayObject[String]`.
+- [x] Valider explicitement les ambiguïtés de résolution de méthode héritée
+  (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Détecter et signaler explicitement les ambiguïtés de méthodes
+  héritées entre plusieurs définitions disponibles dans la hiérarchie
+  (`extends` + `with`), via une validation sémantique explicite et des tests
+  de régression ciblés.
+  - Fichiers / tests associés: `src/compiler_context.hpp`, `src/parser.hpp`,
+    `src/parser.cpp`, `src/ast.cpp`, `tests/test_error_inheritance_generic_field_conflict.nabla`.
 - `1c77da3` - Etendre `collections.set` avec des opérations d’ensemble
   immutables `union`, `intersect`, `difference`, et tests de régression.
   - Fichiers / tests associés: `stdlib/collections/set.nabla`,
@@ -903,5 +911,6 @@ Poursuivre la suite outillée autour de l’héritage et du matching :
 - Finaliser le nettoyage des diagnostics autour du pattern matching, notamment pour
   les motifs nommes.
 - Améliorer l’ergonomie d’héritage pour l’exemple de production:
-  constructeurs parentaux plus simples, prise en charge claire d’`override` et
-  friction réduite des collections d’objets polymorphes.
+  constructeurs parentaux plus simples, prise en charge claire d’`override`
+  (validation dédiée et message dédié), et friction réduite des collections
+  d’objets polymorphes.

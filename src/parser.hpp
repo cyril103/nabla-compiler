@@ -73,7 +73,8 @@ private:
         std::map<std::string, std::string> initialSubstitution = {});
     std::unique_ptr<ASTNode> parseArgument(const std::string& expectedType);
     std::vector<std::string> expectedArgumentTypesForMethodCall(
-        const std::string& receiverType, const std::string& methodName) const;
+        const std::string& receiverType, const std::string& methodName,
+        const SourceLocation& location) const;
     std::pair<std::string, SourceLocation> parseType(const std::string& expectedMessage);
     const ParsedSymbol* findLocal(const std::string& name) const;
     std::pair<const ParsedSymbol*, size_t> findLocalWithScope(const std::string& name) const;

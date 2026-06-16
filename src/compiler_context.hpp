@@ -561,15 +561,16 @@ inline std::string substituteType(
     return type;
 }
 
-inline std::optional<ClassMethodLookupResult> resolveClassMethodInHierarchy(
+inline void collectClassMethodLookupCandidates(
     const CompilerContext& context, const std::string& receiverType,
-    const std::string& methodName, std::set<std::string> visited) {
+    const std::string& methodName, std::set<std::string>& visited,
+    std::set<std::string>& providerTypes,
+    std::vector<ClassMethodLookupResult>& candidates) {
     const std::string classLookupName = genericBaseName(receiverType);
-    if (visited.count(classLookupName)) return std::nullopt;
-    visited.insert(classLookupName);
+    if (visited.count(classLookupName)) return;
 
     auto classIt = context.classes.find(classLookupName);
-    if (classIt == context.classes.end()) return std::nullopt;
+    if (classIt == context.classes.end()) return;
 
     std::map<std::string, std::string> classSubstitution;
     if (auto genericSubstitution = genericSubstitutionFor(context, receiverType)) {
@@ -578,23 +579,39 @@ inline std::optional<ClassMethodLookupResult> resolveClassMethodInHierarchy(
 
     auto methodIt = classIt->second.methods.find(methodName);
     if (methodIt != classIt->second.methods.end()) {
-        return ClassMethodLookupResult{
-            &methodIt->second, classLookupName, classSubstitution};
+        const std::string providerType = substituteType(receiverType, classSubstitution);
+        if (providerTypes.insert(providerType).second) {
+            candidates.push_back(ClassMethodLookupResult{
+                &methodIt->second, classLookupName, classSubstitution});
+        }
+        return;
     }
 
+    visited.insert(classLookupName);
     for (const auto& parentType : classIt->second.parentTypes) {
         const std::string concreteParentType = substituteType(parentType, classSubstitution);
-        if (auto method = resolveClassMethodInHierarchy(context, concreteParentType, methodName, visited)) {
-            return method;
-        }
+        collectClassMethodLookupCandidates(
+            context, concreteParentType, methodName, visited, providerTypes, candidates);
     }
-    return std::nullopt;
+    visited.erase(classLookupName);
+}
+
+inline std::vector<ClassMethodLookupResult> collectClassMethodLookupCandidates(
+    const CompilerContext& context, const std::string& receiverType,
+    const std::string& methodName) {
+    std::set<std::string> visited;
+    std::set<std::string> providerTypes;
+    std::vector<ClassMethodLookupResult> candidates;
+    collectClassMethodLookupCandidates(context, receiverType, methodName, visited, providerTypes, candidates);
+    return candidates;
 }
 
 inline std::optional<ClassMethodLookupResult> resolveClassMethodInHierarchy(
     const CompilerContext& context, const std::string& receiverType,
     const std::string& methodName) {
-    return resolveClassMethodInHierarchy(context, receiverType, methodName, {});
+    const auto candidates = collectClassMethodLookupCandidates(context, receiverType, methodName);
+    if (candidates.empty()) return std::nullopt;
+    return candidates.front();
 }
 
 inline std::optional<std::string> resolveActiveStdlibTypeAlias(

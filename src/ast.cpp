@@ -785,13 +785,33 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             "classe générique '" + classLookupName + "' utilisée sans arguments de type");
     }
 
-    auto methodLookup = resolveClassMethodInHierarchy(context, receiverType, methodName);
-    if (!methodLookup || !methodLookup->signature) {
+    const auto methodCandidates = collectClassMethodLookupCandidates(context, receiverType, methodName);
+    if (methodCandidates.size() > 1) {
+        std::set<std::string> providers;
+        for (const auto& candidate : methodCandidates) {
+            providers.insert(substituteType(candidate.ownerClassName, candidate.classSubstitution));
+        }
+        semanticError(
+            "conflit d'héritage pour la méthode '" + methodName + "' dans la classe '" +
+            genericBaseName(receiverType) + "': plusieurs définitions dans [" +
+            [&providers]() {
+                std::string message;
+                bool first = true;
+                for (const auto& provider : providers) {
+                    if (!first) message += ", ";
+                    message += provider;
+                    first = false;
+                }
+                return message;
+            }() + "]");
+    }
+    if (methodCandidates.empty()) {
         semanticError("méthode inconnue: " + receiverType + "." + methodName);
     }
-    auto& methodSignature = *methodLookup->signature;
+    const auto& methodLookup = methodCandidates.front();
+    const auto& methodSignature = *methodLookup.signature;
 
-    std::map<std::string, std::string> substitution = methodLookup->classSubstitution;
+    std::map<std::string, std::string> substitution = methodLookup.classSubstitution;
     if (methodSignature.typeParameters.empty()) {
         if (!typeArguments.empty()) {
             semanticError("la méthode '" + receiverType + "." + methodName + "' n'accepte pas d'arguments de type");
@@ -826,7 +846,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
     auto parameters = substituteParameters(methodSignature.parameters, substitution);
     validateArguments(receiverType + "." + methodName, arguments, parameters, location);
     resolvedType = substituteType(methodSignature.returnType, substitution);
-    resolvedOwnerType = methodLookup->ownerClassName;
+    resolvedOwnerType = methodLookup.ownerClassName;
 }
 
 std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {

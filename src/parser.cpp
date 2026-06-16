@@ -35,6 +35,17 @@ std::string formatFieldProviders(const std::set<std::string>& providers) {
     return message;
 }
 
+std::string formatMethodProviders(const std::set<std::string>& providers) {
+    std::string message;
+    bool first = true;
+    for (const auto& provider : providers) {
+        if (!first) message += ", ";
+        message += provider;
+        first = false;
+    }
+    return message;
+}
+
 std::optional<ClassFieldLookupResult> resolveClassFieldInHierarchy(
     const CompilerContext& context, const std::string& className,
     const std::string& fieldName, const SourceLocation& location) {
@@ -977,7 +988,7 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
             }
         }
         const std::string receiverType = expr->getType();
-        auto expectedArgumentTypes = expectedArgumentTypesForMethodCall(receiverType, method);
+        auto expectedArgumentTypes = expectedArgumentTypesForMethodCall(receiverType, method, methodToken.location);
         std::string initialReturnType = "Int";
         std::string initialOwnerType = genericBaseName(receiverType);
         const CompilerContext::FunctionSignature* methodSignature = nullptr;
@@ -1336,7 +1347,8 @@ std::unique_ptr<ASTNode> Parser::parseArgument(const std::string& expectedType) 
 }
 
 std::vector<std::string> Parser::expectedArgumentTypesForMethodCall(
-    const std::string& receiverType, const std::string& methodName) const {
+    const std::string& receiverType, const std::string& methodName,
+    const SourceLocation& location) const {
     if (receiverType == "Int" || receiverType == "Long" || receiverType == "Float" || receiverType == "Double") {
         const bool binaryMethod =
             methodName == "+" || methodName == "-" || methodName == "*" || methodName == "/" ||
@@ -1385,10 +1397,23 @@ std::vector<std::string> Parser::expectedArgumentTypesForMethodCall(
         }
         return expectedTypes;
     }
-    auto methodLookup = resolveClassMethodInHierarchy(context, receiverType, methodName);
-    if (!methodLookup || !methodLookup->signature) return {};
-    const auto& methodSignature = *methodLookup->signature;
-    std::map<std::string, std::string> substitution = methodLookup->classSubstitution;
+    const auto methodCandidates = collectClassMethodLookupCandidates(
+        context, receiverType, methodName);
+    if (methodCandidates.size() > 1) {
+        std::set<std::string> providers;
+        for (const auto& candidate : methodCandidates) {
+            providers.insert(substituteType(candidate.ownerClassName, candidate.classSubstitution));
+        }
+        throw CompilerError(
+            ErrorKind::Parser, location,
+            "conflit d'héritage pour la méthode '" + methodName + "' dans la classe '" +
+            genericBaseName(receiverType) + "': plusieurs définitions dans [" +
+            formatMethodProviders(providers) + "]");
+    }
+    if (methodCandidates.empty()) return {};
+    const auto& methodLookup = methodCandidates.front();
+    const auto& methodSignature = *methodLookup.signature;
+    std::map<std::string, std::string> substitution = methodLookup.classSubstitution;
     std::vector<std::string> expectedTypes;
     for (const auto& parameter : methodSignature.parameters) {
         expectedTypes.push_back(substituteType(parameter.type, substitution));
