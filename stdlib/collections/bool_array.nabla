@@ -265,6 +265,14 @@ class ArrayBool(values: BoolArray) {
         boolArrayMkString(values, separator)
     }
 
+    def toString(): String = {
+        if this.isEmpty() {
+            "[]"
+        } else {
+            "[" + this.mkString(", ") + "]"
+        }
+    }
+
     def map(f: (Bool) => Bool): ArrayBool = {
         new ArrayBool(boolArrayMap(values, f))
     }

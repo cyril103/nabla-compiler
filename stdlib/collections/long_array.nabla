@@ -217,6 +217,14 @@ class ArrayLong(values: LongArray) {
         longArrayMkString(values, separator)
     }
 
+    def toString(): String = {
+        if this.isEmpty() {
+            "[]"
+        } else {
+            "[" + this.mkString(", ") + "]"
+        }
+    }
+
     def map(f: (Long) => Long): ArrayLong = {
         new ArrayLong(longArrayMap(values, f))
     }

@@ -921,6 +921,14 @@ class ArrayInt(values: IntArray) {
         intArrayMkString(values, separator)
     }
 
+    def toString(): String = {
+        if this.isEmpty() {
+            "[]"
+        } else {
+            "[" + this.mkString(", ") + "]"
+        }
+    }
+
     def map(f: (Int) => Int): ArrayInt = {
         new ArrayInt(intArrayMap(values, f))
     }
