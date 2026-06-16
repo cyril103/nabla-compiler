@@ -164,7 +164,6 @@ void SemanticAnalyzer::validateDeclaredTypes() {
                 formatMethodProviders(providers) + "]");
         }
         for (const auto& [methodName, signature] : classInfo.methods) {
-            if (!signature.isOverride) continue;
             bool hasInheritedMethod = false;
             for (const auto& parentType : classInfo.parentTypes) {
                 const std::string concreteParentType = substituteType(parentType, classTypeSubstitution);
@@ -175,11 +174,17 @@ void SemanticAnalyzer::validateDeclaredTypes() {
                     break;
                 }
             }
-            if (!hasInheritedMethod) {
+            if (signature.isOverride && !hasInheritedMethod) {
                 throw CompilerError(
                     ErrorKind::Semantic, signature.location,
                     "override invalide pour '" + className + "." + methodName +
                     "' : aucune méthode héritée correspondante");
+            }
+            if (!signature.isOverride && hasInheritedMethod) {
+                throw CompilerError(
+                    ErrorKind::Semantic, signature.location,
+                    "override obligatoire pour '" + className + "." + methodName +
+                    "' : utilisez 'override' pour redéfinir une méthode héritée");
             }
         }
         for (const auto& [fieldName, providers] : inheritedFieldProviders) {

@@ -293,7 +293,8 @@ Limites importantes :
   cas d'usage réels; la résolution des champs et des méthodes héritées reste
   fonctionnelle mais sujette à friction dans des scénarios hétérogènes.
 - Le mot-clé `override` est supporté pour marquer explicitement les
-  redéfinitions; son usage reste optionnel mais valide une cible héritée explicite.
+  redéfinitions de méthodes héritées, et il est obligatoire quand une méthode
+  redéfinit une méthode provenant d'un parent.
   Il manque encore un modèle plus lisible pour les constructeurs
   hérités (chaîne `super(...)` explicite, initialisation claire des champs
   parentaux). Ces zones sont la source principale de verbosité de l'exemple
@@ -590,12 +591,14 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   - Fichiers / tests associés: `src/compiler_context.hpp`, `src/parser.hpp`,
     `src/parser.cpp`, `src/ast.cpp`, `tests/test_error_inheritance_generic_field_conflict.nabla`.
 - `local` - Implémenter le mot-clé `override` pour les méthodes de classes et
-  valider son usage lorsque la cible héritée est absente.
+  valider son usage lorsque la cible héritée est absente, et imposer son usage
+  explicite lors d’une redéfinition de méthode héritée.
   - Fichiers / tests associés: `src/compiler_context.hpp`, `src/lexer.hpp`,
     `src/parser.cpp`, `src/semantic_analyzer.cpp`,
     `tests/test_inheritance_override.nabla`,
     `tests/test_error_override_no_match.nabla`,
-    `tests/test_error_override_missing_parent.nabla`.
+    `tests/test_error_override_missing_parent.nabla`,
+    `tests/test_error_override_without_keyword.nabla`.
 - `1c77da3` - Etendre `collections.set` avec des opérations d’ensemble
   immutables `union`, `intersect`, `difference`, et tests de régression.
   - Fichiers / tests associés: `stdlib/collections/set.nabla`,
@@ -612,7 +615,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `local` - Documenter les limites ergonomiques observées sur l'exemple
   `examples/workshop_set_inheritance.nabla` :
   - appel de constructeurs d'héritage trop verbeux,
-  - absence d'`override` explicite,
+  - usage explicite d’`override` requis pour toute redéfinition.
   - frictions de typage dans `Set[Person]` avec sous-types.
   - Fichiers / notes associés: `AGENTS.md`, `docs/roadmap.md`,
     `examples/workshop_set_inheritance.nabla`.
@@ -919,6 +922,6 @@ Poursuivre la suite outillée autour de l’héritage et du matching :
 - Finaliser le nettoyage des diagnostics autour du pattern matching, notamment pour
   les motifs nommes.
 - Améliorer l’ergonomie d’héritage pour l’exemple de production:
-  constructeurs parentaux plus simples, prise en charge claire d’`override`
-  (validation dédiée et message dédié), et friction réduite des collections
+  constructeurs parentaux plus simples, réduction des frictions dans
+  `workshop_set_inheritance.nabla`, et friction réduite des collections
   d’objets polymorphes.

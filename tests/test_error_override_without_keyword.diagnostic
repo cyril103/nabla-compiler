@@ -1,0 +1,1 @@
+tests/test_error_override_without_keyword.nabla:8:5: semantic error: override obligatoire pour 'Child.value' : utilisez 'override' pour redéfinir une méthode héritée
