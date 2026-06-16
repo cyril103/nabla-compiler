@@ -62,6 +62,10 @@ Le pipeline implemente actuellement :
   generiques, specialises vers `ArrayInt`, `ArrayLong`, `ArrayFloat`,
   `ArrayDouble` ou `ArrayBool` pour `length`, `size`, `isEmpty`, `nonEmpty`,
   `get`, `set`, `map` et `foreach`;
+- constructeur ergonomique `new Array[T](size)` pour les types primitifs et
+  objets utilisateur via les facades `Array[T]`, avec noms utilisateur
+  `ArrayFill[T](size, value)` et `ArrayRange(size)` pour eviter d'exposer
+  `IntArray` / `ArrayInt` / `ObjectArray[T]` dans les cas simples;
 - declarations de classes generiques simples comme `Box[T]`, instanciables avec
   `Box[Int]` ou `Box[String]`, avec substitution des champs, retours de methodes
   et types fonction comme `(T) => T`;
@@ -197,7 +201,8 @@ Le pipeline implemente actuellement :
   `toString`, en utilisant un index de seaux hashés (`hashCode()`) pour des
   opérations de présence à coût moyen réduit.
 - module de bibliotheque standard `collections.array` comme point d'entree
-  commun pour les tableaux specialises, avec `arrayFill[T]`, `arrayMap[T]`,
+  commun pour les tableaux specialises, avec `ArrayFill[T]`, `ArrayRange`,
+  `arrayFill[T]`, `arrayMap[T]`,
   `arrayMap[T, U]`, `arrayFilter[T]`, `arrayFold[T]`, `arrayFold[T, U]`,
   `arrayFlatMap[T]`, `arrayFlatMap[T, U]` et `arrayForeach[T]` resolus vers les
   specialisations `ArrayInt`, `ArrayLong`, `ArrayFloat`, `ArrayDouble` ou

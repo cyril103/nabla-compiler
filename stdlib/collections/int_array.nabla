@@ -881,6 +881,10 @@ class ArrayInt(values: IntArray) {
         arrayBaseGet[Int, IntArray](values, index, intArrayGet)
     }
 
+    def set(index: Int, value: Int): Unit = {
+        arrayBaseSet[Int, IntArray](values, index, value, intArraySet)
+    }
+
     def getOption(index: Int): OptionInt = {
         intArrayGetOption(values, index)
     }

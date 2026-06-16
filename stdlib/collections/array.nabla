@@ -5,3 +5,7 @@ import collections.float_array
 import collections.double_array
 import collections.bool_array
 import collections.object_array
+
+def ArrayRange(size: Int): ArrayInt = {
+    arrayIntRange(size)
+}

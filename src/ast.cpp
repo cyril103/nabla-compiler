@@ -42,6 +42,25 @@ bool isNativeArrayType(const std::string& type) {
            type == "DoubleArray" || type == "BoolArray" || isObjectArrayType(type);
 }
 
+bool isPrimitiveArrayFacadeType(const std::string& type) {
+    return type == "ArrayInt" || type == "ArrayLong" || type == "ArrayFloat" ||
+           type == "ArrayDouble" || type == "ArrayBool";
+}
+
+bool isObjectArrayFacadeType(const std::string& type) {
+    auto parameterizedType = parameterizedTypeFromName(type);
+    return parameterizedType && parameterizedType->first == "ArrayObject" &&
+           parameterizedType->second.size() == 1;
+}
+
+std::string primitiveArrayFacadeStorageType(const std::string& type) {
+    if (type == "ArrayLong") return "LongArray";
+    if (type == "ArrayFloat") return "FloatArray";
+    if (type == "ArrayDouble") return "DoubleArray";
+    if (type == "ArrayBool") return "BoolArray";
+    return "IntArray";
+}
+
 std::string nativeArrayElementType(const std::string& type) {
     if (auto parameterizedType = parameterizedTypeFromName(type);
         parameterizedType && parameterizedType->first == "ObjectArray" &&
@@ -345,6 +364,13 @@ std::string NewNode::getType() {
 void NewNode::validateSemantics(CompilerContext& context) {
     for (const auto& arg : args) arg->validateSemantics(context);
 
+    if (isPrimitiveArrayFacadeType(className) && args.size() == 1 && args[0]->getType() == "Int") {
+        return;
+    }
+    if (isObjectArrayFacadeType(className) && args.size() == 1 && args[0]->getType() == "Int") {
+        return;
+    }
+
     if (isNativeArrayType(className)) {
         if (args.size() != 1) {
             semanticError(
@@ -451,6 +477,21 @@ void NewNode::validateSemantics(CompilerContext& context) {
 std::string NewNode::lowerToIR(IRBuilder& builder) const {
     std::vector<std::string> loweredArguments;
     for (const auto& argument : args) loweredArguments.push_back(argument->lowerToIR(builder));
+    if (isPrimitiveArrayFacadeType(className) && args.size() == 1 && args[0]->getType() == "Int") {
+        const std::string storageType = primitiveArrayFacadeStorageType(className);
+        std::string storage;
+        if (storageType == "LongArray") storage = builder.emitNewLongArray(loweredArguments[0]);
+        else if (storageType == "FloatArray") storage = builder.emitNewFloatArray(loweredArguments[0]);
+        else if (storageType == "DoubleArray") storage = builder.emitNewDoubleArray(loweredArguments[0]);
+        else if (storageType == "BoolArray") storage = builder.emitNewBoolArray(loweredArguments[0]);
+        else storage = builder.emitNewIntArray(loweredArguments[0]);
+        return builder.emitNewObject(className, {storage});
+    }
+    if (isObjectArrayFacadeType(className) && args.size() == 1 && args[0]->getType() == "Int") {
+        const std::string elementType = parameterizedTypeFromName(className)->second[0];
+        const std::string storage = builder.emitNewObjectArray(loweredArguments[0], elementType);
+        return builder.emitNewObject(className, {storage});
+    }
     if (className == "IntArray") return builder.emitNewIntArray(loweredArguments[0]);
     if (className == "LongArray") return builder.emitNewLongArray(loweredArguments[0]);
     if (className == "FloatArray") return builder.emitNewFloatArray(loweredArguments[0]);

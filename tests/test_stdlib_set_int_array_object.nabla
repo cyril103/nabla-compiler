@@ -1,0 +1,88 @@
+import collections.set
+import collections.array
+
+class Student(name: String) {
+    override def toString(): String = {
+        name
+    }
+}
+
+def makeNumbers(): Array[Int] = {
+    val values = new Array[Int](8)
+    values.set(0, -1)
+    values.set(1, 0)
+    values.set(2, -1)
+    values.set(3, 8)
+    values.set(4, 16)
+    values.set(5, 8)
+    values.set(6, -9)
+    values.set(7, 0)
+    values
+}
+
+def makeOtherNumbers(): Array[Int] = {
+    val values = new Array[Int](5)
+    values.set(0, 16)
+    values.set(1, 32)
+    values.set(2, -9)
+    values.set(3, 32)
+    values.set(4, 99)
+    values
+}
+
+def makeStudents(): Array[Student] = {
+    val students = new Array[Student](4)
+    val ada = new Student("ada")
+    students.set(0, ada)
+    students.set(1, new Student("linus"))
+    students.set(2, ada)
+    students.set(3, new Student("grace"))
+    students
+}
+
+def main(): Int = {
+    val values = makeNumbers()
+    val fromArray = SetFromArray[Int](values)
+    val roundTrip = fromArray.toArray()
+    val reconstructed = setFromArray[Int](roundTrip)
+    val other = SetFromArray[Int](makeOtherNumbers())
+    val unioned = fromArray.union(other)
+    val intersected = fromArray.intersect(other)
+    val differenced = fromArray.difference(other)
+    val added = fromArray.add(16).add(32).add(-1)
+    val removed = added.remove(0).remove(99)
+    val cleared = SetEmpty[Int]()
+    val students = SetFromArray[Student](makeStudents())
+
+    if values.toString() == "[-1, 0, -1, 8, 16, 8, -9, 0]" &&
+       fromArray.toString() == "[-1, 0, 8, 16, -9]" &&
+       fromArray.size() == 5 &&
+       fromArray.contains(-1) &&
+       fromArray.contains(0) &&
+       fromArray.contains(16) &&
+       fromArray.contains(-9) &&
+       !fromArray.contains(7) &&
+       roundTrip.size() == 5 &&
+       roundTrip.get(0) == -1 &&
+       roundTrip.get(1) == 0 &&
+       roundTrip.get(2) == 8 &&
+       roundTrip.get(3) == 16 &&
+       roundTrip.get(4) == -9 &&
+       reconstructed.toString() == "[-1, 0, 8, 16, -9]" &&
+       other.toString() == "[16, 32, -9, 99]" &&
+       unioned.toString() == "[-1, 0, 8, 16, -9, 32, 99]" &&
+       intersected.toString() == "[16, -9]" &&
+       differenced.toString() == "[-1, 0, 8]" &&
+       added.toString() == "[-1, 0, 8, 16, -9, 32]" &&
+       removed.toString() == "[-1, 8, 16, -9, 32]" &&
+       cleared.toString() == "[]" &&
+       cleared.size() == 0 &&
+       cleared.isEmpty() &&
+       students.toString() == "[ada, linus, grace]" &&
+       students.size() == 3 &&
+       !fromArray.isEmpty() {
+        0
+    } else {
+        1
+    }
+}

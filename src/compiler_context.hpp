@@ -88,6 +88,16 @@ inline const std::vector<StdlibFunctionAlias>& stdlibFunctionAliases() {
         {"arrayFill", {"Float"}, "arrayFloatFill"},
         {"arrayFill", {"Double"}, "arrayDoubleFill"},
         {"arrayFill", {"Bool"}, "arrayBoolFill"},
+        {"ArrayFill", {"Int"}, "arrayIntFill"},
+        {"ArrayFill", {"Long"}, "arrayLongFill"},
+        {"ArrayFill", {"Float"}, "arrayFloatFill"},
+        {"ArrayFill", {"Double"}, "arrayDoubleFill"},
+        {"ArrayFill", {"Bool"}, "arrayBoolFill"},
+        {"SetFromArray", {"Int"}, "setFromArrayInt"},
+        {"SetFromArray", {"Long"}, "setFromArrayLong"},
+        {"SetFromArray", {"Float"}, "setFromArrayFloat"},
+        {"SetFromArray", {"Double"}, "setFromArrayDouble"},
+        {"SetFromArray", {"Bool"}, "setFromArrayBool"},
         {"arrayMap", {"Int"}, "arrayIntMap"},
         {"arrayMap", {"Long"}, "arrayLongMap"},
         {"arrayMap", {"Float"}, "arrayFloatMap"},
@@ -158,7 +168,8 @@ inline std::optional<std::string> resolveStdlibFunctionAlias(
     }
     if (typeArguments.size() == 1 && !isPrimitiveArrayElementType(typeArguments[0])) {
         if (name == "arrayMkString" && typeArguments[0] == "String") return "objectStringArrayMkString";
-        if (name == "arrayFill") return "objectArrayFill";
+        if (name == "arrayFill" || name == "ArrayFill") return "objectArrayFill";
+        if (name == "SetFromArray") return "setFromArray";
         if (name == "arrayMap") return "objectArrayMapSame";
         if (name == "arrayFilter") return "objectArrayFilter";
         if (name == "arrayForeach") return "objectArrayForeach";

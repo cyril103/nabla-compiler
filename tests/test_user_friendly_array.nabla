@@ -1,0 +1,44 @@
+import collections.array
+
+class Student(name: String) {
+    override def toString(): String = {
+        name
+    }
+}
+
+def main(): Int = {
+    val emptyInts = new Array[Int](3)
+    emptyInts.set(0, 4)
+    emptyInts.set(1, 5)
+    emptyInts.set(2, 6)
+
+    val doubles = new Array[Double](2)
+    doubles.set(0, 1.5)
+    doubles.set(1, 2.5)
+
+    val students = new Array[Student](2)
+    students.set(0, new Student("ada"))
+    students.set(1, new Student("linus"))
+
+    val strings = new Array[String](2)
+    strings.set(0, "hi")
+    strings.set(1, "there")
+
+    val filledInts = ArrayFill[Int](3, 7)
+    val filledStudents = ArrayFill[Student](2, new Student("grace"))
+    val words = ArrayFill[String](2, "go")
+    val range = ArrayRange(4)
+
+    if emptyInts.toString() == "[4, 5, 6]" &&
+       doubles.toString() == "[1.500000, 2.500000]" &&
+       students.toString() == "[ada, linus]" &&
+       strings.toString() == "[hi, there]" &&
+       filledInts.toString() == "[7, 7, 7]" &&
+       filledStudents.toString() == "[grace, grace]" &&
+       words.toString() == "[go, go]" &&
+       range.toString() == "[0, 1, 2, 3]" {
+        0
+    } else {
+        1
+    }
+}

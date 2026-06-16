@@ -398,15 +398,59 @@ def main(): Int = {
 ## Tableaux Et Collections
 
 Le module `collections.array` donne acces a la facade generique `Array[T]` et
-aux fonctions communes.
+aux fonctions communes. C'est l'API recommandee pour le code utilisateur :
+les types plus bas niveau comme `IntArray`, `ArrayInt`, `ObjectArray[T]` et
+`ArrayObject[T]` sont surtout des details d'implementation de la bibliotheque.
 
 ```nabla
 import collections.array
 
 def main(): Int = {
-    val values = arrayFill[Int](3, 7)
+    val scores = new Array[Int](3)
+    scores.set(0, 10)
+    scores.set(1, 20)
+    scores.set(2, 30)
+
+    val weights = new Array[Double](2)
+    weights.set(0, 1.5)
+    weights.set(1, 2.5)
+
+    val values = ArrayFill[Int](3, 7)
     val doubled = values.map(value => value * 2)
-    if doubled.mkString(",") == "14,14,14" {
+    val indexes = ArrayRange(3)
+    if scores.mkString(",") == "10,20,30" &&
+       weights.toString() == "[1.500000, 2.500000]" &&
+       doubled.mkString(",") == "14,14,14" &&
+       indexes.toString() == "[0, 1, 2]" {
+        42
+    } else {
+        1
+    }
+}
+```
+
+Pour creer un tableau de n'importe quel type `T`, l'API recommandee est donc :
+
+- `new Array[T](size)` pour creer un tableau modifiable de taille fixe ;
+- `ArrayFill[T](size, value)` pour creer un tableau deja rempli ;
+- `ArrayRange(size)` pour obtenir `[0, 1, ..., size - 1]` en `Array[Int]`.
+
+Exemple avec un type utilisateur :
+
+```nabla
+import collections.array
+
+class Student(name: String) {
+    override def toString(): String = {
+        name
+    }
+}
+
+def main(): Int = {
+    val students = new Array[Student](2)
+    students.set(0, new Student("ada"))
+    students.set(1, new Student("linus"))
+    if students.toString() == "[ada, linus]" {
         42
     } else {
         1
@@ -427,9 +471,11 @@ Operations courantes :
 - `foreach`
 - `mkString(separator)` pour les tableaux de `Int`, `Long`, `Bool` et `String`
 
-`collections.int_array` expose aussi `arrayIntRange(size)` pour produire
-`0..size-1` et `arrayIntRangeUntil(start, until)` pour produire une plage
-`start..until-1`.
+Les anciens noms bas niveau comme `arrayFill[Int](...)`, `arrayIntRange(size)`,
+`arrayIntRangeUntil(start, until)`, `new IntArray(size)` ou
+`new ObjectArray[T](size)` restent disponibles pour compatibilite et pour la
+stdlib, mais `Array[T]`, `ArrayFill` et `ArrayRange` sont les noms a
+privilegier dans le code utilisateur.
 
 `intRangeUntil(start, until)` produit une plage `Int` paresseuse. Ses operations
 `foreach`, `fold`, `map` et `max` evitent de construire un `IntArray`
@@ -456,17 +502,18 @@ un tableau interne, avec déduplication par `==` et table de hachage interne
 
 ```nabla
 import collections.set
-import collections.object_array
+import collections.array
 
 def main(): Int = {
-    val raw = new ObjectArray[Int](4)
-    raw.set(0, 1)
-    raw.set(1, 3)
-    raw.set(2, 1)
-    raw.set(3, 2)
-    val deduped = setFromArray[Int](new ArrayObject[Int](raw))
-    val numbers = setEmpty[Int]().add(3).add(1).add(3).add(2)
-    val more = setEmpty[Int]().add(2).add(4).add(1)
+    val values = new Array[Int](4)
+    values.set(0, 1)
+    values.set(1, 3)
+    values.set(2, 1)
+    values.set(3, 2)
+
+    val deduped = SetFromArray[Int](values)
+    val numbers = SetEmpty[Int]().add(3).add(1).add(3).add(2)
+    val more = SetEmpty[Int]().add(2).add(4).add(1)
     if numbers.union(more).toString() == "[3, 1, 2, 4]" &&
        deduped.toString() == "[1, 3, 2]" &&
        numbers.intersect(more).toString() == "[1, 2]" &&
@@ -480,7 +527,8 @@ def main(): Int = {
 
 Operations utiles :
 
-- `setFromArray[T](values: ArrayObject[T]): Set[T]`
+- `SetEmpty[T](): Set[T]`
+- `SetFromArray[T](values: Array[T]): Set[T]`
 - `size()`
 - `isEmpty()` / `nonEmpty()`
 - `contains(value: T): Bool`
@@ -492,6 +540,11 @@ Operations utiles :
 - `clear(): Set[T]`
 - `toArray(): ArrayObject[T]`
 - `toString(): String`
+
+Les noms bas niveau `setEmpty`, `setFromArray`, `ObjectArray[T]` et
+`ArrayObject[T]` restent disponibles pour la stdlib et le code existant, mais
+`SetEmpty`, `SetFromArray` et `Array[T]` sont les noms recommandés dans le code
+utilisateur.
 
 ## Option
 

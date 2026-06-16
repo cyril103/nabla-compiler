@@ -1,4 +1,9 @@
 import collections.object_array
+import collections.int_array
+import collections.long_array
+import collections.float_array
+import collections.double_array
+import collections.bool_array
 
 def setIndexBucketCount[T](size: Int): Int = {
     var capacity = 8
@@ -253,8 +258,62 @@ def setFromArray[T](values: ArrayObject[T]): Set[T] = {
     }
 }
 
+def setFromArrayInt(values: ArrayInt): Set[Int] = {
+    val raw = new ObjectArray[Int](values.size())
+    var index = 0
+    while index < values.size() {
+        raw.set(index, values.get(index))
+        index = index + 1
+    }
+    setFromArray[Int](new ArrayObject[Int](raw))
+}
+
+def setFromArrayLong(values: ArrayLong): Set[Long] = {
+    val raw = new ObjectArray[Long](values.size())
+    var index = 0
+    while index < values.size() {
+        raw.set(index, values.get(index))
+        index = index + 1
+    }
+    setFromArray[Long](new ArrayObject[Long](raw))
+}
+
+def setFromArrayFloat(values: ArrayFloat): Set[Float] = {
+    val raw = new ObjectArray[Float](values.size())
+    var index = 0
+    while index < values.size() {
+        raw.set(index, values.get(index))
+        index = index + 1
+    }
+    setFromArray[Float](new ArrayObject[Float](raw))
+}
+
+def setFromArrayDouble(values: ArrayDouble): Set[Double] = {
+    val raw = new ObjectArray[Double](values.size())
+    var index = 0
+    while index < values.size() {
+        raw.set(index, values.get(index))
+        index = index + 1
+    }
+    setFromArray[Double](new ArrayObject[Double](raw))
+}
+
+def setFromArrayBool(values: ArrayBool): Set[Bool] = {
+    val raw = new ObjectArray[Bool](values.size())
+    var index = 0
+    while index < values.size() {
+        raw.set(index, values.get(index))
+        index = index + 1
+    }
+    setFromArray[Bool](new ArrayObject[Bool](raw))
+}
+
 def setEmpty[T](): Set[T] = {
     new Set[T](new ArrayObject[T](new ObjectArray[T](0)))
+}
+
+def SetEmpty[T](): Set[T] = {
+    setEmpty[T]()
 }
 
 class Set[T](values: ArrayObject[T]) {
