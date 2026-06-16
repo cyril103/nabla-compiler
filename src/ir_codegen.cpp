@@ -659,15 +659,14 @@ private:
             codegenError("layout de classe inconnu: " + className);
         }
         auto layoutIt = context.classLayouts.find(layoutClassName);
-        if (classIt->second.fields.empty()) return {};
         if (layoutIt == context.classLayouts.end()) {
             codegenError("layout de classe inconnu: " + className);
         }
         std::vector<int> offsets;
-        for (const auto& field : classIt->second.fields) {
-            auto offsetIt = layoutIt->second.find(field.name);
+        for (const auto& field : collectClassFieldsInHierarchyForLayout(context, layoutClassName)) {
+            auto offsetIt = layoutIt->second.find(field.first);
             if (offsetIt == layoutIt->second.end()) {
-                codegenError("offset de champ inconnu: " + layoutClassName + "." + field.name);
+                codegenError("offset de champ inconnu: " + layoutClassName + "." + field.first);
             }
             offsets.push_back(offsetIt->second);
         }

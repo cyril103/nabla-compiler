@@ -1,0 +1,16 @@
+class Base(seed: Int) {
+    def seedValue(): Int = {
+        seed
+    }
+}
+
+class Child extends Base() {
+    def plusSeed(): Int = {
+        seed + 1
+    }
+}
+
+def main(): Int = {
+    val child = new Child(41)
+    child.plusSeed()
+}

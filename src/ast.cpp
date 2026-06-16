@@ -372,17 +372,17 @@ void NewNode::validateSemantics(CompilerContext& context) {
         semanticError(
             "classe générique '" + classLookupName + "' utilisée sans arguments de type");
     }
-    const auto& fields = classIt->second.fields;
+    auto fields = collectClassFieldsInHierarchyForLayout(context, className);
     if (args.size() != fields.size()) {
         semanticError(
             "Constructeur de '" + className + "': " + std::to_string(fields.size()) +
             " argument(s) attendu(s), " + std::to_string(args.size()) + " reçu(s)");
     }
     for (size_t i = 0; i < args.size(); ++i) {
-        const std::string expectedType = substituteType(fields[i].type, substitution);
+        const std::string expectedType = substituteType(fields[i].second, substitution);
         if (args[i]->getType() != expectedType) {
             throw CompilerError(ErrorKind::Semantic, args[i]->getLocation(),
-                "Constructeur de '" + className + "', champ '" + fields[i].name +
+                "Constructeur de '" + className + "', champ '" + fields[i].first +
                 "': type '" + expectedType + "' attendu, '" + args[i]->getType() + "' reçu");
         }
     }

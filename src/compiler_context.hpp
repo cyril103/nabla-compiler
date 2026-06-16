@@ -375,6 +375,90 @@ struct ClassMethodLookupResult {
     std::map<std::string, std::string> classSubstitution;
 };
 
+struct ClassFieldLookupResult {
+    std::string ownerClassName;
+    std::string type;
+};
+
+inline std::optional<std::map<std::string, std::string>> genericSubstitutionFor(
+    const CompilerContext& context, const std::string& concreteType);
+inline std::string substituteType(
+    const std::string& type, const std::map<std::string, std::string>& substitution);
+
+inline void collectVisibleFieldsInHierarchy(
+    const CompilerContext& context, const std::string& receiverType,
+    std::set<std::string>& visiting,
+    std::map<std::string, std::set<std::string>>& fieldOwners,
+    std::map<std::string, std::string>& fieldTypes) {
+    const std::string classLookupName = genericBaseName(receiverType);
+    if (visiting.count(classLookupName)) return;
+    visiting.insert(classLookupName);
+
+    auto classIt = context.classes.find(classLookupName);
+    if (classIt == context.classes.end()) {
+        visiting.erase(classLookupName);
+        return;
+    }
+
+    std::map<std::string, std::string> classSubstitution;
+    if (auto genericSubstitution = genericSubstitutionFor(context, receiverType)) {
+        classSubstitution = *genericSubstitution;
+    }
+
+    for (const auto& field : classIt->second.fields) {
+        fieldOwners[field.name].insert(classLookupName);
+        if (!fieldTypes.count(field.name)) {
+            fieldTypes[field.name] = substituteType(field.type, classSubstitution);
+        }
+    }
+
+    for (const auto& parentType : classIt->second.parentTypes) {
+        const std::string concreteParentType = substituteType(parentType, classSubstitution);
+        collectVisibleFieldsInHierarchy(context, concreteParentType, visiting, fieldOwners, fieldTypes);
+    }
+
+    visiting.erase(classLookupName);
+}
+
+inline void collectClassFieldsInHierarchyForLayout(
+    const CompilerContext& context, const std::string& receiverType,
+    std::set<std::string>& visiting,
+    std::vector<std::pair<std::string, std::string>>& fields) {
+    const std::string classLookupName = genericBaseName(receiverType);
+    if (visiting.count(classLookupName)) return;
+    visiting.insert(classLookupName);
+
+    auto classIt = context.classes.find(classLookupName);
+    if (classIt == context.classes.end()) {
+        visiting.erase(classLookupName);
+        return;
+    }
+
+    std::map<std::string, std::string> classSubstitution;
+    if (auto genericSubstitution = genericSubstitutionFor(context, receiverType)) {
+        classSubstitution = *genericSubstitution;
+    }
+
+    for (const auto& parentType : classIt->second.parentTypes) {
+        const std::string concreteParentType = substituteType(parentType, classSubstitution);
+        collectClassFieldsInHierarchyForLayout(context, concreteParentType, visiting, fields);
+    }
+
+    for (const auto& field : classIt->second.fields) {
+        fields.emplace_back(field.name, substituteType(field.type, classSubstitution));
+    }
+
+    visiting.erase(classLookupName);
+}
+
+inline std::vector<std::pair<std::string, std::string>> collectClassFieldsInHierarchyForLayout(
+    const CompilerContext& context, const std::string& receiverType) {
+    std::vector<std::pair<std::string, std::string>> fields;
+    std::set<std::string> visiting;
+    collectClassFieldsInHierarchyForLayout(context, receiverType, visiting, fields);
+    return fields;
+}
+
 inline std::map<std::string, std::string> classTypeTemplateSubstitution(
     const CompilerContext& context, const std::string& classType) {
     auto parameterizedType = parameterizedTypeFromName(classType);

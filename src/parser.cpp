@@ -23,6 +23,41 @@ bool isKnownConcreteTypeName(const std::string& type, const CompilerContext& con
     }
     return context.classes.find(type) != context.classes.end();
 }
+
+std::string formatFieldProviders(const std::set<std::string>& providers) {
+    std::string message;
+    bool first = true;
+    for (const auto& provider : providers) {
+        if (!first) message += ", ";
+        message += provider;
+        first = false;
+    }
+    return message;
+}
+
+std::optional<ClassFieldLookupResult> resolveClassFieldInHierarchy(
+    const CompilerContext& context, const std::string& className,
+    const std::string& fieldName, const SourceLocation& location) {
+    std::map<std::string, std::set<std::string>> fieldOwners;
+    std::map<std::string, std::string> fieldTypes;
+    std::set<std::string> visiting;
+    collectVisibleFieldsInHierarchy(context, className, visiting, fieldOwners, fieldTypes);
+
+    auto it = fieldOwners.find(fieldName);
+    if (it == fieldOwners.end()) return std::nullopt;
+    if (it->second.size() > 1) {
+        throw CompilerError(
+            ErrorKind::Parser, location,
+            "conflit d'héritage pour le champ '" + fieldName + "' dans la classe '" +
+            className + "': plusieurs définitions dans [" + formatFieldProviders(it->second) + "]");
+    }
+    auto fieldType = fieldTypes.find(fieldName);
+    if (fieldType == fieldTypes.end()) return std::nullopt;
+    return ClassFieldLookupResult{
+        *it->second.begin(),
+        fieldType->second,
+    };
+}
 }
 
 Parser::Parser(const std::vector<Token>& tokens, CompilerContext& ctx, const std::filesystem::path& currentFile)
@@ -784,16 +819,12 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     }
                 }
             }
-            if (!initialSymbol && !currentParsingClass.empty() &&
-                context.classLayouts[currentParsingClass].count(name)) {
-                for (const auto& field : context.classes[currentParsingClass].fields) {
-                    if (field.name == name) {
-                        if (auto functionType = functionTypeFromName(field.type)) {
-                            fieldFunctionType = field.type;
-                            fieldOwnerType = currentParsingClass;
-                            expectedArgumentTypes = functionType->parameterTypes;
-                        }
-                        break;
+            if (!initialSymbol && !currentParsingClass.empty()) {
+                if (auto field = resolveClassFieldInHierarchy(context, currentParsingClass, name, nameToken.location)) {
+                    if (auto functionType = functionTypeFromName(field->type)) {
+                        fieldFunctionType = field->type;
+                        fieldOwnerType = field->ownerClassName;
+                        expectedArgumentTypes = functionType->parameterTypes;
                     }
                 }
             }
@@ -859,11 +890,12 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             captureIfNeeded(name, *symbol, scopeIndex);
             return located(std::make_unique<IdentifierNode>(name, symbol->internalName, symbol->type), nameToken.location);
         }
-        if (!currentParsingClass.empty() && context.classLayouts[currentParsingClass].count(name)) {
-            for (const auto& field : context.classes[currentParsingClass].fields) {
-                if (field.name == name) {
-                    return located(std::make_unique<FieldAccessNode>(currentParsingClass, name, field.type), nameToken.location);
-                }
+        if (!currentParsingClass.empty()) {
+            if (auto field = resolveClassFieldInHierarchy(context, currentParsingClass, name, nameToken.location)) {
+                return located(
+                    std::make_unique<FieldAccessNode>(
+                        field->ownerClassName, name, field->type),
+                    nameToken.location);
             }
         }
         if (context.functions.count(name)) {

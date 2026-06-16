@@ -218,6 +218,9 @@ Le pipeline implemente actuellement :
   puis mixins), avec validation des parents, détection de conflits de méthodes
   héritées et détection de cycles;
 - appel direct de la méthode parente immédiate via le mot-clé `super`;
+- résolution et résolution en cascade des champs hérités (ordre de résolution par
+  hiérarchie, conflit de définition détecté) + mise à jour des layouts de classes
+  pour l'allocation cohérente des offsets.
 - diagnostics uniformes avec fichier, ligne, colonne et phase du compilateur;
 - IR textuelle pour les fonctions globales, entiers, variables, affectations,
   operations binaires, appels de fonctions globales, `if`, `match`, `while`,
@@ -360,7 +363,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter la classe racine implicite `Any` pour les classes sans parent explicite.
 - [x] Ajouter la résolution de conflits de membres dupliqués entre parent et mixins.
 - [x] Ajouter `super` pour appeler une méthode de la classe parente immédiate.
-- [ ] Formaliser la résolution des membres hérités (champs + ordre de résolution) pour supprimer les ambiguïtés restantes.
+- [x] Formaliser la résolution des membres hérités (champs + ordre de résolution) pour supprimer les ambiguïtés restantes.
 
 - [ ] Formaliser `Int`, `Bool`, `Char`, `String`, `IntArray`, les types fonction canoniques et
   les types de classes.
@@ -391,7 +394,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter le court-circuit pour `&&` et `||`.
 - [x] Ajouter le reste de division `%` pour `Int` et `Long`.
 - [x] Ajouter la conversion `Int.toLong`.
-- [ ] Ajouter les champs et methodes herites si l'heritage est retenu.
+- [x] Ajouter les champs et methodes herites si l'heritage est retenu.
 - [ ] Valider les types des branches, boucles et operateurs de facon uniforme.
 - [x] Ajouter une premiere syntaxe de types parametres pour `Option[Int]` et
   `Array[Int]` via aliases standard.
@@ -544,6 +547,11 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `objectStringArrayMkString` pour `ArrayObject[String]`.
 
 ## Journal Des Jalons
+- `local` - Formaliser la résolution des membres hérités (champs + méthode) en
+  présence de `extends` + `with`, détecter les conflits de champs translatifs et
+  construire les layouts hiérarchiques pour les allocations de champ.
+  - Tests: `test_inheritance_inherited_field.nabla`,
+    `test_error_inheritance_inherited_field_conflict.diagnostic`.
 - `712c2c5` - Etendre l'héritage par mixins avec résolution hiérarchique, détection de conflits et support de `super` pour la classe parente directe.
   - Fichiers / tests associés: `lexer.hpp`, `parser.cpp`, `ast.hpp`, `ast.cpp`,
     `semantic_analyzer.cpp`, `compiler_context.hpp`, `docs/language.md`,

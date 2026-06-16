@@ -3,6 +3,7 @@
 namespace {
 
 using MethodOwnerMap = std::map<std::string, std::set<std::string>>;
+using ClassFieldOwnerMap = std::map<std::string, std::set<std::string>>;
 using ParentMethodProviders = std::map<std::string, std::set<std::string>>;
 
 std::string formatMethodProviders(const std::set<std::string>& providers) {
@@ -126,9 +127,13 @@ void SemanticAnalyzer::validateDeclaredTypes() {
         if (classInfo.parentTypes.empty()) continue;
 
         ParentMethodProviders inheritedProviders;
+        ClassFieldOwnerMap inheritedFieldProviders;
         std::set<std::string> ownMethods;
         for (const auto& methodEntry : classInfo.methods) {
             ownMethods.insert(methodEntry.first);
+        }
+        for (const auto& field : classInfo.fields) {
+            inheritedFieldProviders[field.name].insert(className);
         }
         for (const auto& parentType : classInfo.parentTypes) {
             MethodOwnerMap visibleMethods;
@@ -141,6 +146,13 @@ void SemanticAnalyzer::validateDeclaredTypes() {
                 if (ownMethods.count(methodName)) continue;
                 inheritedProviders[methodName].insert(ownerClasses.begin(), ownerClasses.end());
             }
+            ClassFieldOwnerMap visibleFields;
+            std::map<std::string, std::string> fieldTypes;
+            collectVisibleFieldsInHierarchy(
+                context, concreteParentType, visiting, visibleFields, fieldTypes);
+            for (const auto& [fieldName, ownerClasses] : visibleFields) {
+                inheritedFieldProviders[fieldName].insert(ownerClasses.begin(), ownerClasses.end());
+            }
         }
         for (const auto& [methodName, providers] : inheritedProviders) {
             if (providers.size() <= 1) continue;
@@ -150,6 +162,26 @@ void SemanticAnalyzer::validateDeclaredTypes() {
                 "' dans la classe '" + className + "': plusieurs définitions dans [" +
                 formatMethodProviders(providers) + "]");
         }
+        for (const auto& [fieldName, providers] : inheritedFieldProviders) {
+            if (providers.size() <= 1) continue;
+            throw CompilerError(
+                ErrorKind::Semantic, classInfo.location,
+                "conflit d'héritage pour le champ '" + fieldName +
+                "' dans la classe '" + className + "': plusieurs définitions dans [" +
+                formatMethodProviders(providers) + "]");
+        }
+    }
+
+    for (const auto& [className, _] : context.classes) {
+        if (className == "Any") continue;
+        std::map<std::string, int> classLayout;
+        int offset = 8;
+        for (const auto& [fieldName, fieldType] : collectClassFieldsInHierarchyForLayout(context, className)) {
+            (void) fieldType;
+            classLayout[fieldName] = offset;
+            offset += 8;
+        }
+        context.classLayouts[className] = std::move(classLayout);
     }
 }
 
