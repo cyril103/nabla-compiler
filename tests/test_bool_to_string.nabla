@@ -1,0 +1,8 @@
+def main(): Int = {
+    if true.toString() == "true" && false.toString() == "false" {
+        0
+    } else {
+        1
+    }
+}
+

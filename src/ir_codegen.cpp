@@ -884,6 +884,14 @@ private:
 
         if ((className == "Int" || className == "Long") && methodName == "toString") {
             out << "    call Int_method_toString\n";
+        } else if (className == "Float" && methodName == "toString") {
+            out << "    call Float_method_toString\n";
+        } else if (className == "Double" && methodName == "toString") {
+            out << "    call Double_method_toString\n";
+        } else if (className == "Bool" && methodName == "toString") {
+            out << "    call Bool_method_toString\n";
+        } else if (className == "Char" && methodName == "toString") {
+            out << "    call Char_method_toString\n";
         } else if (className == "Any" && methodName == "toString") {
             out << "    call Any_toString\n";
         } else if (className == "Any" && methodName == "hashCode") {

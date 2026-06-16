@@ -1,0 +1,7 @@
+def main(): Int = {
+    if 'a'.toString() == "a" && 'z'.toString() == "z" {
+        0
+    } else {
+        1
+    }
+}

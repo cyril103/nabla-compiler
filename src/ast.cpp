@@ -430,11 +430,12 @@ MethodCallNode::MethodCallNode(
 std::string MethodCallNode::getType() {
     const std::string receiverType = receiver->getType();
     if (isNumericType(receiverType)) {
-        if (isIntegerType(receiverType) && methodName == "toString") return "String";
+        if (methodName == "toString") return "String";
         if (receiverType == "Int" && methodName == "toLong") return "Long";
         if (isComparisonMethod(methodName)) return "Bool";
         return receiverType;
     }
+    if (receiverType == "Bool" && methodName == "toString") return "String";
     if (receiverType == "String") {
         if (methodName == "+") return "String";
         if (isBoolBinaryMethod(methodName)) return "Bool";
@@ -448,9 +449,11 @@ std::string MethodCallNode::getType() {
         if (methodName == "charAt") return "Char";
     }
     if (receiverType == "Char") {
+        if (methodName == "toString") return "String";
         if (isBoolBinaryMethod(methodName)) return "Bool";
     }
     if (receiverType == "Bool") {
+        if (methodName == "toString") return "String";
         if (isBoolBinaryMethod(methodName)) return "Bool";
     }
     if (isNativeArrayType(receiverType)) {
@@ -485,7 +488,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             resolvedType = isComparisonMethod(methodName) ? "Bool" : receiverType;
             return;
         }
-        if (isIntegerType(receiverType) && methodName == "toString") {
+        if (methodName == "toString") {
             if (!arguments.empty()) {
                 semanticError("la méthode " + receiverType + ".toString n'accepte aucun argument");
             }
@@ -500,6 +503,28 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             return;
         }
         semanticError("méthode inconnue: " + receiverType + "." + methodName);
+    }
+    if (receiverType == "Bool") {
+        if (methodName == "toString") {
+            if (!arguments.empty()) {
+                semanticError("la méthode Bool.toString n'accepte aucun argument");
+            }
+            resolvedType = "String";
+            return;
+        }
+        if (isBoolBinaryMethod(methodName)) {
+            if (arguments.size() != 1) {
+                semanticError("la méthode Bool." + methodName + " attend un argument");
+            }
+            if (arguments[0]->getType() != "Bool") {
+                throw CompilerError(
+                    ErrorKind::Semantic, arguments[0]->getLocation(),
+                    "la méthode Bool." + methodName + " attend un argument de type Bool");
+            }
+            resolvedType = "Bool";
+            return;
+        }
+        semanticError("méthode inconnue: Bool." + methodName);
     }
     if (receiverType == "String") {
         if (methodName == "+") {
@@ -639,6 +664,13 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         semanticError("méthode inconnue: String." + methodName);
     }
     if (receiverType == "Char") {
+        if (methodName == "toString") {
+            if (!arguments.empty()) {
+                semanticError("la méthode Char.toString n'accepte aucun argument");
+            }
+            resolvedType = "String";
+            return;
+        }
         if (isBoolBinaryMethod(methodName)) {
             if (arguments.size() != 1) {
                 semanticError("la méthode Char." + methodName + " attend un argument");
@@ -652,21 +684,6 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             return;
         }
         semanticError("méthode inconnue: Char." + methodName);
-    }
-    if (receiverType == "Bool") {
-        if (isBoolBinaryMethod(methodName)) {
-            if (arguments.size() != 1) {
-                semanticError("la méthode Bool." + methodName + " attend un argument");
-            }
-            if (arguments[0]->getType() != "Bool") {
-                throw CompilerError(
-                    ErrorKind::Semantic, arguments[0]->getLocation(),
-                    "la méthode Bool." + methodName + " attend un argument de type Bool");
-            }
-            resolvedType = "Bool";
-            return;
-        }
-        semanticError("méthode inconnue: Bool." + methodName);
     }
     if (isNativeArrayType(receiverType)) {
         if (methodName == "length") {
@@ -782,7 +799,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
 std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
     const std::string receiverType = receiver->getType();
     if (isNumericType(receiverType)) {
-        if (isIntegerType(receiverType) && methodName == "toString") {
+        if (methodName == "toString") {
             if (!arguments.empty()) {
                 builder.unsupported(location, "l'appel de méthode " + receiverType + ".toString");
             }
@@ -808,6 +825,40 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         std::string left = receiver->lowerToIR(builder);
         std::string right = arguments[0]->lowerToIR(builder);
         return builder.emitBinary(methodName, left, right, isComparisonMethod(methodName) ? "Bool" : receiverType);
+    }
+    if (receiverType == "Bool" && methodName == "toString") {
+        if (!arguments.empty()) {
+            builder.unsupported(location, "l'appel de méthode Bool.toString");
+        }
+        std::string loweredReceiver = receiver->lowerToIR(builder);
+        return builder.emitMethodCall("Bool", "toString", loweredReceiver, {}, "String");
+    }
+    if (receiverType == "Bool") {
+        if (methodName == "==" || methodName == "!=") {
+            if (arguments.size() != 1) {
+                builder.unsupported(location, "l'appel de méthode Bool." + methodName);
+            }
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            std::string loweredArgument = arguments[0]->lowerToIR(builder);
+            return builder.emitBinary(methodName, loweredReceiver, loweredArgument, "Bool");
+        }
+    }
+    if (receiverType == "Char" && methodName == "toString") {
+        if (!arguments.empty()) {
+            builder.unsupported(location, "l'appel de méthode Char.toString");
+        }
+        std::string loweredReceiver = receiver->lowerToIR(builder);
+        return builder.emitMethodCall("Char", "toString", loweredReceiver, {}, "String");
+    }
+    if (receiverType == "Char") {
+        if (methodName == "==" || methodName == "!=") {
+            if (arguments.size() != 1) {
+                builder.unsupported(location, "l'appel de méthode Char." + methodName);
+            }
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            std::string loweredArgument = arguments[0]->lowerToIR(builder);
+            return builder.emitBinary(methodName, loweredReceiver, loweredArgument, "Bool");
+        }
     }
     if (receiverType == "String") {
         if (methodName == "+" && arguments.size() == 1) {
@@ -880,8 +931,15 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         }
     }
     if (receiverType == "Char") {
+        if (methodName == "toString") {
+            if (!arguments.empty()) {
+                builder.unsupported(location, "l'appel de méthode Char.toString");
+            }
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            return builder.emitMethodCall("Char", "toString", loweredReceiver, {}, "String");
+        }
         if (!isBoolBinaryMethod(methodName) || arguments.size() != 1) {
-            builder.unsupported(location, "la méthode Char." + methodName);
+            builder.unsupported(location, "l'appel de méthode Char." + methodName);
         }
         std::string left = receiver->lowerToIR(builder);
         std::string right = arguments[0]->lowerToIR(builder);

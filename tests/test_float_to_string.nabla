@@ -1,0 +1,11 @@
+def main(): Int = {
+    if 12.5F.toString() == "12.500000" &&
+       3.0F.toString() == "3.000000" &&
+       0.0F.toString() == "0" &&
+       (-5.25F).toString() == "-5.250000" {
+        0
+    } else {
+        1
+    }
+}
+

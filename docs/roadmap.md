@@ -11,6 +11,9 @@ pour reprendre facilement apres une pause.
 - Support de l'héritage objet avec `extends` + `with` (mixins), classe racine
   implicite `Any` avec `toString(): String` et `hashCode(): Int`
   redéfinissables, détection de cycles / conflits et appel `super`.
+  La conversion `toString()` est désormais disponible de façon uniforme pour les
+  types primitifs usuels (`Int`, `Long`, `Float`, `Double`, `Bool`, `Char`) au niveau du
+  backend runtime.
 - Standard library deja utile :
   - collections typées et facade `Array[T]`
   - `Option[T]`
