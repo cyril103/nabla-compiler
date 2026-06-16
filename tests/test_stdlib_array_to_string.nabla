@@ -1,0 +1,36 @@
+import collections.int_array
+import collections.bool_array
+import collections.long_array
+import collections.float_array
+import collections.double_array
+import collections.object_array
+
+class Student() {
+    def toString(): String = {
+        "student"
+    }
+}
+
+def main(): Int = {
+    val ints = new ArrayInt(intArrayRange(3))
+    val bools = new ArrayBool(boolArrayFill(4, true))
+    val longs = new ArrayLong(longArrayFill(3, 12L))
+    val floats = new ArrayFloat(floatArrayFill(2, 1.25F))
+    val doubles = new ArrayDouble(doubleArrayFill(2, -7.5))
+    val words = objectArrayFill[String](3, "go")
+    val students = objectArrayFill[Student](2, new Student())
+
+    bools.set(1, false)
+
+    if ints.toString() == "[0, 1, 2]" &&
+       bools.toString() == "[true, false, true, true]" &&
+       longs.toString() == "[12, 12, 12]" &&
+       floats.toString() == "[1.250000, 1.250000]" &&
+       doubles.toString() == "[-7.500000, -7.500000]" &&
+       words.toString() == "[go, go, go]" &&
+       students.toString() == "[student, student]" {
+        0
+    } else {
+        1
+    }
+}

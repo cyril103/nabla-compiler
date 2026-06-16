@@ -26,17 +26,7 @@ def intArraySum(xs: IntArray): Int = {
 }
 
 def intArrayMkString(xs: IntArray, separator: String): String = {
-    var index = 0
-    var result = ""
-    while (index < xs.length()) {
-        if index == 0 {
-            result = xs.get(index).toString()
-        } else {
-            result = result + separator + xs.get(index).toString()
-        }
-        index = index + 1
-    }
-    result
+    arrayBaseMkString[Int, IntArray](xs, (values) => values.length(), (values, index) => values.get(index), separator, (value) => value.toString())
 }
 
 def intArrayFill(size: Int, value: Int): IntArray = {
@@ -922,11 +912,7 @@ class ArrayInt(values: IntArray) {
     }
 
     def toString(): String = {
-        if this.isEmpty() {
-            "[]"
-        } else {
-            "[" + this.mkString(", ") + "]"
-        }
+        arrayBaseToString[Int, IntArray](values, (values) => values.length(), (values, index) => values.get(index), (value) => value.toString())
     }
 
     def map(f: (Int) => Int): ArrayInt = {

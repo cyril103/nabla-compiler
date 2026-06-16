@@ -206,4 +206,23 @@ class ArrayObject[T](values: ObjectArray[T]) {
     def raw(): ObjectArray[T] = {
         arrayBaseRaw[ObjectArray[T]](values)
     }
+
+    def mkString(separator: String): String = {
+        arrayBaseMkString[T, ObjectArray[T]](
+            values,
+            (values) => values.length(),
+            (values, index) => values.get(index),
+            separator,
+            (value) => value.toString()
+        )
+    }
+
+    def toString(): String = {
+        arrayBaseToString[T, ObjectArray[T]](
+            values,
+            (values) => values.length(),
+            (values, index) => values.get(index),
+            (value) => value.toString()
+        )
+    }
 }

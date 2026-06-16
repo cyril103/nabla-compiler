@@ -185,6 +185,14 @@ class ArrayDouble(values: DoubleArray) {
         arrayBaseSet[Double, DoubleArray](values, index, value, doubleArraySet)
     }
 
+    def mkString(separator: String): String = {
+        arrayBaseMkString[Double, DoubleArray](values, (items) => items.length(), (items, index) => items.get(index), separator, (value) => value.toString())
+    }
+
+    def toString(): String = {
+        arrayBaseToString[Double, DoubleArray](values, (items) => items.length(), (items, index) => items.get(index), (value) => value.toString())
+    }
+
     def map(f: (Double) => Double): ArrayDouble = {
         new ArrayDouble(doubleArrayMap(values, f))
     }

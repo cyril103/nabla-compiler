@@ -39,3 +39,25 @@ def arrayBaseFold[Elem, State, Raw](values: Raw, lengthFn: (Raw) => Int, getFn: 
     }
     accumulator
 }
+
+def arrayBaseMkString[Elem, Raw](values: Raw, lengthFn: (Raw) => Int, getFn: (Raw, Int) => Elem, separator: String, toStringFn: (Elem) => String): String = {
+    var index = 0
+    var result = ""
+    while (index < lengthFn(values)) {
+        if index == 0 {
+            result = toStringFn(getFn(values, index))
+        } else {
+            result = result + separator + toStringFn(getFn(values, index))
+        }
+        index = index + 1
+    }
+    result
+}
+
+def arrayBaseToString[Elem, Raw](values: Raw, lengthFn: (Raw) => Int, getFn: (Raw, Int) => Elem, toStringFn: (Elem) => String): String = {
+    if lengthFn(values) == 0 {
+        "[]"
+    } else {
+        "[" + arrayBaseMkString[Elem, Raw](values, lengthFn, getFn, ", ", toStringFn) + "]"
+    }
+}

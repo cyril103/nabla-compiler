@@ -63,17 +63,7 @@ def boolToString(value: Bool): String = {
 }
 
 def boolArrayMkString(xs: BoolArray, separator: String): String = {
-    var index = 0
-    var result = ""
-    while (index < xs.length()) {
-        if index == 0 {
-            result = boolToString(xs.get(index))
-        } else {
-            result = result + separator + boolToString(xs.get(index))
-        }
-        index = index + 1
-    }
-    result
+    arrayBaseMkString[Bool, BoolArray](xs, (values) => values.length(), (values, index) => values.get(index), separator, (value) => boolToString(value))
 }
 
 def boolArrayMap(xs: BoolArray, f: (Bool) => Bool): BoolArray = {
@@ -266,11 +256,7 @@ class ArrayBool(values: BoolArray) {
     }
 
     def toString(): String = {
-        if this.isEmpty() {
-            "[]"
-        } else {
-            "[" + this.mkString(", ") + "]"
-        }
+        arrayBaseToString[Bool, BoolArray](values, (values) => values.length(), (values, index) => values.get(index), (value) => boolToString(value))
     }
 
     def map(f: (Bool) => Bool): ArrayBool = {

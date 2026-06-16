@@ -23,17 +23,7 @@ def longArraySum(xs: LongArray): Long = {
 }
 
 def longArrayMkString(xs: LongArray, separator: String): String = {
-    var index = 0
-    var result = ""
-    while (index < xs.length()) {
-        if index == 0 {
-            result = xs.get(index).toString()
-        } else {
-            result = result + separator + xs.get(index).toString()
-        }
-        index = index + 1
-    }
-    result
+    arrayBaseMkString[Long, LongArray](xs, (values) => values.length(), (values, index) => values.get(index), separator, (value) => value.toString())
 }
 
 def longArrayMap(xs: LongArray, f: (Long) => Long): LongArray = {
@@ -218,11 +208,7 @@ class ArrayLong(values: LongArray) {
     }
 
     def toString(): String = {
-        if this.isEmpty() {
-            "[]"
-        } else {
-            "[" + this.mkString(", ") + "]"
-        }
+        arrayBaseToString[Long, LongArray](values, (values) => values.length(), (values, index) => values.get(index), (value) => value.toString())
     }
 
     def map(f: (Long) => Long): ArrayLong = {

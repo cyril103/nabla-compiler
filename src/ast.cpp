@@ -437,6 +437,7 @@ std::string MethodCallNode::getType() {
     }
     if (receiverType == "Bool" && methodName == "toString") return "String";
     if (receiverType == "String") {
+        if (methodName == "toString") return "String";
         if (methodName == "+") return "String";
         if (isBoolBinaryMethod(methodName)) return "Bool";
         if (methodName == "isEmpty" || methodName == "nonEmpty" || methodName == "startsWith" ||
@@ -462,6 +463,8 @@ std::string MethodCallNode::getType() {
         if (methodName == "get") return nativeArrayElementType(receiverType);
     }
     if (receiverType == "ArrayObject[String]" && methodName == "mkString") return "String";
+    if (methodName == "toString") return "String";
+    if (methodName == "hashCode") return "Int";
     return resolvedType;
 }
 
@@ -470,6 +473,17 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
     for (const auto& argument : arguments) argument->validateSemantics(context);
 
     const std::string receiverType = receiver->getType();
+    if (isTypeParameterName(receiverType, context.semanticTypeParameters)) {
+        receiverIsTypeParameter = true;
+        if (methodName == "toString" || methodName == "hashCode") {
+            if (!arguments.empty()) {
+                semanticError("la méthode " + receiverType + "." + methodName + " n'accepte aucun argument");
+            }
+            resolvedType = methodName == "toString" ? "String" : "Int";
+            return;
+        }
+        semanticError("méthode inconnue: " + receiverType + "." + methodName);
+    }
     if (isNumericType(receiverType)) {
         const bool binaryMethod = isArithmeticMethod(methodName) || isComparisonMethod(methodName);
         if (binaryMethod) {
@@ -527,6 +541,13 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         semanticError("méthode inconnue: Bool." + methodName);
     }
     if (receiverType == "String") {
+        if (methodName == "toString") {
+            if (!arguments.empty()) {
+                semanticError("la méthode String.toString n'accepte aucun argument");
+            }
+            resolvedType = "String";
+            return;
+        }
         if (methodName == "+") {
             if (arguments.size() != 1) {
                 semanticError("la méthode String.+ attend un argument");
@@ -798,6 +819,26 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
 
 std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
     const std::string receiverType = receiver->getType();
+    const std::string activeReceiverType = builder.substituteActiveType(receiverType);
+    if (receiverIsTypeParameter && receiverType == activeReceiverType) {
+        if (methodName == "toString") {
+            if (!arguments.empty()) {
+                builder.unsupported(location, "l'appel de méthode " + receiverType + ".toString");
+            }
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            return builder.emitMethodCall("Any", "toString", loweredReceiver, {}, "String");
+        }
+        if (methodName == "hashCode") {
+            if (!arguments.empty()) {
+                builder.unsupported(location, "l'appel de méthode " + receiverType + ".hashCode");
+            }
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            return builder.emitMethodCall("Any", "hashCode", loweredReceiver, {}, "Int");
+        }
+    }
+    if (activeReceiverType == "String" && methodName == "toString" && arguments.empty()) {
+        return receiver->lowerToIR(builder);
+    }
     if (isNumericType(receiverType)) {
         if (methodName == "toString") {
             if (!arguments.empty()) {
@@ -861,6 +902,9 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         }
     }
     if (receiverType == "String") {
+        if (methodName == "toString" && arguments.empty()) {
+            return receiver->lowerToIR(builder);
+        }
         if (methodName == "+" && arguments.size() == 1) {
             std::string loweredReceiver = receiver->lowerToIR(builder);
             std::string loweredArgument = arguments[0]->lowerToIR(builder);
@@ -1015,7 +1059,6 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         return builder.emitCall(
             "objectStringArrayMkString[String]", {loweredReceiver, loweredSeparator}, "String");
     }
-    const std::string activeReceiverType = builder.substituteActiveType(receiverType);
     if (activeReceiverType != receiverType && stdlibTypeAliasMethodSignature(receiverType, methodName)) {
         std::string loweredReceiver = receiver->lowerToIR(builder);
         std::vector<std::string> loweredArguments;

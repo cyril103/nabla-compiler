@@ -1007,6 +1007,10 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
                 expectedArgumentTypes.push_back(substituteType(parameter.type, substitution));
             }
         }
+        if (!methodSignature && isTypeParameterName(receiverType, currentFunctionTypeParameters)) {
+            if (method == "toString") initialReturnType = "String";
+            else if (method == "hashCode") initialReturnType = "Int";
+        }
         consume(TokenType::LPAREN, "");
         std::vector<std::unique_ptr<ASTNode>> arguments;
         if (methodSignature) {
