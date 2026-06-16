@@ -4,27 +4,7 @@ class RandomState(seedValue: Int) {
     }
 }
 
-class RandomIntResult(valueValue: Int, stateValue: RandomState) {
-    def value(): Int = {
-        valueValue
-    }
-
-    def state(): RandomState = {
-        stateValue
-    }
-}
-
-class RandomBoolResult(valueValue: Bool, stateValue: RandomState) {
-    def value(): Bool = {
-        valueValue
-    }
-
-    def state(): RandomState = {
-        stateValue
-    }
-}
-
-class RandomChoiceResult[T](valueValue: T, stateValue: RandomState) {
+class RandomResult[T](valueValue: T, stateValue: RandomState) {
     def value(): T = {
         valueValue
     }
@@ -32,6 +12,15 @@ class RandomChoiceResult[T](valueValue: T, stateValue: RandomState) {
     def state(): RandomState = {
         stateValue
     }
+}
+
+class RandomIntResult extends RandomResult[Int](valueValue, stateValue) {
+}
+
+class RandomBoolResult extends RandomResult[Bool](valueValue, stateValue) {
+}
+
+class RandomChoiceResult[T] extends RandomResult[T](valueValue, stateValue) {
 }
 
 def randomStep(seed: Int): Int = {

@@ -1,0 +1,24 @@
+import core.option_int
+import util
+
+def main(): Int = {
+    val intOptionSome = optionIntSome(10)
+    val intOptionNone = optionIntNone()
+    val mapped = intOptionSome.map(value => value + 5)
+    val filtered = intOptionSome.filter(value => value > 20)
+    val chained = intOptionNone.orElse(intOptionSome)
+
+    val generated = randomInt(randomSeed(0))
+    val generatedValue = generated.value()
+    val generatedState = generated.state().seed()
+
+    if mapped.getOrElse(0) == 15
+        && filtered.getOrElse(0) == 0
+        && chained.getOrElse(0) == 10
+        && generatedValue == 12345
+        && generatedState == 12345 {
+        42
+    } else {
+        99
+    }
+}

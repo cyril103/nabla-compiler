@@ -1,38 +1,32 @@
-class OptionInt(isDefined: Bool, value: Int) {
-    def isEmpty(): Bool = {
-        !isDefined
-    }
+import core.option
 
-    def nonEmpty(): Bool = {
-        isDefined
-    }
-
-    def map(transform: (Int) => Int): OptionInt = {
-        if isDefined {
+class OptionInt extends Option[Int](defined, value) {
+    override def map(transform: (Int) => Int): OptionInt = {
+        if defined {
             optionIntSome(transform(value))
         } else {
             this
         }
     }
 
-    def filter(predicate: (Int) => Bool): OptionInt = {
-        if isDefined && predicate(value) {
+    override def filter(predicate: (Int) => Bool): OptionInt = {
+        if defined && predicate(value) {
             this
         } else {
             optionIntNone()
         }
     }
 
-    def orElse(other: OptionInt): OptionInt = {
-        if isDefined {
+    override def orElse(other: OptionInt): OptionInt = {
+        if defined {
             this
         } else {
             other
         }
     }
 
-    def getOrElse(default: Int): Int = {
-        if isDefined {
+    override def getOrElse(default: Int): Int = {
+        if defined {
             value
         } else {
             default
