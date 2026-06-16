@@ -5,7 +5,7 @@ def count(values: Array[Bool]): Int = {
 }
 
 def main(): Int = {
-    if count(new Array[Bool](boolArrayFill(4, true))) == 4 {
+    if count(arrayBool(boolArrayFill(4, true))) == 4 {
         42
     } else {
         1

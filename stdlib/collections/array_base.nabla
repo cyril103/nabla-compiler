@@ -61,3 +61,51 @@ def arrayBaseToString[Elem, Raw](values: Raw, lengthFn: (Raw) => Int, getFn: (Ra
         "[" + arrayBaseMkString[Elem, Raw](values, lengthFn, getFn, ", ", toStringFn) + "]"
     }
 }
+
+class ArrayPrimitiveBase[T, Raw](
+    rawValues: Raw,
+    lengthFn: (Raw) => Int,
+    getFn: (Raw, Int) => T,
+    setFn: (Raw, Int, T) => Unit,
+    toStringFn: (T) => String
+) {
+    def length(): Int = {
+        lengthFn(rawValues)
+    }
+
+    def size(): Int = {
+        arrayBaseSize[Raw](rawValues, lengthFn)
+    }
+
+    def isEmpty(): Bool = {
+        arrayBaseIsEmpty[Raw](rawValues, lengthFn)
+    }
+
+    def nonEmpty(): Bool = {
+        arrayBaseNonEmpty[Raw](rawValues, lengthFn)
+    }
+
+    def get(index: Int): T = {
+        arrayBaseGet[T, Raw](rawValues, index, getFn)
+    }
+
+    def set(index: Int, value: T): Unit = {
+        arrayBaseSet[T, Raw](rawValues, index, value, setFn)
+    }
+
+    def mkString(separator: String): String = {
+        arrayBaseMkString[T, Raw](rawValues, lengthFn, getFn, separator, toStringFn)
+    }
+
+    override def toString(): String = {
+        arrayBaseToString[T, Raw](rawValues, lengthFn, getFn, toStringFn)
+    }
+
+    def foreach(f: (T) => Unit): Unit = {
+        arrayBaseForeach[T, Raw](rawValues, lengthFn, getFn, f)
+    }
+
+    def raw(): Raw = {
+        arrayBaseRaw[Raw](rawValues)
+    }
+}

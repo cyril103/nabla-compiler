@@ -13,7 +13,7 @@ class Student() {
 
 def main(): Int = {
     val ints = new ArrayInt(intArrayRange(3))
-    val bools = new ArrayBool(boolArrayFill(4, true))
+    val bools = arrayBool(boolArrayFill(4, true))
     val longs = new ArrayLong(longArrayFill(3, 12L))
     val floats = new ArrayFloat(floatArrayFill(2, 1.25F))
     val doubles = new ArrayDouble(doubleArrayFill(2, -7.5))

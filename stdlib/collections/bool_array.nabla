@@ -214,94 +214,59 @@ def boolArraySet(values: BoolArray, index: Int, value: Bool): Unit = {
     values.set(index, value)
 }
 
-class ArrayBool(values: BoolArray) {
-    def length(): Int = {
-        boolArrayLength(values)
-    }
-
-    def size(): Int = {
-        arrayBaseSize[BoolArray](values, boolArrayLength)
-    }
-
-    def isEmpty(): Bool = {
-        arrayBaseIsEmpty[BoolArray](values, boolArrayLength)
-    }
-
-    def nonEmpty(): Bool = {
-        arrayBaseNonEmpty[BoolArray](values, boolArrayLength)
-    }
-
-    def get(index: Int): Bool = {
-        arrayBaseGet[Bool, BoolArray](values, index, boolArrayGet)
-    }
-
-    def set(index: Int, value: Bool): Unit = {
-        arrayBaseSet[Bool, BoolArray](values, index, value, boolArraySet)
-    }
+class ArrayBool extends ArrayPrimitiveBase[Bool, BoolArray](rawValues, lengthFn, getFn, setFn, toStringFn) {
 
     def countTrue(): Int = {
-        boolArrayCountTrue(values)
+        boolArrayCountTrue(rawValues)
     }
 
     def all(): Bool = {
-        boolArrayAll(values)
+        boolArrayAll(rawValues)
     }
 
     def any(): Bool = {
-        boolArrayAny(values)
-    }
-
-    def mkString(separator: String): String = {
-        boolArrayMkString(values, separator)
-    }
-
-    override def toString(): String = {
-        arrayBaseToString[Bool, BoolArray](values, (values) => values.length(), (values, index) => values.get(index), (value) => boolToString(value))
+        boolArrayAny(rawValues)
     }
 
     def map(f: (Bool) => Bool): ArrayBool = {
-        new ArrayBool(boolArrayMap(values, f))
+        arrayBool(boolArrayMap(rawValues, f))
     }
 
     def mapObject[U](f: (Bool) => U): ArrayObject[U] = {
-        boolArrayMapObject[U](values, f)
+        boolArrayMapObject[U](rawValues, f)
     }
 
     def flatMapObject[U](transform: (Bool) => ArrayObject[U]): ArrayObject[U] = {
-        boolArrayFlatMapObject[U](values, transform)
+        boolArrayFlatMapObject[U](rawValues, transform)
     }
 
     def flatMap(transform: (Bool) => ArrayBool): ArrayBool = {
-        new ArrayBool(boolArrayFlatMap(values, transform))
+        arrayBool(boolArrayFlatMap(rawValues, transform))
     }
 
     def filter(predicate: (Bool) => Bool): ArrayBool = {
-        new ArrayBool(boolArrayFilter(values, predicate))
+        arrayBool(boolArrayFilter(rawValues, predicate))
     }
 
     def shuffle(state: RandomState): ArrayBool = {
-        new ArrayBool(boolArrayShuffle(values, state))
+        arrayBool(boolArrayShuffle(rawValues, state))
     }
 
     def randomChoice(state: RandomState, default: Bool): RandomChoiceResult[Bool] = {
-        boolArrayRandomChoice(values, state, default)
+        boolArrayRandomChoice(rawValues, state, default)
     }
 
     def fold(initial: Bool, combine: (Bool, Bool) => Bool): Bool = {
-        arrayBaseFold[Bool, Bool, BoolArray](values, boolArrayLength, boolArrayGet, initial, combine)
-    }
-
-    def foreach(f: (Bool) => Unit): Unit = {
-        arrayBaseForeach[Bool, BoolArray](values, boolArrayLength, boolArrayGet, f)
-    }
-
-    def raw(): BoolArray = {
-        arrayBaseRaw[BoolArray](values)
+        arrayBaseFold[Bool, Bool, BoolArray](rawValues, lengthFn, getFn, initial, combine)
     }
 }
 
+def arrayBool(values: BoolArray): ArrayBool = {
+    new ArrayBool(values, boolArrayLength, boolArrayGet, boolArraySet, boolToString)
+}
+
 def arrayBoolFill(size: Int, value: Bool): ArrayBool = {
-    new ArrayBool(boolArrayFill(size, value))
+    arrayBool(boolArrayFill(size, value))
 }
 
 def arrayBoolMap(xs: ArrayBool, f: (Bool) => Bool): ArrayBool = {
