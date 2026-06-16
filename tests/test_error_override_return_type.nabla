@@ -1,0 +1,15 @@
+class Parent() {
+    def value(): Int = {
+        1
+    }
+}
+
+class Child extends Parent() {
+    override def value(): String = {
+        "bad"
+    }
+}
+
+def main(): Int = {
+    0
+}

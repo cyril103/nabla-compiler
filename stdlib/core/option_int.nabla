@@ -6,8 +6,20 @@
 import core.option
 
 /// Option specialisee pour `Int`.
-class OptionInt extends Option[Int](defined, value) {
-    override def map(transform: (Int) => Int): OptionInt = {
+class OptionInt(defined: Bool, value: Int) {
+    def isDefined(): Bool = {
+        defined
+    }
+
+    def isEmpty(): Bool = {
+        !defined
+    }
+
+    def nonEmpty(): Bool = {
+        defined
+    }
+
+    def map(transform: (Int) => Int): OptionInt = {
         if defined {
             optionIntSome(transform(value))
         } else {
@@ -15,7 +27,7 @@ class OptionInt extends Option[Int](defined, value) {
         }
     }
 
-    override def filter(predicate: (Int) => Bool): OptionInt = {
+    def filter(predicate: (Int) => Bool): OptionInt = {
         if defined && predicate(value) {
             this
         } else {
@@ -23,7 +35,7 @@ class OptionInt extends Option[Int](defined, value) {
         }
     }
 
-    override def orElse(other: OptionInt): OptionInt = {
+    def orElse(other: OptionInt): OptionInt = {
         if defined {
             this
         } else {
@@ -31,7 +43,7 @@ class OptionInt extends Option[Int](defined, value) {
         }
     }
 
-    override def getOrElse(default: Int): Int = {
+    def getOrElse(default: Int): Int = {
         if defined {
             value
         } else {

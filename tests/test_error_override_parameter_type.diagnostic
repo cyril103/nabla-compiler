@@ -1,0 +1,1 @@
+tests/test_error_override_parameter_type.nabla:8:14: semantic error: override invalide pour 'Child.value' : signature incompatible avec la méthode héritée

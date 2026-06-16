@@ -1583,14 +1583,15 @@ void FunctionValueCallNode::validateSemantics(CompilerContext& context) {
     if (symbol == context.semanticSymbolTypes.end()) {
         semanticError("fonction utilisée hors de sa portée: " + name);
     }
-    auto functionType = functionTypeFromName(symbol->second);
+    calleeType = symbol->second;
+    auto functionType = functionTypeFromName(calleeType);
     if (!functionType) {
         semanticError("la valeur '" + name + "' n'est pas appelable");
     }
     const size_t expectedArgumentCount = functionType->parameterTypes.size();
     if (arguments.size() != expectedArgumentCount) {
         semanticError(
-            symbol->second + ": " + std::to_string(expectedArgumentCount) +
+            calleeType + ": " + std::to_string(expectedArgumentCount) +
             " argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
     }
     resolvedType = functionType->returnType;
@@ -1598,14 +1599,14 @@ void FunctionValueCallNode::validateSemantics(CompilerContext& context) {
         if (arguments[i]->getType() != functionType->parameterTypes[i]) {
             throw CompilerError(
                 ErrorKind::Semantic, arguments[i]->getLocation(),
-                symbol->second + ", paramètre: type '" + functionType->parameterTypes[i] +
+                calleeType + ", paramètre: type '" + functionType->parameterTypes[i] +
                 "' attendu, '" + arguments[i]->getType() + "' reçu");
         }
     }
 }
 
 std::string FunctionValueCallNode::lowerToIR(IRBuilder& builder) const {
-    std::string loweredFunction = builder.emitLoad(symbolName, "");
+    std::string loweredFunction = builder.emitLoad(symbolName, calleeType);
     std::vector<std::string> loweredArguments;
     for (const auto& argument : arguments) loweredArguments.push_back(argument->lowerToIR(builder));
     return builder.emitIndirectCall(loweredFunction, loweredArguments, resolvedType);
@@ -1986,7 +1987,7 @@ std::string FunctionDefNode::lowerToIR(IRBuilder& builder) const {
     } else if (!captures.empty()) {
         builder.bindClosure();
         for (size_t i = 0; i < captures.size(); ++i) {
-            builder.bindCapture(captures[i].symbolName, static_cast<int>(i));
+            builder.bindCapture(captures[i].symbolName, static_cast<int>(i), captures[i].type);
         }
     }
     for (const auto& parameter : parameters) {

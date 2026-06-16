@@ -256,6 +256,12 @@ std::string IRBuilder::emitClosureLoad(const std::string& closure, int captureIn
     return result;
 }
 
+std::string IRBuilder::emitClosureLoad(const std::string& closure, int captureIndex, const std::string& type) {
+    std::string result = nextValue();
+    emit({IROpcode::ClosureLoad, result, substituteActiveType(type), "", {closure, std::to_string(captureIndex)}});
+    return result;
+}
+
 std::string IRBuilder::emitIndirectCall(
     const std::string& callee, const std::vector<std::string>& arguments, const std::string& type) {
     std::vector<std::string> operands = {callee};
@@ -536,7 +542,9 @@ std::string IRBuilder::emitFieldLoad(
 
 std::string IRBuilder::emitLoad(const std::string& symbol, const std::string& type) {
     auto capture = captureValues.find(symbol);
-    if (capture != captureValues.end()) return emitClosureLoad(closureValue, capture->second);
+    if (capture != captureValues.end()) {
+        return emitClosureLoad(closureValue, capture->second.index, capture->second.type);
+    }
     auto parameter = parameterValues.find(symbol);
     if (parameter != parameterValues.end()) return parameter->second;
     std::string result = nextValue();
@@ -611,8 +619,8 @@ void IRBuilder::bindClosure() {
     closureValue = "%closure";
 }
 
-void IRBuilder::bindCapture(const std::string& symbol, int captureIndex) {
-    captureValues[symbol] = captureIndex;
+void IRBuilder::bindCapture(const std::string& symbol, int captureIndex, const std::string& type) {
+    captureValues[symbol] = {captureIndex, substituteActiveType(type)};
 }
 
 [[noreturn]] void IRBuilder::unsupported(

@@ -93,6 +93,7 @@ public:
     std::string emitFunctionReference(
         const std::string& name, const std::vector<std::string>& captures = {});
     std::string emitClosureLoad(const std::string& closure, int captureIndex);
+    std::string emitClosureLoad(const std::string& closure, int captureIndex, const std::string& type);
     std::string emitIndirectCall(
         const std::string& callee, const std::vector<std::string>& arguments,
         const std::string& type = "Int");
@@ -158,14 +159,18 @@ public:
     void bindParameter(const std::string& symbol, const std::string& parameterName);
     void bindThis();
     void bindClosure();
-    void bindCapture(const std::string& symbol, int captureIndex);
+    void bindCapture(const std::string& symbol, int captureIndex, const std::string& type);
     [[noreturn]] void unsupported(const SourceLocation& location, const std::string& feature) const;
 
 private:
     IRProgram program;
     IRFunction* currentFunction = nullptr;
     std::map<std::string, std::string> parameterValues;
-    std::map<std::string, int> captureValues;
+    struct CaptureValue {
+        int index;
+        std::string type;
+    };
+    std::map<std::string, CaptureValue> captureValues;
     std::vector<std::map<std::string, std::string>> typeSubstitutionStack;
     std::map<std::string, std::string> activeTypeSubstitution;
     std::string thisValue;

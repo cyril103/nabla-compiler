@@ -1,0 +1,15 @@
+class Parent() {
+    def value[T](input: T): T = {
+        input
+    }
+}
+
+class Child extends Parent() {
+    override def value[T](input: T): Int = {
+        1
+    }
+}
+
+def main(): Int = {
+    0
+}

@@ -48,16 +48,15 @@ pour reprendre facilement apres une pause.
   - Correction de la revue précédente : l'inversion logique n'est pas confirmée
     dans les tests actuels. Le risque réel est une convention d'encodage booléen
     dispersée entre IR/codegen/runtime, fragile pour de futurs chemins backend.
-- P1 — Vérification incomplète de `override` :
+- Corrigé — Vérification incomplète de `override` :
   - Le flag `override` est parsé et stocké (`src/parser.cpp:1252`) puis seules les règles de présence/supériorité sont contrôlées en semantique (`src/semantic_analyzer.cpp:205`).
-  - Aucune validation de compatibilité de signature (paramètres/retour/sous-types) avec la méthode héritée.
-- P1 — Initialisation des tableaux natifs par défaut à valeur fixe `1` :
-  - `src/ir_codegen.cpp:729` remplit chaque slot des tableaux natifs avec `1` sans tenir compte du type d’élément.
-  - Risque : objets, booléens et usages attendus peuvent observer une valeur neutre non définie/incohérente.
-- P2 — Fallbacks silencieux vers `Int` quand un type est inconnu :
-  - `src/parser.cpp:1071` retourne un `IdentifierNode` de type par défaut `Int` pour les noms non résolus.
-  - `src/ir_codegen.cpp:211` retourne aussi `Int` quand un type IR est vide ou introuvable.
-  - Risque de diagnostics secondaires trompeurs lors de l’inférence/validation, et de masquage d'une perte d'information de type côté backend.
+  - La validation compare maintenant arité, paramètres, retour et paramètres génériques de méthode, avec substitutions des types hérités.
+- Corrigé — Initialisation des tableaux natifs par défaut à valeur fixe `1` :
+  - `src/ir_codegen.cpp:746` remplit maintenant chaque slot des tableaux natifs selon le type d’élément.
+  - Le backend initialise désormais `FloatArray`, `DoubleArray` et `ObjectArray[T]` avec `0`, et conserve `1` pour les zéros/faux taggés de `Int`, `Long` et `Bool`.
+- Corrigé — Fallbacks silencieux vers `Int` quand un type est inconnu :
+  - `src/parser.cpp:1071` utilise maintenant un marqueur `<unresolved>` pour les identifiants non résolus.
+  - `src/ir_codegen.cpp:211` échoue maintenant explicitement si un type IR est vide ou introuvable.
 - P3 — La référence HTML de la stdlib peut dériver sans alerte automatique :
   - `.github/workflows/ci.yml:21` lance les tests et contrôles principaux, mais ne vérifie pas que `make stdlib-docs` laisse `docs/stdlib/` à jour.
   - Risque : les commentaires `///`, `@signature` ou `@symbol` peuvent diverger de la documentation publiée.
@@ -65,10 +64,7 @@ pour reprendre facilement apres une pause.
 Actions suggérées pour la suite :
 
 1. Centraliser la convention d'encodage booléen (tag/valeurs) et ajouter des tests de régression bool via constantes, comparaisons, fonctions et tableaux.
-2. Ajouter une validation stricte de signature `override` avec substitutions de types.
-3. Corriger l’initialisation des tableaux natifs par type.
-4. Remplacer les fallbacks de type `Int` par un marqueur d’erreur explicite côté parser et IR/codegen.
-5. Ajouter un check CI pour la reference HTML stdlib : lancer `make stdlib-docs`
+2. Ajouter un check CI pour la reference HTML stdlib : lancer `make stdlib-docs`
    et échouer si `docs/stdlib/` n'est pas à jour.
 
 1. Finaliser la sémantique d'héritage.

@@ -17,6 +17,86 @@ std::string formatMethodProviders(const std::set<std::string>& providers) {
     return message;
 }
 
+std::string methodTypeWithSubstitution(
+    const std::string& type,
+    const std::map<std::string, std::string>& classSubstitution,
+    const std::map<std::string, std::string>& methodSubstitution) {
+    return substituteType(substituteType(type, methodSubstitution), classSubstitution);
+}
+
+bool isSameOrInheritedType(
+    const CompilerContext& context,
+    const std::string& actualType,
+    const std::string& expectedType,
+    std::set<std::string>& visiting) {
+    if (actualType == expectedType) return true;
+
+    const std::string actualBaseName = genericBaseName(actualType);
+    if (visiting.count(actualBaseName)) return false;
+
+    auto classIt = context.classes.find(actualBaseName);
+    if (classIt == context.classes.end()) return false;
+
+    std::map<std::string, std::string> classSubstitution;
+    if (auto genericSubstitution = genericSubstitutionFor(context, actualType)) {
+        classSubstitution = *genericSubstitution;
+    }
+
+    visiting.insert(actualBaseName);
+    for (const auto& parentType : classIt->second.parentTypes) {
+        const std::string concreteParentType = substituteType(parentType, classSubstitution);
+        if (isSameOrInheritedType(context, concreteParentType, expectedType, visiting)) {
+            visiting.erase(actualBaseName);
+            return true;
+        }
+    }
+    visiting.erase(actualBaseName);
+    return false;
+}
+
+bool isSameOrInheritedType(
+    const CompilerContext& context,
+    const std::string& actualType,
+    const std::string& expectedType) {
+    std::set<std::string> visiting;
+    return isSameOrInheritedType(context, actualType, expectedType, visiting);
+}
+
+bool overrideSignatureMatches(
+    const CompilerContext& context,
+    const CompilerContext::FunctionSignature& overridingSignature,
+    const CompilerContext::FunctionSignature& inheritedSignature,
+    const std::map<std::string, std::string>& inheritedClassSubstitution) {
+    if (overridingSignature.typeParameters.size() != inheritedSignature.typeParameters.size()) {
+        return false;
+    }
+    if (overridingSignature.parameters.size() != inheritedSignature.parameters.size()) {
+        return false;
+    }
+
+    std::map<std::string, std::string> overridingMethodSubstitution;
+    for (size_t i = 0; i < overridingSignature.typeParameters.size(); ++i) {
+        overridingMethodSubstitution[overridingSignature.typeParameters[i]] =
+            inheritedSignature.typeParameters[i];
+    }
+
+    for (size_t i = 0; i < overridingSignature.parameters.size(); ++i) {
+        const std::string overridingParameterType = methodTypeWithSubstitution(
+            overridingSignature.parameters[i].type, {}, overridingMethodSubstitution);
+        const std::string inheritedParameterType = methodTypeWithSubstitution(
+            inheritedSignature.parameters[i].type, inheritedClassSubstitution, {});
+        if (overridingParameterType != inheritedParameterType) {
+            return false;
+        }
+    }
+
+    const std::string overridingReturnType = methodTypeWithSubstitution(
+        overridingSignature.returnType, {}, overridingMethodSubstitution);
+    const std::string inheritedReturnType = methodTypeWithSubstitution(
+        inheritedSignature.returnType, inheritedClassSubstitution, {});
+    return isSameOrInheritedType(context, overridingReturnType, inheritedReturnType);
+}
+
 void collectVisibleMethodsInHierarchy(
     const CompilerContext& context, const std::string& receiverType,
     std::map<std::string, std::string> substitution,
@@ -204,13 +284,20 @@ void SemanticAnalyzer::validateDeclaredTypes() {
         }
         for (const auto& [methodName, signature] : classInfo.methods) {
             bool hasInheritedMethod = false;
+            bool hasCompatibleInheritedMethod = false;
             for (const auto& parentType : classInfo.parentTypes) {
                 const std::string concreteParentType = substituteType(parentType, classTypeSubstitution);
                 const auto inheritedCandidates = collectClassMethodLookupCandidates(
                     context, concreteParentType, methodName);
                 if (!inheritedCandidates.empty()) {
                     hasInheritedMethod = true;
-                    break;
+                    for (const auto& inheritedCandidate : inheritedCandidates) {
+                        if (overrideSignatureMatches(
+                                context, signature, *inheritedCandidate.signature,
+                                inheritedCandidate.classSubstitution)) {
+                            hasCompatibleInheritedMethod = true;
+                        }
+                    }
                 }
             }
             if (signature.isOverride && !hasInheritedMethod) {
@@ -218,6 +305,12 @@ void SemanticAnalyzer::validateDeclaredTypes() {
                     ErrorKind::Semantic, signature.location,
                     "override invalide pour '" + className + "." + methodName +
                     "' : aucune méthode héritée correspondante");
+            }
+            if (signature.isOverride && hasInheritedMethod && !hasCompatibleInheritedMethod) {
+                throw CompilerError(
+                    ErrorKind::Semantic, signature.location,
+                    "override invalide pour '" + className + "." + methodName +
+                    "' : signature incompatible avec la méthode héritée");
             }
             if (!signature.isOverride && hasInheritedMethod) {
                 throw CompilerError(

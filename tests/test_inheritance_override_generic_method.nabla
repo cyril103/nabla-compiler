@@ -1,0 +1,20 @@
+class Parent() {
+    def same[T](value: T): T = {
+        value
+    }
+}
+
+class Child extends Parent() {
+    override def same[U](value: U): U = {
+        value
+    }
+}
+
+def main(): Int = {
+    val child = new Child()
+    if child.same[Int](42) == 42 {
+        0
+    } else {
+        1
+    }
+}

@@ -1068,7 +1068,7 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         if (!typeArguments.empty()) {
             throw CompilerError(ErrorKind::Parser, nameToken.location, "appel attendu après les arguments de type");
         }
-        return located(std::make_unique<IdentifierNode>(name, name, "Int"), nameToken.location);
+        return located(std::make_unique<IdentifierNode>(name, name, "<unresolved>"), nameToken.location);
     }
     throw CompilerError(ErrorKind::Parser, peek().location, "expression primaire invalide '" + peek().value + "'");
 }

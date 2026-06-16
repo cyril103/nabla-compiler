@@ -210,7 +210,9 @@ private:
 
     std::string typeOf(const std::string& name) const {
         auto type = valueTypes.find(name);
-        if (type == valueTypes.end() || type->second.empty()) return "Int";
+        if (type == valueTypes.end() || type->second.empty()) {
+            codegenError("type IR inconnu pour la valeur '" + name + "'");
+        }
         return type->second;
     }
 
@@ -710,6 +712,21 @@ private:
         storeRegister(instruction.result, "rbx");
     }
 
+    std::string nativeArrayDefaultValue(IROpcode opcode) const {
+        switch (opcode) {
+            case IROpcode::NewFloatArray:
+            case IROpcode::NewDoubleArray:
+            case IROpcode::NewObjectArray:
+                return "0";
+            case IROpcode::NewIntArray:
+            case IROpcode::NewLongArray:
+            case IROpcode::NewBoolArray:
+                return "1";
+            default:
+                codegenError("opcode IR de tableau natif inattendu");
+        }
+    }
+
     void emitNewNativeArray(const IRInstruction& instruction) {
         loadValue(instruction.operands[0], "rax");
         out << "    cmp rax, 1\n";
@@ -726,7 +743,7 @@ private:
         out << ".L_array_init_" << asmSymbolPart(function.name) << "_" << asmSymbolPart(instruction.result) << ":\n";
         out << "    cmp rcx, r8\n";
         out << "    jge .L_array_init_done_" << asmSymbolPart(function.name) << "_" << asmSymbolPart(instruction.result) << "\n";
-        out << "    mov qword [rbx + 16 + rcx * 8], 1\n";
+        out << "    mov qword [rbx + 16 + rcx * 8], " << nativeArrayDefaultValue(instruction.opcode) << "\n";
         out << "    inc rcx\n";
         out << "    jmp .L_array_init_" << asmSymbolPart(function.name) << "_" << asmSymbolPart(instruction.result) << "\n";
         out << ".L_array_init_done_" << asmSymbolPart(function.name) << "_" << asmSymbolPart(instruction.result) << ":\n";

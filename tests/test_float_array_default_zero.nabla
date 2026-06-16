@@ -1,0 +1,8 @@
+def main(): Int = {
+    val xs = new FloatArray(2)
+    if xs.get(0) == 0.0F && xs.get(1) == 0.0F {
+        0
+    } else {
+        1
+    }
+}

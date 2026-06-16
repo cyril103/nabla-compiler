@@ -402,6 +402,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `super` pour appeler une méthode de la classe parente immédiate.
 - [x] Consolider la résolution de `super` en présence de chaînes d'héritage et de
   mixins, avec diagnostic dédié pour l'utilisation de `super` sans parent.
+- [x] Valider strictement les signatures `override` héritées, y compris arité,
+  paramètres, retour, paramètres génériques de méthode et substitutions de types
+  de classes parentes génériques.
 - [x] Formaliser l'héritage implicite depuis `Any` pour les classes sans parent
   explicite.
 - [x] Formaliser la résolution des conflits hérités pour les champs et méthodes
@@ -570,6 +573,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter une collection native `BoolArray`.
 - [x] Ajouter `shuffle` sur `ArrayInt`, `ArrayLong`, `ArrayFloat`, `ArrayDouble`
   et `ArrayBool` via le generateur pseudo-aléatoire `util`.
+- [x] Initialiser les tableaux natifs selon l'encodage runtime de leur élément :
+  zéros/faux taggés pour `Int`, `Long` et `Bool`, zéros IEEE pour `Float` /
+  `Double`, et slots nuls pour `ObjectArray[T]`.
 
 ### P3 - Outillage
 
@@ -596,6 +602,19 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Corriger les principaux points de la revue du 16/06/2026 :
+  validation stricte des signatures `override`, initialisation par type des
+  tableaux natifs, marqueur `<unresolved>` côté parser et erreur explicite côté
+  backend lorsqu'un type IR manque.
+  - Fichiers / tests associés: `src/semantic_analyzer.cpp`,
+    `src/ir_codegen.cpp`, `src/parser.cpp`,
+    `tests/test_error_override_return_type.nabla`,
+    `tests/test_error_override_parameter_type.nabla`,
+    `tests/test_error_override_generic_signature.nabla`,
+    `tests/test_inheritance_override_generic_method.nabla`,
+    `tests/test_inheritance_override_generic_parent.nabla`,
+    `tests/test_float_array_default_zero.nabla`,
+    `tests/test_double_array_default_zero.nabla`, `docs/roadmap.md`.
 - `local` - Détecter et signaler explicitement les ambiguïtés de méthodes
   héritées entre plusieurs définitions disponibles dans la hiérarchie
   (`extends` + `with`), via une validation sémantique explicite et des tests
