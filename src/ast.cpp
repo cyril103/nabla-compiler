@@ -373,6 +373,66 @@ void NewNode::validateSemantics(CompilerContext& context) {
             "classe générique '" + classLookupName + "' utilisée sans arguments de type");
     }
     auto fields = collectClassFieldsInHierarchyForLayout(context, className);
+    const auto& parentConstructorArguments = classIt->second.parentConstructorArguments;
+    if (!parentConstructorArguments.empty()) {
+        const size_t expectedArgumentCount =
+            parentConstructorArguments.size() + classIt->second.fields.size();
+        if (args.size() != expectedArgumentCount) {
+            semanticError(
+                "Constructeur de '" + className + "': " + std::to_string(expectedArgumentCount) +
+                " argument(s) attendu(s), " + std::to_string(args.size()) + " reçu(s)");
+        }
+        if (fields.size() != args.size()) {
+            semanticError(
+                "Constructeur de '" + className + "': " + std::to_string(fields.size()) +
+                " champs attendus dans le layout, " + std::to_string(args.size()) + " reçu(s)");
+        }
+
+        std::map<std::string, size_t> fieldOrderByName;
+        for (size_t i = 0; i < fields.size(); ++i) {
+            fieldOrderByName[fields[i].first] = i;
+        }
+
+        std::vector<std::unique_ptr<ASTNode>> mappedArguments(args.size());
+        for (size_t i = 0; i < args.size(); ++i) {
+            std::string targetField;
+            if (i < parentConstructorArguments.size()) {
+                targetField = parentConstructorArguments[i];
+            } else {
+                targetField = classIt->second.fields[i - parentConstructorArguments.size()].name;
+            }
+            auto fieldIndex = fieldOrderByName.find(targetField);
+            if (fieldIndex == fieldOrderByName.end()) {
+                throw CompilerError(
+                    ErrorKind::Semantic, args[i]->getLocation(),
+                    "Constructeur de '" + className +
+                    "': champ cible inconnu dans le parent explicite '" + targetField + "'");
+            }
+            if (mappedArguments[fieldIndex->second]) {
+                throw CompilerError(
+                    ErrorKind::Semantic, args[i]->getLocation(),
+                    "Constructeur de '" + className +
+                    "': cible de champ dupliquée dans le parent explicite '" + targetField + "'");
+            }
+            mappedArguments[fieldIndex->second] = std::move(args[i]);
+        }
+        args = std::move(mappedArguments);
+        for (size_t i = 0; i < fields.size(); ++i) {
+            const std::string expectedType = substituteType(fields[i].second, substitution);
+            if (!args[i]) {
+                semanticError(
+                    "Constructeur de '" + className + "': champ '" + fields[i].first +
+                    "' non initialisé");
+            }
+            if (args[i]->getType() != expectedType) {
+                throw CompilerError(ErrorKind::Semantic, args[i]->getLocation(),
+                    "Constructeur de '" + className + "', champ '" + fields[i].first +
+                    "': type '" + expectedType + "' attendu, '" + args[i]->getType() + "' reçu");
+            }
+        }
+        return;
+    }
+
     if (args.size() != fields.size()) {
         semanticError(
             "Constructeur de '" + className + "': " + std::to_string(fields.size()) +

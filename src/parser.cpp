@@ -175,7 +175,10 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
     }
     context.classes[className].typeParameters = typeParameters;
     context.classes[className].location = classToken.location;
+
     bool hasExplicitParent = false;
+    std::vector<std::string> parentConstructorArguments;
+    bool hasExplicitParentConstructorArguments = false;
     if (peek().type == TokenType::KW_EXTENDS) {
         hasExplicitParent = true;
         consume(TokenType::KW_EXTENDS, "");
@@ -194,29 +197,118 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
             context.classes[className].parentTypes.push_back(mixinType);
         }
     }
+
     context.classes[className].hasExplicitParent = hasExplicitParent;
     if (!hasExplicitParent && className != "Any") {
         context.classes[className].parentTypes.push_back("Any");
     }
+
+    auto parseClassFieldList = [&](int& offset) {
+        consume(TokenType::LPAREN, "");
+        while (peek().type != TokenType::RPAREN) {
+            Token fieldToken = consume(TokenType::IDENTIFIER, "Nom d'attribut attendu");
+            std::string fieldName = fieldToken.value;
+            consume(TokenType::COLON, "");
+            auto [fieldType, fieldTypeLocation] = parseType("Type attendu");
+            if (context.classLayouts[className].count(fieldName)) {
+                throw CompilerError(
+                    ErrorKind::Parser, fieldToken.location,
+                    "champ déjà déclaré dans '" + className + "': " + fieldName);
+            }
+            context.classLayouts[className][fieldName] = offset;
+            context.classes[className].fields.push_back({fieldName, fieldType, fieldTypeLocation});
+            offset += 8;
+            if (peek().type == TokenType::COMMA) {
+                consume(TokenType::COMMA, "");
+            } else if (peek().type != TokenType::RPAREN) {
+                throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ')' attendu après le paramètre");
+            }
+        }
+        consume(TokenType::RPAREN, "");
+    };
+
+    bool consumedHeaderList = false;
+    bool headerListIsTyped = false;
+    if (hasExplicitParent && peek().type == TokenType::LPAREN) {
+        consume(TokenType::LPAREN, "");
+        bool sawTypeAnnotation = false;
+        bool sawBareArgument = false;
+        std::vector<std::string> explicitArguments;
+        int offset = 8;
+        while (peek().type != TokenType::RPAREN) {
+            Token argumentToken = consume(TokenType::IDENTIFIER, "Nom d'argument attendu");
+            if (peek().type == TokenType::COLON) {
+                if (sawBareArgument) {
+                    throw CompilerError(
+                        ErrorKind::Parser, argumentToken.location,
+                        "arguments parent explicites ou signature héritée mélangés dans 'extends'");
+                }
+                sawTypeAnnotation = true;
+                consume(TokenType::COLON, "");
+                auto [fieldType, fieldTypeLocation] = parseType("Type attendu");
+                if (context.classLayouts[className].count(argumentToken.value)) {
+                    throw CompilerError(
+                        ErrorKind::Parser, argumentToken.location,
+                        "champ déjà déclaré dans '" + className + "': " + argumentToken.value);
+                }
+                context.classLayouts[className][argumentToken.value] = offset;
+                context.classes[className].fields.push_back({argumentToken.value, fieldType, fieldTypeLocation});
+                offset += 8;
+            } else {
+                if (peek().type == TokenType::COMMA || peek().type == TokenType::RPAREN) {
+                    if (sawTypeAnnotation) {
+                        throw CompilerError(
+                            ErrorKind::Parser, argumentToken.location,
+                            "arguments parent explicites ou signature héritée mélangés dans 'extends'");
+                    }
+                    sawBareArgument = true;
+                    explicitArguments.push_back(argumentToken.value);
+                    if (peek().type == TokenType::COMMA) {
+                        consume(TokenType::COMMA, "");
+                        continue;
+                    }
+                } else {
+                    throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ')' attendu");
+                }
+            }
+            if (peek().type == TokenType::COMMA) {
+                consume(TokenType::COMMA, "");
+            } else if (peek().type != TokenType::RPAREN) {
+                throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ')' attendu");
+            }
+        }
+        consume(TokenType::RPAREN, "");
+        consumedHeaderList = true;
+        if (sawTypeAnnotation) {
+            if (sawBareArgument) {
+                throw CompilerError(
+                    ErrorKind::Parser, classNameToken.location,
+                    "arguments parent explicites ou signature héritée mélangés dans 'extends'");
+            }
+            headerListIsTyped = true;
+        } else if (sawBareArgument || (peek().type == TokenType::LPAREN)) {
+            hasExplicitParentConstructorArguments = true;
+            parentConstructorArguments = std::move(explicitArguments);
+        }
+    }
+
+    if (!hasExplicitParent && !consumedHeaderList) {
+        int offset = 8;
+        parseClassFieldList(offset);
+    } else if (hasExplicitParent && headerListIsTyped) {
+        // field signature was already parsed in the extends list
+    } else if (hasExplicitParent && hasExplicitParentConstructorArguments) {
+        if (peek().type == TokenType::LPAREN) {
+            int offset = 8;
+            parseClassFieldList(offset);
+        }
+    }
+
+    context.classes[className].parentConstructorArguments = parentConstructorArguments;
     currentParsingClass = className;
     auto previousTypeParameters = currentFunctionTypeParameters;
     currentFunctionTypeParameters = typeParameters;
-    consume(TokenType::LPAREN, "");
-    int offset = 8;
-    while (peek().type != TokenType::RPAREN) {
-        Token fieldToken = consume(TokenType::IDENTIFIER, "Nom d'attribut attendu");
-        std::string fieldName = fieldToken.value;
-        consume(TokenType::COLON, "");
-        auto [fieldType, fieldTypeLocation] = parseType("Type attendu");
-        if (context.classLayouts[className].count(fieldName)) {
-            throw CompilerError(ErrorKind::Parser, fieldToken.location, "champ déjà déclaré dans '" + className + "': " + fieldName);
-        }
-        context.classLayouts[className][fieldName] = offset;
-        context.classes[className].fields.push_back({fieldName, fieldType, fieldTypeLocation});
-        offset += 8;
-        if (peek().type == TokenType::COMMA) consume(TokenType::COMMA, "");
-    }
-    consume(TokenType::RPAREN, "");
+
     if (peek().type == TokenType::LBRACE) {
         consume(TokenType::LBRACE, "");
         while (peek().type != TokenType::RBRACE) {
@@ -230,7 +322,6 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
     currentFunctionTypeParameters = previousTypeParameters;
     currentParsingClass.clear();
 }
-
 std::unique_ptr<ASTNode> Parser::parseIfExpression() {
     Token start = consume(TokenType::KW_IF, "");
     if (peek().type == TokenType::LPAREN) {

@@ -95,6 +95,45 @@ void SemanticAnalyzer::validateDeclaredTypes() {
                     className + "." + methodName + "'");
             }
         }
+
+        if (!classInfo.parentConstructorArguments.empty()) {
+            if (classInfo.parentTypes.empty()) {
+                throw CompilerError(
+                    ErrorKind::Semantic, classInfo.location,
+                    "constructeur de parent explicite invalide pour la classe '" + className + "'");
+            }
+
+            const auto& directParentType = classInfo.parentTypes[0];
+            auto parentFields = collectClassFieldsInHierarchyForLayout(context, directParentType);
+            if (parentFields.size() != classInfo.parentConstructorArguments.size()) {
+                throw CompilerError(
+                    ErrorKind::Semantic, classInfo.location,
+                    "constructeur de la classe '" + className + "': " +
+                    std::to_string(parentFields.size()) +
+                    " argument(s) attendu(s) pour le parent explicite, " +
+                    std::to_string(classInfo.parentConstructorArguments.size()) + " reçu(s)");
+            }
+
+            std::set<std::string> parentFieldNames;
+            for (const auto& parentField : parentFields) {
+                parentFieldNames.insert(parentField.first);
+            }
+            std::set<std::string> seenParentArguments;
+            for (const auto& parentArgument : classInfo.parentConstructorArguments) {
+                if (!parentFieldNames.count(parentArgument)) {
+                    throw CompilerError(
+                        ErrorKind::Semantic, classInfo.location,
+                        "constructeur de parent explicite invalide dans la classe '" + className +
+                        "' : argument inconnu '" + parentArgument + "'");
+                }
+                if (!seenParentArguments.insert(parentArgument).second) {
+                    throw CompilerError(
+                        ErrorKind::Semantic, classInfo.location,
+                        "constructeur de parent explicite invalide dans la classe '" + className +
+                        "' : argument dupliqué '" + parentArgument + "'");
+                }
+            }
+        }
     }
     for (const auto& [functionName, signature] : context.functions) {
         if (signature.parameters.size() > 6) {

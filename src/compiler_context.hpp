@@ -40,6 +40,7 @@ struct CompilerContext {
         std::vector<FieldInfo> fields;
         std::map<std::string, FunctionSignature> methods;
         std::vector<std::string> parentTypes;
+        std::vector<std::string> parentConstructorArguments;
         bool hasExplicitParent = false;
         std::vector<std::string> typeParameters;
         SourceLocation location;
