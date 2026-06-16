@@ -126,6 +126,16 @@ def setDifference[T](left: ArrayObject[T], right: ArrayObject[T]): ArrayObject[T
     new ArrayObject[T](filtered)
 }
 
+def setFromArray[T](values: ArrayObject[T]): Set[T] = {
+    var result = setEmpty[T]()
+    var index = 0
+    while index < values.size() {
+        result = result.add(values.get(index))
+        index = index + 1
+    }
+    result
+}
+
 def setEmpty[T](): Set[T] = {
     new Set[T](new ArrayObject[T](new ObjectArray[T](0)))
 }

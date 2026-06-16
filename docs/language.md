@@ -455,11 +455,19 @@ un tableau interne.
 
 ```nabla
 import collections.set
+import collections.object_array
 
 def main(): Int = {
+    val raw = new ObjectArray[Int](4)
+    raw.set(0, 1)
+    raw.set(1, 3)
+    raw.set(2, 1)
+    raw.set(3, 2)
+    val deduped = setFromArray[Int](new ArrayObject[Int](raw))
     val numbers = setEmpty[Int]().add(3).add(1).add(3).add(2)
     val more = setEmpty[Int]().add(2).add(4).add(1)
     if numbers.union(more).toString() == "[3, 1, 2, 4]" &&
+       deduped.toString() == "[1, 3, 2]" &&
        numbers.intersect(more).toString() == "[1, 2]" &&
        numbers.difference(more).toString() == "[3]" {
         42
@@ -471,6 +479,7 @@ def main(): Int = {
 
 Operations utiles :
 
+- `setFromArray[T](values: ArrayObject[T]): Set[T]`
 - `size()`
 - `isEmpty()` / `nonEmpty()`
 - `contains(value: T): Bool`

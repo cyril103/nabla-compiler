@@ -193,7 +193,8 @@ Le pipeline implemente actuellement :
   `ArrayObject[T]`, `objectArrayShuffle`, `objectArrayMkString`,
   `objectStringArrayMkString` (compatibilité) et `ArrayObject[T].shuffle`.
 - module de bibliotheque standard `collections.set` avec `Set[T]`, `setEmpty`,
-  `add`, `remove`, `union`, `intersect`, `difference` et `toString`.
+  `add`, `remove`, `union`, `intersect`, `difference`, `setFromArray` et
+  `toString`.
 - module de bibliotheque standard `collections.array` comme point d'entree
   commun pour les tableaux specialises, avec `arrayFill[T]`, `arrayMap[T]`,
   `arrayMap[T, U]`, `arrayFilter[T]`, `arrayFold[T]`, `arrayFold[T, U]`,
@@ -351,6 +352,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (approximatives) et conversions degrés/radians.
 - [x] Etendre `collections.set` avec des operations immutables
   (`union`, `intersect`, `difference`).
+- [x] Ajouter `setFromArray[T](values: ArrayObject[T]): Set[T]` pour la
+  construction dédupliquante depuis un tableau source.
 - [x] Ajouter le module standard `util` avec `randomSeed`, `randomInt`,
   `randomIntRange` et `randomBool` pour une API pseudo-aléatoire
   deterministe.
@@ -563,6 +566,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   immutables `union`, `intersect`, `difference`, et tests de régression.
   - Fichiers / tests associés: `stdlib/collections/set.nabla`,
     `tests/test_stdlib_set.nabla`, `tests/test_stdlib_set.expected`.
+- `local` - Ajouter `setFromArray[T](values: ArrayObject[T]): Set[T]` avec
+  déduplication par ordre d’apparition dans la source, et tests associés.
+  - Fichiers / tests associés: `stdlib/collections/set.nabla`,
+    `tests/test_stdlib_set.nabla`, `docs/language.md`.
 - `local` - Renforcer la résolution des membres hérités en cas d'ambiguïtés de type
   générique (`Holder[Int]` vs `Holder[String]`) et formaliser la racine `Any`
   implicite pour les classes sans `extends`.

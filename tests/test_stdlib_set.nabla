@@ -1,4 +1,5 @@
 import collections.set
+import collections.object_array
 
 class Student(name: String) {
     def toString(): String = {
@@ -12,6 +13,13 @@ def sameValue[T](left: T, right: T): Bool = {
 
 def main(): Int = {
     val base = setEmpty[Int]()
+    val rawNumbers = new ObjectArray[Int](4)
+    rawNumbers.set(0, 1)
+    rawNumbers.set(1, 3)
+    rawNumbers.set(2, 1)
+    rawNumbers.set(3, 2)
+    val fromArray = setFromArray[Int](new ArrayObject[Int](rawNumbers))
+    val fromArrayEmpty = setFromArray[Int](new ArrayObject[Int](new ObjectArray[Int](0)))
     val numbers = base.add(3).add(1).add(3).add(2)
     val otherNumbers = base.add(2).add(4).add(1)
     val removedThree = numbers.remove(3)
@@ -26,12 +34,29 @@ def main(): Int = {
     val alice = new Student("alice")
     val bob = new Student("bob")
     val students = setEmpty[Student]().add(alice).add(bob).add(alice)
+    val studentSource = new ObjectArray[Student](4)
+    studentSource.set(0, alice)
+    studentSource.set(1, bob)
+    studentSource.set(2, alice)
+    studentSource.set(3, new Student("carol"))
+    val studentsFromArray = setFromArray[Student](new ArrayObject[Student](studentSource))
     val others = setEmpty[Student]().add(bob).add(alice)
     val studentsUnion = students.union(others)
     val studentsIntersect = students.intersect(others)
     val studentsDifference = students.difference(others)
 
     if numbers.size() == 3 &&
+       fromArray.toString() == "[1, 3, 2]" &&
+       fromArray.size() == 3 &&
+       rawNumbers.length() == 4 &&
+       rawNumbers.get(0) == 1 &&
+       rawNumbers.get(1) == 3 &&
+       rawNumbers.get(2) == 1 &&
+       rawNumbers.get(3) == 2 &&
+    studentSource.get(0).toString() == "alice" &&
+    studentSource.get(1).toString() == "bob" &&
+    studentSource.get(2).toString() == "alice" &&
+       fromArrayEmpty.toString() == "[]" &&
        numbers.contains(1) &&
        !numbers.contains(4) &&
        numbers.toString() == "[3, 1, 2]" &&
@@ -50,11 +75,13 @@ def main(): Int = {
        !students.toArray().isEmpty() &&
        sameValue(3, 3) &&
        !sameValue(3, 4) &&
-       studentsUnion.toString() == "[alice, bob]" &&
-       studentsIntersect.toString() == "[alice, bob]" &&
-       studentsDifference.toString() == "[]" &&
+        studentsUnion.toString() == "[alice, bob]" &&
+        studentsIntersect.toString() == "[alice, bob]" &&
+        studentsDifference.toString() == "[]" &&
+        studentsFromArray.toString() == "[alice, bob, carol]" &&
+        studentsFromArray.size() == 3 &&
         students.contains(alice) &&
-       sameValue(alice, students.toArray().get(0)) {
+        sameValue(alice, students.toArray().get(0)) {
         0
     } else {
         1
