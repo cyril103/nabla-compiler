@@ -37,29 +37,37 @@ pour reprendre facilement apres une pause.
 
 ## Priorites Prochaine Session
 
-### Revue de code (16/06/2026)
+### Revue de code (16/06/2026, corrigée)
 
-- P0 — Incohérence de représentation des `Bool` entre composants sémantiques/codegen/runtime :
-  - `src/ast.cpp:215` émet `true` comme `1` et `false` comme `0`.
-  - `src/ir_codegen.cpp:338` teste le `Bool` par `cmp rax, 1` (branchement sur faux).
-  - `src/runtime_asm.cpp:853` considère `false` quand `rdi == 1`.
-  - Risque confirmé : inversion logique possible des conditions/logique booléenne selon le chemin.
+- P2 — Représentation des `Bool` correcte dans les chemins actuels, mais trop implicite :
+  - `src/ast.cpp:233` émet les constantes booléennes IR comme `1` / `0`.
+  - `src/ir_codegen.cpp:455` boxe ensuite ces constantes, donc `false` devient `1`
+    runtime et `true` devient `3`.
+  - `src/ir_codegen.cpp:338` teste bien le faux runtime par `cmp rax, 1`, et
+    `src/runtime_asm.cpp:853` suit la même convention pour `Bool.toString`.
+  - Correction de la revue précédente : l'inversion logique n'est pas confirmée
+    dans les tests actuels. Le risque réel est une convention d'encodage booléen
+    dispersée entre IR/codegen/runtime, fragile pour de futurs chemins backend.
 - P1 — Vérification incomplète de `override` :
   - Le flag `override` est parsé et stocké (`src/parser.cpp:1252`) puis seules les règles de présence/supériorité sont contrôlées en semantique (`src/semantic_analyzer.cpp:205`).
   - Aucune validation de compatibilité de signature (paramètres/retour/sous-types) avec la méthode héritée.
 - P1 — Initialisation des tableaux natifs par défaut à valeur fixe `1` :
   - `src/ir_codegen.cpp:729` remplit chaque slot des tableaux natifs avec `1` sans tenir compte du type d’élément.
   - Risque : objets, booléens et usages attendus peuvent observer une valeur neutre non définie/incohérente.
-- P2 — Fallback parser sur identifiant inconnu :
-  - `src/parser.cpp:1069` retourne un `IdentifierNode` de type par défaut `Int` pour les noms non résolus.
-  - Risque de diagnostics secondaires trompeurs lors de l’inférence/validation.
+- P2 — Fallbacks silencieux vers `Int` quand un type est inconnu :
+  - `src/parser.cpp:1071` retourne un `IdentifierNode` de type par défaut `Int` pour les noms non résolus.
+  - `src/ir_codegen.cpp:211` retourne aussi `Int` quand un type IR est vide ou introuvable.
+  - Risque de diagnostics secondaires trompeurs lors de l’inférence/validation, et de masquage d'une perte d'information de type côté backend.
+- P3 — La référence HTML de la stdlib peut dériver sans alerte automatique :
+  - `.github/workflows/ci.yml:21` lance les tests et contrôles principaux, mais ne vérifie pas que `make stdlib-docs` laisse `docs/stdlib/` à jour.
+  - Risque : les commentaires `///`, `@signature` ou `@symbol` peuvent diverger de la documentation publiée.
 
 Actions suggérées pour la suite :
 
-1. Unifier la représentation booléenne (tag/valeurs) entre parser/IR/codegen/runtime.
+1. Centraliser la convention d'encodage booléen (tag/valeurs) et ajouter des tests de régression bool via constantes, comparaisons, fonctions et tableaux.
 2. Ajouter une validation stricte de signature `override` avec substitutions de types.
 3. Corriger l’initialisation des tableaux natifs par type.
-4. Remplacer le fallback de type `Int` par un marqueur d’erreur explicite.
+4. Remplacer les fallbacks de type `Int` par un marqueur d’erreur explicite côté parser et IR/codegen.
 5. Ajouter un check CI pour la reference HTML stdlib : lancer `make stdlib-docs`
    et échouer si `docs/stdlib/` n'est pas à jour.
 
