@@ -1,0 +1,106 @@
+import collections.object_array
+
+def setContains[T](values: ArrayObject[T], expected: T): Bool = {
+    var index = 0
+    var found = false
+    while index < values.size() && !found {
+        if values.get(index).toString() == expected.toString() {
+            found = true
+        } else {
+            found
+        }
+        index = index + 1
+    }
+    found
+}
+
+def setAppend[T](values: ArrayObject[T], value: T): ArrayObject[T] = {
+    val appended = new ObjectArray[T](values.size() + 1)
+    var index = 0
+    while index < values.size() {
+        appended.set(index, values.get(index))
+        index = index + 1
+    }
+    appended.set(values.size(), value)
+    new ArrayObject[T](appended)
+}
+
+def setWithout[T](values: ArrayObject[T], expected: T): ArrayObject[T] = {
+    var index = 0
+    var removed = false
+    var kept = 0
+    while index < values.size() {
+        if values.get(index).toString() == expected.toString() && !removed {
+            removed = true
+        } else {
+            kept = kept + 1
+        }
+        index = index + 1
+    }
+
+    val filtered = new ObjectArray[T](kept)
+    index = 0
+    var output = 0
+    removed = false
+    while index < values.size() {
+        val value = values.get(index)
+        if value.toString() == expected.toString() && !removed {
+            removed = true
+        } else {
+            filtered.set(output, value)
+            output = output + 1
+        }
+        index = index + 1
+    }
+    new ArrayObject[T](filtered)
+}
+
+def setEmpty[T](): Set[T] = {
+    new Set[T](new ArrayObject[T](new ObjectArray[T](0)))
+}
+
+class Set[T](values: ArrayObject[T]) {
+    def size(): Int = {
+        values.size()
+    }
+
+    def isEmpty(): Bool = {
+        values.isEmpty()
+    }
+
+    def nonEmpty(): Bool = {
+        values.nonEmpty()
+    }
+
+    def contains(value: T): Bool = {
+        setContains[T](values, value)
+    }
+
+    def add(value: T): Set[T] = {
+        if setContains[T](values, value) {
+            this
+        } else {
+            new Set[T](setAppend[T](values, value))
+        }
+    }
+
+    def remove(value: T): Set[T] = {
+        new Set[T](setWithout[T](values, value))
+    }
+
+    def clear(): Set[T] = {
+        setEmpty[T]()
+    }
+
+    def toArray(): ArrayObject[T] = {
+        values
+    }
+
+    def mkString(separator: String): String = {
+        values.mkString(separator)
+    }
+
+    def toString(): String = {
+        values.toString()
+    }
+}
