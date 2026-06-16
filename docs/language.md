@@ -291,7 +291,9 @@ class Child extends Base() {
 ```
 
 Quand une classe n'indique pas de parent, une classe racine implicite `Any` est
-ajoutee pour uniformiser le modele objet et les futures extensions.
+ajoutee pour uniformiser le modele objet. `Any` apporte des methodes de base
+qui sont disponible sur toute classe : `toString(): String` et `hashCode(): Int`.
+Ces méthodes peuvent etre redefinies dans les sous-classes.
 
 ## Generiques
 

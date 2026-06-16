@@ -9,7 +9,8 @@ pour reprendre facilement apres une pause.
 - Typage statique avec fonctions, methodes, classes, generiques simples et lambdas.
 - Controle de flux : `if` expression, `else if`, `match`, `while`, `for`.
 - Support de l'héritage objet avec `extends` + `with` (mixins), classe racine
-  implicite `Any`, détection de cycles / conflits et appel `super`.
+  implicite `Any` avec `toString(): String` et `hashCode(): Int`
+  redéfinissables, détection de cycles / conflits et appel `super`.
 - Standard library deja utile :
   - collections typées et facade `Array[T]`
   - `Option[T]`
@@ -38,13 +39,10 @@ pour reprendre facilement apres une pause.
 2. Consolider le système `super`.
    - Confirmer les cas `super` dans chaînes de mixins / héritage.
    - Définir règles et tests pour les masquages explicites.
-3. Formaliser la classe `Any`.
-   - Documenter ses propriétés de base et son usage implicite dans les classes.
-   - Valider les invariants `Any` côté sémantique + codegen.
-4. Revenir sur le chantier `match` avancé.
+3. Revenir sur le chantier `match` avancé.
    - Finaliser les motifs nommés et les gardes (`motif if condition`).
    - Ajouter des diagnostics propres pour les erreurs de portée/typage des gardes.
-5. Ajouter des tests “mélange” héritage + autres fonctionnalités.
+4. Ajouter des tests “mélange” héritage + autres fonctionnalités.
    - Cas de régression couvrant `super`, champs hérités, shadowing contrôlé
      et conflit translatif.
 

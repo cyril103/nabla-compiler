@@ -187,9 +187,32 @@ void SemanticAnalyzer::validateDeclaredTypes() {
 }
 
 void SemanticAnalyzer::ensureAnyRootType() {
-    if (context.classes.count("Any") > 0) return;
-    context.classes["Any"] = {};
-    context.classes["Any"].location = {"<built-in>", 1, 1};
+    if (context.classes.count("Any") == 0) {
+        context.classes["Any"] = {};
+        context.classes["Any"].location = {"<built-in>", 1, 1};
+    }
+
+    auto& anyClass = context.classes["Any"];
+    auto builtInLocation = SourceLocation{"<built-in>", 1, 1};
+
+    if (!anyClass.methods.count("toString")) {
+        anyClass.methods["toString"] = {
+            {},
+            "String",
+            {},
+            builtInLocation,
+            builtInLocation
+        };
+    }
+    if (!anyClass.methods.count("hashCode")) {
+        anyClass.methods["hashCode"] = {
+            {},
+            "Int",
+            {},
+            builtInLocation,
+            builtInLocation
+        };
+    }
 }
 
 void SemanticAnalyzer::validateParentTypes() const {

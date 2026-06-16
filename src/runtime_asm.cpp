@@ -847,5 +847,21 @@ void emit(std::ostream& out) {
         << "    mov [rbx + 16], rsi\n"
         << "    mov rax, rbx\n"
         << "    ret\n\n";
+    out << "Any_hashCode:\n"
+        << "    test rdi, 1\n"
+        << "    jnz .L_any_hash_immediate\n"
+        << "    mov rax, rdi\n"
+        << "    shr rax, 1\n"
+        << "    and rax, 0x3fffffffffffffff\n"
+        << "    or rax, 1\n"
+        << "    ret\n"
+        << ".L_any_hash_immediate:\n"
+        << "    mov rax, rdi\n"
+        << "    ret\n\n";
+    out << "Any_toString:\n"
+        << "    call Any_hashCode\n"
+        << "    mov rdi, rax\n"
+        << "    call Int_method_toString\n"
+        << "    ret\n\n";
 }
 }

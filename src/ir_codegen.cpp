@@ -884,6 +884,10 @@ private:
 
         if ((className == "Int" || className == "Long") && methodName == "toString") {
             out << "    call Int_method_toString\n";
+        } else if (className == "Any" && methodName == "toString") {
+            out << "    call Any_toString\n";
+        } else if (className == "Any" && methodName == "hashCode") {
+            out << "    call Any_hashCode\n";
         } else if (className == "Int" && methodName == "toLong") {
             out << "    mov rax, rdi\n";
         } else if (className == "String" && methodName == "length") {
