@@ -388,11 +388,8 @@ class RangeIntFiltered extends RangeIntBase(start, until)(predicate: (Int) => Bo
     }
 }
 
-class RangeIntFilteredMapped extends RangeIntBase(start, until)(
-    predicate: (Int) => Bool,
-    transform: (Int) => Int
-) {
-    def foreach(f: (Int) => Unit): Unit = {
+class RangeIntFilteredMapped extends RangeIntFiltered(start, until, predicate)(transform: (Int) => Int) {
+    override def foreach(f: (Int) => Unit): Unit = {
         var value = start
         while value < until {
             if predicate(value) {
@@ -404,7 +401,7 @@ class RangeIntFilteredMapped extends RangeIntBase(start, until)(
         }
     }
 
-    def fold(initial: Int, combine: (Int, Int) => Int): Int = {
+    override def fold(initial: Int, combine: (Int, Int) => Int): Int = {
         var value = start
         var accumulator = initial
         while value < until {
@@ -418,7 +415,7 @@ class RangeIntFilteredMapped extends RangeIntBase(start, until)(
         accumulator
     }
 
-    def max(): OptionInt = {
+    override def max(): OptionInt = {
         var value = start
         var current = optionIntNone()
         while value < until {
