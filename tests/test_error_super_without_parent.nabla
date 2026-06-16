@@ -1,0 +1,16 @@
+class Base() {
+    def value(): Int = {
+        1
+    }
+}
+
+class Child() {
+    def answer(): Int = {
+        super.value()
+    }
+}
+
+def main(): Int = {
+    val child = new Child()
+    child.answer()
+}

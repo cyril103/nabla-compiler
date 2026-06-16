@@ -1,0 +1,1 @@
+tests/test_error_super_without_parent.nabla:9:9: parser error: 'super' non autorisé dans une classe sans parent explicite

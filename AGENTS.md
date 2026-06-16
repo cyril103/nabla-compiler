@@ -217,7 +217,9 @@ Le pipeline implemente actuellement :
 - support de l'héritage de méthodes via `extends` + `with` (un parent explicite
   puis mixins), avec validation des parents, détection de conflits de méthodes
   héritées et détection de cycles;
-- appel direct de la méthode parente immédiate via le mot-clé `super`;
+- appel de la méthode parente via `super`, y compris en présence de chaînes
+  d'héritage et de mixins; diagnostic explicite quand `super` est utilisé sans
+  parent explicite.
 - résolution et résolution en cascade des champs hérités (ordre de résolution par
   hiérarchie, conflit de définition détecté) + mise à jour des layouts de classes
   pour l'allocation cohérente des offsets.
@@ -363,6 +365,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter la classe racine implicite `Any` pour les classes sans parent explicite.
 - [x] Ajouter la résolution de conflits de membres dupliqués entre parent et mixins.
 - [x] Ajouter `super` pour appeler une méthode de la classe parente immédiate.
+- [x] Consolider la résolution de `super` en présence de chaînes d'héritage et de
+  mixins, avec diagnostic dédié pour l'utilisation de `super` sans parent.
 - [x] Formaliser la résolution des membres hérités (champs + ordre de résolution) pour supprimer les ambiguïtés restantes.
 
 - [ ] Formaliser `Int`, `Bool`, `Char`, `String`, `IntArray`, les types fonction canoniques et
@@ -547,6 +551,11 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `objectStringArrayMkString` pour `ArrayObject[String]`.
 
 ## Journal Des Jalons
+- `local` - Consolider la résolution `super` en présence de chaînes d'héritage,
+  de mixins et d'erreur dédiée pour `super` sans parent explicite.
+  - Tests: `test_inheritance_super_chain.nabla`,
+    `test_inheritance_super_with_mixin.nabla`,
+    `test_error_super_without_parent.nabla`.
 - `local` - Formaliser la résolution des membres hérités (champs + méthode) en
   présence de `extends` + `with`, détecter les conflits de champs translatifs et
   construire les layouts hiérarchiques pour les allocations de champ.
