@@ -224,38 +224,29 @@ def boolArraySet(values: BoolArray, index: Int, value: Bool): Unit = {
     values.set(index, value)
 }
 
-def boolArrayBase(values: BoolArray): ArrayBase[Bool, BoolArray] = {
-    new ArrayBase[Bool, BoolArray](
-        values,
-        boolArrayLength,
-        boolArrayGet,
-        boolArraySet
-    )
-}
-
 class ArrayBool(values: BoolArray) {
     def length(): Int = {
-        boolArrayBase(values).length()
+        boolArrayLength(values)
     }
 
     def size(): Int = {
-        boolArrayBase(values).size()
+        arrayBaseSize[Bool, BoolArray](values, boolArrayLength)
     }
 
     def isEmpty(): Bool = {
-        boolArrayBase(values).isEmpty()
+        arrayBaseIsEmpty[Bool, BoolArray](values, boolArrayLength)
     }
 
     def nonEmpty(): Bool = {
-        boolArrayBase(values).nonEmpty()
+        arrayBaseNonEmpty[Bool, BoolArray](values, boolArrayLength)
     }
 
     def get(index: Int): Bool = {
-        boolArrayBase(values).get(index)
+        arrayBaseGet[Bool, BoolArray](values, index, boolArrayGet)
     }
 
     def set(index: Int, value: Bool): Unit = {
-        boolArrayBase(values).set(index, value)
+        arrayBaseSet[Bool, BoolArray](values, index, value, boolArraySet)
     }
 
     def countTrue(): Int = {
@@ -303,15 +294,15 @@ class ArrayBool(values: BoolArray) {
     }
 
     def fold(initial: Bool, combine: (Bool, Bool) => Bool): Bool = {
-        boolArrayBase(values).fold(initial, combine)
+        arrayBaseFold[Bool, Bool, BoolArray](values, boolArrayLength, boolArrayGet, initial, combine)
     }
 
     def foreach(f: (Bool) => Unit): Unit = {
-        boolArrayBase(values).foreach(f)
+        arrayBaseForeach[Bool, BoolArray](values, boolArrayLength, boolArrayGet, f)
     }
 
     def raw(): BoolArray = {
-        boolArrayBase(values).raw()
+        arrayBaseRaw[Bool, BoolArray](values)
     }
 }
 

@@ -74,42 +74,33 @@ def objectArraySet[T](xs: ObjectArray[T], index: Int, value: T): Unit = {
     xs.set(index, value)
 }
 
-def objectArrayBase[T](values: ObjectArray[T]): ArrayBase[T, ObjectArray[T]] = {
-    new ArrayBase[T, ObjectArray[T]](
-        values,
-        objectArrayLength[T],
-        objectArrayGet[T],
-        objectArraySet[T]
-    )
-}
-
 def objectStringArrayMkString[T](xs: ArrayObject[String], separator: String): String = {
     objectArrayMkString(xs, separator)
 }
 
 class ArrayObject[T](values: ObjectArray[T]) {
     def length(): Int = {
-        objectArrayBase(values).length()
+        objectArrayLength(values)
     }
 
     def size(): Int = {
-        objectArrayBase(values).size()
+        arrayBaseSize[T, ObjectArray[T]](values, objectArrayLength[T])
     }
 
     def isEmpty(): Bool = {
-        objectArrayBase(values).isEmpty()
+        arrayBaseIsEmpty[T, ObjectArray[T]](values, objectArrayLength[T])
     }
 
     def nonEmpty(): Bool = {
-        objectArrayBase(values).nonEmpty()
+        arrayBaseNonEmpty[T, ObjectArray[T]](values, objectArrayLength[T])
     }
 
     def get(index: Int): T = {
-        objectArrayBase(values).get(index)
+        arrayBaseGet[T, ObjectArray[T]](values, index, objectArrayGet[T])
     }
 
     def set(index: Int, value: T): Unit = {
-        objectArrayBase(values).set(index, value)
+        arrayBaseSet[T, ObjectArray[T]](values, index, value, objectArraySet[T])
     }
 
     def shuffle(state: RandomState): ArrayObject[T] = {
@@ -181,7 +172,7 @@ class ArrayObject[T](values: ObjectArray[T]) {
     }
 
     def fold[U](initial: U, combine: (U, T) => U): U = {
-        objectArrayBase(values).fold[U](initial, combine)
+        arrayBaseFold[T, U, ObjectArray[T]](values, objectArrayLength[T], objectArrayGet[T], initial, combine)
     }
 
     def flatMap[U](transform: (T) => ArrayObject[U]): ArrayObject[U] = {
@@ -209,10 +200,10 @@ class ArrayObject[T](values: ObjectArray[T]) {
     }
 
     def foreach(f: (T) => Unit): Unit = {
-        objectArrayBase(values).foreach(f)
+        arrayBaseForeach[T, ObjectArray[T]](values, objectArrayLength[T], objectArrayGet[T], f)
     }
 
     def raw(): ObjectArray[T] = {
-        objectArrayBase(values).raw()
+        arrayBaseRaw[T, ObjectArray[T]](values)
     }
 }

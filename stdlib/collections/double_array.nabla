@@ -160,38 +160,29 @@ def doubleArraySet(values: DoubleArray, index: Int, value: Double): Unit = {
     values.set(index, value)
 }
 
-def doubleArrayBase(values: DoubleArray): ArrayBase[Double, DoubleArray] = {
-    new ArrayBase[Double, DoubleArray](
-        values,
-        doubleArrayLength,
-        doubleArrayGet,
-        doubleArraySet
-    )
-}
-
 class ArrayDouble(values: DoubleArray) {
     def length(): Int = {
-        doubleArrayBase(values).length()
+        doubleArrayLength(values)
     }
 
     def size(): Int = {
-        doubleArrayBase(values).size()
+        arrayBaseSize[Double, DoubleArray](values, doubleArrayLength)
     }
 
     def isEmpty(): Bool = {
-        doubleArrayBase(values).isEmpty()
+        arrayBaseIsEmpty[Double, DoubleArray](values, doubleArrayLength)
     }
 
     def nonEmpty(): Bool = {
-        doubleArrayBase(values).nonEmpty()
+        arrayBaseNonEmpty[Double, DoubleArray](values, doubleArrayLength)
     }
 
     def get(index: Int): Double = {
-        doubleArrayBase(values).get(index)
+        arrayBaseGet[Double, DoubleArray](values, index, doubleArrayGet)
     }
 
     def set(index: Int, value: Double): Unit = {
-        doubleArrayBase(values).set(index, value)
+        arrayBaseSet[Double, DoubleArray](values, index, value, doubleArraySet)
     }
 
     def map(f: (Double) => Double): ArrayDouble = {
@@ -223,15 +214,15 @@ class ArrayDouble(values: DoubleArray) {
     }
 
     def fold(initial: Double, combine: (Double, Double) => Double): Double = {
-        doubleArrayBase(values).fold(initial, combine)
+        arrayBaseFold[Double, Double, DoubleArray](values, doubleArrayLength, doubleArrayGet, initial, combine)
     }
 
     def foreach(f: (Double) => Unit): Unit = {
-        doubleArrayBase(values).foreach(f)
+        arrayBaseForeach[Double, DoubleArray](values, doubleArrayLength, doubleArrayGet, f)
     }
 
     def raw(): DoubleArray = {
-        doubleArrayBase(values).raw()
+        arrayBaseRaw[Double, DoubleArray](values)
     }
 }
 

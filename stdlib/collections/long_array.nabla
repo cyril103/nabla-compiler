@@ -184,38 +184,29 @@ def longArraySet(values: LongArray, index: Int, value: Long): Unit = {
     values.set(index, value)
 }
 
-def longArrayBase(values: LongArray): ArrayBase[Long, LongArray] = {
-    new ArrayBase[Long, LongArray](
-        values,
-        longArrayLength,
-        longArrayGet,
-        longArraySet
-    )
-}
-
 class ArrayLong(values: LongArray) {
     def length(): Int = {
-        longArrayBase(values).length()
+        longArrayLength(values)
     }
 
     def size(): Int = {
-        longArrayBase(values).size()
+        arrayBaseSize[Long, LongArray](values, longArrayLength)
     }
 
     def isEmpty(): Bool = {
-        longArrayBase(values).isEmpty()
+        arrayBaseIsEmpty[Long, LongArray](values, longArrayLength)
     }
 
     def nonEmpty(): Bool = {
-        longArrayBase(values).nonEmpty()
+        arrayBaseNonEmpty[Long, LongArray](values, longArrayLength)
     }
 
     def get(index: Int): Long = {
-        longArrayBase(values).get(index)
+        arrayBaseGet[Long, LongArray](values, index, longArrayGet)
     }
 
     def set(index: Int, value: Long): Unit = {
-        longArrayBase(values).set(index, value)
+        arrayBaseSet[Long, LongArray](values, index, value, longArraySet)
     }
 
     def sum(): Long = {
@@ -255,15 +246,15 @@ class ArrayLong(values: LongArray) {
     }
 
     def fold(initial: Long, combine: (Long, Long) => Long): Long = {
-        longArrayBase(values).fold(initial, combine)
+        arrayBaseFold[Long, Long, LongArray](values, longArrayLength, longArrayGet, initial, combine)
     }
 
     def foreach(f: (Long) => Unit): Unit = {
-        longArrayBase(values).foreach(f)
+        arrayBaseForeach[Long, LongArray](values, longArrayLength, longArrayGet, f)
     }
 
     def raw(): LongArray = {
-        longArrayBase(values).raw()
+        arrayBaseRaw[Long, LongArray](values)
     }
 }
 

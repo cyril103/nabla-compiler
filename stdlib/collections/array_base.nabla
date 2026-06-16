@@ -50,3 +50,45 @@ class ArrayBase[Elem, Raw](
         accumulator
     }
 }
+
+def arrayBaseSize[Elem, Raw](values: Raw, lengthFn: (Raw) => Int): Int = {
+    lengthFn(values)
+}
+
+def arrayBaseIsEmpty[Elem, Raw](values: Raw, lengthFn: (Raw) => Int): Bool = {
+    lengthFn(values) == 0
+}
+
+def arrayBaseNonEmpty[Elem, Raw](values: Raw, lengthFn: (Raw) => Int): Bool = {
+    lengthFn(values) != 0
+}
+
+def arrayBaseGet[Elem, Raw](values: Raw, index: Int, getFn: (Raw, Int) => Elem): Elem = {
+    getFn(values, index)
+}
+
+def arrayBaseSet[Elem, Raw](values: Raw, index: Int, value: Elem, setFn: (Raw, Int, Elem) => Unit): Unit = {
+    setFn(values, index, value)
+}
+
+def arrayBaseRaw[Elem, Raw](values: Raw): Raw = {
+    values
+}
+
+def arrayBaseForeach[Elem, Raw](values: Raw, lengthFn: (Raw) => Int, getFn: (Raw, Int) => Elem, f: (Elem) => Unit): Unit = {
+    var index = 0
+    while (index < lengthFn(values)) {
+        f(getFn(values, index))
+        index = index + 1
+    }
+}
+
+def arrayBaseFold[Elem, State, Raw](values: Raw, lengthFn: (Raw) => Int, getFn: (Raw, Int) => Elem, initial: State, combine: (State, Elem) => State): State = {
+    var index = 0
+    var accumulator = initial
+    while (index < lengthFn(values)) {
+        accumulator = combine(accumulator, getFn(values, index))
+        index = index + 1
+    }
+    accumulator
+}

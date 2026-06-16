@@ -160,38 +160,29 @@ def floatArraySet(values: FloatArray, index: Int, value: Float): Unit = {
     values.set(index, value)
 }
 
-def floatArrayBase(values: FloatArray): ArrayBase[Float, FloatArray] = {
-    new ArrayBase[Float, FloatArray](
-        values,
-        floatArrayLength,
-        floatArrayGet,
-        floatArraySet
-    )
-}
-
 class ArrayFloat(values: FloatArray) {
     def length(): Int = {
-        floatArrayBase(values).length()
+        floatArrayLength(values)
     }
 
     def size(): Int = {
-        floatArrayBase(values).size()
+        arrayBaseSize[Float, FloatArray](values, floatArrayLength)
     }
 
     def isEmpty(): Bool = {
-        floatArrayBase(values).isEmpty()
+        arrayBaseIsEmpty[Float, FloatArray](values, floatArrayLength)
     }
 
     def nonEmpty(): Bool = {
-        floatArrayBase(values).nonEmpty()
+        arrayBaseNonEmpty[Float, FloatArray](values, floatArrayLength)
     }
 
     def get(index: Int): Float = {
-        floatArrayBase(values).get(index)
+        arrayBaseGet[Float, FloatArray](values, index, floatArrayGet)
     }
 
     def set(index: Int, value: Float): Unit = {
-        floatArrayBase(values).set(index, value)
+        arrayBaseSet[Float, FloatArray](values, index, value, floatArraySet)
     }
 
     def map(f: (Float) => Float): ArrayFloat = {
@@ -223,15 +214,15 @@ class ArrayFloat(values: FloatArray) {
     }
 
     def fold(initial: Float, combine: (Float, Float) => Float): Float = {
-        floatArrayBase(values).fold(initial, combine)
+        arrayBaseFold[Float, Float, FloatArray](values, floatArrayLength, floatArrayGet, initial, combine)
     }
 
     def foreach(f: (Float) => Unit): Unit = {
-        floatArrayBase(values).foreach(f)
+        arrayBaseForeach[Float, FloatArray](values, floatArrayLength, floatArrayGet, f)
     }
 
     def raw(): FloatArray = {
-        floatArrayBase(values).raw()
+        arrayBaseRaw[Float, FloatArray](values)
     }
 }
 
