@@ -1,0 +1,16 @@
+class Base(name: String, age: Int) {
+    def description(): String = {
+        name
+    }
+}
+
+class Student(score: Int) extends Base(name, age) {
+    def score(): Int = {
+        score
+    }
+}
+
+
+def main(): Int = {
+    (new Student("Ada", 19, 100)).score()
+}

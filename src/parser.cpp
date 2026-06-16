@@ -179,29 +179,17 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
     bool hasExplicitParent = false;
     std::vector<std::string> parentConstructorArguments;
     bool hasExplicitParentConstructorArguments = false;
-    if (peek().type == TokenType::KW_EXTENDS) {
-        hasExplicitParent = true;
-        consume(TokenType::KW_EXTENDS, "");
-        auto [baseParentType, baseParentTypeLocation] = parseType("Type de parent attendu");
-        (void) baseParentTypeLocation;
-        context.classes[className].parentTypes.push_back(baseParentType);
-        if (peek().type == TokenType::COMMA) {
-            throw CompilerError(
-                ErrorKind::Parser, peek().location,
-                "syntaxe d'héritage multiple supprimée: utilisez 'with' pour les mixins");
-        }
-        while (peek().type == TokenType::KW_WITH) {
-            consume(TokenType::KW_WITH, "");
-            auto [mixinType, mixinTypeLocation] = parseType("Type de mixin attendu");
-            (void) mixinTypeLocation;
-            context.classes[className].parentTypes.push_back(mixinType);
-        }
-    }
+    bool consumedHeaderList = false;
+    bool headerListIsTyped = false;
 
-    context.classes[className].hasExplicitParent = hasExplicitParent;
-    if (!hasExplicitParent && className != "Any") {
-        context.classes[className].parentTypes.push_back("Any");
-    }
+    auto isTypedFieldHeader = [&]() -> bool {
+        if (peek().type != TokenType::LPAREN) return false;
+        if (index + 1 >= tokens.size()) return false;
+        if (tokens[index + 1].type == TokenType::RPAREN) return true;
+        return tokens[index + 1].type == TokenType::IDENTIFIER &&
+               index + 2 < tokens.size() &&
+               tokens[index + 2].type == TokenType::COLON;
+    };
 
     auto parseClassFieldList = [&](int& offset) {
         consume(TokenType::LPAREN, "");
@@ -227,8 +215,37 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
         consume(TokenType::RPAREN, "");
     };
 
-    bool consumedHeaderList = false;
-    bool headerListIsTyped = false;
+    if (isTypedFieldHeader()) {
+        int offset = 8;
+        parseClassFieldList(offset);
+        consumedHeaderList = true;
+        headerListIsTyped = true;
+    }
+
+    if (peek().type == TokenType::KW_EXTENDS) {
+        hasExplicitParent = true;
+        consume(TokenType::KW_EXTENDS, "");
+        auto [baseParentType, baseParentTypeLocation] = parseType("Type de parent attendu");
+        (void) baseParentTypeLocation;
+        context.classes[className].parentTypes.push_back(baseParentType);
+        if (peek().type == TokenType::COMMA) {
+            throw CompilerError(
+                ErrorKind::Parser, peek().location,
+                "syntaxe d'héritage multiple supprimée: utilisez 'with' pour les mixins");
+        }
+        while (peek().type == TokenType::KW_WITH) {
+            consume(TokenType::KW_WITH, "");
+            auto [mixinType, mixinTypeLocation] = parseType("Type de mixin attendu");
+            (void) mixinTypeLocation;
+            context.classes[className].parentTypes.push_back(mixinType);
+        }
+    }
+
+    context.classes[className].hasExplicitParent = hasExplicitParent;
+    if (!hasExplicitParent && className != "Any") {
+        context.classes[className].parentTypes.push_back("Any");
+    }
+
     if (hasExplicitParent && peek().type == TokenType::LPAREN) {
         consume(TokenType::LPAREN, "");
         bool sawTypeAnnotation = false;
