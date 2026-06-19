@@ -206,6 +206,9 @@ examples: nablac
 
 examples-full: examples
 
+tooling-tests: nablac
+	@tests/test_missing_external_tools.sh
+
 stdlib-docs:
 	tools/generate_stdlib_docs.py
 
@@ -217,4 +220,4 @@ debug: nablac
 clean:
 	rm -rf $(BUILD_DIR) nablac
 
-.PHONY: all clean test debug all-tests examples examples-quick examples-full stdlib-docs
+.PHONY: all clean test debug all-tests examples examples-quick examples-full tooling-tests stdlib-docs

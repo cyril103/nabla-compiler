@@ -86,6 +86,8 @@ Le projet se compile avec GNU C++17 et le `Makefile` expose des cibles pratiques
 - `make` : compile le compilateur `nablac`
 - `make test` : exécute `nablac` sur la source par défaut (`tests/test_import.nabla`), affiche le code ASM généré et lance ensuite le binaire produit
 - `make debug` : exécute `nablac --keep-asm` sur la source par défaut, conserve le fichier assembleur `<basename>_tmp.asm`, puis lance le binaire
+- `make all-tests` : exécute la suite de tests langage complète
+- `make tooling-tests` : vérifie les diagnostics d'outillage du compilateur, par exemple `nasm` absent du `PATH`
 - `make clean` : supprime `nablac` et le binaire généré par le test
 
 Le compilateur peut aussi afficher sa représentation intermédiaire textuelle :

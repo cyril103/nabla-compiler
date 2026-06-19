@@ -6,6 +6,8 @@ pour reprendre facilement apres une pause.
 ## Etat Actuel
 
 - Backend natif Linux x86_64 via assembleur, avec backend IR utilise par defaut.
+  Le compilateur signale explicitement une commande externe introuvable comme
+  `nasm` ou `ld`.
 - Typage statique avec fonctions, methodes, classes, generiques simples et lambdas.
 - Controle de flux : `if` expression, `else if`, `match`, `while`, `for`.
 - Support de l'héritage objet avec `extends` + `with` (mixins), classe racine

@@ -155,7 +155,8 @@ Le pipeline implemente actuellement :
   `Double`) ;
 - operateur reste de division `%` pour `Int` et `Long`;
 - invocation NASM/ld via `fork` + `execvp` (sans `std::system`) pour limiter
-  l'injection shell,
+  l'injection shell, avec diagnostic explicite quand une commande externe comme
+  `nasm` ou `ld` est introuvable,
   et vérifications runtime renforcées pour `parseInt`/division par zéro.
 - collection native `IntArray` avec `length`, `get` et `set`;
 - collection native `LongArray` avec `length`, `get` et `set`;
@@ -636,6 +637,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter un support Vim minimal pour `*.nabla`.
 - [x] Ajouter des tests Project Euler progressifs pour guider les extensions du
   langage.
+- [x] Ajouter un test d'outillage pour vérifier le diagnostic quand une commande
+  externe requise (`nasm`) est absente du `PATH`.
 - [x] Ajouter le support `write` / `append` multi-mots dans
   `examples/command_shell.nabla`.
 - [x] Exposer `objectArrayMkString` et l'alias compat
@@ -644,6 +647,12 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Améliorer le diagnostic d'outillage externe : si `execvp` ne trouve
+  pas `nasm` ou `ld`, le compilateur affiche maintenant la commande manquante et
+  `make tooling-tests` couvre le cas `nasm` absent du `PATH`.
+  - Fichiers / tests associés: `src/main.cpp`, `Makefile`,
+    `.github/workflows/ci.yml`, `tests/test_missing_external_tools.sh`,
+    `README.md`, `docs/roadmap.md`, `AGENTS.md`.
 - `local` - Ajouter un garde-fou CI pour la documentation générée de la stdlib :
   `make stdlib-docs` est exécuté puis `git diff --exit-code docs/stdlib`
   échoue si la référence HTML n'est pas committée.

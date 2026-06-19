@@ -20,6 +20,9 @@ jobs:
       - name: Run test suite
         run: make all-tests
 
+      - name: Run compiler tooling tests
+        run: make tooling-tests
+
       - name: Check generated stdlib docs
         run: |
           make stdlib-docs

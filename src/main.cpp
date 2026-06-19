@@ -8,6 +8,8 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <cerrno>
+#include <cstring>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <string>
@@ -44,6 +46,9 @@ int runCommand(const std::vector<std::string>& args) {
 
     if (pid == 0) {
         execvp(cArgs[0], cArgs.data());
+        std::string message = "Erreur: commande externe introuvable: " + args[0] +
+            " (" + std::strerror(errno) + ")\n";
+        write(STDERR_FILENO, message.c_str(), message.size());
         _exit(127);
     }
 
