@@ -242,8 +242,8 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
     }
 
     context.classes[className].hasExplicitParent = hasExplicitParent;
-    if (!hasExplicitParent && className != "Any") {
-        context.classes[className].parentTypes.push_back("Any");
+    if (!hasExplicitParent && className != "Any" && className != "AnyVal" && className != "AnyRef") {
+        context.classes[className].parentTypes.push_back("AnyRef");
     }
 
     if (hasExplicitParent && peek().type == TokenType::LPAREN) {

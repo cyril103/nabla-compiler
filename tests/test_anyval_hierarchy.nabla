@@ -1,0 +1,21 @@
+def acceptsAny(x: Any): Int = {
+    1
+}
+
+def acceptsAnyVal(x: AnyVal): Int = {
+    2
+}
+
+def main(): Int = {
+    acceptsAny(42)
+    acceptsAny(123L)
+    acceptsAny(1.5f)
+    acceptsAny(2.5)
+    acceptsAny(true)
+    acceptsAnyVal(42)
+    acceptsAnyVal(123L)
+    acceptsAnyVal(1.5f)
+    acceptsAnyVal(2.5)
+    acceptsAnyVal(false)
+    0
+}

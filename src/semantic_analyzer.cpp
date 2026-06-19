@@ -24,44 +24,6 @@ std::string methodTypeWithSubstitution(
     return substituteType(substituteType(type, methodSubstitution), classSubstitution);
 }
 
-bool isSameOrInheritedType(
-    const CompilerContext& context,
-    const std::string& actualType,
-    const std::string& expectedType,
-    std::set<std::string>& visiting) {
-    if (actualType == expectedType) return true;
-
-    const std::string actualBaseName = genericBaseName(actualType);
-    if (visiting.count(actualBaseName)) return false;
-
-    auto classIt = context.classes.find(actualBaseName);
-    if (classIt == context.classes.end()) return false;
-
-    std::map<std::string, std::string> classSubstitution;
-    if (auto genericSubstitution = genericSubstitutionFor(context, actualType)) {
-        classSubstitution = *genericSubstitution;
-    }
-
-    visiting.insert(actualBaseName);
-    for (const auto& parentType : classIt->second.parentTypes) {
-        const std::string concreteParentType = substituteType(parentType, classSubstitution);
-        if (isSameOrInheritedType(context, concreteParentType, expectedType, visiting)) {
-            visiting.erase(actualBaseName);
-            return true;
-        }
-    }
-    visiting.erase(actualBaseName);
-    return false;
-}
-
-bool isSameOrInheritedType(
-    const CompilerContext& context,
-    const std::string& actualType,
-    const std::string& expectedType) {
-    std::set<std::string> visiting;
-    return isSameOrInheritedType(context, actualType, expectedType, visiting);
-}
-
 bool overrideSignatureMatches(
     const CompilerContext& context,
     const CompilerContext::FunctionSignature& overridingSignature,
@@ -94,7 +56,7 @@ bool overrideSignatureMatches(
         overridingSignature.returnType, {}, overridingMethodSubstitution);
     const std::string inheritedReturnType = methodTypeWithSubstitution(
         inheritedSignature.returnType, inheritedClassSubstitution, {});
-    return isSameOrInheritedType(context, overridingReturnType, inheritedReturnType);
+    return isTypeAssignable(context, overridingReturnType, inheritedReturnType);
 }
 
 void collectVisibleMethodsInHierarchy(
@@ -343,13 +305,27 @@ void SemanticAnalyzer::validateDeclaredTypes() {
 }
 
 void SemanticAnalyzer::ensureAnyRootType() {
+    auto builtInLocation = SourceLocation{"<built-in>", 1, 1};
     if (context.classes.count("Any") == 0) {
         context.classes["Any"] = {};
-        context.classes["Any"].location = {"<built-in>", 1, 1};
     }
+    context.classes["Any"].location = builtInLocation;
+
+    if (context.classes.count("AnyVal") == 0) {
+        context.classes["AnyVal"] = {};
+    }
+    auto& anyValClass = context.classes["AnyVal"];
+    anyValClass.location = builtInLocation;
+    anyValClass.parentTypes = {"Any"};
+
+    if (context.classes.count("AnyRef") == 0) {
+        context.classes["AnyRef"] = {};
+    }
+    auto& anyRefClass = context.classes["AnyRef"];
+    anyRefClass.location = builtInLocation;
+    anyRefClass.parentTypes = {"Any"};
 
     auto& anyClass = context.classes["Any"];
-    auto builtInLocation = SourceLocation{"<built-in>", 1, 1};
 
     if (!anyClass.methods.count("toString")) {
         anyClass.methods["toString"] = {
@@ -437,7 +413,8 @@ void SemanticAnalyzer::validateInheritanceCycles() const {
 bool SemanticAnalyzer::isKnownType(const std::string& type) const {
     if (type == "Int" || type == "Long" || type == "Float" || type == "Double" ||
         type == "Bool" || type == "Char" || type == "String" || type == "Unit" ||
-        type == "Any" || type == "IntArray" || type == "LongArray" || type == "FloatArray" ||
+        type == "Any" || type == "AnyVal" || type == "AnyRef" ||
+        type == "IntArray" || type == "LongArray" || type == "FloatArray" ||
         type == "DoubleArray" || type == "BoolArray" || isFunctionTypeName(type)) {
         return true;
     }

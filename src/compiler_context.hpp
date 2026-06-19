@@ -130,9 +130,30 @@ inline const std::vector<StdlibFunctionAlias>& stdlibFunctionAliases() {
     return aliases;
 }
 
+inline std::optional<std::pair<std::string, std::vector<std::string>>> parameterizedTypeFromName(
+    const std::string& type);
+inline bool isFunctionTypeName(const std::string& type);
+
 inline bool isPrimitiveArrayElementType(const std::string& type) {
     return type == "Int" || type == "Long" || type == "Float" ||
            type == "Double" || type == "Bool";
+}
+
+inline bool isBuiltinValueType(const std::string& type) {
+    return type == "Int" || type == "Long" || type == "Float" ||
+           type == "Double" || type == "Bool" || type == "Char" ||
+           type == "Unit";
+}
+
+inline bool isBuiltinReferenceType(const std::string& type) {
+    if (type == "String" || type == "IntArray" || type == "LongArray" ||
+        type == "FloatArray" || type == "DoubleArray" || type == "BoolArray" ||
+        isFunctionTypeName(type)) {
+        return true;
+    }
+    auto parameterizedType = parameterizedTypeFromName(type);
+    return parameterizedType && parameterizedType->first == "ObjectArray" &&
+           parameterizedType->second.size() == 1;
 }
 
 inline std::optional<std::string> primitiveArrayAliasPrefix(const std::string& type) {
@@ -572,6 +593,47 @@ inline std::string substituteType(
     }
 
     return type;
+}
+
+inline bool isTypeAssignable(
+    const CompilerContext& context,
+    const std::string& actualType,
+    const std::string& expectedType,
+    std::set<std::string>& visiting) {
+    if (actualType == expectedType) return true;
+    if (expectedType == "Any") return true;
+    if (expectedType == "AnyVal") return isBuiltinValueType(actualType);
+    if (expectedType == "AnyRef" && isBuiltinReferenceType(actualType)) return true;
+
+    const std::string actualBaseName = genericBaseName(actualType);
+    if (visiting.count(actualBaseName)) return false;
+
+    auto classIt = context.classes.find(actualBaseName);
+    if (classIt == context.classes.end()) return false;
+
+    std::map<std::string, std::string> classSubstitution;
+    if (auto genericSubstitution = genericSubstitutionFor(context, actualType)) {
+        classSubstitution = *genericSubstitution;
+    }
+
+    visiting.insert(actualBaseName);
+    for (const auto& parentType : classIt->second.parentTypes) {
+        const std::string concreteParentType = substituteType(parentType, classSubstitution);
+        if (isTypeAssignable(context, concreteParentType, expectedType, visiting)) {
+            visiting.erase(actualBaseName);
+            return true;
+        }
+    }
+    visiting.erase(actualBaseName);
+    return false;
+}
+
+inline bool isTypeAssignable(
+    const CompilerContext& context,
+    const std::string& actualType,
+    const std::string& expectedType) {
+    std::set<std::string> visiting;
+    return isTypeAssignable(context, actualType, expectedType, visiting);
 }
 
 inline void collectClassMethodLookupCandidates(

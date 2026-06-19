@@ -1,0 +1,19 @@
+class Person(name: String) {
+}
+
+def acceptsAny(x: Any): Int = {
+    1
+}
+
+def acceptsAnyRef(x: AnyRef): Int = {
+    2
+}
+
+def main(): Int = {
+    val person = new Person("Ada")
+    acceptsAny("hello")
+    acceptsAny(person)
+    acceptsAnyRef("hello")
+    acceptsAnyRef(person)
+    0
+}

@@ -67,6 +67,17 @@ Types de base disponibles :
 - `String`
 - `Unit`
 
+Types racines Scala-like :
+
+- `Any` est le supertype de toutes les valeurs Nabla.
+- `AnyVal` est le supertype des valeurs primitives builtin : `Unit`, `Bool`,
+  `Int`, `Long`, `Float`, `Double` et `Char`.
+- `AnyRef` est le supertype des references heap : `String`, tableaux,
+  fonctions/closures et classes utilisateur.
+
+`AnyVal` et `AnyRef` sont des types builtin abstraits. Ils structurent le
+systeme de types mais ne sont pas des classes utilisateur instanciables.
+
 Collections et types standard :
 
 - `IntArray`, `LongArray`, `FloatArray`, `DoubleArray`, `BoolArray`
@@ -290,10 +301,22 @@ class Child extends Base() {
 }
 ```
 
-Quand une classe n'indique pas de parent, une classe racine implicite `Any` est
-ajoutee pour uniformiser le modele objet. `Any` apporte des methodes de base
-qui sont disponible sur toute classe : `toString(): String` et `hashCode(): Int`.
-Ces méthodes peuvent etre redefinies dans les sous-classes.
+Quand une classe n'indique pas de parent, la racine implicite ajoutee est
+`AnyRef`. `AnyRef` herite de `Any`, et `AnyVal` herite aussi de `Any` pour les
+types primitifs builtin. La hierarchie de surface est donc :
+
+```text
+Any
+├── AnyVal  // Unit, Bool, Int, Long, Float, Double, Char
+└── AnyRef  // String, tableaux, fonctions/closures, classes utilisateur
+```
+
+`Any` apporte des methodes de base disponibles sur toute classe reference :
+`toString(): String` et `hashCode(): Int`. Ces methodes peuvent etre redefinies
+dans les sous-classes. Les primitives disposent aussi de chemins specialises
+comme `Int.toString()` ou `Double.toString()` ; une valeur primitive vue comme
+`Any`/`AnyVal` reste une relation de type et pourra necessiter du boxing dans les
+chemins runtime plus generiques.
 
 ## Generiques
 

@@ -1,0 +1,8 @@
+def acceptsAnyRef(x: AnyRef): Int = {
+    1
+}
+
+def main(): Int = {
+    acceptsAnyRef(42)
+    0
+}

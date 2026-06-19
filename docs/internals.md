@@ -40,6 +40,26 @@ Nabla utilise une représentation uniforme par slots de 64 bits.
 backend et le runtime assembleur : tag, valeurs booleennes, zero tagge, slot nul,
 taille de slot et bornes des entiers immediats.
 
+### Hiérarchie de types racine
+
+Le type system expose une hiérarchie Scala-like :
+
+```text
+Any
+├── AnyVal
+└── AnyRef
+```
+
+`AnyVal` et `AnyRef` sont des types builtin abstraits. Les primitives `Unit`,
+`Bool`, `Int`, `Long`, `Float`, `Double` et `Char` sont assignables a `AnyVal`
+et `Any`. Les références heap (`String`, tableaux, fonctions/closures et classes
+utilisateur) sont assignables a `AnyRef` et `Any`. Une classe utilisateur sans
+parent explicite hérite implicitement de `AnyRef`, pas directement de `Any`.
+
+Cette hiérarchie est une convention de type, pas une promesse de représentation
+objet uniforme : les chemins spécialisés peuvent conserver des valeurs
+immédiates ou brutes.
+
 ### Valeurs taggées
 
 `Int`, `Long` et `Bool` utilisent le tagging par bit de poids faible :
@@ -66,7 +86,10 @@ booléens C++ implicites.
 
 `Float` et `Double` sont portés comme valeurs numériques brutes dans les chemins
 IR/backend qui les manipulent. Les tableaux natifs de flottants utilisent des
-slots initialisés à zéro IEEE, pas au zéro taggé.
+slots initialisés à zéro IEEE, pas au zéro taggé. Quand ces primitives doivent
+etre transportees via une surface pleinement generique (`Any`/`AnyVal` stocke ou
+inspecte dynamiquement), le modele cible est un boxing heap explicite ; ce
+boxing n'est pas encore generalise dans tous les chemins runtime.
 
 ### Objets heap
 

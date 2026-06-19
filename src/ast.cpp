@@ -27,7 +27,8 @@ bool isBoolBinaryMethod(const std::string& methodName) {
 
 bool isKnownBuiltinType(const std::string& type) {
     return type == "Int" || type == "Long" || type == "Float" || type == "Double" || type == "Bool" ||
-           type == "Char" || type == "String" || type == "Unit" || type == "IntArray" || type == "LongArray" ||
+           type == "Char" || type == "String" || type == "Unit" || type == "Any" ||
+           type == "AnyVal" || type == "AnyRef" || type == "IntArray" || type == "LongArray" ||
            type == "FloatArray" || type == "DoubleArray" || type == "BoolArray";
 }
 
@@ -124,6 +125,7 @@ std::vector<std::string> orderedTypeArguments(
 }
 
 void validateArguments(
+    const CompilerContext& context,
     const std::string& callableName,
     const std::vector<std::unique_ptr<ASTNode>>& arguments,
     const std::vector<CompilerContext::ParameterInfo>& parameters,
@@ -134,7 +136,7 @@ void validateArguments(
             " argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
     }
     for (size_t i = 0; i < arguments.size(); ++i) {
-        if (arguments[i]->getType() != parameters[i].type) {
+        if (!isTypeAssignable(context, arguments[i]->getType(), parameters[i].type)) {
             throw CompilerError(ErrorKind::Semantic, arguments[i]->getLocation(),
                 callableName + ", paramètre '" + parameters[i].name + "': type '" +
                 parameters[i].type + "' attendu, '" + arguments[i]->getType() + "' reçu");
@@ -869,7 +871,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         if (!typeArguments.empty()) {
             semanticError("la méthode '" + receiverType + "." + methodName + "' n'accepte pas d'arguments de type");
         }
-        validateArguments(receiverType + "." + methodName, arguments, signature->parameters, location);
+        validateArguments(context, receiverType + "." + methodName, arguments, signature->parameters, location);
         resolvedType = signature->returnType;
         resolvedTypeArguments.clear();
         resolvedOwnerType.clear();
@@ -945,7 +947,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         resolvedTypeArguments = orderedTypeArguments(methodSignature.typeParameters, *methodSubstitution);
     }
     auto parameters = substituteParameters(methodSignature.parameters, substitution);
-    validateArguments(receiverType + "." + methodName, arguments, parameters, location);
+    validateArguments(context, receiverType + "." + methodName, arguments, parameters, location);
     resolvedType = substituteType(methodSignature.returnType, substitution);
     resolvedOwnerType = methodLookup.ownerClassName;
 }
@@ -1457,7 +1459,7 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
         if (!typeArguments.empty()) {
             semanticError("la fonction '" + name + "' n'accepte pas d'arguments de type");
         }
-        validateArguments(name, arguments, function->second.parameters, location);
+        validateArguments(context, name, arguments, function->second.parameters, location);
         resolvedType = function->second.returnType;
         resolvedTypeArguments.clear();
         return;
@@ -1479,7 +1481,7 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
             std::to_string(function->second.typeParameters.size()) + " argument(s) de type");
     }
     auto parameters = substituteParameters(function->second.parameters, *substitution);
-    validateArguments(name, arguments, parameters, location);
+    validateArguments(context, name, arguments, parameters, location);
     resolvedType = substituteType(function->second.returnType, *substitution);
     resolvedTypeArguments = orderedTypeArguments(function->second.typeParameters, *substitution);
 }
@@ -1959,7 +1961,7 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
     if (!knownType) {
         semanticError("type de retour inconnu '" + returnType + "' pour la fonction '" + name + "'");
     }
-    if (body && body->getType() != returnType) {
+    if (body && !isTypeAssignable(context, body->getType(), returnType)) {
         semanticError(
             "Type de retour invalide pour '" + name + "': '" + returnType +
             "' attendu, '" + body->getType() + "' reçu");
@@ -2142,7 +2144,7 @@ void AssignmentNode::validateSemantics(CompilerContext& context) {
         semanticError("affectation sur variable hors de sa portée: " + name);
     }
     targetType = symbol->second;
-    if (value->getType() != targetType) {
+    if (!isTypeAssignable(context, value->getType(), targetType)) {
         semanticError(
             "Affectation invalide pour '" + name + "': type '" + targetType +
             "' attendu, '" + value->getType() + "' reçu");

@@ -442,7 +442,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter la syntaxe `class X extends A with B` pour un parent + mixins.
 - [x] Résoudre les méthodes héritées dans la hiérarchie (`resolveClassMethodInHierarchy`).
 - [x] Valider l'existence et l'arité des parents, et détecter les cycles.
-- [x] Ajouter la classe racine implicite `Any` pour les classes sans parent explicite.
+- [x] Ajouter la hiérarchie racine `Any` / `AnyVal` / `AnyRef`, avec `AnyRef`
+  implicite pour les classes sans parent explicite.
 - [x] Ajouter la résolution de conflits de membres dupliqués entre parent et mixins.
 - [x] Ajouter `super` pour appeler une méthode de la classe parente immédiate.
 - [x] Consolider la résolution de `super` en présence de chaînes d'héritage et de

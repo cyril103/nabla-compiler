@@ -10,9 +10,10 @@ pour reprendre facilement apres une pause.
   `nasm` ou `ld`.
 - Typage statique avec fonctions, methodes, classes, generiques simples et lambdas.
 - Controle de flux : `if` expression, `else if`, `match`, `while`, `for`.
-- Support de l'héritage objet avec `extends` + `with` (mixins), classe racine
-  implicite `Any` avec `toString(): String` et `hashCode(): Int`
-  redéfinissables, détection de cycles / conflits et appel `super`.
+- Support de l'héritage objet avec `extends` + `with` (mixins), hiérarchie
+  racine `Any` / `AnyVal` / `AnyRef`, `toString(): String` et
+  `hashCode(): Int` redéfinissables sur les classes reference, détection de
+  cycles / conflits et appel `super`.
   La conversion `toString()` est désormais disponible de façon uniforme pour les
   types primitifs usuels (`Int`, `Long`, `Float`, `Double`, `Bool`, `Char`) au niveau du
   backend runtime.
