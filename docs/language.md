@@ -319,10 +319,12 @@ Any
 
 `Any` apporte des methodes de base disponibles sur toute classe reference :
 `toString(): String` et `hashCode(): Int`. Ces methodes peuvent etre redefinies
-dans les sous-classes. Les primitives disposent aussi de chemins specialises
-comme `Int.toString()` ou `Double.toString()`. Quand une primitive est passée à
-un paramètre `Any` ou `AnyVal` de fonction/méthode, le compilateur insère un
-boxing runtime minimal :
+dans les sous-classes. Les appels a `hashCode()` redispatchent vers l'override
+runtime quand la valeur est manipulée via `Any`, un type parent ou un paramètre
+générique spécialisé. Les primitives disposent aussi de chemins specialises comme
+`Int.toString()` ou `Double.toString()`. Quand une primitive est passée à un
+paramètre `Any` ou `AnyVal` de fonction/méthode, le compilateur insère un boxing
+runtime minimal :
 `value.toString()` conserve alors le rendu spécialisé (`true`, `Z`,
 `1.500000`, etc.).
 
@@ -529,7 +531,9 @@ sont specialises vers des facades primitives. Les autres types passent par
 
 Le module `collections.set` fournit une structure `Set[T]` immutable basée sur
 un tableau interne, avec déduplication par `==` et table de hachage interne
-(`hashCode()`) pour des vérifications d’appartenance rapides en moyenne.
+(`hashCode()`) pour des vérifications d’appartenance rapides en moyenne. Si une
+classe redéfinit `hashCode()`, cette méthode est utilisée même dans un
+`Set[Parent]` contenant des instances de sous-types.
 
 ```nabla
 import collections.set

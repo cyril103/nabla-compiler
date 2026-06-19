@@ -704,7 +704,7 @@ private:
 
     long long classIdFor(const std::string& className) const {
         const std::string classBaseName = genericBaseName(className);
-        long long nextClassId = 1;
+        long long nextClassId = 1000;
         for (const auto& [candidateName, _] : context.classes) {
             if (candidateName == classBaseName) return nextClassId;
             ++nextClassId;
@@ -1005,7 +1005,34 @@ private:
         } else if (className == "Any" && methodName == "toString") {
             out << "    call Any_toString\n";
         } else if (className == "Any" && methodName == "hashCode") {
-            out << "    call Any_hashCode\n";
+            const auto targets = allowDynamicDispatch
+                ? dynamicDispatchTargets(className, methodName)
+                : std::vector<DynamicDispatchTarget>{};
+            if (targets.empty()) {
+                out << "    call Any_hashCode\n";
+            } else {
+                const std::string dispatchPrefix =
+                    ".L_dispatch_" + asmSymbolPart(function.name) + "_" +
+                    asmSymbolPart(instruction.result);
+                const std::string fallbackLabel = dispatchPrefix + "_fallback";
+                const std::string doneLabel = dispatchPrefix + "_done";
+                out << "    test rdi, 1\n";
+                out << "    jnz " << fallbackLabel << "\n";
+                out << "    mov r10, [rdi]\n";
+                for (size_t i = 0; i < targets.size(); ++i) {
+                    out << "    cmp r10, " << classIdFor(targets[i].runtimeClassName) << "\n";
+                    out << "    je " << dispatchPrefix << "_" << i << "\n";
+                }
+                out << "    jmp " << fallbackLabel << "\n";
+                for (size_t i = 0; i < targets.size(); ++i) {
+                    out << dispatchPrefix << "_" << i << ":\n";
+                    out << "    call " << asmFunctionName(targets[i].targetOwnerName + "." + methodName) << "\n";
+                    out << "    jmp " << doneLabel << "\n";
+                }
+                out << fallbackLabel << ":\n";
+                out << "    call Any_hashCode\n";
+                out << doneLabel << ":\n";
+            }
         } else if (className == "Int" && methodName == "toLong") {
             out << "    mov rax, rdi\n";
         } else if (className == "String" && methodName == "length") {

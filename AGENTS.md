@@ -358,18 +358,19 @@ Limites importantes :
   d'exposer `ObjectArray[T]` / `ArrayObject[T]` dans le chemin applicatif
   principal. Les overrides utilisateur non génériques redispatchent maintenant
   via le header runtime quand une valeur est manipulée par son type parent; la
-  friction restante concerne les vtables complètes, génériques et cas avancés
-  d'égalité/hash.
+  méthode `hashCode()` redispatche aussi depuis `Any` pour stabiliser l'index
+  hashé de `Set[Parent]`. La friction restante concerne les vtables complètes,
+  génériques et cas avancés d'égalité personnalisée.
 - Le mot-clé `override` est supporté pour marquer explicitement les
   redéfinitions de méthodes héritées, et il est obligatoire quand une méthode
   redéfinit une méthode provenant d'un parent.
   Les constructeurs hérités peuvent désormais être exposés avec une signature
   typée dans `extends Parent(...)`: le préfixe reprend les champs du parent
   direct, et le suffixe déclare les champs propres de l'enfant.
-- Les collections basées sur `Any` gagneraient à mieux documenter la stratégie
-  d'égalité (`==`) + `hashCode()` dans les cas d'héritage, pour réduire
-  l'incertitude de comportement quand `Student`, `Instructor` et `Volunteer`
-  se croisent dans `Set` ou `ObjectArray`.
+- Les collections basées sur `Any` utilisent `==` pour l'égalité et
+  `hashCode()` pour l'index interne. `hashCode()` redispatche vers les overrides
+  utilisateur même quand la valeur passe par `Any`, un type parent ou un
+  paramètre générique spécialisé.
 
 ## Invariants D'Architecture
 
@@ -678,6 +679,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   statique.
 - [x] Ajouter une signature constructeur héritée typée dans `extends Parent(...)`
   pour rendre explicites les champs transmis au parent et les champs propres.
+- [x] Redispatcher `Any.hashCode()` vers les overrides utilisateur pour les
+  valeurs parent-typées ou génériques utilisées par `Set[T]`.
 - [x] Ajouter un test d'outillage pour vérifier le diagnostic quand une commande
   externe requise (`nasm`) est absente du `PATH`.
 - [x] Ajouter le support `write` / `append` multi-mots dans
@@ -688,6 +691,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Redispatcher `Any.hashCode()` vers les overrides utilisateur quand
+  une valeur est manipulée via `Any`, un type parent ou un paramètre générique
+  spécialisé, et décaler les identifiants de classes runtime hors de la plage
+  des tags boxed.
+  - Fichiers / tests associés: `src/ir_codegen.cpp`,
+    `tests/test_inheritance_set_hashcode_override.nabla`, `docs/language.md`,
+    `docs/internals.md`, `docs/roadmap.md`, `AGENTS.md`.
 - `local` - Ajouter la signature constructeur héritée typée dans
   `extends Parent(...)`: le préfixe valide les champs du parent direct et le
   suffixe devient les champs propres de la classe enfant. Migrer le workshop

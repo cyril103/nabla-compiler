@@ -140,8 +140,11 @@ Actions suggérées pour la suite :
    - Corrigé : les appels de méthodes utilisateur non génériques redispatchent
      vers l'override runtime quand la valeur est manipulée via un type parent,
      tout en gardant `super` statique.
+   - Corrigé : `Any.hashCode()` redispatche vers les overrides utilisateur, ce
+     qui stabilise l'index hashé de `Set[Parent]` avec des instances de
+     sous-types.
    - Reste à clarifier : stratégie complète de vtables, méthodes/classes
-     génériques et égalité/hash en hiérarchie plus complexe.
+     génériques et égalité personnalisée en hiérarchie plus complexe.
    - Documenter des motifs d’exemple pour utiliser ce cas facilement.
 6. Ajouter des tests “mélange” héritage + autres fonctionnalités.
    - Cas de régression couvrant `super`, champs hérités, shadowing contrôlé
