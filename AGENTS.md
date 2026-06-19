@@ -289,6 +289,8 @@ Le pipeline implemente actuellement :
 - tests de compilation et d'execution via `make all-tests`.
 - examples Project Euler 1 a 10 (`examples/euler1.nabla` ... `examples/euler10_functional.nabla`)
   comme banc progressif pour exercer le langage et la bibliotheque standard.
+- `examples/student_scores.nabla` comme exemple idiomatique vérifié pour
+  `Array[T]`, `Option[T]`, classes, lambdas et sorties console.
 
 Limites importantes :
 
@@ -642,6 +644,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter un support Vim minimal pour `*.nabla`.
 - [x] Ajouter des tests Project Euler progressifs pour guider les extensions du
   langage.
+- [x] Vérifier `examples/student_scores.nabla` avec un code de sortie et une
+  sortie console attendus.
 - [x] Ajouter un test d'outillage pour vérifier le diagnostic quand une commande
   externe requise (`nasm`) est absente du `PATH`.
 - [x] Ajouter le support `write` / `append` multi-mots dans
@@ -652,6 +656,12 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Vérifier `examples/student_scores.nabla` comme exemple public
+  idiomatique : sortie console nettoyée, code de sortie attendu et oracle
+  stdout sous `make examples`.
+  - Fichiers / tests associés: `examples/student_scores.nabla`,
+    `examples/student_scores.expected`, `examples/student_scores.stdout`,
+    `AGENTS.md`, `docs/roadmap.md`.
 - `local` - Centraliser les constantes d'encodage runtime dans
   `src/runtime_values.hpp` et les utiliser depuis le backend IR et le runtime
   assembleur pour les entiers tagges, booleens et slots nuls.

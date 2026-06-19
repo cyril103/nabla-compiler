@@ -36,6 +36,8 @@ pour reprendre facilement apres une pause.
 - Exemple principal `examples/command_shell.nabla` utilise maintenant `match`,
   les commandes fichier, et sert de vitrine pour l'ergonomie du langage,
   notamment `write` / `append` avec texte multi-mots.
+- `examples/student_scores.nabla` sert d'exemple public vérifié pour
+  `Array[T]`, `Option[T]`, classes, lambdas et sortie console.
 - Support Vim minimal disponible dans `editor/vim`.
 - Suite `make all-tests` verte au moment de cette mise a jour.
 

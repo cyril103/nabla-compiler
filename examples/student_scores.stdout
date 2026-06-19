@@ -1,0 +1,30 @@
+Nabla student score report
+passing students:
+Ada
+Cy
+Dee
+
+score bands:
+excellent
+retry
+passing
+passing
+
+index labels:
+student
+student
+student
+student
+
+class size: 
+4
+first student: 
+Ada
+total: 
+52
+passing count: 
+3
+excellent count: 
+1
+first badge: 
+honors

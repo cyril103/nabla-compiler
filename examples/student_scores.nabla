@@ -33,8 +33,7 @@ def excellent(student: Student): Bool = {
 }
 
 def printString(value: String): Unit = {
-    print(value)
-    print(" ")
+    println(value)
 }
 
 def printNames(title: String, names: ArrayObject[String]): Unit = {
