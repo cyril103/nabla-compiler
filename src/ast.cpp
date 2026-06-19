@@ -1,5 +1,6 @@
 #include "ast.hpp"
 #include "ir.hpp"
+#include "runtime_values.hpp"
 #include <algorithm>
 
 namespace {
@@ -23,6 +24,12 @@ bool isNumericType(const std::string& type) {
 
 bool isBoolBinaryMethod(const std::string& methodName) {
     return methodName == "==" || methodName == "!=";
+}
+
+std::string emitBoolConstant(IRBuilder& builder, bool value) {
+    return builder.emitConstant(
+        std::to_string(value ? RuntimeValues::kTaggedTrue : RuntimeValues::kTaggedFalse),
+        "Bool");
 }
 
 bool isKnownBuiltinType(const std::string& type) {
@@ -250,7 +257,7 @@ void BoolNode::validateSemantics(CompilerContext& context) {
 }
 
 std::string BoolNode::lowerToIR(IRBuilder& builder) const {
-    return builder.emitConstant(value ? "1" : "0", "Bool");
+    return emitBoolConstant(builder, value);
 }
 
 NotNode::NotNode(std::unique_ptr<ASTNode> expr) : expression(std::move(expr)) {}
@@ -268,7 +275,7 @@ void NotNode::validateSemantics(CompilerContext& context) {
 
 std::string NotNode::lowerToIR(IRBuilder& builder) const {
     std::string loweredExpression = expression->lowerToIR(builder);
-    std::string falseValue = builder.emitConstant("0", "Bool");
+    std::string falseValue = emitBoolConstant(builder, false);
     return builder.emitBinary("==", loweredExpression, falseValue, "Bool");
 }
 
@@ -324,7 +331,7 @@ std::string LogicalNode::lowerToIR(IRBuilder& builder) const {
         builder.emitBranchIfFalse(leftValue, skipLabel);
         builder.emitJump(rightLabel);
         builder.emitLabel(skipLabel);
-        std::string falseValue = builder.emitConstant("0", "Bool");
+        std::string falseValue = emitBoolConstant(builder, false);
         builder.emitJump(endLabel);
         builder.emitLabel(rightLabel);
         std::string rightValue = right->lowerToIR(builder);
@@ -339,7 +346,7 @@ std::string LogicalNode::lowerToIR(IRBuilder& builder) const {
     std::string rightValue = right->lowerToIR(builder);
     builder.emitJump(endLabel);
     builder.emitLabel(skipLabel);
-    std::string trueValue = builder.emitConstant("1", "Bool");
+    std::string trueValue = emitBoolConstant(builder, true);
     builder.emitJump(endLabel);
     builder.emitLabel(endLabel);
     return builder.emitPhi(rightValue, trueValue, "Bool");

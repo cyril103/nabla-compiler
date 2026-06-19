@@ -672,7 +672,7 @@ Conventions actuelles :
 - `writeTextFile` et `appendTextFile` retournent le nombre d'octets ecrits.
 - Une valeur negative indique une erreur de syscall Linux. Nabla n'a pas encore
   de type `Result` ni d'abstraction `errno`.
-- Les fichiers tres volumineux peuvent epuiser le tas statique du runtime.
+- Les fichiers tres volumineux peuvent epuiser le heap runtime actuel.
 - Les dossiers parents ne sont pas crees automatiquement.
 
 ## Module `strings`
@@ -711,7 +711,8 @@ projet, puis dans `stdlib/`.
 ## Limites Actuelles
 
 - Les chaines sont byte-based/ASCII, pas encore Unicode.
-- La memoire utilise un bump allocator sans liberation ni GC.
+- La memoire utilise un heap `mmap` de 8 MiB avec bump allocator, sans
+  liberation ni GC.
 - Les vtables ont encore un emplacement reserve mais pas une strategie objet
   complete d'heritage dynamique.
 - La monomorphisation des classes generiques est encore limitee aux cas

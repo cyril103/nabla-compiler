@@ -82,7 +82,9 @@ Les booléens suivent la même famille de représentation :
 - `false` runtime : `1` ;
 - `true` runtime : `3`.
 
-Les comparaisons et conditions doivent manipuler ces valeurs runtime, pas des
+Les constantes `Bool` dans l'IR sont déjà émises sous cette forme taggée. Le
+backend refuse une constante IR `Bool` qui ne vaut pas `1` ou `3`. Les
+comparaisons et conditions doivent manipuler ces valeurs runtime, pas des
 booléens C++ implicites.
 
 ### Valeurs flottantes

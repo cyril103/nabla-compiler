@@ -1,5 +1,5 @@
 function main() -> Int
-  %0: Bool = const 1
+  %0: Bool = const 3
   branch_if_false %0, if.else.0
   %1: Int = const 10
   jump if.end.1

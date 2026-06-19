@@ -70,7 +70,7 @@ Priorites structurantes :
    `docs/stdlib-api.md` avant d'ajouter de nouveaux symboles.
 3. Maintenir la specification vivante `docs/internals.md` pour les types,
    le runtime et les regles de typage.
-4. Ajouter le check CI qui verifie que `make stdlib-docs` ne laisse aucun diff.
+4. Maintenir le check CI qui verifie que `make stdlib-docs` ne laisse aucun diff.
 5. Produire des exemples idiomatiques n'utilisant pas les API internes.
 6. Reporter les grosses nouvelles structures (`Result[T]`, `Map[K,V]`, GC,
    variance avancee) tant que l'ergonomie des collections et options n'est pas
@@ -149,6 +149,9 @@ Le pipeline implemente actuellement :
 - types `Bool`, `Unit`, `Long`, `Float` et `Double` formalises; les
   comparaisons retournent `Bool` et les conditions `if` / `while` attendent
   `Bool`;
+- constantes d'encodage runtime centralisees dans `src/runtime_values.hpp`;
+  les constantes IR `Bool` sont emises et validees sous leur forme taggee
+  runtime (`false = 1`, `true = 3`) ;
 - expressions `if` typees avec le type commun des branches, ou `Unit` quand les
   branches ont des types differents et servent d'effets de bord;
 - operateurs booleens `&&`, `||` et `!`, avec court-circuit pour `&&` et
@@ -245,9 +248,9 @@ Le pipeline implemente actuellement :
   `ArrayObject[T]`, `objectArrayShuffle`, `objectArrayMkString`,
   `objectStringArrayMkString` (compatibilité) et `ArrayObject[T].shuffle`.
 - module de bibliotheque standard `collections.set` avec `Set[T]`, `setEmpty`,
-  `add`, `remove`, `union`, `intersect`, `difference`, `setFromArray` et
-  `toString`, en utilisant un index de seaux hashés (`hashCode()`) pour des
-  opérations de présence à coût moyen réduit.
+  `SetEmpty[T]`, `SetFromArray[T]`, `add`, `remove`, `union`, `intersect`,
+  `difference`, `setFromArray` et `toString`, en utilisant un index de seaux
+  hashés (`hashCode()`) pour des opérations de présence à coût moyen réduit.
 - module de bibliotheque standard `collections.array` comme point d'entree
   commun pour les tableaux specialises, avec `ArrayFill[T]`, `ArrayRange`,
   `arrayFill[T]`, `arrayMap[T]`,
@@ -295,15 +298,16 @@ Le pipeline implemente actuellement :
 - `examples/student_scores.nabla` comme exemple idiomatique vérifié pour
   `Array[T]`, `Option[T]`, classes, lambdas et sorties console.
 - `examples/workshop_set_inheritance.nabla` comme exemple vérifié pour
-  `Set[T]`, `setFromArray`, opérations d'ensemble et héritage avec `override`.
+  `Set[T]`, opérations d'ensemble et héritage avec `override`; il conserve
+  volontairement des frictions de typage utiles pour guider le prochain
+  nettoyage ergonomique autour des collections polymorphes.
 
 Limites importantes :
 
 - les fonctions globales sont limitees a 6 parametres et les methodes a 5,
   conformement a la convention d'appel actuelle;
 - `Float` et `Double` couvrent les litteraux, operations, comparaisons,
-  fonctions, lambdas, champs et collections specialisees, mais pas encore
-  `toString`;
+  fonctions, lambdas, champs, collections specialisees et `toString`;
 - `String` et `Char` sont actuellement byte-based/ASCII pour les operations de
   longueur et d'indexation; les bytes UTF-8 sont conserves pour l'affichage et
   l'entree, mais `length` ne compte pas encore les code points Unicode;
@@ -382,6 +386,10 @@ Executer avant chaque commit :
 
 ```bash
 make all-tests
+make examples
+make tooling-tests
+make stdlib-docs
+git diff --exit-code docs/stdlib
 g++ -std=c++17 -Wall -Wextra -Werror \
   src/main.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp src/ir.cpp \
   src/ir_codegen.cpp src/runtime_asm.cpp \
@@ -472,6 +480,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   generation SSE.
 - [x] Formaliser `Unit` pour les fonctions a effet et les boucles.
 - [x] Ajouter les booleens et typer les conditions en `Bool`.
+- [x] Centraliser et verifier l'encodage runtime de `Bool` dans l'IR et le
+  backend (`false = 1`, `true = 3`).
 - [x] Ajouter `else if`.
 - [x] Typer les branches `if` heterogenes comme `Unit` pour les usages a effets
   de bord.
@@ -665,6 +675,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Rendre explicite l'encodage runtime de `Bool` dans l'IR :
+  constantes source taggees des le lowering, validation backend des constantes
+  `Bool` et test de regression couvrant constantes, comparaisons, retours de
+  fonctions, logique et `BoolArray`.
+  - Fichiers / tests associés: `src/ast.cpp`, `src/ir_codegen.cpp`,
+    `tests/test_bool_runtime_encoding_regression.nabla`,
+    `tests/test_bool_runtime_encoding_regression.expected`,
+    `tests/test_bool_runtime_encoding_regression.ir`, `docs/internals.md`,
+    `docs/roadmap.md`, `AGENTS.md`.
 - `local` - Vérifier `examples/workshop_set_inheritance.nabla` comme exemple
   public d'héritage et de `collections.set`, avec code de sortie et oracle
   stdout sous `make examples`.

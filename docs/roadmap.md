@@ -39,7 +39,8 @@ pour reprendre facilement apres une pause.
 - `examples/student_scores.nabla` sert d'exemple public vérifié pour
   `Array[T]`, `Option[T]`, classes, lambdas et sortie console.
 - `examples/workshop_set_inheritance.nabla` sert d'exemple public vérifié pour
-  `Set[T]`, `setFromArray`, opérations d'ensemble et héritage avec `override`.
+  `Set[T]`, opérations d'ensemble et héritage avec `override`; il reste aussi
+  un bon révélateur des frictions de typage autour des collections polymorphes.
 - Support Vim minimal disponible dans `editor/vim`.
 - Suites `make all-tests`, `make examples` et `make tooling-tests` vertes au
   moment de cette mise a jour; la CI GitHub lance aussi les exemples publics.
@@ -58,9 +59,9 @@ features.
 - Details a cacher ou marquer internes : `IntArray`, `LongArray`,
   `FloatArray`, `DoubleArray`, `BoolArray`, `ObjectArray[T]`,
   `ArrayObject[T]`, helpers `arrayBase...` et fonctions specialisees de pont.
-- Runtime a formaliser : valeurs taggees `Int`/`Long`/`Bool`, valeurs raw
-  `Float`/`Double`, objets heap, tableaux natifs, slots nuls, conventions
-  d'erreur et limites memoire.
+- Runtime a formaliser en continu : valeurs raw `Float`/`Double`, objets heap,
+  tableaux natifs, slots nuls, conventions d'erreur et limites memoire. Les
+  constantes d'encodage `Int`/`Long`/`Bool` sont deja centralisees dans le code.
 - Typage a garder simple : sous-typage nominal pour les classes, generiques
   invariants par defaut, conversions explicites ou helpers stdlib.
 - Documentation : la reference HTML doit devenir une doc utilisateur claire,
@@ -86,15 +87,16 @@ Actions recommandees :
 
 ### Revue de code (16/06/2026, corrigée)
 
-- P2 — Représentation des `Bool` correcte dans les chemins actuels, mais trop implicite :
-  - `src/ast.cpp:233` émet les constantes booléennes IR comme `1` / `0`.
-  - `src/ir_codegen.cpp:455` boxe ensuite ces constantes, donc `false` devient `1`
-    runtime et `true` devient `3`.
-  - `src/ir_codegen.cpp:338` teste bien le faux runtime par `cmp rax, 1`, et
-    `src/runtime_asm.cpp:853` suit la même convention pour `Bool.toString`.
-  - Correction de la revue précédente : l'inversion logique n'est pas confirmée
-    dans les tests actuels. Le risque réel est une convention d'encodage booléen
-    dispersée entre IR/codegen/runtime, fragile pour de futurs chemins backend.
+- Corrigé — Représentation des `Bool` correcte et explicite :
+  - `src/runtime_values.hpp` centralise les valeurs runtime `false = 1` et
+    `true = 3`.
+  - `src/ast.cpp` émet maintenant les constantes booléennes IR directement avec
+    ces valeurs taggées.
+  - `src/ir_codegen.cpp` valide que les constantes IR `Bool` sont déjà taggées
+    avant de les écrire en assembleur, au lieu de les faire passer par
+    l'encodage `Int`.
+  - `tests/test_bool_runtime_encoding_regression.nabla` couvre constantes,
+    comparaisons, retours de fonctions, opérateurs logiques et `BoolArray`.
 - Corrigé — Vérification incomplète de `override` :
   - Le flag `override` est parsé et stocké (`src/parser.cpp:1252`) puis seules les règles de présence/supériorité sont contrôlées en semantique (`src/semantic_analyzer.cpp:205`).
   - La validation compare maintenant arité, paramètres, retour et paramètres génériques de méthode, avec substitutions des types hérités.
@@ -114,8 +116,6 @@ Actions recommandees :
 
 Actions suggérées pour la suite :
 
-1. Centraliser la convention d'encodage booléen (tag/valeurs) et ajouter des tests de régression bool via constantes, comparaisons, fonctions et tableaux.
-
 1. Finaliser la sémantique d'héritage.
    - Valider la résolution des champs hérités et les conflits de noms entre
      champs/méthodes.
@@ -125,7 +125,6 @@ Actions suggérées pour la suite :
    - Définir règles et tests pour les masquages explicites.
 3. Améliorer l’ergonomie héritage/collisions de types.
    - Simplifier les constructeurs d’héritage (appel parent depuis sous-classe).
-   - Introduire/valider `override` pour la redéfinition explicite.
    - Rendre la résolution des champs/méthodes héritées plus prédictible dans les
      exemples concrets.
 4. Revenir sur le chantier `match` avancé.
@@ -143,7 +142,8 @@ Actions suggérées pour la suite :
 
 - Introduire un type `Result[T]` ou une convention d'erreurs plus riche pour
   l'I/O et le parsing.
-- Agrandir ou rendre configurable le tas statique du runtime.
+- Agrandir ou rendre configurable le heap runtime actuellement initialise a
+  8 MiB.
 - Refactoriser les primitives runtime I/O pour eviter la duplication autour des
   chemins C.
 - Ajouter un support editeur supplementaire :

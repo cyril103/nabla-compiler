@@ -48,8 +48,10 @@ helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
   - `ArrayDouble`
   - `ArrayBool`
   - `ArrayObject[T]`
-- `Set[T]` / set d'entiers existant, tant que la version generique reste en
-  consolidation.
+- `Set[T]`
+- Constructeurs/fabriques :
+  - `SetEmpty[T]()`
+  - `SetFromArray[T](values)`
 
 Les exemples doivent privilegier `Array[T]` et les fonctions de haut niveau. Les
 facades specialisees restent acceptables dans les tests de backend/runtime et les
@@ -108,6 +110,8 @@ nouveaux exemples devraient preferer la surface publique ci-dessus :
   `ArrayFill[T]` exprime mieux l'intention.
 - Helpers `arrayIntMap`, `arrayObjectMap`, etc. quand une methode de facade
   existe (`xs.map(...)`, `xs.filter(...)`, `xs.fold(...)`, etc.).
+- Fonctions bas niveau `setEmpty`, `setFromArray` et variantes specialisees
+  quand `SetEmpty[T]()` ou `SetFromArray[T](values)` suffit.
 
 ## Details Internes
 

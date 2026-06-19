@@ -13,19 +13,29 @@ Les diagnostics indiquent le fichier, la ligne, la colonne et la phase concerné
 tests/example.nabla:8:15: semantic error: méthode inconnue: A.missing
 ```
 
-Le langage met l'accent sur une unification forte des types (tout est objet, y compris les entiers), l'absence de runtime lourd ou de machine virtuelle, et une exécution ultra-rapide au plus proche du matériel.
+Le langage met l'accent sur une surface Scala-like simple, une hiérarchie de
+types unifiée (`Any` / `AnyVal` / `AnyRef`), l'absence de machine virtuelle et
+une exécution native proche du matériel.
 
 ---
 
 ## 🚀 Fonctionnalités Clés & Choix d'Architecture
 
-* **Unification du Type `Int` :** Contrairement aux langages classiques où les types primitifs sont gérés à part, `Int` dans Nabla est une véritable classe possédant ses propres méthodes (`+`, `-`, `*`, `/`, `.toString()`).
-* **Pointer Tagging (Bit de poids faible) :** Pour éviter d'allouer les entiers sur le tas à chaque opération, Nabla utilise le *pointer tagging*. Le bit de poids faible détermine la nature de la donnée :
-    * `bit 0 == 1` : C'est un entier immédiat taggué. Sa valeur réelle en mémoire est $V_{real} = (V \times 2) + 1$. Le runtime corrige le tag à la volée en assembleur lors des calculs.
-    * `bit 0 == 0` : C'est un pointeur direct vers un objet aligné sur le tas.
-* **Modèle Objet & Pointeur `this` :** L'instanciation via `new` crée une disposition linéaire d'éléments de 8 octets (Offset 0: Pointeur de VTable, Offsets suivants: Attributs). Lors de l'appel d'une méthode, le registre `RDI` reçoit secrètement l'adresse de l'objet faisant office de contexte `this`.
-* **Bump Allocator Interne :** L'allocation des objets se fait sur un tas statique virtuel (`global_heap`) géré par un pointeur de tas (`heap_pointer`) incrémenté de manière synchrone en assembleur.
-* **Système d'Import Résolutif :** Gestion des dépendances par graphe de fichiers avec détection des inclusions cycliques pour éviter la duplication de code généré.
+* **Hiérarchie de types unifiée :** `Any` est le supertype de toutes les valeurs.
+  `AnyVal` couvre les primitives builtin (`Int`, `Long`, `Bool`, `Float`,
+  `Double`, `Char`, `Unit`) et `AnyRef` couvre les références heap (`String`,
+  tableaux, closures et classes utilisateur).
+* **Pointer Tagging :** `Int`, `Long` et `Bool` utilisent le bit de poids faible
+  pour représenter les valeurs immédiates. Les constantes runtime communes sont
+  centralisées dans `src/runtime_values.hpp`.
+* **Modèle Objet & Pointeur `this` :** L'instanciation via `new` crée une
+  disposition linéaire de slots de 8 octets. Le slot 0 reste réservé à un
+  header/vtable futur, puis viennent les champs. Lors d'un appel de méthode,
+  `RDI` reçoit l'objet courant comme `this`.
+* **Bump Allocator Interne :** Le runtime initialise un tas de 8 MiB avec
+  `mmap`, aligne les allocations sur 8 octets et vérifie les dépassements.
+* **Système d'Import Résolutif :** Gestion des dépendances par graphe de fichiers
+  avec détection des inclusions cycliques pour éviter la duplication de code généré.
 * **Fonctions et Méthodes Paramétrées :** Les signatures sont validées
   statiquement. Les fonctions globales acceptent jusqu'à 6 paramètres et les
   méthodes jusqu'à 5 paramètres, `RDI` étant réservé à `this`.
@@ -37,14 +47,23 @@ Le langage met l'accent sur une unification forte des types (tout est objet, y c
 ```text
 nabla-compiler/
 ├── src/
-│   ├── main.cpp       # Pipeline principal du compilateur (I/O, génération binaire)
-│   ├── lexer.hpp      # Analyseur lexical (Tokenisation de la syntaxe)
-│   ├── parser.hpp     # Analyseur syntaxique avec précédence et résolution d'imports
-│   └── ast.hpp        # Nœuds de l'AST et logique de génération d'assembleur x86_64
+│   ├── main.cpp                 # Pipeline principal et invocation NASM/ld
+│   ├── lexer.hpp                # Tokenisation
+│   ├── parser.cpp/.hpp          # Syntaxe, imports, collecte des declarations
+│   ├── semantic_analyzer.cpp    # Validation des types, classes et signatures
+│   ├── ast.cpp/.hpp             # Nœuds AST et lowering vers IR
+│   ├── ir.cpp/.hpp              # IR textuelle et builder
+│   ├── ir_codegen.cpp/.hpp      # Génération x86_64 depuis l'IR
+│   └── runtime_asm.cpp/.hpp     # Runtime assembleur partagé
+├── stdlib/             # Bibliothèque standard Nabla
+├── examples/           # Exemples publics et scénarios applicatifs
+├── docs/               # Guide langage, API stdlib, internals et roadmap
 ├── tests/
-│   ├── test_import.nabla  # Script Nabla principal testant les fonctionnalités objets
-│   └── utils/
-│       └── Math.nabla     # Sous-module Nabla importé dynamiquement
+│   ├── *.nabla          # Tests positifs et négatifs
+│   ├── *.expected       # Codes de sortie attendus
+│   ├── *.stdout         # Sorties console attendues optionnelles
+│   ├── *.diagnostic     # Diagnostics attendus optionnels
+│   └── *.ir             # Snapshots IR optionnels
 ├── Makefile           # Automatisation de la compilation du projet
 └── .gitignore         # Fichiers et binaires temporaires à ignorer
 ```
@@ -91,7 +110,10 @@ Le projet se compile avec GNU C++17 et le `Makefile` expose des cibles pratiques
 - `make debug` : exécute `nablac --keep-asm` sur la source par défaut, conserve le fichier assembleur `<basename>_tmp.asm`, puis lance le binaire
 - `make all-tests` : exécute la suite de tests langage complète
 - `make tooling-tests` : vérifie les diagnostics d'outillage du compilateur, par exemple `nasm` absent du `PATH`
-- `make clean` : supprime `nablac` et le binaire généré par le test
+- `make examples` : compile les exemples publics et vérifie leurs oracles quand
+  ils existent
+- `make stdlib-docs` : régénère la référence HTML de la stdlib
+- `make clean` : supprime `build/`
 
 Le compilateur peut aussi afficher sa représentation intermédiaire textuelle :
 
@@ -105,21 +127,18 @@ function add(%a: Int, %b: Int) -> Int
   return %0
 ```
 
-Cette première IR couvre les fonctions globales, entiers, variables,
-affectations, opérations binaires, appels de fonctions globales, `if`, `while`,
-`for`, instanciations d'objets, accès aux champs, appels de méthodes et
-`Int.toString`. La génération assembleur reste pour le moment directe depuis
-l'AST.
+L'IR couvre le langage testé actuel : fonctions, variables, contrôle de flux,
+`match`, objets, héritage, appels de méthodes, lambdas/closures, tableaux
+natifs, génériques monomorphisés et appels vers la bibliothèque standard.
 
-La génération assembleur utilise désormais le backend IR par défaut :
+La génération assembleur utilise le backend IR par défaut :
 
 ```bash
 build/nablac tests/test_arithmetic.nabla
 ```
 
-Ce backend couvre désormais la suite positive actuelle, incluant fonctions,
-variables, contrôle de flux, imports, objets, champs, appels de méthodes et
-`Int.toString`.
+L'option historique `--backend-ir` est conservée pour compatibilité, mais elle
+ne sélectionne plus un chemin séparé.
 
 ### Personnaliser le fichier source
 

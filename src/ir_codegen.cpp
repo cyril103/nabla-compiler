@@ -475,6 +475,20 @@ private:
             storeRegister(instruction.result, "rax");
             return;
         }
+        if (instruction.type == "Bool") {
+            long long parsed = 0;
+            try {
+                parsed = std::stoll(instruction.operands[0]);
+            } catch (...) {
+                codegenError("constante Bool IR invalide: " + instruction.operands[0]);
+            }
+            if (parsed != RuntimeValues::kTaggedFalse && parsed != RuntimeValues::kTaggedTrue) {
+                codegenError("constante Bool IR non taggee: " + instruction.operands[0]);
+            }
+            out << "    mov rax, " << parsed << "\n";
+            storeRegister(instruction.result, "rax");
+            return;
+        }
         out << "    mov rax, " << boxedInt(instruction.operands[0]) << "\n";
         storeRegister(instruction.result, "rax");
     }

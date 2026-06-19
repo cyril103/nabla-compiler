@@ -1,0 +1,21 @@
+def always(): Bool = {
+    true
+}
+
+def isSeven(value: Int): Bool = {
+    value == 7
+}
+
+def main(): Int = {
+    val flags = new BoolArray(4)
+    flags.set(0, true)
+    flags.set(1, false)
+    flags.set(2, 2 < 3)
+    flags.set(3, isSeven(6))
+
+    if always() && flags.get(0) && !flags.get(1) && flags.get(2) && !flags.get(3) {
+        42
+    } else {
+        1
+    }
+}
