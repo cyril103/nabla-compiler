@@ -55,6 +55,7 @@ Une première documentation utilisateur du langage est disponible ici :
 
 - [docs/language.md](docs/language.md)
 - [docs/roadmap.md](docs/roadmap.md)
+- [docs/internals.md](docs/internals.md)
 
 La reference HTML de la bibliotheque standard se genere depuis les commentaires
 `///` places devant les declarations publiques :

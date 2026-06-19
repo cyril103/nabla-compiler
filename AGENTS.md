@@ -66,8 +66,8 @@ Priorites structurantes :
 
 1. Stabiliser l'API publique de `Array[T]`, `Option[T]` et `Set[T]`.
 2. Classer la stdlib en surface publique et modules/helpers internes.
-3. Ajouter une courte specification vivante (`docs/spec.md` ou
-   `docs/internals.md`) pour les types, le runtime et les regles de typage.
+3. Maintenir la specification vivante `docs/internals.md` pour les types,
+   le runtime et les regles de typage.
 4. Ajouter le check CI qui verifie que `make stdlib-docs` ne laisse aucun diff.
 5. Produire des exemples idiomatiques n'utilisant pas les API internes.
 6. Reporter les grosses nouvelles structures (`Result[T]`, `Map[K,V]`, GC,
@@ -633,6 +633,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `///` publics.
 - [x] Ajouter un check CI qui lance `make stdlib-docs` et echoue si la
   generation laisse un diff non commite.
+- [x] Ajouter une courte specification vivante (`docs/internals.md`) pour les
+  types, le runtime, l'IR et les conventions de stdlib.
 - [x] Ajouter une roadmap de reprise dans `docs/roadmap.md`.
 - [x] Ajouter un support Vim minimal pour `*.nabla`.
 - [x] Ajouter des tests Project Euler progressifs pour guider les extensions du
@@ -647,6 +649,12 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Ajouter `docs/internals.md` comme specification vivante des
+  conventions internes actuelles : pipeline, commandes externes, tagging,
+  layout objets/tableaux, chaînes, closures, héritage, génériques et erreurs
+  runtime observables.
+  - Fichiers / tests associés: `docs/internals.md`, `README.md`,
+    `docs/roadmap.md`, `AGENTS.md`.
 - `local` - Améliorer le diagnostic d'outillage externe : si `execvp` ne trouve
   pas `nasm` ou `ld`, le compilateur affiche maintenant la commande manquante et
   `make tooling-tests` couvre le cas `nasm` absent du `PATH`.
