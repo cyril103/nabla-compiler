@@ -1005,14 +1005,17 @@ private:
             out << "    call Bool_method_toString\n";
         } else if (className == "Char" && methodName == "toString") {
             out << "    call Char_method_toString\n";
-        } else if (className == "Any" && methodName == "toString") {
-            out << "    call Any_toString\n";
-        } else if (className == "Any" && methodName == "hashCode") {
+        } else if (className == "Any" &&
+                   (methodName == "toString" || methodName == "hashCode" || methodName == "equals")) {
             const auto targets = allowDynamicDispatch
                 ? dynamicDispatchTargets(className, methodName)
                 : std::vector<DynamicDispatchTarget>{};
+            const std::string fallbackMethod =
+                methodName == "toString" ? "Any_toString" :
+                methodName == "hashCode" ? "Any_hashCode" :
+                "Any_equals";
             if (targets.empty()) {
-                out << "    call Any_hashCode\n";
+                out << "    call " << fallbackMethod << "\n";
             } else {
                 const std::string dispatchPrefix =
                     ".L_dispatch_" + asmSymbolPart(function.name) + "_" +
@@ -1033,7 +1036,7 @@ private:
                     out << "    jmp " << doneLabel << "\n";
                 }
                 out << fallbackLabel << ":\n";
-                out << "    call Any_hashCode\n";
+                out << "    call " << fallbackMethod << "\n";
                 out << doneLabel << ":\n";
             }
         } else if (className == "Int" && methodName == "toLong") {

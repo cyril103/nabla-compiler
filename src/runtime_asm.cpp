@@ -1028,6 +1028,13 @@ void emit(std::ostream& out) {
         << ".L_any_hash_immediate:\n"
         << "    mov rax, rdi\n"
         << "    ret\n\n";
+    out << "Any_equals:\n"
+        << "    cmp rdi, rsi\n"
+        << "    sete al\n"
+        << "    movzx rax, al\n"
+        << "    shl rax, 1\n"
+        << "    or rax, 1\n"
+        << "    ret\n\n";
     out << "Any_toString:\n"
         << "    test rdi, 1\n"
         << "    jnz .L_any_to_string_immediate\n"

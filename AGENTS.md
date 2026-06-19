@@ -359,9 +359,10 @@ Limites importantes :
   principal. Les appels de méthodes utilisateur sont virtuels par défaut quand
   une valeur est manipulée par son type parent, y compris parent générique
   instancié et méthode générique spécialisée; `super` reste statique. La méthode
-  `hashCode()` redispatche aussi depuis `Any` pour stabiliser l'index hashé de
-  `Set[Parent]`. La friction restante concerne les vtables complètes et les cas
-  avancés d'égalité personnalisée.
+  `toString()`, `hashCode()` et `equals(...)` redispatchent aussi depuis `Any`
+  pour stabiliser l'égalité et l'index hashé de `Set[Parent]`. La friction
+  restante concerne les vtables complètes et les règles avancées d'égalité dans
+  les hiérarchies complexes.
 - Le mot-clé `override` est supporté pour marquer explicitement les
   redéfinitions de méthodes héritées, et il est obligatoire quand une méthode
   redéfinit une méthode provenant d'un parent.
@@ -369,9 +370,10 @@ Limites importantes :
   typée dans `extends Parent(...)`: le préfixe reprend les champs du parent
   direct, et le suffixe déclare les champs propres de l'enfant.
 - Les collections basées sur `Any` utilisent `==` pour l'égalité et
-  `hashCode()` pour l'index interne. `hashCode()` redispatche vers les overrides
-  utilisateur même quand la valeur passe par `Any`, un type parent ou un
-  paramètre générique spécialisé.
+  `hashCode()` pour l'index interne. `==` / `!=` sur objets passent par
+  `Any.equals(...)`, et `toString()`, `hashCode()` et `equals(...)`
+  redispatchent vers les overrides utilisateur même quand la valeur passe par
+  `Any`, un type parent ou un paramètre générique spécialisé.
 
 ## Invariants D'Architecture
 
@@ -681,8 +683,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   statique.
 - [x] Ajouter une signature constructeur héritée typée dans `extends Parent(...)`
   pour rendre explicites les champs transmis au parent et les champs propres.
-- [x] Redispatcher `Any.hashCode()` vers les overrides utilisateur pour les
-  valeurs parent-typées ou génériques utilisées par `Set[T]`.
+- [x] Redispatcher `Any.toString()`, `Any.hashCode()` et `Any.equals(...)` vers
+  les overrides utilisateur pour les valeurs parent-typées ou génériques
+  utilisées par `Set[T]`.
 - [x] Ajouter un test d'outillage pour vérifier le diagnostic quand une commande
   externe requise (`nasm`) est absente du `PATH`.
 - [x] Ajouter le support `write` / `append` multi-mots dans
@@ -693,6 +696,16 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Ajouter l'égalité personnalisée de base pour les objets: `Any`
+  expose `equals(other: Any): Bool`, `==` / `!=` sur objets s'abaissent vers
+  `Any.equals(...)`, et `Any.toString()` / `Any.hashCode()` / `Any.equals(...)`
+  redispatchent vers les overrides utilisateur pour les valeurs parent-typées
+  ou génériques.
+  - Fichiers / tests associés: `src/semantic_analyzer.cpp`, `src/ast.cpp`,
+    `src/ir_codegen.cpp`, `src/runtime_asm.cpp`,
+    `tests/test_any_equals_default.nabla`,
+    `tests/test_inheritance_set_equals_override.nabla`, `docs/language.md`,
+    `docs/internals.md`, `docs/roadmap.md`.
 - `local` - Étendre le dispatch dynamique au modèle attendu de polymorphisme
   runtime: parents génériques instanciés (`Parent[Int]`) et méthodes génériques
   spécialisées (`tag[Int]`) redispatchent vers l'override runtime; l'IR builder
@@ -1166,5 +1179,5 @@ Poursuivre la suite outillée autour de l’héritage et du matching :
 - Finaliser le nettoyage des diagnostics autour du pattern matching, notamment pour
   les motifs nommes.
 - Améliorer l’ergonomie d’héritage pour l'exemple de production:
-  vtables à formaliser et stratégie d'égalité personnalisée claire pour les
-  hiérarchies polymorphes.
+  vtables à formaliser et règles d'égalité avancées à clarifier pour les
+  hiérarchies polymorphes complexes.

@@ -318,13 +318,15 @@ Any
 ```
 
 `Any` apporte des methodes de base disponibles sur toute classe reference :
-`toString(): String` et `hashCode(): Int`. Ces methodes peuvent etre redefinies
-dans les sous-classes. Les appels a `hashCode()` redispatchent vers l'override
-runtime quand la valeur est manipulée via `Any`, un type parent ou un paramètre
-générique spécialisé. Les primitives disposent aussi de chemins specialises comme
-`Int.toString()` ou `Double.toString()`. Quand une primitive est passée à un
-paramètre `Any` ou `AnyVal` de fonction/méthode, le compilateur insère un boxing
-runtime minimal :
+`toString(): String`, `hashCode(): Int` et `equals(other: Any): Bool`. Ces
+methodes peuvent etre redefinies dans les sous-classes. Les appels a
+`toString()`, `hashCode()` et `equals(...)` redispatchent vers l'override runtime
+quand la valeur est manipulée via `Any`, un type parent ou un paramètre générique
+spécialisé. Pour les objets, `==` et `!=` s'appuient sur `equals(...)`; le
+fallback de `Any.equals` conserve l'égalité par identité. Les primitives
+disposent aussi de chemins specialises comme `Int.toString()` ou
+`Double.toString()`. Quand une primitive est passée à un paramètre `Any` ou
+`AnyVal` de fonction/méthode, le compilateur insère un boxing runtime minimal :
 `value.toString()` conserve alors le rendu spécialisé (`true`, `Z`,
 `1.500000`, etc.).
 
@@ -726,7 +728,8 @@ projet, puis dans `stdlib/`.
 - Les objets utilisateur stockent un identifiant de classe runtime dans leur
   header et les appels de méthodes utilisateur sont virtuels par défaut quand
   la valeur est manipulée via un type parent, y compris pour un parent générique
-  instancié et une méthode générique spécialisée. `super` reste un appel
+  instancié, une méthode générique spécialisée et les méthodes de base
+  `Any.toString` / `Any.hashCode` / `Any.equals`. `super` reste un appel
   statique. Les vraies vtables ne sont pas encore formalisées.
 - La monomorphisation des classes generiques est encore limitee aux cas
   supportes par la suite actuelle.

@@ -1,0 +1,50 @@
+import collections.array
+import collections.set
+
+class Person(nameValue: String) {
+    override def toString(): String = {
+        nameValue
+    }
+
+    override def hashCode(): Int = {
+        nameValue.length()
+    }
+
+    override def equals(other: Any): Bool = {
+        nameValue == other.toString()
+    }
+}
+
+class Badge extends Person(nameValue: String) {
+}
+
+def sameValue[T](left: T, right: T): Bool = {
+    left == right
+}
+
+def render(value: Any): String = {
+    value.toString()
+}
+
+def main(): Int = {
+    val adaOne = new Badge("ada")
+    val adaTwo = new Badge("ada")
+    val bob = new Badge("bob")
+    val values = new Array[Person](3)
+    values.set(0, adaOne)
+    values.set(1, bob)
+    values.set(2, adaTwo)
+    val people = SetFromArray[Person](values)
+    if adaOne != bob &&
+       adaOne == adaTwo &&
+       sameValue[Person](adaOne, adaTwo) &&
+       sameValue[Badge](adaOne, adaTwo) &&
+       render(adaOne) == "ada" &&
+       people.size() == 2 &&
+       people.contains(adaTwo) &&
+       people.toString() == "[ada, bob]" {
+        42
+    } else {
+        1
+    }
+}

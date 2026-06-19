@@ -423,6 +423,15 @@ void SemanticAnalyzer::ensureAnyRootType() {
             builtInLocation
         };
     }
+    if (!anyClass.methods.count("equals")) {
+        anyClass.methods["equals"] = {
+            {{"other", "Any", builtInLocation}},
+            "Bool",
+            {},
+            builtInLocation,
+            builtInLocation
+        };
+    }
 }
 
 void SemanticAnalyzer::validateParentTypes() const {

@@ -110,7 +110,10 @@ slot 1..n   : champs de constructeur et champs hérités
 Les vraies vtables ne sont pas encore formalisées. Le header sert aujourd'hui
 au dispatch dynamique des méthodes utilisateur quand une valeur est manipulée
 via un type parent, y compris pour des parents génériques instanciés et des
-méthodes génériques spécialisées. `super` est abaissé comme appel statique.
+méthodes génériques spécialisées. Les appels à `Any.toString`,
+`Any.hashCode` et `Any.equals` utilisent le même identifiant de classe pour
+redispatcher vers les overrides utilisateur avant de tomber sur le fallback
+runtime. `super` est abaissé comme appel statique.
 Les identifiants de classes commencent à `1000` pour éviter les tags runtime
 boxed. Les closures réutilisent leur propre convention de header pour stocker
 le pointeur de code.
@@ -179,7 +182,8 @@ Les classes sans parent explicite héritent implicitement de `Any`.
 `Any` fournit actuellement :
 
 - `toString(): String` ;
-- `hashCode(): Int`.
+- `hashCode(): Int` ;
+- `equals(other: Any): Bool`.
 
 Les méthodes héritées sont résolues dans la classe courante, puis le parent, puis
 les mixins dans l'ordre d'énonciation. Les conflits hérités doivent être

@@ -141,11 +141,11 @@ Actions suggérées pour la suite :
      runtime quand la valeur est manipulée via un type parent, y compris pour un
      parent générique instancié et une méthode générique spécialisée, tout en
      gardant `super` statique.
-   - Corrigé : `Any.hashCode()` redispatche vers les overrides utilisateur, ce
-     qui stabilise l'index hashé de `Set[Parent]` avec des instances de
-     sous-types.
-   - Reste à clarifier : stratégie complète de vtables et égalité personnalisée
-     en hiérarchie plus complexe.
+   - Corrigé : `Any.toString()`, `Any.hashCode()` et `Any.equals(...)`
+     redispatchent vers les overrides utilisateur, ce qui stabilise `==` / `!=`
+     et l'index hashé de `Set[Parent]` avec des instances de sous-types.
+   - Reste à clarifier : stratégie complète de vtables et éventuelles règles
+     d'égalité plus strictes pour les hiérarchies complexes.
    - Documenter des motifs d’exemple pour utiliser ce cas facilement.
 6. Ajouter des tests “mélange” héritage + autres fonctionnalités.
    - Cas de régression couvrant `super`, champs hérités, shadowing contrôlé

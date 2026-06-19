@@ -1,0 +1,22 @@
+class Plain(value: Int) {
+    override def hashCode(): Int = {
+        value
+    }
+}
+
+def sameValue[T](left: T, right: T): Bool = {
+    left == right
+}
+
+def main(): Int = {
+    val first = new Plain(7)
+    val second = new Plain(7)
+    if first == first &&
+       first != second &&
+       sameValue[Plain](first, first) &&
+       !sameValue[Plain](first, second) {
+        42
+    } else {
+        1
+    }
+}

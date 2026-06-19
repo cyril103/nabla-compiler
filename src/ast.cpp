@@ -609,6 +609,14 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             resolvedType = methodName == "toString" ? "String" : "Int";
             return;
         }
+        if (methodName == "equals") {
+            if (arguments.size() != 1) {
+                semanticError("la méthode " + receiverType + ".equals attend un argument");
+            }
+            resolvedType = "Bool";
+            resolvedParameterTypes = {"Any"};
+            return;
+        }
         if (methodName == "==" || methodName == "!=") {
             if (arguments.size() != 1) {
                 semanticError("la méthode " + receiverType + "." + methodName + " attend un argument");
@@ -891,6 +899,14 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         resolvedType = "String";
         return;
     }
+    if (isBoolBinaryMethod(methodName)) {
+        if (arguments.size() != 1) {
+            semanticError("la méthode " + receiverType + "." + methodName + " attend un argument");
+        }
+        resolvedType = "Bool";
+        resolvedParameterTypes = {"Any"};
+        return;
+    }
     if (auto signature = stdlibTypeAliasMethodSignature(receiverType, methodName)) {
         if (!typeArguments.empty()) {
             semanticError("la méthode '" + receiverType + "." + methodName + "' n'accepte pas d'arguments de type");
@@ -1001,13 +1017,29 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
             std::string loweredReceiver = receiver->lowerToIR(builder);
             return builder.emitMethodCall("Any", "hashCode", loweredReceiver, {}, "Int");
         }
+        if (methodName == "equals") {
+            if (arguments.size() != 1) {
+                builder.unsupported(location, "l'appel de méthode " + receiverType + ".equals");
+            }
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            std::string loweredArgument = arguments[0]->lowerToIR(builder);
+            loweredArgument = boxValueForParameter(
+                builder, loweredArgument, arguments[0]->getType(), "Any");
+            return builder.emitMethodCall("Any", "equals", loweredReceiver, {loweredArgument}, "Bool");
+        }
         if (methodName == "==" || methodName == "!=") {
             if (arguments.size() != 1) {
                 builder.unsupported(location, "l'appel de méthode " + receiverType + "." + methodName);
             }
             const std::string loweredReceiver = receiver->lowerToIR(builder);
-            const std::string loweredArgument = arguments[0]->lowerToIR(builder);
-            return builder.emitBinary(methodName, loweredReceiver, loweredArgument, "Bool");
+            std::string loweredArgument = arguments[0]->lowerToIR(builder);
+            loweredArgument = boxValueForParameter(
+                builder, loweredArgument, arguments[0]->getType(), "Any");
+            std::string equalsResult =
+                builder.emitMethodCall("Any", "equals", loweredReceiver, {loweredArgument}, "Bool");
+            if (methodName == "==") return equalsResult;
+            std::string falseValue = emitBoolConstant(builder, false);
+            return builder.emitBinary("==", equalsResult, falseValue, "Bool");
         }
     }
     if (activeReceiverType == "String" && methodName == "toString" && arguments.empty()) {
@@ -1170,6 +1202,17 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         std::string left = receiver->lowerToIR(builder);
         std::string right = arguments[0]->lowerToIR(builder);
         return builder.emitBinary(methodName, left, right, "Bool");
+    }
+    if (isBoolBinaryMethod(methodName) && arguments.size() == 1) {
+        std::string loweredReceiver = receiver->lowerToIR(builder);
+        std::string loweredArgument = arguments[0]->lowerToIR(builder);
+        loweredArgument = boxValueForParameter(
+            builder, loweredArgument, arguments[0]->getType(), "Any");
+        std::string equalsResult =
+            builder.emitMethodCall("Any", "equals", loweredReceiver, {loweredArgument}, "Bool");
+        if (methodName == "==") return equalsResult;
+        std::string falseValue = emitBoolConstant(builder, false);
+        return builder.emitBinary("==", equalsResult, falseValue, "Bool");
     }
     if (isNativeArrayType(receiverType)) {
         std::string loweredReceiver = receiver->lowerToIR(builder);
