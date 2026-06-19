@@ -85,7 +85,9 @@ Actions recommandees :
 7. Continuer a garder les exemples publics sur les facades idiomatiques
    (`Array[T]`, `Array.fill[T]`, `Set.fromArray[T]`,
    `Option.some[T]` / `Option.none[T]`) quand elles existent.
-8. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
+8. Garder les diagnostics de compatibilite orientes vers les compagnons
+   recommandes (`Array.fill`, `Set.fromArray`, `Option.some`, etc.).
+9. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
    surface n'est pas propre.
 
 ### Revue de code (16/06/2026, corrigée)

@@ -1,1 +1,1 @@
-tests/test_error_stdlib_array_generic_fill_unsupported.nabla:4:26: semantic error: objectArrayFill, paramètre 'value': type 'String' attendu, 'Int' reçu
+tests/test_error_stdlib_array_generic_fill_unsupported.nabla:4:26: semantic error: arrayFill, paramètre 'value': type 'String' attendu, 'Int' reçu. Nom recommande: 'Array.fill'

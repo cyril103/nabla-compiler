@@ -164,6 +164,7 @@ public:
 
 class FunctionCallNode : public ASTNode {
     std::string name;
+    std::string diagnosticName;
     std::vector<std::unique_ptr<ASTNode>> arguments;
     std::vector<std::string> typeArguments;
     std::vector<std::string> resolvedTypeArguments;
@@ -173,7 +174,8 @@ public:
     FunctionCallNode(
         std::string functionName, std::vector<std::unique_ptr<ASTNode>> args,
         std::vector<std::string> genericTypeArguments = {},
-        std::string initialResolvedType = "Int");
+        std::string initialResolvedType = "Int",
+        std::string userFacingName = "");
     std::string getType() override;
     void validateSemantics(CompilerContext& context) override;
     std::string lowerToIR(IRBuilder& builder) const override;

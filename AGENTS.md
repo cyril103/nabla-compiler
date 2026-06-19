@@ -705,6 +705,17 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Ameliorer les diagnostics de compatibilite stdlib: les appels via
+  anciens noms (`ArrayFill`, `SetFromArray`, `SetEmpty`, `optionSome`) gardent
+  le nom source dans les erreurs meme apres resolution vers un helper interne,
+  et ajoutent une suggestion vers le compagnon recommande.
+  - Fichiers / tests associés: `src/compiler_context.hpp`, `src/ast.hpp`,
+    `src/ast.cpp`, `src/parser.cpp`,
+    `tests/test_error_legacy_array_fill_type.nabla`,
+    `tests/test_error_legacy_array_fill_type_args.nabla`,
+    `tests/test_error_legacy_set_from_array_type.nabla`,
+    `tests/test_error_legacy_set_empty_arity.nabla`,
+    `tests/test_error_legacy_option_some_type.nabla`, `docs/roadmap.md`.
 - `local` - Nettoyer les exemples publics vers la surface compagnon: migrer
   `examples/euler1_array.nabla` vers `Array.range`, exposer `Array[T]` dans les
   signatures de `examples/command_shell.nabla` et `examples/student_scores.nabla`

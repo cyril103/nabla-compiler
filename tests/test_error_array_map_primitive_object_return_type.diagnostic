@@ -1,1 +1,1 @@
-tests/test_error_array_map_primitive_object_return_type.nabla:4:45: semantic error: arrayIntMapObject, paramètre 'f': type 'Fn(Int)->String' attendu, 'Fn(Int)->Int' reçu
+tests/test_error_array_map_primitive_object_return_type.nabla:4:45: semantic error: arrayMap, paramètre 'f': type 'Fn(Int)->String' attendu, 'Fn(Int)->Int' reçu

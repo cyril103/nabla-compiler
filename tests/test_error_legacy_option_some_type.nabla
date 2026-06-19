@@ -1,0 +1,5 @@
+import core.option
+
+def main(): Int = {
+    optionSome[String](1).getOrElse("x").length()
+}

@@ -984,7 +984,8 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     throw CompilerError(
                         ErrorKind::Parser, nameToken.location,
                         "la fonction standard générique '" + name +
-                        "' ne supporte pas ces arguments de type");
+                        "' ne supporte pas ces arguments de type" +
+                        recommendedStdlibFunctionSuffix(name));
                 }
             }
             if (initialSymbol) {
@@ -1058,9 +1059,12 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                 }
                 initialReturnType = substituteType(function->second.returnType, substitution);
             }
+            const std::string diagnosticFunctionName =
+                functionLookupName == name ? std::string() : name;
             return located(
                 std::make_unique<FunctionCallNode>(
-                    functionLookupName, std::move(arguments), std::move(functionTypeArguments), initialReturnType),
+                    functionLookupName, std::move(arguments), std::move(functionTypeArguments),
+                    initialReturnType, diagnosticFunctionName),
                 nameToken.location);
         }
         auto [symbol, scopeIndex] = findLocalWithScope(name);
@@ -1169,7 +1173,8 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
                 throw CompilerError(
                     ErrorKind::Parser, methodToken.location,
                     "la fonction standard générique '" + qualifiedFunctionName +
-                    "' ne supporte pas ces arguments de type");
+                    "' ne supporte pas ces arguments de type" +
+                    recommendedStdlibFunctionSuffix(qualifiedFunctionName));
             }
             auto qualifiedFunction = context.functions.find(functionLookupName);
             if (qualifiedFunction != context.functions.end()) {
@@ -1195,7 +1200,8 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
                 expr = located(
                     std::make_unique<FunctionCallNode>(
                         functionLookupName, std::move(arguments), std::move(functionTypeArguments),
-                        initialReturnType),
+                        initialReturnType,
+                        functionLookupName == qualifiedFunctionName ? std::string() : qualifiedFunctionName),
                     methodToken.location);
                 continue;
             }

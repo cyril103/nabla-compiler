@@ -229,6 +229,33 @@ inline bool isStdlibFunctionAliasName(const std::string& name) {
     return false;
 }
 
+inline std::optional<std::string> recommendedStdlibFunctionName(const std::string& name) {
+    if (name == "ArrayFill" || name == "arrayFill" ||
+        name == "arrayIntFill" || name == "arrayLongFill" ||
+        name == "arrayFloatFill" || name == "arrayDoubleFill" ||
+        name == "arrayBoolFill" || name == "objectArrayFill") {
+        return "Array.fill";
+    }
+    if (name == "ArrayRange" || name == "arrayIntRange") return "Array.range";
+    if (name == "SetEmpty" || name == "setEmpty") return "Set.empty";
+    if (name == "SetFromArray" || name == "setFromArray" ||
+        name == "setFromArrayInt" || name == "setFromArrayLong" ||
+        name == "setFromArrayFloat" || name == "setFromArrayDouble" ||
+        name == "setFromArrayBool") {
+        return "Set.fromArray";
+    }
+    if (name == "optionSome") return "Option.some";
+    if (name == "optionNone") return "Option.none";
+    return std::nullopt;
+}
+
+inline std::string recommendedStdlibFunctionSuffix(const std::string& name) {
+    if (auto recommended = recommendedStdlibFunctionName(name)) {
+        return ". Nom recommande: '" + *recommended + "'";
+    }
+    return "";
+}
+
 inline std::string formatFunctionType(const CompilerContext::FunctionType& functionType) {
     std::string formatted = "Fn(";
     for (size_t i = 0; i < functionType.parameterTypes.size(); ++i) {

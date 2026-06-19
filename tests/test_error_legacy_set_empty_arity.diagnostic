@@ -1,0 +1,1 @@
+tests/test_error_legacy_set_empty_arity.nabla:4:5: semantic error: SetEmpty: 0 argument(s) attendu(s), 1 reçu(s). Nom recommande: 'Set.empty'

@@ -1,1 +1,1 @@
-tests/test_error_stdlib_array_generic_map_unsupported.nabla:5:22: semantic error: objectArrayMapSame, paramètre 'xs': type 'ArrayObject[String]' attendu, 'ArrayInt' reçu
+tests/test_error_stdlib_array_generic_map_unsupported.nabla:5:22: semantic error: arrayMap, paramètre 'xs': type 'ArrayObject[String]' attendu, 'ArrayInt' reçu

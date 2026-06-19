@@ -140,13 +140,15 @@ void validateArguments(
     if (arguments.size() != parameters.size()) {
         throw CompilerError(ErrorKind::Semantic, location,
             callableName + ": " + std::to_string(parameters.size()) +
-            " argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
+            " argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)" +
+            recommendedStdlibFunctionSuffix(callableName));
     }
     for (size_t i = 0; i < arguments.size(); ++i) {
         if (!isTypeAssignable(context, arguments[i]->getType(), parameters[i].type)) {
             throw CompilerError(ErrorKind::Semantic, arguments[i]->getLocation(),
                 callableName + ", paramètre '" + parameters[i].name + "': type '" +
-                parameters[i].type + "' attendu, '" + arguments[i]->getType() + "' reçu");
+                parameters[i].type + "' attendu, '" + arguments[i]->getType() + "' reçu" +
+                recommendedStdlibFunctionSuffix(callableName));
         }
     }
 }
@@ -1370,8 +1372,10 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
 
 FunctionCallNode::FunctionCallNode(
     std::string functionName, std::vector<std::unique_ptr<ASTNode>> args,
-    std::vector<std::string> genericTypeArguments, std::string initialResolvedType)
-    : name(std::move(functionName)), arguments(std::move(args)), typeArguments(std::move(genericTypeArguments)),
+    std::vector<std::string> genericTypeArguments, std::string initialResolvedType,
+    std::string userFacingName)
+    : name(std::move(functionName)), diagnosticName(std::move(userFacingName)),
+      arguments(std::move(args)), typeArguments(std::move(genericTypeArguments)),
       resolvedType(std::move(initialResolvedType)) {}
 
 std::string FunctionCallNode::getType() {
@@ -1542,13 +1546,19 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
     }
     auto function = context.functions.find(name);
     if (function == context.functions.end()) {
-        semanticError("fonction inconnue: " + name);
+        const std::string displayName = diagnosticName.empty() ? name : diagnosticName;
+        semanticError("fonction inconnue: " + displayName + recommendedStdlibFunctionSuffix(displayName));
     }
     if (function->second.typeParameters.empty()) {
         if (!typeArguments.empty()) {
-            semanticError("la fonction '" + name + "' n'accepte pas d'arguments de type");
+            const std::string displayName = diagnosticName.empty() ? name : diagnosticName;
+            semanticError(
+                "la fonction '" + displayName + "' n'accepte pas d'arguments de type" +
+                recommendedStdlibFunctionSuffix(displayName));
         }
-        validateArguments(context, name, arguments, function->second.parameters, location);
+        validateArguments(
+            context, diagnosticName.empty() ? name : diagnosticName,
+            arguments, function->second.parameters, location);
         resolvedType = function->second.returnType;
         resolvedParameterTypes = parameterTypes(function->second.parameters);
         resolvedTypeArguments.clear();
@@ -1564,14 +1574,21 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
     }
     if (!substitution) {
         if (typeArguments.empty()) {
-            semanticError("impossible d'inférer les arguments de type pour la fonction générique '" + name + "'");
+            const std::string displayName = diagnosticName.empty() ? name : diagnosticName;
+            semanticError(
+                "impossible d'inférer les arguments de type pour la fonction générique '" +
+                displayName + "'" + recommendedStdlibFunctionSuffix(displayName));
         }
+        const std::string displayName = diagnosticName.empty() ? name : diagnosticName;
         semanticError(
-            "la fonction générique '" + name + "' attend " +
-            std::to_string(function->second.typeParameters.size()) + " argument(s) de type");
+            "la fonction générique '" + displayName + "' attend " +
+            std::to_string(function->second.typeParameters.size()) + " argument(s) de type" +
+            recommendedStdlibFunctionSuffix(displayName));
     }
     auto parameters = substituteParameters(function->second.parameters, *substitution);
-    validateArguments(context, name, arguments, parameters, location);
+    validateArguments(
+        context, diagnosticName.empty() ? name : diagnosticName,
+        arguments, parameters, location);
     resolvedType = substituteType(function->second.returnType, *substitution);
     resolvedParameterTypes = parameterTypes(parameters);
     resolvedTypeArguments = orderedTypeArguments(function->second.typeParameters, *substitution);
