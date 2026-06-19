@@ -39,7 +39,7 @@ def main(): Int = {
     people.set(2, cy)
     people.set(3, ada)
 
-    val unique = SetFromArray[Person](people)
+    val unique = Set.fromArray[Person](people)
     if unique.size() == 3 &&
        unique.contains(ada) &&
        unique.contains(bob) &&

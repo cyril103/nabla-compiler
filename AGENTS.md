@@ -247,10 +247,11 @@ Le pipeline implemente actuellement :
 - module de bibliotheque standard `collections.object_array` avec `ObjectArray[T]`,
   `ArrayObject[T]`, `objectArrayShuffle`, `objectArrayMkString`,
   `objectStringArrayMkString` (compatibilité) et `ArrayObject[T].shuffle`.
-- module de bibliotheque standard `collections.set` avec `Set[T]`, `setEmpty`,
-  `SetEmpty[T]`, `SetFromArray[T]`, `add`, `remove`, `union`, `intersect`,
-  `difference`, `setFromArray` et `toString`, en utilisant un index de seaux
-  hashés (`hashCode()`) pour des opérations de présence à coût moyen réduit.
+- module de bibliotheque standard `collections.set` avec `Set[T]`,
+  `Set.empty[T]`, `Set.fromArray[T]`, `SetEmpty[T]`, `SetFromArray[T]`, `add`,
+  `remove`, `union`, `intersect`, `difference`, `setEmpty`, `setFromArray` et
+  `toString`, en utilisant un index de seaux hashés (`hashCode()`) pour des
+  opérations de présence à coût moyen réduit.
 - module de bibliotheque standard `collections.array` comme point d'entree
   commun pour les tableaux specialises, avec `ArrayFill[T]`, `ArrayRange`,
   `arrayFill[T]`, `arrayMap[T]`,
@@ -298,7 +299,7 @@ Le pipeline implemente actuellement :
 - `examples/student_scores.nabla` comme exemple idiomatique vérifié pour
   `Array[T]`, `Option[T]`, classes, lambdas et sorties console.
 - `examples/workshop_set_inheritance.nabla` comme exemple vérifié pour
-  `Array[T]`, `Set[T]`, `SetFromArray[T]`, opérations d'ensemble et héritage
+  `Array[T]`, `Set[T]`, `Set.fromArray[T]`, opérations d'ensemble et héritage
   avec `override`; la friction restante porte surtout sur les collections
   polymorphes de type parent comme `Set[Person]`.
 
@@ -353,8 +354,8 @@ Limites importantes :
   fuient pas hors de l'expression `match`.
 - L'héritage fonctionne avec les collections typées par un parent dans les cas
   simples: `Array[Person]` peut contenir des instances de `Student`,
-  `Instructor` et `Volunteer`, puis alimenter `SetFromArray[Person]`.
-  L'exemple public utilise désormais `Array[T]` et `SetFromArray[T]` pour éviter
+  `Instructor` et `Volunteer`, puis alimenter `Set.fromArray[Person]`.
+  L'exemple public utilise désormais `Array[T]` et `Set.fromArray[T]` pour éviter
   d'exposer `ObjectArray[T]` / `ArrayObject[T]` dans le chemin applicatif
   principal. Les appels de méthodes utilisateur sont virtuels par défaut quand
   une valeur est manipulée par son type parent, y compris parent générique
@@ -677,7 +678,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Vérifier `examples/workshop_set_inheritance.nabla` avec un code de sortie
   et une sortie console attendus.
 - [x] Migrer `examples/workshop_set_inheritance.nabla` vers l'API publique
-  `Array[T]` + `SetFromArray[T]` au lieu de `ObjectArray[T]` / `ArrayObject[T]`
+  `Array[T]` + `Set.fromArray[T]` au lieu de `ObjectArray[T]` / `ArrayObject[T]`
   dans son chemin principal.
 - [x] Ajouter une régression `Set[Person]` construite depuis `Array[Person]`
   contenant des instances de sous-types (`Student`, `Instructor`, `Volunteer`).
@@ -702,6 +703,19 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Exposer le compagnon standard `object Set` comme surface
+  idiomatique: `Set.empty[T]()` et `Set.fromArray[T](values)`, avec résolution
+  des alias specialisees pour les tableaux primitifs et conservation de
+  `SetEmpty` / `SetFromArray` comme compatibilite.
+  - Fichiers / tests associés: `src/compiler_context.hpp`, `src/parser.cpp`,
+    `stdlib/collections/set.nabla`, `tests/test_stdlib_set.nabla`,
+    `tests/test_stdlib_set_int_array_object.nabla`,
+    `tests/test_inheritance_collection_parent_type.nabla`,
+    `tests/test_inheritance_set_equals_override.nabla`,
+    `tests/test_inheritance_set_hashcode_override.nabla`,
+    `examples/workshop_set_inheritance.nabla`, `docs/language.md`,
+    `docs/stdlib-api.md`, `docs/stdlib/collections/set.html`,
+    `docs/roadmap.md`.
 - `local` - Ajouter les objets statiques façon Scala: `object Name { def ... }`
   déclare des fonctions globales qualifiées appelables via `Name.method(...)`,
   avec support des méthodes génériques et des compagnons de surface
@@ -765,7 +779,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `docs/roadmap.md`.
 - `local` - Migrer l'exemple public `workshop_set_inheritance` vers la surface
   utilisateur recommandee : `collections.array`, `new Array[Student](...)` et
-  `SetFromArray[Student](...)`, tout en conservant les oracles de sortie.
+  `Set.fromArray[Student](...)`, tout en conservant les oracles de sortie.
   - Fichiers / tests associés: `examples/workshop_set_inheritance.nabla`,
     `AGENTS.md`, `docs/roadmap.md`, `make test SRC=examples/workshop_set_inheritance.nabla`.
 - `local` - Rendre explicite l'encodage runtime de `Bool` dans l'IR :

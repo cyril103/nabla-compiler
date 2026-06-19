@@ -1,4 +1,5 @@
 import collections.set
+import collections.array
 import collections.object_array
 
 class Student(name: String) {
@@ -22,14 +23,14 @@ def sameValue[T](left: T, right: T): Bool = {
 }
 
 def main(): Int = {
-    val base = setEmpty[Int]()
-    val rawNumbers = new ObjectArray[Int](4)
+    val base = Set.empty[Int]()
+    val rawNumbers = new Array[Int](4)
     rawNumbers.set(0, 1)
     rawNumbers.set(1, 3)
     rawNumbers.set(2, 1)
     rawNumbers.set(3, 2)
-    val fromArray = setFromArray[Int](new ArrayObject[Int](rawNumbers))
-    val fromArrayEmpty = setFromArray[Int](new ArrayObject[Int](new ObjectArray[Int](0)))
+    val fromArray = Set.fromArray[Int](rawNumbers)
+    val fromArrayEmpty = Set.fromArray[Int](new Array[Int](0))
     val numbers = base.add(3).add(1).add(3).add(2)
     val otherNumbers = base.add(2).add(4).add(1)
     val removedThree = numbers.remove(3)
@@ -43,26 +44,26 @@ def main(): Int = {
 
     val alice = new Student("alice")
     val bob = new Student("bob")
-    val students = setEmpty[Student]().add(alice).add(bob).add(alice)
+    val students = Set.empty[Student]().add(alice).add(bob).add(alice)
     val studentSource = new ObjectArray[Student](4)
     studentSource.set(0, alice)
     studentSource.set(1, bob)
     studentSource.set(2, alice)
     studentSource.set(3, new Student("carol"))
-    val studentsFromArray = setFromArray[Student](new ArrayObject[Student](studentSource))
-    val others = setEmpty[Student]().add(bob).add(alice)
+    val studentsFromArray = Set.fromArray[Student](new ArrayObject[Student](studentSource))
+    val others = Set.empty[Student]().add(bob).add(alice)
     val studentsUnion = students.union(others)
     val studentsIntersect = students.intersect(others)
     val studentsDifference = students.difference(others)
     val first = new ConstantHash("first", 3)
     val second = new ConstantHash("second", 3)
     val third = new ConstantHash("third", 3)
-    val collisionSet = setEmpty[ConstantHash]()
+    val collisionSet = Set.empty[ConstantHash]()
         .add(first)
         .add(second)
         .add(first)
         .add(third)
-    val collisionOther = setEmpty[ConstantHash]()
+    val collisionOther = Set.empty[ConstantHash]()
         .add(second)
         .add(new ConstantHash("fourth", 3))
     val collisionUnion = collisionSet.union(collisionOther)
@@ -73,13 +74,13 @@ def main(): Int = {
     collisionSource.set(1, second)
     collisionSource.set(2, first)
     collisionSource.set(3, new ConstantHash("third", 3))
-    val collisionFromArray = setFromArray[ConstantHash](new ArrayObject[ConstantHash](collisionSource))
+    val collisionFromArray = Set.fromArray[ConstantHash](new ArrayObject[ConstantHash](collisionSource))
     val collisionProbe = new ConstantHash("probe", 3)
 
     if numbers.size() == 3 &&
        fromArray.toString() == "[1, 3, 2]" &&
        fromArray.size() == 3 &&
-       rawNumbers.length() == 4 &&
+       rawNumbers.size() == 4 &&
        rawNumbers.get(0) == 1 &&
        rawNumbers.get(1) == 3 &&
        rawNumbers.get(2) == 1 &&

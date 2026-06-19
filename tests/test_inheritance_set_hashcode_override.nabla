@@ -24,7 +24,7 @@ def main(): Int = {
     values.set(0, ada)
     values.set(1, bob)
     values.set(2, ada)
-    val badges = SetFromArray[Person](values)
+    val badges = Set.fromArray[Person](values)
     if ada.hashCode() == 7 &&
        bob.hashCode() == 7 &&
        hashOf[Person](ada) == 7 &&

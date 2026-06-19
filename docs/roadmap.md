@@ -39,7 +39,7 @@ pour reprendre facilement apres une pause.
 - `examples/student_scores.nabla` sert d'exemple public vérifié pour
   `Array[T]`, `Option[T]`, classes, lambdas et sortie console.
 - `examples/workshop_set_inheritance.nabla` sert d'exemple public vérifié pour
-  `Array[T]`, `Set[T]`, `SetFromArray[T]`, opérations d'ensemble et héritage
+  `Array[T]`, `Set[T]`, `Set.fromArray[T]`, opérations d'ensemble et héritage
   avec `override`; il couvre maintenant aussi les collections polymorphes de
   type parent avec dispatch runtime des overrides utilisateur.
 - Support Vim minimal disponible dans `editor/vim`.
@@ -82,7 +82,7 @@ Actions recommandees :
 6. Stabiliser `Array[T]`, `Option[T]` et `Set[T]` comme surfaces utilisateur
    principales.
 7. Continuer a garder les exemples publics sur les facades idiomatiques
-   (`Array[T]`, `SetFromArray[T]`, `Option[T]`) quand elles existent.
+   (`Array[T]`, `Set.fromArray[T]`, `Option[T]`) quand elles existent.
 8. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
    surface n'est pas propre.
 
@@ -134,7 +134,7 @@ Actions suggérées pour la suite :
    - Finaliser les motifs nommés et les gardes (`motif if condition`).
    - Ajouter des diagnostics propres pour les erreurs de portée/typage des gardes.
 5. Réduire la friction entre héritage et collections.
-   - Corrigé : `Array[Person]` peut alimenter `SetFromArray[Person]` avec des
+   - Corrigé : `Array[Person]` peut alimenter `Set.fromArray[Person]` avec des
      instances `Student`, `Instructor`, `Volunteer` sans dupliquer les
      spécialisations IR.
    - Corrigé : les appels de méthodes utilisateur redispatchent vers l'override

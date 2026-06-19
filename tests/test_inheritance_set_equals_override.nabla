@@ -34,7 +34,7 @@ def main(): Int = {
     values.set(0, adaOne)
     values.set(1, bob)
     values.set(2, adaTwo)
-    val people = SetFromArray[Person](values)
+    val people = Set.fromArray[Person](values)
     if adaOne != bob &&
        adaOne == adaTwo &&
        sameValue[Person](adaOne, adaTwo) &&

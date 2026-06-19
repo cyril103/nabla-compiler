@@ -100,6 +100,11 @@ inline const std::vector<StdlibFunctionAlias>& stdlibFunctionAliases() {
         {"SetFromArray", {"Float"}, "setFromArrayFloat"},
         {"SetFromArray", {"Double"}, "setFromArrayDouble"},
         {"SetFromArray", {"Bool"}, "setFromArrayBool"},
+        {"Set.fromArray", {"Int"}, "setFromArrayInt"},
+        {"Set.fromArray", {"Long"}, "setFromArrayLong"},
+        {"Set.fromArray", {"Float"}, "setFromArrayFloat"},
+        {"Set.fromArray", {"Double"}, "setFromArrayDouble"},
+        {"Set.fromArray", {"Bool"}, "setFromArrayBool"},
         {"arrayMap", {"Int"}, "arrayIntMap"},
         {"arrayMap", {"Long"}, "arrayLongMap"},
         {"arrayMap", {"Float"}, "arrayFloatMap"},
@@ -193,6 +198,7 @@ inline std::optional<std::string> resolveStdlibFunctionAlias(
         if (name == "arrayMkString" && typeArguments[0] == "String") return "objectStringArrayMkString";
         if (name == "arrayFill" || name == "ArrayFill") return "objectArrayFill";
         if (name == "SetFromArray") return "setFromArray";
+        if (name == "Set.fromArray") return "setFromArray";
         if (name == "arrayMap") return "objectArrayMapSame";
         if (name == "arrayFilter") return "objectArrayFilter";
         if (name == "arrayForeach") return "objectArrayForeach";

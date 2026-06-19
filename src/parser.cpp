@@ -1155,18 +1155,34 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
         if (auto* identifier = dynamic_cast<IdentifierNode*>(expr.get());
             identifier && identifier->getType() == "<unresolved>") {
             const std::string qualifiedFunctionName = identifier->getName() + "." + method;
-            auto qualifiedFunction = context.functions.find(qualifiedFunctionName);
+            std::string functionLookupName = qualifiedFunctionName;
+            std::vector<std::string> functionTypeArguments = typeArguments;
+            if (auto alias = resolveStdlibFunctionAlias(qualifiedFunctionName, typeArguments)) {
+                auto aliasFunction = context.functions.find(*alias);
+                if (aliasFunction != context.functions.end()) {
+                    functionLookupName = *alias;
+                    if (aliasFunction->second.typeParameters.empty()) {
+                        functionTypeArguments.clear();
+                    }
+                }
+            } else if (isStdlibFunctionAliasName(qualifiedFunctionName) && !typeArguments.empty()) {
+                throw CompilerError(
+                    ErrorKind::Parser, methodToken.location,
+                    "la fonction standard générique '" + qualifiedFunctionName +
+                    "' ne supporte pas ces arguments de type");
+            }
+            auto qualifiedFunction = context.functions.find(functionLookupName);
             if (qualifiedFunction != context.functions.end()) {
                 consume(TokenType::LPAREN, "");
                 std::vector<std::unique_ptr<ASTNode>> arguments =
-                    parseFunctionCallArguments(qualifiedFunction->second, typeArguments);
+                    parseFunctionCallArguments(qualifiedFunction->second, functionTypeArguments);
                 consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
 
                 std::map<std::string, std::string> substitution;
                 if (auto genericSubstitution =
-                        genericFunctionSubstitutionFor(qualifiedFunction->second, typeArguments)) {
+                        genericFunctionSubstitutionFor(qualifiedFunction->second, functionTypeArguments)) {
                     substitution = *genericSubstitution;
-                } else if (typeArguments.empty() && !qualifiedFunction->second.typeParameters.empty()) {
+                } else if (functionTypeArguments.empty() && !qualifiedFunction->second.typeParameters.empty()) {
                     std::vector<std::string> actualArgumentTypes;
                     for (const auto& argument : arguments) actualArgumentTypes.push_back(argument->getType());
                     if (auto inferredSubstitution =
@@ -1178,7 +1194,7 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
                     substituteType(qualifiedFunction->second.returnType, substitution);
                 expr = located(
                     std::make_unique<FunctionCallNode>(
-                        qualifiedFunctionName, std::move(arguments), std::move(typeArguments),
+                        functionLookupName, std::move(arguments), std::move(functionTypeArguments),
                         initialReturnType),
                     methodToken.location);
                 continue;

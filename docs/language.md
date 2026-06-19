@@ -582,9 +582,9 @@ def main(): Int = {
     values.set(2, 1)
     values.set(3, 2)
 
-    val deduped = SetFromArray[Int](values)
-    val numbers = SetEmpty[Int]().add(3).add(1).add(3).add(2)
-    val more = SetEmpty[Int]().add(2).add(4).add(1)
+    val deduped = Set.fromArray[Int](values)
+    val numbers = Set.empty[Int]().add(3).add(1).add(3).add(2)
+    val more = Set.empty[Int]().add(2).add(4).add(1)
     if numbers.union(more).toString() == "[3, 1, 2, 4]" &&
        deduped.toString() == "[1, 3, 2]" &&
        numbers.intersect(more).toString() == "[1, 2]" &&
@@ -598,8 +598,8 @@ def main(): Int = {
 
 Operations utiles :
 
-- `SetEmpty[T](): Set[T]`
-- `SetFromArray[T](values: Array[T]): Set[T]`
+- `Set.empty[T](): Set[T]`
+- `Set.fromArray[T](values: Array[T]): Set[T]`
 - `size()`
 - `isEmpty()` / `nonEmpty()`
 - `contains(value: T): Bool`
@@ -612,9 +612,10 @@ Operations utiles :
 - `toArray(): ArrayObject[T]`
 - `toString(): String`
 
-Les noms bas niveau `setEmpty`, `setFromArray`, `ObjectArray[T]` et
-`ArrayObject[T]` restent disponibles pour la stdlib et le code existant, mais
-`SetEmpty`, `SetFromArray` et `Array[T]` sont les noms recommandés dans le code
+Les noms de compatibilite `SetEmpty`, `SetFromArray`, ainsi que les noms bas
+niveau `setEmpty`, `setFromArray`, `ObjectArray[T]` et `ArrayObject[T]`,
+restent disponibles pour la stdlib et le code existant, mais `Set.empty`,
+`Set.fromArray` et `Array[T]` sont les noms recommandés dans le code
 utilisateur.
 
 ## Option

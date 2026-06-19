@@ -72,8 +72,8 @@ def main(): Int = {
     eveningSource.set(4, new Student("Bob"))
     eveningSource.set(5, alice)
 
-    val morning = SetFromArray[Student](morningSource)
-    val evening = SetFromArray[Student](eveningSource)
+    val morning = Set.fromArray[Student](morningSource)
+    val evening = Set.fromArray[Student](eveningSource)
     val morningSnapshot = morning.toString()
 
     val all = morning.union(evening)
