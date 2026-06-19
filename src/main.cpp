@@ -126,7 +126,7 @@ int main(int argc, char* argv[]) {
         semanticAnalyzer.analyze(*globalAST);
         IRProgram irProgram;
         if (emitIR) {
-            irProgram = IRBuilder().build(*globalAST);
+            irProgram = IRBuilder().build(*globalAST, context);
         }
         if (emitIR) {
             std::cout << irProgram.format();
@@ -134,7 +134,7 @@ int main(int argc, char* argv[]) {
         }
 
         std::ofstream asmFile(asmFilename);
-        irProgram = IRBuilder().build(*globalAST);
+        irProgram = IRBuilder().build(*globalAST, context);
         IRCodeGenerator().generateASM(irProgram, context, asmFile);
         asmFile.close();
 

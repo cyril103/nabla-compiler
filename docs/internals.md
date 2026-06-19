@@ -108,10 +108,12 @@ slot 1..n   : champs de constructeur et champs hérités
 ```
 
 Les vraies vtables ne sont pas encore formalisées. Le header sert aujourd'hui
-au dispatch dynamique simple des méthodes utilisateur non génériques quand une
-valeur est manipulée via un type parent ou via `Any.hashCode()`. Les identifiants
-de classes commencent à `1000` pour éviter les tags runtime boxed. Les closures
-réutilisent leur propre convention de header pour stocker le pointeur de code.
+au dispatch dynamique des méthodes utilisateur quand une valeur est manipulée
+via un type parent, y compris pour des parents génériques instanciés et des
+méthodes génériques spécialisées. `super` est abaissé comme appel statique.
+Les identifiants de classes commencent à `1000` pour éviter les tags runtime
+boxed. Les closures réutilisent leur propre convention de header pour stocker
+le pointeur de code.
 
 ### Slots nuls
 

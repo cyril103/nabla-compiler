@@ -1,0 +1,24 @@
+class Parent[T]() {
+    def value(input: T): T = {
+        input
+    }
+}
+
+class Child extends Parent[Int]() {
+    override def value(input: Int): Int = {
+        input + 1
+    }
+}
+
+def render(parent: Parent[Int]): Int = {
+    parent.value(41)
+}
+
+def main(): Int = {
+    val child = new Child()
+    if render(child) == 42 && child.value(41) == 42 {
+        42
+    } else {
+        1
+    }
+}

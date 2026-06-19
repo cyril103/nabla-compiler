@@ -137,14 +137,15 @@ Actions suggérées pour la suite :
    - Corrigé : `Array[Person]` peut alimenter `SetFromArray[Person]` avec des
      instances `Student`, `Instructor`, `Volunteer` sans dupliquer les
      spécialisations IR.
-   - Corrigé : les appels de méthodes utilisateur non génériques redispatchent
-     vers l'override runtime quand la valeur est manipulée via un type parent,
-     tout en gardant `super` statique.
+   - Corrigé : les appels de méthodes utilisateur redispatchent vers l'override
+     runtime quand la valeur est manipulée via un type parent, y compris pour un
+     parent générique instancié et une méthode générique spécialisée, tout en
+     gardant `super` statique.
    - Corrigé : `Any.hashCode()` redispatche vers les overrides utilisateur, ce
      qui stabilise l'index hashé de `Set[Parent]` avec des instances de
      sous-types.
-   - Reste à clarifier : stratégie complète de vtables, méthodes/classes
-     génériques et égalité personnalisée en hiérarchie plus complexe.
+   - Reste à clarifier : stratégie complète de vtables et égalité personnalisée
+     en hiérarchie plus complexe.
    - Documenter des motifs d’exemple pour utiliser ce cas facilement.
 6. Ajouter des tests “mélange” héritage + autres fonctionnalités.
    - Cas de régression couvrant `super`, champs hérités, shadowing contrôlé

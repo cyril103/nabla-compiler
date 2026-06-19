@@ -78,6 +78,7 @@ struct IRProgram {
 class IRBuilder {
 public:
     IRProgram build(const class ProgramNode& program);
+    IRProgram build(const class ProgramNode& program, const class CompilerContext& context);
 
     void beginFunction(
         const std::string& name, const std::vector<IRParameter>& parameters,
@@ -197,10 +198,12 @@ private:
     };
     std::vector<MethodSpecialization> methodSpecializations;
     std::vector<FunctionSpecialization> functionSpecializations;
+    const class CompilerContext* context = nullptr;
 
     std::string nextValue();
     void emit(IRInstruction instruction);
     void emitPendingSpecializations(const class ProgramNode& root);
     void emitMethodSpecialization(const MethodSpecialization& specialization, const class ProgramNode& root);
+    void registerOverrideMethodSpecializations(const MethodSpecialization& specialization);
     void emitFunctionSpecialization(const FunctionSpecialization& specialization, const class ProgramNode& root);
 };

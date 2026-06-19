@@ -724,9 +724,10 @@ projet, puis dans `stdlib/`.
 - La memoire utilise un heap `mmap` de 8 MiB avec bump allocator, sans
   liberation ni GC.
 - Les objets utilisateur stockent un identifiant de classe runtime dans leur
-  header et les méthodes override non génériques peuvent être redispatchées
-  quand la valeur est manipulée via un type parent. Les vraies vtables ne sont
-  pas encore formalisées.
+  header et les appels de méthodes utilisateur sont virtuels par défaut quand
+  la valeur est manipulée via un type parent, y compris pour un parent générique
+  instancié et une méthode générique spécialisée. `super` reste un appel
+  statique. Les vraies vtables ne sont pas encore formalisées.
 - La monomorphisation des classes generiques est encore limitee aux cas
   supportes par la suite actuelle.
 - Les fonctions generiques ne sont pas encore des valeurs polymorphes.

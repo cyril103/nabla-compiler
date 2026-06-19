@@ -713,13 +713,14 @@ private:
     }
 
     bool canUseRuntimeClassDispatch(const std::string& className, const std::string& methodName) const {
-        if (parameterizedTypeFromName(className)) return false;
-        if (parameterizedTypeFromName(methodName)) return false;
+        const auto parameterizedMethod = parameterizedTypeFromName(methodName);
+        const std::string methodBaseName = parameterizedMethod ? parameterizedMethod->first : methodName;
         const std::string classBaseName = genericBaseName(className);
         auto classIt = context.classes.find(classBaseName);
         if (classIt == context.classes.end()) return false;
-        auto methodIt = classIt->second.methods.find(methodName);
-        if (methodIt != classIt->second.methods.end() && !methodIt->second.typeParameters.empty()) {
+        auto methodIt = classIt->second.methods.find(methodBaseName);
+        if (methodIt != classIt->second.methods.end() &&
+            !methodIt->second.typeParameters.empty() && !parameterizedMethod) {
             return false;
         }
         return true;
@@ -731,21 +732,23 @@ private:
         if (!canUseRuntimeClassDispatch(className, methodName)) return targets;
 
         const std::string staticClassName = genericBaseName(className);
+        const auto parameterizedMethod = parameterizedTypeFromName(methodName);
+        const std::string methodBaseName = parameterizedMethod ? parameterizedMethod->first : methodName;
         std::set<std::pair<std::string, std::string>> seen;
         for (const auto& [runtimeClassName, runtimeClass] : context.classes) {
             if (runtimeClassName == staticClassName) continue;
             if (!runtimeClass.typeParameters.empty()) continue;
-            if (!isTypeAssignable(context, runtimeClassName, staticClassName)) continue;
+            if (!isTypeAssignable(context, runtimeClassName, className)) continue;
 
-            auto methodLookup = resolveClassMethodInHierarchy(context, runtimeClassName, methodName);
+            auto methodLookup = resolveClassMethodInHierarchy(context, runtimeClassName, methodBaseName);
             if (!methodLookup) continue;
             const std::string targetOwnerName = genericBaseName(methodLookup->ownerClassName);
             if (targetOwnerName == staticClassName) continue;
             auto targetOwnerIt = context.classes.find(targetOwnerName);
             if (targetOwnerIt == context.classes.end()) continue;
-            auto targetMethodIt = targetOwnerIt->second.methods.find(methodName);
+            auto targetMethodIt = targetOwnerIt->second.methods.find(methodBaseName);
             if (targetMethodIt == targetOwnerIt->second.methods.end()) continue;
-            if (!targetMethodIt->second.typeParameters.empty()) continue;
+            if (!targetMethodIt->second.typeParameters.empty() && !parameterizedMethod) continue;
 
             if (seen.insert({runtimeClassName, targetOwnerName}).second) {
                 targets.push_back({runtimeClassName, targetOwnerName});

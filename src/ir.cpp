@@ -185,6 +185,19 @@ std::string IRProgram::format() const {
 }
 
 IRProgram IRBuilder::build(const ProgramNode& root) {
+    context = nullptr;
+    program = {};
+    methodSpecializations.clear();
+    functionSpecializations.clear();
+    typeSubstitutionStack.clear();
+    activeTypeSubstitution.clear();
+    root.lowerToIR(*this);
+    emitPendingSpecializations(root);
+    return program;
+}
+
+IRProgram IRBuilder::build(const ProgramNode& root, const CompilerContext& compilerContext) {
+    context = &compilerContext;
     program = {};
     methodSpecializations.clear();
     functionSpecializations.clear();
@@ -371,6 +384,7 @@ void IRBuilder::emitMethodSpecialization(
             function->getName() == specialization.methodName) {
             function->lowerSpecializedMethodToIR(
                 *this, specialization.concreteClassName, specialization.methodTypeArguments);
+            registerOverrideMethodSpecializations(specialization);
             return;
         }
     }
@@ -378,6 +392,34 @@ void IRBuilder::emitMethodSpecialization(
         ErrorKind::Codegen, SourceLocation{},
         "méthode générique introuvable pour spécialisation: " +
         qualifiedMember(specialization.templateClassName, specialization.methodName));
+}
+
+void IRBuilder::registerOverrideMethodSpecializations(const MethodSpecialization& specialization) {
+    if (!context || specialization.methodTypeArguments.empty()) return;
+
+    const std::string staticClassName = genericBaseName(specialization.concreteClassName);
+    for (const auto& [runtimeClassName, runtimeClass] : context->classes) {
+        if (runtimeClassName == staticClassName) continue;
+        if (!runtimeClass.typeParameters.empty()) continue;
+        if (!isTypeAssignable(*context, runtimeClassName, specialization.concreteClassName)) continue;
+
+        const auto methodLookup =
+            resolveClassMethodInHierarchy(*context, runtimeClassName, specialization.methodName);
+        if (!methodLookup) continue;
+        const std::string targetOwnerName = genericBaseName(methodLookup->ownerClassName);
+        if (targetOwnerName == genericBaseName(specialization.templateClassName)) continue;
+
+        auto targetOwnerIt = context->classes.find(targetOwnerName);
+        if (targetOwnerIt == context->classes.end()) continue;
+        auto targetMethodIt = targetOwnerIt->second.methods.find(specialization.methodName);
+        if (targetMethodIt == targetOwnerIt->second.methods.end()) continue;
+        if (targetMethodIt->second.typeParameters.empty()) continue;
+
+        registerMethodSpecialization(
+            targetOwnerName, targetOwnerName, specialization.methodName,
+            specialization.methodTypeArguments, specialization.argumentTypes,
+            specialization.returnType);
+    }
 }
 
 std::string IRBuilder::emitNewObject(

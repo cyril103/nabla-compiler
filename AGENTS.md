@@ -356,11 +356,12 @@ Limites importantes :
   `Instructor` et `Volunteer`, puis alimenter `SetFromArray[Person]`.
   L'exemple public utilise désormais `Array[T]` et `SetFromArray[T]` pour éviter
   d'exposer `ObjectArray[T]` / `ArrayObject[T]` dans le chemin applicatif
-  principal. Les overrides utilisateur non génériques redispatchent maintenant
-  via le header runtime quand une valeur est manipulée par son type parent; la
-  méthode `hashCode()` redispatche aussi depuis `Any` pour stabiliser l'index
-  hashé de `Set[Parent]`. La friction restante concerne les vtables complètes,
-  génériques et cas avancés d'égalité personnalisée.
+  principal. Les appels de méthodes utilisateur sont virtuels par défaut quand
+  une valeur est manipulée par son type parent, y compris parent générique
+  instancié et méthode générique spécialisée; `super` reste statique. La méthode
+  `hashCode()` redispatche aussi depuis `Any` pour stabiliser l'index hashé de
+  `Set[Parent]`. La friction restante concerne les vtables complètes et les cas
+  avancés d'égalité personnalisée.
 - Le mot-clé `override` est supporté pour marquer explicitement les
   redéfinitions de méthodes héritées, et il est obligatoire quand une méthode
   redéfinit une méthode provenant d'un parent.
@@ -674,8 +675,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   dans son chemin principal.
 - [x] Ajouter une régression `Set[Person]` construite depuis `Array[Person]`
   contenant des instances de sous-types (`Student`, `Instructor`, `Volunteer`).
-- [x] Ajouter un premier dispatch dynamique runtime pour les méthodes override
-  utilisateur non génériques appelées via un type parent, avec `super` maintenu
+- [x] Ajouter un dispatch dynamique runtime pour les méthodes override
+  utilisateur appelées via un type parent, y compris parents génériques
+  instanciés et méthodes génériques spécialisées, avec `super` maintenu
   statique.
 - [x] Ajouter une signature constructeur héritée typée dans `extends Parent(...)`
   pour rendre explicites les champs transmis au parent et les champs propres.
@@ -691,6 +693,16 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Étendre le dispatch dynamique au modèle attendu de polymorphisme
+  runtime: parents génériques instanciés (`Parent[Int]`) et méthodes génériques
+  spécialisées (`tag[Int]`) redispatchent vers l'override runtime; l'IR builder
+  reçoit désormais le contexte pour émettre les spécialisations override
+  nécessaires même sans appel direct à la sous-classe.
+  - Fichiers / tests associés: `src/ir.hpp`, `src/ir.cpp`, `src/main.cpp`,
+    `src/ir_codegen.cpp`,
+    `tests/test_inheritance_dynamic_dispatch_generic_parent.nabla`,
+    `tests/test_inheritance_dynamic_dispatch_generic_method.nabla`,
+    `docs/language.md`, `docs/internals.md`, `docs/roadmap.md`.
 - `local` - Redispatcher `Any.hashCode()` vers les overrides utilisateur quand
   une valeur est manipulée via `Any`, un type parent ou un paramètre générique
   spécialisé, et décaler les identifiants de classes runtime hors de la plage
@@ -1154,5 +1166,5 @@ Poursuivre la suite outillée autour de l’héritage et du matching :
 - Finaliser le nettoyage des diagnostics autour du pattern matching, notamment pour
   les motifs nommes.
 - Améliorer l’ergonomie d’héritage pour l'exemple de production:
-  vtables/génériques à formaliser et stratégie d'égalité/hash claire pour les
+  vtables à formaliser et stratégie d'égalité personnalisée claire pour les
   hiérarchies polymorphes.
