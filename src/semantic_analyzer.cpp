@@ -89,6 +89,83 @@ void collectVisibleMethodsInHierarchy(
     visiting.erase(classLookupName);
 }
 
+void resolveInheritedConstructorSignatures(CompilerContext& context) {
+    for (auto& [className, classInfo] : context.classes) {
+        if (classInfo.inheritedConstructorSignature.empty()) continue;
+        if (classInfo.parentTypes.empty()) {
+            throw CompilerError(
+                ErrorKind::Semantic, classInfo.location,
+                "signature héritée invalide pour la classe '" + className +
+                "' : aucun parent explicite");
+        }
+        if (!classInfo.parentConstructorArguments.empty()) {
+            throw CompilerError(
+                ErrorKind::Semantic, classInfo.location,
+                "signature héritée invalide pour la classe '" + className +
+                "' : arguments parent explicites déjà définis");
+        }
+
+        const auto parentFields =
+            collectClassFieldsInHierarchyForLayout(context, classInfo.parentTypes[0]);
+        if (classInfo.inheritedConstructorSignature.size() < parentFields.size()) {
+            throw CompilerError(
+                ErrorKind::Semantic, classInfo.location,
+                "signature héritée invalide pour la classe '" + className + "' : " +
+                std::to_string(parentFields.size()) +
+                " champ(s) parent attendu(s), " +
+                std::to_string(classInfo.inheritedConstructorSignature.size()) + " reçu(s)");
+        }
+
+        std::vector<std::string> parentConstructorArguments;
+        for (size_t i = 0; i < parentFields.size(); ++i) {
+            const auto& inheritedField = classInfo.inheritedConstructorSignature[i];
+            if (inheritedField.name != parentFields[i].first ||
+                inheritedField.type != parentFields[i].second) {
+                throw CompilerError(
+                    ErrorKind::Semantic, inheritedField.location,
+                    "signature héritée invalide pour la classe '" + className +
+                    "' : champ parent '" + parentFields[i].first + ": " +
+                    parentFields[i].second + "' attendu");
+            }
+            parentConstructorArguments.push_back(inheritedField.name);
+        }
+
+        std::set<std::string> signatureFieldNames;
+        for (const auto& field : classInfo.inheritedConstructorSignature) {
+            signatureFieldNames.insert(field.name);
+        }
+
+        std::vector<CompilerContext::FieldInfo> parsedOwnFields = std::move(classInfo.fields);
+        classInfo.fields.clear();
+
+        std::set<std::string> seenFieldNames;
+        for (const auto& parentField : parentFields) {
+            seenFieldNames.insert(parentField.first);
+        }
+        for (const auto& field : parsedOwnFields) {
+            if (signatureFieldNames.count(field.name)) continue;
+            if (!seenFieldNames.insert(field.name).second) {
+                throw CompilerError(
+                    ErrorKind::Semantic, field.location,
+                    "champ déjà déclaré dans '" + className + "': " + field.name);
+            }
+            classInfo.fields.push_back(field);
+        }
+        for (size_t i = parentFields.size(); i < classInfo.inheritedConstructorSignature.size(); ++i) {
+            const auto& field = classInfo.inheritedConstructorSignature[i];
+            if (!seenFieldNames.insert(field.name).second) {
+                throw CompilerError(
+                    ErrorKind::Semantic, field.location,
+                    "champ déjà déclaré dans '" + className + "': " + field.name);
+            }
+            classInfo.fields.push_back(field);
+        }
+
+        classInfo.parentConstructorArguments = std::move(parentConstructorArguments);
+        classInfo.inheritedConstructorSignature.clear();
+    }
+}
+
 }
 
 SemanticAnalyzer::SemanticAnalyzer(CompilerContext& context) : context(context) {}
@@ -102,6 +179,7 @@ void SemanticAnalyzer::validateDeclaredTypes() {
     ensureAnyRootType();
     validateParentTypes();
     validateInheritanceCycles();
+    resolveInheritedConstructorSignatures(context);
 
     for (const auto& [className, classInfo] : context.classes) {
         for (const auto& field : classInfo.fields) {

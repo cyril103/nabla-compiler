@@ -1,0 +1,11 @@
+class Entity(nameValue: String) {
+    def name(): String = {
+        nameValue
+    }
+}
+
+class Person extends Entity(label: String) {
+    def label(): String = {
+        label
+    }
+}

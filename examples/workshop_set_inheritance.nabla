@@ -12,7 +12,7 @@ class Person(nameValue: String) {
     }
 }
 
-class Student extends Person() {
+class Student extends Person(nameValue: String) {
     override def role(): String = {
         "Student"
     }
@@ -22,7 +22,7 @@ class Student extends Person() {
     }
 }
 
-class Instructor extends Person() {
+class Instructor extends Person(nameValue: String) {
     override def role(): String = {
         "Instructor"
     }
@@ -32,7 +32,7 @@ class Instructor extends Person() {
     }
 }
 
-class Volunteer extends Person() {
+class Volunteer extends Person(nameValue: String) {
     override def role(): String = {
         "Volunteer"
     }

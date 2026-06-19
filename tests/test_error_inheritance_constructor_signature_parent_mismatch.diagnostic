@@ -1,0 +1,1 @@
+tests/test_error_inheritance_constructor_signature_parent_mismatch.nabla:7:36: semantic error: signature héritée invalide pour la classe 'Person' : champ parent 'nameValue: String' attendu

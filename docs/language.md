@@ -274,6 +274,12 @@ class Worker extends Person with CanWork(nameValue: String, ageValue: Int) {
 }
 ```
 
+Dans une signature héritée comme `extends Entity(nameValue: String, ageValue:
+Int)`, le préfixe doit reprendre les champs du parent direct dans l'ordre de son
+layout. Les champs restants deviennent les champs propres de la classe enfant.
+Cette forme rend le constructeur public explicite sans répéter un appel parent
+séparé.
+
 La resolution des methodes suit une recherche dans la classe courante, puis dans
 le parent puis les mixins dans l'ordre d'énonciation (`with`). Les conflits
 de méthodes sont détectés également quand une méthode ambiguë provient d'une

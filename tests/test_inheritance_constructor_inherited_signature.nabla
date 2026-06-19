@@ -1,0 +1,26 @@
+class Entity(nameValue: String) {
+    def name(): String = {
+        nameValue
+    }
+}
+
+class Person extends Entity(nameValue: String, ageValue: Int) {
+    def age(): Int = {
+        ageValue
+    }
+}
+
+class Student extends Person(nameValue: String, ageValue: Int, scoreValue: Int) {
+    def score(): Int = {
+        scoreValue
+    }
+}
+
+def main(): Int = {
+    val ada = new Student("Ada", 19, 23)
+    if ada.name() == "Ada" && ada.age() == 19 {
+        ada.score() + 19
+    } else {
+        1
+    }
+}

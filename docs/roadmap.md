@@ -125,7 +125,9 @@ Actions suggérées pour la suite :
    - Confirmer les cas `super` dans chaînes de mixins / héritage.
    - Définir règles et tests pour les masquages explicites.
 3. Améliorer l’ergonomie héritage/collisions de types.
-   - Simplifier les constructeurs d’héritage (appel parent depuis sous-classe).
+   - Corrigé : `extends Parent(field: Type, extra: Type)` expose une signature
+     constructeur héritée lisible ; le préfixe initialise le parent direct et
+     le suffixe déclare les champs propres.
    - Rendre la résolution des champs/méthodes héritées plus prédictible dans les
      exemples concrets.
 4. Revenir sur le chantier `match` avancé.

@@ -1,4 +1,5 @@
 #include "parser.hpp"
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 
@@ -178,9 +179,11 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
 
     bool hasExplicitParent = false;
     std::vector<std::string> parentConstructorArguments;
+    std::vector<CompilerContext::FieldInfo> inheritedConstructorSignature;
     bool hasExplicitParentConstructorArguments = false;
     bool consumedHeaderList = false;
     bool headerListIsTyped = false;
+    std::string directParentType;
 
     auto isTypedFieldHeader = [&]() -> bool {
         if (peek().type != TokenType::LPAREN) return false;
@@ -227,6 +230,7 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
         consume(TokenType::KW_EXTENDS, "");
         auto [baseParentType, baseParentTypeLocation] = parseType("Type de parent attendu");
         (void) baseParentTypeLocation;
+        directParentType = baseParentType;
         context.classes[className].parentTypes.push_back(baseParentType);
         if (peek().type == TokenType::COMMA) {
             throw CompilerError(
@@ -263,13 +267,18 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
                 sawTypeAnnotation = true;
                 consume(TokenType::COLON, "");
                 auto [fieldType, fieldTypeLocation] = parseType("Type attendu");
-                if (context.classLayouts[className].count(argumentToken.value)) {
+                const auto duplicateSignatureField = std::find_if(
+                    inheritedConstructorSignature.begin(), inheritedConstructorSignature.end(),
+                    [&](const CompilerContext::FieldInfo& field) {
+                        return field.name == argumentToken.value;
+                    });
+                if (duplicateSignatureField != inheritedConstructorSignature.end()) {
                     throw CompilerError(
                         ErrorKind::Parser, argumentToken.location,
                         "champ déjà déclaré dans '" + className + "': " + argumentToken.value);
                 }
-                context.classLayouts[className][argumentToken.value] = offset;
-                context.classes[className].fields.push_back({argumentToken.value, fieldType, fieldTypeLocation});
+                inheritedConstructorSignature.push_back(
+                    {argumentToken.value, fieldType, fieldTypeLocation});
                 offset += 8;
             } else {
                 if (peek().type == TokenType::COMMA || peek().type == TokenType::RPAREN) {
@@ -302,6 +311,22 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
                     ErrorKind::Parser, classNameToken.location,
                     "arguments parent explicites ou signature héritée mélangés dans 'extends'");
             }
+            size_t firstOwnField = 0;
+            if (!directParentType.empty() && context.classes.count(genericBaseName(directParentType))) {
+                firstOwnField = collectClassFieldsInHierarchyForLayout(context, directParentType).size();
+            }
+            int ownFieldOffset = 8;
+            for (size_t i = firstOwnField; i < inheritedConstructorSignature.size(); ++i) {
+                const auto& field = inheritedConstructorSignature[i];
+                if (context.classLayouts[className].count(field.name)) {
+                    throw CompilerError(
+                        ErrorKind::Parser, field.location,
+                        "champ déjà déclaré dans '" + className + "': " + field.name);
+                }
+                context.classLayouts[className][field.name] = ownFieldOffset;
+                context.classes[className].fields.push_back(field);
+                ownFieldOffset += 8;
+            }
             headerListIsTyped = true;
         } else if (sawBareArgument || (peek().type == TokenType::LPAREN)) {
             hasExplicitParentConstructorArguments = true;
@@ -322,6 +347,7 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
     }
 
     context.classes[className].parentConstructorArguments = parentConstructorArguments;
+    context.classes[className].inheritedConstructorSignature = inheritedConstructorSignature;
     currentParsingClass = className;
     auto previousTypeParameters = currentFunctionTypeParameters;
     currentFunctionTypeParameters = typeParameters;

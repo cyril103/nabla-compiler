@@ -41,6 +41,7 @@ struct CompilerContext {
         std::map<std::string, FunctionSignature> methods;
         std::vector<std::string> parentTypes;
         std::vector<std::string> parentConstructorArguments;
+        std::vector<FieldInfo> inheritedConstructorSignature;
         bool hasExplicitParent = false;
         std::vector<std::string> typeParameters;
         SourceLocation location;

@@ -363,10 +363,9 @@ Limites importantes :
 - Le mot-clé `override` est supporté pour marquer explicitement les
   redéfinitions de méthodes héritées, et il est obligatoire quand une méthode
   redéfinit une méthode provenant d'un parent.
-  Il manque encore un modèle plus lisible pour les constructeurs
-  hérités (chaîne `super(...)` explicite, initialisation claire des champs
-  parentaux). Ces zones sont la source principale de verbosité de l'exemple
-  `workshop_set_inheritance.nabla`.
+  Les constructeurs hérités peuvent désormais être exposés avec une signature
+  typée dans `extends Parent(...)`: le préfixe reprend les champs du parent
+  direct, et le suffixe déclare les champs propres de l'enfant.
 - Les collections basées sur `Any` gagneraient à mieux documenter la stratégie
   d'égalité (`==`) + `hashCode()` dans les cas d'héritage, pour réduire
   l'incertitude de comportement quand `Student`, `Instructor` et `Volunteer`
@@ -677,6 +676,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter un premier dispatch dynamique runtime pour les méthodes override
   utilisateur non génériques appelées via un type parent, avec `super` maintenu
   statique.
+- [x] Ajouter une signature constructeur héritée typée dans `extends Parent(...)`
+  pour rendre explicites les champs transmis au parent et les champs propres.
 - [x] Ajouter un test d'outillage pour vérifier le diagnostic quand une commande
   externe requise (`nasm`) est absente du `PATH`.
 - [x] Ajouter le support `write` / `append` multi-mots dans
@@ -687,6 +688,16 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Ajouter la signature constructeur héritée typée dans
+  `extends Parent(...)`: le préfixe valide les champs du parent direct et le
+  suffixe devient les champs propres de la classe enfant. Migrer le workshop
+  héritage vers `extends Person(nameValue: String)`.
+  - Fichiers / tests associés: `src/parser.cpp`, `src/semantic_analyzer.cpp`,
+    `src/compiler_context.hpp`,
+    `tests/test_inheritance_constructor_inherited_signature.nabla`,
+    `tests/test_error_inheritance_constructor_signature_parent_mismatch.nabla`,
+    `examples/workshop_set_inheritance.nabla`, `docs/language.md`,
+    `docs/roadmap.md`.
 - `local` - Ajouter un premier dispatch dynamique pour les overrides utilisateur
   non génériques via identifiant de classe runtime dans le header objet, et
   distinguer les appels `super` comme appels statiques dans l'IR.
@@ -1132,6 +1143,6 @@ Poursuivre la suite outillée autour de l’héritage et du matching :
 
 - Finaliser le nettoyage des diagnostics autour du pattern matching, notamment pour
   les motifs nommes.
-- Améliorer l’ergonomie d’héritage pour l’exemple de production:
-  constructeurs parentaux plus simples, vtables/génériques à formaliser, et
-  stratégie d'égalité/hash claire pour les hiérarchies polymorphes.
+- Améliorer l’ergonomie d’héritage pour l'exemple de production:
+  vtables/génériques à formaliser et stratégie d'égalité/hash claire pour les
+  hiérarchies polymorphes.
