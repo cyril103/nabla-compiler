@@ -294,6 +294,8 @@ Le pipeline implemente actuellement :
   comme banc progressif pour exercer le langage et la bibliotheque standard.
 - `examples/student_scores.nabla` comme exemple idiomatique vérifié pour
   `Array[T]`, `Option[T]`, classes, lambdas et sorties console.
+- `examples/workshop_set_inheritance.nabla` comme exemple vérifié pour
+  `Set[T]`, `setFromArray`, opérations d'ensemble et héritage avec `override`.
 
 Limites importantes :
 
@@ -651,6 +653,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   langage.
 - [x] Vérifier `examples/student_scores.nabla` avec un code de sortie et une
   sortie console attendus.
+- [x] Vérifier `examples/workshop_set_inheritance.nabla` avec un code de sortie
+  et une sortie console attendus.
 - [x] Ajouter un test d'outillage pour vérifier le diagnostic quand une commande
   externe requise (`nasm`) est absente du `PATH`.
 - [x] Ajouter le support `write` / `append` multi-mots dans
@@ -661,6 +665,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Vérifier `examples/workshop_set_inheritance.nabla` comme exemple
+  public d'héritage et de `collections.set`, avec code de sortie et oracle
+  stdout sous `make examples`.
+  - Fichiers / tests associés: `examples/workshop_set_inheritance.nabla`,
+    `examples/workshop_set_inheritance.expected`,
+    `examples/workshop_set_inheritance.stdout`, `AGENTS.md`,
+    `docs/roadmap.md`.
 - `local` - Ajouter `make examples` à la CI GitHub pour vérifier les exemples
   publics à chaque push et pull request.
   - Fichiers / tests associés: `.github/workflows/ci.yml`, `AGENTS.md`,

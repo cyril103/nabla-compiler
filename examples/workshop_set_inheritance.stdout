@@ -1,0 +1,9 @@
+Inheritance check: Instructor, Volunteer
+Morning     = [Alice [Student], Bob [Student], Claire [Student], Eve [Student], Gina [Student]]
+Evening     = [Bob [Student], Eve [Student], Frank [Student], Claire [Student], Bob [Student], Alice [Student]]
+Union       = [Alice [Student], Bob [Student], Claire [Student], Eve [Student], Gina [Student], Frank [Student], Bob [Student]]
+Intersect   = [Alice [Student], Bob [Student], Claire [Student], Eve [Student]]
+Only morning= [Gina [Student]]
+Only evening= [Frank [Student], Bob [Student]]
+After add   = [Alice [Student], Bob [Student], Claire [Student], Eve [Student], Gina [Student], Hugo [Student]]
+After remove= [Alice [Student], Bob [Student], Claire [Student], Gina [Student], Hugo [Student]]

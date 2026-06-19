@@ -38,6 +38,8 @@ pour reprendre facilement apres une pause.
   notamment `write` / `append` avec texte multi-mots.
 - `examples/student_scores.nabla` sert d'exemple public vérifié pour
   `Array[T]`, `Option[T]`, classes, lambdas et sortie console.
+- `examples/workshop_set_inheritance.nabla` sert d'exemple public vérifié pour
+  `Set[T]`, `setFromArray`, opérations d'ensemble et héritage avec `override`.
 - Support Vim minimal disponible dans `editor/vim`.
 - Suites `make all-tests`, `make examples` et `make tooling-tests` vertes au
   moment de cette mise a jour; la CI GitHub lance aussi les exemples publics.
