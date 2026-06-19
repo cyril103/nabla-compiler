@@ -1,6 +1,6 @@
 import core.option
 
 def main(): Int = {
-    optionNone(0).foreach(value => print(new IntArray(0).get(0).toString()))
+    Option.none[Int](0).foreach(value => print(new IntArray(0).get(0).toString()))
     42
 }

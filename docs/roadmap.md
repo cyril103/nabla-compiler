@@ -37,7 +37,8 @@ pour reprendre facilement apres une pause.
   les commandes fichier, et sert de vitrine pour l'ergonomie du langage,
   notamment `write` / `append` avec texte multi-mots.
 - `examples/student_scores.nabla` sert d'exemple public vérifié pour
-  `Array[T]`, `Option[T]`, classes, lambdas et sortie console.
+  `Array[T]`, `Option.some[T]` / `Option.none[T]`, classes, lambdas et sortie
+  console.
 - `examples/workshop_set_inheritance.nabla` sert d'exemple public vérifié pour
   `Array[T]`, `Set[T]`, `Set.fromArray[T]`, opérations d'ensemble et héritage
   avec `override`; il couvre maintenant aussi les collections polymorphes de
@@ -82,7 +83,8 @@ Actions recommandees :
 6. Stabiliser `Array[T]`, `Option[T]` et `Set[T]` comme surfaces utilisateur
    principales.
 7. Continuer a garder les exemples publics sur les facades idiomatiques
-   (`Array[T]`, `Set.fromArray[T]`, `Option[T]`) quand elles existent.
+   (`Array[T]`, `Set.fromArray[T]`, `Option.some[T]` / `Option.none[T]`) quand
+   elles existent.
 8. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
    surface n'est pas propre.
 

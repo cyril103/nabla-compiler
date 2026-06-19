@@ -210,9 +210,10 @@ Le pipeline implemente actuellement :
   `hypotenuseDouble`.
 - module de bibliotheque standard `core.option_int` avec `OptionInt`,
   `optionIntSome`, `optionIntNone`, `map`, `filter` et `orElse`;
-- module de bibliotheque standard `core.option` avec `Option[T]`, `optionSome`,
-  `optionNone`, `isDefined`, `isEmpty`, `nonEmpty`, `map[U]`, `filter`,
-  `flatMap[U]`, `foreach`, `orElse` et `getOrElse`;
+- module de bibliotheque standard `core.option` avec `Option[T]`,
+  `Option.some[T]`, `Option.none[T]`, `optionSome`, `optionNone`, `isDefined`,
+  `isEmpty`, `nonEmpty`, `map[U]`, `filter`, `flatMap[U]`, `foreach`, `orElse`
+  et `getOrElse`;
 - premier module de bibliotheque standard `collections.int_array` avec
   `intArraySum`, `intArrayFill`, `intArrayRange`, `intArrayMap`,
   `intArrayFilter` et la facade objet `ArrayInt` avec `map`, `filter`,
@@ -703,6 +704,24 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Exposer le compagnon standard `object Option` comme surface
+  idiomatique: `Option.some[T](value)` et `Option.none[T](default)`, tout en
+  gardant `optionSome` / `optionNone` comme compatibilite. L'absence garde pour
+  l'instant une valeur interne de secours, conformement a la representation
+  actuelle de `Option[T]`.
+  - Fichiers / tests associés: `stdlib/core/option.nabla`,
+    `tests/test_stdlib_option_string.nabla`, `tests/test_stdlib_option_int.nabla`,
+    `tests/test_stdlib_option_map_int.nabla`,
+    `tests/test_stdlib_option_map_string.nabla`,
+    `tests/test_stdlib_option_filter.nabla`,
+    `tests/test_stdlib_option_or_else.nabla`,
+    `tests/test_stdlib_option_flatmap_int.nabla`,
+    `tests/test_stdlib_option_flatmap_string.nabla`,
+    `tests/test_stdlib_option_flatmap_none.nabla`,
+    `tests/test_stdlib_option_foreach_string.nabla`,
+    `tests/test_stdlib_option_foreach_none.nabla`,
+    `examples/student_scores.nabla`, `docs/language.md`,
+    `docs/stdlib-api.md`, `docs/roadmap.md`.
 - `local` - Exposer le compagnon standard `object Set` comme surface
   idiomatique: `Set.empty[T]()` et `Set.fromArray[T](values)`, avec résolution
   des alias specialisees pour les tableaux primitifs et conservation de

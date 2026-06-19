@@ -626,8 +626,8 @@ Le module `core.option` fournit `Option[T]`.
 import core.option
 
 def main(): Int = {
-    val some = optionSome("hello")
-    val none = optionNone("fallback")
+    val some = Option.some[String]("hello")
+    val none = Option.none[String]("fallback")
 
     if some.getOrElse("x") == "hello" &&
        none.getOrElse("fallback") == "fallback" {
@@ -640,6 +640,8 @@ def main(): Int = {
 
 Operations courantes :
 
+- `Option.some[T](value): Option[T]`
+- `Option.none[T](default): Option[T]`
 - `isEmpty()`
 - `nonEmpty()`
 - `getOrElse(default)`
@@ -648,6 +650,9 @@ Operations courantes :
 - `foreach(f)`
 - `filter(predicate)`
 - `orElse(fallback)`
+
+Les noms de compatibilite `optionSome[T](value)` et
+`optionNone[T](default)` restent disponibles pour le code existant.
 
 ## Entree Et Sortie
 

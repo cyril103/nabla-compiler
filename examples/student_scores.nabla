@@ -64,11 +64,11 @@ def scoreBand(student: Student): String = {
 }
 
 def studentBadges(student: Student): ArrayObject[Option[String]] = {
-    val badges = arrayFill[Option[String]](2, optionSome(student.name()))
+    val badges = arrayFill[Option[String]](2, Option.some[String](student.name()))
     if excellent(student) {
-        badges.set(1, optionSome("honors"))
+        badges.set(1, Option.some[String]("honors"))
     } else {
-        badges.set(1, optionNone("badge"))
+        badges.set(1, Option.none[String]("badge"))
     }
     badges
 }

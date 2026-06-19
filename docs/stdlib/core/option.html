@@ -16,7 +16,7 @@
     <section class="module-hero">
       <p class="import">import core.option</p>
       <h1>Option</h1>
-      <p>Valeur optionnelle generique. `Option[T]` represente soit une valeur presente, soit une absence. C&#x27;est le type a privilegier quand une operation peut ne rien produire sans que ce soit une erreur.</p>
+      <p>Valeur optionnelle generique. `Option[T]` represente soit une valeur presente, soit une absence. C&#x27;est le type a privilegier quand une operation peut ne rien produire sans que ce soit une erreur. Utiliser `Option.some[T](value)` pour construire une valeur presente et `Option.none[T](default)` pour construire une absence avec sa valeur interne de secours. Les anciens noms `optionSome[T](value)` et `optionNone[T](default)` restent disponibles pour compatibilite.</p>
     </section>
     <section class="entries">
     <article class="entry" id="Option">
@@ -24,6 +24,19 @@
       <h2>Option</h2>
       <pre><code>class Option[T](defined: Bool, value: T)</code></pre>
       <p>Conteneur optionnel generique.</p>
+    </article>
+    <article class="entry" id="some">
+      <div class="kind">def</div>
+      <h2>some</h2>
+      <pre><code>def Option.some[T](value: T): Option[T]</code></pre>
+      <p>Construit une option contenant une valeur.</p>
+    </article>
+    <article class="entry" id="none">
+      <div class="kind">def</div>
+      <h2>none</h2>
+      <pre><code>def Option.none[T](default: T): Option[T]</code></pre>
+      <p>Construit une option vide.</p>
+<p>Le parametre `default` sert de valeur interne de secours pour le type `T`.</p>
     </article>
     <article class="entry" id="optionSome">
       <div class="kind">def</div>

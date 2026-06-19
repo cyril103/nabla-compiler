@@ -22,6 +22,8 @@ helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
 ### Core
 
 - `Option[T]`
+  - `Option.some[T](value)`
+  - `Option.none[T](default)`
   - `isDefined()`
   - `isEmpty()`
   - `getOrElse(default)`
@@ -31,8 +33,8 @@ helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
   - `foreach(...)`
   - `orElse(...)`
 - Constructeurs/fabriques :
-  - `optionSome[T](value)`
-  - `optionNone[T](default)`
+  - `optionSome[T](value)` et `optionNone[T](default)` restent disponibles par
+    compatibilite.
 - `OptionInt` reste public tant que les generiques primitifs ne couvrent pas
   totalement les besoins de performance/representation.
 

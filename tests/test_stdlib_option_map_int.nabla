@@ -1,8 +1,8 @@
 import core.option
 
 def main(): Int = {
-    val some = optionSome(41)
-    val none = optionNone(10)
+    val some = Option.some[Int](41)
+    val none = Option.none[Int](10)
     val mappedSome = some.map[Int](0, value => value + 1)
     val mappedNone = none.map[Int](42, value => value + 1)
     mappedSome.getOrElse(0) + mappedNone.getOrElse(0)

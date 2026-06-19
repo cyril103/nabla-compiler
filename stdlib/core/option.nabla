@@ -2,7 +2,10 @@
 /// Valeur optionnelle generique.
 /// `Option[T]` represente soit une valeur presente, soit une absence. C'est le
 /// type a privilegier quand une operation peut ne rien produire sans que ce soit
-/// une erreur.
+/// une erreur. Utiliser `Option.some[T](value)` pour construire une valeur
+/// presente et `Option.none[T](default)` pour construire une absence avec sa
+/// valeur interne de secours. Les anciens noms `optionSome[T](value)` et
+/// `optionNone[T](default)` restent disponibles pour compatibilite.
 
 /// Conteneur optionnel generique.
 class Option[T](defined: Bool, value: T) {
@@ -69,14 +72,31 @@ class Option[T](defined: Bool, value: T) {
     }
 }
 
+object Option {
+    /// Construit une option contenant une valeur.
+    /// @signature def Option.some[T](value: T): Option[T]
+    def some[T](value: T): Option[T] = {
+        new Option[T](true, value)
+    }
+
+    /// Construit une option vide.
+    /// @signature def Option.none[T](default: T): Option[T]
+    ///
+    /// Le parametre `default` sert de valeur interne de secours pour le type
+    /// `T`.
+    def none[T](default: T): Option[T] = {
+        new Option[T](false, default)
+    }
+}
+
 /// Construit une option contenant une valeur.
 def optionSome[T](value: T): Option[T] = {
-    new Option[T](true, value)
+    Option.some[T](value)
 }
 
 /// Construit une option vide.
 ///
 /// Le parametre `default` sert de valeur interne de secours pour le type `T`.
 def optionNone[T](default: T): Option[T] = {
-    new Option[T](false, default)
+    Option.none[T](default)
 }
