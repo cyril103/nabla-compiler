@@ -885,9 +885,29 @@ private:
         storeRegister(instruction.result, "rax");
     }
 
+    void emitBoxedValue(const IRInstruction& instruction, long long tag) {
+        if (instruction.operands.size() != 1) codegenError("boxing IR invalide");
+        loadValue(instruction.operands[0], "r10");
+        out << "    mov rdi, 16\n";
+        out << "    call Runtime_alloc\n";
+        out << "    mov qword [rax], " << tag << "\n";
+        out << "    mov [rax + 8], r10\n";
+        storeRegister(instruction.result, "rax");
+    }
+
     void emitMethodCall(const IRInstruction& instruction) {
         auto [className, methodName] = splitQualifiedMember(instruction.operation);
         if (instruction.operands.empty()) codegenError("appel de methode IR sans receveur");
+        if (methodName == "box") {
+            if (className == "Int") return emitBoxedValue(instruction, RuntimeValues::kBoxedIntTag);
+            if (className == "Long") return emitBoxedValue(instruction, RuntimeValues::kBoxedLongTag);
+            if (className == "Float") return emitBoxedValue(instruction, RuntimeValues::kBoxedFloatTag);
+            if (className == "Double") return emitBoxedValue(instruction, RuntimeValues::kBoxedDoubleTag);
+            if (className == "Bool") return emitBoxedValue(instruction, RuntimeValues::kBoxedBoolTag);
+            if (className == "Char") return emitBoxedValue(instruction, RuntimeValues::kBoxedCharTag);
+            if (className == "Unit") return emitBoxedValue(instruction, RuntimeValues::kBoxedUnitTag);
+            codegenError("boxing non supporté pour " + className);
+        }
 
         loadValue(instruction.operands[0], "rdi");
         const size_t methodArgumentCount = instruction.operands.size() - 1;

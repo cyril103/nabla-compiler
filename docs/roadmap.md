@@ -16,7 +16,8 @@ pour reprendre facilement apres une pause.
   cycles / conflits et appel `super`.
   La conversion `toString()` est désormais disponible de façon uniforme pour les
   types primitifs usuels (`Int`, `Long`, `Float`, `Double`, `Bool`, `Char`) au niveau du
-  backend runtime.
+  backend runtime, y compris via un paramètre `Any`/`AnyVal` de fonction/méthode
+  grâce au boxing heap minimal.
 - Standard library deja utile :
   - collections typées et facade `Array[T]`
   - `collections.set` avec `Set[T]`, `add`, `remove`, `union`, `intersect`,

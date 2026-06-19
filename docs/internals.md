@@ -58,7 +58,10 @@ parent explicite hérite implicitement de `AnyRef`, pas directement de `Any`.
 
 Cette hiérarchie est une convention de type, pas une promesse de représentation
 objet uniforme : les chemins spécialisés peuvent conserver des valeurs
-immédiates ou brutes.
+immédiates ou brutes. Quand une primitive builtin est passée à un paramètre
+`Any` ou `AnyVal` d'une fonction ou méthode, le lowering IR insère un boxing
+heap explicite afin que les méthodes dynamiques communes comme `toString()`
+puissent retrouver le type runtime d'origine.
 
 ### Valeurs taggées
 
@@ -86,10 +89,11 @@ booléens C++ implicites.
 
 `Float` et `Double` sont portés comme valeurs numériques brutes dans les chemins
 IR/backend qui les manipulent. Les tableaux natifs de flottants utilisent des
-slots initialisés à zéro IEEE, pas au zéro taggé. Quand ces primitives doivent
-etre transportees via une surface pleinement generique (`Any`/`AnyVal` stocke ou
-inspecte dynamiquement), le modele cible est un boxing heap explicite ; ce
-boxing n'est pas encore generalise dans tous les chemins runtime.
+slots initialisés à zéro IEEE, pas au zéro taggé. Le boxing heap explicite est
+actuellement émis pour les appels de fonctions/méthodes dont le paramètre
+attendu est `Any` ou `AnyVal`; le payload conserve les bits IEEE et le tag de
+box permet à `Any.toString()` de redispatcher vers `Float.toString()` /
+`Double.toString()`.
 
 ### Objets heap
 

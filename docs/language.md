@@ -314,9 +314,11 @@ Any
 `Any` apporte des methodes de base disponibles sur toute classe reference :
 `toString(): String` et `hashCode(): Int`. Ces methodes peuvent etre redefinies
 dans les sous-classes. Les primitives disposent aussi de chemins specialises
-comme `Int.toString()` ou `Double.toString()` ; une valeur primitive vue comme
-`Any`/`AnyVal` reste une relation de type et pourra necessiter du boxing dans les
-chemins runtime plus generiques.
+comme `Int.toString()` ou `Double.toString()`. Quand une primitive est passée à
+un paramètre `Any` ou `AnyVal` de fonction/méthode, le compilateur insère un
+boxing runtime minimal :
+`value.toString()` conserve alors le rendu spécialisé (`true`, `Z`,
+`1.500000`, etc.).
 
 ## Generiques
 

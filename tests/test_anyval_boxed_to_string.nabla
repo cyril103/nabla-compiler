@@ -1,0 +1,21 @@
+def stringify(value: AnyVal): String = {
+    value.toString()
+}
+
+def stringifyAny(value: Any): String = {
+    value.toString()
+}
+
+def main(): Int = {
+    if stringify(42) == "42" &&
+       stringify(7L) == "7" &&
+       stringify(true) == "true" &&
+       stringify('Z') == "Z" &&
+       stringify(1.5F) == "1.500000" &&
+       stringify(2.25) == "2.250000" &&
+       stringifyAny(3.5) == "3.500000" {
+        42
+    } else {
+        1
+    }
+}

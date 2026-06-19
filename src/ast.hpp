@@ -150,6 +150,7 @@ class MethodCallNode : public ASTNode {
     std::vector<std::string> resolvedTypeArguments;
     std::string resolvedType = "Int";
     std::string resolvedOwnerType;
+    std::vector<std::string> resolvedParameterTypes;
     bool receiverIsTypeParameter = false;
 public:
     MethodCallNode(
@@ -166,6 +167,7 @@ class FunctionCallNode : public ASTNode {
     std::vector<std::unique_ptr<ASTNode>> arguments;
     std::vector<std::string> typeArguments;
     std::vector<std::string> resolvedTypeArguments;
+    std::vector<std::string> resolvedParameterTypes;
     std::string resolvedType = "Int";
 public:
     FunctionCallNode(
@@ -207,6 +209,7 @@ class FunctionValueCallNode : public ASTNode {
     std::vector<std::unique_ptr<ASTNode>> arguments;
     std::string resolvedType = "Int";
     std::string calleeType;
+    std::vector<std::string> resolvedParameterTypes;
 public:
     FunctionValueCallNode(
         std::string functionName, std::string symbol, std::vector<std::unique_ptr<ASTNode>> args,
@@ -221,6 +224,7 @@ class FunctionExpressionCallNode : public ASTNode {
     std::unique_ptr<ASTNode> callee;
     std::vector<std::unique_ptr<ASTNode>> arguments;
     std::string resolvedType = "Int";
+    std::vector<std::string> resolvedParameterTypes;
 public:
     FunctionExpressionCallNode(
         std::string functionName, std::unique_ptr<ASTNode> functionExpression,

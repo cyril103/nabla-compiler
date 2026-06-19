@@ -1,0 +1,14 @@
+class Sink() {
+    def stringify(value: AnyVal): String = {
+        value.toString()
+    }
+}
+
+def main(): Int = {
+    val sink = new Sink()
+    if sink.stringify(false) == "false" && sink.stringify(4.25) == "4.250000" {
+        42
+    } else {
+        1
+    }
+}
