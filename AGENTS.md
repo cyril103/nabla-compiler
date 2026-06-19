@@ -64,8 +64,10 @@ Principes de direction :
 
 Priorites structurantes :
 
-1. Stabiliser l'API publique de `Array[T]`, `Option[T]` et `Set[T]`.
-2. Classer la stdlib en surface publique et modules/helpers internes.
+1. Stabiliser l'API publique de `Array[T]`, `Option[T]` et `Set[T]` en suivant
+   `docs/stdlib-api.md`.
+2. Classer la stdlib en surface publique et modules/helpers internes dans
+   `docs/stdlib-api.md` avant d'ajouter de nouveaux symboles.
 3. Maintenir la specification vivante `docs/internals.md` pour les types,
    le runtime et les regles de typage.
 4. Ajouter le check CI qui verifie que `make stdlib-docs` ne laisse aucun diff.
@@ -649,6 +651,12 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Classer la surface de la bibliotheque standard avec
+  `docs/stdlib-api.md` : API publique, compatibilite temporaire et details
+  internes, afin de guider les prochains exemples et durcissements de
+  diagnostics.
+  - Fichiers / tests associés: `docs/stdlib-api.md`, `README.md`,
+    `docs/roadmap.md`, `AGENTS.md`.
 - `local` - Ajouter `docs/internals.md` comme specification vivante des
   conventions internes actuelles : pipeline, commandes externes, tagging,
   layout objets/tableaux, chaînes, closures, héritage, génériques et erreurs

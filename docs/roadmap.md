@@ -64,12 +64,14 @@ Actions recommandees :
 1. Maintenir le check CI pour `make stdlib-docs` et la référence HTML générée.
 2. Maintenir et enrichir `docs/internals.md`, la specification vivante pour
    types, runtime, IR et conventions de stdlib.
-3. Revoir la doc stdlib pour masquer ou signaler les helpers internes.
-4. Stabiliser `Array[T]`, `Option[T]` et `Set[T]` comme surfaces utilisateur
+3. Utiliser `docs/stdlib-api.md` pour distinguer API publique, compatibilite
+   temporaire et helpers internes avant d'ajouter de nouveaux symboles.
+4. Revoir la doc stdlib pour masquer ou signaler les helpers internes.
+5. Stabiliser `Array[T]`, `Option[T]` et `Set[T]` comme surfaces utilisateur
    principales.
-5. Ajouter des exemples idiomatiques sans `IntArray` / `ObjectArray[T]` quand
+6. Ajouter des exemples idiomatiques sans `IntArray` / `ObjectArray[T]` quand
    une facade publique existe.
-6. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
+7. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
    surface n'est pas propre.
 
 ### Revue de code (16/06/2026, corrigée)
