@@ -36,7 +36,7 @@ def printString(value: String): Unit = {
     println(value)
 }
 
-def printNames(title: String, names: ArrayObject[String]): Unit = {
+def printNames(title: String, names: Array[String]): Unit = {
     println(title)
     names.foreach(name => printString(name))
     println("")
@@ -63,7 +63,7 @@ def scoreBand(student: Student): String = {
     }
 }
 
-def studentBadges(student: Student): ArrayObject[Option[String]] = {
+def studentBadges(student: Student): Array[Option[String]] = {
     val badges = Array.fill[Option[String]](2, Option.some[String](student.name()))
     if excellent(student) {
         badges.set(1, Option.some[String]("honors"))
@@ -84,7 +84,7 @@ def report(students: Array[Student]): Int = {
     val passingNames = passing.map[String](student => student.name())
     val bands = roster.map[String](scoreBand)
     val badges = roster.flatMap[Option[String]](studentBadges)
-    val indexLabels = arrayIntRange(roster.size()).mapObject[String](indexLabel)
+    val indexLabels = Array.range(roster.size()).mapObject[String](indexLabel)
     val total = roster.fold[Int](0, (accumulator, student) => accumulator + student.score())
     val firstStudent = firstOf(roster)
     val firstBadge = badges.get(1)

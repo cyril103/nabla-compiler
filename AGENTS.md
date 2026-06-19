@@ -111,7 +111,7 @@ Le pipeline implemente actuellement :
   `get`, `set`, `map` et `foreach`;
 - constructeur ergonomique `new Array[T](size)` pour les types primitifs et
   objets utilisateur via les facades `Array[T]`, avec noms utilisateur
-  `ArrayFill[T](size, value)` et `ArrayRange(size)` pour eviter d'exposer
+  `Array.fill[T](size, value)` et `Array.range(size)` pour eviter d'exposer
   `IntArray` / `ArrayInt` / `ObjectArray[T]` dans les cas simples;
 - declarations de classes generiques simples comme `Box[T]`, instanciables avec
   `Box[Int]` ou `Box[String]`, avec substitution des champs, retours de methodes
@@ -298,7 +298,8 @@ Le pipeline implemente actuellement :
 - examples Project Euler 1 a 10 (`examples/euler1.nabla` ... `examples/euler10_functional.nabla`)
   comme banc progressif pour exercer le langage et la bibliotheque standard.
 - `examples/student_scores.nabla` comme exemple idiomatique vérifié pour
-  `Array[T]`, `Option[T]`, classes, lambdas et sorties console.
+  `Array[T]`, `Array.fill[T]`, `Option.some[T]` / `Option.none[T]`, classes,
+  lambdas et sorties console.
 - `examples/workshop_set_inheritance.nabla` comme exemple vérifié pour
   `Array[T]`, `Set[T]`, `Set.fromArray[T]`, opérations d'ensemble et héritage
   avec `override`; la friction restante porte surtout sur les collections
@@ -704,6 +705,14 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Nettoyer les exemples publics vers la surface compagnon: migrer
+  `examples/euler1_array.nabla` vers `Array.range`, exposer `Array[T]` dans les
+  signatures de `examples/command_shell.nabla` et `examples/student_scores.nabla`
+  au lieu de `ArrayObject[T]`, et conserver les exemples bas niveau uniquement
+  quand ils exercent volontairement une facade specialisee.
+  - Fichiers / tests associés: `examples/euler1_array.nabla`,
+    `examples/command_shell.nabla`, `examples/student_scores.nabla`,
+    `docs/releases/0.1.md`, `AGENTS.md`, `make examples`.
 - `local` - Exposer le compagnon standard `object Array` comme surface
   idiomatique: `Array.fill[T](size, value)` et `Array.range(size)`, avec
   résolution des alias specialises pour les tableaux primitifs et conservation

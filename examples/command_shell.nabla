@@ -6,14 +6,14 @@ def printHelp(): Unit = {
     println("commands: add A B | repeat TEXT N | len TEXT | cat PATH | write PATH TEXT... | append PATH TEXT... | rm PATH | rename FROM TO | mkdir PATH | exists PATH | help | quit")
 }
 
-def commandName(parts: ArrayObject[String]): String = {
+def commandName(parts: Array[String]): String = {
     match parts.size() {
         0 => ""
         _ => parts.get(0)
     }
 }
 
-def runAdd(parts: ArrayObject[String]): Unit = {
+def runAdd(parts: Array[String]): Unit = {
     match parts.size() {
         3 => {
             val left = parts.get(1).toInt()
@@ -24,21 +24,21 @@ def runAdd(parts: ArrayObject[String]): Unit = {
     }
 }
 
-def runRepeat(parts: ArrayObject[String]): Unit = {
+def runRepeat(parts: Array[String]): Unit = {
     match parts.size() {
         3 => println(parts.get(1).repeat(parts.get(2).toInt()))
         _ => println("usage: repeat TEXT N")
     }
 }
 
-def runLen(parts: ArrayObject[String]): Unit = {
+def runLen(parts: Array[String]): Unit = {
     match parts.size() {
         2 => println(parts.get(1).length().toString())
         _ => println("usage: len TEXT")
     }
 }
 
-def runCat(parts: ArrayObject[String]): Unit = {
+def runCat(parts: Array[String]): Unit = {
     match parts.size() {
         2 => {
             val path = parts.get(1)
@@ -51,7 +51,7 @@ def runCat(parts: ArrayObject[String]): Unit = {
     }
 }
 
-def joinFrom(parts: ArrayObject[String], start: Int): String = {
+def joinFrom(parts: Array[String], start: Int): String = {
     var index = start
     var result = ""
     while (index < parts.size()) {
@@ -65,7 +65,7 @@ def joinFrom(parts: ArrayObject[String], start: Int): String = {
     result
 }
 
-def runWrite(parts: ArrayObject[String]): Unit = {
+def runWrite(parts: Array[String]): Unit = {
     if parts.size() >= 3 {
         val path = parts.get(1)
         val text = joinFrom(parts, 2)
@@ -76,7 +76,7 @@ def runWrite(parts: ArrayObject[String]): Unit = {
     }
 }
 
-def runAppend(parts: ArrayObject[String]): Unit = {
+def runAppend(parts: Array[String]): Unit = {
     if parts.size() >= 3 {
         val path = parts.get(1)
         val text = joinFrom(parts, 2)
@@ -87,7 +87,7 @@ def runAppend(parts: ArrayObject[String]): Unit = {
     }
 }
 
-def runExists(parts: ArrayObject[String]): Unit = {
+def runExists(parts: Array[String]): Unit = {
     match parts.size() {
         2 => {
             match pathExists(parts.get(1)) {
@@ -99,7 +99,7 @@ def runExists(parts: ArrayObject[String]): Unit = {
     }
 }
 
-def runRm(parts: ArrayObject[String]): Unit = {
+def runRm(parts: Array[String]): Unit = {
     match parts.size() {
         2 => {
             match deleteTextFile(parts.get(1)) {
@@ -111,7 +111,7 @@ def runRm(parts: ArrayObject[String]): Unit = {
     }
 }
 
-def runRename(parts: ArrayObject[String]): Unit = {
+def runRename(parts: Array[String]): Unit = {
     match parts.size() {
         3 => {
             match renameTextFile(parts.get(1), parts.get(2)) {
@@ -123,7 +123,7 @@ def runRename(parts: ArrayObject[String]): Unit = {
     }
 }
 
-def runMkdir(parts: ArrayObject[String]): Unit = {
+def runMkdir(parts: Array[String]): Unit = {
     match parts.size() {
         2 => {
             match createDirectory(parts.get(1)) {
@@ -135,7 +135,7 @@ def runMkdir(parts: ArrayObject[String]): Unit = {
     }
 }
 
-def runKnownCommand(command: String, parts: ArrayObject[String]): Unit = {
+def runKnownCommand(command: String, parts: Array[String]): Unit = {
     match command {
         "help" => printHelp()
         "add" => runAdd(parts)

@@ -1,7 +1,7 @@
-import collections.int_array
+import collections.array
 
 def main(): Int = {
-    val total = arrayIntRange(1000)
+    val total = Array.range(1000)
         .filter(value => value % 3 == 0 || value % 5 == 0)
         .sum()
     print(total.toString())
