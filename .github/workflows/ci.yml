@@ -20,6 +20,9 @@ jobs:
       - name: Run test suite
         run: make all-tests
 
+      - name: Run public examples
+        run: make examples
+
       - name: Run compiler tooling tests
         run: make tooling-tests
 

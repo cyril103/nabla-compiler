@@ -39,7 +39,8 @@ pour reprendre facilement apres une pause.
 - `examples/student_scores.nabla` sert d'exemple public vérifié pour
   `Array[T]`, `Option[T]`, classes, lambdas et sortie console.
 - Support Vim minimal disponible dans `editor/vim`.
-- Suite `make all-tests` verte au moment de cette mise a jour.
+- Suites `make all-tests`, `make examples` et `make tooling-tests` vertes au
+  moment de cette mise a jour; la CI GitHub lance aussi les exemples publics.
 
 ## Priorites Prochaine Session
 
@@ -67,16 +68,18 @@ features.
 Actions recommandees :
 
 1. Maintenir le check CI pour `make stdlib-docs` et la référence HTML générée.
-2. Maintenir et enrichir `docs/internals.md`, la specification vivante pour
+2. Maintenir le check CI `make examples` pour garantir que les exemples publics
+   restent compilables et que leurs sorties attendues ne dérivent pas.
+3. Maintenir et enrichir `docs/internals.md`, la specification vivante pour
    types, runtime, IR et conventions de stdlib.
-3. Utiliser `docs/stdlib-api.md` pour distinguer API publique, compatibilite
+4. Utiliser `docs/stdlib-api.md` pour distinguer API publique, compatibilite
    temporaire et helpers internes avant d'ajouter de nouveaux symboles.
-4. Revoir la doc stdlib pour masquer ou signaler les helpers internes.
-5. Stabiliser `Array[T]`, `Option[T]` et `Set[T]` comme surfaces utilisateur
+5. Revoir la doc stdlib pour masquer ou signaler les helpers internes.
+6. Stabiliser `Array[T]`, `Option[T]` et `Set[T]` comme surfaces utilisateur
    principales.
-6. Ajouter des exemples idiomatiques sans `IntArray` / `ObjectArray[T]` quand
+7. Ajouter des exemples idiomatiques sans `IntArray` / `ObjectArray[T]` quand
    une facade publique existe.
-7. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
+8. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
    surface n'est pas propre.
 
 ### Revue de code (16/06/2026, corrigée)
@@ -103,6 +106,9 @@ Actions recommandees :
   - `.github/workflows/ci.yml` lance maintenant `make stdlib-docs` puis
     `git diff --exit-code docs/stdlib` pour empêcher une documentation générée
     désynchronisée.
+- P3 — Corrigé : les exemples publics sont vérifiés par la CI :
+  - `.github/workflows/ci.yml` lance maintenant `make examples` entre la suite
+    générale et les tests d'outillage.
 
 Actions suggérées pour la suite :
 

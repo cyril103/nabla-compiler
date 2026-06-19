@@ -287,6 +287,9 @@ Le pipeline implemente actuellement :
 - backend ASM par defaut depuis l'IR couvrant la suite positive actuelle
   (fonctions, variables, controle de flux, imports, objets et methodes);
 - tests de compilation et d'execution via `make all-tests`.
+- CI GitHub avec `make all-tests`, `make examples`, `make tooling-tests`,
+  vérification `make stdlib-docs` sans diff, compilation `-Werror` et
+  `git diff --check`;
 - examples Project Euler 1 a 10 (`examples/euler1.nabla` ... `examples/euler10_functional.nabla`)
   comme banc progressif pour exercer le langage et la bibliotheque standard.
 - `examples/student_scores.nabla` comme exemple idiomatique vérifié pour
@@ -638,6 +641,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `///` publics.
 - [x] Ajouter un check CI qui lance `make stdlib-docs` et echoue si la
   generation laisse un diff non commite.
+- [x] Ajouter un check CI qui lance `make examples` pour vérifier les exemples
+  publics.
 - [x] Ajouter une courte specification vivante (`docs/internals.md`) pour les
   types, le runtime, l'IR et les conventions de stdlib.
 - [x] Ajouter une roadmap de reprise dans `docs/roadmap.md`.
@@ -656,6 +661,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Ajouter `make examples` à la CI GitHub pour vérifier les exemples
+  publics à chaque push et pull request.
+  - Fichiers / tests associés: `.github/workflows/ci.yml`, `AGENTS.md`,
+    `docs/roadmap.md`.
 - `local` - Vérifier `examples/student_scores.nabla` comme exemple public
   idiomatique : sortie console nettoyée, code de sortie attendu et oracle
   stdout sous `make examples`.
