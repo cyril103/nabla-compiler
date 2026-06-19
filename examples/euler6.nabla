@@ -1,7 +1,7 @@
-import collections.int_array
+import collections.array
 
 def main(): Int = {
-    val values = arrayIntRangeUntil(1, 101)
+    val values = Array.rangeUntil(1, 101)
     val sumOfSquares = values
         .map(value => value * value)
         .sum()

@@ -1,10 +1,10 @@
 /// @module Array
 /// Tableaux generiques pour le code utilisateur.
 /// Importer `collections.array` donne acces a `Array[T]`, `Array.fill[T]` et
-/// `Array.range`. Les anciens noms `ArrayFill[T]` et `ArrayRange` restent
-/// disponibles pour compatibilite. Les types bas niveau comme `IntArray`,
-/// `ArrayInt`, `ObjectArray[T]` et `ArrayObject[T]` restent des details de
-/// stdlib dans les cas courants.
+/// `Array.range` / `Array.rangeUntil`. Les anciens noms `ArrayFill[T]` et
+/// `ArrayRange` restent disponibles pour compatibilite. Les types bas niveau
+/// comme `IntArray`, `ArrayInt`, `ObjectArray[T]` et `ArrayObject[T]` restent
+/// des details de stdlib dans les cas courants.
 
 /// @symbol class Array[T](size: Int)
 /// Tableau mutable de taille fixe.
@@ -44,5 +44,11 @@ object Array {
     /// @signature def Array.range(size: Int): Array[Int]
     def range(size: Int): ArrayInt = {
         ArrayRange(size)
+    }
+
+    /// Cree un tableau d'entiers contenant `start, ..., until - 1`.
+    /// @signature def Array.rangeUntil(start: Int, until: Int): Array[Int]
+    def rangeUntil(start: Int, until: Int): ArrayInt = {
+        arrayIntRangeUntil(start, until)
     }
 }

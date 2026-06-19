@@ -72,22 +72,25 @@ features.
 
 Actions recommandees :
 
-1. Maintenir le check CI pour `make stdlib-docs` et la référence HTML générée.
-2. Maintenir le check CI `make examples` pour garantir que les exemples publics
+1. Prochaine étape : nettoyer la référence stdlib générée pour séparer
+   visuellement API recommandée, compatibilité et helpers internes, en
+   commençant par `Array`, `Option` et `Set`.
+2. Maintenir le check CI pour `make stdlib-docs` et la référence HTML générée.
+3. Maintenir le check CI `make examples` pour garantir que les exemples publics
    restent compilables et que leurs sorties attendues ne dérivent pas.
-3. Maintenir et enrichir `docs/internals.md`, la specification vivante pour
+4. Maintenir et enrichir `docs/internals.md`, la specification vivante pour
    types, runtime, IR et conventions de stdlib.
-4. Utiliser `docs/stdlib-api.md` pour distinguer API publique, compatibilite
+5. Utiliser `docs/stdlib-api.md` pour distinguer API publique, compatibilite
    temporaire et helpers internes avant d'ajouter de nouveaux symboles.
-5. Revoir la doc stdlib pour masquer ou signaler les helpers internes.
-6. Stabiliser `Array[T]`, `Option[T]` et `Set[T]` comme surfaces utilisateur
+6. Revoir la doc stdlib pour masquer ou signaler les helpers internes.
+7. Stabiliser `Array[T]`, `Option[T]` et `Set[T]` comme surfaces utilisateur
    principales.
-7. Continuer a garder les exemples publics sur les facades idiomatiques
+8. Continuer a garder les exemples publics sur les facades idiomatiques
    (`Array[T]`, `Array.fill[T]`, `Set.fromArray[T]`,
    `Option.some[T]` / `Option.none[T]`) quand elles existent.
-8. Garder les diagnostics de compatibilite orientes vers les compagnons
+9. Garder les diagnostics de compatibilite orientes vers les compagnons
    recommandes (`Array.fill`, `Set.fromArray`, `Option.some`, etc.).
-9. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
+10. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
    surface n'est pas propre.
 
 ### Revue de code (16/06/2026, corrigée)

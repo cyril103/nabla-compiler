@@ -1,4 +1,4 @@
-import collections.int_array
+import collections.array
 
 def gcdTail(left: Int, right: Int): Int = {
     if right == 0 {
@@ -17,7 +17,7 @@ def lcm(left: Int, right: Int): Int = {
 }
 
 def main(): Int = {
-    val value = arrayIntRangeUntil(1, 21)
+    val value = Array.rangeUntil(1, 21)
         .fold(1, (accumulator, divisor) => lcm(accumulator, divisor))
 
     print(value.toString())

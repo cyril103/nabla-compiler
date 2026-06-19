@@ -111,8 +111,9 @@ Le pipeline implemente actuellement :
   `get`, `set`, `map` et `foreach`;
 - constructeur ergonomique `new Array[T](size)` pour les types primitifs et
   objets utilisateur via les facades `Array[T]`, avec noms utilisateur
-  `Array.fill[T](size, value)` et `Array.range(size)` pour eviter d'exposer
-  `IntArray` / `ArrayInt` / `ObjectArray[T]` dans les cas simples;
+  `Array.fill[T](size, value)`, `Array.range(size)` et
+  `Array.rangeUntil(start, until)` pour eviter d'exposer `IntArray` /
+  `ArrayInt` / `ObjectArray[T]` dans les cas simples;
 - declarations de classes generiques simples comme `Box[T]`, instanciables avec
   `Box[Int]` ou `Box[String]`, avec substitution des champs, retours de methodes
   et types fonction comme `(T) => T`;
@@ -255,7 +256,7 @@ Le pipeline implemente actuellement :
   opérations de présence à coût moyen réduit.
 - module de bibliotheque standard `collections.array` comme point d'entree
   commun pour les tableaux specialises, avec `Array.fill[T]`, `Array.range`,
-  `ArrayFill[T]`, `ArrayRange`, `arrayFill[T]`, `arrayMap[T]`,
+  `Array.rangeUntil`, `ArrayFill[T]`, `ArrayRange`, `arrayFill[T]`, `arrayMap[T]`,
   `arrayMap[T, U]`, `arrayFilter[T]`, `arrayFold[T]`, `arrayFold[T, U]`,
   `arrayFlatMap[T]`, `arrayFlatMap[T, U]` et `arrayForeach[T]` resolus vers les
   specialisations `ArrayInt`, `ArrayLong`, `ArrayFloat`, `ArrayDouble` ou
@@ -725,12 +726,14 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `examples/command_shell.nabla`, `examples/student_scores.nabla`,
     `docs/releases/0.1.md`, `AGENTS.md`, `make examples`.
 - `local` - Exposer le compagnon standard `object Array` comme surface
-  idiomatique: `Array.fill[T](size, value)` et `Array.range(size)`, avec
-  résolution des alias specialises pour les tableaux primitifs et conservation
-  de `ArrayFill` / `ArrayRange` comme compatibilite.
+  idiomatique: `Array.fill[T](size, value)`, `Array.range(size)` et
+  `Array.rangeUntil(start, until)`, avec résolution des alias specialises pour
+  les tableaux primitifs et conservation de `ArrayFill` / `ArrayRange` comme
+  compatibilite.
   - Fichiers / tests associés: `src/compiler_context.hpp`,
     `stdlib/collections/array.nabla`, `tests/test_user_friendly_array.nabla`,
     `tests/test_stdlib_array_generic_fill.nabla`,
+    `examples/euler5_fold.nabla`, `examples/euler6.nabla`,
     `examples/student_scores.nabla`, `docs/language.md`,
     `docs/stdlib-api.md`.
 - `local` - Exposer le compagnon standard `object Option` comme surface

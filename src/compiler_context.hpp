@@ -237,6 +237,7 @@ inline std::optional<std::string> recommendedStdlibFunctionName(const std::strin
         return "Array.fill";
     }
     if (name == "ArrayRange" || name == "arrayIntRange") return "Array.range";
+    if (name == "arrayIntRangeUntil") return "Array.rangeUntil";
     if (name == "SetEmpty" || name == "setEmpty") return "Set.empty";
     if (name == "SetFromArray" || name == "setFromArray" ||
         name == "setFromArrayInt" || name == "setFromArrayLong" ||

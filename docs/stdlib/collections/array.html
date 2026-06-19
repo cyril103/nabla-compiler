@@ -16,7 +16,7 @@
     <section class="module-hero">
       <p class="import">import collections.array</p>
       <h1>Array</h1>
-      <p>Tableaux generiques pour le code utilisateur. Importer `collections.array` donne acces a `Array[T]`, `Array.fill[T]` et `Array.range`. Les anciens noms `ArrayFill[T]` et `ArrayRange` restent disponibles pour compatibilite. Les types bas niveau comme `IntArray`, `ArrayInt`, `ObjectArray[T]` et `ArrayObject[T]` restent des details de stdlib dans les cas courants.</p>
+      <p>Tableaux generiques pour le code utilisateur. Importer `collections.array` donne acces a `Array[T]`, `Array.fill[T]` et `Array.range` / `Array.rangeUntil`. Les anciens noms `ArrayFill[T]` et `ArrayRange` restent disponibles pour compatibilite. Les types bas niveau comme `IntArray`, `ArrayInt`, `ObjectArray[T]` et `ArrayObject[T]` restent des details de stdlib dans les cas courants.</p>
     </section>
     <section class="entries">
     <article class="entry" id="Array">
@@ -50,6 +50,12 @@
       <h2>range</h2>
       <pre><code>def Array.range(size: Int): Array[Int]</code></pre>
       <p>Cree un tableau d&#x27;entiers contenant `0, 1, ..., size - 1`.</p>
+    </article>
+    <article class="entry" id="rangeUntil">
+      <div class="kind">def</div>
+      <h2>rangeUntil</h2>
+      <pre><code>def Array.rangeUntil(start: Int, until: Int): Array[Int]</code></pre>
+      <p>Cree un tableau d&#x27;entiers contenant `start, ..., until - 1`.</p>
     </article>
     </section>
   </main>
