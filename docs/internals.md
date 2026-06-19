@@ -36,6 +36,10 @@ La cible `make tooling-tests` couvre ce comportement.
 
 Nabla utilise une représentation uniforme par slots de 64 bits.
 
+`src/runtime_values.hpp` centralise les constantes d'encodage utilisees par le
+backend et le runtime assembleur : tag, valeurs booleennes, zero tagge, slot nul,
+taille de slot et bornes des entiers immediats.
+
 ### Valeurs taggées
 
 `Int`, `Long` et `Bool` utilisent le tagging par bit de poids faible :

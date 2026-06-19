@@ -651,6 +651,11 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Centraliser les constantes d'encodage runtime dans
+  `src/runtime_values.hpp` et les utiliser depuis le backend IR et le runtime
+  assembleur pour les entiers tagges, booleens et slots nuls.
+  - Fichiers / tests associés: `src/runtime_values.hpp`, `src/ir_codegen.cpp`,
+    `src/runtime_asm.cpp`, `docs/internals.md`, `AGENTS.md`.
 - `local` - Definir le perimetre de Nabla 0.1 : objectifs, inclusions,
   non-objectifs, criteres de sortie et roadmap courte avant tag.
   - Fichiers / tests associés: `docs/releases/0.1.md`, `README.md`,

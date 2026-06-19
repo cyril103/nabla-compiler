@@ -1,6 +1,7 @@
 #include "ir_codegen.hpp"
 #include "compiler_error.hpp"
 #include "runtime_asm.hpp"
+#include "runtime_values.hpp"
 #include <algorithm>
 #include <cctype>
 #include <climits>
@@ -46,12 +47,10 @@ long long boxedInt(const std::string& value) {
         codegenError("entier constant invalide ou trop grand: " + value);
     }
 
-    constexpr long long kMaxBoxedInt = (1LL << 62) - 1;
-    constexpr long long kMinBoxedInt = -(1LL << 62);
-    if (parsed > kMaxBoxedInt || parsed < kMinBoxedInt) {
+    if (parsed > RuntimeValues::kMaxTaggedIntPayload || parsed < RuntimeValues::kMinTaggedIntPayload) {
         codegenError("entier constant hors de la plage Int: " + value);
     }
-    return (parsed << 1) | 1;
+    return RuntimeValues::encodeTaggedInteger(parsed);
 }
 
 std::string asmDataBytes(const std::string& value) {
@@ -337,7 +336,7 @@ private:
                 break;
             case IROpcode::BranchIfFalse:
                 loadValue(instruction.operands[0], "rax");
-                out << "    cmp rax, 1\n";
+                out << RuntimeValues::asmCompareTaggedFalse("rax");
                 out << "    je " << asmLabelName(function.name, instruction.operands[1]) << "\n";
                 break;
             case IROpcode::Jump:
@@ -717,11 +716,11 @@ private:
             case IROpcode::NewFloatArray:
             case IROpcode::NewDoubleArray:
             case IROpcode::NewObjectArray:
-                return "0";
+                return std::to_string(RuntimeValues::kNullSlot);
             case IROpcode::NewIntArray:
             case IROpcode::NewLongArray:
             case IROpcode::NewBoolArray:
-                return "1";
+                return std::to_string(RuntimeValues::kTaggedZero);
             default:
                 codegenError("opcode IR de tableau natif inattendu");
         }
@@ -729,7 +728,7 @@ private:
 
     void emitNewNativeArray(const IRInstruction& instruction) {
         loadValue(instruction.operands[0], "rax");
-        out << "    cmp rax, 1\n";
+        out << RuntimeValues::asmCompareTaggedFalse("rax");
         out << "    jl Runtime_bounds_error\n";
         out << "    mov r8, rax\n";
         out << "    sar rax, 1\n";
@@ -852,7 +851,7 @@ private:
         emitArrayBoundsCheck("rbx", "rcx");
         loadValue(instruction.operands[2], "rax");
         out << "    mov [rbx + 16 + rcx * 8], rax\n";
-        out << "    mov rax, 1\n";
+        out << RuntimeValues::asmMoveTaggedFalse("rax");
         storeRegister(instruction.result, "rax");
     }
 

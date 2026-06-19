@@ -1,4 +1,5 @@
 #include "runtime_asm.hpp"
+#include "runtime_values.hpp"
 #include <ostream>
 
 namespace RuntimeASM {
@@ -26,8 +27,7 @@ void emit(std::ostream& out) {
         << "    or rax, rdx\n"
         << "    mov rbx, 2147483647\n"
         << "    and rax, rbx\n"
-        << "    shl rax, 1\n"
-        << "    or rax, 1\n"
+        << RuntimeValues::asmEncodeTaggedInteger("rax")
         << "    ret\n\n";
     out << "Runtime_initHeap:\n"
         << "    mov rax, 9\n"
@@ -190,13 +190,13 @@ void emit(std::ostream& out) {
         << ".L_read_file_done:\n"
         << "    mov [r15 + 8], r12\n"
         << "    mov rdi, r13\n"
-        << "    mov rax, 3\n"
+        << RuntimeValues::asmMoveTaggedTrue("rax")
         << "    syscall\n"
         << "    mov rax, r15\n"
         << "    ret\n"
         << ".L_read_file_close_empty:\n"
         << "    mov rdi, r13\n"
-        << "    mov rax, 3\n"
+        << RuntimeValues::asmMoveTaggedTrue("rax")
         << "    syscall\n"
         << "    jmp Runtime_emptyString\n\n";
     out << "Runtime_writeFile:\n"
@@ -217,12 +217,11 @@ void emit(std::ostream& out) {
         << "    syscall\n"
         << "    mov r14, rax\n"
         << "    mov rdi, r13\n"
-        << "    mov rax, 3\n"
+        << RuntimeValues::asmMoveTaggedTrue("rax")
         << "    syscall\n"
         << "    mov rax, r14\n"
         << ".L_write_file_return_tagged:\n"
-        << "    shl rax, 1\n"
-        << "    or rax, 1\n"
+        << RuntimeValues::asmEncodeTaggedInteger("rax")
         << "    ret\n\n";
     out << "Runtime_appendFile:\n"
         << "    mov r12, rsi\n"
@@ -242,12 +241,11 @@ void emit(std::ostream& out) {
         << "    syscall\n"
         << "    mov r14, rax\n"
         << "    mov rdi, r13\n"
-        << "    mov rax, 3\n"
+        << RuntimeValues::asmMoveTaggedTrue("rax")
         << "    syscall\n"
         << "    mov rax, r14\n"
         << ".L_append_file_return_tagged:\n"
-        << "    shl rax, 1\n"
-        << "    or rax, 1\n"
+        << RuntimeValues::asmEncodeTaggedInteger("rax")
         << "    ret\n\n";
     out << "Runtime_fileExists:\n"
         << "    call Runtime_copyPathToCString\n"
@@ -260,9 +258,9 @@ void emit(std::ostream& out) {
         << "    jl .L_file_exists_false\n"
         << "    mov r13, rax\n"
         << "    mov rdi, r13\n"
-        << "    mov rax, 3\n"
+        << RuntimeValues::asmMoveTaggedTrue("rax")
         << "    syscall\n"
-        << "    mov rax, 3\n"
+        << RuntimeValues::asmMoveTaggedTrue("rax")
         << "    ret\n"
         << ".L_file_exists_false:\n"
         << "    mov rax, 1\n"
@@ -274,7 +272,7 @@ void emit(std::ostream& out) {
         << "    syscall\n"
         << "    cmp rax, 0\n"
         << "    jne .L_delete_file_false\n"
-        << "    mov rax, 3\n"
+        << RuntimeValues::asmMoveTaggedTrue("rax")
         << "    ret\n"
         << ".L_delete_file_false:\n"
         << "    mov rax, 1\n"
@@ -291,7 +289,7 @@ void emit(std::ostream& out) {
         << "    syscall\n"
         << "    cmp rax, 0\n"
         << "    jne .L_rename_file_false\n"
-        << "    mov rax, 3\n"
+        << RuntimeValues::asmMoveTaggedTrue("rax")
         << "    ret\n"
         << ".L_rename_file_false:\n"
         << "    mov rax, 1\n"
@@ -304,7 +302,7 @@ void emit(std::ostream& out) {
         << "    syscall\n"
         << "    cmp rax, 0\n"
         << "    jne .L_create_dir_false\n"
-        << "    mov rax, 3\n"
+        << RuntimeValues::asmMoveTaggedTrue("rax")
         << "    ret\n"
         << ".L_create_dir_false:\n"
         << "    mov rax, 1\n"
@@ -327,7 +325,7 @@ void emit(std::ostream& out) {
         << "    dec rcx\n"
         << "    jmp .L_string_equals_loop\n"
         << ".L_string_equals_true:\n"
-        << "    mov rax, 3\n"
+        << RuntimeValues::asmMoveTaggedTrue("rax")
         << "    ret\n"
         << ".L_string_equals_false:\n"
         << "    mov rax, 1\n"
@@ -350,7 +348,7 @@ void emit(std::ostream& out) {
         << "    dec rcx\n"
         << "    jmp .L_string_starts_loop\n"
         << ".L_string_starts_true:\n"
-        << "    mov rax, 3\n"
+        << RuntimeValues::asmMoveTaggedTrue("rax")
         << "    ret\n"
         << ".L_string_starts_false:\n"
         << "    mov rax, 1\n"
@@ -376,7 +374,7 @@ void emit(std::ostream& out) {
         << "    dec rcx\n"
         << "    jmp .L_string_ends_loop\n"
         << ".L_string_ends_true:\n"
-        << "    mov rax, 3\n"
+        << RuntimeValues::asmMoveTaggedTrue("rax")
         << "    ret\n"
         << ".L_string_ends_false:\n"
         << "    mov rax, 1\n"
@@ -413,8 +411,7 @@ void emit(std::ostream& out) {
         << "    jmp .L_string_index_outer\n"
         << ".L_string_index_found:\n"
         << "    mov rax, rcx\n"
-        << "    shl rax, 1\n"
-        << "    or rax, 1\n"
+        << RuntimeValues::asmEncodeTaggedInteger("rax")
         << "    ret\n"
         << ".L_string_index_found_zero:\n"
         << "    mov rax, 1\n"
@@ -504,8 +501,7 @@ void emit(std::ostream& out) {
         << "    neg rax\n"
         << "    jo Runtime_parse_error\n"
         << ".L_string_to_int_tag:\n"
-        << "    shl rax, 1\n"
-        << "    or rax, 1\n"
+        << RuntimeValues::asmEncodeTaggedInteger("rax")
         << "    ret\n\n";
     out << "Runtime_stringToCharArray:\n"
         << "    mov r11, [rdi + 8]\n"
@@ -515,16 +511,14 @@ void emit(std::ostream& out) {
         << "    mov rbx, rax\n"
         << "    mov qword [rbx], 0\n"
         << "    mov rax, r11\n"
-        << "    shl rax, 1\n"
-        << "    or rax, 1\n"
+        << RuntimeValues::asmEncodeTaggedInteger("rax")
         << "    mov [rbx + 8], rax\n"
         << "    xor rcx, rcx\n"
         << ".L_string_to_char_array_loop:\n"
         << "    cmp rcx, r11\n"
         << "    jge .L_string_to_char_array_wrap\n"
         << "    movzx rax, byte [r10 + rcx]\n"
-        << "    shl rax, 1\n"
-        << "    or rax, 1\n"
+        << RuntimeValues::asmEncodeTaggedInteger("rax")
         << "    mov [rbx + 16 + rcx * 8], rax\n"
         << "    inc rcx\n"
         << "    jmp .L_string_to_char_array_loop\n"
@@ -714,8 +708,7 @@ void emit(std::ostream& out) {
         << "    mov rbx, rax\n"
         << "    mov qword [rbx], 0\n"
         << "    mov rax, r8\n"
-        << "    shl rax, 1\n"
-        << "    or rax, 1\n"
+        << RuntimeValues::asmEncodeTaggedInteger("rax")
         << "    mov [rbx + 8], rax\n"
         << "    xor r8, r8\n"
         << "    xor r9, r9\n"
@@ -755,8 +748,7 @@ void emit(std::ostream& out) {
         << "    mov rbx, rax\n"
         << "    mov qword [rbx], 0\n"
         << "    mov rax, r8\n"
-        << "    shl rax, 1\n"
-        << "    or rax, 1\n"
+        << RuntimeValues::asmEncodeTaggedInteger("rax")
         << "    mov [rbx + 8], rax\n"
         << "    xor r8, r8\n"
         << "    xor rdx, rdx\n"
@@ -813,7 +805,7 @@ void emit(std::ostream& out) {
         << "    call Runtime_alloc\n"
         << "    mov rbx, rax\n"
         << "    mov rax, r10\n"
-        << "    sar rax, 1\n"
+        << RuntimeValues::asmDecodeTaggedInteger("rax")
         << "    mov qword [rbx], 0\n"
         << "    mov rcx, 10\n"
         << "    lea rsi, [rbx + 56]\n"
@@ -851,7 +843,7 @@ void emit(std::ostream& out) {
         << "    mov rax, rbx\n"
         << "    ret\n\n";
     out << "Bool_method_toString:\n"
-        << "    cmp rdi, 1\n"
+        << RuntimeValues::asmCompareTaggedFalse("rdi")
         << "    je .L_bool_to_string_false\n"
         << "    mov rdi, 28\n"
         << "    call Runtime_alloc\n"
@@ -939,7 +931,7 @@ void emit(std::ostream& out) {
         << "    jnz .L_float_double_to_string_fraction\n"
         << "    mov r12, [rsp + 24]\n"
         << "    mov r10, [rsp + 16]\n"
-        << "    cmp qword [rsp + 32], 1\n"
+        << "    cmp qword [rsp + 32], " << RuntimeValues::kTaggedFalse << "\n"
         << "    jne .L_float_double_prefix_done\n"
         << "    mov rsi, [r10 + 16]\n"
         << "    mov r8b, byte [rsi]\n"
@@ -957,7 +949,7 @@ void emit(std::ostream& out) {
         << "    mov [rbx + 8], r15\n"
         << "    lea rdi, [rbx + 24]\n"
         << "    mov [rbx + 16], rdi\n"
-        << "    cmp qword [rsp + 32], 1\n"
+        << "    cmp qword [rsp + 32], " << RuntimeValues::kTaggedFalse << "\n"
         << "    jne .L_float_double_copy_integer_part\n"
         << "    mov rsi, [r10 + 16]\n"
         << "    mov r8b, byte [rsi]\n"
@@ -986,7 +978,7 @@ void emit(std::ostream& out) {
         << "    ret\n\n"
         << ".L_float_double_to_string_no_fraction_not_zero:\n"
         << "    mov r12, r13\n"
-        << "    cmp qword [rsp + 32], 1\n"
+        << "    cmp qword [rsp + 32], " << RuntimeValues::kTaggedFalse << "\n"
         << "    jne .L_float_double_no_fraction_copy_prefix\n"
         << "    mov rsi, [r10 + 16]\n"
         << "    mov r8b, byte [rsi]\n"
@@ -1004,7 +996,7 @@ void emit(std::ostream& out) {
         << "    mov [rbx + 8], r15\n"
         << "    lea rdi, [rbx + 24]\n"
         << "    mov [rbx + 16], rdi\n"
-        << "    cmp qword [rsp + 32], 1\n"
+        << "    cmp qword [rsp + 32], " << RuntimeValues::kTaggedFalse << "\n"
         << "    jne .L_float_double_no_fraction_copy_integer_part\n"
         << "    mov rsi, [r10 + 16]\n"
         << "    mov r8b, byte [rsi]\n"
