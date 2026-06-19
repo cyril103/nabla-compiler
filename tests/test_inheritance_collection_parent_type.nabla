@@ -1,0 +1,52 @@
+import collections.array
+import collections.set
+
+class Person(nameValue: String) {
+    def name(): String = {
+        nameValue
+    }
+
+    override def toString(): String = {
+        nameValue
+    }
+}
+
+class Student extends Person() {
+    override def toString(): String = {
+        nameValue + " student"
+    }
+}
+
+class Instructor extends Person() {
+    override def toString(): String = {
+        nameValue + " instructor"
+    }
+}
+
+class Volunteer extends Person() {
+    override def toString(): String = {
+        nameValue + " volunteer"
+    }
+}
+
+def main(): Int = {
+    val ada = new Student("ada")
+    val bob = new Instructor("bob")
+    val cy = new Volunteer("cy")
+    val people = new Array[Person](4)
+    people.set(0, ada)
+    people.set(1, bob)
+    people.set(2, cy)
+    people.set(3, ada)
+
+    val unique = SetFromArray[Person](people)
+    if unique.size() == 3 &&
+       unique.contains(ada) &&
+       unique.contains(bob) &&
+       unique.contains(cy) &&
+       unique.toString() == "[ada, bob, cy]" {
+        42
+    } else {
+        1
+    }
+}

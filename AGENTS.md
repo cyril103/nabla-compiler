@@ -298,9 +298,9 @@ Le pipeline implemente actuellement :
 - `examples/student_scores.nabla` comme exemple idiomatique vérifié pour
   `Array[T]`, `Option[T]`, classes, lambdas et sorties console.
 - `examples/workshop_set_inheritance.nabla` comme exemple vérifié pour
-  `Set[T]`, opérations d'ensemble et héritage avec `override`; il conserve
-  volontairement des frictions de typage utiles pour guider le prochain
-  nettoyage ergonomique autour des collections polymorphes.
+  `Array[T]`, `Set[T]`, `SetFromArray[T]`, opérations d'ensemble et héritage
+  avec `override`; la friction restante porte surtout sur les collections
+  polymorphes de type parent comme `Set[Person]`.
 
 Limites importantes :
 
@@ -351,11 +351,13 @@ Limites importantes :
   finale `_` (avec ou sans garde selon la position; la branche finale `_` ne
   peut pas porter de garde). Les motifs nommes sont locaux à la branche et ne
   fuient pas hors de l'expression `match`.
-- L'héritage rend les API de collections moins idiomatiques: la combinaison
-  `Set[Person]` avec des instances `Student` / `Instructor` / `Volunteer`
-  fonctionne mais requiert des conversions explicites qui nuisent à la lisibilité des
-  cas d'usage réels; la résolution des champs et des méthodes héritées reste
-  fonctionnelle mais sujette à friction dans des scénarios hétérogènes.
+- L'héritage fonctionne avec les collections typées par un parent dans les cas
+  simples: `Array[Person]` peut contenir des instances de `Student`,
+  `Instructor` et `Volunteer`, puis alimenter `SetFromArray[Person]`.
+  L'exemple public utilise désormais `Array[T]` et `SetFromArray[T]` pour éviter
+  d'exposer `ObjectArray[T]` / `ArrayObject[T]` dans le chemin applicatif
+  principal. La friction restante concerne surtout le dispatch dynamique complet
+  quand une valeur est manipulée via son type parent.
 - Le mot-clé `override` est supporté pour marquer explicitement les
   redéfinitions de méthodes héritées, et il est obligatoire quand une méthode
   redéfinit une méthode provenant d'un parent.
@@ -665,6 +667,11 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   sortie console attendus.
 - [x] Vérifier `examples/workshop_set_inheritance.nabla` avec un code de sortie
   et une sortie console attendus.
+- [x] Migrer `examples/workshop_set_inheritance.nabla` vers l'API publique
+  `Array[T]` + `SetFromArray[T]` au lieu de `ObjectArray[T]` / `ArrayObject[T]`
+  dans son chemin principal.
+- [x] Ajouter une régression `Set[Person]` construite depuis `Array[Person]`
+  contenant des instances de sous-types (`Student`, `Instructor`, `Volunteer`).
 - [x] Ajouter un test d'outillage pour vérifier le diagnostic quand une commande
   externe requise (`nasm`) est absente du `PATH`.
 - [x] Ajouter le support `write` / `append` multi-mots dans
@@ -675,6 +682,17 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Corriger le dédoublonnage des spécialisations IR de méthodes afin
+  qu'un même corps spécialisé comme `Set[Person].contains` ne soit pas émis
+  plusieurs fois lorsque les appels passent des sous-types différents.
+  - Fichiers / tests associés: `src/ir.cpp`,
+    `tests/test_inheritance_collection_parent_type.nabla`, `AGENTS.md`,
+    `docs/roadmap.md`.
+- `local` - Migrer l'exemple public `workshop_set_inheritance` vers la surface
+  utilisateur recommandee : `collections.array`, `new Array[Student](...)` et
+  `SetFromArray[Student](...)`, tout en conservant les oracles de sortie.
+  - Fichiers / tests associés: `examples/workshop_set_inheritance.nabla`,
+    `AGENTS.md`, `docs/roadmap.md`, `make test SRC=examples/workshop_set_inheritance.nabla`.
 - `local` - Rendre explicite l'encodage runtime de `Bool` dans l'IR :
   constantes source taggees des le lowering, validation backend des constantes
   `Bool` et test de regression couvrant constantes, comparaisons, retours de
@@ -799,8 +817,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `tests/test_stdlib_array_to_string.nabla`, `tests/test_stdlib_set.nabla`,
     `examples/workshop_set_inheritance.nabla`.
 - `local` - Ajouter `examples/workshop_set_inheritance.nabla` montrant
-  `collections.set` (avec `setFromArray`, `union`, `intersect`, `difference`) et
-  l’héritage via `Person`, `Student`, `Instructor`, `Volunteer`.
+  `collections.set` (avec construction depuis tableau, `union`, `intersect`,
+  `difference`) et l’héritage via `Person`, `Student`, `Instructor`,
+  `Volunteer`.
 - `local` - Renforcer la résolution des membres hérités en cas d'ambiguïtés de type
   générique (`Holder[Int]` vs `Holder[String]`) et formaliser la racine `Any`
   implicite pour les classes sans `extends`.
@@ -1101,6 +1120,5 @@ Poursuivre la suite outillée autour de l’héritage et du matching :
 - Finaliser le nettoyage des diagnostics autour du pattern matching, notamment pour
   les motifs nommes.
 - Améliorer l’ergonomie d’héritage pour l’exemple de production:
-  constructeurs parentaux plus simples, réduction des frictions dans
-  `workshop_set_inheritance.nabla`, et friction réduite des collections
-  d’objets polymorphes.
+  constructeurs parentaux plus simples et friction réduite des collections
+  d’objets polymorphes (`Set[Person]` avec instances de sous-types).

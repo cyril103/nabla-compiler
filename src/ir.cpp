@@ -293,7 +293,6 @@ void IRBuilder::registerMethodSpecialization(
             specialization.templateClassName == templateClassName &&
             specialization.methodName == methodName &&
             specialization.methodTypeArguments == methodTypeArguments &&
-            specialization.argumentTypes == argumentTypes &&
             specialization.returnType == returnType) {
             return;
         }

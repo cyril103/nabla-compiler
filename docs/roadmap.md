@@ -39,8 +39,9 @@ pour reprendre facilement apres une pause.
 - `examples/student_scores.nabla` sert d'exemple public vérifié pour
   `Array[T]`, `Option[T]`, classes, lambdas et sortie console.
 - `examples/workshop_set_inheritance.nabla` sert d'exemple public vérifié pour
-  `Set[T]`, opérations d'ensemble et héritage avec `override`; il reste aussi
-  un bon révélateur des frictions de typage autour des collections polymorphes.
+  `Array[T]`, `Set[T]`, `SetFromArray[T]`, opérations d'ensemble et héritage
+  avec `override`; il reste aussi un bon révélateur des frictions de typage
+  autour des collections polymorphes de type parent.
 - Support Vim minimal disponible dans `editor/vim`.
 - Suites `make all-tests`, `make examples` et `make tooling-tests` vertes au
   moment de cette mise a jour; la CI GitHub lance aussi les exemples publics.
@@ -80,8 +81,8 @@ Actions recommandees :
 5. Revoir la doc stdlib pour masquer ou signaler les helpers internes.
 6. Stabiliser `Array[T]`, `Option[T]` et `Set[T]` comme surfaces utilisateur
    principales.
-7. Ajouter des exemples idiomatiques sans `IntArray` / `ObjectArray[T]` quand
-   une facade publique existe.
+7. Continuer a garder les exemples publics sur les facades idiomatiques
+   (`Array[T]`, `SetFromArray[T]`, `Option[T]`) quand elles existent.
 8. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
    surface n'est pas propre.
 
@@ -131,8 +132,11 @@ Actions suggérées pour la suite :
    - Finaliser les motifs nommés et les gardes (`motif if condition`).
    - Ajouter des diagnostics propres pour les erreurs de portée/typage des gardes.
 5. Réduire la friction entre héritage et collections.
-   - Permettre `Set[Person]` et `ArrayObject[Person]` avec des instances
-     `Student`, `Instructor`, `Volunteer` sans contorsions de type.
+   - Corrigé : `Array[Person]` peut alimenter `SetFromArray[Person]` avec des
+     instances `Student`, `Instructor`, `Volunteer` sans dupliquer les
+     spécialisations IR.
+   - Reste à clarifier : dispatch dynamique complet quand les valeurs sont
+     manipulées via le type parent, notamment pour les rendus `toString()`.
    - Documenter des motifs d’exemple pour utiliser ce cas facilement.
 6. Ajouter des tests “mélange” héritage + autres fonctionnalités.
    - Cas de régression couvrant `super`, champs hérités, shadowing contrôlé
