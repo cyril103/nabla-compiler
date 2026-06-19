@@ -254,8 +254,8 @@ Le pipeline implemente actuellement :
   `toString`, en utilisant un index de seaux hashés (`hashCode()`) pour des
   opérations de présence à coût moyen réduit.
 - module de bibliotheque standard `collections.array` comme point d'entree
-  commun pour les tableaux specialises, avec `ArrayFill[T]`, `ArrayRange`,
-  `arrayFill[T]`, `arrayMap[T]`,
+  commun pour les tableaux specialises, avec `Array.fill[T]`, `Array.range`,
+  `ArrayFill[T]`, `ArrayRange`, `arrayFill[T]`, `arrayMap[T]`,
   `arrayMap[T, U]`, `arrayFilter[T]`, `arrayFold[T]`, `arrayFold[T, U]`,
   `arrayFlatMap[T]`, `arrayFlatMap[T, U]` et `arrayForeach[T]` resolus vers les
   specialisations `ArrayInt`, `ArrayLong`, `ArrayFloat`, `ArrayDouble` ou
@@ -704,6 +704,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Exposer le compagnon standard `object Array` comme surface
+  idiomatique: `Array.fill[T](size, value)` et `Array.range(size)`, avec
+  résolution des alias specialises pour les tableaux primitifs et conservation
+  de `ArrayFill` / `ArrayRange` comme compatibilite.
+  - Fichiers / tests associés: `src/compiler_context.hpp`,
+    `stdlib/collections/array.nabla`, `tests/test_user_friendly_array.nabla`,
+    `tests/test_stdlib_array_generic_fill.nabla`,
+    `examples/student_scores.nabla`, `docs/language.md`,
+    `docs/stdlib-api.md`.
 - `local` - Exposer le compagnon standard `object Option` comme surface
   idiomatique: `Option.some[T](value)` et `Option.none[T](default)`, tout en
   gardant `optionSome` / `optionNone` comme compatibilite. L'absence garde pour

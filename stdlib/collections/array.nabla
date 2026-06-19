@@ -1,9 +1,10 @@
 /// @module Array
 /// Tableaux generiques pour le code utilisateur.
-/// Importer `collections.array` donne acces a `Array[T]`, `ArrayFill[T]` et
-/// `ArrayRange`. Les types bas niveau comme `IntArray`, `ArrayInt`,
-/// `ObjectArray[T]` et `ArrayObject[T]` restent des details de stdlib dans les
-/// cas courants.
+/// Importer `collections.array` donne acces a `Array[T]`, `Array.fill[T]` et
+/// `Array.range`. Les anciens noms `ArrayFill[T]` et `ArrayRange` restent
+/// disponibles pour compatibilite. Les types bas niveau comme `IntArray`,
+/// `ArrayInt`, `ObjectArray[T]` et `ArrayObject[T]` restent des details de
+/// stdlib dans les cas courants.
 
 /// @symbol class Array[T](size: Int)
 /// Tableau mutable de taille fixe.
@@ -26,4 +27,22 @@ import collections.object_array
 /// @signature def ArrayRange(size: Int): Array[Int]
 def ArrayRange(size: Int): ArrayInt = {
     arrayIntRange(size)
+}
+
+object Array {
+    /// Cree un tableau rempli avec la meme valeur.
+    /// @signature def Array.fill[T](size: Int, value: T): Array[T]
+    ///
+    /// Pour `T = Int`, `Long`, `Float`, `Double` ou `Bool`, le compilateur
+    /// redirige ce nom vers la specialisation primitive adaptee. Pour les
+    /// autres types, `Array[T]` est represente par `ArrayObject[T]`.
+    def fill[T](size: Int, value: T): ArrayObject[T] = {
+        objectArrayFill[T](size, value)
+    }
+
+    /// Cree un tableau d'entiers contenant `0, 1, ..., size - 1`.
+    /// @signature def Array.range(size: Int): Array[Int]
+    def range(size: Int): ArrayInt = {
+        ArrayRange(size)
+    }
 }

@@ -64,7 +64,7 @@ def scoreBand(student: Student): String = {
 }
 
 def studentBadges(student: Student): ArrayObject[Option[String]] = {
-    val badges = arrayFill[Option[String]](2, Option.some[String](student.name()))
+    val badges = Array.fill[Option[String]](2, Option.some[String](student.name()))
     if excellent(student) {
         badges.set(1, Option.some[String]("honors"))
     } else {
@@ -127,7 +127,7 @@ def main(): Int = {
     val cy = new Student("Cy", 12)
     val dee = new Student("Dee", 13)
 
-    val students = arrayFill[Student](4, ada)
+    val students = Array.fill[Student](4, ada)
     students.set(1, bob)
     students.set(2, cy)
     students.set(3, dee)

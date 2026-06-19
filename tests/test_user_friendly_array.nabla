@@ -24,10 +24,10 @@ def main(): Int = {
     strings.set(0, "hi")
     strings.set(1, "there")
 
-    val filledInts = ArrayFill[Int](3, 7)
-    val filledStudents = ArrayFill[Student](2, new Student("grace"))
-    val words = ArrayFill[String](2, "go")
-    val range = ArrayRange(4)
+    val filledInts = Array.fill[Int](3, 7)
+    val filledStudents = Array.fill[Student](2, new Student("grace"))
+    val words = Array.fill[String](2, "go")
+    val range = Array.range(4)
 
     if emptyInts.toString() == "[4, 5, 6]" &&
        doubles.toString() == "[1.500000, 2.500000]" &&

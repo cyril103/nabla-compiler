@@ -95,6 +95,11 @@ inline const std::vector<StdlibFunctionAlias>& stdlibFunctionAliases() {
         {"ArrayFill", {"Float"}, "arrayFloatFill"},
         {"ArrayFill", {"Double"}, "arrayDoubleFill"},
         {"ArrayFill", {"Bool"}, "arrayBoolFill"},
+        {"Array.fill", {"Int"}, "arrayIntFill"},
+        {"Array.fill", {"Long"}, "arrayLongFill"},
+        {"Array.fill", {"Float"}, "arrayFloatFill"},
+        {"Array.fill", {"Double"}, "arrayDoubleFill"},
+        {"Array.fill", {"Bool"}, "arrayBoolFill"},
         {"SetFromArray", {"Int"}, "setFromArrayInt"},
         {"SetFromArray", {"Long"}, "setFromArrayLong"},
         {"SetFromArray", {"Float"}, "setFromArrayFloat"},
@@ -196,7 +201,7 @@ inline std::optional<std::string> resolveStdlibFunctionAlias(
     }
     if (typeArguments.size() == 1 && !isPrimitiveArrayElementType(typeArguments[0])) {
         if (name == "arrayMkString" && typeArguments[0] == "String") return "objectStringArrayMkString";
-        if (name == "arrayFill" || name == "ArrayFill") return "objectArrayFill";
+        if (name == "arrayFill" || name == "ArrayFill" || name == "Array.fill") return "objectArrayFill";
         if (name == "SetFromArray") return "setFromArray";
         if (name == "Set.fromArray") return "setFromArray";
         if (name == "arrayMap") return "objectArrayMapSame";

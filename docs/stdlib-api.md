@@ -41,8 +41,8 @@ helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
 ### Collections
 
 - `Array[T]`
-- `ArrayFill[T](size, value)`
-- `ArrayRange(size)`
+- `Array.fill[T](size, value)`
+- `Array.range(size)`
 - Facades specialisees exposees par compatibilite utile :
   - `ArrayInt`
   - `ArrayLong`
@@ -108,8 +108,10 @@ nouveaux exemples devraient preferer la surface publique ci-dessus :
 
 - `ArrayInt`, `ArrayLong`, `ArrayFloat`, `ArrayDouble`, `ArrayBool`,
   `ArrayObject[T]` quand `Array[T]` suffit.
-- Fabriques specialisees `arrayIntFill`, `arrayLongFill`, etc. quand
-  `ArrayFill[T]` exprime mieux l'intention.
+- Compatibilite `ArrayFill[T](size, value)` et `ArrayRange(size)` quand
+  `Array.fill[T](...)` ou `Array.range(...)` suffit.
+- Fabriques specialisees `arrayIntFill`, `arrayLongFill`, etc. quand une
+  fabrique `Array` exprime mieux l'intention.
 - Helpers `arrayIntMap`, `arrayObjectMap`, etc. quand une methode de facade
   existe (`xs.map(...)`, `xs.filter(...)`, `xs.fold(...)`, etc.).
 - Compatibilite `SetEmpty[T]()` et `SetFromArray[T](values)` quand
