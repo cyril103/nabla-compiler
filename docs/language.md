@@ -713,8 +713,10 @@ projet, puis dans `stdlib/`.
 - Les chaines sont byte-based/ASCII, pas encore Unicode.
 - La memoire utilise un heap `mmap` de 8 MiB avec bump allocator, sans
   liberation ni GC.
-- Les vtables ont encore un emplacement reserve mais pas une strategie objet
-  complete d'heritage dynamique.
+- Les objets utilisateur stockent un identifiant de classe runtime dans leur
+  header et les méthodes override non génériques peuvent être redispatchées
+  quand la valeur est manipulée via un type parent. Les vraies vtables ne sont
+  pas encore formalisées.
 - La monomorphisation des classes generiques est encore limitee aux cas
   supportes par la suite actuelle.
 - Les fonctions generiques ne sont pas encore des valeurs polymorphes.

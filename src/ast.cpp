@@ -1314,6 +1314,12 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         shouldSpecializeAsConcreteClass || resolvedOwnerType.empty()
             ? concreteReceiverType
             : resolvedOwnerType;
+    const bool isSuperCall = dynamic_cast<const SuperNode*>(receiver.get()) != nullptr;
+    if (isSuperCall) {
+        return builder.emitStaticMethodCall(
+            methodOwnerType,
+            concreteMethodName, loweredReceiver, loweredArguments, concreteReturnType);
+    }
     return builder.emitMethodCall(
         methodOwnerType,
         concreteMethodName, loweredReceiver, loweredArguments, concreteReturnType);

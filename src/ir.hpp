@@ -14,6 +14,7 @@ enum class IROpcode {
     ClosureLoad,
     IndirectCall,
     MethodCall,
+    StaticMethodCall,
     NewObject,
     NewIntArray,
     IntArrayLength,
@@ -98,6 +99,9 @@ public:
         const std::string& callee, const std::vector<std::string>& arguments,
         const std::string& type = "Int");
     std::string emitMethodCall(
+        const std::string& className, const std::string& methodName, const std::string& receiver,
+        const std::vector<std::string>& arguments, const std::string& type = "Int");
+    std::string emitStaticMethodCall(
         const std::string& className, const std::string& methodName, const std::string& receiver,
         const std::vector<std::string>& arguments, const std::string& type = "Int");
     void registerMethodSpecialization(

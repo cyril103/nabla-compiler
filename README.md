@@ -29,9 +29,10 @@ une exécution native proche du matériel.
   pour représenter les valeurs immédiates. Les constantes runtime communes sont
   centralisées dans `src/runtime_values.hpp`.
 * **Modèle Objet & Pointeur `this` :** L'instanciation via `new` crée une
-  disposition linéaire de slots de 8 octets. Le slot 0 reste réservé à un
-  header/vtable futur, puis viennent les champs. Lors d'un appel de méthode,
-  `RDI` reçoit l'objet courant comme `this`.
+  disposition linéaire de slots de 8 octets. Le slot 0 porte un identifiant de
+  classe runtime pour le dispatch dynamique simple des overrides utilisateur,
+  puis viennent les champs. Lors d'un appel de méthode, `RDI` reçoit l'objet
+  courant comme `this`.
 * **Bump Allocator Interne :** Le runtime initialise un tas de 8 MiB avec
   `mmap`, aligne les allocations sur 8 octets et vérifie les dépassements.
 * **Système d'Import Résolutif :** Gestion des dépendances par graphe de fichiers

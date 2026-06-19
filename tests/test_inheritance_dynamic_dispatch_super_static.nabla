@@ -1,0 +1,30 @@
+class Root() {
+    def value(): Int = {
+        1
+    }
+}
+
+class Mid extends Root() {
+    override def value(): Int = {
+        super.value() + 1
+    }
+}
+
+class Leaf extends Mid() {
+    override def value(): Int = {
+        super.value() + 10
+    }
+}
+
+def read(root: Root): Int = {
+    root.value()
+}
+
+def main(): Int = {
+    val leaf = new Leaf()
+    if read(leaf) == 12 && leaf.value() == 12 {
+        42
+    } else {
+        1
+    }
+}

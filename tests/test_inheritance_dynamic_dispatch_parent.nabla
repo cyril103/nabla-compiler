@@ -1,0 +1,25 @@
+class Person(nameValue: String) {
+    def label(): String = {
+        "person:" + nameValue
+    }
+}
+
+class Student extends Person() {
+    override def label(): String = {
+        "student:" + nameValue
+    }
+}
+
+def render(person: Person): String = {
+    person.label()
+}
+
+def main(): Int = {
+    val student = new Student("ada")
+    if render(student) == "student:ada" &&
+       student.label() == "student:ada" {
+        42
+    } else {
+        1
+    }
+}

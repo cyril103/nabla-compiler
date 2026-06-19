@@ -44,7 +44,7 @@ def main(): Int = {
        unique.contains(ada) &&
        unique.contains(bob) &&
        unique.contains(cy) &&
-       unique.toString() == "[ada, bob, cy]" {
+       unique.toString() == "[ada student, bob instructor, cy volunteer]" {
         42
     } else {
         1

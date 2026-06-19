@@ -103,12 +103,14 @@ Les objets sont alloués dans le heap runtime par bump allocation. Le layout est
 linéaire par slots de 8 octets :
 
 ```text
-slot 0      : emplacement réservé pour pointeur de vtable / header futur
+slot 0      : identifiant de classe runtime pour les objets utilisateur
 slot 1..n   : champs de constructeur et champs hérités
 ```
 
-Les vraies vtables ne sont pas encore formalisées ; l'emplacement réservé doit
-être traité comme une convention interne à stabiliser ou retirer.
+Les vraies vtables ne sont pas encore formalisées. Le header sert aujourd'hui
+au dispatch dynamique simple des méthodes utilisateur non génériques quand une
+valeur est manipulée via un type parent. Les closures réutilisent leur propre
+convention de header pour stocker le pointeur de code.
 
 ### Slots nuls
 

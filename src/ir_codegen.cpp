@@ -89,6 +89,11 @@ struct CallingConvention {
     std::vector<std::string> methodArgumentRegisters = METHOD_ARGUMENT_REGISTERS;
 };
 
+struct DynamicDispatchTarget {
+    std::string runtimeClassName;
+    std::string targetOwnerName;
+};
+
 class StackFrame {
 public:
     void addSlot(const std::string& name) {
@@ -239,7 +244,10 @@ private:
                 emitIndirectCall(instruction);
                 break;
             case IROpcode::MethodCall:
-                emitMethodCall(instruction);
+                emitMethodCall(instruction, true);
+                break;
+            case IROpcode::StaticMethodCall:
+                emitMethodCall(instruction, false);
                 break;
             case IROpcode::NewObject:
                 emitNewObject(instruction);
@@ -694,6 +702,58 @@ private:
         return *std::max_element(offsets.begin(), offsets.end()) + 8;
     }
 
+    long long classIdFor(const std::string& className) const {
+        const std::string classBaseName = genericBaseName(className);
+        long long nextClassId = 1;
+        for (const auto& [candidateName, _] : context.classes) {
+            if (candidateName == classBaseName) return nextClassId;
+            ++nextClassId;
+        }
+        return 0;
+    }
+
+    bool canUseRuntimeClassDispatch(const std::string& className, const std::string& methodName) const {
+        if (parameterizedTypeFromName(className)) return false;
+        if (parameterizedTypeFromName(methodName)) return false;
+        const std::string classBaseName = genericBaseName(className);
+        auto classIt = context.classes.find(classBaseName);
+        if (classIt == context.classes.end()) return false;
+        auto methodIt = classIt->second.methods.find(methodName);
+        if (methodIt != classIt->second.methods.end() && !methodIt->second.typeParameters.empty()) {
+            return false;
+        }
+        return true;
+    }
+
+    std::vector<DynamicDispatchTarget> dynamicDispatchTargets(
+        const std::string& className, const std::string& methodName) const {
+        std::vector<DynamicDispatchTarget> targets;
+        if (!canUseRuntimeClassDispatch(className, methodName)) return targets;
+
+        const std::string staticClassName = genericBaseName(className);
+        std::set<std::pair<std::string, std::string>> seen;
+        for (const auto& [runtimeClassName, runtimeClass] : context.classes) {
+            if (runtimeClassName == staticClassName) continue;
+            if (!runtimeClass.typeParameters.empty()) continue;
+            if (!isTypeAssignable(context, runtimeClassName, staticClassName)) continue;
+
+            auto methodLookup = resolveClassMethodInHierarchy(context, runtimeClassName, methodName);
+            if (!methodLookup) continue;
+            const std::string targetOwnerName = genericBaseName(methodLookup->ownerClassName);
+            if (targetOwnerName == staticClassName) continue;
+            auto targetOwnerIt = context.classes.find(targetOwnerName);
+            if (targetOwnerIt == context.classes.end()) continue;
+            auto targetMethodIt = targetOwnerIt->second.methods.find(methodName);
+            if (targetMethodIt == targetOwnerIt->second.methods.end()) continue;
+            if (!targetMethodIt->second.typeParameters.empty()) continue;
+
+            if (seen.insert({runtimeClassName, targetOwnerName}).second) {
+                targets.push_back({runtimeClassName, targetOwnerName});
+            }
+        }
+        return targets;
+    }
+
     int fieldOffsetFor(const std::string& qualifiedField) const {
         auto [className, fieldName] = splitQualifiedMember(qualifiedField);
         const std::string layoutClassName = genericBaseName(className);
@@ -717,7 +777,7 @@ private:
         out << "    mov rdi, " << objectSizeFor(instruction.operation) << "\n";
         out << "    call Runtime_alloc\n";
         out << "    mov rbx, rax\n";
-        out << "    mov qword [rbx], 0\n";
+        out << "    mov qword [rbx], " << classIdFor(instruction.operation) << "\n";
         for (size_t i = 0; i < instruction.operands.size(); ++i) {
             loadValue(instruction.operands[i], "rax");
             out << "    mov [rbx + " << fieldOffsets[i] << "], rax\n";
@@ -909,7 +969,7 @@ private:
         storeRegister(instruction.result, "rax");
     }
 
-    void emitMethodCall(const IRInstruction& instruction) {
+    void emitMethodCall(const IRInstruction& instruction, bool allowDynamicDispatch) {
         auto [className, methodName] = splitQualifiedMember(instruction.operation);
         if (instruction.operands.empty()) codegenError("appel de methode IR sans receveur");
         if (methodName == "box") {
@@ -1007,6 +1067,31 @@ private:
             out << "    call Runtime_stringRepeat\n";
         } else if (className == "String" && methodName == "trim") {
             out << "    call Runtime_stringTrim\n";
+        } else if (allowDynamicDispatch) {
+            const auto targets = dynamicDispatchTargets(className, methodName);
+            if (targets.empty()) {
+                out << "    call " << asmFunctionName(instruction.operation) << "\n";
+            } else {
+                const std::string dispatchPrefix =
+                    ".L_dispatch_" + asmSymbolPart(function.name) + "_" +
+                    asmSymbolPart(instruction.result);
+                const std::string fallbackLabel = dispatchPrefix + "_fallback";
+                const std::string doneLabel = dispatchPrefix + "_done";
+                out << "    mov r10, [rdi]\n";
+                for (size_t i = 0; i < targets.size(); ++i) {
+                    out << "    cmp r10, " << classIdFor(targets[i].runtimeClassName) << "\n";
+                    out << "    je " << dispatchPrefix << "_" << i << "\n";
+                }
+                out << "    jmp " << fallbackLabel << "\n";
+                for (size_t i = 0; i < targets.size(); ++i) {
+                    out << dispatchPrefix << "_" << i << ":\n";
+                    out << "    call " << asmFunctionName(targets[i].targetOwnerName + "." + methodName) << "\n";
+                    out << "    jmp " << doneLabel << "\n";
+                }
+                out << fallbackLabel << ":\n";
+                out << "    call " << asmFunctionName(instruction.operation) << "\n";
+                out << doneLabel << ":\n";
+            }
         } else {
             out << "    call " << asmFunctionName(instruction.operation) << "\n";
         }

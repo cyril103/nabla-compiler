@@ -356,8 +356,10 @@ Limites importantes :
   `Instructor` et `Volunteer`, puis alimenter `SetFromArray[Person]`.
   L'exemple public utilise désormais `Array[T]` et `SetFromArray[T]` pour éviter
   d'exposer `ObjectArray[T]` / `ArrayObject[T]` dans le chemin applicatif
-  principal. La friction restante concerne surtout le dispatch dynamique complet
-  quand une valeur est manipulée via son type parent.
+  principal. Les overrides utilisateur non génériques redispatchent maintenant
+  via le header runtime quand une valeur est manipulée par son type parent; la
+  friction restante concerne les vtables complètes, génériques et cas avancés
+  d'égalité/hash.
 - Le mot-clé `override` est supporté pour marquer explicitement les
   redéfinitions de méthodes héritées, et il est obligatoire quand une méthode
   redéfinit une méthode provenant d'un parent.
@@ -618,7 +620,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 - [x] Verifier les depassements du tas.
 - [x] Initialiser le tas runtime via `mmap` et aligner les allocations bump.
-- [ ] Definir et utiliser de vraies vtables ou retirer leur emplacement reserve.
+- [ ] Definir de vraies vtables ou stabiliser le header runtime actuel.
 - [x] Extraire le runtime ASM commun du backend IR.
 - [x] Stabiliser la representation de `String`.
 - [x] Ajouter `String.charAt(index): Char` sur la representation byte-based.
@@ -672,6 +674,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   dans son chemin principal.
 - [x] Ajouter une régression `Set[Person]` construite depuis `Array[Person]`
   contenant des instances de sous-types (`Student`, `Instructor`, `Volunteer`).
+- [x] Ajouter un premier dispatch dynamique runtime pour les méthodes override
+  utilisateur non génériques appelées via un type parent, avec `super` maintenu
+  statique.
 - [x] Ajouter un test d'outillage pour vérifier le diagnostic quand une commande
   externe requise (`nasm`) est absente du `PATH`.
 - [x] Ajouter le support `write` / `append` multi-mots dans
@@ -682,6 +687,14 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Ajouter un premier dispatch dynamique pour les overrides utilisateur
+  non génériques via identifiant de classe runtime dans le header objet, et
+  distinguer les appels `super` comme appels statiques dans l'IR.
+  - Fichiers / tests associés: `src/ir.hpp`, `src/ir.cpp`, `src/ast.cpp`,
+    `src/ir_codegen.cpp`, `tests/test_inheritance_dynamic_dispatch_parent.nabla`,
+    `tests/test_inheritance_dynamic_dispatch_super_static.nabla`,
+    `tests/test_inheritance_collection_parent_type.nabla`, `README.md`,
+    `docs/language.md`, `docs/internals.md`, `docs/roadmap.md`.
 - `local` - Corriger le dédoublonnage des spécialisations IR de méthodes afin
   qu'un même corps spécialisé comme `Set[Person].contains` ne soit pas émis
   plusieurs fois lorsque les appels passent des sous-types différents.
@@ -1120,5 +1133,5 @@ Poursuivre la suite outillée autour de l’héritage et du matching :
 - Finaliser le nettoyage des diagnostics autour du pattern matching, notamment pour
   les motifs nommes.
 - Améliorer l’ergonomie d’héritage pour l’exemple de production:
-  constructeurs parentaux plus simples et friction réduite des collections
-  d’objets polymorphes (`Set[Person]` avec instances de sous-types).
+  constructeurs parentaux plus simples, vtables/génériques à formaliser, et
+  stratégie d'égalité/hash claire pour les hiérarchies polymorphes.

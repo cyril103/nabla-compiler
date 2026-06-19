@@ -40,8 +40,8 @@ pour reprendre facilement apres une pause.
   `Array[T]`, `Option[T]`, classes, lambdas et sortie console.
 - `examples/workshop_set_inheritance.nabla` sert d'exemple public vérifié pour
   `Array[T]`, `Set[T]`, `SetFromArray[T]`, opérations d'ensemble et héritage
-  avec `override`; il reste aussi un bon révélateur des frictions de typage
-  autour des collections polymorphes de type parent.
+  avec `override`; il couvre maintenant aussi les collections polymorphes de
+  type parent avec dispatch runtime des overrides utilisateur.
 - Support Vim minimal disponible dans `editor/vim`.
 - Suites `make all-tests`, `make examples` et `make tooling-tests` vertes au
   moment de cette mise a jour; la CI GitHub lance aussi les exemples publics.
@@ -135,8 +135,11 @@ Actions suggérées pour la suite :
    - Corrigé : `Array[Person]` peut alimenter `SetFromArray[Person]` avec des
      instances `Student`, `Instructor`, `Volunteer` sans dupliquer les
      spécialisations IR.
-   - Reste à clarifier : dispatch dynamique complet quand les valeurs sont
-     manipulées via le type parent, notamment pour les rendus `toString()`.
+   - Corrigé : les appels de méthodes utilisateur non génériques redispatchent
+     vers l'override runtime quand la valeur est manipulée via un type parent,
+     tout en gardant `super` statique.
+   - Reste à clarifier : stratégie complète de vtables, méthodes/classes
+     génériques et égalité/hash en hiérarchie plus complexe.
    - Documenter des motifs d’exemple pour utiliser ce cas facilement.
 6. Ajouter des tests “mélange” héritage + autres fonctionnalités.
    - Cas de régression couvrant `super`, champs hérités, shadowing contrôlé

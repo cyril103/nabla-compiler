@@ -74,6 +74,9 @@ std::string IRProgram::format() const {
                 case IROpcode::MethodCall:
                     out << "call_method " << instruction.operation << "(" << join(instruction.operands, ", ") << ")";
                     break;
+                case IROpcode::StaticMethodCall:
+                    out << "static_call_method " << instruction.operation << "(" << join(instruction.operands, ", ") << ")";
+                    break;
                 case IROpcode::NewObject:
                     out << "new " << instruction.operation << "(" << join(instruction.operands, ", ") << ")";
                     break;
@@ -279,6 +282,18 @@ std::string IRBuilder::emitMethodCall(
     std::string result = nextValue();
     emit({
         IROpcode::MethodCall, result, substituteActiveType(type),
+        qualifiedMember(substituteActiveType(className), methodName), operands});
+    return result;
+}
+
+std::string IRBuilder::emitStaticMethodCall(
+    const std::string& className, const std::string& methodName, const std::string& receiver,
+    const std::vector<std::string>& arguments, const std::string& type) {
+    std::vector<std::string> operands = {receiver};
+    operands.insert(operands.end(), arguments.begin(), arguments.end());
+    std::string result = nextValue();
+    emit({
+        IROpcode::StaticMethodCall, result, substituteActiveType(type),
         qualifiedMember(substituteActiveType(className), methodName), operands});
     return result;
 }
