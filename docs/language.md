@@ -234,6 +234,40 @@ def main(): Int = {
 
 `this` est disponible implicitement dans les methodes.
 
+## Objets Statiques
+
+Un `object` déclare un namespace statique inspiré des objets compagnons Scala.
+Dans l'implémentation actuelle, un objet ne possède pas encore d'identité
+runtime, de champs, ni de valeur singleton manipulable : seules des fonctions
+statiques sont autorisées dans son bloc.
+
+```nabla
+object MathTools {
+    def abs(value: Int): Int = {
+        if value < 0 { -value } else { value }
+    }
+}
+
+def main(): Int = {
+    MathTools.abs(-42)
+}
+```
+
+Un objet peut partager son nom avec une classe pour former un compagnon de
+surface :
+
+```nabla
+class Box[T](value: T) {
+    def get(): T = { value }
+}
+
+object Box {
+    def of[T](value: T): Box[T] = {
+        new Box[T](value)
+    }
+}
+```
+
 ## Héritage
 
 Une classe peut heriter d'une classe base via une clause `extends` optionnelle,
@@ -731,6 +765,8 @@ projet, puis dans `stdlib/`.
   instancié, une méthode générique spécialisée et les méthodes de base
   `Any.toString` / `Any.hashCode` / `Any.equals`. `super` reste un appel
   statique. Les vraies vtables ne sont pas encore formalisées.
+- Les `object` sont pour l'instant des namespaces statiques, pas des singletons
+  runtime avec champs ou identité.
 - La monomorphisation des classes generiques est encore limitee aux cas
   supportes par la suite actuelle.
 - Les fonctions generiques ne sont pas encore des valeurs polymorphes.

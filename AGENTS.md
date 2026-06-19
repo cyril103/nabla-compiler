@@ -374,6 +374,10 @@ Limites importantes :
   `Any.equals(...)`, et `toString()`, `hashCode()` et `equals(...)`
   redispatchent vers les overrides utilisateur même quand la valeur passe par
   `Any`, un type parent ou un paramètre générique spécialisé.
+- Les `object` existent comme namespaces statiques: leurs `def` sont abaissés
+  vers des fonctions globales qualifiées (`Name.method`) et peuvent servir de
+  compagnons de surface à une `class Name`. Ils ne sont pas encore des valeurs
+  singleton runtime avec champs, identité ou initialisation dédiée.
 
 ## Invariants D'Architecture
 
@@ -686,6 +690,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Redispatcher `Any.toString()`, `Any.hashCode()` et `Any.equals(...)` vers
   les overrides utilisateur pour les valeurs parent-typées ou génériques
   utilisées par `Set[T]`.
+- [x] Ajouter `object Name { def ... }` comme namespace statique et supporter
+  les compagnons de surface `class Name` + `object Name`.
 - [x] Ajouter un test d'outillage pour vérifier le diagnostic quand une commande
   externe requise (`nasm`) est absente du `PATH`.
 - [x] Ajouter le support `write` / `append` multi-mots dans
@@ -696,6 +702,16 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Ajouter les objets statiques façon Scala: `object Name { def ... }`
+  déclare des fonctions globales qualifiées appelables via `Name.method(...)`,
+  avec support des méthodes génériques et des compagnons de surface
+  `class Name` + `object Name`.
+  - Fichiers / tests associés: `src/lexer.hpp`, `src/parser.hpp`,
+    `src/parser.cpp`, `src/compiler_context.hpp`,
+    `tests/test_object_static_methods.nabla`,
+    `tests/test_object_companion_namespace.nabla`,
+    `tests/test_error_object_override.nabla`, `docs/language.md`,
+    `docs/internals.md`, `docs/roadmap.md`.
 - `local` - Ajouter l'égalité personnalisée de base pour les objets: `Any`
   expose `equals(other: Any): Bool`, `==` / `!=` sur objets s'abaissent vers
   `Any.equals(...)`, et `Any.toString()` / `Any.hashCode()` / `Any.equals(...)`

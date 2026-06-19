@@ -147,7 +147,14 @@ Actions suggérées pour la suite :
    - Reste à clarifier : stratégie complète de vtables et éventuelles règles
      d'égalité plus strictes pour les hiérarchies complexes.
    - Documenter des motifs d’exemple pour utiliser ce cas facilement.
-6. Ajouter des tests “mélange” héritage + autres fonctionnalités.
+6. Ajouter les objets statiques façon Scala.
+   - Corrigé : `object Name { def ... }` est supporté comme namespace statique
+     abaissé vers des fonctions globales qualifiées (`Name.method(...)`).
+   - Corrigé : un `object` peut partager son nom avec une `class` pour servir de
+     compagnon de surface (`Box.of(...)`).
+   - Reste à clarifier : vrais singletons runtime, champs d'objet et stratégie
+     d'initialisation.
+7. Ajouter des tests “mélange” héritage + autres fonctionnalités.
    - Cas de régression couvrant `super`, champs hérités, shadowing contrôlé
      et conflit translatif.
 

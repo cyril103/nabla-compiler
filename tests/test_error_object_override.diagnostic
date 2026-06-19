@@ -1,0 +1,1 @@
+tests/test_error_object_override.nabla:2:5: parser error: mot-clé 'override' non autorisé dans un objet statique

@@ -1,0 +1,19 @@
+object MathTools {
+    def abs(value: Int): Int = {
+        if value < 0 { -value } else { value }
+    }
+
+    def identity[T](value: T): T = {
+        value
+    }
+}
+
+def main(): Int = {
+    if MathTools.abs(-40) == 40 &&
+       MathTools.identity[Int](2) == 2 &&
+       MathTools.identity("ok") == "ok" {
+        42
+    } else {
+        1
+    }
+}

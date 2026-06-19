@@ -44,6 +44,7 @@ private:
 
     void parseImport(std::unique_ptr<ProgramNode>& currentProgram);
     void parseClassDefinition(std::unique_ptr<ProgramNode>& program);
+    void parseObjectDefinition(std::unique_ptr<ProgramNode>& program);
     std::unique_ptr<ASTNode> parseIfExpression();
     std::unique_ptr<ASTNode> parseMatchExpression();
     std::unique_ptr<ASTNode> parseWhileExpression();
@@ -64,7 +65,7 @@ private:
     std::unique_ptr<ASTNode> parseExpression();
     std::unique_ptr<ASTNode> parseBlock();
     std::unique_ptr<ASTNode> parseStatement();
-    std::unique_ptr<ASTNode> parseFunctionDef(std::string clName);
+    std::unique_ptr<ASTNode> parseFunctionDef(std::string clName, std::string objectName = "");
     std::vector<std::unique_ptr<ASTNode>> parseArguments(
         const std::vector<std::string>& expectedTypes = {});
     std::vector<std::unique_ptr<ASTNode>> parseFunctionCallArguments(

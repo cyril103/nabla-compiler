@@ -82,6 +82,8 @@ std::unique_ptr<ProgramNode> Parser::parseProgram() {
             parseImport(program);
         } else if (peek().type == TokenType::KW_CLASS) {
             parseClassDefinition(program);
+        } else if (peek().type == TokenType::KW_OBJECT) {
+            parseObjectDefinition(program);
         } else if (peek().type == TokenType::KW_DEF) {
             program->elements.push_back(parseFunctionDef(""));
         } else {
@@ -365,6 +367,33 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
     currentFunctionTypeParameters = previousTypeParameters;
     currentParsingClass.clear();
 }
+
+void Parser::parseObjectDefinition(std::unique_ptr<ProgramNode>& program) {
+    consume(TokenType::KW_OBJECT, "");
+    Token objectNameToken = consume(TokenType::IDENTIFIER, "Nom d'objet attendu");
+    const std::string objectName = objectNameToken.value;
+    if (context.objects.count(objectName)) {
+        throw CompilerError(ErrorKind::Parser, objectNameToken.location, "objet déjà déclaré: " + objectName);
+    }
+    context.objects.insert(objectName);
+
+    consume(TokenType::LBRACE, "'{' attendu après le nom de l'objet");
+    while (peek().type != TokenType::RBRACE) {
+        if (peek().type == TokenType::KW_DEF) {
+            program->elements.push_back(parseFunctionDef("", objectName));
+        } else if (peek().type == TokenType::KW_OVERRIDE) {
+            throw CompilerError(
+                ErrorKind::Parser, peek().location,
+                "mot-clé 'override' non autorisé dans un objet statique");
+        } else {
+            throw CompilerError(
+                ErrorKind::Parser, peek().location,
+                "seules les déclarations 'def' sont autorisées dans un objet statique");
+        }
+    }
+    consume(TokenType::RBRACE, "'}' attendu après l'objet");
+}
+
 std::unique_ptr<ASTNode> Parser::parseIfExpression() {
     Token start = consume(TokenType::KW_IF, "");
     if (peek().type == TokenType::LPAREN) {
@@ -1123,6 +1152,38 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
                 throw CompilerError(ErrorKind::Parser, methodToken.location, "appel attendu après les arguments de type");
             }
         }
+        if (auto* identifier = dynamic_cast<IdentifierNode*>(expr.get());
+            identifier && identifier->getType() == "<unresolved>") {
+            const std::string qualifiedFunctionName = identifier->getName() + "." + method;
+            auto qualifiedFunction = context.functions.find(qualifiedFunctionName);
+            if (qualifiedFunction != context.functions.end()) {
+                consume(TokenType::LPAREN, "");
+                std::vector<std::unique_ptr<ASTNode>> arguments =
+                    parseFunctionCallArguments(qualifiedFunction->second, typeArguments);
+                consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
+
+                std::map<std::string, std::string> substitution;
+                if (auto genericSubstitution =
+                        genericFunctionSubstitutionFor(qualifiedFunction->second, typeArguments)) {
+                    substitution = *genericSubstitution;
+                } else if (typeArguments.empty() && !qualifiedFunction->second.typeParameters.empty()) {
+                    std::vector<std::string> actualArgumentTypes;
+                    for (const auto& argument : arguments) actualArgumentTypes.push_back(argument->getType());
+                    if (auto inferredSubstitution =
+                            inferGenericFunctionSubstitution(qualifiedFunction->second, actualArgumentTypes)) {
+                        substitution = *inferredSubstitution;
+                    }
+                }
+                const std::string initialReturnType =
+                    substituteType(qualifiedFunction->second.returnType, substitution);
+                expr = located(
+                    std::make_unique<FunctionCallNode>(
+                        qualifiedFunctionName, std::move(arguments), std::move(typeArguments),
+                        initialReturnType),
+                    methodToken.location);
+                continue;
+            }
+        }
         const std::string receiverType = expr->getType();
         auto expectedArgumentTypes = expectedArgumentTypesForMethodCall(receiverType, method, methodToken.location);
         std::string initialReturnType = "Int";
@@ -1274,7 +1335,7 @@ std::unique_ptr<ASTNode> Parser::parseExpression() {
     return parseLogicalOr();
 }
 
-std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
+std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName, std::string objectName) {
     bool isOverride = false;
     if (peek().type == TokenType::KW_OVERRIDE) {
         if (clName.empty()) {
@@ -1288,6 +1349,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
     Token defToken = consume(TokenType::KW_DEF, "");
     Token nameToken = consume(TokenType::IDENTIFIER, "Nom de fonction attendu");
     std::string name = nameToken.value;
+    const std::string functionName = objectName.empty() ? name : objectName + "." + name;
     std::vector<std::string> typeParameters;
     if (peek().type == TokenType::LBRACKET) {
         consume(TokenType::LBRACKET, "");
@@ -1351,10 +1413,10 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
         }
         context.classes[clName].methods[name] = signature;
     } else {
-        if (context.functions.count(name)) {
-            throw CompilerError(ErrorKind::Parser, nameToken.location, "fonction déjà déclarée: " + name);
+        if (context.functions.count(functionName)) {
+            throw CompilerError(ErrorKind::Parser, nameToken.location, "fonction déjà déclarée: " + functionName);
         }
-        context.functions[name] = signature;
+        context.functions[functionName] = signature;
     }
     consume(TokenType::EQUAL, ""); consume(TokenType::LBRACE, "");
     auto previousFunctionTypeParameters = currentFunctionTypeParameters;
@@ -1371,7 +1433,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName) {
     std::vector<std::string> ownerTypeParameters;
     if (!clName.empty()) ownerTypeParameters = context.classes[clName].typeParameters;
     return located(std::make_unique<FunctionDefNode>(
-        clName, name, returnType, std::move(typeParameters),
+        clName, functionName, returnType, std::move(typeParameters),
         std::move(parameters), std::move(body), std::vector<FunctionDefNode::Capture>{},
         std::move(ownerTypeParameters)), defToken.location);
 }

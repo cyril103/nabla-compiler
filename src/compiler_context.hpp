@@ -50,6 +50,7 @@ struct CompilerContext {
     std::map<std::string, std::map<std::string, int>> classLayouts;
     std::map<std::string, ClassInfo> classes;
     std::map<std::string, FunctionSignature> functions;
+    std::set<std::string> objects;
     std::set<std::string> parsedFiles;
     std::filesystem::path rootDir;
     std::filesystem::path stdlibDir;

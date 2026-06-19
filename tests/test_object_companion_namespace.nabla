@@ -1,0 +1,25 @@
+class Box[T](value: T) {
+    def get(): T = {
+        value
+    }
+}
+
+object Box {
+    def of[T](value: T): Box[T] = {
+        new Box[T](value)
+    }
+
+    def int(value: Int): Box[Int] = {
+        Box.of[Int](value)
+    }
+}
+
+def main(): Int = {
+    val fromGeneric = Box.of[String]("hi")
+    val fromSpecific = Box.int(42)
+    if fromGeneric.get() == "hi" && fromSpecific.get() == 42 {
+        42
+    } else {
+        1
+    }
+}

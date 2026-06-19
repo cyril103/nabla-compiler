@@ -175,6 +175,14 @@ Les captures sont matérialisées côté IR/runtime comme valeurs stockées dans
 structure de closure. Les limites de paramètres restent liées à la convention
 d'appel actuelle.
 
+## Objets Statiques
+
+Les `object` source sont abaissés comme namespaces de fonctions globales
+qualifiées. Par exemple `object Math { def abs(...) }` enregistre une fonction
+`Math.abs` dans `CompilerContext::functions`, et l'appel `Math.abs(...)` devient
+un appel de fonction normal côté IR. Il n'y a pas encore de singleton runtime,
+de champs d'objet, d'initialisation lazy/eager ni d'identité manipulable.
+
 ## Classes, Héritage Et `Any`
 
 Les classes sans parent explicite héritent implicitement de `Any`.
