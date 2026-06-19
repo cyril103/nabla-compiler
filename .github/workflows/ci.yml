@@ -20,6 +20,11 @@ jobs:
       - name: Run test suite
         run: make all-tests
 
+      - name: Check generated stdlib docs
+        run: |
+          make stdlib-docs
+          git diff --exit-code docs/stdlib
+
       - name: Compile with warnings as errors
         run: |
           g++ -std=c++17 -Wall -Wextra -Werror \

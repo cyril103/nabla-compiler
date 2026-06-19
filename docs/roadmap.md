@@ -90,15 +90,14 @@ Actions recommandees :
 - Corrigé — Fallbacks silencieux vers `Int` quand un type est inconnu :
   - `src/parser.cpp:1071` utilise maintenant un marqueur `<unresolved>` pour les identifiants non résolus.
   - `src/ir_codegen.cpp:211` échoue maintenant explicitement si un type IR est vide ou introuvable.
-- P3 — La référence HTML de la stdlib peut dériver sans alerte automatique :
-  - `.github/workflows/ci.yml:21` lance les tests et contrôles principaux, mais ne vérifie pas que `make stdlib-docs` laisse `docs/stdlib/` à jour.
-  - Risque : les commentaires `///`, `@signature` ou `@symbol` peuvent diverger de la documentation publiée.
+- P3 — Corrigé : la référence HTML de la stdlib est vérifiée par la CI :
+  - `.github/workflows/ci.yml` lance maintenant `make stdlib-docs` puis
+    `git diff --exit-code docs/stdlib` pour empêcher une documentation générée
+    désynchronisée.
 
 Actions suggérées pour la suite :
 
 1. Centraliser la convention d'encodage booléen (tag/valeurs) et ajouter des tests de régression bool via constantes, comparaisons, fonctions et tableaux.
-2. Ajouter un check CI pour la reference HTML stdlib : lancer `make stdlib-docs`
-   et échouer si `docs/stdlib/` n'est pas à jour.
 
 1. Finaliser la sémantique d'héritage.
    - Valider la résolution des champs hérités et les conflits de noms entre

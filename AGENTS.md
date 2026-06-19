@@ -630,7 +630,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter une premiere documentation utilisateur du langage.
 - [x] Ajouter une reference HTML de la stdlib generee depuis les commentaires
   `///` publics.
-- [ ] Ajouter un check CI qui lance `make stdlib-docs` et echoue si la
+- [x] Ajouter un check CI qui lance `make stdlib-docs` et echoue si la
   generation laisse un diff non commite.
 - [x] Ajouter une roadmap de reprise dans `docs/roadmap.md`.
 - [x] Ajouter un support Vim minimal pour `*.nabla`.
@@ -644,6 +644,11 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Ajouter un garde-fou CI pour la documentation générée de la stdlib :
+  `make stdlib-docs` est exécuté puis `git diff --exit-code docs/stdlib`
+  échoue si la référence HTML n'est pas committée.
+  - Fichiers / tests associés: `.github/workflows/ci.yml`, `AGENTS.md`,
+    `docs/roadmap.md`.
 - `local` - Corriger les principaux points de la revue du 16/06/2026 :
   validation stricte des signatures `override`, initialisation par type des
   tableaux natifs, marqueur `<unresolved>` côté parser et erreur explicite côté
