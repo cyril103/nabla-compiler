@@ -651,6 +651,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Definir le perimetre de Nabla 0.1 : objectifs, inclusions,
+  non-objectifs, criteres de sortie et roadmap courte avant tag.
+  - Fichiers / tests associés: `docs/releases/0.1.md`, `README.md`,
+    `AGENTS.md`.
 - `local` - Classer la surface de la bibliotheque standard avec
   `docs/stdlib-api.md` : API publique, compatibilite temporaire et details
   internes, afin de guider les prochains exemples et durcissements de

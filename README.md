@@ -57,6 +57,7 @@ Une première documentation utilisateur du langage est disponible ici :
 - [docs/stdlib-api.md](docs/stdlib-api.md)
 - [docs/roadmap.md](docs/roadmap.md)
 - [docs/internals.md](docs/internals.md)
+- [docs/releases/0.1.md](docs/releases/0.1.md)
 
 La reference HTML de la bibliotheque standard se genere depuis les commentaires
 `///` places devant les declarations publiques :

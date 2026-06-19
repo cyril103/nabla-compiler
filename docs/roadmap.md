@@ -57,7 +57,8 @@ features.
 - Typage a garder simple : sous-typage nominal pour les classes, generiques
   invariants par defaut, conversions explicites ou helpers stdlib.
 - Documentation : la reference HTML doit devenir une doc utilisateur claire,
-  avec une separation visible entre API publique et helpers internes.
+  avec une separation visible entre API publique et helpers internes. Le
+  perimetre cible de Nabla 0.1 est fixe dans `docs/releases/0.1.md`.
 
 Actions recommandees :
 
