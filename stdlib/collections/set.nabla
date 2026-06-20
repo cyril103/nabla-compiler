@@ -1,8 +1,8 @@
 /// @module Set
 /// Ensembles immuables avec valeurs uniques.
-/// Utiliser `Set.empty[T]()` pour construire progressivement un ensemble, ou
-/// `Set.fromArray[T](values)` pour dedupliquer un tableau. Les anciens noms
-/// `SetEmpty[T]()` et `SetFromArray[T](values)` restent disponibles pour
+/// Utiliser Set.empty[T]() pour construire progressivement un ensemble, ou
+/// Set.fromArray[T](values) pour dedupliquer un tableau. Les anciens noms
+/// SetEmpty[T]() et SetFromArray[T](values) restent disponibles pour
 /// compatibilite, mais ne sont plus l'API recommandee pour du code applicatif.
 
 import collections.object_array
@@ -331,10 +331,10 @@ object Set {
     /// @signature def Set.fromArray[T](values: Array[T]): Set[T]
     /// @status Recommandee
     ///
-    /// Pour `Array[Int]`, `Array[Long]`, `Array[Float]`, `Array[Double]` et
-    /// `Array[Bool]`, le compilateur redirige ce nom vers la specialisation
-    /// adaptee. Pour les autres types, `Array[T]` est represente par
-    /// `ArrayObject[T]`.
+    /// Pour Array[Int], Array[Long], Array[Float], Array[Double] et
+    /// Array[Bool], le compilateur redirige ce nom vers la specialisation
+    /// adaptee. Pour les autres types, Array[T] est represente par
+    /// ArrayObject[T].
     def fromArray[T](values: ArrayObject[T]): Set[T] = {
         setFromArray[T](values)
     }
@@ -344,16 +344,19 @@ object Set {
 /// @signature def SetFromArray[T](values: Array[T]): Set[T]
 /// @status Compatibilite
 ///
-/// Pour `Array[Int]`, `Array[Long]`, `Array[Float]`, `Array[Double]` et
-/// `Array[Bool]`, le compilateur redirige ce nom vers la specialisation
-/// adaptee. Pour les autres types, `Array[T]` est represente par
-/// `ArrayObject[T]`.
+/// Preferer Set.fromArray[T](values) dans le nouveau code.
+///
+/// Pour Array[Int], Array[Long], Array[Float], Array[Double] et Array[Bool],
+/// le compilateur redirige ce nom vers la specialisation adaptee. Pour les
+/// autres types, Array[T] est represente par ArrayObject[T].
 def SetFromArray[T](values: ArrayObject[T]): Set[T] = {
     Set.fromArray[T](values)
 }
 
 /// Cree un ensemble vide.
 /// @status Compatibilite
+///
+/// Preferer Set.empty[T]() dans le nouveau code.
 def SetEmpty[T](): Set[T] = {
     Set.empty[T]()
 }
@@ -362,8 +365,10 @@ def SetEmpty[T](): Set[T] = {
 /// @signature class Set[T]
 /// @status Recommandee
 ///
-/// Les operations comme `add`, `remove`, `union`, `intersect` et `difference`
+/// Les operations comme add, remove, union, intersect et difference
 /// retournent un nouvel ensemble. L'instance d'origine n'est pas modifiee.
+/// L'egalite repose sur == et l'index interne utilise hashCode(), ce qui permet
+/// aux overrides utilisateur de participer a la deduplication.
 class Set[T](values: ArrayObject[T]) {
     def size(): Int = {
         values.size()

@@ -760,6 +760,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Nettoyer la surface documentaire de `collections.set`: la page
+  HTML evite maintenant les marqueurs Markdown bruts, les alias
+  `SetFromArray` / `SetEmpty` pointent explicitement vers `Set.fromArray` /
+  `Set.empty`, et `Set[T]` documente la convention `==` / `hashCode()` utilisee
+  pour la deduplication.
+  - Fichiers / tests associes: `stdlib/collections/set.nabla`,
+    `docs/stdlib/collections/set.html`, `AGENTS.md`, `make stdlib-docs`.
 - `local` - Nettoyer la surface documentaire de `stdlib/util.nabla`: les types
   de resultat et les fonctions recommandees sont maintenant publies dans la
   reference HTML avec `@status`, tandis que `randomStep` reste interne et que

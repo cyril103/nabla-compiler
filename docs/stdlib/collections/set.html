@@ -16,7 +16,7 @@
     <section class="module-hero">
       <p class="import">import collections.set</p>
       <h1>Set</h1>
-      <p>Ensembles immuables avec valeurs uniques. Utiliser `Set.empty[T]()` pour construire progressivement un ensemble, ou `Set.fromArray[T](values)` pour dedupliquer un tableau. Les anciens noms `SetEmpty[T]()` et `SetFromArray[T](values)` restent disponibles pour compatibilite, mais ne sont plus l&#x27;API recommandee pour du code applicatif.</p>
+      <p>Ensembles immuables avec valeurs uniques. Utiliser Set.empty[T]() pour construire progressivement un ensemble, ou Set.fromArray[T](values) pour dedupliquer un tableau. Les anciens noms SetEmpty[T]() et SetFromArray[T](values) restent disponibles pour compatibilite, mais ne sont plus l&#x27;API recommandee pour du code applicatif.</p>
     </section>
     <section class="entries">
     <article class="entry" id="empty">
@@ -34,7 +34,7 @@
       <h2>fromArray</h2>
       <pre><code>def Set.fromArray[T](values: Array[T]): Set[T]</code></pre>
       <p>Deduplique un tableau en ensemble.</p>
-<p>Pour `Array[Int]`, `Array[Long]`, `Array[Float]`, `Array[Double]` et `Array[Bool]`, le compilateur redirige ce nom vers la specialisation adaptee. Pour les autres types, `Array[T]` est represente par `ArrayObject[T]`.</p>
+<p>Pour Array[Int], Array[Long], Array[Float], Array[Double] et Array[Bool], le compilateur redirige ce nom vers la specialisation adaptee. Pour les autres types, Array[T] est represente par ArrayObject[T].</p>
     </article>
     <article class="entry" id="SetFromArray">
       <div class="entry-meta">
@@ -43,7 +43,8 @@
       <h2>SetFromArray</h2>
       <pre><code>def SetFromArray[T](values: Array[T]): Set[T]</code></pre>
       <p>Deduplique un tableau en ensemble.</p>
-<p>Pour `Array[Int]`, `Array[Long]`, `Array[Float]`, `Array[Double]` et `Array[Bool]`, le compilateur redirige ce nom vers la specialisation adaptee. Pour les autres types, `Array[T]` est represente par `ArrayObject[T]`.</p>
+<p>Preferer Set.fromArray[T](values) dans le nouveau code.</p>
+<p>Pour Array[Int], Array[Long], Array[Float], Array[Double] et Array[Bool], le compilateur redirige ce nom vers la specialisation adaptee. Pour les autres types, Array[T] est represente par ArrayObject[T].</p>
     </article>
     <article class="entry" id="SetEmpty">
       <div class="entry-meta">
@@ -52,6 +53,7 @@
       <h2>SetEmpty</h2>
       <pre><code>def SetEmpty[T](): Set[T]</code></pre>
       <p>Cree un ensemble vide.</p>
+<p>Preferer Set.empty[T]() dans le nouveau code.</p>
     </article>
     <article class="entry" id="Set">
       <div class="entry-meta">
@@ -60,7 +62,7 @@
       <h2>Set</h2>
       <pre><code>class Set[T]</code></pre>
       <p>Ensemble immutable.</p>
-<p>Les operations comme `add`, `remove`, `union`, `intersect` et `difference` retournent un nouvel ensemble. L&#x27;instance d&#x27;origine n&#x27;est pas modifiee.</p>
+<p>Les operations comme add, remove, union, intersect et difference retournent un nouvel ensemble. L&#x27;instance d&#x27;origine n&#x27;est pas modifiee. L&#x27;egalite repose sur == et l&#x27;index interne utilise hashCode(), ce qui permet aux overrides utilisateur de participer a la deduplication.</p>
     </article>
     </section>
   </main>
