@@ -1110,6 +1110,10 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                         "la fonction standard générique '" + name +
                         "' ne supporte pas ces arguments de type" +
                         recommendedStdlibFunctionSuffix(name));
+                } else if (context.objects.count(name) &&
+                           !functionOverloadNames(context, name + ".apply").empty() &&
+                           functionOverloadNames(context, name).empty()) {
+                    functionLookupName = name + ".apply";
                 }
             }
             if (initialSymbol) {
@@ -1556,14 +1560,29 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName, std::strin
         Token parameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre attendu");
         std::string parameterName = parameterToken.value;
         consume(TokenType::COLON, "':' attendu après le nom du paramètre");
-        auto [parameterType, parameterTypeLocation] = parseType("Type de paramètre attendu");
+        auto [declaredParameterType, parameterTypeLocation] = parseType("Type de paramètre attendu");
+        bool isRepeated = false;
+        std::string repeatedElementType;
+        std::string parameterType = declaredParameterType;
+        if (peek().type == TokenType::STAR) {
+            consume(TokenType::STAR, "");
+            isRepeated = true;
+            repeatedElementType = declaredParameterType;
+            parameterType = canonicalTypeName(formatParameterizedType("Array", {declaredParameterType}));
+            if (peek().type == TokenType::COMMA) {
+                throw CompilerError(
+                    ErrorKind::Parser, parameterToken.location,
+                    "un paramètre répété doit être le dernier paramètre");
+            }
+        }
         if (localScopes.back().count(parameterName)) {
             throw CompilerError(ErrorKind::Parser, parameterToken.location, "paramètre déjà déclaré: " + parameterName);
         }
         std::string symbolName = parameterName + "#" + std::to_string(nextSymbolId++);
         localScopes.back()[parameterName] = {symbolName, parameterType, false};
         parameters.push_back({parameterName, symbolName, parameterType});
-        signatureParameters.push_back({parameterName, parameterType, parameterTypeLocation});
+        signatureParameters.push_back({
+            parameterName, parameterType, parameterTypeLocation, isRepeated, repeatedElementType});
         if (peek().type == TokenType::COMMA) {
             consume(TokenType::COMMA, "");
         } else if (peek().type != TokenType::RPAREN) {
@@ -1729,12 +1748,18 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseFunctionCallArguments(
     while (peek().type != TokenType::RPAREN) {
         std::string expectedType;
         std::string expectedPattern;
-        if (arguments.size() < signature.parameters.size()) {
-            expectedPattern = substituteType(signature.parameters[arguments.size()].type, substitution);
+        const size_t parameterIndex = arguments.size();
+        if (parameterIndex < signature.parameters.size() ||
+            (hasRepeatedParameter(signature) && parameterIndex >= signature.parameters.size() - 1)) {
+            if (hasRepeatedParameter(signature) && parameterIndex >= signature.parameters.size() - 1) {
+                expectedPattern = substituteType(signature.parameters.back().repeatedElementType, substitution);
+            } else {
+                expectedPattern = substituteType(signature.parameters[parameterIndex].type, substitution);
+            }
             expectedType = expectedPattern;
         }
         auto argument = parseArgument(expectedType);
-        if (typeArguments.empty() && arguments.size() < signature.parameters.size()) {
+        if (typeArguments.empty() && !expectedPattern.empty()) {
             inferTypeArgumentsFromTypes(
                 expectedPattern, argument->getType(),
                 signature.typeParameters, substitution);
@@ -1819,7 +1844,7 @@ std::optional<ClassMethodLookupResult> Parser::selectedOverloadedMethodCallForAr
     for (const auto& candidate : methodCandidates) {
         if (!candidate.signature) continue;
         const auto& signature = *candidate.signature;
-        if (signature.parameters.size() != argumentShape->size()) continue;
+        if (!acceptsArgumentCount(signature, argumentShape->size())) continue;
         std::map<std::string, std::string> substitution = candidate.classSubstitution;
         if (!typeArguments.empty()) {
             auto methodSubstitution = genericFunctionSubstitutionFor(signature, typeArguments);
@@ -1829,7 +1854,7 @@ std::optional<ClassMethodLookupResult> Parser::selectedOverloadedMethodCallForAr
         bool lambdaCompatible = true;
         for (size_t i = 0; i < argumentShape->size(); ++i) {
             if (!(*argumentShape)[i]) continue;
-            const std::string expectedType = substituteType(signature.parameters[i].type, substitution);
+            const std::string expectedType = expectedArgumentTypeAt(signature, i, substitution);
             if (!functionTypeFromName(expectedType)) {
                 lambdaCompatible = false;
                 break;

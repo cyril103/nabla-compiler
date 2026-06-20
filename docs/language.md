@@ -127,6 +127,21 @@ Les appels recursifs directs en position terminale sont optimises en boucle par
 le backend. Cela couvre notamment les branches `if` qui retournent directement
 la valeur de l'appel recursif.
 
+Le dernier parametre d'une fonction ou methode peut etre repete avec `*`.
+Dans le corps, ce parametre est vu comme un `Array[T]`.
+
+```nabla
+import collections.array
+
+def join(words: String*): String = {
+    words.mkString("-")
+}
+
+def main(): Int = {
+    if join("a", "b", "c") == "a-b-c" { 42 } else { 1 }
+}
+```
+
 Les fonctions globales peuvent etre surchargees par signature. Deux fonctions
 peuvent partager le meme nom si la liste de types de leurs parametres les
 distingue. L'appel est resolu statiquement depuis les types des arguments :
@@ -347,6 +362,9 @@ object Box {
 }
 ```
 
+Si un objet expose une methode `apply`, `Name(...)` est un raccourci pour
+`Name.apply(...)`. C'est notamment utilise par `Array(1, 2, 3)`.
+
 ## Héritage
 
 Une classe peut heriter d'une classe base via une clause `extends` optionnelle,
@@ -565,6 +583,7 @@ def main(): Int = {
 
     val values = Array.fill[Int](3, 7)
     val doubled = values.map(value => value * 2)
+    val literal = Array(1, 2, 3)
     val empty = Array.empty[Int]()
     val squares = Array.tabulate[Int](4, index => index * index)
     val indexes = Array.range(3)
@@ -572,6 +591,7 @@ def main(): Int = {
     if scores.mkString(",") == "10,20,30" &&
        weights.toString() == "[1.500000, 2.500000]" &&
        doubled.mkString(",") == "14,14,14" &&
+       literal.toString() == "[1, 2, 3]" &&
        empty.isEmpty() &&
        squares.toString() == "[0, 1, 4, 9]" &&
        indexes.toString() == "[0, 1, 2]" &&
@@ -586,6 +606,7 @@ def main(): Int = {
 Pour creer un tableau de n'importe quel type `T`, l'API recommandee est donc :
 
 - `new Array[T](size)` pour creer un tableau modifiable de taille fixe ;
+- `Array(value1, value2, ...)` pour creer un tableau depuis des elements ;
 - `Array.empty[T]()` pour creer un tableau vide ;
 - `Array.fill[T](size, value)` pour creer un tableau deja rempli ;
 - `Array.tabulate[T](size, f)` pour creer un tableau en calculant chaque
@@ -634,9 +655,9 @@ Les anciens noms `ArrayFill[T](...)`, `ArrayRange(size)` et les noms bas niveau
 comme `arrayFill[Int](...)`, `arrayIntRange(size)`,
 `arrayIntRangeUntil(start, until)`, `new IntArray(size)` ou
 `new ObjectArray[T](size)` restent disponibles pour compatibilite et pour la
-stdlib, mais `Array[T]`, `Array.empty`, `Array.fill`, `Array.tabulate`,
-`Array.range` et `Array.rangeUntil` sont les noms a privilegier dans le code
-utilisateur.
+stdlib, mais `Array[T]`, `Array(...)`, `Array.apply`, `Array.empty`,
+`Array.fill`, `Array.tabulate`, `Array.range` et `Array.rangeUntil` sont les
+noms a privilegier dans le code utilisateur.
 
 `intRangeUntil(start, until)` produit une plage `Int` paresseuse. Ses operations
 `foreach`, `fold`, `map` et `max` evitent de construire un `IntArray`

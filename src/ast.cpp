@@ -115,6 +115,9 @@ std::vector<CompilerContext::ParameterInfo> substituteParameters(
     std::vector<CompilerContext::ParameterInfo> substituted;
     for (auto parameter : parameters) {
         parameter.type = substituteType(parameter.type, substitution);
+        if (parameter.isRepeated) {
+            parameter.repeatedElementType = substituteType(parameter.repeatedElementType, substitution);
+        }
         substituted.push_back(std::move(parameter));
     }
     return substituted;
@@ -126,17 +129,26 @@ void validateArguments(
     const std::vector<std::unique_ptr<ASTNode>>& arguments,
     const std::vector<CompilerContext::ParameterInfo>& parameters,
     const SourceLocation& location) {
-    if (arguments.size() != parameters.size()) {
+    const bool hasRepeated = !parameters.empty() && parameters.back().isRepeated;
+    const size_t minimumCount = hasRepeated ? parameters.size() - 1 : parameters.size();
+    if ((!hasRepeated && arguments.size() != parameters.size()) ||
+        (hasRepeated && arguments.size() < minimumCount)) {
         throw CompilerError(ErrorKind::Semantic, location,
-            callableName + ": " + std::to_string(parameters.size()) +
+            callableName + ": " + std::to_string(minimumCount) +
             " argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)" +
             recommendedStdlibFunctionSuffix(callableName));
     }
     for (size_t i = 0; i < arguments.size(); ++i) {
-        if (!isTypeAssignable(context, arguments[i]->getType(), parameters[i].type)) {
+        const auto& parameter = hasRepeated && i >= parameters.size() - 1
+            ? parameters.back()
+            : parameters[i];
+        const std::string expectedType = hasRepeated && i >= parameters.size() - 1
+            ? parameter.repeatedElementType
+            : parameter.type;
+        if (!isTypeAssignable(context, arguments[i]->getType(), expectedType)) {
             throw CompilerError(ErrorKind::Semantic, arguments[i]->getLocation(),
-                callableName + ", paramètre '" + parameters[i].name + "': type '" +
-                parameters[i].type + "' attendu, '" + arguments[i]->getType() + "' reçu" +
+                callableName + ", paramètre '" + parameter.name + "': type '" +
+                expectedType + "' attendu, '" + arguments[i]->getType() + "' reçu" +
                 recommendedStdlibFunctionSuffix(callableName));
         }
     }
@@ -157,6 +169,83 @@ std::string boxValueForParameter(
     const std::string& actualType, const std::string& expectedType) {
     if (!shouldBoxArgumentForParameter(actualType, expectedType)) return loweredValue;
     return builder.emitMethodCall(actualType, "box", loweredValue, {}, expectedType);
+}
+
+std::string emitPackedArrayArgument(
+    IRBuilder& builder,
+    const std::vector<std::unique_ptr<ASTNode>>& arguments,
+    size_t startIndex,
+    const CompilerContext::ParameterInfo& parameter) {
+    const size_t repeatedCount = arguments.size() - startIndex;
+    const std::string size = builder.emitConstant(std::to_string(repeatedCount), "Int");
+    const std::string elementType = builder.substituteActiveType(parameter.repeatedElementType);
+    const std::string arrayType = builder.substituteActiveType(parameter.type);
+
+    std::string rawArray;
+    if (arrayType == "ArrayLong") {
+        rawArray = builder.emitNewLongArray(size);
+    } else if (arrayType == "ArrayFloat") {
+        rawArray = builder.emitNewFloatArray(size);
+    } else if (arrayType == "ArrayDouble") {
+        rawArray = builder.emitNewDoubleArray(size);
+    } else if (arrayType == "ArrayBool") {
+        rawArray = builder.emitNewBoolArray(size);
+    } else if (arrayType == "ArrayInt") {
+        rawArray = builder.emitNewIntArray(size);
+    } else {
+        rawArray = builder.emitNewObjectArray(size, elementType);
+    }
+
+    for (size_t i = 0; i < repeatedCount; ++i) {
+        const auto& argument = arguments[startIndex + i];
+        const std::string index = builder.emitConstant(std::to_string(i), "Int");
+        std::string value = argument->lowerToIR(builder);
+        value = boxValueForParameter(
+            builder, value, argument->getType(), parameter.repeatedElementType);
+
+        if (arrayType == "ArrayLong") {
+            builder.emitLongArraySet(rawArray, index, value);
+        } else if (arrayType == "ArrayFloat") {
+            builder.emitFloatArraySet(rawArray, index, value);
+        } else if (arrayType == "ArrayDouble") {
+            builder.emitDoubleArraySet(rawArray, index, value);
+        } else if (arrayType == "ArrayBool") {
+            builder.emitBoolArraySet(rawArray, index, value);
+        } else if (arrayType == "ArrayInt") {
+            builder.emitIntArraySet(rawArray, index, value);
+        } else {
+            builder.emitObjectArraySet(rawArray, index, value);
+        }
+    }
+
+    return builder.emitNewObject(arrayType, {rawArray}, arrayType);
+}
+
+std::vector<std::string> lowerCallArgumentsForParameters(
+    IRBuilder& builder,
+    const std::vector<std::unique_ptr<ASTNode>>& arguments,
+    const std::vector<CompilerContext::ParameterInfo>& parameters) {
+    std::vector<std::string> loweredArguments;
+    const bool hasRepeated = !parameters.empty() && parameters.back().isRepeated;
+    const size_t fixedCount = hasRepeated ? parameters.size() - 1 : parameters.size();
+
+    for (size_t i = 0; i < arguments.size() && i < fixedCount; ++i) {
+        std::string loweredArgument = arguments[i]->lowerToIR(builder);
+        loweredArgument = boxValueForParameter(
+            builder, loweredArgument, arguments[i]->getType(), parameters[i].type);
+        loweredArguments.push_back(loweredArgument);
+    }
+
+    if (hasRepeated) {
+        loweredArguments.push_back(
+            emitPackedArrayArgument(builder, arguments, fixedCount, parameters.back()));
+        return loweredArguments;
+    }
+
+    for (size_t i = fixedCount; i < arguments.size(); ++i) {
+        loweredArguments.push_back(arguments[i]->lowerToIR(builder));
+    }
+    return loweredArguments;
 }
 }
 
@@ -905,6 +994,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         validateArguments(context, receiverType + "." + methodName, arguments, signature->parameters, location);
         resolvedType = signature->returnType;
         resolvedParameterTypes = parameterTypes(signature->parameters);
+        resolvedParameters = signature->parameters;
         resolvedTypeArguments.clear();
         resolvedOwnerType.clear();
         return;
@@ -1000,6 +1090,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
     validateArguments(context, receiverType + "." + methodName, arguments, parameters, location);
     resolvedType = substituteType(methodSignature.returnType, substitution);
     resolvedParameterTypes = parameterTypes(parameters);
+    resolvedParameters = parameters;
     resolvedOwnerType = methodLookup.ownerClassName;
 }
 
@@ -1287,14 +1378,18 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
     }
     if (activeReceiverType != receiverType && stdlibTypeAliasMethodSignature(receiverType, methodName)) {
         std::string loweredReceiver = receiver->lowerToIR(builder);
-        std::vector<std::string> loweredArguments;
-        for (size_t i = 0; i < arguments.size(); ++i) {
-            std::string loweredArgument = arguments[i]->lowerToIR(builder);
-            if (i < resolvedParameterTypes.size()) {
-                loweredArgument = boxValueForParameter(
-                    builder, loweredArgument, arguments[i]->getType(), resolvedParameterTypes[i]);
+        std::vector<std::string> loweredArguments = resolvedParameters.empty()
+            ? std::vector<std::string>{}
+            : lowerCallArgumentsForParameters(builder, arguments, resolvedParameters);
+        if (resolvedParameters.empty()) {
+            for (size_t i = 0; i < arguments.size(); ++i) {
+                std::string loweredArgument = arguments[i]->lowerToIR(builder);
+                if (i < resolvedParameterTypes.size()) {
+                    loweredArgument = boxValueForParameter(
+                        builder, loweredArgument, arguments[i]->getType(), resolvedParameterTypes[i]);
+                }
+                loweredArguments.push_back(loweredArgument);
             }
-            loweredArguments.push_back(loweredArgument);
         }
         std::vector<std::string> concreteTypeArguments;
         for (const auto& typeArgument : resolvedTypeArguments) {
@@ -1327,14 +1422,18 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
     }
 
     std::string loweredReceiver = receiver->lowerToIR(builder);
-    std::vector<std::string> loweredArguments;
-    for (size_t i = 0; i < arguments.size(); ++i) {
-        std::string loweredArgument = arguments[i]->lowerToIR(builder);
-        if (i < resolvedParameterTypes.size()) {
-            loweredArgument = boxValueForParameter(
-                builder, loweredArgument, arguments[i]->getType(), resolvedParameterTypes[i]);
+    std::vector<std::string> loweredArguments = resolvedParameters.empty()
+        ? std::vector<std::string>{}
+        : lowerCallArgumentsForParameters(builder, arguments, resolvedParameters);
+    if (resolvedParameters.empty()) {
+        for (size_t i = 0; i < arguments.size(); ++i) {
+            std::string loweredArgument = arguments[i]->lowerToIR(builder);
+            if (i < resolvedParameterTypes.size()) {
+                loweredArgument = boxValueForParameter(
+                    builder, loweredArgument, arguments[i]->getType(), resolvedParameterTypes[i]);
+            }
+            loweredArguments.push_back(loweredArgument);
         }
-        loweredArguments.push_back(loweredArgument);
     }
     std::vector<std::string> argumentTypes;
     for (const auto& argument : arguments) {
@@ -1600,6 +1699,7 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
             arguments, function->second.parameters, location);
         resolvedType = function->second.returnType;
         resolvedParameterTypes = parameterTypes(function->second.parameters);
+        resolvedParameters = function->second.parameters;
         resolvedTypeArguments.clear();
         return;
     }
@@ -1628,18 +1728,23 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
         arguments, parameters, location);
     resolvedType = substituteType(function->second.returnType, *substitution);
     resolvedParameterTypes = parameterTypes(parameters);
+    resolvedParameters = parameters;
     resolvedTypeArguments = orderedTypeArguments(function->second.typeParameters, *substitution);
 }
 
 std::string FunctionCallNode::lowerToIR(IRBuilder& builder) const {
-    std::vector<std::string> loweredArguments;
-    for (size_t i = 0; i < arguments.size(); ++i) {
-        std::string loweredArgument = arguments[i]->lowerToIR(builder);
-        if (i < resolvedParameterTypes.size()) {
-            loweredArgument = boxValueForParameter(
-                builder, loweredArgument, arguments[i]->getType(), resolvedParameterTypes[i]);
+    std::vector<std::string> loweredArguments = resolvedParameters.empty()
+        ? std::vector<std::string>{}
+        : lowerCallArgumentsForParameters(builder, arguments, resolvedParameters);
+    if (resolvedParameters.empty()) {
+        for (size_t i = 0; i < arguments.size(); ++i) {
+            std::string loweredArgument = arguments[i]->lowerToIR(builder);
+            if (i < resolvedParameterTypes.size()) {
+                loweredArgument = boxValueForParameter(
+                    builder, loweredArgument, arguments[i]->getType(), resolvedParameterTypes[i]);
+            }
+            loweredArguments.push_back(loweredArgument);
         }
-        loweredArguments.push_back(loweredArgument);
     }
     std::vector<std::string> concreteTypeArguments;
     for (const auto& typeArgument : resolvedTypeArguments) {

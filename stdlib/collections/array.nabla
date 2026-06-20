@@ -38,6 +38,13 @@ def ArrayRange(size: Int): ArrayInt = {
 }
 
 object Array {
+    /// Cree un tableau avec les elements donnes.
+    /// @signature def Array.apply[T](values: T*): Array[T]
+    /// @status Recommandee
+    def apply[T](values: T*): Array[T] = {
+        values
+    }
+
     /// Cree un tableau vide.
     /// @signature def Array.empty[T](): Array[T]
     /// @status Recommandee

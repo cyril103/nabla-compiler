@@ -41,6 +41,8 @@ helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
 ### Collections
 
 - `Array[T]`
+- `Array(value1, value2, ...)`
+- `Array.apply[T](values: T*)`
 - `Array.empty[T]()`
 - `Array.fill[T](size, value)`
 - `Array.tabulate[T](size, f)`

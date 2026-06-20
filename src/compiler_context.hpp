@@ -20,6 +20,8 @@ struct CompilerContext {
         std::string name;
         std::string type;
         SourceLocation location;
+        bool isRepeated = false;
+        std::string repeatedElementType = "";
     };
 
     struct FunctionSignature {
@@ -621,6 +623,46 @@ inline std::optional<std::map<std::string, std::string>> genericFunctionSubstitu
     return substitution;
 }
 
+inline bool hasRepeatedParameter(const CompilerContext::FunctionSignature& signature) {
+    return !signature.parameters.empty() && signature.parameters.back().isRepeated;
+}
+
+inline size_t minimumArgumentCount(const CompilerContext::FunctionSignature& signature) {
+    return hasRepeatedParameter(signature)
+        ? signature.parameters.size() - 1
+        : signature.parameters.size();
+}
+
+inline bool acceptsArgumentCount(
+    const CompilerContext::FunctionSignature& signature, size_t argumentCount) {
+    if (hasRepeatedParameter(signature)) {
+        return argumentCount >= minimumArgumentCount(signature);
+    }
+    return argumentCount == signature.parameters.size();
+}
+
+inline std::string expectedArgumentTypeAt(
+    const CompilerContext::FunctionSignature& signature,
+    size_t argumentIndex,
+    const std::map<std::string, std::string>& substitution) {
+    if (hasRepeatedParameter(signature) && argumentIndex >= signature.parameters.size() - 1) {
+        return substituteType(signature.parameters.back().repeatedElementType, substitution);
+    }
+    return substituteType(signature.parameters[argumentIndex].type, substitution);
+}
+
+inline std::vector<std::string> expandedExpectedArgumentTypes(
+    const CompilerContext::FunctionSignature& signature,
+    size_t argumentCount,
+    const std::map<std::string, std::string>& substitution = {}) {
+    std::vector<std::string> expectedTypes;
+    if (!acceptsArgumentCount(signature, argumentCount)) return expectedTypes;
+    for (size_t i = 0; i < argumentCount; ++i) {
+        expectedTypes.push_back(expectedArgumentTypeAt(signature, i, substitution));
+    }
+    return expectedTypes;
+}
+
 inline std::vector<std::string> orderedTypeArguments(
     const std::vector<std::string>& typeParameters,
     const std::map<std::string, std::string>& substitution) {
@@ -786,7 +828,7 @@ inline ClassMethodOverloadMatches exactClassMethodOverloadMatches(
     for (const auto& candidate : collectClassMethodLookupCandidates(context, receiverType, methodName)) {
         if (!candidate.signature) continue;
         const auto& signature = *candidate.signature;
-        if (signature.parameters.size() != actualArgumentTypes.size()) continue;
+        if (!acceptsArgumentCount(signature, actualArgumentTypes.size())) continue;
 
         std::map<std::string, std::string> substitution = candidate.classSubstitution;
         if (!typeArguments.empty()) {
@@ -807,7 +849,7 @@ inline ClassMethodOverloadMatches exactClassMethodOverloadMatches(
 
         bool compatible = true;
         for (size_t i = 0; i < actualArgumentTypes.size(); ++i) {
-            const std::string expectedType = substituteType(signature.parameters[i].type, substitution);
+            const std::string expectedType = expectedArgumentTypeAt(signature, i, substitution);
             if (expectedType != actualArgumentTypes[i]) {
                 compatible = false;
                 break;
@@ -929,11 +971,15 @@ inline bool inferTypeArgumentsFromTypes(
 inline std::optional<std::map<std::string, std::string>> inferGenericFunctionSubstitution(
     const CompilerContext::FunctionSignature& signature, const std::vector<std::string>& actualArgumentTypes) {
     if (signature.typeParameters.empty()) return std::map<std::string, std::string>{};
-    if (signature.parameters.size() != actualArgumentTypes.size()) return std::nullopt;
+    if (!acceptsArgumentCount(signature, actualArgumentTypes.size())) return std::nullopt;
     std::map<std::string, std::string> substitution;
-    for (size_t i = 0; i < signature.parameters.size(); ++i) {
+    for (size_t i = 0; i < actualArgumentTypes.size(); ++i) {
+        const std::string expectedPattern = hasRepeatedParameter(signature) &&
+                i >= signature.parameters.size() - 1
+            ? signature.parameters.back().repeatedElementType
+            : signature.parameters[i].type;
         if (!inferTypeArgumentsFromTypes(
-                signature.parameters[i].type, actualArgumentTypes[i],
+                expectedPattern, actualArgumentTypes[i],
                 signature.typeParameters, substitution)) {
             return std::nullopt;
         }
@@ -1035,6 +1081,8 @@ inline bool functionSignatureParametersMatch(
     if (left.parameters.size() != right.parameters.size()) return false;
     for (size_t i = 0; i < left.parameters.size(); ++i) {
         if (left.parameters[i].type != right.parameters[i].type) return false;
+        if (left.parameters[i].isRepeated != right.parameters[i].isRepeated) return false;
+        if (left.parameters[i].repeatedElementType != right.parameters[i].repeatedElementType) return false;
     }
     return left.typeParameters == right.typeParameters;
 }
@@ -1086,7 +1134,7 @@ inline FunctionOverloadMatches exactFunctionOverloadMatches(
     for (const auto& overloadName : functionOverloadNames(context, sourceName)) {
         const auto* signature = findFunctionSignature(context, overloadName);
         if (!signature) continue;
-        if (signature->parameters.size() != actualArgumentTypes.size()) continue;
+        if (!acceptsArgumentCount(*signature, actualArgumentTypes.size())) continue;
         if (!typeArguments.empty()) {
             if (!genericFunctionSubstitutionFor(*signature, typeArguments)) continue;
         } else if (!signature->typeParameters.empty()) {
@@ -1106,7 +1154,7 @@ inline FunctionOverloadMatches exactFunctionOverloadMatches(
 
         bool compatible = true;
         for (size_t i = 0; i < actualArgumentTypes.size(); ++i) {
-            const std::string expectedType = substituteType(signature->parameters[i].type, substitution);
+            const std::string expectedType = expectedArgumentTypeAt(*signature, i, substitution);
             if (expectedType != actualArgumentTypes[i]) {
                 compatible = false;
                 break;
@@ -1157,7 +1205,9 @@ inline std::string formatFunctionSignatureCandidate(
     const CompilerContext::FunctionSignature& signature) {
     std::vector<std::string> parameterTypes;
     for (const auto& parameter : signature.parameters) {
-        parameterTypes.push_back(parameter.type);
+        parameterTypes.push_back(parameter.isRepeated
+            ? parameter.repeatedElementType + "*"
+            : parameter.type);
     }
     return sourceName + "(" + formatTypeList(parameterTypes) + "): " + signature.returnType;
 }

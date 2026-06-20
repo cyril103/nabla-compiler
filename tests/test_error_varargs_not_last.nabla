@@ -1,0 +1,7 @@
+def bad(values: Int*, tail: Int): Int = {
+    tail
+}
+
+def main(): Int = {
+    bad(1, 2)
+}

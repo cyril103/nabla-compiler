@@ -1,0 +1,36 @@
+import collections.array
+
+class Student(name: String) {
+    override def toString(): String = {
+        name
+    }
+}
+
+def joinWords(words: String*): String = {
+    words.mkString("-")
+}
+
+def copyValues[T](values: T*): Array[T] = {
+    values
+}
+
+def main(): Int = {
+    val ints = Array(1, 2, 3, 4)
+    val emptyInts = Array[Int]()
+    val words = Array("go", "nabla")
+    val direct = Array.apply[Long](10L, 20L)
+    val students = Array(new Student("ada"), new Student("linus"))
+    val copied = copyValues[Int](5, 6, 7)
+
+    if ints.toString() == "[1, 2, 3, 4]" &&
+       emptyInts.isEmpty() &&
+       words.toString() == "[go, nabla]" &&
+       direct.toString() == "[10, 20]" &&
+       students.toString() == "[ada, linus]" &&
+       joinWords("a", "b", "c") == "a-b-c" &&
+       copied.toString() == "[5, 6, 7]" {
+        0
+    } else {
+        1
+    }
+}
