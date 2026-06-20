@@ -296,6 +296,9 @@ Le pipeline implemente actuellement :
 - CI GitHub avec `make all-tests`, `make examples`, `make tooling-tests`,
   vérification `make stdlib-docs` sans diff, compilation `-Werror` et
   `git diff --check`;
+- reference HTML de la stdlib generee depuis `///`, avec directive `@status`
+  pour distinguer visuellement API recommandee, compatibilite et helpers
+  internes; `Array`, `Option` et `Set` affichent deja ces statuts.
 - examples Project Euler 1 a 10 (`examples/euler1.nabla` ... `examples/euler10_functional.nabla`)
   comme banc progressif pour exercer le langage et la bibliotheque standard.
 - `examples/student_scores.nabla` comme exemple idiomatique vérifié pour
@@ -666,6 +669,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter une premiere documentation utilisateur du langage.
 - [x] Ajouter une reference HTML de la stdlib generee depuis les commentaires
   `///` publics.
+- [x] Ajouter des badges de statut `@status` dans la reference HTML pour
+  distinguer API recommandee, compatibilite et helpers internes documentes.
 - [x] Ajouter un check CI qui lance `make stdlib-docs` et echoue si la
   generation laisse un diff non commite.
 - [x] Ajouter un check CI qui lance `make examples` pour vérifier les exemples
@@ -706,6 +711,14 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Ajouter les statuts visuels dans la reference HTML de la stdlib:
+  le generateur lit `@status`, affiche des badges `Recommandee`,
+  `Compatibilite` ou `Interne`, et les surfaces `Array`, `Option` et `Set`
+  distinguent les compagnons recommandes des anciens alias compatibles.
+  - Fichiers / tests associés: `tools/generate_stdlib_docs.py`,
+    `stdlib/collections/array.nabla`, `stdlib/core/option.nabla`,
+    `stdlib/collections/set.nabla`, `docs/stdlib/`, `docs/roadmap.md`,
+    `make stdlib-docs`, `git diff --exit-code docs/stdlib`.
 - `local` - Ameliorer les diagnostics de compatibilite stdlib: les appels via
   anciens noms (`ArrayFill`, `SetFromArray`, `SetEmpty`, `optionSome`) gardent
   le nom source dans les erreurs meme apres resolution vers un helper interne,

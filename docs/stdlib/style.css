@@ -66,6 +66,34 @@ main {
 .kind {
   color: var(--muted);
 }
+.entry-meta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.status {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+.status.recommended {
+  color: #0f5d3f;
+  background: #e9f7ef;
+  border-color: #b8e2c9;
+}
+.status.compat {
+  color: #7a4d00;
+  background: #fff5dc;
+  border-color: #efd18b;
+}
+.status.internal {
+  color: #6b425b;
+  background: #f8edf4;
+  border-color: #e5bdd6;
+}
 .module-card strong {
   display: block;
   font-size: 1.25rem;

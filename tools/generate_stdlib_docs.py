@@ -27,6 +27,7 @@ class Entry:
     kind: str
     name: str
     signature: str
+    status: str | None
     description: list[str]
 
 
@@ -71,15 +72,18 @@ def split_summary(lines: list[str]) -> tuple[str | None, list[str], list[str]]:
     return None, [], lines
 
 
-def extract_signature(lines: list[str], fallback: str) -> tuple[str, list[str]]:
+def extract_metadata(lines: list[str], fallback: str) -> tuple[str, str | None, list[str]]:
     kept: list[str] = []
     signature = fallback
+    status: str | None = None
     for line in lines:
         if line.startswith("@signature "):
             signature = line[11:].strip()
+        elif line.startswith("@status "):
+            status = line[8:].strip()
         else:
             kept.append(line)
-    return signature, kept
+    return signature, status, kept
 
 
 def entry_from_signature(signature: str, description: list[str]) -> Entry:
@@ -87,10 +91,12 @@ def entry_from_signature(signature: str, description: list[str]) -> Entry:
     if not declaration:
         raise ValueError(f"Invalid documented symbol signature: {signature}")
     kind = declaration.group(1)
+    signature, status, description = extract_metadata(description, signature)
     return Entry(
         kind=kind,
         name=symbol_name(kind, declaration.group(2).strip()),
         signature=signature,
+        status=status,
         description=description,
     )
 
@@ -138,7 +144,7 @@ def parse_module(path: Path) -> ModuleDoc:
                 signature = signature[:-1].rstrip()
             if signature.endswith("="):
                 signature = signature[:-1].rstrip()
-            signature, doc_lines = extract_signature(doc_lines, signature)
+            signature, status, doc_lines = extract_metadata(doc_lines, signature)
 
             if title is not None:
                 module_title = title
@@ -149,6 +155,7 @@ def parse_module(path: Path) -> ModuleDoc:
                         kind=kind,
                         name=symbol_name(kind, signature_tail),
                         signature=signature,
+                        status=status,
                         description=doc_lines,
                     )
                 )
@@ -210,7 +217,9 @@ def page_template(title: str, body: str, depth: int = 0) -> str:
 def render_module(module: ModuleDoc) -> str:
     entries = "\n".join(
         f"""    <article class="entry" id="{html.escape(entry.name)}">
-      <div class="kind">{html.escape(entry.kind)}</div>
+      <div class="entry-meta">
+        <span class="kind">{html.escape(entry.kind)}</span>{render_status(entry.status)}
+      </div>
       <h2>{html.escape(entry.name)}</h2>
       <pre><code>{html.escape(entry.signature)}</code></pre>
       {render_paragraphs(entry.description)}
@@ -230,6 +239,19 @@ def render_module(module: ModuleDoc) -> str:
 {entries}
     </section>"""
     return page_template(module.title, body, depth=1)
+
+
+def render_status(status: str | None) -> str:
+    if not status:
+        return ""
+    normalized = status.lower()
+    if "compat" in normalized:
+        css_class = "compat"
+    elif "interne" in normalized:
+        css_class = "internal"
+    else:
+        css_class = "recommended"
+    return f' <span class="status {css_class}">{html.escape(status)}</span>'
 
 
 def render_index(modules: list[ModuleDoc]) -> str:
@@ -320,6 +342,34 @@ main {
 .module-card small,
 .kind {
   color: var(--muted);
+}
+.entry-meta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.status {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+.status.recommended {
+  color: #0f5d3f;
+  background: #e9f7ef;
+  border-color: #b8e2c9;
+}
+.status.compat {
+  color: #7a4d00;
+  background: #fff5dc;
+  border-color: #efd18b;
+}
+.status.internal {
+  color: #6b425b;
+  background: #f8edf4;
+  border-color: #e5bdd6;
 }
 .module-card strong {
   display: block;

@@ -322,12 +322,14 @@ def setEmpty[T](): Set[T] = {
 object Set {
     /// Cree un ensemble vide.
     /// @signature def Set.empty[T](): Set[T]
+    /// @status Recommandee
     def empty[T](): Set[T] = {
         setEmpty[T]()
     }
 
     /// Deduplique un tableau en ensemble.
     /// @signature def Set.fromArray[T](values: Array[T]): Set[T]
+    /// @status Recommandee
     ///
     /// Pour `Array[Int]`, `Array[Long]`, `Array[Float]`, `Array[Double]` et
     /// `Array[Bool]`, le compilateur redirige ce nom vers la specialisation
@@ -340,6 +342,7 @@ object Set {
 
 /// Deduplique un tableau en ensemble.
 /// @signature def SetFromArray[T](values: Array[T]): Set[T]
+/// @status Compatibilite
 ///
 /// Pour `Array[Int]`, `Array[Long]`, `Array[Float]`, `Array[Double]` et
 /// `Array[Bool]`, le compilateur redirige ce nom vers la specialisation
@@ -350,12 +353,14 @@ def SetFromArray[T](values: ArrayObject[T]): Set[T] = {
 }
 
 /// Cree un ensemble vide.
+/// @status Compatibilite
 def SetEmpty[T](): Set[T] = {
     Set.empty[T]()
 }
 
 /// Ensemble immutable.
 /// @signature class Set[T]
+/// @status Recommandee
 ///
 /// Les operations comme `add`, `remove`, `union`, `intersect` et `difference`
 /// retournent un nouvel ensemble. L'instance d'origine n'est pas modifiee.

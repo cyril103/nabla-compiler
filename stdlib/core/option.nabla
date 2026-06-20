@@ -8,6 +8,7 @@
 /// `optionNone[T](default)` restent disponibles pour compatibilite.
 
 /// Conteneur optionnel generique.
+/// @status Recommandee
 class Option[T](defined: Bool, value: T) {
     def isDefined(): Bool = {
         defined
@@ -75,12 +76,14 @@ class Option[T](defined: Bool, value: T) {
 object Option {
     /// Construit une option contenant une valeur.
     /// @signature def Option.some[T](value: T): Option[T]
+    /// @status Recommandee
     def some[T](value: T): Option[T] = {
         new Option[T](true, value)
     }
 
     /// Construit une option vide.
     /// @signature def Option.none[T](default: T): Option[T]
+    /// @status Recommandee
     ///
     /// Le parametre `default` sert de valeur interne de secours pour le type
     /// `T`.
@@ -90,11 +93,13 @@ object Option {
 }
 
 /// Construit une option contenant une valeur.
+/// @status Compatibilite
 def optionSome[T](value: T): Option[T] = {
     Option.some[T](value)
 }
 
 /// Construit une option vide.
+/// @status Compatibilite
 ///
 /// Le parametre `default` sert de valeur interne de secours pour le type `T`.
 def optionNone[T](default: T): Option[T] = {

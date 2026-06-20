@@ -7,12 +7,14 @@
 /// des details de stdlib dans les cas courants.
 
 /// @symbol class Array[T](size: Int)
+/// @status Recommandee
 /// Tableau mutable de taille fixe.
 ///
 /// `Array[T]` est le nom public a utiliser. Le compilateur choisit la
 /// representation adaptee selon `T`.
 
 /// @symbol def ArrayFill[T](size: Int, value: T): Array[T]
+/// @status Compatibilite
 /// Cree un tableau rempli avec la meme valeur.
 
 import collections.array_base
@@ -25,6 +27,7 @@ import collections.object_array
 
 /// Cree un tableau d'entiers contenant `0, 1, ..., size - 1`.
 /// @signature def ArrayRange(size: Int): Array[Int]
+/// @status Compatibilite
 def ArrayRange(size: Int): ArrayInt = {
     arrayIntRange(size)
 }
@@ -32,6 +35,7 @@ def ArrayRange(size: Int): ArrayInt = {
 object Array {
     /// Cree un tableau rempli avec la meme valeur.
     /// @signature def Array.fill[T](size: Int, value: T): Array[T]
+    /// @status Recommandee
     ///
     /// Pour `T = Int`, `Long`, `Float`, `Double` ou `Bool`, le compilateur
     /// redirige ce nom vers la specialisation primitive adaptee. Pour les
@@ -42,12 +46,14 @@ object Array {
 
     /// Cree un tableau d'entiers contenant `0, 1, ..., size - 1`.
     /// @signature def Array.range(size: Int): Array[Int]
+    /// @status Recommandee
     def range(size: Int): ArrayInt = {
         ArrayRange(size)
     }
 
     /// Cree un tableau d'entiers contenant `start, ..., until - 1`.
     /// @signature def Array.rangeUntil(start: Int, until: Int): Array[Int]
+    /// @status Recommandee
     def rangeUntil(start: Int, until: Int): ArrayInt = {
         arrayIntRangeUntil(start, until)
     }

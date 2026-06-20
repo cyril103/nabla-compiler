@@ -68,13 +68,16 @@ features.
   invariants par defaut, conversions explicites ou helpers stdlib.
 - Documentation : la reference HTML doit devenir une doc utilisateur claire,
   avec une separation visible entre API publique et helpers internes. Le
-  perimetre cible de Nabla 0.1 est fixe dans `docs/releases/0.1.md`.
+  generateur accepte maintenant `@status` pour afficher des badges de statut;
+  `Array`, `Option` et `Set` distinguent les symboles recommandes des alias de
+  compatibilite. Le perimetre cible de Nabla 0.1 est fixe dans
+  `docs/releases/0.1.md`.
 
 Actions recommandees :
 
-1. Prochaine étape : nettoyer la référence stdlib générée pour séparer
-   visuellement API recommandée, compatibilité et helpers internes, en
-   commençant par `Array`, `Option` et `Set`.
+1. Continuer le nettoyage de la référence stdlib générée en appliquant les
+   statuts visuels aux autres modules publics et aux helpers internes qui
+   doivent rester documentés.
 2. Maintenir le check CI pour `make stdlib-docs` et la référence HTML générée.
 3. Maintenir le check CI `make examples` pour garantir que les exemples publics
    restent compilables et que leurs sorties attendues ne dérivent pas.

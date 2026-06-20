@@ -20,39 +20,51 @@
     </section>
     <section class="entries">
     <article class="entry" id="Array">
-      <div class="kind">class</div>
+      <div class="entry-meta">
+        <span class="kind">class</span> <span class="status recommended">Recommandee</span>
+      </div>
       <h2>Array</h2>
       <pre><code>class Array[T](size: Int)</code></pre>
       <p>Tableau mutable de taille fixe.</p>
 <p>`Array[T]` est le nom public a utiliser. Le compilateur choisit la representation adaptee selon `T`.</p>
     </article>
     <article class="entry" id="ArrayFill">
-      <div class="kind">def</div>
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status compat">Compatibilite</span>
+      </div>
       <h2>ArrayFill</h2>
       <pre><code>def ArrayFill[T](size: Int, value: T): Array[T]</code></pre>
       <p>Cree un tableau rempli avec la meme valeur.</p>
     </article>
     <article class="entry" id="ArrayRange">
-      <div class="kind">def</div>
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status compat">Compatibilite</span>
+      </div>
       <h2>ArrayRange</h2>
       <pre><code>def ArrayRange(size: Int): Array[Int]</code></pre>
       <p>Cree un tableau d&#x27;entiers contenant `0, 1, ..., size - 1`.</p>
     </article>
     <article class="entry" id="fill">
-      <div class="kind">def</div>
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
       <h2>fill</h2>
       <pre><code>def Array.fill[T](size: Int, value: T): Array[T]</code></pre>
       <p>Cree un tableau rempli avec la meme valeur.</p>
 <p>Pour `T = Int`, `Long`, `Float`, `Double` ou `Bool`, le compilateur redirige ce nom vers la specialisation primitive adaptee. Pour les autres types, `Array[T]` est represente par `ArrayObject[T]`.</p>
     </article>
     <article class="entry" id="range">
-      <div class="kind">def</div>
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
       <h2>range</h2>
       <pre><code>def Array.range(size: Int): Array[Int]</code></pre>
       <p>Cree un tableau d&#x27;entiers contenant `0, 1, ..., size - 1`.</p>
     </article>
     <article class="entry" id="rangeUntil">
-      <div class="kind">def</div>
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
       <h2>rangeUntil</h2>
       <pre><code>def Array.rangeUntil(start: Int, until: Int): Array[Int]</code></pre>
       <p>Cree un tableau d&#x27;entiers contenant `start, ..., until - 1`.</p>
