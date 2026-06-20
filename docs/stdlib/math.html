@@ -16,7 +16,7 @@
     <section class="module-hero">
       <p class="import">import math</p>
       <h1>Math</h1>
-      <p>Fonctions mathematiques courantes. Les noms gardent le type dans leur suffixe (`Int`, `Long`, `Float`, `Double`) tant que le langage ne dispose pas de surcharge utilisateur. Une future API pourra exposer des noms surcharges comme `sqrt(value)`.</p>
+      <p>Fonctions mathematiques courantes. Les noms surcharges (`abs`, `min`, `max`, `sqrt`) forment l&#x27;API idiomatique. Les noms suffixes (`absInt`, `maxLong`, `sqrtDouble`, etc.) restent disponibles comme compatibilite explicite.</p>
     </section>
     <section class="entries">
     <article class="entry" id="absInt">
@@ -51,6 +51,38 @@
       <pre><code>def absDouble(value: Double): Double</code></pre>
       <p>Valeur absolue d&#x27;un flottant double precision.</p>
     </article>
+    <article class="entry" id="abs">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>abs</h2>
+      <pre><code>def abs(value: Int): Int</code></pre>
+      <p>Valeur absolue surchargee pour `Int`.</p>
+    </article>
+    <article class="entry" id="abs-2">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>abs</h2>
+      <pre><code>def abs(value: Long): Long</code></pre>
+      <p>Valeur absolue surchargee pour `Long`.</p>
+    </article>
+    <article class="entry" id="abs-3">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>abs</h2>
+      <pre><code>def abs(value: Float): Float</code></pre>
+      <p>Valeur absolue surchargee pour `Float`.</p>
+    </article>
+    <article class="entry" id="abs-4">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>abs</h2>
+      <pre><code>def abs(value: Double): Double</code></pre>
+      <p>Valeur absolue surchargee pour `Double`.</p>
+    </article>
     <article class="entry" id="maxInt">
       <div class="entry-meta">
         <span class="kind">def</span> <span class="status recommended">Recommandee</span>
@@ -59,6 +91,38 @@
       <pre><code>def maxInt(left: Int, right: Int): Int</code></pre>
       <p>Plus grande des deux valeurs entieres.</p>
     </article>
+    <article class="entry" id="max">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>max</h2>
+      <pre><code>def max(left: Int, right: Int): Int</code></pre>
+      <p>Plus grande valeur surchargee pour `Int`.</p>
+    </article>
+    <article class="entry" id="max-2">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>max</h2>
+      <pre><code>def max(left: Long, right: Long): Long</code></pre>
+      <p>Plus grande valeur surchargee pour `Long`.</p>
+    </article>
+    <article class="entry" id="max-3">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>max</h2>
+      <pre><code>def max(left: Float, right: Float): Float</code></pre>
+      <p>Plus grande valeur surchargee pour `Float`.</p>
+    </article>
+    <article class="entry" id="max-4">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>max</h2>
+      <pre><code>def max(left: Double, right: Double): Double</code></pre>
+      <p>Plus grande valeur surchargee pour `Double`.</p>
+    </article>
     <article class="entry" id="minInt">
       <div class="entry-meta">
         <span class="kind">def</span> <span class="status recommended">Recommandee</span>
@@ -66,6 +130,38 @@
       <h2>minInt</h2>
       <pre><code>def minInt(left: Int, right: Int): Int</code></pre>
       <p>Plus petite des deux valeurs entieres.</p>
+    </article>
+    <article class="entry" id="min">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>min</h2>
+      <pre><code>def min(left: Int, right: Int): Int</code></pre>
+      <p>Plus petite valeur surchargee pour `Int`.</p>
+    </article>
+    <article class="entry" id="min-2">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>min</h2>
+      <pre><code>def min(left: Long, right: Long): Long</code></pre>
+      <p>Plus petite valeur surchargee pour `Long`.</p>
+    </article>
+    <article class="entry" id="min-3">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>min</h2>
+      <pre><code>def min(left: Float, right: Float): Float</code></pre>
+      <p>Plus petite valeur surchargee pour `Float`.</p>
+    </article>
+    <article class="entry" id="min-4">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>min</h2>
+      <pre><code>def min(left: Double, right: Double): Double</code></pre>
+      <p>Plus petite valeur surchargee pour `Double`.</p>
     </article>
     <article class="entry" id="clampInt">
       <div class="entry-meta">

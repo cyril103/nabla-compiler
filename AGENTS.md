@@ -202,9 +202,11 @@ Le pipeline implemente actuellement :
   `randomBool`, `randomSeedNow` et `randomSeedTime` pour une API pseudo-aléatoire
   deterministe basée sur une seed;
 - module de bibliotheque standard `math` avec `absInt`, `absLong`, `absFloat`,
-  `absDouble`, `absDiffInt`, `absDiffLong`, `absDiffFloat`,
-  `absDiffDouble`, `maxInt`, `maxLong`, `maxFloat`, `maxDouble`, `minInt`,
-  `minLong`, `minFloat`, `minDouble`, `clampInt`, `clampLong`, `clampFloat`,
+  `absDouble`, `abs(Int/Long/Float/Double)`, `absDiffInt`, `absDiffLong`,
+  `absDiffFloat`, `absDiffDouble`, `maxInt`, `maxLong`, `maxFloat`,
+  `maxDouble`, `max(Int/Long/Float/Double)`, `minInt`, `minLong`,
+  `minFloat`, `minDouble`, `min(Int/Long/Float/Double)`, `clampInt`,
+  `clampLong`, `clampFloat`,
   `clampDouble`, `signInt`, `signLong`, `signFloat`, `signDouble`,
   `isEvenInt`, `isOddInt`, `isEvenLong`, `isOddLong`, `isBetweenInt`,
   `isBetweenLong`, `gcdInt`, `lcmInt`, `gcdLong`, `lcmLong`, `powInt`,
@@ -463,6 +465,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `isEven`, `isOdd`, `isBetween`, `gcd`/`lcm` pour `Long`, `absDiff`,
   `pow` pour `Float` et `Double`, `isClose`, `sqrt`, constantes `pi`
   (approximatives) et conversions degrés/radians.
+- [x] Exposer les noms mathematiques surcharges `abs`, `min`, `max` et `sqrt`
+  en gardant les noms suffixes comme compatibilite.
 - [x] Etendre `collections.set` avec des operations immutables
   (`union`, `intersect`, `difference`).
 - [x] Ajouter `setFromArray[T](values: ArrayObject[T]): Set[T]` pour la
@@ -766,6 +770,14 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `tests/test_local_type_annotation_var.nabla`,
     `tests/test_error_local_type_annotation_mismatch.nabla`,
     `docs/language.md`, `docs/roadmap.md`, `make all-tests`.
+- `local` - Migrer une premiere surface `math` vers les noms idiomatiques
+  surcharges: `abs`, `min` et `max` couvrent maintenant `Int`, `Long`, `Float`
+  et `Double`, en plus de `sqrt(Float)` / `sqrt(Double)`. Les noms suffixes
+  restent publics pour compatibilite, et le backend protege le symbole ASM
+  reserve `abs` avec un nom assembleur sûr.
+  - Fichiers / tests associes: `stdlib/math.nabla`, `src/ir_codegen.cpp`,
+    `tests/test_stdlib_math.nabla`, `docs/stdlib-api.md`, `make stdlib-docs`,
+    `make all-tests`.
 - `local` - Enrichir les descriptions utilisateur de la reference stdlib pour
   `io`, `math`, `strings` et `OptionInt`: conventions de retour I/O,
   comportements limites de `pow*` / `sqrt*`, separation de `words`, et raison
@@ -1343,5 +1355,5 @@ Etendre la surcharge de fonctions au-dela de la V1 :
 - definir la strategie pour les methodes surchargees;
 - enrichir les diagnostics pour distinguer absence de candidat, arite
   incompatible et ambiguite reelle;
-- migrer progressivement `math` vers des noms idiomatiques surcharges (`abs`,
-  `min`, `max`, `pow`) en gardant les noms suffixes comme compatibilite.
+- migrer progressivement `math` vers d'autres noms idiomatiques surcharges
+  (`clamp`, `pow`) en gardant les noms suffixes comme compatibilite.

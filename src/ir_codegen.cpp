@@ -26,6 +26,10 @@ std::string asmFunctionName(const std::string& name) {
         if (std::isalnum(static_cast<unsigned char>(c))) result += c;
         else result += "_";
     }
+    static const std::set<std::string> reservedNames = {
+        "abs",
+    };
+    if (reservedNames.count(result)) return "nabla_fn_" + result;
     return result;
 }
 

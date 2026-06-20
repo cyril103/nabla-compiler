@@ -91,6 +91,9 @@ l'implementation, par exemple :
 
 - `sqrt(value: Float): Float`
 - `sqrt(value: Double): Double`
+- `abs(value: Int | Long | Float | Double)`
+- `min(left, right)` et `max(left, right)` pour `Int`, `Long`, `Float` et
+  `Double`
 
 ### Util
 
