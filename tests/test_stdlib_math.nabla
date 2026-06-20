@@ -5,16 +5,16 @@ def main(): Int = {
        abs(-42L) == 42L &&
        abs(-2.5F) == 2.5F &&
        abs(-2.5) == 2.5 &&
-       isCloseFloat(piFloat(), 3.1415927F, 0.000001F) &&
-       isCloseDouble(piDouble(), 3.141592653589793, 0.000000000000001) &&
-       isCloseFloat(twoPiFloat(), 6.2831855F, 0.000001F) &&
-       isCloseDouble(twoPiDouble(), 6.283185307179586, 0.000000000000001) &&
-       isCloseFloat(degreesToRadiansFloat(180.0F), piFloat(), 0.000001F) &&
-       isCloseFloat(radiansToDegreesFloat(piFloat()), 180.0F, 0.000001F) &&
-       isCloseDouble(degreesToRadiansDouble(180.0), piDouble(), 0.000000000000001) &&
-       isCloseDouble(radiansToDegreesDouble(piDouble()), 180.0, 0.000000000000001) &&
-       isCloseFloat(hypotenuseFloat(3.0F, 4.0F), 5.0F, 0.000001F) &&
-       isCloseDouble(hypotenuseDouble(3.0, 4.0), 5.0, 0.000000000000001) &&
+       isClose(piFloat(), 3.1415927F, 0.000001F) &&
+       isClose(piDouble(), 3.141592653589793, 0.000000000000001) &&
+       isClose(twoPiFloat(), 6.2831855F, 0.000001F) &&
+       isClose(twoPiDouble(), 6.283185307179586, 0.000000000000001) &&
+       isClose(degreesToRadians(180.0F), piFloat(), 0.000001F) &&
+       isClose(radiansToDegrees(piFloat()), 180.0F, 0.000001F) &&
+       isClose(degreesToRadians(180.0), piDouble(), 0.000000000000001) &&
+       isClose(radiansToDegrees(piDouble()), 180.0, 0.000000000000001) &&
+       isClose(hypotenuse(3.0F, 4.0F), 5.0F, 0.000001F) &&
+       isClose(hypotenuse(3.0, 4.0), 5.0, 0.000000000000001) &&
        clamp(-3, 0, 10) == 0 &&
        clamp(-3L, 0L, 10L) == 0L &&
        clamp(-3.0F, 0.0F, 10.0F) == 0.0F &&
@@ -28,52 +28,52 @@ def main(): Int = {
        min(1.0F, 2.0F) == 1.0F &&
        min(1.0, 2.0) == 1.0 &&
        clamp(7, 0, 10) == 7 &&
-       signInt(-7) == -1 &&
-       signInt(0) == 0 &&
-       signInt(7) == 1 &&
-       signFloat(-7.0F) == -1.0F &&
-       signFloat(0.0F) == 0.0F &&
-       signFloat(7.0F) == 1.0F &&
-       signDouble(-7.0) == -1.0 &&
-       signDouble(0.0) == 0.0 &&
-       signDouble(7.0) == 1.0 &&
-       isEvenInt(2) &&
-       !isEvenInt(3) &&
-       isOddInt(3) &&
-       !isOddInt(2) &&
-       isEvenLong(2L) &&
-       !isEvenLong(3L) &&
-       isOddLong(3L) &&
-       !isOddLong(2L) &&
-       isBetweenInt(5, 0, 10) &&
-       !isBetweenInt(11, 0, 10) &&
-       isBetweenLong(5L, 0L, 10L) &&
-       !isBetweenLong(11L, 0L, 10L) &&
-        signInt(-7) == -1 &&
-        signInt(0) == 0 &&
-        signInt(7) == 1 &&
-       gcdInt(84, 30) == 6 &&
-       gcdLong(-84L, 30L) == 6L &&
-       lcmLong(7L, 6L) == 42L &&
-        lcmInt(7, 6) == 42 &&
+       sign(-7) == -1 &&
+       sign(0) == 0 &&
+       sign(7) == 1 &&
+       sign(-7.0F) == -1.0F &&
+       sign(0.0F) == 0.0F &&
+       sign(7.0F) == 1.0F &&
+       sign(-7.0) == -1.0 &&
+       sign(0.0) == 0.0 &&
+       sign(7.0) == 1.0 &&
+       isEven(2) &&
+       !isEven(3) &&
+       isOdd(3) &&
+       !isOdd(2) &&
+       isEven(2L) &&
+       !isEven(3L) &&
+       isOdd(3L) &&
+       !isOdd(2L) &&
+       isBetween(5, 0, 10) &&
+       !isBetween(11, 0, 10) &&
+       isBetween(5L, 0L, 10L) &&
+       !isBetween(11L, 0L, 10L) &&
+        sign(-7) == -1 &&
+        sign(0) == 0 &&
+        sign(7) == 1 &&
+       gcd(84, 30) == 6 &&
+       gcd(-84L, 30L) == 6L &&
+       lcm(7L, 6L) == 42L &&
+        lcm(7, 6) == 42 &&
         pow(2, 8) == 256 &&
         pow(2, 0) == 1 &&
         pow(2, -1) == 0 &&
-       absDiffInt(3, 7) == 4 &&
-       absDiffLong(3L, 7L) == 4L &&
-       absDiffFloat(2.5F, 5.0F) == 2.5F &&
-       absDiffDouble(2.5, 5.0) == 2.5 &&
+       absDiff(3, 7) == 4 &&
+       absDiff(3L, 7L) == 4L &&
+       absDiff(2.5F, 5.0F) == 2.5F &&
+       absDiff(2.5, 5.0) == 2.5 &&
        pow(2.0F, 4) == 16.0F &&
        pow(2.0, 5) == 32.0 &&
-       isCloseFloat(sqrt(16.0F), 4.0F, 0.0001F) &&
-       isCloseDouble(sqrt(81.0), 9.0, 0.0001) &&
-        factorialInt(6) == 720 &&
+       isClose(sqrt(16.0F), 4.0F, 0.0001F) &&
+       isClose(sqrt(81.0), 9.0, 0.0001) &&
+        factorial(6) == 720 &&
        max(3.0, 2.5) == 3.0 &&
        min(-1.0, 2.0) == -1.0 &&
        clamp(15, 0, 10) == 10 &&
-       signLong(-7L) == -1L &&
-       signLong(0L) == 0L &&
-       signLong(7L) == 1L {
+       sign(-7L) == -1L &&
+       sign(0L) == 0L &&
+       sign(7L) == 1L {
         42
     } else {
         1

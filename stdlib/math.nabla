@@ -161,12 +161,12 @@ def clamp(value: Double, minimum: Double, maximum: Double): Double = {
     }
 }
 
-def isCloseFloat(left: Float, right: Float, epsilon: Float): Bool = {
-    absDiffFloat(left, right) < epsilon
+def isClose(left: Float, right: Float, epsilon: Float): Bool = {
+    absDiff(left, right) < epsilon
 }
 
-def isCloseDouble(left: Double, right: Double, epsilon: Double): Bool = {
-    absDiffDouble(left, right) < epsilon
+def isClose(left: Double, right: Double, epsilon: Double): Bool = {
+    absDiff(left, right) < epsilon
 }
 
 def piFloat(): Float = {
@@ -185,31 +185,31 @@ def twoPiDouble(): Double = {
     6.283185307179586
 }
 
-def degreesToRadiansFloat(degrees: Float): Float = {
+def degreesToRadians(degrees: Float): Float = {
     (degrees * piFloat()) / 180.0F
 }
 
-def radiansToDegreesFloat(radians: Float): Float = {
+def radiansToDegrees(radians: Float): Float = {
     (radians / piFloat()) * 180.0F
 }
 
-def degreesToRadiansDouble(degrees: Double): Double = {
+def degreesToRadians(degrees: Double): Double = {
     (degrees * piDouble()) / 180.0
 }
 
-def radiansToDegreesDouble(radians: Double): Double = {
+def radiansToDegrees(radians: Double): Double = {
     (radians / piDouble()) * 180.0
 }
 
-def hypotenuseFloat(opposite: Float, adjacent: Float): Float = {
+def hypotenuse(opposite: Float, adjacent: Float): Float = {
     sqrt((opposite * opposite) + (adjacent * adjacent))
 }
 
-def hypotenuseDouble(opposite: Double, adjacent: Double): Double = {
+def hypotenuse(opposite: Double, adjacent: Double): Double = {
     sqrt((opposite * opposite) + (adjacent * adjacent))
 }
 
-def signInt(value: Int): Int = {
+def sign(value: Int): Int = {
     if value < 0 {
         -1
     } else if value > 0 {
@@ -219,7 +219,7 @@ def signInt(value: Int): Int = {
     }
 }
 
-def signLong(value: Long): Long = {
+def sign(value: Long): Long = {
     if value < 0L {
         -1L
     } else if value > 0L {
@@ -229,7 +229,7 @@ def signLong(value: Long): Long = {
     }
 }
 
-def signFloat(value: Float): Float = {
+def sign(value: Float): Float = {
     if value < 0.0F {
         -1.0F
     } else if value > 0.0F {
@@ -239,7 +239,7 @@ def signFloat(value: Float): Float = {
     }
 }
 
-def signDouble(value: Double): Double = {
+def sign(value: Double): Double = {
     if value < 0.0 {
         -1.0
     } else if value > 0.0 {
@@ -251,35 +251,35 @@ def signDouble(value: Double): Double = {
 
 /// Indique si un entier est pair.
 /// @status Recommandee
-def isEvenInt(value: Int): Bool = {
+def isEven(value: Int): Bool = {
     value % 2 == 0
 }
 
 /// Indique si un entier est impair.
 /// @status Recommandee
-def isOddInt(value: Int): Bool = {
+def isOdd(value: Int): Bool = {
     value % 2 != 0
 }
 
-def isEvenLong(value: Long): Bool = {
+def isEven(value: Long): Bool = {
     value % 2L == 0L
 }
 
-def isOddLong(value: Long): Bool = {
+def isOdd(value: Long): Bool = {
     value % 2L != 0L
 }
 
-def isBetweenInt(value: Int, minimum: Int, maximum: Int): Bool = {
+def isBetween(value: Int, minimum: Int, maximum: Int): Bool = {
     value >= minimum && value <= maximum
 }
 
-def isBetweenLong(value: Long, minimum: Long, maximum: Long): Bool = {
+def isBetween(value: Long, minimum: Long, maximum: Long): Bool = {
     value >= minimum && value <= maximum
 }
 
 /// Plus grand commun diviseur de deux entiers.
 /// @status Recommandee
-def gcdInt(left: Int, right: Int): Int = {
+def gcd(left: Int, right: Int): Int = {
     var x = abs(left)
     var y = abs(right)
     while y != 0 {
@@ -290,7 +290,7 @@ def gcdInt(left: Int, right: Int): Int = {
     x
 }
 
-def gcdLong(left: Long, right: Long): Long = {
+def gcd(left: Long, right: Long): Long = {
     var x = abs(left)
     var y = abs(right)
     while y != 0L {
@@ -303,8 +303,8 @@ def gcdLong(left: Long, right: Long): Long = {
 
 /// Plus petit commun multiple de deux entiers.
 /// @status Recommandee
-def lcmInt(left: Int, right: Int): Int = {
-    val divisor = gcdInt(left, right)
+def lcm(left: Int, right: Int): Int = {
+    val divisor = gcd(left, right)
     if divisor == 0 {
         0
     } else {
@@ -312,8 +312,8 @@ def lcmInt(left: Int, right: Int): Int = {
     }
 }
 
-def lcmLong(left: Long, right: Long): Long = {
-    val divisor = gcdLong(left, right)
+def lcm(left: Long, right: Long): Long = {
+    val divisor = gcd(left, right)
     if divisor == 0L {
         0L
     } else {
@@ -321,7 +321,7 @@ def lcmLong(left: Long, right: Long): Long = {
     }
 }
 
-def absDiffInt(left: Int, right: Int): Int = {
+def absDiff(left: Int, right: Int): Int = {
     if left < right {
         right - left
     } else {
@@ -329,7 +329,7 @@ def absDiffInt(left: Int, right: Int): Int = {
     }
 }
 
-def absDiffLong(left: Long, right: Long): Long = {
+def absDiff(left: Long, right: Long): Long = {
     if left < right {
         right - left
     } else {
@@ -337,11 +337,11 @@ def absDiffLong(left: Long, right: Long): Long = {
     }
 }
 
-def absDiffFloat(left: Float, right: Float): Float = {
+def absDiff(left: Float, right: Float): Float = {
     abs(left - right)
 }
 
-def absDiffDouble(left: Double, right: Double): Double = {
+def absDiff(left: Double, right: Double): Double = {
     abs(left - right)
 }
 
@@ -399,7 +399,7 @@ def pow(base: Double, exponent: Int): Double = {
     }
 }
 
-def factorialInt(value: Int): Int = {
+def factorial(value: Int): Int = {
     if value < 0 {
         0
     } else {

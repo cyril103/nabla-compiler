@@ -211,18 +211,16 @@ Le pipeline implemente actuellement :
   `randomBool`, `randomSeedNow` et `randomSeedTime` pour une API pseudo-aléatoire
   deterministe basée sur une seed;
 - module de bibliotheque standard `math` avec `abs(Int/Long/Float/Double)`,
-  `absDiffInt`, `absDiffLong`, `absDiffFloat`, `absDiffDouble`,
-  `max(Int/Long/Float/Double)`, `min(Int/Long/Float/Double)`,
-  `clamp(Int/Long/Float/Double)`, `signInt`, `signLong`, `signFloat`,
-  `signDouble`,
-  `isEvenInt`, `isOddInt`, `isEvenLong`, `isOddLong`, `isBetweenInt`,
-  `isBetweenLong`, `gcdInt`, `lcmInt`, `gcdLong`, `lcmLong`,
-  `pow(Int/Float/Double)`, `factorialInt`, `isCloseFloat`, `isCloseDouble`,
-  `sqrt(Float)`, `sqrt(Double)`, `piFloat`, `piDouble`, `twoPiFloat`,
-  `twoPiDouble`, `degreesToRadiansFloat`, `radiansToDegreesFloat`,
-  `degreesToRadiansDouble`, `radiansToDegreesDouble`, `hypotenuseFloat`,
-  `hypotenuseDouble`; les wrappers publics suffixes des familles surchargees
-  (`absInt`, `maxLong`, `sqrtDouble`, etc.) ont ete retires;
+  `absDiff(Int/Long/Float/Double)`, `max(Int/Long/Float/Double)`,
+  `min(Int/Long/Float/Double)`, `clamp(Int/Long/Float/Double)`,
+  `sign(Int/Long/Float/Double)`, `isEven(Int/Long)`, `isOdd(Int/Long)`,
+  `isBetween(Int/Long)`, `gcd(Int/Long)`, `lcm(Int/Long)`,
+  `pow(Int/Float/Double)`, `factorial(Int)`, `isClose(Float/Double)`,
+  `sqrt(Float/Double)`, `degreesToRadians(Float/Double)`,
+  `radiansToDegrees(Float/Double)`, `hypotenuse(Float/Double)`, ainsi que
+  `piFloat`, `piDouble`, `twoPiFloat` et `twoPiDouble`; les wrappers publics
+  suffixes des familles surchargees (`absInt`, `gcdLong`, `sqrtDouble`, etc.)
+  ont ete retires;
 - module de bibliotheque standard `core.option_int` avec `OptionInt`,
   `optionIntSome`, `optionIntNone`, `map`, `filter` et `orElse`;
 - module de bibliotheque standard `core.option` avec `Option[T]`,
@@ -886,9 +884,11 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `make all-tests`.
 - `local` - Nettoyer l'API publique de `stdlib/math.nabla` en supprimant les
   wrappers suffixes des familles deja surchargees (`abs*`, `min*`, `max*`,
-  `clamp*`, `pow*`, `sqrt*`): les implementations vivent directement sous les
-  noms idiomatiques surcharges, les tests math utilisent ces noms, et la doc API
-  note le retrait des anciens wrappers publics.
+  `clamp*`, `pow*`, `sqrt*`, puis `sign*`, `isEven*`, `isOdd*`, `isBetween*`,
+  `gcd*`, `lcm*`, `absDiff*`, `isClose*`, `degreesToRadians*`,
+  `radiansToDegrees*`, `hypotenuse*` et `factorialInt`): les implementations
+  vivent directement sous les noms idiomatiques surcharges, les tests math
+  utilisent ces noms, et la doc API note le retrait des anciens wrappers publics.
   - Fichiers / tests associes: `stdlib/math.nabla`,
     `tests/test_stdlib_math.nabla`, `docs/stdlib-api.md`, `make all-tests`.
 - `local` - Enrichir les descriptions utilisateur de la reference stdlib pour
@@ -1464,9 +1464,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 Etendre la surcharge de fonctions au-dela de la V1 :
 
-- migrer progressivement les helpers math suffixes restants (`sign*`, `gcd*`,
-  `lcm*`, `isEven*`, etc.) vers des noms surcharges quand les signatures le
-  permettent;
+- evaluer une forme idiomatique pour les constantes math sans argument
+  (`piFloat`, `piDouble`, etc.), qui ne peuvent pas encore etre surchargees par
+  type de retour seul;
 - ajouter une etape d'ambiguite explicite si une future resolution devient moins
   stricte que la signature exacte;
 - garder les helpers internes specialises de collections tant qu'ils expriment

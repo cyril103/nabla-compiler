@@ -94,11 +94,22 @@ signature suffit a choisir l'implementation :
   `Double`
 - `clamp(value, minimum, maximum)` pour `Int`, `Long`, `Float` et `Double`
 - `pow(base, exponent: Int)` pour `Int`, `Float` et `Double`
+- `sign(value)` pour `Int`, `Long`, `Float` et `Double`
+- `isEven(value)` et `isOdd(value)` pour `Int` et `Long`
+- `isBetween(value, minimum, maximum)` pour `Int` et `Long`
+- `gcd(left, right)` et `lcm(left, right)` pour `Int` et `Long`
+- `absDiff(left, right)` pour `Int`, `Long`, `Float` et `Double`
+- `isClose(left, right, epsilon)` pour `Float` et `Double`
+- `degreesToRadians(value)` et `radiansToDegrees(value)` pour `Float` et
+  `Double`
+- `hypotenuse(opposite, adjacent)` pour `Float` et `Double`
+- `factorial(value: Int): Int`
 
 Les fonctions suffixees historiques de ces familles (`absInt`, `maxLong`,
-`sqrtDouble`, etc.) ont ete retirees de l'API publique. Les helpers suffixes qui
-n'ont pas encore de forme surchargee, comme `gcdInt` ou `signFloat`, restent
-disponibles jusqu'a leur propre migration.
+`sqrtDouble`, `gcdInt`, `signFloat`, etc.) ont ete retirees de l'API publique.
+Les constantes sans argument restent suffixees (`piFloat`, `piDouble`,
+`twoPiFloat`, `twoPiDouble`) car la surcharge ne choisit pas encore sur le type
+de retour seul.
 
 ### Util
 
