@@ -759,13 +759,18 @@ inline std::optional<ClassMethodLookupResult> resolveClassMethodInHierarchy(
     return candidates.front();
 }
 
-inline std::optional<ClassMethodLookupResult> resolveExactClassMethodOverload(
+struct ClassMethodOverloadMatches {
+    std::vector<ClassMethodLookupResult> concreteMatches;
+    std::vector<ClassMethodLookupResult> genericMatches;
+};
+
+inline ClassMethodOverloadMatches exactClassMethodOverloadMatches(
     const CompilerContext& context,
     const std::string& receiverType,
     const std::string& methodName,
     const std::vector<std::string>& actualArgumentTypes,
     const std::vector<std::string>& typeArguments = {}) {
-    std::vector<ClassMethodLookupResult> matches;
+    ClassMethodOverloadMatches matches;
     for (const auto& candidate : collectClassMethodLookupCandidates(context, receiverType, methodName)) {
         if (!candidate.signature) continue;
         const auto& signature = *candidate.signature;
@@ -796,9 +801,29 @@ inline std::optional<ClassMethodLookupResult> resolveExactClassMethodOverload(
                 break;
             }
         }
-        if (compatible) matches.push_back(candidate);
+        if (compatible) {
+            if (signature.typeParameters.empty()) {
+                matches.concreteMatches.push_back(candidate);
+            } else {
+                matches.genericMatches.push_back(candidate);
+            }
+        }
     }
-    if (matches.size() == 1) return matches[0];
+    return matches;
+}
+
+inline std::optional<ClassMethodLookupResult> resolveExactClassMethodOverload(
+    const CompilerContext& context,
+    const std::string& receiverType,
+    const std::string& methodName,
+    const std::vector<std::string>& actualArgumentTypes,
+    const std::vector<std::string>& typeArguments = {}) {
+    const auto matches =
+        exactClassMethodOverloadMatches(context, receiverType, methodName, actualArgumentTypes, typeArguments);
+    if (matches.concreteMatches.size() == 1) return matches.concreteMatches[0];
+    if (matches.concreteMatches.empty() && matches.genericMatches.size() == 1) {
+        return matches.genericMatches[0];
+    }
     return std::nullopt;
 }
 

@@ -193,11 +193,13 @@ def main(): Int = {
 ```
 
 La surcharge de methodes est resolue statiquement depuis le type du receveur et
-les types des arguments. Une lambda inferee en argument peut recevoir son type
-attendu si l'arite et les positions de lambdas identifient une seule surcharge.
-Si plusieurs surcharges fonctionnelles restent possibles, un diagnostic
-d'ambiguite liste les signatures candidates. Les generiques et conversions
-implicites restent volontairement limites a la resolution exacte actuelle.
+les types des arguments. Une signature concrete exacte est prioritaire sur une
+signature generique inferable, et plusieurs signatures generiques compatibles
+produisent un diagnostic d'ambiguite. Une lambda inferee en argument peut
+recevoir son type attendu si l'arite et les positions de lambdas identifient une
+seule surcharge. Si plusieurs surcharges fonctionnelles restent possibles, un
+diagnostic d'ambiguite liste les signatures candidates. Les conversions
+implicites restent volontairement limitees a la resolution exacte actuelle.
 
 `Unit` sert aux fonctions a effet.
 

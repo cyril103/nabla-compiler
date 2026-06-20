@@ -951,6 +951,15 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         ? std::optional<ClassMethodLookupResult>(methodCandidates.front())
         : resolveExactClassMethodOverload(context, receiverType, methodName, actualArgumentTypes, typeArguments);
     if (!resolvedMethodLookup) {
+        const auto matches =
+            exactClassMethodOverloadMatches(context, receiverType, methodName, actualArgumentTypes, typeArguments);
+        if (matches.concreteMatches.size() > 1 ||
+            (matches.concreteMatches.empty() && matches.genericMatches.size() > 1)) {
+            semanticError(
+                "appel de méthode surchargée ambigu pour '" +
+                formatFunctionCallShape(receiverType + "." + methodName, actualArgumentTypes) + "'" +
+                "\ncandidats:" + formatMethodOverloadCandidates(context, receiverType, methodName));
+        }
         semanticError(formatNoMatchingMethodOverloadMessage(context, receiverType, methodName, actualArgumentTypes));
     }
     const auto& methodLookup = *resolvedMethodLookup;

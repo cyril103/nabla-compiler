@@ -98,7 +98,8 @@ Le pipeline implemente actuellement :
   candidates; les helpers internes de `math` commencent a consommer les noms
   surcharges idiomatiques hors wrappers de compatibilite;
 - surcharge V1 des methodes de classe par signature exacte, avec nom IR unique
-  par variante et resolution par les types d'arguments; les lambdas inferees en
+  par variante, resolution par les types d'arguments et priorite aux variantes
+  concretes sur les variantes generiques inferables; les lambdas inferees en
   argument recoivent un type attendu quand la forme d'appel selectionne une
   surcharge unique, et les cas ambigus produisent un diagnostic dedie;
 - types fonction-valeur canoniques `Fn(...)->...`, references de fonctions
@@ -567,6 +568,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter les annotations de type locales pour `val` / `var`.
 - [x] Enrichir les diagnostics de surcharge avec forme appelee et candidats.
 - [x] Ajouter une premiere surcharge des methodes de classe par signature exacte.
+- [x] Prioriser les surcharges de methodes concretes sur les generiques
+  inferables.
 - [x] Ajouter l'inference des arguments de type des fonctions generiques.
 - [x] Autoriser les references de fonctions generiques specialisees comme
   valeurs, par exemple `identity[Int]`.
@@ -861,6 +864,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   - Fichiers / tests associes: `src/compiler_context.hpp`, `src/parser.cpp`,
     `tests/test_function_overload_generic_reference.nabla`,
     `tests/test_error_function_overload_generic_reference_ambiguous.nabla`,
+    `make all-tests`.
+- `local` - Etendre la resolution des surcharges de methodes aux signatures
+  generiques inferables: une methode concrete exacte gagne sur une methode
+  generique compatible, une methode generique seule reste appelable, et plusieurs
+  methodes generiques compatibles produisent un diagnostic d'ambiguite avec les
+  candidats.
+  - Fichiers / tests associes: `src/compiler_context.hpp`, `src/ast.cpp`,
+    `tests/test_method_overload_generic_priority.nabla`,
+    `tests/test_error_method_overload_generic_ambiguous.nabla`,
     `make all-tests`.
 - `local` - Enrichir les descriptions utilisateur de la reference stdlib pour
   `io`, `math`, `strings` et `OptionInt`: conventions de retour I/O,
@@ -1435,7 +1447,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 Etendre la surcharge de fonctions au-dela de la V1 :
 
-- definir la strategie pour les methodes surchargees generiques;
+- definir la strategie pour les lambdas inferees avec methodes generiques
+  surchargees;
 - ajouter une etape d'ambiguite explicite si une future resolution devient moins
   stricte que la signature exacte;
 - garder les noms suffixes `math` comme compatibilite documentee, mais faire
