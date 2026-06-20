@@ -1374,7 +1374,7 @@ FunctionCallNode::FunctionCallNode(
     std::string functionName, std::vector<std::unique_ptr<ASTNode>> args,
     std::vector<std::string> genericTypeArguments, std::string initialResolvedType,
     std::string userFacingName)
-    : name(std::move(functionName)), diagnosticName(std::move(userFacingName)),
+    : name(std::move(functionName)), resolvedFunctionName(name), diagnosticName(std::move(userFacingName)),
       arguments(std::move(args)), typeArguments(std::move(genericTypeArguments)),
       resolvedType(std::move(initialResolvedType)) {}
 
@@ -1544,7 +1544,28 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
         resolvedType = "Int";
         return;
     }
-    auto function = context.functions.find(name);
+    std::vector<std::string> actualArgumentTypes;
+    for (const auto& argument : arguments) actualArgumentTypes.push_back(argument->getType());
+
+    auto overloads = functionOverloadNames(context, name);
+    if (overloads.empty()) {
+        const std::string displayName = diagnosticName.empty() ? name : diagnosticName;
+        semanticError("fonction inconnue: " + displayName + recommendedStdlibFunctionSuffix(displayName));
+    }
+    std::optional<std::string> overloadName;
+    if (overloads.size() == 1) {
+        overloadName = overloads[0];
+    } else {
+        overloadName = resolveExactFunctionOverload(context, name, actualArgumentTypes, typeArguments);
+    }
+    if (!overloadName) {
+        const std::string displayName = diagnosticName.empty() ? name : diagnosticName;
+        semanticError(
+            "aucune surcharge compatible pour '" + displayName + "'" +
+            recommendedStdlibFunctionSuffix(displayName));
+    }
+    resolvedFunctionName = *overloadName;
+    auto function = context.functions.find(resolvedFunctionName);
     if (function == context.functions.end()) {
         const std::string displayName = diagnosticName.empty() ? name : diagnosticName;
         semanticError("fonction inconnue: " + displayName + recommendedStdlibFunctionSuffix(displayName));
@@ -1566,8 +1587,6 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
     }
     std::optional<std::map<std::string, std::string>> substitution;
     if (typeArguments.empty()) {
-        std::vector<std::string> actualArgumentTypes;
-        for (const auto& argument : arguments) actualArgumentTypes.push_back(argument->getType());
         substitution = inferGenericFunctionSubstitution(function->second, actualArgumentTypes);
     } else {
         substitution = genericFunctionSubstitutionFor(function->second, typeArguments);
@@ -1610,12 +1629,12 @@ std::string FunctionCallNode::lowerToIR(IRBuilder& builder) const {
     }
     if (!concreteTypeArguments.empty()) {
         const std::string concreteReturnType = builder.substituteActiveType(resolvedType);
-        builder.registerFunctionSpecialization(name, concreteTypeArguments, concreteReturnType);
+        builder.registerFunctionSpecialization(resolvedFunctionName, concreteTypeArguments, concreteReturnType);
         return builder.emitCall(
-            formatParameterizedType(name, concreteTypeArguments),
+            formatParameterizedType(resolvedFunctionName, concreteTypeArguments),
             loweredArguments, concreteReturnType);
     }
-    return builder.emitCall(name, loweredArguments, resolvedType);
+    return builder.emitCall(resolvedFunctionName, loweredArguments, resolvedType);
 }
 
 FunctionReferenceNode::FunctionReferenceNode(

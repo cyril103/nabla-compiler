@@ -85,8 +85,12 @@ supposer une prise en charge Unicode complete.
 ### Math
 
 Les fonctions specialisees par type (`absInt`, `maxLong`, `sqrtDouble`, etc.)
-sont publiques pour l'instant. Une future couche plus generique pourra ajouter
-des noms idiomatiques sans retirer immediatement ces fonctions.
+restent publiques pour compatibilite. Les nouvelles API peuvent utiliser des
+noms idiomatiques surcharges quand la signature suffit a choisir
+l'implementation, par exemple :
+
+- `sqrt(value: Float): Float`
+- `sqrt(value: Double): Double`
 
 ### Util
 

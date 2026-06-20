@@ -281,6 +281,17 @@ void SemanticAnalyzer::validateDeclaredTypes() {
                     functionName + "'");
         }
     }
+    if (auto mainOverloads = context.functionOverloads.find("main");
+        mainOverloads != context.functionOverloads.end()) {
+        for (const auto& overloadName : mainOverloads->second) {
+            const auto function = context.functions.find(overloadName);
+            if (function != context.functions.end() && !function->second.parameters.empty()) {
+                throw CompilerError(
+                    ErrorKind::Semantic, function->second.location,
+                    "la fonction 'main' ne peut pas accepter de paramètres");
+            }
+        }
+    }
 
     for (const auto& [className, classInfo] : context.classes) {
         if (className == "Any") continue;

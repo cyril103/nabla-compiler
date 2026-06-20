@@ -89,6 +89,9 @@ Le pipeline implemente actuellement :
   avec protection contre les cycles;
 - objets avec champs de constructeur et appels de methodes parametres;
 - fonctions globales appelables avec parametres;
+- surcharge V1 des fonctions globales non generiques par signature exacte, avec
+  nom IR unique par variante et wrappers `math.sqrt(Float)` /
+  `math.sqrt(Double)`;
 - types fonction-valeur canoniques `Fn(...)->...`, references de fonctions
   nommees et appels indirects, avec lambdas sans capture `(x: Int) => { ... }` et
   `(acc: Int, value: Int) => { ... }`;
@@ -205,8 +208,8 @@ Le pipeline implemente actuellement :
   `isEvenInt`, `isOddInt`, `isEvenLong`, `isOddLong`, `isBetweenInt`,
   `isBetweenLong`, `gcdInt`, `lcmInt`, `gcdLong`, `lcmLong`, `powInt`,
   `powFloat`, `powDouble`, `factorialInt`, `isCloseFloat`, `isCloseDouble`,
-  `sqrtFloat`, `sqrtDouble`, `piFloat`, `piDouble`, `twoPiFloat`,
-  `twoPiDouble`, `degreesToRadiansFloat`, `radiansToDegreesFloat`,
+  `sqrtFloat`, `sqrtDouble`, `sqrt(Float)`, `sqrt(Double)`, `piFloat`,
+  `piDouble`, `twoPiFloat`, `twoPiDouble`, `degreesToRadiansFloat`, `radiansToDegreesFloat`,
   `degreesToRadiansDouble`, `radiansToDegreesDouble`, `hypotenuseFloat`,
   `hypotenuseDouble`.
 - module de bibliotheque standard `core.option_int` avec `OptionInt`,
@@ -325,6 +328,9 @@ Limites importantes :
   inference des arguments de type; les references explicites comme
   `identity[Int]` sont utilisables comme valeurs, mais les fonctions generiques
   ne sont pas encore des valeurs vraiment polymorphes;
+  la surcharge de fonctions couvre pour l'instant les appels globaux resolus par
+  types d'arguments exacts; les references de fonctions surchargees sans type
+  attendu ne sont pas encore supportees;
   `Array[Int]` reste une facade specialisee vers `ArrayInt`; `Array[Long]`
   reste une facade specialisee vers `ArrayLong`; `Array[Float]` reste une
   facade specialisee vers `ArrayFloat`; `Array[Double]` reste une facade
@@ -532,6 +538,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   avec substitution des champs, methodes et types fonction.
 - [x] Ajouter les fonctions generiques utilisateur explicites
   `def identity[T](value: T): T`.
+- [x] Ajouter une premiere surcharge des fonctions globales non generiques par
+  signature exacte.
 - [x] Ajouter l'inference des arguments de type des fonctions generiques.
 - [x] Autoriser les references de fonctions generiques specialisees comme
   valeurs, par exemple `identity[Int]`.
@@ -713,6 +721,21 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Ajouter la surcharge V1 des fonctions globales par signature exacte:
+  le contexte garde un index de surcharges par nom source, les variantes sont
+  abaissées vers des noms IR uniques, les appels choisissent la variante depuis
+  les types d'arguments, et `math` expose maintenant `sqrt(value: Float)` /
+  `sqrt(value: Double)` en plus des noms suffixes de compatibilite.
+  - Limites actuelles: resolution exacte uniquement, references de fonctions
+    surchargees sans type attendu non supportees, methodes et generiques a
+    etendre plus tard.
+  - Fichiers / tests associés: `src/compiler_context.hpp`, `src/parser.cpp`,
+    `src/ast.hpp`, `src/ast.cpp`, `stdlib/math.nabla`,
+    `tests/test_function_overload.nabla`,
+    `tests/test_function_overload_math_sqrt.nabla`,
+    `tests/test_error_function_overload_duplicate.nabla`,
+    `tests/test_error_function_overload_no_match.nabla`, `docs/language.md`,
+    `docs/stdlib-api.md`, `docs/roadmap.md`, `make all-tests`.
 - `local` - Enrichir les descriptions utilisateur de la reference stdlib pour
   `io`, `math`, `strings` et `OptionInt`: conventions de retour I/O,
   comportements limites de `pow*` / `sqrt*`, separation de `words`, et raison
@@ -1284,13 +1307,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Attaquer la surcharge de fonctions par signature.
+Etendre la surcharge de fonctions au-dela de la V1 :
 
-- Permettre plusieurs fonctions globales avec le meme nom si leur signature
-  d'arguments les distingue, par exemple `sqrt(value: Float)` et
-  `sqrt(value: Double)`.
-- Resoudre un appel surcharge en semantique a partir du nom, du nombre
-  d'arguments et des types deja inferes, puis abaisser vers un symbole IR unique.
-- Ajouter des diagnostics d'ambiguite et d'absence de surcharge compatible.
-- Utiliser `math.sqrt` comme premier cas utilisateur, en conservant
-  `sqrtFloat` / `sqrtDouble` comme compatibilite pendant la transition.
+- autoriser les references de fonctions surchargees quand un type attendu est
+  disponible, par exemple affectation vers `(Float) => Float`;
+- definir la strategie pour les fonctions generiques surchargees et les lambdas
+  inferees en argument;
+- enrichir les diagnostics pour distinguer absence de candidat, arite
+  incompatible et ambiguite reelle;
+- migrer progressivement `math` vers des noms idiomatiques surcharges (`abs`,
+  `min`, `max`, `pow`) en gardant les noms suffixes comme compatibilite.

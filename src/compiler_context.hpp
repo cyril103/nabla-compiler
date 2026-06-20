@@ -50,6 +50,7 @@ struct CompilerContext {
     std::map<std::string, std::map<std::string, int>> classLayouts;
     std::map<std::string, ClassInfo> classes;
     std::map<std::string, FunctionSignature> functions;
+    std::map<std::string, std::vector<std::string>> functionOverloads;
     std::set<std::string> objects;
     std::set<std::string> parsedFiles;
     std::filesystem::path rootDir;
@@ -864,4 +865,105 @@ inline bool functionTypeNameMatchesSignature(
         if (expectedType->parameterTypes[i] != signature.parameters[i].type) return false;
     }
     return expectedType->returnType == signature.returnType;
+}
+
+inline std::string mangleFunctionTypePart(const std::string& type) {
+    std::string result;
+    for (char c : type) {
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+            (c >= '0' && c <= '9')) {
+            result.push_back(c);
+        } else {
+            result.push_back('_');
+        }
+    }
+    return result;
+}
+
+inline std::string overloadedFunctionName(
+    const std::string& sourceName, const CompilerContext::FunctionSignature& signature) {
+    std::string result = sourceName;
+    result += "$";
+    if (signature.parameters.empty()) {
+        result += "Unit";
+    } else {
+        for (size_t i = 0; i < signature.parameters.size(); ++i) {
+            if (i > 0) result += "$";
+            result += mangleFunctionTypePart(signature.parameters[i].type);
+        }
+    }
+    return result;
+}
+
+inline bool functionSignatureParametersMatch(
+    const CompilerContext::FunctionSignature& left,
+    const CompilerContext::FunctionSignature& right) {
+    if (left.parameters.size() != right.parameters.size()) return false;
+    for (size_t i = 0; i < left.parameters.size(); ++i) {
+        if (left.parameters[i].type != right.parameters[i].type) return false;
+    }
+    return left.typeParameters == right.typeParameters;
+}
+
+inline const CompilerContext::FunctionSignature* findFunctionSignature(
+    const CompilerContext& context, const std::string& functionName) {
+    auto function = context.functions.find(functionName);
+    if (function == context.functions.end()) return nullptr;
+    return &function->second;
+}
+
+inline std::vector<std::string> functionOverloadNames(
+    const CompilerContext& context, const std::string& sourceName) {
+    auto overloads = context.functionOverloads.find(sourceName);
+    if (overloads != context.functionOverloads.end()) return overloads->second;
+    if (context.functions.count(sourceName)) return {sourceName};
+    return {};
+}
+
+inline const CompilerContext::FunctionSignature* uniqueFunctionSignatureForName(
+    const CompilerContext& context, const std::string& sourceName) {
+    auto overloads = functionOverloadNames(context, sourceName);
+    if (overloads.size() != 1) return nullptr;
+    return findFunctionSignature(context, overloads[0]);
+}
+
+inline std::optional<std::string> resolveExactFunctionOverload(
+    const CompilerContext& context,
+    const std::string& sourceName,
+    const std::vector<std::string>& actualArgumentTypes,
+    const std::vector<std::string>& typeArguments = {}) {
+    std::vector<std::string> matches;
+    for (const auto& overloadName : functionOverloadNames(context, sourceName)) {
+        const auto* signature = findFunctionSignature(context, overloadName);
+        if (!signature) continue;
+        if (signature->parameters.size() != actualArgumentTypes.size()) continue;
+        if (!typeArguments.empty()) {
+            if (!genericFunctionSubstitutionFor(*signature, typeArguments)) continue;
+        } else if (!signature->typeParameters.empty()) {
+            if (!inferGenericFunctionSubstitution(*signature, actualArgumentTypes)) continue;
+        }
+
+        std::map<std::string, std::string> substitution;
+        if (!typeArguments.empty()) {
+            auto genericSubstitution = genericFunctionSubstitutionFor(*signature, typeArguments);
+            if (!genericSubstitution) continue;
+            substitution = *genericSubstitution;
+        } else if (!signature->typeParameters.empty()) {
+            auto inferredSubstitution = inferGenericFunctionSubstitution(*signature, actualArgumentTypes);
+            if (!inferredSubstitution) continue;
+            substitution = *inferredSubstitution;
+        }
+
+        bool compatible = true;
+        for (size_t i = 0; i < actualArgumentTypes.size(); ++i) {
+            const std::string expectedType = substituteType(signature->parameters[i].type, substitution);
+            if (expectedType != actualArgumentTypes[i]) {
+                compatible = false;
+                break;
+            }
+        }
+        if (compatible) matches.push_back(overloadName);
+    }
+    if (matches.size() == 1) return matches[0];
+    return std::nullopt;
 }

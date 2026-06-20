@@ -164,6 +164,7 @@ public:
 
 class FunctionCallNode : public ASTNode {
     std::string name;
+    std::string resolvedFunctionName;
     std::string diagnosticName;
     std::vector<std::unique_ptr<ASTNode>> arguments;
     std::vector<std::string> typeArguments;

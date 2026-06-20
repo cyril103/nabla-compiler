@@ -455,3 +455,15 @@ def sqrtDouble(value: Double): Double = {
         guess
     }
 }
+
+/// Racine carree surchargee pour `Float`.
+/// @status Recommandee
+def sqrt(value: Float): Float = {
+    sqrtFloat(value)
+}
+
+/// Racine carree surchargee pour `Double`.
+/// @status Recommandee
+def sqrt(value: Double): Double = {
+    sqrtDouble(value)
+}

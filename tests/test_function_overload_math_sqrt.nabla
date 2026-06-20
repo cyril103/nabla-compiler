@@ -1,0 +1,11 @@
+import math
+
+def main(): Int = {
+    val asFloat = sqrt(16.0F)
+    val asDouble = sqrt(25.0)
+    if asFloat == 4.0F && asDouble == 5.0 {
+        42
+    } else {
+        1
+    }
+}

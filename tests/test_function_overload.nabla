@@ -1,0 +1,11 @@
+def choose(value: Int): Int = {
+    value + 1
+}
+
+def choose(value: String): Int = {
+    value.length()
+}
+
+def main(): Int = {
+    choose(41) + choose("x")
+}

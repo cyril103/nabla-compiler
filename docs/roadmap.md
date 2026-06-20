@@ -9,6 +9,9 @@ pour reprendre facilement apres une pause.
   Le compilateur signale explicitement une commande externe introuvable comme
   `nasm` ou `ld`.
 - Typage statique avec fonctions, methodes, classes, generiques simples et lambdas.
+- Surcharge V1 des fonctions globales non generiques par signature exacte :
+  plusieurs `def` peuvent partager un nom si leurs types de parametres
+  different; les appels sont abaisses vers un symbole IR unique.
 - Controle de flux : `if` expression, `else if`, `match`, `while`, `for`.
 - Support de l'héritage objet avec `extends` + `with` (mixins), hiérarchie
   racine `Any` / `AnyVal` / `AnyRef`, `toString(): String` et
@@ -94,10 +97,9 @@ Actions recommandees :
    `Option.some[T]` / `Option.none[T]`) quand elles existent.
 9. Garder les diagnostics de compatibilite orientes vers les compagnons
    recommandes (`Array.fill`, `Set.fromArray`, `Option.some`, etc.).
-10. Prochain chantier langage cible : ajouter la surcharge de fonctions par
-    signature, afin de remplacer progressivement les noms suffixes comme
-    `sqrtFloat` / `sqrtDouble` par des surcharges `sqrt(value: Float)` et
-    `sqrt(value: Double)`.
+10. Poursuivre la surcharge par signature : etendre progressivement aux
+    fonctions generiques, aux references de fonctions avec type attendu et aux
+    diagnostics d'ambiguite plus riches.
 11. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
    surface n'est pas propre.
 

@@ -1,0 +1,11 @@
+def same(value: Int): Int = {
+    value
+}
+
+def same(other: Int): Int = {
+    other + 1
+}
+
+def main(): Int = {
+    same(1)
+}

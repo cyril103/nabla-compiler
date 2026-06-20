@@ -215,8 +215,14 @@ def page_template(title: str, body: str, depth: int = 0) -> str:
 
 
 def render_module(module: ModuleDoc) -> str:
-    entries = "\n".join(
-        f"""    <article class="entry" id="{html.escape(entry.name)}">
+    seen_entry_ids: dict[str, int] = {}
+    rendered_entries: list[str] = []
+    for entry in module.entries:
+        seen_count = seen_entry_ids.get(entry.name, 0) + 1
+        seen_entry_ids[entry.name] = seen_count
+        entry_id = entry.name if seen_count == 1 else f"{entry.name}-{seen_count}"
+        rendered_entries.append(
+            f"""    <article class="entry" id="{html.escape(entry_id)}">
       <div class="entry-meta">
         <span class="kind">{html.escape(entry.kind)}</span>{render_status(entry.status)}
       </div>
@@ -224,8 +230,8 @@ def render_module(module: ModuleDoc) -> str:
       <pre><code>{html.escape(entry.signature)}</code></pre>
       {render_paragraphs(entry.description)}
     </article>"""
-        for entry in module.entries
-    )
+        )
+    entries = "\n".join(rendered_entries)
     if not entries:
         entries = "    <p class=\"empty\">Aucun symbole public documente.</p>"
 

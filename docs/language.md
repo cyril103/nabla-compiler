@@ -124,6 +124,28 @@ Les appels recursifs directs en position terminale sont optimises en boucle par
 le backend. Cela couvre notamment les branches `if` qui retournent directement
 la valeur de l'appel recursif.
 
+Les fonctions globales peuvent etre surchargees par signature. Deux fonctions
+peuvent partager le meme nom si la liste de types de leurs parametres les
+distingue. L'appel est resolu statiquement depuis les types des arguments :
+
+```nabla
+def label(value: Int): Int = {
+    value + 1
+}
+
+def label(value: String): Int = {
+    value.length()
+}
+
+def main(): Int = {
+    label(41) + label("x")
+}
+```
+
+Une redéfinition avec exactement les memes types de parametres est refusee. Les
+references de fonctions surchargees sans type attendu explicite ne sont pas
+encore supportees.
+
 `Unit` sert aux fonctions a effet.
 
 ```nabla

@@ -1,0 +1,11 @@
+def pick(value: Int): Int = {
+    value
+}
+
+def pick(value: String): Int = {
+    value.length()
+}
+
+def main(): Int = {
+    pick(true)
+}

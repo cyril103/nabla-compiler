@@ -992,13 +992,13 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                 auto functionType = functionTypeFromName(initialSymbol->type);
                 if (functionType) expectedArgumentTypes = functionType->parameterTypes;
             } else {
-                auto function = context.functions.find(functionLookupName);
-                if (function != context.functions.end()) {
+                const auto* function = uniqueFunctionSignatureForName(context, functionLookupName);
+                if (function) {
                     std::map<std::string, std::string> substitution;
-                    if (auto genericSubstitution = genericFunctionSubstitutionFor(function->second, functionTypeArguments)) {
+                    if (auto genericSubstitution = genericFunctionSubstitutionFor(*function, functionTypeArguments)) {
                         substitution = *genericSubstitution;
                     }
-                    for (const auto& parameter : function->second.parameters) {
+                    for (const auto& parameter : function->parameters) {
                         expectedArgumentTypes.push_back(substituteType(parameter.type, substitution));
                     }
                 }
@@ -1014,9 +1014,9 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             }
             consume(TokenType::LPAREN, "");
             std::vector<std::unique_ptr<ASTNode>> arguments;
-            auto namedFunction = context.functions.find(functionLookupName);
-            if (!initialSymbol && namedFunction != context.functions.end()) {
-                arguments = parseFunctionCallArguments(namedFunction->second, functionTypeArguments);
+            const auto* namedFunction = uniqueFunctionSignatureForName(context, functionLookupName);
+            if (!initialSymbol && namedFunction) {
+                arguments = parseFunctionCallArguments(*namedFunction, functionTypeArguments);
             } else {
                 arguments = parseArguments(expectedArgumentTypes);
             }
@@ -1044,20 +1044,20 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     nameToken.location);
             }
             std::string initialReturnType = "Int";
-            auto function = context.functions.find(functionLookupName);
-            if (function != context.functions.end()) {
+            const auto* function = uniqueFunctionSignatureForName(context, functionLookupName);
+            if (function) {
                 std::map<std::string, std::string> substitution;
-                if (auto genericSubstitution = genericFunctionSubstitutionFor(function->second, functionTypeArguments)) {
+                if (auto genericSubstitution = genericFunctionSubstitutionFor(*function, functionTypeArguments)) {
                     substitution = *genericSubstitution;
-                } else if (functionTypeArguments.empty() && !function->second.typeParameters.empty()) {
+                } else if (functionTypeArguments.empty() && !function->typeParameters.empty()) {
                     std::vector<std::string> actualArgumentTypes;
                     for (const auto& argument : arguments) actualArgumentTypes.push_back(argument->getType());
                     if (auto inferredSubstitution =
-                            inferGenericFunctionSubstitution(function->second, actualArgumentTypes)) {
+                            inferGenericFunctionSubstitution(*function, actualArgumentTypes)) {
                         substitution = *inferredSubstitution;
                     }
                 }
-                initialReturnType = substituteType(function->second.returnType, substitution);
+                initialReturnType = substituteType(function->returnType, substitution);
             }
             const std::string diagnosticFunctionName =
                 functionLookupName == name ? std::string() : name;
@@ -1085,8 +1085,14 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     nameToken.location);
             }
         }
-        if (context.functions.count(name)) {
-            const auto& signature = context.functions[name];
+        auto overloadNames = functionOverloadNames(context, name);
+        if (!overloadNames.empty()) {
+            if (overloadNames.size() > 1) {
+                throw CompilerError(
+                    ErrorKind::Parser, nameToken.location,
+                    "référence de fonction surchargée non supportée sans type attendu: " + name);
+            }
+            const auto& signature = context.functions[overloadNames[0]];
             if (!signature.typeParameters.empty()) {
                 if (typeArguments.empty()) {
                     throw CompilerError(
@@ -1429,16 +1435,33 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName, std::strin
     auto [returnType, returnTypeLocation] = parseType("Type de retour attendu");
     CompilerContext::FunctionSignature signature{
         signatureParameters, returnType, typeParameters, defToken.location, returnTypeLocation, isOverride};
+    std::string registeredFunctionName = functionName;
     if (!clName.empty()) {
         if (context.classes[clName].methods.count(name)) {
             throw CompilerError(ErrorKind::Parser, nameToken.location, "méthode déjà déclarée dans '" + clName + "': " + name);
         }
         context.classes[clName].methods[name] = signature;
     } else {
-        if (context.functions.count(functionName)) {
-            throw CompilerError(ErrorKind::Parser, nameToken.location, "fonction déjà déclarée: " + functionName);
+        auto& overloads = context.functionOverloads[functionName];
+        for (const auto& overloadName : overloads) {
+            const auto existingFunction = context.functions.find(overloadName);
+            if (existingFunction != context.functions.end() &&
+                functionSignatureParametersMatch(existingFunction->second, signature)) {
+                throw CompilerError(
+                    ErrorKind::Parser, nameToken.location,
+                    "fonction déjà déclarée avec cette signature: " + functionName);
+            }
         }
-        context.functions[functionName] = signature;
+        if (!overloads.empty()) {
+            registeredFunctionName = overloadedFunctionName(functionName, signature);
+            if (context.functions.count(registeredFunctionName)) {
+                throw CompilerError(
+                    ErrorKind::Parser, nameToken.location,
+                    "fonction déjà déclarée avec cette signature: " + functionName);
+            }
+        }
+        overloads.push_back(registeredFunctionName);
+        context.functions[registeredFunctionName] = signature;
     }
     consume(TokenType::EQUAL, ""); consume(TokenType::LBRACE, "");
     auto previousFunctionTypeParameters = currentFunctionTypeParameters;
@@ -1455,7 +1478,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName, std::strin
     std::vector<std::string> ownerTypeParameters;
     if (!clName.empty()) ownerTypeParameters = context.classes[clName].typeParameters;
     return located(std::make_unique<FunctionDefNode>(
-        clName, functionName, returnType, std::move(typeParameters),
+        clName, registeredFunctionName, returnType, std::move(typeParameters),
         std::move(parameters), std::move(body), std::vector<FunctionDefNode::Capture>{},
         std::move(ownerTypeParameters)), defToken.location);
 }
