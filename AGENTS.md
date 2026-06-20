@@ -760,6 +760,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Nettoyer la surface documentaire de `io` et `strings`: les pages
+  HTML evitent maintenant les marqueurs Markdown bruts, les conventions de
+  retour I/O affichent directement `Bool`, `Int`, `true`, `false` et `-1`, et
+  `strings.words` decrit son decoupage sur espaces sans syntaxe de rendu brute.
+  - Fichiers / tests associes: `stdlib/io.nabla`, `stdlib/strings.nabla`,
+    `docs/stdlib/io.html`, `docs/stdlib/strings.html`, `AGENTS.md`,
+    `make stdlib-docs`.
 - `local` - Nettoyer la surface documentaire de `core.option` et
   `core.option_int`: les pages HTML evitent maintenant les marqueurs Markdown
   bruts, `optionSome` / `optionNone` pointent explicitement vers

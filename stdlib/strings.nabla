@@ -1,6 +1,6 @@
 /// @module Strings
 /// Helpers pour travailler avec les chaines. Les operations natives de
-/// `String` restent documentees dans le guide du langage; ce module ajoute des
+/// String restent documentees dans le guide du langage; ce module ajoute des
 /// fonctions de convenance composees au-dessus de ces primitives.
 
 import collections.array
@@ -15,7 +15,7 @@ def stringNonEmpty(value: String): Bool = {
 /// @status Recommandee
 ///
 /// Les espaces de debut et de fin sont retires avant la separation. La
-/// separation se fait sur le caractere espace simple `" "`; les segments vides
+/// separation se fait sur le caractere espace simple; les segments vides
 /// sont ensuite filtres.
 def words(text: String): ArrayObject[String] = {
     text.trim().split(" ").filter(stringNonEmpty)

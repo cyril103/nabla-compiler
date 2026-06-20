@@ -1,6 +1,6 @@
 /// @module IO
 /// Fonctions d'entree-sortie simples.
-/// Les operations de fichier retournent un `Bool` ou un code `Int` pour laisser
+/// Les operations de fichier retournent un Bool ou un code Int pour laisser
 /// le programme decider comment reagir aux erreurs. Les fonctions de ce module
 /// sont des wrappers utilisateur autour des primitives runtime bas niveau.
 
@@ -25,17 +25,17 @@ def readTextFile(path: String): String = {
     readFile(path)
 }
 
-/// Ecrit `content` dans un fichier texte en remplacant son contenu.
+/// Ecrit content dans un fichier texte en remplacant son contenu.
 ///
-/// Retourne le nombre de bytes ecrits, ou `-1` en cas d'erreur runtime.
+/// Retourne le nombre de bytes ecrits, ou -1 en cas d'erreur runtime.
 /// @status Recommandee
 def writeTextFile(path: String, content: String): Int = {
     writeFile(path, content)
 }
 
-/// Ajoute `content` a la fin d'un fichier texte.
+/// Ajoute content a la fin d'un fichier texte.
 ///
-/// Retourne le nombre de bytes ecrits, ou `-1` en cas d'erreur runtime.
+/// Retourne le nombre de bytes ecrits, ou -1 en cas d'erreur runtime.
 /// @status Recommandee
 def appendTextFile(path: String, content: String): Int = {
     appendFile(path, content)
@@ -43,7 +43,7 @@ def appendTextFile(path: String, content: String): Int = {
 
 /// Renomme ou deplace un fichier texte.
 ///
-/// Retourne `true` si l'operation reussit, `false` sinon.
+/// Retourne true si l'operation reussit, false sinon.
 /// @status Recommandee
 def renameTextFile(from: String, to: String): Bool = {
     renameFile(from, to)
@@ -51,7 +51,7 @@ def renameTextFile(from: String, to: String): Bool = {
 
 /// Cree un repertoire.
 ///
-/// Retourne `true` si le repertoire est cree, `false` sinon.
+/// Retourne true si le repertoire est cree, false sinon.
 /// @status Recommandee
 def createDirectory(path: String): Bool = {
     createDir(path)
@@ -59,7 +59,7 @@ def createDirectory(path: String): Bool = {
 
 /// Supprime un fichier texte.
 ///
-/// Retourne `true` si la suppression reussit, `false` sinon.
+/// Retourne true si la suppression reussit, false sinon.
 /// @status Recommandee
 def deleteTextFile(path: String): Bool = {
     deleteFile(path)
@@ -67,7 +67,7 @@ def deleteTextFile(path: String): Bool = {
 
 /// Indique si un chemin existe.
 ///
-/// Retourne `true` pour un fichier ou repertoire existant.
+/// Retourne true pour un fichier ou repertoire existant.
 /// @status Recommandee
 def pathExists(path: String): Bool = {
     fileExists(path)

@@ -16,7 +16,7 @@
     <section class="module-hero">
       <p class="import">import io</p>
       <h1>IO</h1>
-      <p>Fonctions d&#x27;entree-sortie simples. Les operations de fichier retournent un `Bool` ou un code `Int` pour laisser le programme decider comment reagir aux erreurs. Les fonctions de ce module sont des wrappers utilisateur autour des primitives runtime bas niveau.</p>
+      <p>Fonctions d&#x27;entree-sortie simples. Les operations de fichier retournent un Bool ou un code Int pour laisser le programme decider comment reagir aux erreurs. Les fonctions de ce module sont des wrappers utilisateur autour des primitives runtime bas niveau.</p>
     </section>
     <section class="entries">
     <article class="entry" id="println">
@@ -50,8 +50,8 @@
       </div>
       <h2>writeTextFile</h2>
       <pre><code>def writeTextFile(path: String, content: String): Int</code></pre>
-      <p>Ecrit `content` dans un fichier texte en remplacant son contenu.</p>
-<p>Retourne le nombre de bytes ecrits, ou `-1` en cas d&#x27;erreur runtime.</p>
+      <p>Ecrit content dans un fichier texte en remplacant son contenu.</p>
+<p>Retourne le nombre de bytes ecrits, ou -1 en cas d&#x27;erreur runtime.</p>
     </article>
     <article class="entry" id="appendTextFile">
       <div class="entry-meta">
@@ -59,8 +59,8 @@
       </div>
       <h2>appendTextFile</h2>
       <pre><code>def appendTextFile(path: String, content: String): Int</code></pre>
-      <p>Ajoute `content` a la fin d&#x27;un fichier texte.</p>
-<p>Retourne le nombre de bytes ecrits, ou `-1` en cas d&#x27;erreur runtime.</p>
+      <p>Ajoute content a la fin d&#x27;un fichier texte.</p>
+<p>Retourne le nombre de bytes ecrits, ou -1 en cas d&#x27;erreur runtime.</p>
     </article>
     <article class="entry" id="renameTextFile">
       <div class="entry-meta">
@@ -69,7 +69,7 @@
       <h2>renameTextFile</h2>
       <pre><code>def renameTextFile(from: String, to: String): Bool</code></pre>
       <p>Renomme ou deplace un fichier texte.</p>
-<p>Retourne `true` si l&#x27;operation reussit, `false` sinon.</p>
+<p>Retourne true si l&#x27;operation reussit, false sinon.</p>
     </article>
     <article class="entry" id="createDirectory">
       <div class="entry-meta">
@@ -78,7 +78,7 @@
       <h2>createDirectory</h2>
       <pre><code>def createDirectory(path: String): Bool</code></pre>
       <p>Cree un repertoire.</p>
-<p>Retourne `true` si le repertoire est cree, `false` sinon.</p>
+<p>Retourne true si le repertoire est cree, false sinon.</p>
     </article>
     <article class="entry" id="deleteTextFile">
       <div class="entry-meta">
@@ -87,7 +87,7 @@
       <h2>deleteTextFile</h2>
       <pre><code>def deleteTextFile(path: String): Bool</code></pre>
       <p>Supprime un fichier texte.</p>
-<p>Retourne `true` si la suppression reussit, `false` sinon.</p>
+<p>Retourne true si la suppression reussit, false sinon.</p>
     </article>
     <article class="entry" id="pathExists">
       <div class="entry-meta">
@@ -96,7 +96,7 @@
       <h2>pathExists</h2>
       <pre><code>def pathExists(path: String): Bool</code></pre>
       <p>Indique si un chemin existe.</p>
-<p>Retourne `true` pour un fichier ou repertoire existant.</p>
+<p>Retourne true pour un fichier ou repertoire existant.</p>
     </article>
     </section>
   </main>
