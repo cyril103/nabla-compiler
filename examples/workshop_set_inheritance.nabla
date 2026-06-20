@@ -1,5 +1,4 @@
 import io
-import collections.array
 import collections.set
 
 class Person(nameValue: String) {
@@ -56,24 +55,8 @@ def main(): Int = {
     val mentor = new Instructor("Bob")
     val helper = new Volunteer("Gina")
 
-    val morningSource = new Array[Student](6)
-    morningSource.set(0, alice)
-    morningSource.set(1, bob)
-    morningSource.set(2, claire)
-    morningSource.set(3, alice)
-    morningSource.set(4, eve)
-    morningSource.set(5, gina)
-
-    val eveningSource = new Array[Student](6)
-    eveningSource.set(0, bob)
-    eveningSource.set(1, eve)
-    eveningSource.set(2, frank)
-    eveningSource.set(3, claire)
-    eveningSource.set(4, new Student("Bob"))
-    eveningSource.set(5, alice)
-
-    val morning = Set.fromArray[Student](morningSource)
-    val evening = Set.fromArray[Student](eveningSource)
+    val morning = Set(alice, bob, claire, alice, eve, gina)
+    val evening = Set(bob, eve, frank, claire, new Student("Bob"), alice)
     val morningSnapshot = morning.toString()
 
     val all = morning.union(evening)

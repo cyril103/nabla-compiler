@@ -43,6 +43,7 @@ helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
 - `Array[T]`
 - `Array(value1, value2, ...)`
 - `Array.apply[T](values: T*)`
+- `existingArray: _*` pour passer un tableau a un parametre repete
 - `Array.empty[T]()`
 - `Array.fill[T](size, value)`
 - `Array.tabulate[T](size, f)`
@@ -59,6 +60,7 @@ helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
 - Constructeurs/fabriques :
   - `Set(value1, value2, ...)`
   - `Set.apply[T](values: T*)`
+  - `Set(values: _*)` pour dedupliquer un tableau existant
   - `Set.empty[T]()`
   - `Set.fromArray[T](values)`
 

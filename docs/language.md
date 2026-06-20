@@ -704,13 +704,8 @@ import collections.set
 import collections.array
 
 def main(): Int = {
-    val values = new Array[Int](4)
-    values.set(0, 1)
-    values.set(1, 3)
-    values.set(2, 1)
-    values.set(3, 2)
-
-    val deduped = Set.fromArray[Int](values)
+    val values = Array(1, 3, 1, 2)
+    val deduped = Set(values: _*)
     val literal = Set(5, 5, 8)
     val numbers = Set.empty[Int]().add(3).add(1).add(3).add(2)
     val more = Set.empty[Int]().add(2).add(4).add(1)

@@ -14,7 +14,7 @@ def main(): Int = {
     val numbers = Array(1, 2, 3)
     val copied = copyValues(numbers: _*)
     val set = Set(numbers: _*)
-    val direct = Array.apply[String](words: _*)
+    val direct = Array[String](words: _*)
 
     if join(words: _*) == "a-b-c" &&
        copied.toString() == "[1, 2, 3]" &&

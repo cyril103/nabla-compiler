@@ -64,13 +64,11 @@ def scoreBand(student: Student): String = {
 }
 
 def studentBadges(student: Student): Array[Option[String]] = {
-    val badges = Array.fill[Option[String]](2, Option.some[String](student.name()))
     if excellent(student) {
-        badges.set(1, Option.some[String]("honors"))
+        Array(Option.some[String](student.name()), Option.some[String]("honors"))
     } else {
-        badges.set(1, Option.none[String]("badge"))
+        Array(Option.some[String](student.name()), Option.none[String]("badge"))
     }
-    badges
 }
 
 def indexLabel(index: Int): String = {
@@ -127,9 +125,6 @@ def main(): Int = {
     val cy = new Student("Cy", 12)
     val dee = new Student("Dee", 13)
 
-    val students = Array.fill[Student](4, ada)
-    students.set(1, bob)
-    students.set(2, cy)
-    students.set(3, dee)
+    val students = Array(ada, bob, cy, dee)
     report(students)
 }
