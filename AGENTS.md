@@ -299,7 +299,8 @@ Le pipeline implemente actuellement :
 - reference HTML de la stdlib generee depuis `///`, avec directive `@status`
   pour distinguer visuellement API recommandee, compatibilite et helpers
   internes; toutes les pages actuellement publiees affichent les statuts des
-  symboles documentes.
+  symboles documentes, et les modules `io`, `math`, `strings` et `OptionInt`
+  explicitent leurs conventions utilisateur principales.
 - examples Project Euler 1 a 10 (`examples/euler1.nabla` ... `examples/euler10_functional.nabla`)
   comme banc progressif pour exercer le langage et la bibliotheque standard.
 - `examples/student_scores.nabla` comme exemple idiomatique vérifié pour
@@ -712,6 +713,14 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Enrichir les descriptions utilisateur de la reference stdlib pour
+  `io`, `math`, `strings` et `OptionInt`: conventions de retour I/O,
+  comportements limites de `pow*` / `sqrt*`, separation de `words`, et raison
+  d'etre de `OptionInt`. La doc `math` note aussi le futur objectif de surcharge
+  (`sqrt(value)`) pour remplacer les noms suffixes.
+  - Fichiers / tests associés: `stdlib/io.nabla`, `stdlib/math.nabla`,
+    `stdlib/strings.nabla`, `stdlib/core/option_int.nabla`, `docs/stdlib/`,
+    `docs/roadmap.md`, `make stdlib-docs`.
 - `local` - Ajouter les statuts visuels dans la reference HTML de la stdlib:
   le generateur lit `@status`, affiche des badges `Recommandee`,
   `Compatibilite` ou `Interne`, et les surfaces `Array`, `Option` et `Set`
@@ -1275,10 +1284,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Poursuivre la suite outillée autour de l’héritage et du matching :
+Attaquer la surcharge de fonctions par signature.
 
-- Finaliser le nettoyage des diagnostics autour du pattern matching, notamment pour
-  les motifs nommes.
-- Améliorer l’ergonomie d’héritage pour l'exemple de production:
-  vtables à formaliser et règles d'égalité avancées à clarifier pour les
-  hiérarchies polymorphes complexes.
+- Permettre plusieurs fonctions globales avec le meme nom si leur signature
+  d'arguments les distingue, par exemple `sqrt(value: Float)` et
+  `sqrt(value: Double)`.
+- Resoudre un appel surcharge en semantique a partir du nom, du nombre
+  d'arguments et des types deja inferes, puis abaisser vers un symbole IR unique.
+- Ajouter des diagnostics d'ambiguite et d'absence de surcharge compatible.
+- Utiliser `math.sqrt` comme premier cas utilisateur, en conservant
+  `sqrtFloat` / `sqrtDouble` comme compatibilite pendant la transition.

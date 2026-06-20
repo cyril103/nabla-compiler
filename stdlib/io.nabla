@@ -1,7 +1,8 @@
 /// @module IO
 /// Fonctions d'entree-sortie simples.
 /// Les operations de fichier retournent un `Bool` ou un code `Int` pour laisser
-/// le programme decider comment reagir aux erreurs.
+/// le programme decider comment reagir aux erreurs. Les fonctions de ce module
+/// sont des wrappers utilisateur autour des primitives runtime bas niveau.
 
 /// Affiche une chaine suivie d'un retour a la ligne.
 /// @status Recommandee
@@ -16,42 +17,57 @@ def input(): String = {
 }
 
 /// Lit tout le contenu d'un fichier texte.
+///
+/// Si le fichier ne peut pas etre lu, la primitive runtime retourne une chaine
+/// vide.
 /// @status Recommandee
 def readTextFile(path: String): String = {
     readFile(path)
 }
 
 /// Ecrit `content` dans un fichier texte en remplacant son contenu.
+///
+/// Retourne le nombre de bytes ecrits, ou `-1` en cas d'erreur runtime.
 /// @status Recommandee
 def writeTextFile(path: String, content: String): Int = {
     writeFile(path, content)
 }
 
 /// Ajoute `content` a la fin d'un fichier texte.
+///
+/// Retourne le nombre de bytes ecrits, ou `-1` en cas d'erreur runtime.
 /// @status Recommandee
 def appendTextFile(path: String, content: String): Int = {
     appendFile(path, content)
 }
 
 /// Renomme ou deplace un fichier texte.
+///
+/// Retourne `true` si l'operation reussit, `false` sinon.
 /// @status Recommandee
 def renameTextFile(from: String, to: String): Bool = {
     renameFile(from, to)
 }
 
 /// Cree un repertoire.
+///
+/// Retourne `true` si le repertoire est cree, `false` sinon.
 /// @status Recommandee
 def createDirectory(path: String): Bool = {
     createDir(path)
 }
 
 /// Supprime un fichier texte.
+///
+/// Retourne `true` si la suppression reussit, `false` sinon.
 /// @status Recommandee
 def deleteTextFile(path: String): Bool = {
     deleteFile(path)
 }
 
 /// Indique si un chemin existe.
+///
+/// Retourne `true` pour un fichier ou repertoire existant.
 /// @status Recommandee
 def pathExists(path: String): Bool = {
     fileExists(path)

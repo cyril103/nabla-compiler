@@ -94,7 +94,11 @@ Actions recommandees :
    `Option.some[T]` / `Option.none[T]`) quand elles existent.
 9. Garder les diagnostics de compatibilite orientes vers les compagnons
    recommandes (`Array.fill`, `Set.fromArray`, `Option.some`, etc.).
-10. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
+10. Prochain chantier langage cible : ajouter la surcharge de fonctions par
+    signature, afin de remplacer progressivement les noms suffixes comme
+    `sqrtFloat` / `sqrtDouble` par des surcharges `sqrt(value: Float)` et
+    `sqrt(value: Double)`.
+11. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
    surface n'est pas propre.
 
 ### Revue de code (16/06/2026, corrigée)

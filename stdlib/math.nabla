@@ -1,7 +1,8 @@
 /// @module Math
 /// Fonctions mathematiques courantes.
 /// Les noms gardent le type dans leur suffixe (`Int`, `Long`, `Float`,
-/// `Double`) tant que le langage ne dispose pas de surcharge utilisateur.
+/// `Double`) tant que le langage ne dispose pas de surcharge utilisateur. Une
+/// future API pourra exposer des noms surcharges comme `sqrt(value)`.
 
 /// Valeur absolue d'un entier.
 /// @status Recommandee
@@ -346,6 +347,8 @@ def absDiffDouble(left: Double, right: Double): Double = {
 }
 
 /// Puissance entiere positive.
+///
+/// Retourne `0` si `exponent` est negatif.
 /// @status Recommandee
 def powInt(base: Int, exponent: Int): Int = {
     if exponent < 0 {
@@ -361,6 +364,10 @@ def powInt(base: Int, exponent: Int): Int = {
     }
 }
 
+/// Puissance flottante simple precision avec exposant entier positif.
+///
+/// Retourne `0.0F` si `exponent` est negatif.
+/// @status Recommandee
 def powFloat(base: Float, exponent: Int): Float = {
     if exponent < 0 {
         0.0F
@@ -375,6 +382,10 @@ def powFloat(base: Float, exponent: Int): Float = {
     }
 }
 
+/// Puissance flottante double precision avec exposant entier positif.
+///
+/// Retourne `0.0` si `exponent` est negatif.
+/// @status Recommandee
 def powDouble(base: Double, exponent: Int): Double = {
     if exponent < 0 {
         0.0
@@ -403,6 +414,11 @@ def factorialInt(value: Int): Int = {
     }
 }
 
+/// Racine carree simple precision.
+///
+/// Retourne `-1.0F` si `value` est negatif. Le calcul utilise une approximation
+/// iterative fixe.
+/// @status Recommandee
 def sqrtFloat(value: Float): Float = {
     if value < 0.0F {
         -1.0F
@@ -419,6 +435,11 @@ def sqrtFloat(value: Float): Float = {
     }
 }
 
+/// Racine carree double precision.
+///
+/// Retourne `-1.0` si `value` est negatif. Le calcul utilise une approximation
+/// iterative fixe.
+/// @status Recommandee
 def sqrtDouble(value: Double): Double = {
     if value < 0.0 {
         -1.0
