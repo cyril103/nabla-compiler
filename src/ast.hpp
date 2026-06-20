@@ -374,8 +374,11 @@ class VarDeclNode : public ASTNode {
     std::string symbolName;
     std::unique_ptr<ASTNode> initializer;
     bool isMutable;
+    std::string declaredType;
 public:
-    VarDeclNode(std::string n, std::string symbol, std::unique_ptr<ASTNode> init, bool mut);
+    VarDeclNode(
+        std::string n, std::string symbol, std::unique_ptr<ASTNode> init, bool mut,
+        std::string annotatedType = "");
     std::string getType() override;
     void validateSemantics(CompilerContext& context) override;
     std::string lowerToIR(IRBuilder& builder) const override;

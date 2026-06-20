@@ -96,11 +96,14 @@ reste de division `%` est disponible pour `Int` et `Long`.
 ## Variables
 
 `val` declare une valeur non reassignee. `var` declare une variable mutable.
+Une annotation de type locale peut etre ajoutee avant `=`; elle sert aussi de
+type attendu pour les lambdas inferees et les references de fonctions
+surchargees.
 
 ```nabla
 def main(): Int = {
     val base = 40
-    var value = base
+    var value: Int = base
     value = value + 2
     value
 }
@@ -144,8 +147,9 @@ def main(): Int = {
 
 Une redéfinition avec exactement les memes types de parametres est refusee. Les
 references de fonctions surchargees sont autorisees lorsqu'un type fonction est
-attendu, par exemple en argument de fonction d'ordre superieur. Sans type
-attendu explicite, elles restent refusees pour eviter une ambiguite silencieuse.
+attendu, par exemple en argument de fonction d'ordre superieur ou via une
+annotation locale comme `val f: (Float) => Float = sqrt`. Sans type attendu
+explicite, elles restent refusees pour eviter une ambiguite silencieuse.
 
 `Unit` sert aux fonctions a effet.
 

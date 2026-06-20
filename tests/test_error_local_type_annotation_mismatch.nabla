@@ -1,0 +1,4 @@
+def main(): Int = {
+    val value: String = 42
+    0
+}

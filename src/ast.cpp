@@ -2256,21 +2256,32 @@ std::string IdentifierNode::lowerToIR(IRBuilder& builder) const {
     return builder.emitLoad(symbolName, type);
 }
 
-VarDeclNode::VarDeclNode(std::string n, std::string symbol, std::unique_ptr<ASTNode> init, bool mut)
-    : name(std::move(n)), symbolName(std::move(symbol)), initializer(std::move(init)), isMutable(mut) {}
+VarDeclNode::VarDeclNode(
+    std::string n, std::string symbol, std::unique_ptr<ASTNode> init, bool mut,
+    std::string annotatedType)
+    : name(std::move(n)), symbolName(std::move(symbol)), initializer(std::move(init)),
+      isMutable(mut), declaredType(std::move(annotatedType)) {}
 
 std::string VarDeclNode::getType() {
+    if (!declaredType.empty()) return declaredType;
     return initializer ? initializer->getType() : "Unit";
 }
 
 void VarDeclNode::validateSemantics(CompilerContext& context) {
     initializer->validateSemantics(context);
-    context.semanticSymbolTypes[symbolName] = initializer->getType();
+    if (!declaredType.empty() && !isTypeAssignable(context, initializer->getType(), declaredType)) {
+        semanticError(
+            "Déclaration invalide pour '" + name + "': type '" + declaredType +
+            "' attendu, '" + initializer->getType() + "' reçu");
+    }
+    context.semanticSymbolTypes[symbolName] = getType();
 }
 
 std::string VarDeclNode::lowerToIR(IRBuilder& builder) const {
     std::string value = initializer->lowerToIR(builder);
-    builder.emitStore(symbolName, value, const_cast<ASTNode*>(initializer.get())->getType());
+    const std::string storageType =
+        declaredType.empty() ? const_cast<ASTNode*>(initializer.get())->getType() : declaredType;
+    builder.emitStore(symbolName, value, storageType);
     return value;
 }
 

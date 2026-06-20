@@ -1,0 +1,14 @@
+import math
+
+def main(): Int = {
+    val floatSqrt: (Float) => Float = sqrt
+    val doubleSqrt: (Double) => Double = sqrt
+    val inc: (Int) => Int = value => value + 1
+    val asFloat = floatSqrt(16.0F)
+    val asDouble = doubleSqrt(25.0)
+    if asFloat == 4.0F && asDouble == 5.0 && inc(41) == 42 {
+        42
+    } else {
+        1
+    }
+}

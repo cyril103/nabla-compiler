@@ -546,8 +546,15 @@ std::unique_ptr<ASTNode> Parser::parseStatement() {
         bool isMutable = (peek().type == TokenType::KW_VAR);
         index++; // consume kw
         std::string name = consume(TokenType::IDENTIFIER, "Nom de variable attendu").value;
+        std::string declaredType;
+        if (peek().type == TokenType::COLON) {
+            consume(TokenType::COLON, "");
+            auto [typeName, typeLocation] = parseType("Type de variable attendu");
+            (void) typeLocation;
+            declaredType = typeName;
+        }
         consume(TokenType::EQUAL, "Initialisation requise pour 'val'/'var'");
-        auto init = parseExpression();
+        auto init = declaredType.empty() ? parseExpression() : parseArgument(declaredType);
         if (localScopes.empty()) {
             throw CompilerError(ErrorKind::Parser, declarationToken.location, "déclaration locale hors d'un bloc: " + name);
         }
@@ -555,8 +562,11 @@ std::unique_ptr<ASTNode> Parser::parseStatement() {
             throw CompilerError(ErrorKind::Parser, declarationToken.location, "variable déjà déclarée dans cette portée: " + name);
         }
         std::string symbolName = name + "#" + std::to_string(nextSymbolId++);
-        localScopes.back()[name] = {symbolName, init->getType(), isMutable};
-        return located(std::make_unique<VarDeclNode>(name, symbolName, std::move(init), isMutable), declarationToken.location);
+        localScopes.back()[name] = {symbolName, declaredType.empty() ? init->getType() : declaredType, isMutable};
+        return located(
+            std::make_unique<VarDeclNode>(
+                name, symbolName, std::move(init), isMutable, declaredType),
+            declarationToken.location);
     }
     if (peek().type == TokenType::IDENTIFIER) {
         // possible assignment

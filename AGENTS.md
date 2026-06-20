@@ -83,7 +83,7 @@ Le pipeline implemente actuellement :
 - tokenisation et parsing des classes, imports, fonctions et methodes avec
   parametres,
   expressions arithmetiques, comparaisons, `if`, `else if`, `match`, `while`,
-  `for`, `val` et `var`;
+  `for`, `val` et `var` avec annotations de type locales optionnelles;
 - identifiants et chemins d'import avec lettres, chiffres et `_`;
 - resolution des imports relatifs, depuis la racine projet et depuis `stdlib/`,
   avec protection contre les cycles;
@@ -92,7 +92,7 @@ Le pipeline implemente actuellement :
 - surcharge V1.1 des fonctions globales non generiques par signature exacte,
   avec nom IR unique par variante, wrappers `math.sqrt(Float)` /
   `math.sqrt(Double)` et references resolues quand un type fonction est attendu
-  en argument;
+  en argument ou via une annotation locale;
 - types fonction-valeur canoniques `Fn(...)->...`, references de fonctions
   nommees et appels indirects, avec lambdas sans capture `(x: Int) => { ... }` et
   `(acc: Int, value: Int) => { ... }`;
@@ -544,6 +544,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   signature exacte.
 - [x] Autoriser les references de fonctions surchargees quand un type fonction
   est attendu en argument.
+- [x] Ajouter les annotations de type locales pour `val` / `var`.
 - [x] Ajouter l'inference des arguments de type des fonctions generiques.
 - [x] Autoriser les references de fonctions generiques specialisees comme
   valeurs, par exemple `identity[Int]`.
@@ -751,6 +752,19 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `src/ast.hpp`, `src/ast.cpp`,
     `tests/test_function_overload_reference_expected.nabla`,
     `tests/test_error_function_overload_reference_no_expected.nabla`,
+    `docs/language.md`, `docs/roadmap.md`, `make all-tests`.
+- `local` - Ajouter les annotations de type locales pour `val` et `var`: la
+  syntaxe `val name: Type = expr` / `var name: Type = expr` valide
+  l'assignabilite de l'initialiseur, donne un type attendu aux lambdas inferees
+  et permet maintenant `val f: (Float) => Float = sqrt` pour choisir une
+  surcharge par signature.
+  - Limites actuelles: les references surchargees sans type attendu restent
+    refusees; les fonctions generiques surchargees et les methodes surchargees
+    restent a definir.
+  - Fichiers / tests associes: `src/parser.cpp`, `src/ast.hpp`,
+    `src/ast.cpp`, `tests/test_local_type_annotation_function_reference.nabla`,
+    `tests/test_local_type_annotation_var.nabla`,
+    `tests/test_error_local_type_annotation_mismatch.nabla`,
     `docs/language.md`, `docs/roadmap.md`, `make all-tests`.
 - `local` - Enrichir les descriptions utilisateur de la reference stdlib pour
   `io`, `math`, `strings` et `OptionInt`: conventions de retour I/O,
@@ -1325,9 +1339,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 Etendre la surcharge de fonctions au-dela de la V1 :
 
-- ajouter les annotations de type locales pour pouvoir ecrire
-  `val f: (Float) => Float = sqrt`;
 - definir la strategie pour les fonctions generiques surchargees;
+- definir la strategie pour les methodes surchargees;
 - enrichir les diagnostics pour distinguer absence de candidat, arite
   incompatible et ambiguite reelle;
 - migrer progressivement `math` vers des noms idiomatiques surcharges (`abs`,
