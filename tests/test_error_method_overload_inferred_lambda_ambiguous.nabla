@@ -1,0 +1,16 @@
+class Runner() {
+    def run(transform: (Int) => Int): Int = {
+        transform(1)
+    }
+
+    def run(transform: (String) => Int): Int = {
+        transform("x")
+    }
+}
+
+def main(): Int = {
+    val runner = new Runner()
+    runner.run(value => {
+        1
+    })
+}

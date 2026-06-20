@@ -1800,6 +1800,15 @@ std::vector<std::string> Parser::expectedArgumentTypesForOverloadedMethodCall(
         if (lambdaCompatible) matches.push_back({&signature, substitution});
     }
 
+    const bool hasInferredLambdaArgument =
+        std::find(argumentShape->begin(), argumentShape->end(), true) != argumentShape->end();
+    if (matches.size() > 1 && hasInferredLambdaArgument) {
+        throw CompilerError(
+            ErrorKind::Parser, location,
+            "appel de méthode surchargée ambigu pour '" + receiverType + "." + methodName +
+            "' avec lambda inférée: ajoutez des types explicites aux paramètres de lambda ou annotez la valeur fonction" +
+            "\ncandidats:" + formatMethodOverloadCandidates(context, receiverType, methodName));
+    }
     if (matches.size() != 1) return {};
     std::vector<std::string> expectedTypes;
     const auto* signature = matches.front().first;

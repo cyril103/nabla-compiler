@@ -99,7 +99,7 @@ Le pipeline implemente actuellement :
 - surcharge V1 des methodes de classe par signature exacte, avec nom IR unique
   par variante et resolution par les types d'arguments; les lambdas inferees en
   argument recoivent un type attendu quand la forme d'appel selectionne une
-  surcharge unique;
+  surcharge unique, et les cas ambigus produisent un diagnostic dedie;
 - types fonction-valeur canoniques `Fn(...)->...`, references de fonctions
   nommees et appels indirects, avec lambdas sans capture `(x: Int) => { ... }` et
   `(acc: Int, value: Int) => { ... }`;
@@ -834,6 +834,12 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   exemple `runner.run(value => { value + 1 })`.
   - Fichiers / tests associes: `src/parser.hpp`, `src/parser.cpp`,
     `tests/test_method_overload_inferred_lambda.nabla`, `make all-tests`.
+- `local` - Diagnostiquer explicitement les lambdas inferees ambigues dans les
+  appels de methodes surchargees: quand plusieurs candidats fonctionnels restent
+  possibles, le parseur indique l'ambiguite et liste les signatures candidates.
+  - Fichiers / tests associes: `src/parser.cpp`,
+    `tests/test_error_method_overload_inferred_lambda_ambiguous.nabla`,
+    `make all-tests`.
 - `local` - Enrichir les descriptions utilisateur de la reference stdlib pour
   `io`, `math`, `strings` et `OptionInt`: conventions de retour I/O,
   comportements limites de `pow*` / `sqrt*`, separation de `words`, et raison
@@ -1408,8 +1414,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 Etendre la surcharge de fonctions au-dela de la V1 :
 
 - definir la strategie pour les fonctions generiques surchargees;
-- definir la strategie pour les methodes surchargees generiques et les cas
-  ambigus de lambdas en argument de methodes surchargees;
+- definir la strategie pour les methodes surchargees generiques;
 - ajouter une etape d'ambiguite explicite si une future resolution devient moins
   stricte que la signature exacte;
 - garder les noms suffixes `math` comme compatibilite documentee, mais faire
