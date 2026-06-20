@@ -2,7 +2,7 @@ import collections.array
 
 
 def main(): Int = {
-    val words = arrayFill[String](3, "go")
+    val words = Array.fill[String](3, "go")
     val asMethod = words.mkString("|")
     val asFacade = arrayMkString[String](words, ",")
     val asConcreteFacade = objectArrayMkString(words, ",")

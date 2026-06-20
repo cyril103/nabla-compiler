@@ -1,9 +1,9 @@
 import collections.array
 
 def main(): Int = {
-    val ints = arrayMap[Int](arrayFill[Int](3, 10), value => value + 4)
-    val longs = arrayMap[Long](arrayFill[Long](2, 20L), value => value + 1L)
-    val bools = arrayMap[Bool](arrayFill[Bool](4, false), value => !value)
+    val ints = arrayMap[Int](Array.fill[Int](3, 10), value => value + 4)
+    val longs = arrayMap[Long](Array.fill[Long](2, 20L), value => value + 1L)
+    val bools = arrayMap[Bool](Array.fill[Bool](4, false), value => !value)
     arrayForeach[Int](ints, value => print(""))
     arrayForeach[Long](longs, value => print(""))
     arrayForeach[Bool](bools, value => print(""))

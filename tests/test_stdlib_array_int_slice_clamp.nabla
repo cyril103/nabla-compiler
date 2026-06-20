@@ -1,7 +1,7 @@
-import collections.int_array
+import collections.array
 
 def main(): Int = {
-    val xs = arrayIntRange(5)
+    val xs = Array.range(5)
     val left = xs.slice(0 - 2, 2)
     val right = xs.slice(3, 99)
     left.size() + left.last() + right.size() + right.head() + right.last()

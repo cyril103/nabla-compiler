@@ -13,8 +13,8 @@ def touchDouble(value: Double): Unit = {
 }
 
 def main(): Int = {
-    val floats = arrayMap[Float](arrayFill[Float](2, 1.5F), value => value + 1.0F)
-    val doubles = arrayMap[Double](arrayFill[Double](3, 2.5), value => value + 0.5)
+    val floats = arrayMap[Float](Array.fill[Float](2, 1.5F), value => value + 1.0F)
+    val doubles = arrayMap[Double](Array.fill[Double](3, 2.5), value => value + 0.5)
     floats.foreach(touchFloat)
     doubles.foreach(touchDouble)
     if floats.size() == 2 &&

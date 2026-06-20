@@ -27,19 +27,19 @@ def boolLabel(value: Bool): String = {
 
 def maybeFlag(value: Bool): Option[String] = {
     if value {
-        optionSome("yes")
+        Option.some("yes")
     } else {
-        optionNone("no")
+        Option.none("no")
     }
 }
 
 def main(): Int = {
-    val ints = arrayIntRange(2).mapObject[String](intLabel)
-    val longs = arrayFill[Long](1, 5L).mapObject[String](longLabel)
-    val floats = arrayFill[Float](1, 1.5F).mapObject[String](floatLabel)
-    val doubles = arrayFill[Double](1, 2.5).mapObject[String](doubleLabel)
-    val bools = arrayFill[Bool](2, true).mapObject[String](boolLabel)
-    val maybeBools = arrayFill[Bool](1, true).mapObject[Option[String]](maybeFlag)
+    val ints = Array.range(2).mapObject[String](intLabel)
+    val longs = Array.fill[Long](1, 5L).mapObject[String](longLabel)
+    val floats = Array.fill[Float](1, 1.5F).mapObject[String](floatLabel)
+    val doubles = Array.fill[Double](1, 2.5).mapObject[String](doubleLabel)
+    val bools = Array.fill[Bool](2, true).mapObject[String](boolLabel)
+    val maybeBools = Array.fill[Bool](1, true).mapObject[Option[String]](maybeFlag)
 
     if ints.size() == 2 &&
        ints.get(0).length() == 3 &&

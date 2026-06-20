@@ -12,7 +12,7 @@ def stringify(value: Int): String = {
 }
 
 def main(): Int = {
-    val words = arrayFill[String](3, "hi")
+    val words = Array.fill[String](3, "hi")
     words.set(1, "hello")
     val lengths = words.map[Int](word => word.length())
     val lengthsViaFunction = arrayMap[String, Int](words, word => word.length())
@@ -21,7 +21,7 @@ def main(): Int = {
     rawNumbers.set(1, 9)
     val labels = rawNumbers.map[String](stringify)
 
-    val scores = arrayFill[Score](2, new Score(10))
+    val scores = Array.fill[Score](2, new Score(10))
     scores.set(1, new Score(32))
     val points = scores.map[Int](score => score.points())
 

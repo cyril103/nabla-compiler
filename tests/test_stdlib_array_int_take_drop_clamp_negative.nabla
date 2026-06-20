@@ -1,7 +1,7 @@
-import collections.int_array
+import collections.array
 
 def main(): Int = {
-    val xs = arrayIntRange(3)
+    val xs = Array.range(3)
     val taken = xs.take(0 - 2)
     val dropped = xs.drop(0 - 2)
     if taken.isEmpty() && dropped.size() == 3 && dropped.head() == 0 {

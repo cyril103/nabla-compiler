@@ -1,5 +1,5 @@
 import collections.array
 
 def main(): Int = {
-    arrayIntRange(2).mapObject[String](value => value + 1).size()
+    Array.range(2).mapObject[String](value => value + 1).size()
 }

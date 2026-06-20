@@ -1,11 +1,11 @@
-import collections.int_array
+import collections.array
 
 def show(value: Int): Unit = {
     print(value.toString())
 }
 
 def main(): Int = {
-    val xs = arrayIntRange(3)
+    val xs = Array.range(3)
     xs.foreach(show)
     xs.sum()
 }

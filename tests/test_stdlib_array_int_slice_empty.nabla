@@ -1,7 +1,7 @@
-import collections.int_array
+import collections.array
 
 def main(): Int = {
-    val xs = arrayIntRange(5)
+    val xs = Array.range(5)
     val reversedBounds = xs.slice(4, 2)
     val equalBounds = xs.slice(3, 3)
     if reversedBounds.isEmpty() && equalBounds.isEmpty() {

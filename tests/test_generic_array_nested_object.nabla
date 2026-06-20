@@ -5,8 +5,8 @@ def firstRow(rows: Array[Array[Int]]): Array[Int] = {
 }
 
 def main(): Int = {
-    val row = arrayFill[Int](2, 21)
-    val rows = arrayFill[Array[Int]](2, row)
+    val row = Array.fill[Int](2, 21)
+    val rows = Array.fill[Array[Int]](2, row)
     val first = firstRow(rows)
     if rows.size() == 2 &&
        first.size() == 2 &&

@@ -5,5 +5,5 @@ def total[T](xs: Array[T]): Int = {
 }
 
 def main(): Int = {
-    total(arrayFill[Int](1, 1))
+    total(Array.fill[Int](1, 1))
 }

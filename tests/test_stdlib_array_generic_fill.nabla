@@ -13,9 +13,9 @@ def allTrue(xs: Array[Bool]): Bool = {
 }
 
 def main(): Int = {
-    val ints = arrayFill[Int](3, 14)
-    val longs = arrayFill[Long](2, 21L)
-    val bools = arrayFill[Bool](4, true)
+    val ints = Array.fill[Int](3, 14)
+    val longs = Array.fill[Long](2, 21L)
+    val bools = Array.fill[Bool](4, true)
     if intTotal(ints) == 42 && longTotal(longs) == 42L && allTrue(bools) {
         42
     } else {

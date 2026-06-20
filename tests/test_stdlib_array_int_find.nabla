@@ -1,6 +1,6 @@
-import collections.int_array
+import collections.array
 
 def main(): Int = {
-    val xs = arrayIntRange(6)
+    val xs = Array.range(6)
     xs.find(value => value > 3).getOrElse(99)
 }

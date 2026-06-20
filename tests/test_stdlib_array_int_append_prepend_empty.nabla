@@ -1,7 +1,7 @@
-import collections.int_array
+import collections.array
 
 def main(): Int = {
-    val empty = arrayIntRange(0)
+    val empty = Array.range(0)
     val appended = empty.append(4)
     val prepended = empty.prepend(5)
     appended.size() + appended.head() + prepended.size() + prepended.last()

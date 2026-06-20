@@ -1,7 +1,7 @@
-import collections.int_array
+import collections.array
 
 def main(): Int = {
-    val xs = arrayIntFill(3, 7)
+    val xs = Array.fill[Int](3, 7)
     xs.map((value: Int) => {
         value * 2
     }).sum()

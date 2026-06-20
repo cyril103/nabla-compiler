@@ -13,9 +13,9 @@ def arrayIdentityMap[T](xs: Array[T]): Array[T] = {
 }
 
 def main(): Int = {
-    val ints = arrayIdentityMap(arrayFill[Int](3, 14))
-    val longs = arrayIdentityMap(arrayFill[Long](2, 21L))
-    val bools = arrayIdentityMap(arrayFill[Bool](4, true))
+    val ints = arrayIdentityMap(Array.fill[Int](3, 14))
+    val longs = arrayIdentityMap(Array.fill[Long](2, 21L))
+    val bools = arrayIdentityMap(Array.fill[Bool](4, true))
     if arraySize(ints) == 3 &&
        arrayFirst(ints) == 14 &&
        arraySize(longs) == 2 &&

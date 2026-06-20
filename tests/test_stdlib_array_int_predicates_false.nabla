@@ -1,7 +1,7 @@
-import collections.int_array
+import collections.array
 
 def main(): Int = {
-    val xs = arrayIntRange(5)
+    val xs = Array.range(5)
     if xs.exists(value => value == 9) {
         1
     } else {

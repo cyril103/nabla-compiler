@@ -12,19 +12,19 @@ class Student(nameValue: String, scoreValue: Int) {
 }
 
 def main(): Int = {
-    val words = arrayFill[String](3, "hi")
+    val words = Array.fill[String](3, "hi")
     words.set(1, "hello")
     val longWords = words.filter(word => word.length() > 2)
 
     val ada = new Student("Ada", 21)
     val bob = new Student("Bob", 20)
-    val students = arrayFill[Student](3, ada)
+    val students = Array.fill[Student](3, ada)
     students.set(1, bob)
     val topStudents = students.filter(student => student.score() > 20)
 
-    val some = optionSome("yes")
-    val none = optionNone("no")
-    val options = arrayFill[Option[String]](3, some)
+    val some = Option.some("yes")
+    val none = Option.none("no")
+    val options = Array.fill[Option[String]](3, some)
     options.set(2, none)
     val defined = options.filter(value => value.isDefined())
 

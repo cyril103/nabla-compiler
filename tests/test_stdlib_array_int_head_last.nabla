@@ -1,6 +1,6 @@
-import collections.int_array
+import collections.array
 
 def main(): Int = {
-    val xs = arrayIntRange(3)
+    val xs = Array.range(3)
     xs.head() + xs.last()
 }

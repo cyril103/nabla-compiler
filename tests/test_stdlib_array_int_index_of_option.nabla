@@ -1,7 +1,7 @@
-import collections.int_array
+import collections.array
 
 def main(): Int = {
-    val xs = arrayIntRange(5).append(3)
+    val xs = Array.range(5).append(3)
     if xs.indexOfOption(3).isEmpty() {
         99
     } else {

@@ -1,8 +1,8 @@
-import collections.int_array
+import collections.array
 
 def main(): Int = {
-    val values = arrayIntRangeUntil(2, 5)
-    val empty = arrayIntRangeUntil(5, 2)
+    val values = Array.rangeUntil(2, 5)
+    val empty = Array.rangeUntil(5, 2)
 
     if values.mkString(",") == "2,3,4" &&
        values.sum() == 9 &&

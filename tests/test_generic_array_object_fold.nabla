@@ -30,17 +30,17 @@ def firstDefined(current: Option[String], next: Option[String]): Option[String] 
 def main(): Int = {
     val ada = new Student("Ada", 21)
     val bob = new Student("Bob", 20)
-    val students = arrayFill[Student](2, ada)
+    val students = Array.fill[Student](2, ada)
     students.set(1, bob)
     val totalScore = students.fold[Int](0, (total, student) => total + student.score())
 
-    val words = arrayFill[String](3, "hi")
+    val words = Array.fill[String](3, "hi")
     words.set(1, "hello")
     val longest = words.fold[String]("", keepLonger)
 
-    val none = optionNone("missing")
-    val some = optionSome("yes")
-    val options = arrayFill[Option[String]](2, none)
+    val none = Option.none("missing")
+    val some = Option.some("yes")
+    val options = Array.fill[Option[String]](2, none)
     options.set(1, some)
     val first = options.fold[Option[String]](none, firstDefined)
 

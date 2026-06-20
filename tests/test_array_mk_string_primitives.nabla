@@ -5,8 +5,8 @@ def flip(value: Bool): Bool = {
 }
 
 def main(): Int = {
-    val longs = arrayFill[Long](3, 7L)
-    val bools = arrayFill[Bool](3, true)
+    val longs = Array.fill[Long](3, 7L)
+    val bools = Array.fill[Bool](3, true)
     bools.set(1, false)
     val flipped = bools.map(flip)
 

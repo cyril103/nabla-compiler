@@ -226,7 +226,8 @@ Le pipeline implemente actuellement :
 - module de bibliotheque standard `core.option` avec `Option[T]`,
   `Option.some[T]`, `Option.none[T]`, `optionSome`, `optionNone`, `isDefined`,
   `isEmpty`, `nonEmpty`, `map[U]`, `filter`, `flatMap[U]`, `foreach`, `orElse`
-  et `getOrElse`;
+  et `getOrElse`; les methodes internes construisent directement `Option[T]`
+  sans repasser par les wrappers publics de compatibilite;
 - premier module de bibliotheque standard `collections.int_array` avec
   `intArraySum`, `intArrayFill`, `intArrayRange`, `intArrayMap`,
   `intArrayFilter` et la facade objet `ArrayInt` avec `map`, `filter`,
@@ -322,6 +323,10 @@ Le pipeline implemente actuellement :
   `Array[T]`, `Set[T]`, `Set.fromArray[T]`, opérations d'ensemble et héritage
   avec `override`; la friction restante porte surtout sur les collections
   polymorphes de type parent comme `Set[Person]`.
+- les tests et exemples ordinaires privilegient maintenant `Array.range`,
+  `Array.rangeUntil`, `Array.fill[T]`, `Option.some` / `Option.none`,
+  `Set.fromArray` et `Set.empty`; les anciens noms restent couverts dans les
+  tests explicitement dedies aux alias ou diagnostics legacy.
 
 Limites importantes :
 
@@ -494,6 +499,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `ArrayObject[T]`.
 - [x] Ajouter `randomSeedNow()` au module standard `util`, basé sur une source de
   timestamp en runtime pour initialiser un générateur avec une seed temporelle.
+- [x] Migrer les tests et exemples ordinaires de collections/options/set vers
+  l'API publique recommandee (`Array.*`, `Option.*`, `Set.*`) en conservant les
+  tests d'alias legacy.
 
 ### P2 - Héritage Et Mixins
 
@@ -750,6 +758,18 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Nettoyer la premiere couche Collections/Core dans les usages
+  ordinaires: les tests et exemples migrent de `arrayIntRange`,
+  `array<Type>Fill`, `optionSome` / `optionNone`, `SetFromArray` / `SetEmpty`
+  vers `Array.range`, `Array.fill[T]`, `Option.some` / `Option.none`,
+  `Set.fromArray` et `Set.empty`. Les tests `*_alias*` et
+  `test_error_legacy_*` restent en place pour couvrir les chemins de
+  compatibilite. `Option[T]` evite aussi ses wrappers de compat dans ses methodes
+  internes, et `Array.range` / `Array.rangeUntil` descendent directement vers les
+  helpers bruts internes.
+  - Fichiers / tests associes: `stdlib/collections/array.nabla`,
+    `stdlib/core/option.nabla`, tests collections/options/set mis a jour,
+    diagnostics de colonnes associes, `make all-tests`.
 - `local` - Ajouter la surcharge V1 des fonctions globales par signature exacte:
   le contexte garde un index de surcharges par nom source, les variantes sont
   abaissées vers des noms IR uniques, les appels choisissent la variante depuis

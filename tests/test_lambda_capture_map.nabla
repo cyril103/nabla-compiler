@@ -1,8 +1,8 @@
-import collections.int_array
+import collections.array
 
 def main(): Int = {
     val factor = 3
-    val xs = arrayIntRange(4)
+    val xs = Array.range(4)
     xs.map((value: Int) => {
         value * factor
     }).sum()

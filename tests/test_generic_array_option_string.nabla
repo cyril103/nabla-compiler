@@ -6,9 +6,9 @@ def firstDefined(values: Array[Option[String]]): String = {
 }
 
 def main(): Int = {
-    val some = optionSome("hello")
-    val none = optionNone("fallback")
-    val values = arrayFill[Option[String]](3, some)
+    val some = Option.some("hello")
+    val none = Option.none("fallback")
+    val values = Array.fill[Option[String]](3, some)
     values.set(1, none)
 
     if values.size() == 3 &&

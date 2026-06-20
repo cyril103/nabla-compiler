@@ -33,20 +33,20 @@ def both(left: Bool, right: Bool): Bool = {
 }
 
 def main(): Int = {
-    val longs = arrayFill[Long](3, 4L)
+    val longs = Array.fill[Long](3, 4L)
     val keptLongs = longs.filter(keepLong)
-    val longTotal = arrayLongFold(keptLongs, 1L, addLong)
+    val longTotal = keptLongs.fold(1L, addLong)
 
-    val floats = arrayFill[Float](2, 1.5F)
-    val keptFloats = arrayFloatFilter(floats, keepFloat)
+    val floats = Array.fill[Float](2, 1.5F)
+    val keptFloats = floats.filter(keepFloat)
     val floatTotal = keptFloats.fold(1.0F, addFloat)
 
-    val doubles = arrayFill[Double](2, 2.5)
+    val doubles = Array.fill[Double](2, 2.5)
     val keptDoubles = doubles.filter(keepDouble)
-    val doubleTotal = arrayDoubleFold(keptDoubles, 1.0, addDouble)
+    val doubleTotal = keptDoubles.fold(1.0, addDouble)
 
-    val bools = arrayFill[Bool](3, true)
-    val keptBools = arrayBoolFilter(bools, keepBool)
+    val bools = Array.fill[Bool](3, true)
+    val keptBools = bools.filter(keepBool)
     val boolTotal = keptBools.fold(true, both)
 
     if keptLongs.size() == 3 &&

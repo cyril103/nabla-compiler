@@ -29,7 +29,7 @@ import collections.object_array
 /// @signature def ArrayRange(size: Int): Array[Int]
 /// @status Compatibilite
 def ArrayRange(size: Int): ArrayInt = {
-    arrayIntRange(size)
+    new ArrayInt(intArrayRange(size))
 }
 
 object Array {
@@ -48,13 +48,13 @@ object Array {
     /// @signature def Array.range(size: Int): Array[Int]
     /// @status Recommandee
     def range(size: Int): ArrayInt = {
-        ArrayRange(size)
+        new ArrayInt(intArrayRange(size))
     }
 
     /// Cree un tableau d'entiers contenant `start, ..., until - 1`.
     /// @signature def Array.rangeUntil(start: Int, until: Int): Array[Int]
     /// @status Recommandee
     def rangeUntil(start: Int, until: Int): ArrayInt = {
-        arrayIntRangeUntil(start, until)
+        new ArrayInt(intArrayRangeUntil(start, until))
     }
 }

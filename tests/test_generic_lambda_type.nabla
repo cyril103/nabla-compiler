@@ -5,7 +5,7 @@ def apply(value: Option[Int], transform: (Option[Int]) => Int): Int = {
 }
 
 def main(): Int = {
-    apply(optionSome(42), (value: Option[Int]) => {
+    apply(Option.some(42), (value: Option[Int]) => {
         value.getOrElse(0)
     })
 }

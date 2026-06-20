@@ -1,7 +1,7 @@
-import collections.int_array
+import collections.array
 
 def main(): Int = {
-    val xs = arrayIntRange(4)
+    val xs = Array.range(4)
     xs.foreach((value: Int) => {
         print(value.toString())
     })

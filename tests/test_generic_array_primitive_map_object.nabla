@@ -27,22 +27,22 @@ def boolLabel(value: Bool): String = {
 
 def maybePositive(value: Int): Option[String] = {
     if value > 0 {
-        optionSome("positive")
+        Option.some("positive")
     } else {
-        optionNone("zero")
+        Option.none("zero")
     }
 }
 
 def main(): Int = {
-    val ints = arrayIntRange(2)
+    val ints = Array.range(2)
     val explicitSame = arrayMap[Int, Int](ints, value => value + 1)
     val intLabels = arrayMap[Int, String](ints, intLabel)
     val maybeLabels = arrayMap[Int, Option[String]](ints, maybePositive)
 
-    val longs = arrayMap[Long, String](arrayFill[Long](1, 4L), longLabel)
-    val floats = arrayMap[Float, String](arrayFill[Float](1, 1.5F), floatLabel)
-    val doubles = arrayMap[Double, String](arrayFill[Double](1, 2.5), doubleLabel)
-    val bools = arrayMap[Bool, String](arrayFill[Bool](2, false), boolLabel)
+    val longs = arrayMap[Long, String](Array.fill[Long](1, 4L), longLabel)
+    val floats = arrayMap[Float, String](Array.fill[Float](1, 1.5F), floatLabel)
+    val doubles = arrayMap[Double, String](Array.fill[Double](1, 2.5), doubleLabel)
+    val bools = arrayMap[Bool, String](Array.fill[Bool](2, false), boolLabel)
 
     if explicitSame.sum() == 3 &&
        intLabels.get(0).length() == 3 &&

@@ -15,7 +15,7 @@ def touch(value: String): Unit = {
 }
 
 def main(): Int = {
-    val words = sameArray(arrayFill[String](3, "hi"))
+    val words = sameArray(Array.fill[String](3, "hi"))
     words.foreach(touch)
     if words.size() == 3 &&
        firstOf(words).length() == 2 &&

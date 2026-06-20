@@ -1,10 +1,10 @@
-import collections.int_array
+import collections.array
 
 def unary(value: Int): Int = {
     value
 }
 
 def main(): Int = {
-    val xs = arrayIntFill(1, 7)
+    val xs = Array.fill[Int](1, 7)
     xs.fold(0, unary)
 }

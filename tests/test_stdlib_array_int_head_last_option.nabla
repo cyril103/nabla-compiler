@@ -1,8 +1,8 @@
-import collections.int_array
+import collections.array
 
 def main(): Int = {
-    val xs = arrayIntRange(3)
-    val empty = arrayIntRange(0)
+    val xs = Array.range(3)
+    val empty = Array.range(0)
     xs.headOption().getOrElse(10) + xs.lastOption().getOrElse(20) +
         empty.headOption().getOrElse(30) + empty.lastOption().getOrElse(40)
 }

@@ -1,7 +1,7 @@
-import collections.int_array
+import collections.array
 
 def main(): Int = {
-    val xs = arrayIntRange(0)
+    val xs = Array.range(0)
     if xs.min().isEmpty() && xs.max().isEmpty() {
         xs.min().getOrElse(20) + xs.max().getOrElse(22)
     } else {

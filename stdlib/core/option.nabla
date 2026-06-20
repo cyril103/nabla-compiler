@@ -24,9 +24,9 @@ class Option[T](defined: Bool, value: T) {
 
     def map[U](default: U, transform: (T) => U): Option[U] = {
         if defined {
-            optionSome(transform(value))
+            new Option[U](true, transform(value))
         } else {
-            optionNone(default)
+            new Option[U](false, default)
         }
     }
 
@@ -34,7 +34,7 @@ class Option[T](defined: Bool, value: T) {
         if defined {
             transform(value)
         } else {
-            optionNone(default)
+            new Option[U](false, default)
         }
     }
 
@@ -52,7 +52,7 @@ class Option[T](defined: Bool, value: T) {
         if defined && predicate(value) {
             this
         } else {
-            optionNone(value)
+            new Option[T](false, value)
         }
     }
 

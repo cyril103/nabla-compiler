@@ -22,7 +22,7 @@ def main(): Int = {
     sampleInts.set(2, 30)
     val sampleIntFacade = new ArrayInt(sampleInts)
     val intChoiceTop = intArrayRandomChoice(sampleInts, randomSeed(1), -1)
-    val intChoiceFacade = arrayIntRandomChoice(sampleIntFacade, randomSeed(1), -1)
+    val intChoiceFacade = sampleIntFacade.randomChoice(randomSeed(1), -1)
     val intChoiceMethod = sampleIntFacade.randomChoice(randomSeed(1), -1)
 
     val sampleObjects = objectArrayFill[String](3, "")

@@ -1,8 +1,8 @@
-import collections.int_array
+import collections.array
 
 def main(): Int = {
     val offset = 10
-    val xs = arrayIntRange(3)
+    val xs = Array.range(3)
     xs.foreach(value => print((value + offset).toString()))
     xs.sum()
 }

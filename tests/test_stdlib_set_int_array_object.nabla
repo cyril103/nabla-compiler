@@ -42,17 +42,17 @@ def makeStudents(): Array[Student] = {
 
 def main(): Int = {
     val values = makeNumbers()
-    val fromArray = SetFromArray[Int](values)
+    val fromArray = Set.fromArray[Int](values)
     val roundTrip = fromArray.toArray()
-    val reconstructed = setFromArray[Int](roundTrip)
-    val other = SetFromArray[Int](makeOtherNumbers())
+    val reconstructed = Set.fromArray(roundTrip)
+    val other = Set.fromArray[Int](makeOtherNumbers())
     val unioned = fromArray.union(other)
     val intersected = fromArray.intersect(other)
     val differenced = fromArray.difference(other)
     val added = fromArray.add(16).add(32).add(-1)
     val removed = added.remove(0).remove(99)
-    val cleared = SetEmpty[Int]()
-    val students = SetFromArray[Student](makeStudents())
+    val cleared = Set.empty[Int]()
+    val students = Set.fromArray[Student](makeStudents())
 
     if values.toString() == "[-1, 0, -1, 8, 16, 8, -9, 0]" &&
        fromArray.toString() == "[-1, 0, 8, 16, -9]" &&

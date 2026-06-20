@@ -1,8 +1,8 @@
 import collections.array
 
 def main(): Int = {
-    val numbers = arrayIntRange(3).map(value => value + 1)
-    val words = arrayFill[String](3, "go")
+    val numbers = Array.range(3).map(value => value + 1)
+    val words = Array.fill[String](3, "go")
     val left = numbers.mkString(",")
     val viaAlias = arrayMkString[Int](numbers, "-")
     val right = words.mkString("|")
