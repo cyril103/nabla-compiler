@@ -93,7 +93,9 @@ Le pipeline implemente actuellement :
   avec nom IR unique par variante, wrappers `math.sqrt(Float)` /
   `math.sqrt(Double)` et references resolues quand un type fonction est attendu
   en argument ou via une annotation locale; les echecs de resolution listent la
-  forme appelee et les signatures candidates;
+  forme appelee et les signatures candidates; les helpers internes de `math`
+  commencent a consommer les noms surcharges idiomatiques hors wrappers de
+  compatibilite;
 - types fonction-valeur canoniques `Fn(...)->...`, references de fonctions
   nommees et appels indirects, avec lambdas sans capture `(x: Int) => { ... }` et
   `(acc: Int, value: Int) => { ... }`;
@@ -471,6 +473,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (approximatives) et conversions degrés/radians.
 - [x] Exposer les noms mathematiques surcharges `abs`, `min`, `max`, `clamp`,
   `pow` et `sqrt` en gardant les noms suffixes comme compatibilite.
+- [x] Migrer les helpers internes `math` hors wrappers vers les noms
+  idiomatiques surcharges.
 - [x] Etendre `collections.set` avec des operations immutables
   (`union`, `intersect`, `difference`).
 - [x] Ajouter `setFromArray[T](values: ArrayObject[T]): Set[T]` pour la
@@ -799,6 +803,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `tests/test_error_function_overload_arity.nabla`,
     `tests/test_error_function_overload_reference_expected_mismatch.nabla`,
     `make all-tests`.
+- `local` - Migrer les helpers internes `math` vers la surface surchargee:
+  `hypotenuse*`, `gcd*`, `lcm*` et `absDiff*` utilisent maintenant `sqrt(...)`
+  ou `abs(...)` quand ils ne sont pas eux-memes des wrappers de compatibilite.
+  Le test stdlib central couvre aussi `sqrt(Float)` et `sqrt(Double)` via le nom
+  surcharge.
+  - Fichiers / tests associes: `stdlib/math.nabla`,
+    `tests/test_stdlib_math.nabla`, `make all-tests`, `make stdlib-docs`.
 - `local` - Enrichir les descriptions utilisateur de la reference stdlib pour
   `io`, `math`, `strings` et `OptionInt`: conventions de retour I/O,
   comportements limites de `pow*` / `sqrt*`, separation de `words`, et raison
@@ -1376,5 +1387,5 @@ Etendre la surcharge de fonctions au-dela de la V1 :
 - definir la strategie pour les methodes surchargees;
 - ajouter une etape d'ambiguite explicite si une future resolution devient moins
   stricte que la signature exacte;
-- migrer progressivement les exemples publics vers les noms `math` surcharges
-  et conserver les noms suffixes comme compatibilite documentee.
+- garder les noms suffixes `math` comme compatibilite documentee, mais faire
+  converger les nouveaux exemples vers les noms idiomatiques surcharges.

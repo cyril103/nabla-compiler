@@ -79,7 +79,9 @@ def main(): Int = {
        powDouble(2.0, 5) == 32.0 &&
        pow(2.0, 5) == 32.0 &&
        isCloseFloat(sqrtFloat(16.0F), 4.0F, 0.0001F) &&
+       isCloseFloat(sqrt(16.0F), 4.0F, 0.0001F) &&
        isCloseDouble(sqrtDouble(81.0), 9.0, 0.0001) &&
+       isCloseDouble(sqrt(81.0), 9.0, 0.0001) &&
         factorialInt(6) == 720 &&
        maxDouble(3.0, 2.5) == 3.0 &&
        minDouble(-1.0, 2.0) == -1.0 &&
