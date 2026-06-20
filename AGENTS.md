@@ -760,6 +760,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Nettoyer la surface documentaire de `collections.array`: la page
+  HTML evite maintenant les marqueurs Markdown bruts, `ArrayFill` et
+  `ArrayRange` pointent explicitement vers `Array.fill` et `Array.range`, et la
+  description de `Array[T]` clarifie que le compilateur choisit la
+  representation adaptee.
+  - Fichiers / tests associes: `stdlib/collections/array.nabla`,
+    `docs/stdlib/collections/array.html`, `AGENTS.md`, `make stdlib-docs`.
 - `local` - Nettoyer la surface documentaire de `collections.set`: la page
   HTML evite maintenant les marqueurs Markdown bruts, les alias
   `SetFromArray` / `SetEmpty` pointent explicitement vers `Set.fromArray` /

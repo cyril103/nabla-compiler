@@ -16,7 +16,7 @@
     <section class="module-hero">
       <p class="import">import collections.array</p>
       <h1>Array</h1>
-      <p>Tableaux generiques pour le code utilisateur. Importer `collections.array` donne acces a `Array[T]`, `Array.fill[T]` et `Array.range` / `Array.rangeUntil`. Les anciens noms `ArrayFill[T]` et `ArrayRange` restent disponibles pour compatibilite. Les types bas niveau comme `IntArray`, `ArrayInt`, `ObjectArray[T]` et `ArrayObject[T]` restent des details de stdlib dans les cas courants.</p>
+      <p>Tableaux generiques pour le code utilisateur. Importer collections.array donne acces a Array[T], Array.fill[T] et Array.range / Array.rangeUntil. Les anciens noms ArrayFill[T] et ArrayRange restent disponibles pour compatibilite. Les types bas niveau comme IntArray, ArrayInt, ObjectArray[T] et ArrayObject[T] restent des details de stdlib dans les cas courants.</p>
     </section>
     <section class="entries">
     <article class="entry" id="Array">
@@ -26,7 +26,7 @@
       <h2>Array</h2>
       <pre><code>class Array[T](size: Int)</code></pre>
       <p>Tableau mutable de taille fixe.</p>
-<p>`Array[T]` est le nom public a utiliser. Le compilateur choisit la representation adaptee selon `T`.</p>
+<p>Array[T] est le nom public a utiliser. Le compilateur choisit la representation adaptee selon T.</p>
     </article>
     <article class="entry" id="ArrayFill">
       <div class="entry-meta">
@@ -35,6 +35,7 @@
       <h2>ArrayFill</h2>
       <pre><code>def ArrayFill[T](size: Int, value: T): Array[T]</code></pre>
       <p>Cree un tableau rempli avec la meme valeur.</p>
+<p>Preferer Array.fill[T](size, value) dans le nouveau code.</p>
     </article>
     <article class="entry" id="ArrayRange">
       <div class="entry-meta">
@@ -42,7 +43,8 @@
       </div>
       <h2>ArrayRange</h2>
       <pre><code>def ArrayRange(size: Int): Array[Int]</code></pre>
-      <p>Cree un tableau d&#x27;entiers contenant `0, 1, ..., size - 1`.</p>
+      <p>Cree un tableau d&#x27;entiers contenant 0, 1, ..., size - 1.</p>
+<p>Preferer Array.range(size) dans le nouveau code.</p>
     </article>
     <article class="entry" id="fill">
       <div class="entry-meta">
@@ -51,7 +53,7 @@
       <h2>fill</h2>
       <pre><code>def Array.fill[T](size: Int, value: T): Array[T]</code></pre>
       <p>Cree un tableau rempli avec la meme valeur.</p>
-<p>Pour `T = Int`, `Long`, `Float`, `Double` ou `Bool`, le compilateur redirige ce nom vers la specialisation primitive adaptee. Pour les autres types, `Array[T]` est represente par `ArrayObject[T]`.</p>
+<p>Pour T = Int, Long, Float, Double ou Bool, le compilateur redirige ce nom vers la specialisation primitive adaptee. Pour les autres types, Array[T] est represente par ArrayObject[T].</p>
     </article>
     <article class="entry" id="range">
       <div class="entry-meta">
@@ -59,7 +61,7 @@
       </div>
       <h2>range</h2>
       <pre><code>def Array.range(size: Int): Array[Int]</code></pre>
-      <p>Cree un tableau d&#x27;entiers contenant `0, 1, ..., size - 1`.</p>
+      <p>Cree un tableau d&#x27;entiers contenant 0, 1, ..., size - 1.</p>
     </article>
     <article class="entry" id="rangeUntil">
       <div class="entry-meta">
@@ -67,7 +69,7 @@
       </div>
       <h2>rangeUntil</h2>
       <pre><code>def Array.rangeUntil(start: Int, until: Int): Array[Int]</code></pre>
-      <p>Cree un tableau d&#x27;entiers contenant `start, ..., until - 1`.</p>
+      <p>Cree un tableau d&#x27;entiers contenant start, ..., until - 1.</p>
     </article>
     </section>
   </main>

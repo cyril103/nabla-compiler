@@ -1,21 +1,23 @@
 /// @module Array
 /// Tableaux generiques pour le code utilisateur.
-/// Importer `collections.array` donne acces a `Array[T]`, `Array.fill[T]` et
-/// `Array.range` / `Array.rangeUntil`. Les anciens noms `ArrayFill[T]` et
-/// `ArrayRange` restent disponibles pour compatibilite. Les types bas niveau
-/// comme `IntArray`, `ArrayInt`, `ObjectArray[T]` et `ArrayObject[T]` restent
+/// Importer collections.array donne acces a Array[T], Array.fill[T] et
+/// Array.range / Array.rangeUntil. Les anciens noms ArrayFill[T] et
+/// ArrayRange restent disponibles pour compatibilite. Les types bas niveau
+/// comme IntArray, ArrayInt, ObjectArray[T] et ArrayObject[T] restent
 /// des details de stdlib dans les cas courants.
 
 /// @symbol class Array[T](size: Int)
 /// @status Recommandee
 /// Tableau mutable de taille fixe.
 ///
-/// `Array[T]` est le nom public a utiliser. Le compilateur choisit la
-/// representation adaptee selon `T`.
+/// Array[T] est le nom public a utiliser. Le compilateur choisit la
+/// representation adaptee selon T.
 
 /// @symbol def ArrayFill[T](size: Int, value: T): Array[T]
 /// @status Compatibilite
 /// Cree un tableau rempli avec la meme valeur.
+///
+/// Preferer Array.fill[T](size, value) dans le nouveau code.
 
 import collections.array_base
 import collections.int_array
@@ -25,9 +27,11 @@ import collections.double_array
 import collections.bool_array
 import collections.object_array
 
-/// Cree un tableau d'entiers contenant `0, 1, ..., size - 1`.
+/// Cree un tableau d'entiers contenant 0, 1, ..., size - 1.
 /// @signature def ArrayRange(size: Int): Array[Int]
 /// @status Compatibilite
+///
+/// Preferer Array.range(size) dans le nouveau code.
 def ArrayRange(size: Int): ArrayInt = {
     new ArrayInt(intArrayRange(size))
 }
@@ -37,21 +41,21 @@ object Array {
     /// @signature def Array.fill[T](size: Int, value: T): Array[T]
     /// @status Recommandee
     ///
-    /// Pour `T = Int`, `Long`, `Float`, `Double` ou `Bool`, le compilateur
+    /// Pour T = Int, Long, Float, Double ou Bool, le compilateur
     /// redirige ce nom vers la specialisation primitive adaptee. Pour les
-    /// autres types, `Array[T]` est represente par `ArrayObject[T]`.
+    /// autres types, Array[T] est represente par ArrayObject[T].
     def fill[T](size: Int, value: T): ArrayObject[T] = {
         objectArrayFill[T](size, value)
     }
 
-    /// Cree un tableau d'entiers contenant `0, 1, ..., size - 1`.
+    /// Cree un tableau d'entiers contenant 0, 1, ..., size - 1.
     /// @signature def Array.range(size: Int): Array[Int]
     /// @status Recommandee
     def range(size: Int): ArrayInt = {
         new ArrayInt(intArrayRange(size))
     }
 
-    /// Cree un tableau d'entiers contenant `start, ..., until - 1`.
+    /// Cree un tableau d'entiers contenant start, ..., until - 1.
     /// @signature def Array.rangeUntil(start: Int, until: Int): Array[Int]
     /// @status Recommandee
     def rangeUntil(start: Int, until: Int): ArrayInt = {
