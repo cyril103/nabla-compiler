@@ -92,7 +92,8 @@ Le pipeline implemente actuellement :
 - surcharge V1.1 des fonctions globales non generiques par signature exacte,
   avec nom IR unique par variante, wrappers `math.sqrt(Float)` /
   `math.sqrt(Double)` et references resolues quand un type fonction est attendu
-  en argument ou via une annotation locale;
+  en argument ou via une annotation locale; les echecs de resolution listent la
+  forme appelee et les signatures candidates;
 - types fonction-valeur canoniques `Fn(...)->...`, references de fonctions
   nommees et appels indirects, avec lambdas sans capture `(x: Int) => { ... }` et
   `(acc: Int, value: Int) => { ... }`;
@@ -335,8 +336,9 @@ Limites importantes :
   ne sont pas encore des valeurs vraiment polymorphes;
   la surcharge de fonctions couvre pour l'instant les appels globaux resolus par
   types d'arguments exacts et les references de fonctions surchargees en
-  position d'argument avec type fonction attendu; les references sans type
-  attendu ne sont pas encore supportees;
+  position d'argument avec type fonction attendu; les diagnostics d'echec
+  affichent les candidats disponibles, mais les references sans type attendu ne
+  sont pas encore supportees;
   `Array[Int]` reste une facade specialisee vers `ArrayInt`; `Array[Long]`
   reste une facade specialisee vers `ArrayLong`; `Array[Float]` reste une
   facade specialisee vers `ArrayFloat`; `Array[Double]` reste une facade
@@ -551,6 +553,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Autoriser les references de fonctions surchargees quand un type fonction
   est attendu en argument.
 - [x] Ajouter les annotations de type locales pour `val` / `var`.
+- [x] Enrichir les diagnostics de surcharge avec forme appelee et candidats.
 - [x] Ajouter l'inference des arguments de type des fonctions generiques.
 - [x] Autoriser les references de fonctions generiques specialisees comme
   valeurs, par exemple `identity[Int]`.
@@ -787,6 +790,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   - Fichiers / tests associes: `stdlib/math.nabla`,
     `tests/test_stdlib_math.nabla`, `docs/stdlib-api.md`, `docs/stdlib/`,
     `make stdlib-docs`, `make all-tests`.
+- `local` - Enrichir les diagnostics de surcharge: les appels sans candidat
+  indiquent maintenant la forme appelee (`foo(Int, String)`) et les signatures
+  candidates; les references surchargees avec type attendu incompatible
+  affichent aussi les candidats disponibles.
+  - Fichiers / tests associes: `src/compiler_context.hpp`, `src/ast.cpp`,
+    `src/parser.cpp`, `tests/test_error_function_overload_no_match.nabla`,
+    `tests/test_error_function_overload_arity.nabla`,
+    `tests/test_error_function_overload_reference_expected_mismatch.nabla`,
+    `make all-tests`.
 - `local` - Enrichir les descriptions utilisateur de la reference stdlib pour
   `io`, `math`, `strings` et `OptionInt`: conventions de retour I/O,
   comportements limites de `pow*` / `sqrt*`, separation de `words`, et raison
@@ -1362,7 +1374,7 @@ Etendre la surcharge de fonctions au-dela de la V1 :
 
 - definir la strategie pour les fonctions generiques surchargees;
 - definir la strategie pour les methodes surchargees;
-- enrichir les diagnostics pour distinguer absence de candidat, arite
-  incompatible et ambiguite reelle;
+- ajouter une etape d'ambiguite explicite si une future resolution devient moins
+  stricte que la signature exacte;
 - migrer progressivement les exemples publics vers les noms `math` surcharges
   et conserver les noms suffixes comme compatibilite documentee.

@@ -913,9 +913,12 @@ std::unique_ptr<ASTNode> Parser::parseFunctionReferenceWithExpectedType(const st
     }
 
     if (matches.size() != 1) {
+        std::string candidates = formatFunctionOverloadCandidates(context, name);
         throw CompilerError(
             ErrorKind::Parser, nameToken.location,
-            "aucune surcharge compatible pour la référence '" + name + "' avec le type attendu " + expectedType);
+            "aucune surcharge compatible pour la référence '" + name +
+            "' avec le type attendu " + expectedType +
+            (candidates.empty() ? "" : "\ncandidats:" + candidates));
     }
     return located(
         std::make_unique<FunctionReferenceNode>(

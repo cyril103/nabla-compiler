@@ -5,6 +5,7 @@
 #include <map>
 #include <optional>
 #include <set>
+#include <sstream>
 #include <string>
 #include <filesystem>
 #include <vector>
@@ -966,4 +967,55 @@ inline std::optional<std::string> resolveExactFunctionOverload(
     }
     if (matches.size() == 1) return matches[0];
     return std::nullopt;
+}
+
+inline std::string formatTypeList(const std::vector<std::string>& types) {
+    std::string result;
+    for (size_t i = 0; i < types.size(); ++i) {
+        if (i > 0) result += ", ";
+        result += types[i];
+    }
+    return result;
+}
+
+inline std::string formatFunctionCallShape(
+    const std::string& sourceName,
+    const std::vector<std::string>& argumentTypes) {
+    return sourceName + "(" + formatTypeList(argumentTypes) + ")";
+}
+
+inline std::string formatFunctionSignatureCandidate(
+    const std::string& sourceName,
+    const CompilerContext::FunctionSignature& signature) {
+    std::vector<std::string> parameterTypes;
+    for (const auto& parameter : signature.parameters) {
+        parameterTypes.push_back(parameter.type);
+    }
+    return sourceName + "(" + formatTypeList(parameterTypes) + "): " + signature.returnType;
+}
+
+inline std::string formatFunctionOverloadCandidates(
+    const CompilerContext& context,
+    const std::string& sourceName) {
+    std::ostringstream out;
+    for (const auto& overloadName : functionOverloadNames(context, sourceName)) {
+        const auto* signature = findFunctionSignature(context, overloadName);
+        if (!signature) continue;
+        out << "\n- " << formatFunctionSignatureCandidate(sourceName, *signature);
+    }
+    return out.str();
+}
+
+inline std::string formatNoMatchingFunctionOverloadMessage(
+    const CompilerContext& context,
+    const std::string& sourceName,
+    const std::vector<std::string>& argumentTypes) {
+    std::string message =
+        "aucune surcharge compatible pour '" +
+        formatFunctionCallShape(sourceName, argumentTypes) + "'";
+    std::string candidates = formatFunctionOverloadCandidates(context, sourceName);
+    if (!candidates.empty()) {
+        message += "\ncandidats:" + candidates;
+    }
+    return message;
 }

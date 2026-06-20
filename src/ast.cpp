@@ -1561,7 +1561,7 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
     if (!overloadName) {
         const std::string displayName = diagnosticName.empty() ? name : diagnosticName;
         semanticError(
-            "aucune surcharge compatible pour '" + displayName + "'" +
+            formatNoMatchingFunctionOverloadMessage(context, displayName, actualArgumentTypes) +
             recommendedStdlibFunctionSuffix(displayName));
     }
     resolvedFunctionName = *overloadName;
