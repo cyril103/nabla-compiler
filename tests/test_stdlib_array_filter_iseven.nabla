@@ -1,0 +1,12 @@
+import collections.array
+import math
+
+def main(): Int = {
+    val xs = Array.tabulate[Int](10, x => x * 2)
+    val ys = xs.filter(x => isEven(x))
+    if ys.size() == 10 {
+        42
+    } else {
+        1
+    }
+}

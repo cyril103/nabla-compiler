@@ -727,7 +727,7 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
     }
     lambdaCaptureScopes.pop_back();
 
-    const std::string returnType = body->getType();
+    const std::string returnType = inferLambdaReturnType(*body, parameters, captures);
     std::string lambdaName = "lambda." + std::to_string(context.nextLambdaId++);
     context.functions[lambdaName] = {
         signatureParameters, returnType, currentFunctionTypeParameters, start.location, start.location};
@@ -824,7 +824,7 @@ std::unique_ptr<ASTNode> Parser::parseInferredLambdaExpression(const std::string
     }
     lambdaCaptureScopes.pop_back();
 
-    const std::string returnType = body->getType();
+    const std::string returnType = inferLambdaReturnType(*body, parameters, captures);
     std::string lambdaName = "lambda." + std::to_string(context.nextLambdaId++);
     context.functions[lambdaName] = {
         signatureParameters, returnType, currentFunctionTypeParameters, start.location, start.location};
@@ -854,6 +854,29 @@ std::unique_ptr<ASTNode> Parser::parseInferredLambdaExpression(const std::string
         std::make_unique<FunctionReferenceNode>(
             lambdaName, *functionType, currentFunctionTypeParameters, std::move(referenceCaptures)),
         start.location);
+}
+
+std::string Parser::inferLambdaReturnType(
+    ASTNode& body, const std::vector<FunctionDefNode::Parameter>& parameters,
+    const std::vector<FunctionDefNode::Capture>& captures) {
+    const auto previousSymbolTypes = context.semanticSymbolTypes;
+    const auto previousTypeParameters = context.semanticTypeParameters;
+
+    context.semanticSymbolTypes.clear();
+    context.semanticTypeParameters = currentFunctionTypeParameters;
+    for (const auto& capture : captures) {
+        context.semanticSymbolTypes[capture.symbolName] = capture.type;
+    }
+    for (const auto& parameter : parameters) {
+        context.semanticSymbolTypes[parameter.symbolName] = parameter.type;
+    }
+
+    body.validateSemantics(context);
+    const std::string returnType = body.getType();
+
+    context.semanticSymbolTypes = previousSymbolTypes;
+    context.semanticTypeParameters = previousTypeParameters;
+    return returnType;
 }
 
 std::unique_ptr<ASTNode> Parser::parseFunctionReferenceWithExpectedType(const std::string& expectedType) {
