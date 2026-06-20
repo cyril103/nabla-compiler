@@ -96,6 +96,8 @@ Le pipeline implemente actuellement :
   forme appelee et les signatures candidates; les helpers internes de `math`
   commencent a consommer les noms surcharges idiomatiques hors wrappers de
   compatibilite;
+- surcharge V1 des methodes de classe par signature exacte, avec nom IR unique
+  par variante et resolution par les types d'arguments;
 - types fonction-valeur canoniques `Fn(...)->...`, references de fonctions
   nommees et appels indirects, avec lambdas sans capture `(x: Int) => { ... }` et
   `(acc: Int, value: Int) => { ... }`;
@@ -558,6 +560,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   est attendu en argument.
 - [x] Ajouter les annotations de type locales pour `val` / `var`.
 - [x] Enrichir les diagnostics de surcharge avec forme appelee et candidats.
+- [x] Ajouter une premiere surcharge des methodes de classe par signature exacte.
 - [x] Ajouter l'inference des arguments de type des fonctions generiques.
 - [x] Autoriser les references de fonctions generiques specialisees comme
   valeurs, par exemple `identity[Int]`.
@@ -810,6 +813,19 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   surcharge.
   - Fichiers / tests associes: `stdlib/math.nabla`,
     `tests/test_stdlib_math.nabla`, `make all-tests`, `make stdlib-docs`.
+- `local` - Ajouter la surcharge V1 des methodes de classe par signature exacte:
+  les classes gardent un index de surcharges par nom source, les variantes sont
+  abaissees vers des noms IR uniques, les appels choisissent la variante depuis
+  les types d'arguments, et les diagnostics listent les signatures candidates.
+  - Limites actuelles: resolution exacte uniquement; les lambdas en argument
+    d'une methode surchargee ne recoivent pas encore de type attendu tant que la
+    surcharge n'est pas choisie; generiques et conversions implicites restent a
+    cadrer.
+  - Fichiers / tests associes: `src/compiler_context.hpp`, `src/parser.cpp`,
+    `src/ast.hpp`, `src/ast.cpp`, `src/semantic_analyzer.cpp`,
+    `tests/test_method_overload.nabla`,
+    `tests/test_error_method_overload_duplicate.nabla`,
+    `tests/test_error_method_overload_no_match.nabla`, `make all-tests`.
 - `local` - Enrichir les descriptions utilisateur de la reference stdlib pour
   `io`, `math`, `strings` et `OptionInt`: conventions de retour I/O,
   comportements limites de `pow*` / `sqrt*`, separation de `words`, et raison
@@ -1384,7 +1400,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 Etendre la surcharge de fonctions au-dela de la V1 :
 
 - definir la strategie pour les fonctions generiques surchargees;
-- definir la strategie pour les methodes surchargees;
+- definir la strategie pour les methodes surchargees generiques et les lambdas
+  en argument de methodes surchargees;
 - ajouter une etape d'ambiguite explicite si une future resolution devient moins
   stricte que la signature exacte;
 - garder les noms suffixes `math` comme compatibilite documentee, mais faire

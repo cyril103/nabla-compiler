@@ -1,0 +1,13 @@
+class Box() {
+    def pick(value: Int): Int = {
+        value
+    }
+
+    def pick(value: Int): Int = {
+        value + 1
+    }
+}
+
+def main(): Int = {
+    0
+}

@@ -145,6 +145,7 @@ public:
 class MethodCallNode : public ASTNode {
     std::unique_ptr<ASTNode> receiver;
     std::string methodName;
+    std::string resolvedMethodName;
     std::vector<std::unique_ptr<ASTNode>> arguments;
     std::vector<std::string> typeArguments;
     std::vector<std::string> resolvedTypeArguments;

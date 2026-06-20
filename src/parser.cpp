@@ -1318,17 +1318,20 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
                 expectedArgumentTypes.push_back(parameter.type);
             }
         }
-        if (auto methodLookup = resolveClassMethodInHierarchy(context, receiverType, method)) {
-            methodSignature = methodLookup->signature;
-            initialOwnerType = methodLookup->ownerClassName;
-            classSubstitution = methodLookup->classSubstitution;
-            std::map<std::string, std::string> substitution = methodLookup->classSubstitution;
-            if (auto methodSubstitution = genericFunctionSubstitutionFor(*methodLookup->signature, typeArguments)) {
+        const auto methodLookupCandidates =
+            collectClassMethodLookupCandidates(context, receiverType, method);
+        if (methodLookupCandidates.size() == 1) {
+            const auto& methodLookup = methodLookupCandidates.front();
+            methodSignature = methodLookup.signature;
+            initialOwnerType = methodLookup.ownerClassName;
+            classSubstitution = methodLookup.classSubstitution;
+            std::map<std::string, std::string> substitution = methodLookup.classSubstitution;
+            if (auto methodSubstitution = genericFunctionSubstitutionFor(*methodLookup.signature, typeArguments)) {
                 substitution.insert(methodSubstitution->begin(), methodSubstitution->end());
             }
-            initialReturnType = substituteType(methodLookup->signature->returnType, substitution);
+            initialReturnType = substituteType(methodLookup.signature->returnType, substitution);
             expectedArgumentTypes.clear();
-            for (const auto& parameter : methodLookup->signature->parameters) {
+            for (const auto& parameter : methodLookup.signature->parameters) {
                 expectedArgumentTypes.push_back(substituteType(parameter.type, substitution));
             }
         }
@@ -1526,10 +1529,27 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName, std::strin
         signatureParameters, returnType, typeParameters, defToken.location, returnTypeLocation, isOverride};
     std::string registeredFunctionName = functionName;
     if (!clName.empty()) {
-        if (context.classes[clName].methods.count(name)) {
-            throw CompilerError(ErrorKind::Parser, nameToken.location, "méthode déjà déclarée dans '" + clName + "': " + name);
+        auto& overloads = context.classes[clName].methodOverloads[name];
+        for (const auto& overloadName : overloads) {
+            const auto existingMethod = context.classes[clName].methods.find(overloadName);
+            if (existingMethod != context.classes[clName].methods.end() &&
+                functionSignatureParametersMatch(existingMethod->second, signature)) {
+                throw CompilerError(
+                    ErrorKind::Parser, nameToken.location,
+                    "méthode déjà déclarée avec cette signature dans '" + clName + "': " + name);
+            }
         }
-        context.classes[clName].methods[name] = signature;
+        registeredFunctionName = name;
+        if (!overloads.empty()) {
+            registeredFunctionName = overloadedMethodName(name, signature);
+            if (context.classes[clName].methods.count(registeredFunctionName)) {
+                throw CompilerError(
+                    ErrorKind::Parser, nameToken.location,
+                    "méthode déjà déclarée avec cette signature dans '" + clName + "': " + name);
+            }
+        }
+        overloads.push_back(registeredFunctionName);
+        context.classes[clName].methods[registeredFunctionName] = signature;
     } else {
         auto& overloads = context.functionOverloads[functionName];
         for (const auto& overloadName : overloads) {
@@ -1749,6 +1769,7 @@ std::vector<std::string> Parser::expectedArgumentTypesForMethodCall(
         for (const auto& candidate : methodCandidates) {
             providers.insert(substituteType(candidate.ownerClassName, candidate.classSubstitution));
         }
+        if (providers.size() <= 1) return {};
         throw CompilerError(
             ErrorKind::Parser, location,
             "conflit d'héritage pour la méthode '" + methodName + "' dans la classe '" +

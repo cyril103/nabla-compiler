@@ -40,6 +40,7 @@ struct CompilerContext {
     struct ClassInfo {
         std::vector<FieldInfo> fields;
         std::map<std::string, FunctionSignature> methods;
+        std::map<std::string, std::vector<std::string>> methodOverloads;
         std::vector<std::string> parentTypes;
         std::vector<std::string> parentConstructorArguments;
         std::vector<FieldInfo> inheritedConstructorSignature;
@@ -449,6 +450,7 @@ inline std::string genericBaseName(const std::string& type) {
 
 struct ClassMethodLookupResult {
     const CompilerContext::FunctionSignature* signature = nullptr;
+    std::string methodName;
     std::string ownerClassName;
     std::map<std::string, std::string> classSubstitution;
 };
@@ -462,6 +464,9 @@ inline std::optional<std::map<std::string, std::string>> genericSubstitutionFor(
     const CompilerContext& context, const std::string& concreteType);
 inline std::string substituteType(
     const std::string& type, const std::map<std::string, std::string>& substitution);
+inline std::optional<std::map<std::string, std::string>> inferGenericFunctionSubstitution(
+    const CompilerContext::FunctionSignature& signature,
+    const std::vector<std::string>& actualArgumentTypes);
 
 inline void collectVisibleFieldsInHierarchy(
     const CompilerContext& context, const std::string& receiverType,
@@ -695,12 +700,23 @@ inline void collectClassMethodLookupCandidates(
         classSubstitution = *genericSubstitution;
     }
 
-    auto methodIt = classIt->second.methods.find(methodName);
-    if (methodIt != classIt->second.methods.end()) {
+    std::vector<std::string> methodNames;
+    auto overloadsIt = classIt->second.methodOverloads.find(methodName);
+    if (overloadsIt != classIt->second.methodOverloads.end()) {
+        methodNames = overloadsIt->second;
+    } else if (classIt->second.methods.count(methodName)) {
+        methodNames = {methodName};
+    }
+
+    if (!methodNames.empty()) {
         const std::string providerType = substituteType(receiverType, classSubstitution);
         if (providerTypes.insert(providerType).second) {
-            candidates.push_back(ClassMethodLookupResult{
-                &methodIt->second, classLookupName, classSubstitution});
+            for (const auto& resolvedMethodName : methodNames) {
+                auto methodIt = classIt->second.methods.find(resolvedMethodName);
+                if (methodIt == classIt->second.methods.end()) continue;
+                candidates.push_back(ClassMethodLookupResult{
+                    &methodIt->second, resolvedMethodName, classLookupName, classSubstitution});
+            }
         }
         return;
     }
@@ -730,6 +746,49 @@ inline std::optional<ClassMethodLookupResult> resolveClassMethodInHierarchy(
     const auto candidates = collectClassMethodLookupCandidates(context, receiverType, methodName);
     if (candidates.empty()) return std::nullopt;
     return candidates.front();
+}
+
+inline std::optional<ClassMethodLookupResult> resolveExactClassMethodOverload(
+    const CompilerContext& context,
+    const std::string& receiverType,
+    const std::string& methodName,
+    const std::vector<std::string>& actualArgumentTypes,
+    const std::vector<std::string>& typeArguments = {}) {
+    std::vector<ClassMethodLookupResult> matches;
+    for (const auto& candidate : collectClassMethodLookupCandidates(context, receiverType, methodName)) {
+        if (!candidate.signature) continue;
+        const auto& signature = *candidate.signature;
+        if (signature.parameters.size() != actualArgumentTypes.size()) continue;
+
+        std::map<std::string, std::string> substitution = candidate.classSubstitution;
+        if (!typeArguments.empty()) {
+            auto genericSubstitution = genericFunctionSubstitutionFor(signature, typeArguments);
+            if (!genericSubstitution) continue;
+            substitution.insert(genericSubstitution->begin(), genericSubstitution->end());
+        } else if (!signature.typeParameters.empty()) {
+            CompilerContext::FunctionSignature substitutedSignature = signature;
+            for (auto& parameter : substitutedSignature.parameters) {
+                parameter.type = substituteType(parameter.type, substitution);
+            }
+            substitutedSignature.returnType = substituteType(substitutedSignature.returnType, substitution);
+            auto inferredSubstitution =
+                inferGenericFunctionSubstitution(substitutedSignature, actualArgumentTypes);
+            if (!inferredSubstitution) continue;
+            substitution.insert(inferredSubstitution->begin(), inferredSubstitution->end());
+        }
+
+        bool compatible = true;
+        for (size_t i = 0; i < actualArgumentTypes.size(); ++i) {
+            const std::string expectedType = substituteType(signature.parameters[i].type, substitution);
+            if (expectedType != actualArgumentTypes[i]) {
+                compatible = false;
+                break;
+            }
+        }
+        if (compatible) matches.push_back(candidate);
+    }
+    if (matches.size() == 1) return matches[0];
+    return std::nullopt;
 }
 
 inline std::optional<std::string> resolveActiveStdlibTypeAlias(
@@ -906,6 +965,11 @@ inline bool functionSignatureParametersMatch(
     return left.typeParameters == right.typeParameters;
 }
 
+inline std::string overloadedMethodName(
+    const std::string& sourceName, const CompilerContext::FunctionSignature& signature) {
+    return overloadedFunctionName(sourceName, signature);
+}
+
 inline const CompilerContext::FunctionSignature* findFunctionSignature(
     const CompilerContext& context, const std::string& functionName) {
     auto function = context.functions.find(functionName);
@@ -1014,6 +1078,39 @@ inline std::string formatNoMatchingFunctionOverloadMessage(
         "aucune surcharge compatible pour '" +
         formatFunctionCallShape(sourceName, argumentTypes) + "'";
     std::string candidates = formatFunctionOverloadCandidates(context, sourceName);
+    if (!candidates.empty()) {
+        message += "\ncandidats:" + candidates;
+    }
+    return message;
+}
+
+inline std::string formatMethodOverloadCandidates(
+    const CompilerContext& context,
+    const std::string& receiverType,
+    const std::string& methodName) {
+    std::ostringstream out;
+    for (const auto& candidate : collectClassMethodLookupCandidates(context, receiverType, methodName)) {
+        if (!candidate.signature) continue;
+        std::map<std::string, std::string> substitution = candidate.classSubstitution;
+        CompilerContext::FunctionSignature signature = *candidate.signature;
+        for (auto& parameter : signature.parameters) {
+            parameter.type = substituteType(parameter.type, substitution);
+        }
+        signature.returnType = substituteType(signature.returnType, substitution);
+        out << "\n- " << formatFunctionSignatureCandidate(receiverType + "." + methodName, signature);
+    }
+    return out.str();
+}
+
+inline std::string formatNoMatchingMethodOverloadMessage(
+    const CompilerContext& context,
+    const std::string& receiverType,
+    const std::string& methodName,
+    const std::vector<std::string>& argumentTypes) {
+    std::string message =
+        "aucune surcharge compatible pour '" +
+        formatFunctionCallShape(receiverType + "." + methodName, argumentTypes) + "'";
+    std::string candidates = formatMethodOverloadCandidates(context, receiverType, methodName);
     if (!candidates.empty()) {
         message += "\ncandidats:" + candidates;
     }

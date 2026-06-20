@@ -1,5 +1,7 @@
 #include "semantic_analyzer.hpp"
 
+#include <algorithm>
+
 namespace {
 
 using MethodOwnerMap = std::map<std::string, std::set<std::string>>;
@@ -75,7 +77,7 @@ void collectVisibleMethodsInHierarchy(
     }
 
     const std::string providerType = substituteType(receiverType, substitution);
-    for (const auto& [methodName, _] : classIt->second.methods) {
+    for (const auto& [methodName, _] : classIt->second.methodOverloads) {
         if (visibleMethods[methodName].empty()) {
             visibleMethods[methodName].insert(providerType);
         }
@@ -300,7 +302,7 @@ void SemanticAnalyzer::validateDeclaredTypes() {
         ClassFieldOwnerMap inheritedFieldProviders;
         std::set<std::string> ownMethods;
         const auto classTypeSubstitution = classTypeTemplateSubstitution(context, className);
-        for (const auto& methodEntry : classInfo.methods) {
+        for (const auto& methodEntry : classInfo.methodOverloads) {
             ownMethods.insert(methodEntry.first);
         }
         for (const auto& field : classInfo.fields) {
@@ -333,7 +335,14 @@ void SemanticAnalyzer::validateDeclaredTypes() {
                 "' dans la classe '" + className + "': plusieurs définitions dans [" +
                 formatMethodProviders(providers) + "]");
         }
-        for (const auto& [methodName, signature] : classInfo.methods) {
+        for (const auto& [registeredMethodName, signature] : classInfo.methods) {
+            std::string methodName = registeredMethodName;
+            for (const auto& [sourceName, overloadNames] : classInfo.methodOverloads) {
+                if (std::find(overloadNames.begin(), overloadNames.end(), registeredMethodName) != overloadNames.end()) {
+                    methodName = sourceName;
+                    break;
+                }
+            }
             bool hasInheritedMethod = false;
             bool hasCompatibleInheritedMethod = false;
             for (const auto& parentType : classInfo.parentTypes) {
@@ -363,7 +372,7 @@ void SemanticAnalyzer::validateDeclaredTypes() {
                     "override invalide pour '" + className + "." + methodName +
                     "' : signature incompatible avec la méthode héritée");
             }
-            if (!signature.isOverride && hasInheritedMethod) {
+            if (!signature.isOverride && hasCompatibleInheritedMethod) {
                 throw CompilerError(
                     ErrorKind::Semantic, signature.location,
                     "override obligatoire pour '" + className + "." + methodName +
@@ -425,6 +434,7 @@ void SemanticAnalyzer::ensureAnyRootType() {
             builtInLocation
         };
     }
+    anyClass.methodOverloads["toString"] = {"toString"};
     if (!anyClass.methods.count("hashCode")) {
         anyClass.methods["hashCode"] = {
             {},
@@ -434,6 +444,7 @@ void SemanticAnalyzer::ensureAnyRootType() {
             builtInLocation
         };
     }
+    anyClass.methodOverloads["hashCode"] = {"hashCode"};
     if (!anyClass.methods.count("equals")) {
         anyClass.methods["equals"] = {
             {{"other", "Any", builtInLocation}},
@@ -443,6 +454,7 @@ void SemanticAnalyzer::ensureAnyRootType() {
             builtInLocation
         };
     }
+    anyClass.methodOverloads["equals"] = {"equals"};
 }
 
 void SemanticAnalyzer::validateParentTypes() const {

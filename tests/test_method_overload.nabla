@@ -1,0 +1,14 @@
+class Box() {
+    def pick(value: Int): Int = {
+        value
+    }
+
+    def pick(value: String): Int = {
+        value.length()
+    }
+}
+
+def main(): Int = {
+    val box = new Box()
+    box.pick(40) + box.pick("hi")
+}

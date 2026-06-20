@@ -1,0 +1,4 @@
+tests/test_error_method_overload_no_match.nabla:13:9: semantic error: aucune surcharge compatible pour 'Box.pick(Bool)'
+candidats:
+- Box.pick(Int): Int
+- Box.pick(String): Int

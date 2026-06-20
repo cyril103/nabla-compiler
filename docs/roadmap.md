@@ -97,8 +97,9 @@ Actions recommandees :
    `Option.some[T]` / `Option.none[T]`) quand elles existent.
 9. Garder les diagnostics de compatibilite orientes vers les compagnons
    recommandes (`Array.fill`, `Set.fromArray`, `Option.some`, etc.).
-10. Poursuivre la surcharge par signature : etendre progressivement aux
-    fonctions generiques, aux methodes surchargees et aux diagnostics
+10. Poursuivre la surcharge par signature : la base couvre maintenant les
+    fonctions globales et les methodes de classe par signature exacte; etendre
+    progressivement aux generiques, aux lambdas en argument et aux diagnostics
     d'ambiguite plus riches.
 11. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
    surface n'est pas propre.

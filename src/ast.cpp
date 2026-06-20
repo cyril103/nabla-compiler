@@ -552,7 +552,7 @@ MethodCallNode::MethodCallNode(
     std::unique_ptr<ASTNode> rec, std::string method, std::vector<std::unique_ptr<ASTNode>> args,
     std::vector<std::string> genericTypeArguments,
     std::string initialResolvedType, std::string initialOwnerType)
-    : receiver(std::move(rec)), methodName(std::move(method)), arguments(std::move(args)),
+    : receiver(std::move(rec)), methodName(std::move(method)), resolvedMethodName(methodName), arguments(std::move(args)),
       typeArguments(std::move(genericTypeArguments)),
       resolvedType(std::move(initialResolvedType)), resolvedOwnerType(std::move(initialOwnerType)) {}
 
@@ -937,25 +937,36 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         for (const auto& candidate : methodCandidates) {
             providers.insert(substituteType(candidate.ownerClassName, candidate.classSubstitution));
         }
-        semanticError(
-            "conflit d'héritage pour la méthode '" + methodName + "' dans la classe '" +
-            genericBaseName(receiverType) + "': plusieurs définitions dans [" +
-            [&providers]() {
-                std::string message;
-                bool first = true;
-                for (const auto& provider : providers) {
-                    if (!first) message += ", ";
-                    message += provider;
-                    first = false;
-                }
-                return message;
-            }() + "]");
+        if (providers.size() > 1) {
+            semanticError(
+                "conflit d'héritage pour la méthode '" + methodName + "' dans la classe '" +
+                genericBaseName(receiverType) + "': plusieurs définitions dans [" +
+                [&providers]() {
+                    std::string message;
+                    bool first = true;
+                    for (const auto& provider : providers) {
+                        if (!first) message += ", ";
+                        message += provider;
+                        first = false;
+                    }
+                    return message;
+                }() + "]");
+        }
     }
     if (methodCandidates.empty()) {
         semanticError("méthode inconnue: " + receiverType + "." + methodName);
     }
-    const auto& methodLookup = methodCandidates.front();
+    std::vector<std::string> actualArgumentTypes;
+    for (const auto& argument : arguments) actualArgumentTypes.push_back(argument->getType());
+    auto resolvedMethodLookup = methodCandidates.size() == 1
+        ? std::optional<ClassMethodLookupResult>(methodCandidates.front())
+        : resolveExactClassMethodOverload(context, receiverType, methodName, actualArgumentTypes, typeArguments);
+    if (!resolvedMethodLookup) {
+        semanticError(formatNoMatchingMethodOverloadMessage(context, receiverType, methodName, actualArgumentTypes));
+    }
+    const auto& methodLookup = *resolvedMethodLookup;
     const auto& methodSignature = *methodLookup.signature;
+    resolvedMethodName = methodLookup.methodName;
 
     std::map<std::string, std::string> substitution = methodLookup.classSubstitution;
     if (methodSignature.typeParameters.empty()) {
@@ -966,8 +977,6 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
     } else {
         auto methodSubstitution = genericFunctionSubstitutionFor(methodSignature, typeArguments);
         if (!methodSubstitution && typeArguments.empty()) {
-            std::vector<std::string> actualArgumentTypes;
-            for (const auto& argument : arguments) actualArgumentTypes.push_back(argument->getType());
             CompilerContext::FunctionSignature substitutedSignature = methodSignature;
             for (auto& parameter : substitutedSignature.parameters) {
                 parameter.type = substituteType(parameter.type, substitution);
@@ -1338,9 +1347,11 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
     for (const auto& typeArgument : resolvedTypeArguments) {
         concreteTypeArguments.push_back(builder.substituteActiveType(typeArgument));
     }
+    const std::string loweredSourceMethodName =
+        resolvedMethodName.empty() ? methodName : resolvedMethodName;
     const std::string concreteMethodName = concreteTypeArguments.empty()
-        ? methodName
-        : formatParameterizedType(methodName, concreteTypeArguments);
+        ? loweredSourceMethodName
+        : formatParameterizedType(loweredSourceMethodName, concreteTypeArguments);
     const std::string concreteReturnType = builder.substituteActiveType(resolvedType);
     const bool receiverBaseChanged = !resolvedOwnerType.empty() &&
         genericBaseName(concreteReceiverType) != genericBaseName(resolvedOwnerType);
@@ -1352,7 +1363,7 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         const std::string concreteClassName =
             shouldSpecializeAsConcreteClass ? concreteReceiverType : resolvedOwnerType;
         builder.registerMethodSpecialization(
-            concreteClassName, resolvedOwnerType, methodName, concreteTypeArguments,
+            concreteClassName, resolvedOwnerType, loweredSourceMethodName, concreteTypeArguments,
             argumentTypes, concreteReturnType);
     }
     const std::string methodOwnerType =

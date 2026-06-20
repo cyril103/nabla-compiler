@@ -151,6 +151,29 @@ attendu, par exemple en argument de fonction d'ordre superieur ou via une
 annotation locale comme `val f: (Float) => Float = sqrt`. Sans type attendu
 explicite, elles restent refusees pour eviter une ambiguite silencieuse.
 
+Les methodes de classe peuvent aussi etre surchargees par signature exacte :
+
+```nabla
+class Box() {
+    def pick(value: Int): Int = {
+        value
+    }
+
+    def pick(value: String): Int = {
+        value.length()
+    }
+}
+
+def main(): Int = {
+    val box = new Box()
+    box.pick(40) + box.pick("hi")
+}
+```
+
+La surcharge de methodes est resolue statiquement depuis le type du receveur et
+les types des arguments. Les generiques, lambdas en argument et conversions
+implicites restent volontairement limites a la resolution exacte actuelle.
+
 `Unit` sert aux fonctions a effet.
 
 ```nabla
