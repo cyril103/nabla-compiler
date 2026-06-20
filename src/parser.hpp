@@ -78,7 +78,7 @@ private:
     std::vector<std::string> expectedArgumentTypesForMethodCall(
         const std::string& receiverType, const std::string& methodName,
         const SourceLocation& location) const;
-    std::vector<std::string> expectedArgumentTypesForOverloadedMethodCall(
+    std::optional<ClassMethodLookupResult> selectedOverloadedMethodCallForArgumentShape(
         const std::string& receiverType, const std::string& methodName,
         const std::vector<std::string>& typeArguments, size_t callParenIndex,
         const SourceLocation& location) const;

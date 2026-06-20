@@ -100,9 +100,10 @@ Actions recommandees :
 10. Poursuivre la surcharge par signature : la base couvre maintenant les
     fonctions globales, y compris les generiques inferables et les references
     typees, ainsi que les methodes de classe concretes ou generiques par
-    signature exacte; etendre progressivement l'inference des lambdas avec les
-    methodes generiques surchargees et les diagnostics d'ambiguite plus riches si
-    la resolution devient moins stricte que l'exact match.
+    signature exacte, y compris l'inference de lambdas apres arguments generiques
+    deja resolus; commencer la migration publique de la stdlib vers les noms
+    surcharges idiomatiques et garder les diagnostics d'ambiguite riches si la
+    resolution devient moins stricte que l'exact match.
 11. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
    surface n'est pas propre.
 

@@ -101,7 +101,8 @@ Le pipeline implemente actuellement :
   par variante, resolution par les types d'arguments et priorite aux variantes
   concretes sur les variantes generiques inferables; les lambdas inferees en
   argument recoivent un type attendu quand la forme d'appel selectionne une
-  surcharge unique, et les cas ambigus produisent un diagnostic dedie;
+  surcharge unique, y compris apres inference de type depuis les arguments deja
+  lus d'une methode generique, et les cas ambigus produisent un diagnostic dedie;
 - types fonction-valeur canoniques `Fn(...)->...`, references de fonctions
   nommees et appels indirects, avec lambdas sans capture `(x: Int) => { ... }` et
   `(acc: Int, value: Int) => { ... }`;
@@ -570,6 +571,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter une premiere surcharge des methodes de classe par signature exacte.
 - [x] Prioriser les surcharges de methodes concretes sur les generiques
   inferables.
+- [x] Inferer les lambdas dans les appels de methodes generiques surchargees
+  quand les arguments precedents resolvent les parametres de type.
 - [x] Ajouter l'inference des arguments de type des fonctions generiques.
 - [x] Autoriser les references de fonctions generiques specialisees comme
   valeurs, par exemple `identity[Int]`.
@@ -873,6 +876,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   - Fichiers / tests associes: `src/compiler_context.hpp`, `src/ast.cpp`,
     `tests/test_method_overload_generic_priority.nabla`,
     `tests/test_error_method_overload_generic_ambiguous.nabla`,
+    `make all-tests`.
+- `local` - Utiliser la surcharge selectionnee par la forme des lambdas pour
+  parser les arguments de methodes surchargees avec `parseFunctionCallArguments`:
+  les arguments precedents peuvent inferer les parametres de type d'une methode
+  generique avant de fournir le type attendu a une lambda suivante, et plusieurs
+  variantes generiques compatibles restent diagnostiquees comme ambigues.
+  - Fichiers / tests associes: `src/parser.hpp`, `src/parser.cpp`,
+    `tests/test_method_overload_generic_inferred_lambda.nabla`,
+    `tests/test_error_method_overload_generic_inferred_lambda_ambiguous.nabla`,
     `make all-tests`.
 - `local` - Enrichir les descriptions utilisateur de la reference stdlib pour
   `io`, `math`, `strings` et `OptionInt`: conventions de retour I/O,
@@ -1447,8 +1459,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 Etendre la surcharge de fonctions au-dela de la V1 :
 
-- definir la strategie pour les lambdas inferees avec methodes generiques
-  surchargees;
+- migrer progressivement la stdlib publique vers les noms surcharges
+  idiomatiques (`sqrt`, `pow`, etc.) tout en gardant les wrappers suffixes comme
+  compatibilite;
 - ajouter une etape d'ambiguite explicite si une future resolution devient moins
   stricte que la signature exacte;
 - garder les noms suffixes `math` comme compatibilite documentee, mais faire
