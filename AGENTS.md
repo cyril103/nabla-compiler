@@ -91,12 +91,11 @@ Le pipeline implemente actuellement :
 - fonctions globales appelables avec parametres;
 - surcharge V1.2 des fonctions globales par signature exacte, avec nom IR unique
   par variante, priorite aux variantes concretes sur les variantes generiques
-  inferees, references typees capables d'inferer les variantes generiques,
-  wrappers `math.sqrt(Float)` / `math.sqrt(Double)` et references resolues quand
-  un type fonction est attendu en argument ou via une annotation locale; les
-  echecs et ambiguites de resolution listent la forme appelee et les signatures
-  candidates; les helpers internes de `math` commencent a consommer les noms
-  surcharges idiomatiques hors wrappers de compatibilite;
+  inferees, references typees capables d'inferer les variantes generiques, et
+  references resolues quand un type fonction est attendu en argument ou via une
+  annotation locale; les echecs et ambiguites de resolution listent la forme
+  appelee et les signatures candidates; `math` consomme directement les noms
+  surcharges idiomatiques pour `abs`, `min`, `max`, `clamp`, `pow` et `sqrt`;
 - surcharge V1 des methodes de classe par signature exacte, avec nom IR unique
   par variante, resolution par les types d'arguments et priorite aux variantes
   concretes sur les variantes generiques inferables; les lambdas inferees en
@@ -211,22 +210,19 @@ Le pipeline implemente actuellement :
   `randomIntRange`, `randomIntInRange`, `RandomChoiceResult`,
   `randomBool`, `randomSeedNow` et `randomSeedTime` pour une API pseudo-aléatoire
   deterministe basée sur une seed;
-- module de bibliotheque standard `math` avec `absInt`, `absLong`, `absFloat`,
-  `absDouble`, `abs(Int/Long/Float/Double)`, `absDiffInt`, `absDiffLong`,
-  `absDiffFloat`, `absDiffDouble`, `maxInt`, `maxLong`, `maxFloat`,
-  `maxDouble`, `max(Int/Long/Float/Double)`, `minInt`, `minLong`,
-  `minFloat`, `minDouble`, `min(Int/Long/Float/Double)`, `clampInt`,
-  `clampLong`, `clampFloat`, `clampDouble`,
+- module de bibliotheque standard `math` avec `abs(Int/Long/Float/Double)`,
+  `absDiffInt`, `absDiffLong`, `absDiffFloat`, `absDiffDouble`,
+  `max(Int/Long/Float/Double)`, `min(Int/Long/Float/Double)`,
   `clamp(Int/Long/Float/Double)`, `signInt`, `signLong`, `signFloat`,
   `signDouble`,
   `isEvenInt`, `isOddInt`, `isEvenLong`, `isOddLong`, `isBetweenInt`,
-  `isBetweenLong`, `gcdInt`, `lcmInt`, `gcdLong`, `lcmLong`, `powInt`,
-  `powFloat`, `powDouble`, `pow(Int/Float/Double)`, `factorialInt`,
-  `isCloseFloat`, `isCloseDouble`,
-  `sqrtFloat`, `sqrtDouble`, `sqrt(Float)`, `sqrt(Double)`, `piFloat`,
-  `piDouble`, `twoPiFloat`, `twoPiDouble`, `degreesToRadiansFloat`, `radiansToDegreesFloat`,
+  `isBetweenLong`, `gcdInt`, `lcmInt`, `gcdLong`, `lcmLong`,
+  `pow(Int/Float/Double)`, `factorialInt`, `isCloseFloat`, `isCloseDouble`,
+  `sqrt(Float)`, `sqrt(Double)`, `piFloat`, `piDouble`, `twoPiFloat`,
+  `twoPiDouble`, `degreesToRadiansFloat`, `radiansToDegreesFloat`,
   `degreesToRadiansDouble`, `radiansToDegreesDouble`, `hypotenuseFloat`,
-  `hypotenuseDouble`.
+  `hypotenuseDouble`; les wrappers publics suffixes des familles surchargees
+  (`absInt`, `maxLong`, `sqrtDouble`, etc.) ont ete retires;
 - module de bibliotheque standard `core.option_int` avec `OptionInt`,
   `optionIntSome`, `optionIntNone`, `map`, `filter` et `orElse`;
 - module de bibliotheque standard `core.option` avec `Option[T]`,
@@ -479,7 +475,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `pow` pour `Float` et `Double`, `isClose`, `sqrt`, constantes `pi`
   (approximatives) et conversions degrés/radians.
 - [x] Exposer les noms mathematiques surcharges `abs`, `min`, `max`, `clamp`,
-  `pow` et `sqrt` en gardant les noms suffixes comme compatibilite.
+  `pow` et `sqrt`.
+- [x] Supprimer les wrappers publics suffixes des familles `math` deja
+  surchargees.
 - [x] Migrer les helpers internes `math` hors wrappers vers les noms
   idiomatiques surcharges.
 - [x] Etendre `collections.set` avec des operations immutables
@@ -886,6 +884,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `tests/test_method_overload_generic_inferred_lambda.nabla`,
     `tests/test_error_method_overload_generic_inferred_lambda_ambiguous.nabla`,
     `make all-tests`.
+- `local` - Nettoyer l'API publique de `stdlib/math.nabla` en supprimant les
+  wrappers suffixes des familles deja surchargees (`abs*`, `min*`, `max*`,
+  `clamp*`, `pow*`, `sqrt*`): les implementations vivent directement sous les
+  noms idiomatiques surcharges, les tests math utilisent ces noms, et la doc API
+  note le retrait des anciens wrappers publics.
+  - Fichiers / tests associes: `stdlib/math.nabla`,
+    `tests/test_stdlib_math.nabla`, `docs/stdlib-api.md`, `make all-tests`.
 - `local` - Enrichir les descriptions utilisateur de la reference stdlib pour
   `io`, `math`, `strings` et `OptionInt`: conventions de retour I/O,
   comportements limites de `pow*` / `sqrt*`, separation de `words`, et raison
@@ -1459,10 +1464,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 Etendre la surcharge de fonctions au-dela de la V1 :
 
-- migrer progressivement la stdlib publique vers les noms surcharges
-  idiomatiques (`sqrt`, `pow`, etc.) tout en gardant les wrappers suffixes comme
-  compatibilite;
+- migrer progressivement les helpers math suffixes restants (`sign*`, `gcd*`,
+  `lcm*`, `isEven*`, etc.) vers des noms surcharges quand les signatures le
+  permettent;
 - ajouter une etape d'ambiguite explicite si une future resolution devient moins
   stricte que la signature exacte;
-- garder les noms suffixes `math` comme compatibilite documentee, mais faire
-  converger les nouveaux exemples vers les noms idiomatiques surcharges.
+- garder les helpers internes specialises de collections tant qu'ils expriment
+  des contraintes runtime/IR reelles.

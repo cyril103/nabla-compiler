@@ -1,13 +1,9 @@
 import math
 
 def main(): Int = {
-    if absInt(-42) == 42 &&
-       abs(-42) == 42 &&
-       absLong(-42L) == 42L &&
+    if abs(-42) == 42 &&
        abs(-42L) == 42L &&
-       absFloat(-2.5F) == 2.5F &&
        abs(-2.5F) == 2.5F &&
-       absDouble(-2.5) == 2.5 &&
        abs(-2.5) == 2.5 &&
        isCloseFloat(piFloat(), 3.1415927F, 0.000001F) &&
        isCloseDouble(piDouble(), 3.141592653589793, 0.000000000000001) &&
@@ -19,25 +15,19 @@ def main(): Int = {
        isCloseDouble(radiansToDegreesDouble(piDouble()), 180.0, 0.000000000000001) &&
        isCloseFloat(hypotenuseFloat(3.0F, 4.0F), 5.0F, 0.000001F) &&
        isCloseDouble(hypotenuseDouble(3.0, 4.0), 5.0, 0.000000000000001) &&
-       clampInt(-3, 0, 10) == 0 &&
        clamp(-3, 0, 10) == 0 &&
-       clampLong(-3L, 0L, 10L) == 0L &&
        clamp(-3L, 0L, 10L) == 0L &&
-       clampFloat(-3.0F, 0.0F, 10.0F) == 0.0F &&
        clamp(-3.0F, 0.0F, 10.0F) == 0.0F &&
-       clampDouble(-3.0, 0.0, 10.0) == 0.0 &&
        clamp(-3.0, 0.0, 10.0) == 0.0 &&
-       maxInt(1, 2) == 2 &&
        max(1, 2) == 2 &&
        max(1L, 2L) == 2L &&
        max(1.0F, 2.0F) == 2.0F &&
        max(1.0, 2.0) == 2.0 &&
-       minInt(1, 2) == 1 &&
        min(1, 2) == 1 &&
        min(1L, 2L) == 1L &&
        min(1.0F, 2.0F) == 1.0F &&
        min(1.0, 2.0) == 1.0 &&
-       clampInt(7, 0, 10) == 7 &&
+       clamp(7, 0, 10) == 7 &&
        signInt(-7) == -1 &&
        signInt(0) == 0 &&
        signInt(7) == 1 &&
@@ -66,26 +56,20 @@ def main(): Int = {
        gcdLong(-84L, 30L) == 6L &&
        lcmLong(7L, 6L) == 42L &&
         lcmInt(7, 6) == 42 &&
-        powInt(2, 8) == 256 &&
         pow(2, 8) == 256 &&
-        powInt(2, 0) == 1 &&
-        powInt(2, -1) == 0 &&
+        pow(2, 0) == 1 &&
+        pow(2, -1) == 0 &&
        absDiffInt(3, 7) == 4 &&
        absDiffLong(3L, 7L) == 4L &&
        absDiffFloat(2.5F, 5.0F) == 2.5F &&
        absDiffDouble(2.5, 5.0) == 2.5 &&
-       powFloat(2.0F, 4) == 16.0F &&
        pow(2.0F, 4) == 16.0F &&
-       powDouble(2.0, 5) == 32.0 &&
        pow(2.0, 5) == 32.0 &&
-       isCloseFloat(sqrtFloat(16.0F), 4.0F, 0.0001F) &&
        isCloseFloat(sqrt(16.0F), 4.0F, 0.0001F) &&
-       isCloseDouble(sqrtDouble(81.0), 9.0, 0.0001) &&
        isCloseDouble(sqrt(81.0), 9.0, 0.0001) &&
         factorialInt(6) == 720 &&
-       maxDouble(3.0, 2.5) == 3.0 &&
-       minDouble(-1.0, 2.0) == -1.0 &&
-       clampInt(15, 0, 10) == 10 &&
+       max(3.0, 2.5) == 3.0 &&
+       min(-1.0, 2.0) == -1.0 &&
        clamp(15, 0, 10) == 10 &&
        signLong(-7L) == -1L &&
        signLong(0L) == 0L &&

@@ -1,12 +1,11 @@
 /// @module Math
 /// Fonctions mathematiques courantes.
-/// Les noms surcharges (`abs`, `min`, `max`, `clamp`, `pow`, `sqrt`) forment l'API
-/// idiomatique. Les noms suffixes (`absInt`, `maxLong`, `sqrtDouble`, etc.)
-/// restent disponibles comme compatibilite explicite.
+/// Les operations communes utilisent les noms surcharges idiomatiques
+/// (`abs`, `min`, `max`, `clamp`, `pow`, `sqrt`).
 
 /// Valeur absolue d'un entier.
 /// @status Recommandee
-def absInt(value: Int): Int = {
+def abs(value: Int): Int = {
     if value < 0 {
         -value
     } else {
@@ -16,7 +15,7 @@ def absInt(value: Int): Int = {
 
 /// Valeur absolue d'un entier long.
 /// @status Recommandee
-def absLong(value: Long): Long = {
+def abs(value: Long): Long = {
     if value < 0L {
         -value
     } else {
@@ -26,7 +25,7 @@ def absLong(value: Long): Long = {
 
 /// Valeur absolue d'un flottant simple precision.
 /// @status Recommandee
-def absFloat(value: Float): Float = {
+def abs(value: Float): Float = {
     if value < 0.0F {
         -value
     } else {
@@ -36,7 +35,7 @@ def absFloat(value: Float): Float = {
 
 /// Valeur absolue d'un flottant double precision.
 /// @status Recommandee
-def absDouble(value: Double): Double = {
+def abs(value: Double): Double = {
     if value < 0.0 {
         -value
     } else {
@@ -44,218 +43,122 @@ def absDouble(value: Double): Double = {
     }
 }
 
-/// Valeur absolue surchargee pour `Int`.
-/// @status Recommandee
-def abs(value: Int): Int = {
-    absInt(value)
-}
-
-/// Valeur absolue surchargee pour `Long`.
-/// @status Recommandee
-def abs(value: Long): Long = {
-    absLong(value)
-}
-
-/// Valeur absolue surchargee pour `Float`.
-/// @status Recommandee
-def abs(value: Float): Float = {
-    absFloat(value)
-}
-
-/// Valeur absolue surchargee pour `Double`.
-/// @status Recommandee
-def abs(value: Double): Double = {
-    absDouble(value)
-}
-
 /// Plus grande des deux valeurs entieres.
 /// @status Recommandee
-def maxInt(left: Int, right: Int): Int = {
-    if left > right {
-        left
-    } else {
-        right
-    }
-}
-
-def maxLong(left: Long, right: Long): Long = {
-    if left > right {
-        left
-    } else {
-        right
-    }
-}
-
-def maxFloat(left: Float, right: Float): Float = {
-    if left > right {
-        left
-    } else {
-        right
-    }
-}
-
-def maxDouble(left: Double, right: Double): Double = {
-    if left > right {
-        left
-    } else {
-        right
-    }
-}
-
-/// Plus grande valeur surchargee pour `Int`.
-/// @status Recommandee
 def max(left: Int, right: Int): Int = {
-    maxInt(left, right)
+    if left > right {
+        left
+    } else {
+        right
+    }
 }
 
-/// Plus grande valeur surchargee pour `Long`.
-/// @status Recommandee
 def max(left: Long, right: Long): Long = {
-    maxLong(left, right)
+    if left > right {
+        left
+    } else {
+        right
+    }
 }
 
-/// Plus grande valeur surchargee pour `Float`.
-/// @status Recommandee
 def max(left: Float, right: Float): Float = {
-    maxFloat(left, right)
+    if left > right {
+        left
+    } else {
+        right
+    }
 }
 
-/// Plus grande valeur surchargee pour `Double`.
-/// @status Recommandee
 def max(left: Double, right: Double): Double = {
-    maxDouble(left, right)
+    if left > right {
+        left
+    } else {
+        right
+    }
 }
 
 /// Plus petite des deux valeurs entieres.
 /// @status Recommandee
-def minInt(left: Int, right: Int): Int = {
-    if left < right {
-        left
-    } else {
-        right
-    }
-}
-
-def minLong(left: Long, right: Long): Long = {
-    if left < right {
-        left
-    } else {
-        right
-    }
-}
-
-def minFloat(left: Float, right: Float): Float = {
-    if left < right {
-        left
-    } else {
-        right
-    }
-}
-
-def minDouble(left: Double, right: Double): Double = {
-    if left < right {
-        left
-    } else {
-        right
-    }
-}
-
-/// Plus petite valeur surchargee pour `Int`.
-/// @status Recommandee
 def min(left: Int, right: Int): Int = {
-    minInt(left, right)
+    if left < right {
+        left
+    } else {
+        right
+    }
 }
 
-/// Plus petite valeur surchargee pour `Long`.
-/// @status Recommandee
 def min(left: Long, right: Long): Long = {
-    minLong(left, right)
+    if left < right {
+        left
+    } else {
+        right
+    }
 }
 
-/// Plus petite valeur surchargee pour `Float`.
-/// @status Recommandee
 def min(left: Float, right: Float): Float = {
-    minFloat(left, right)
+    if left < right {
+        left
+    } else {
+        right
+    }
 }
 
-/// Plus petite valeur surchargee pour `Double`.
-/// @status Recommandee
 def min(left: Double, right: Double): Double = {
-    minDouble(left, right)
+    if left < right {
+        left
+    } else {
+        right
+    }
 }
 
 /// Contraint une valeur entiere dans l'intervalle donne.
 /// @status Recommandee
-def clampInt(value: Int, minimum: Int, maximum: Int): Int = {
-    if value < minimum {
-        minimum
-    } else {
-        if value > maximum {
-            maximum
-        } else {
-            value
-        }
-    }
-}
-
-def clampLong(value: Long, minimum: Long, maximum: Long): Long = {
-    if value < minimum {
-        minimum
-    } else {
-        if value > maximum {
-            maximum
-        } else {
-            value
-        }
-    }
-}
-
-def clampFloat(value: Float, minimum: Float, maximum: Float): Float = {
-    if value < minimum {
-        minimum
-    } else {
-        if value > maximum {
-            maximum
-        } else {
-            value
-        }
-    }
-}
-
-def clampDouble(value: Double, minimum: Double, maximum: Double): Double = {
-    if value < minimum {
-        minimum
-    } else {
-        if value > maximum {
-            maximum
-        } else {
-            value
-        }
-    }
-}
-
-/// Contraint une valeur surchargee `Int` dans l'intervalle donne.
-/// @status Recommandee
 def clamp(value: Int, minimum: Int, maximum: Int): Int = {
-    clampInt(value, minimum, maximum)
+    if value < minimum {
+        minimum
+    } else {
+        if value > maximum {
+            maximum
+        } else {
+            value
+        }
+    }
 }
 
-/// Contraint une valeur surchargee `Long` dans l'intervalle donne.
-/// @status Recommandee
 def clamp(value: Long, minimum: Long, maximum: Long): Long = {
-    clampLong(value, minimum, maximum)
+    if value < minimum {
+        minimum
+    } else {
+        if value > maximum {
+            maximum
+        } else {
+            value
+        }
+    }
 }
 
-/// Contraint une valeur surchargee `Float` dans l'intervalle donne.
-/// @status Recommandee
 def clamp(value: Float, minimum: Float, maximum: Float): Float = {
-    clampFloat(value, minimum, maximum)
+    if value < minimum {
+        minimum
+    } else {
+        if value > maximum {
+            maximum
+        } else {
+            value
+        }
+    }
 }
 
-/// Contraint une valeur surchargee `Double` dans l'intervalle donne.
-/// @status Recommandee
 def clamp(value: Double, minimum: Double, maximum: Double): Double = {
-    clampDouble(value, minimum, maximum)
+    if value < minimum {
+        minimum
+    } else {
+        if value > maximum {
+            maximum
+        } else {
+            value
+        }
+    }
 }
 
 def isCloseFloat(left: Float, right: Float, epsilon: Float): Bool = {
@@ -446,7 +349,7 @@ def absDiffDouble(left: Double, right: Double): Double = {
 ///
 /// Retourne `0` si `exponent` est negatif.
 /// @status Recommandee
-def powInt(base: Int, exponent: Int): Int = {
+def pow(base: Int, exponent: Int): Int = {
     if exponent < 0 {
         0
     } else {
@@ -464,7 +367,7 @@ def powInt(base: Int, exponent: Int): Int = {
 ///
 /// Retourne `0.0F` si `exponent` est negatif.
 /// @status Recommandee
-def powFloat(base: Float, exponent: Int): Float = {
+def pow(base: Float, exponent: Int): Float = {
     if exponent < 0 {
         0.0F
     } else {
@@ -482,7 +385,7 @@ def powFloat(base: Float, exponent: Int): Float = {
 ///
 /// Retourne `0.0` si `exponent` est negatif.
 /// @status Recommandee
-def powDouble(base: Double, exponent: Int): Double = {
+def pow(base: Double, exponent: Int): Double = {
     if exponent < 0 {
         0.0
     } else {
@@ -494,24 +397,6 @@ def powDouble(base: Double, exponent: Int): Double = {
         }
         result
     }
-}
-
-/// Puissance surchargee pour `Int`.
-/// @status Recommandee
-def pow(base: Int, exponent: Int): Int = {
-    powInt(base, exponent)
-}
-
-/// Puissance surchargee pour `Float`.
-/// @status Recommandee
-def pow(base: Float, exponent: Int): Float = {
-    powFloat(base, exponent)
-}
-
-/// Puissance surchargee pour `Double`.
-/// @status Recommandee
-def pow(base: Double, exponent: Int): Double = {
-    powDouble(base, exponent)
 }
 
 def factorialInt(value: Int): Int = {
@@ -533,7 +418,7 @@ def factorialInt(value: Int): Int = {
 /// Retourne `-1.0F` si `value` est negatif. Le calcul utilise une approximation
 /// iterative fixe.
 /// @status Recommandee
-def sqrtFloat(value: Float): Float = {
+def sqrt(value: Float): Float = {
     if value < 0.0F {
         -1.0F
     } else if value == 0.0F {
@@ -554,7 +439,7 @@ def sqrtFloat(value: Float): Float = {
 /// Retourne `-1.0` si `value` est negatif. Le calcul utilise une approximation
 /// iterative fixe.
 /// @status Recommandee
-def sqrtDouble(value: Double): Double = {
+def sqrt(value: Double): Double = {
     if value < 0.0 {
         -1.0
     } else if value == 0.0 {
@@ -568,16 +453,4 @@ def sqrtDouble(value: Double): Double = {
         }
         guess
     }
-}
-
-/// Racine carree surchargee pour `Float`.
-/// @status Recommandee
-def sqrt(value: Float): Float = {
-    sqrtFloat(value)
-}
-
-/// Racine carree surchargee pour `Double`.
-/// @status Recommandee
-def sqrt(value: Double): Double = {
-    sqrtDouble(value)
 }

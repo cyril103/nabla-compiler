@@ -16,48 +16,16 @@
     <section class="module-hero">
       <p class="import">import math</p>
       <h1>Math</h1>
-      <p>Fonctions mathematiques courantes. Les noms surcharges (`abs`, `min`, `max`, `clamp`, `pow`, `sqrt`) forment l&#x27;API idiomatique. Les noms suffixes (`absInt`, `maxLong`, `sqrtDouble`, etc.) restent disponibles comme compatibilite explicite.</p>
+      <p>Fonctions mathematiques courantes. Les operations communes utilisent les noms surcharges idiomatiques (`abs`, `min`, `max`, `clamp`, `pow`, `sqrt`).</p>
     </section>
     <section class="entries">
-    <article class="entry" id="absInt">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>absInt</h2>
-      <pre><code>def absInt(value: Int): Int</code></pre>
-      <p>Valeur absolue d&#x27;un entier.</p>
-    </article>
-    <article class="entry" id="absLong">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>absLong</h2>
-      <pre><code>def absLong(value: Long): Long</code></pre>
-      <p>Valeur absolue d&#x27;un entier long.</p>
-    </article>
-    <article class="entry" id="absFloat">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>absFloat</h2>
-      <pre><code>def absFloat(value: Float): Float</code></pre>
-      <p>Valeur absolue d&#x27;un flottant simple precision.</p>
-    </article>
-    <article class="entry" id="absDouble">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>absDouble</h2>
-      <pre><code>def absDouble(value: Double): Double</code></pre>
-      <p>Valeur absolue d&#x27;un flottant double precision.</p>
-    </article>
     <article class="entry" id="abs">
       <div class="entry-meta">
         <span class="kind">def</span> <span class="status recommended">Recommandee</span>
       </div>
       <h2>abs</h2>
       <pre><code>def abs(value: Int): Int</code></pre>
-      <p>Valeur absolue surchargee pour `Int`.</p>
+      <p>Valeur absolue d&#x27;un entier.</p>
     </article>
     <article class="entry" id="abs-2">
       <div class="entry-meta">
@@ -65,7 +33,7 @@
       </div>
       <h2>abs</h2>
       <pre><code>def abs(value: Long): Long</code></pre>
-      <p>Valeur absolue surchargee pour `Long`.</p>
+      <p>Valeur absolue d&#x27;un entier long.</p>
     </article>
     <article class="entry" id="abs-3">
       <div class="entry-meta">
@@ -73,7 +41,7 @@
       </div>
       <h2>abs</h2>
       <pre><code>def abs(value: Float): Float</code></pre>
-      <p>Valeur absolue surchargee pour `Float`.</p>
+      <p>Valeur absolue d&#x27;un flottant simple precision.</p>
     </article>
     <article class="entry" id="abs-4">
       <div class="entry-meta">
@@ -81,15 +49,7 @@
       </div>
       <h2>abs</h2>
       <pre><code>def abs(value: Double): Double</code></pre>
-      <p>Valeur absolue surchargee pour `Double`.</p>
-    </article>
-    <article class="entry" id="maxInt">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>maxInt</h2>
-      <pre><code>def maxInt(left: Int, right: Int): Int</code></pre>
-      <p>Plus grande des deux valeurs entieres.</p>
+      <p>Valeur absolue d&#x27;un flottant double precision.</p>
     </article>
     <article class="entry" id="max">
       <div class="entry-meta">
@@ -97,39 +57,7 @@
       </div>
       <h2>max</h2>
       <pre><code>def max(left: Int, right: Int): Int</code></pre>
-      <p>Plus grande valeur surchargee pour `Int`.</p>
-    </article>
-    <article class="entry" id="max-2">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>max</h2>
-      <pre><code>def max(left: Long, right: Long): Long</code></pre>
-      <p>Plus grande valeur surchargee pour `Long`.</p>
-    </article>
-    <article class="entry" id="max-3">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>max</h2>
-      <pre><code>def max(left: Float, right: Float): Float</code></pre>
-      <p>Plus grande valeur surchargee pour `Float`.</p>
-    </article>
-    <article class="entry" id="max-4">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>max</h2>
-      <pre><code>def max(left: Double, right: Double): Double</code></pre>
-      <p>Plus grande valeur surchargee pour `Double`.</p>
-    </article>
-    <article class="entry" id="minInt">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>minInt</h2>
-      <pre><code>def minInt(left: Int, right: Int): Int</code></pre>
-      <p>Plus petite des deux valeurs entieres.</p>
+      <p>Plus grande des deux valeurs entieres.</p>
     </article>
     <article class="entry" id="min">
       <div class="entry-meta">
@@ -137,39 +65,7 @@
       </div>
       <h2>min</h2>
       <pre><code>def min(left: Int, right: Int): Int</code></pre>
-      <p>Plus petite valeur surchargee pour `Int`.</p>
-    </article>
-    <article class="entry" id="min-2">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>min</h2>
-      <pre><code>def min(left: Long, right: Long): Long</code></pre>
-      <p>Plus petite valeur surchargee pour `Long`.</p>
-    </article>
-    <article class="entry" id="min-3">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>min</h2>
-      <pre><code>def min(left: Float, right: Float): Float</code></pre>
-      <p>Plus petite valeur surchargee pour `Float`.</p>
-    </article>
-    <article class="entry" id="min-4">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>min</h2>
-      <pre><code>def min(left: Double, right: Double): Double</code></pre>
-      <p>Plus petite valeur surchargee pour `Double`.</p>
-    </article>
-    <article class="entry" id="clampInt">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>clampInt</h2>
-      <pre><code>def clampInt(value: Int, minimum: Int, maximum: Int): Int</code></pre>
-      <p>Contraint une valeur entiere dans l&#x27;intervalle donne.</p>
+      <p>Plus petite des deux valeurs entieres.</p>
     </article>
     <article class="entry" id="clamp">
       <div class="entry-meta">
@@ -177,31 +73,7 @@
       </div>
       <h2>clamp</h2>
       <pre><code>def clamp(value: Int, minimum: Int, maximum: Int): Int</code></pre>
-      <p>Contraint une valeur surchargee `Int` dans l&#x27;intervalle donne.</p>
-    </article>
-    <article class="entry" id="clamp-2">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>clamp</h2>
-      <pre><code>def clamp(value: Long, minimum: Long, maximum: Long): Long</code></pre>
-      <p>Contraint une valeur surchargee `Long` dans l&#x27;intervalle donne.</p>
-    </article>
-    <article class="entry" id="clamp-3">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>clamp</h2>
-      <pre><code>def clamp(value: Float, minimum: Float, maximum: Float): Float</code></pre>
-      <p>Contraint une valeur surchargee `Float` dans l&#x27;intervalle donne.</p>
-    </article>
-    <article class="entry" id="clamp-4">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>clamp</h2>
-      <pre><code>def clamp(value: Double, minimum: Double, maximum: Double): Double</code></pre>
-      <p>Contraint une valeur surchargee `Double` dans l&#x27;intervalle donne.</p>
+      <p>Contraint une valeur entiere dans l&#x27;intervalle donne.</p>
     </article>
     <article class="entry" id="isEvenInt">
       <div class="entry-meta">
@@ -235,40 +107,14 @@
       <pre><code>def lcmInt(left: Int, right: Int): Int</code></pre>
       <p>Plus petit commun multiple de deux entiers.</p>
     </article>
-    <article class="entry" id="powInt">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>powInt</h2>
-      <pre><code>def powInt(base: Int, exponent: Int): Int</code></pre>
-      <p>Puissance entiere positive.</p>
-<p>Retourne `0` si `exponent` est negatif.</p>
-    </article>
-    <article class="entry" id="powFloat">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>powFloat</h2>
-      <pre><code>def powFloat(base: Float, exponent: Int): Float</code></pre>
-      <p>Puissance flottante simple precision avec exposant entier positif.</p>
-<p>Retourne `0.0F` si `exponent` est negatif.</p>
-    </article>
-    <article class="entry" id="powDouble">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>powDouble</h2>
-      <pre><code>def powDouble(base: Double, exponent: Int): Double</code></pre>
-      <p>Puissance flottante double precision avec exposant entier positif.</p>
-<p>Retourne `0.0` si `exponent` est negatif.</p>
-    </article>
     <article class="entry" id="pow">
       <div class="entry-meta">
         <span class="kind">def</span> <span class="status recommended">Recommandee</span>
       </div>
       <h2>pow</h2>
       <pre><code>def pow(base: Int, exponent: Int): Int</code></pre>
-      <p>Puissance surchargee pour `Int`.</p>
+      <p>Puissance entiere positive.</p>
+<p>Retourne `0` si `exponent` est negatif.</p>
     </article>
     <article class="entry" id="pow-2">
       <div class="entry-meta">
@@ -276,7 +122,8 @@
       </div>
       <h2>pow</h2>
       <pre><code>def pow(base: Float, exponent: Int): Float</code></pre>
-      <p>Puissance surchargee pour `Float`.</p>
+      <p>Puissance flottante simple precision avec exposant entier positif.</p>
+<p>Retourne `0.0F` si `exponent` est negatif.</p>
     </article>
     <article class="entry" id="pow-3">
       <div class="entry-meta">
@@ -284,25 +131,8 @@
       </div>
       <h2>pow</h2>
       <pre><code>def pow(base: Double, exponent: Int): Double</code></pre>
-      <p>Puissance surchargee pour `Double`.</p>
-    </article>
-    <article class="entry" id="sqrtFloat">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>sqrtFloat</h2>
-      <pre><code>def sqrtFloat(value: Float): Float</code></pre>
-      <p>Racine carree simple precision.</p>
-<p>Retourne `-1.0F` si `value` est negatif. Le calcul utilise une approximation iterative fixe.</p>
-    </article>
-    <article class="entry" id="sqrtDouble">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>sqrtDouble</h2>
-      <pre><code>def sqrtDouble(value: Double): Double</code></pre>
-      <p>Racine carree double precision.</p>
-<p>Retourne `-1.0` si `value` est negatif. Le calcul utilise une approximation iterative fixe.</p>
+      <p>Puissance flottante double precision avec exposant entier positif.</p>
+<p>Retourne `0.0` si `exponent` est negatif.</p>
     </article>
     <article class="entry" id="sqrt">
       <div class="entry-meta">
@@ -310,7 +140,8 @@
       </div>
       <h2>sqrt</h2>
       <pre><code>def sqrt(value: Float): Float</code></pre>
-      <p>Racine carree surchargee pour `Float`.</p>
+      <p>Racine carree simple precision.</p>
+<p>Retourne `-1.0F` si `value` est negatif. Le calcul utilise une approximation iterative fixe.</p>
     </article>
     <article class="entry" id="sqrt-2">
       <div class="entry-meta">
@@ -318,7 +149,8 @@
       </div>
       <h2>sqrt</h2>
       <pre><code>def sqrt(value: Double): Double</code></pre>
-      <p>Racine carree surchargee pour `Double`.</p>
+      <p>Racine carree double precision.</p>
+<p>Retourne `-1.0` si `value` est negatif. Le calcul utilise une approximation iterative fixe.</p>
     </article>
     </section>
   </main>

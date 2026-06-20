@@ -84,10 +84,8 @@ supposer une prise en charge Unicode complete.
 
 ### Math
 
-Les fonctions specialisees par type (`absInt`, `maxLong`, `sqrtDouble`, etc.)
-restent publiques pour compatibilite. Les nouvelles API peuvent utiliser des
-noms idiomatiques surcharges quand la signature suffit a choisir
-l'implementation, par exemple :
+Les operations communes utilisent les noms idiomatiques surcharges quand la
+signature suffit a choisir l'implementation :
 
 - `sqrt(value: Float): Float`
 - `sqrt(value: Double): Double`
@@ -96,6 +94,11 @@ l'implementation, par exemple :
   `Double`
 - `clamp(value, minimum, maximum)` pour `Int`, `Long`, `Float` et `Double`
 - `pow(base, exponent: Int)` pour `Int`, `Float` et `Double`
+
+Les fonctions suffixees historiques de ces familles (`absInt`, `maxLong`,
+`sqrtDouble`, etc.) ont ete retirees de l'API publique. Les helpers suffixes qui
+n'ont pas encore de forme surchargee, comme `gcdInt` ou `signFloat`, restent
+disponibles jusqu'a leur propre migration.
 
 ### Util
 
