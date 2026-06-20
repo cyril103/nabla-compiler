@@ -120,7 +120,6 @@ de retour seul.
 - `RandomChoiceResult[T]`
 - `randomSeed(...)`
 - `randomSeedNow()`
-- `randomSeedTime()`
 - `randomInt(...)`
 - `randomIntRange(...)`
 - `randomBool(...)`
@@ -142,6 +141,9 @@ nouveaux exemples devraient preferer la surface publique ci-dessus :
   `Set.empty[T]()` ou `Set.fromArray[T](values)` suffit.
 - Fonctions bas niveau `setEmpty`, `setFromArray` et variantes specialisees
   quand la fabrique de `Set` exprime mieux l'intention.
+- Compatibilite `randomSeedTime()` quand `randomSeedNow()` exprime mieux
+  l'intention.
+- Compatibilite `randomIntInRange(...)` quand `randomIntRange(...)` suffit.
 
 ## Details Internes
 

@@ -1,9 +1,22 @@
+/// @module Util
+/// Generateur pseudo-aleatoire deterministe.
+/// Les fonctions retournent la valeur generee avec le nouvel etat. Conserver et
+/// reutiliser cet etat permet de produire une sequence reproductible; utiliser
+/// randomSeedNow() quand une seed temporelle suffit.
+
+/// Etat immuable du generateur pseudo-aleatoire.
+/// @status Recommandee
 class RandomState(seedValue: Int) {
     def seed(): Int = {
         seedValue
     }
 }
 
+/// Resultat generique d'un tirage aleatoire.
+///
+/// value() donne la valeur tiree et state() donne l'etat a utiliser pour le
+/// tirage suivant.
+/// @status Recommandee
 class RandomResult[T](valueValue: T, stateValue: RandomState) {
     def value(): T = {
         valueValue
@@ -14,12 +27,18 @@ class RandomResult[T](valueValue: T, stateValue: RandomState) {
     }
 }
 
+/// Resultat d'un tirage entier.
+/// @status Recommandee
 class RandomIntResult extends RandomResult[Int](valueValue, stateValue) {
 }
 
+/// Resultat d'un tirage booleen.
+/// @status Recommandee
 class RandomBoolResult extends RandomResult[Bool](valueValue, stateValue) {
 }
 
+/// Resultat d'un choix aleatoire dans une collection.
+/// @status Recommandee
 class RandomChoiceResult[T] extends RandomResult[T](valueValue, stateValue) {
 }
 
@@ -32,27 +51,42 @@ def randomStep(seed: Int): Int = {
     }
 }
 
+/// Cree un etat pseudo-aleatoire depuis une seed explicite.
+/// @status Recommandee
 def randomSeed(seed: Int): RandomState = {
     new RandomState(seed)
 }
 
+/// Cree un etat pseudo-aleatoire depuis l'horloge runtime.
+/// @status Recommandee
 def randomSeedNow(): RandomState = {
     randomSeed(timeSeed())
 }
 
+/// Alias de compatibilite pour randomSeedNow().
+/// @status Compatibilite
 def randomSeedTime(): RandomState = {
     randomSeedNow()
 }
 
+/// Tire un entier pseudo-aleatoire positif.
+/// @status Recommandee
 def randomInt(state: RandomState): RandomIntResult = {
     val nextSeed = randomStep(state.seed())
     new RandomIntResult(nextSeed, new RandomState(nextSeed))
 }
 
+/// Alias de compatibilite pour randomIntRange.
+/// @status Compatibilite
 def randomIntInRange(state: RandomState, minimum: Int, maximum: Int): RandomIntResult = {
     randomIntRange(state, minimum, maximum)
 }
 
+/// Tire un entier dans l'intervalle inclusif minimum..maximum.
+///
+/// Si les bornes sont donnees dans l'ordre inverse, elles sont normalisees avant
+/// le tirage.
+/// @status Recommandee
 def randomIntRange(state: RandomState, minimum: Int, maximum: Int): RandomIntResult = {
     val lower = if maximum < minimum {
         maximum
@@ -74,6 +108,8 @@ def randomIntRange(state: RandomState, minimum: Int, maximum: Int): RandomIntRes
     }
 }
 
+/// Tire un booleen pseudo-aleatoire.
+/// @status Recommandee
 def randomBool(state: RandomState): RandomBoolResult = {
     val generated = randomInt(state)
     new RandomBoolResult(generated.value() % 2 == 0, generated.state())

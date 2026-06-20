@@ -206,10 +206,12 @@ Le pipeline implemente actuellement :
   wrappers `io.readTextFile`, `io.writeTextFile`, `io.appendTextFile`,
   `io.deleteTextFile`, `io.renameTextFile` et `io.createDirectory` /
   `io.pathExists`;
-- module de bibliotheque standard `util` avec `randomSeed`, `randomInt`,
-  `randomIntRange`, `randomIntInRange`, `RandomChoiceResult`,
-  `randomBool`, `randomSeedNow` et `randomSeedTime` pour une API pseudo-aléatoire
-  deterministe basée sur une seed;
+- module de bibliotheque standard `util` avec `RandomState`,
+  `RandomResult[T]`, `RandomIntResult`, `RandomBoolResult`,
+  `RandomChoiceResult[T]`, `randomSeed`, `randomSeedNow`, `randomInt`,
+  `randomIntRange` et `randomBool` pour une API pseudo-aléatoire deterministe
+  basée sur une seed; `randomSeedTime` et `randomIntInRange` restent des alias
+  de compatibilite;
 - module de bibliotheque standard `math` avec `abs(Int/Long/Float/Double)`,
   `absDiff(Int/Long/Float/Double)`, `max(Int/Long/Float/Double)`,
   `min(Int/Long/Float/Double)`, `clamp(Int/Long/Float/Double)`,
@@ -312,8 +314,8 @@ Le pipeline implemente actuellement :
 - reference HTML de la stdlib generee depuis `///`, avec directive `@status`
   pour distinguer visuellement API recommandee, compatibilite et helpers
   internes; toutes les pages actuellement publiees affichent les statuts des
-  symboles documentes, et les modules `io`, `math`, `strings` et `OptionInt`
-  explicitent leurs conventions utilisateur principales.
+  symboles documentes, et les modules `io`, `math`, `strings`, `util` et
+  `OptionInt` explicitent leurs conventions utilisateur principales.
 - examples Project Euler 1 a 10 (`examples/euler1.nabla` ... `examples/euler10_functional.nabla`)
   comme banc progressif pour exercer le langage et la bibliotheque standard.
 - `examples/student_scores.nabla` comme exemple idiomatique vérifié pour
@@ -758,6 +760,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Nettoyer la surface documentaire de `stdlib/util.nabla`: les types
+  de resultat et les fonctions recommandees sont maintenant publies dans la
+  reference HTML avec `@status`, tandis que `randomStep` reste interne et que
+  `randomSeedTime` / `randomIntInRange` sont classes en compatibilite.
+  - Fichiers / tests associes: `stdlib/util.nabla`, `docs/stdlib-api.md`,
+    `docs/stdlib/`, `AGENTS.md`, `make stdlib-docs`,
+    `make all-tests`.
 - `local` - Formaliser les conventions internes des types deja stabilises:
   `Int`/`Long` immediats, `Bool` tagge, `Char` ASCII, `String` byte-based,
   tableaux natifs specialises, types fonction canoniques et types de classes
