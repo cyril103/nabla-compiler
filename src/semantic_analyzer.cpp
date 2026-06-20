@@ -268,6 +268,11 @@ void SemanticAnalyzer::validateDeclaredTypes() {
                 ErrorKind::Semantic, signature.location,
                 "la fonction 'main' ne peut pas accepter de paramètres");
         }
+        if (functionName == "main" && !signature.typeParameters.empty()) {
+            throw CompilerError(
+                ErrorKind::Semantic, signature.location,
+                "la fonction 'main' ne peut pas être générique");
+        }
         for (const auto& parameter : signature.parameters) {
             if (!isKnownTypeInScope(parameter.type, signature.typeParameters)) {
                 throw CompilerError(

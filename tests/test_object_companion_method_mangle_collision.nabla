@@ -1,0 +1,15 @@
+class A() {
+    def x(): Int = {
+        1
+    }
+}
+
+object A {
+    def x(): Int = {
+        2
+    }
+}
+
+def main(): Int = {
+    (new A()).x() + A.x()
+}

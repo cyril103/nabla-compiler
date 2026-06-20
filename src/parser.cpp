@@ -1963,7 +1963,9 @@ std::pair<const Parser::ParsedSymbol*, size_t> Parser::findLocalWithScope(const 
 
 void Parser::captureIfNeeded(const std::string& name, const ParsedSymbol& symbol, size_t scopeIndex) {
     if (lambdaCaptureScopes.empty()) return;
-    auto& lambda = lambdaCaptureScopes.back();
-    if (scopeIndex >= lambda.outerScopeCount) return;
-    lambda.capturesBySymbol[symbol.internalName] = {name, symbol.internalName, symbol.type};
+    for (auto& lambda : lambdaCaptureScopes) {
+        if (scopeIndex < lambda.outerScopeCount) {
+            lambda.capturesBySymbol[symbol.internalName] = {name, symbol.internalName, symbol.type};
+        }
+    }
 }

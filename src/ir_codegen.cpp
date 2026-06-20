@@ -20,17 +20,26 @@ const std::vector<std::string> METHOD_ARGUMENT_REGISTERS = {"rsi", "rdx", "rcx",
     throw CompilerError(ErrorKind::Codegen, {"<ir>", 1, 1}, message);
 }
 
-std::string asmFunctionName(const std::string& name) {
+std::string asmSymbolName(const std::string& name) {
     std::string result;
-    for (char c : name) {
-        if (std::isalnum(static_cast<unsigned char>(c))) result += c;
-        else result += "_";
+    result.reserve(name.size() + 10);
+    result = "nabla_sym_";
+    static constexpr char hex[] = "0123456789abcdef";
+    for (unsigned char c : name) {
+        if (std::isalnum(c)) {
+            result += static_cast<char>(c);
+        } else {
+            result += "_";
+            result += hex[(c >> 4) & 0x0f];
+            result += hex[c & 0x0f];
+        }
     }
-    static const std::set<std::string> reservedNames = {
-        "abs",
-    };
-    if (reservedNames.count(result)) return "nabla_fn_" + result;
     return result;
+}
+
+std::string asmFunctionName(const std::string& name) {
+    if (name == "main") return "main";
+    return asmSymbolName(name);
 }
 
 std::string asmLabelName(const std::string& functionName, const std::string& label) {
@@ -41,6 +50,15 @@ std::pair<std::string, std::string> splitQualifiedMember(const std::string& name
     size_t dot = name.find('.');
     if (dot == std::string::npos) codegenError("membre IR non qualifie: " + name);
     return {name.substr(0, dot), name.substr(dot + 1)};
+}
+
+std::string methodFunctionName(const std::string& className, const std::string& methodName) {
+    return "method." + className + "." + methodName;
+}
+
+std::string methodFunctionName(const std::string& qualifiedMember) {
+    auto [className, methodName] = splitQualifiedMember(qualifiedMember);
+    return methodFunctionName(className, methodName);
 }
 
 long long boxedInt(const std::string& value) {
@@ -74,12 +92,7 @@ std::string normalizeFloatConstant(const std::string& value) {
 }
 
 std::string asmSymbolPart(const std::string& value) {
-    std::string result;
-    for (char c : value) {
-        if (std::isalnum(static_cast<unsigned char>(c))) result += c;
-        else result += "_";
-    }
-    return result;
+    return asmSymbolName(value);
 }
 
 struct PhiInfo {
@@ -1036,7 +1049,7 @@ private:
                 out << "    jmp " << fallbackLabel << "\n";
                 for (size_t i = 0; i < targets.size(); ++i) {
                     out << dispatchPrefix << "_" << i << ":\n";
-                    out << "    call " << asmFunctionName(targets[i].targetOwnerName + "." + methodName) << "\n";
+                    out << "    call " << asmFunctionName(methodFunctionName(targets[i].targetOwnerName, methodName)) << "\n";
                     out << "    jmp " << doneLabel << "\n";
                 }
                 out << fallbackLabel << ":\n";
@@ -1107,7 +1120,7 @@ private:
         } else if (allowDynamicDispatch) {
             const auto targets = dynamicDispatchTargets(className, methodName);
             if (targets.empty()) {
-                out << "    call " << asmFunctionName(instruction.operation) << "\n";
+                out << "    call " << asmFunctionName(methodFunctionName(instruction.operation)) << "\n";
             } else {
                 const std::string dispatchPrefix =
                     ".L_dispatch_" + asmSymbolPart(function.name) + "_" +
@@ -1122,15 +1135,15 @@ private:
                 out << "    jmp " << fallbackLabel << "\n";
                 for (size_t i = 0; i < targets.size(); ++i) {
                     out << dispatchPrefix << "_" << i << ":\n";
-                    out << "    call " << asmFunctionName(targets[i].targetOwnerName + "." + methodName) << "\n";
+                    out << "    call " << asmFunctionName(methodFunctionName(targets[i].targetOwnerName, methodName)) << "\n";
                     out << "    jmp " << doneLabel << "\n";
                 }
                 out << fallbackLabel << ":\n";
-                out << "    call " << asmFunctionName(instruction.operation) << "\n";
+                out << "    call " << asmFunctionName(methodFunctionName(instruction.operation)) << "\n";
                 out << doneLabel << ":\n";
             }
         } else {
-            out << "    call " << asmFunctionName(instruction.operation) << "\n";
+            out << "    call " << asmFunctionName(methodFunctionName(instruction.operation)) << "\n";
         }
         storeRegister(instruction.result, "rax");
     }

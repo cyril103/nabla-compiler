@@ -2151,7 +2151,7 @@ std::string FunctionDefNode::lowerToIR(IRBuilder& builder) const {
     for (const auto& parameter : parameters) {
         irParameters.push_back({parameter.name, parameter.type});
     }
-    const std::string functionName = className.empty() ? name : className + "." + name;
+    const std::string functionName = className.empty() ? name : "method." + className + "." + name;
     builder.beginFunction(functionName, irParameters, returnType);
     if (!className.empty()) {
         builder.bindThis();
@@ -2210,7 +2210,7 @@ std::string FunctionDefNode::lowerSpecializedMethodToIR(
     const std::string concreteMethodName = concreteMethodTypeArguments.empty()
         ? name
         : formatParameterizedType(name, concreteMethodTypeArguments);
-    builder.beginFunction(concreteClassName + "." + concreteMethodName, irParameters, returnType);
+    builder.beginFunction("method." + concreteClassName + "." + concreteMethodName, irParameters, returnType);
     builder.bindThis();
     builder.bindParameter("this", "this");
     for (const auto& parameter : parameters) {

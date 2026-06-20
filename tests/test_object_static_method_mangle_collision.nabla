@@ -1,0 +1,13 @@
+object A {
+    def b(): Int = {
+        1
+    }
+}
+
+def A_b(): Int = {
+    2
+}
+
+def main(): Int = {
+    A.b() + A_b()
+}

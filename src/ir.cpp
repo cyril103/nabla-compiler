@@ -28,13 +28,21 @@ std::string quotedString(const std::string& value) {
     out << "\"";
     return out.str();
 }
+
+std::string displayFunctionName(const std::string& name) {
+    const std::string methodPrefix = "method.";
+    if (name.rfind(methodPrefix, 0) == 0) {
+        return name.substr(methodPrefix.size());
+    }
+    return name;
+}
 }
 
 std::string IRProgram::format() const {
     std::ostringstream out;
     for (size_t functionIndex = 0; functionIndex < functions.size(); ++functionIndex) {
         const auto& function = functions[functionIndex];
-        out << "function " << function.name << "(";
+        out << "function " << displayFunctionName(function.name) << "(";
         for (size_t i = 0; i < function.parameters.size(); ++i) {
             if (i > 0) out << ", ";
             out << "%" << function.parameters[i].name << ": " << function.parameters[i].type;

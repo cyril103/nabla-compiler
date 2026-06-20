@@ -1,0 +1,1 @@
+tests/test_error_main_generic.nabla:1:1: semantic error: la fonction 'main' ne peut pas être générique

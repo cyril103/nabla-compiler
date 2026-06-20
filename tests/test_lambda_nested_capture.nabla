@@ -1,0 +1,10 @@
+def main(): Int = {
+    val offset = 2
+    val maker: (Int) => Int = (x: Int) => {
+        val inner: (Int) => Int = (y: Int) => {
+            y + offset
+        }
+        inner(x)
+    }
+    maker(40)
+}
