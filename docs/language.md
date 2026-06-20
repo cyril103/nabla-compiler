@@ -143,8 +143,9 @@ def main(): Int = {
 ```
 
 Une redéfinition avec exactement les memes types de parametres est refusee. Les
-references de fonctions surchargees sans type attendu explicite ne sont pas
-encore supportees.
+references de fonctions surchargees sont autorisees lorsqu'un type fonction est
+attendu, par exemple en argument de fonction d'ordre superieur. Sans type
+attendu explicite, elles restent refusees pour eviter une ambiguite silencieuse.
 
 `Unit` sert aux fonctions a effet.
 

@@ -1,0 +1,32 @@
+import math
+
+def applyFloat(value: Float, f: (Float) => Float): Float = {
+    f(value)
+}
+
+def applyDouble(value: Double, f: (Double) => Double): Double = {
+    f(value)
+}
+
+def label(value: Int): Int = {
+    value + 1
+}
+
+def label(value: String): Int = {
+    value.length()
+}
+
+def applyInt(value: Int, f: (Int) => Int): Int = {
+    f(value)
+}
+
+def main(): Int = {
+    val asFloat = applyFloat(16.0F, sqrt)
+    val asDouble = applyDouble(25.0, sqrt)
+    val asInt = applyInt(41, label)
+    if asFloat == 4.0F && asDouble == 5.0 && asInt == 42 {
+        42
+    } else {
+        1
+    }
+}

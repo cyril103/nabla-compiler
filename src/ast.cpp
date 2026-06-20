@@ -1639,8 +1639,10 @@ std::string FunctionCallNode::lowerToIR(IRBuilder& builder) const {
 
 FunctionReferenceNode::FunctionReferenceNode(
     std::string functionName, std::string functionType,
-    std::vector<std::string> genericTypeArguments, std::vector<Capture> capturedValues)
-    : name(std::move(functionName)), resolvedType(std::move(functionType)),
+    std::vector<std::string> genericTypeArguments, std::vector<Capture> capturedValues,
+    std::string resolvedName)
+    : name(std::move(functionName)), resolvedFunctionName(resolvedName.empty() ? name : std::move(resolvedName)),
+      resolvedType(std::move(functionType)),
       typeArguments(std::move(genericTypeArguments)),
       captures(std::move(capturedValues)) {}
 
@@ -1649,7 +1651,7 @@ std::string FunctionReferenceNode::getType() {
 }
 
 void FunctionReferenceNode::validateSemantics(CompilerContext& context) {
-    auto function = context.functions.find(name);
+    auto function = context.functions.find(resolvedFunctionName);
     if (function == context.functions.end()) {
         semanticError("fonction inconnue: " + name);
     }
@@ -1696,11 +1698,11 @@ std::string FunctionReferenceNode::lowerToIR(IRBuilder& builder) const {
     if (!concreteTypeArguments.empty()) {
         auto functionType = functionTypeFromName(resolvedType);
         const std::string concreteReturnType = functionType ? functionType->returnType : "";
-        builder.registerFunctionSpecialization(name, concreteTypeArguments, concreteReturnType);
+        builder.registerFunctionSpecialization(resolvedFunctionName, concreteTypeArguments, concreteReturnType);
         return builder.emitFunctionReference(
-            formatParameterizedType(name, concreteTypeArguments), loweredCaptures);
+            formatParameterizedType(resolvedFunctionName, concreteTypeArguments), loweredCaptures);
     }
-    return builder.emitFunctionReference(name, loweredCaptures);
+    return builder.emitFunctionReference(resolvedFunctionName, loweredCaptures);
 }
 
 FunctionValueCallNode::FunctionValueCallNode(

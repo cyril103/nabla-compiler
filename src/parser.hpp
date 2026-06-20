@@ -54,6 +54,7 @@ private:
     bool skipTypeAt(size_t& cursor) const;
     std::unique_ptr<ASTNode> parseLambdaExpression();
     std::unique_ptr<ASTNode> parseInferredLambdaExpression(const std::string& expectedType);
+    std::unique_ptr<ASTNode> parseFunctionReferenceWithExpectedType(const std::string& expectedType);
     std::unique_ptr<ASTNode> parsePrimary();
     std::unique_ptr<ASTNode> parsePostfix();
     std::unique_ptr<ASTNode> parseUnary();

@@ -98,8 +98,8 @@ Actions recommandees :
 9. Garder les diagnostics de compatibilite orientes vers les compagnons
    recommandes (`Array.fill`, `Set.fromArray`, `Option.some`, etc.).
 10. Poursuivre la surcharge par signature : etendre progressivement aux
-    fonctions generiques, aux references de fonctions avec type attendu et aux
-    diagnostics d'ambiguite plus riches.
+    fonctions generiques, aux annotations de type locales pour les references
+    de fonctions et aux diagnostics d'ambiguite plus riches.
 11. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
    surface n'est pas propre.
 

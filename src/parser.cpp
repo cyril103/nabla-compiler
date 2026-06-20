@@ -841,6 +841,79 @@ std::unique_ptr<ASTNode> Parser::parseInferredLambdaExpression(const std::string
         start.location);
 }
 
+std::unique_ptr<ASTNode> Parser::parseFunctionReferenceWithExpectedType(const std::string& expectedType) {
+    if (!functionTypeFromName(expectedType) || peek().type != TokenType::IDENTIFIER) {
+        return nullptr;
+    }
+
+    Token nameToken = peek();
+    std::string name = nameToken.value;
+    if (findLocal(name)) {
+        return nullptr;
+    }
+    if (!currentParsingClass.empty() &&
+        resolveClassFieldInHierarchy(context, currentParsingClass, name, nameToken.location)) {
+        return nullptr;
+    }
+    const auto overloadNames = functionOverloadNames(context, name);
+    if (overloadNames.size() <= 1) {
+        return nullptr;
+    }
+
+    consume(TokenType::IDENTIFIER, "");
+    std::vector<std::string> typeArguments;
+    if (peek().type == TokenType::LBRACKET) {
+        consume(TokenType::LBRACKET, "");
+        while (peek().type != TokenType::RBRACKET) {
+            auto [typeArgument, typeLocation] = parseType("Type d'argument générique attendu");
+            (void) typeLocation;
+            typeArguments.push_back(typeArgument);
+            if (peek().type == TokenType::COMMA) {
+                consume(TokenType::COMMA, "");
+            } else if (peek().type != TokenType::RBRACKET) {
+                throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ']' attendu après l'argument de type");
+            }
+        }
+        consume(TokenType::RBRACKET, "']' attendu après les arguments de type");
+    }
+    if (peek().type == TokenType::LPAREN) {
+        throw CompilerError(
+            ErrorKind::Parser, nameToken.location,
+            "référence de fonction attendue, appel trouvé: " + name);
+    }
+
+    std::vector<std::string> matches;
+    for (const auto& overloadName : overloadNames) {
+        const auto* signature = findFunctionSignature(context, overloadName);
+        if (!signature) continue;
+        CompilerContext::FunctionSignature candidate = *signature;
+        if (candidate.typeParameters.empty()) {
+            if (!typeArguments.empty()) continue;
+        } else {
+            auto substitution = genericFunctionSubstitutionFor(candidate, typeArguments);
+            if (!substitution) continue;
+            for (auto& parameter : candidate.parameters) {
+                parameter.type = substituteType(parameter.type, *substitution);
+            }
+            candidate.returnType = substituteType(candidate.returnType, *substitution);
+        }
+        if (functionTypeNameMatchesSignature(expectedType, candidate)) {
+            matches.push_back(overloadName);
+        }
+    }
+
+    if (matches.size() != 1) {
+        throw CompilerError(
+            ErrorKind::Parser, nameToken.location,
+            "aucune surcharge compatible pour la référence '" + name + "' avec le type attendu " + expectedType);
+    }
+    return located(
+        std::make_unique<FunctionReferenceNode>(
+            name, expectedType, std::move(typeArguments),
+            std::vector<FunctionReferenceNode::Capture>{}, matches[0]),
+        nameToken.location);
+}
+
 std::unique_ptr<ASTNode> Parser::parsePrimary() {
     if (peek().type == TokenType::KW_IF) {
         return parseIfExpression();
@@ -1111,7 +1184,9 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     }
                 }
                 return located(
-                    std::make_unique<FunctionReferenceNode>(name, functionType, std::move(typeArguments)),
+                    std::make_unique<FunctionReferenceNode>(
+                        name, functionType, std::move(typeArguments),
+                        std::vector<FunctionReferenceNode::Capture>{}, overloadNames[0]),
                     nameToken.location);
             }
             if (!typeArguments.empty()) {
@@ -1127,7 +1202,8 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             }
             return located(
                 std::make_unique<FunctionReferenceNode>(
-                    name, *functionType, std::vector<std::string>{}),
+                    name, *functionType, std::vector<std::string>{},
+                    std::vector<FunctionReferenceNode::Capture>{}, overloadNames[0]),
                 nameToken.location);
         }
         if (!typeArguments.empty()) {
@@ -1595,6 +1671,9 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseFunctionCallArguments(
 std::unique_ptr<ASTNode> Parser::parseArgument(const std::string& expectedType) {
     if (startsInferredLambdaExpression()) {
         return parseInferredLambdaExpression(expectedType);
+    }
+    if (auto functionReference = parseFunctionReferenceWithExpectedType(expectedType)) {
+        return functionReference;
     }
     return parseExpression();
 }

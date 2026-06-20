@@ -89,9 +89,10 @@ Le pipeline implemente actuellement :
   avec protection contre les cycles;
 - objets avec champs de constructeur et appels de methodes parametres;
 - fonctions globales appelables avec parametres;
-- surcharge V1 des fonctions globales non generiques par signature exacte, avec
-  nom IR unique par variante et wrappers `math.sqrt(Float)` /
-  `math.sqrt(Double)`;
+- surcharge V1.1 des fonctions globales non generiques par signature exacte,
+  avec nom IR unique par variante, wrappers `math.sqrt(Float)` /
+  `math.sqrt(Double)` et references resolues quand un type fonction est attendu
+  en argument;
 - types fonction-valeur canoniques `Fn(...)->...`, references de fonctions
   nommees et appels indirects, avec lambdas sans capture `(x: Int) => { ... }` et
   `(acc: Int, value: Int) => { ... }`;
@@ -329,7 +330,8 @@ Limites importantes :
   `identity[Int]` sont utilisables comme valeurs, mais les fonctions generiques
   ne sont pas encore des valeurs vraiment polymorphes;
   la surcharge de fonctions couvre pour l'instant les appels globaux resolus par
-  types d'arguments exacts; les references de fonctions surchargees sans type
+  types d'arguments exacts et les references de fonctions surchargees en
+  position d'argument avec type fonction attendu; les references sans type
   attendu ne sont pas encore supportees;
   `Array[Int]` reste une facade specialisee vers `ArrayInt`; `Array[Long]`
   reste une facade specialisee vers `ArrayLong`; `Array[Float]` reste une
@@ -540,6 +542,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `def identity[T](value: T): T`.
 - [x] Ajouter une premiere surcharge des fonctions globales non generiques par
   signature exacte.
+- [x] Autoriser les references de fonctions surchargees quand un type fonction
+  est attendu en argument.
 - [x] Ajouter l'inference des arguments de type des fonctions generiques.
 - [x] Autoriser les references de fonctions generiques specialisees comme
   valeurs, par exemple `identity[Int]`.
@@ -736,6 +740,18 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `tests/test_error_function_overload_duplicate.nabla`,
     `tests/test_error_function_overload_no_match.nabla`, `docs/language.md`,
     `docs/stdlib-api.md`, `docs/roadmap.md`, `make all-tests`.
+- `local` - Etendre la surcharge aux references de fonctions avec type attendu:
+  le parseur resout maintenant `sqrt` ou une surcharge utilisateur en position
+  d'argument quand la signature attendue est un type fonction, puis l'AST garde
+  le nom source pour les diagnostics et le nom IR unique pour l'abaissement.
+  - Limites actuelles: pas encore d'annotation de type locale pour ecrire
+    `val f: (Float) => Float = sqrt`, references surchargees nues toujours
+    refusees, generiques/methodes surchargees a definir plus tard.
+  - Fichiers / tests associes: `src/parser.cpp`, `src/parser.hpp`,
+    `src/ast.hpp`, `src/ast.cpp`,
+    `tests/test_function_overload_reference_expected.nabla`,
+    `tests/test_error_function_overload_reference_no_expected.nabla`,
+    `docs/language.md`, `docs/roadmap.md`, `make all-tests`.
 - `local` - Enrichir les descriptions utilisateur de la reference stdlib pour
   `io`, `math`, `strings` et `OptionInt`: conventions de retour I/O,
   comportements limites de `pow*` / `sqrt*`, separation de `words`, et raison
@@ -1309,10 +1325,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 Etendre la surcharge de fonctions au-dela de la V1 :
 
-- autoriser les references de fonctions surchargees quand un type attendu est
-  disponible, par exemple affectation vers `(Float) => Float`;
-- definir la strategie pour les fonctions generiques surchargees et les lambdas
-  inferees en argument;
+- ajouter les annotations de type locales pour pouvoir ecrire
+  `val f: (Float) => Float = sqrt`;
+- definir la strategie pour les fonctions generiques surchargees;
 - enrichir les diagnostics pour distinguer absence de candidat, arite
   incompatible et ambiguite reelle;
 - migrer progressivement `math` vers des noms idiomatiques surcharges (`abs`,
