@@ -87,6 +87,15 @@ backend refuse une constante IR `Bool` qui ne vaut pas `1` ou `3`. Les
 comparaisons et conditions doivent manipuler ces valeurs runtime, pas des
 booléens C++ implicites.
 
+`Int` et `Long` partagent l'encodage immediat, mais restent des types source et
+IR distincts. Les operations arithmetiques, comparaisons, champs, parametres et
+retours conservent ce type jusqu'au backend; une conversion `Int.toLong` est
+explicite. Les tests de mismatch entre `Int` et `Long` couvrent cette frontiere.
+
+`Char` est aussi une valeur immediate taggee dans les chemins actuels. Sa
+surface source reste limitee aux litteraux ASCII, aux retours de
+`String.charAt(index)` et aux conversions/affichages specialises.
+
 ### Valeurs flottantes
 
 `Float` et `Double` sont portés comme valeurs numériques brutes dans les chemins
@@ -142,6 +151,12 @@ Les valeurs par défaut suivent le type d'élément :
 - `Float`, `Double` : zéro IEEE (`0`) ;
 - objets : slot nul (`0`).
 
+`IntArray`, `LongArray`, `FloatArray`, `DoubleArray` et `BoolArray` sont des
+types natifs spécialisés. Leur type d'element est fixe et leurs methodes
+`length`, `get` et `set` sont typees par la specialisation. Un `set` avec une
+valeur d'un autre type doit echouer en analyse semantique, avant la generation
+ASM.
+
 La surface utilisateur cible est la façade `Array[T]` et les wrappers standard
 comme `ArrayInt`, `ArrayObject[T]`, etc. Les fonctions `arrayBase...` et helpers
 spécialisés sont des détails d'implémentation.
@@ -160,6 +175,11 @@ spécialisés sont des détails d'implémentation.
 `Char` représente un caractère ASCII. Une future prise en charge Unicode devra
 réviser explicitement ces conventions.
 
+Une valeur `String` est une reference heap vers un buffer de bytes runtime. Les
+operations `+`, `==` et `!=` sont des primitives specialisees sur cette
+representation byte-based; `toCharArray()` produit un `ArrayObject[Char]` afin
+de ne pas exposer de tableau natif specialise pour les caracteres.
+
 ## Fonctions, Lambdas Et Closures
 
 Les types fonction sont canoniques sous la forme interne :
@@ -169,6 +189,9 @@ Fn(T1,T2)->R
 ```
 
 La syntaxe source `(T1, T2) => R` est abaissée vers cette représentation.
+Cette forme canonique est celle utilisee pour comparer les signatures, typer les
+annotations locales, resoudre les references de fonctions et representer les
+champs de type fonction.
 
 Les lambdas sans capture et closures avec capture par valeur sont supportées.
 Les captures sont matérialisées côté IR/runtime comme valeurs stockées dans une
@@ -198,6 +221,12 @@ les mixins dans l'ordre d'énonciation. Les conflits hérités doivent être
 signalés explicitement. Une redéfinition de méthode héritée requiert `override`
 et sa signature est validée strictement : arité, paramètres, retour, paramètres
 génériques de méthode et substitutions des types hérités.
+
+Les types de classes sont nominaux. Deux classes avec le meme layout ne sont pas
+interchangeables sans relation d'heritage, et les classes generiques instanciees
+restent distinguees par leurs arguments de type dans les signatures et les corps
+IR specialises. Les champs herites sont integres au layout avant les champs
+propres afin que les offsets restent coherents dans les appels parent-types.
 
 `super` cible la classe parente immédiate dans une méthode de classe. Son usage
 hors classe ou sans parent explicite valide doit produire un diagnostic dédié.

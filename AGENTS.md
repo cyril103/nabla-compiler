@@ -523,7 +523,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   provenant d'instances génériques distinctes du même ancêtre.
 - [x] Formaliser la résolution des membres hérités (champs + ordre de résolution) pour supprimer les ambiguïtés restantes.
 
-- [ ] Formaliser `Int`, `Bool`, `Char`, `String`, `IntArray`, les types fonction canoniques et
+- [x] Formaliser `Int`, `Bool`, `Char`, `String`, `IntArray`, les types fonction canoniques et
   les types de classes.
 - [x] Ajouter `Long` avec litteraux suffixes `L`, arithmetique, comparaisons,
   fonctions, champs et `toString`.
@@ -758,6 +758,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Formaliser les conventions internes des types deja stabilises:
+  `Int`/`Long` immediats, `Bool` tagge, `Char` ASCII, `String` byte-based,
+  tableaux natifs specialises, types fonction canoniques et types de classes
+  nominaux avec layouts herites. La specification vivante explicite maintenant
+  les frontieres source/IR/runtime que la suite existante couvre deja.
+  - Fichiers / tests associes: `docs/internals.md`, `AGENTS.md`,
+    `make all-tests`.
 - `local` - Nettoyer la premiere couche Collections/Core dans les usages
   ordinaires: les tests et exemples migrent de `arrayIntRange`,
   `array<Type>Fill`, `optionSome` / `optionNone`, `SetFromArray` / `SetEmpty`
