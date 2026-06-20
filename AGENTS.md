@@ -97,7 +97,9 @@ Le pipeline implemente actuellement :
   commencent a consommer les noms surcharges idiomatiques hors wrappers de
   compatibilite;
 - surcharge V1 des methodes de classe par signature exacte, avec nom IR unique
-  par variante et resolution par les types d'arguments;
+  par variante et resolution par les types d'arguments; les lambdas inferees en
+  argument recoivent un type attendu quand la forme d'appel selectionne une
+  surcharge unique;
 - types fonction-valeur canoniques `Fn(...)->...`, references de fonctions
   nommees et appels indirects, avec lambdas sans capture `(x: Int) => { ... }` et
   `(acc: Int, value: Int) => { ... }`;
@@ -818,14 +820,20 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   abaissees vers des noms IR uniques, les appels choisissent la variante depuis
   les types d'arguments, et les diagnostics listent les signatures candidates.
   - Limites actuelles: resolution exacte uniquement; les lambdas en argument
-    d'une methode surchargee ne recoivent pas encore de type attendu tant que la
-    surcharge n'est pas choisie; generiques et conversions implicites restent a
-    cadrer.
+    d'une methode surchargee ne recoivent un type attendu que si la forme
+    d'appel selectionne une surcharge unique; generiques et conversions
+    implicites restent a cadrer.
   - Fichiers / tests associes: `src/compiler_context.hpp`, `src/parser.cpp`,
     `src/ast.hpp`, `src/ast.cpp`, `src/semantic_analyzer.cpp`,
     `tests/test_method_overload.nabla`,
     `tests/test_error_method_overload_duplicate.nabla`,
     `tests/test_error_method_overload_no_match.nabla`, `make all-tests`.
+- `local` - Typer les lambdas inferees dans les appels de methodes surchargees:
+  le parseur inspecte la forme d'appel, l'arite et les positions de lambdas pour
+  fournir un type attendu lorsqu'une seule surcharge reste compatible, par
+  exemple `runner.run(value => { value + 1 })`.
+  - Fichiers / tests associes: `src/parser.hpp`, `src/parser.cpp`,
+    `tests/test_method_overload_inferred_lambda.nabla`, `make all-tests`.
 - `local` - Enrichir les descriptions utilisateur de la reference stdlib pour
   `io`, `math`, `strings` et `OptionInt`: conventions de retour I/O,
   comportements limites de `pow*` / `sqrt*`, separation de `words`, et raison
@@ -1400,8 +1408,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 Etendre la surcharge de fonctions au-dela de la V1 :
 
 - definir la strategie pour les fonctions generiques surchargees;
-- definir la strategie pour les methodes surchargees generiques et les lambdas
-  en argument de methodes surchargees;
+- definir la strategie pour les methodes surchargees generiques et les cas
+  ambigus de lambdas en argument de methodes surchargees;
 - ajouter une etape d'ambiguite explicite si une future resolution devient moins
   stricte que la signature exacte;
 - garder les noms suffixes `math` comme compatibilite documentee, mais faire

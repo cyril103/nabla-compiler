@@ -647,11 +647,16 @@ bool Parser::skipTypeAt(size_t& cursor) const {
 }
 
 bool Parser::startsInferredLambdaExpression() const {
-    if (peek().type == TokenType::IDENTIFIER) {
-        return index + 1 < tokens.size() && tokens[index + 1].type == TokenType::FAT_ARROW;
+    return startsInferredLambdaExpressionAt(index);
+}
+
+bool Parser::startsInferredLambdaExpressionAt(size_t cursor) const {
+    if (cursor >= tokens.size()) return false;
+    if (tokens[cursor].type == TokenType::IDENTIFIER) {
+        return cursor + 1 < tokens.size() && tokens[cursor + 1].type == TokenType::FAT_ARROW;
     }
-    if (peek().type != TokenType::LPAREN) return false;
-    size_t cursor = index + 1;
+    if (tokens[cursor].type != TokenType::LPAREN) return false;
+    ++cursor;
     if (cursor >= tokens.size() || tokens[cursor].type == TokenType::RPAREN) return false;
 
     while (cursor < tokens.size()) {
@@ -1345,11 +1350,17 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
                 expectedArgumentTypes = {receiverType};
             }
         }
+        const size_t callParenIndex = index;
         consume(TokenType::LPAREN, "");
         std::vector<std::unique_ptr<ASTNode>> arguments;
         if (methodSignature) {
             arguments = parseFunctionCallArguments(*methodSignature, typeArguments, classSubstitution);
         } else {
+            auto overloadExpectedArgumentTypes = expectedArgumentTypesForOverloadedMethodCall(
+                receiverType, method, typeArguments, callParenIndex, methodToken.location);
+            if (!overloadExpectedArgumentTypes.empty()) {
+                expectedArgumentTypes = std::move(overloadExpectedArgumentTypes);
+            }
             arguments = parseArguments(expectedArgumentTypes);
         }
         consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de méthode");
@@ -1699,6 +1710,104 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseFunctionCallArguments(
         }
     }
     return arguments;
+}
+
+std::optional<std::vector<bool>> Parser::argumentLambdaShapeAtCall(size_t callParenIndex) const {
+    if (callParenIndex >= tokens.size() || tokens[callParenIndex].type != TokenType::LPAREN) {
+        return std::nullopt;
+    }
+    std::vector<bool> shape;
+    size_t cursor = callParenIndex + 1;
+    if (cursor < tokens.size() && tokens[cursor].type == TokenType::RPAREN) {
+        return shape;
+    }
+
+    while (cursor < tokens.size()) {
+        shape.push_back(startsInferredLambdaExpressionAt(cursor));
+        int parenDepth = 0;
+        int bracketDepth = 0;
+        int braceDepth = 0;
+        while (cursor < tokens.size()) {
+            const auto tokenType = tokens[cursor].type;
+            if (tokenType == TokenType::LPAREN) {
+                ++parenDepth;
+            } else if (tokenType == TokenType::RPAREN) {
+                if (parenDepth == 0 && bracketDepth == 0 && braceDepth == 0) {
+                    return shape;
+                }
+                --parenDepth;
+            } else if (tokenType == TokenType::LBRACKET) {
+                ++bracketDepth;
+            } else if (tokenType == TokenType::RBRACKET) {
+                --bracketDepth;
+            } else if (tokenType == TokenType::LBRACE) {
+                ++braceDepth;
+            } else if (tokenType == TokenType::RBRACE) {
+                --braceDepth;
+            } else if (tokenType == TokenType::COMMA &&
+                       parenDepth == 0 && bracketDepth == 0 && braceDepth == 0) {
+                ++cursor;
+                break;
+            }
+            ++cursor;
+        }
+    }
+    return std::nullopt;
+}
+
+std::vector<std::string> Parser::expectedArgumentTypesForOverloadedMethodCall(
+    const std::string& receiverType, const std::string& methodName,
+    const std::vector<std::string>& typeArguments, size_t callParenIndex,
+    const SourceLocation& location) const {
+    auto argumentShape = argumentLambdaShapeAtCall(callParenIndex);
+    if (!argumentShape) return {};
+
+    const auto methodCandidates = collectClassMethodLookupCandidates(context, receiverType, methodName);
+    if (methodCandidates.size() <= 1) return {};
+
+    std::set<std::string> providers;
+    for (const auto& candidate : methodCandidates) {
+        providers.insert(substituteType(candidate.ownerClassName, candidate.classSubstitution));
+    }
+    if (providers.size() > 1) {
+        throw CompilerError(
+            ErrorKind::Parser, location,
+            "conflit d'héritage pour la méthode '" + methodName + "' dans la classe '" +
+            genericBaseName(receiverType) + "': plusieurs définitions dans [" +
+            formatMethodProviders(providers) + "]");
+    }
+
+    std::vector<std::pair<const CompilerContext::FunctionSignature*, std::map<std::string, std::string>>> matches;
+    for (const auto& candidate : methodCandidates) {
+        if (!candidate.signature) continue;
+        const auto& signature = *candidate.signature;
+        if (signature.parameters.size() != argumentShape->size()) continue;
+        std::map<std::string, std::string> substitution = candidate.classSubstitution;
+        if (!typeArguments.empty()) {
+            auto methodSubstitution = genericFunctionSubstitutionFor(signature, typeArguments);
+            if (!methodSubstitution) continue;
+            substitution.insert(methodSubstitution->begin(), methodSubstitution->end());
+        }
+        bool lambdaCompatible = true;
+        for (size_t i = 0; i < argumentShape->size(); ++i) {
+            if (!(*argumentShape)[i]) continue;
+            const std::string expectedType = substituteType(signature.parameters[i].type, substitution);
+            if (!functionTypeFromName(expectedType)) {
+                lambdaCompatible = false;
+                break;
+            }
+        }
+        if (lambdaCompatible) matches.push_back({&signature, substitution});
+    }
+
+    if (matches.size() != 1) return {};
+    std::vector<std::string> expectedTypes;
+    const auto* signature = matches.front().first;
+    const auto& substitution = matches.front().second;
+    for (const auto& parameter : signature->parameters) {
+        expectedTypes.push_back(substituteType(parameter.type, substitution));
+    }
+    return expectedTypes;
 }
 
 std::unique_ptr<ASTNode> Parser::parseArgument(const std::string& expectedType) {

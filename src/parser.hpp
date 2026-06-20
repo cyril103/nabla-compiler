@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -77,6 +78,12 @@ private:
     std::vector<std::string> expectedArgumentTypesForMethodCall(
         const std::string& receiverType, const std::string& methodName,
         const SourceLocation& location) const;
+    std::vector<std::string> expectedArgumentTypesForOverloadedMethodCall(
+        const std::string& receiverType, const std::string& methodName,
+        const std::vector<std::string>& typeArguments, size_t callParenIndex,
+        const SourceLocation& location) const;
+    bool startsInferredLambdaExpressionAt(size_t cursor) const;
+    std::optional<std::vector<bool>> argumentLambdaShapeAtCall(size_t callParenIndex) const;
     std::pair<std::string, SourceLocation> parseType(const std::string& expectedMessage);
     const ParsedSymbol* findLocal(const std::string& name) const;
     std::pair<const ParsedSymbol*, size_t> findLocalWithScope(const std::string& name) const;

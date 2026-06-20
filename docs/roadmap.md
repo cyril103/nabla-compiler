@@ -99,8 +99,8 @@ Actions recommandees :
    recommandes (`Array.fill`, `Set.fromArray`, `Option.some`, etc.).
 10. Poursuivre la surcharge par signature : la base couvre maintenant les
     fonctions globales et les methodes de classe par signature exacte; etendre
-    progressivement aux generiques, aux lambdas en argument et aux diagnostics
-    d'ambiguite plus riches.
+    progressivement aux generiques, aux cas ambigus de lambdas en argument et
+    aux diagnostics d'ambiguite plus riches.
 11. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
    surface n'est pas propre.
 

@@ -171,8 +171,10 @@ def main(): Int = {
 ```
 
 La surcharge de methodes est resolue statiquement depuis le type du receveur et
-les types des arguments. Les generiques, lambdas en argument et conversions
-implicites restent volontairement limites a la resolution exacte actuelle.
+les types des arguments. Une lambda inferee en argument peut recevoir son type
+attendu si l'arite et les positions de lambdas identifient une seule surcharge.
+Les generiques, cas ambigus et conversions implicites restent volontairement
+limites a la resolution exacte actuelle.
 
 `Unit` sert aux fonctions a effet.
 
