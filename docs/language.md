@@ -565,11 +565,15 @@ def main(): Int = {
 
     val values = Array.fill[Int](3, 7)
     val doubled = values.map(value => value * 2)
+    val empty = Array.empty[Int]()
+    val squares = Array.tabulate[Int](4, index => index * index)
     val indexes = Array.range(3)
     val oneBased = Array.rangeUntil(1, 4)
     if scores.mkString(",") == "10,20,30" &&
        weights.toString() == "[1.500000, 2.500000]" &&
        doubled.mkString(",") == "14,14,14" &&
+       empty.isEmpty() &&
+       squares.toString() == "[0, 1, 4, 9]" &&
        indexes.toString() == "[0, 1, 2]" &&
        oneBased.toString() == "[1, 2, 3]" {
         42
@@ -582,7 +586,10 @@ def main(): Int = {
 Pour creer un tableau de n'importe quel type `T`, l'API recommandee est donc :
 
 - `new Array[T](size)` pour creer un tableau modifiable de taille fixe ;
+- `Array.empty[T]()` pour creer un tableau vide ;
 - `Array.fill[T](size, value)` pour creer un tableau deja rempli ;
+- `Array.tabulate[T](size, f)` pour creer un tableau en calculant chaque
+  element depuis son index ;
 - `Array.range(size)` pour obtenir `[0, 1, ..., size - 1]` en `Array[Int]` ;
 - `Array.rangeUntil(start, until)` pour obtenir `[start, ..., until - 1]` en
   `Array[Int]`.
@@ -627,8 +634,9 @@ Les anciens noms `ArrayFill[T](...)`, `ArrayRange(size)` et les noms bas niveau
 comme `arrayFill[Int](...)`, `arrayIntRange(size)`,
 `arrayIntRangeUntil(start, until)`, `new IntArray(size)` ou
 `new ObjectArray[T](size)` restent disponibles pour compatibilite et pour la
-stdlib, mais `Array[T]`, `Array.fill`, `Array.range` et `Array.rangeUntil` sont
-les noms a privilegier dans le code utilisateur.
+stdlib, mais `Array[T]`, `Array.empty`, `Array.fill`, `Array.tabulate`,
+`Array.range` et `Array.rangeUntil` sont les noms a privilegier dans le code
+utilisateur.
 
 `intRangeUntil(start, until)` produit une plage `Int` paresseuse. Ses operations
 `foreach`, `fold`, `map` et `max` evitent de construire un `IntArray`

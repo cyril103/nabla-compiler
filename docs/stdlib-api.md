@@ -41,7 +41,9 @@ helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
 ### Collections
 
 - `Array[T]`
+- `Array.empty[T]()`
 - `Array.fill[T](size, value)`
+- `Array.tabulate[T](size, f)`
 - `Array.range(size)`
 - `Array.rangeUntil(start, until)`
 - Facades specialisees exposees par compatibilite utile :

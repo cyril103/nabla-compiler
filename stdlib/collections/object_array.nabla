@@ -11,6 +11,20 @@ def objectArrayFill[T](size: Int, value: T): ArrayObject[T] = {
     new ArrayObject[T](xs)
 }
 
+def objectArrayEmpty[T](): ArrayObject[T] = {
+    new ArrayObject[T](new ObjectArray[T](0))
+}
+
+def objectArrayTabulate[T](size: Int, f: (Int) => T): ArrayObject[T] = {
+    val xs = new ObjectArray[T](size)
+    var index = 0
+    while (index < size) {
+        xs.set(index, f(index))
+        index = index + 1
+    }
+    new ArrayObject[T](xs)
+}
+
 def objectArrayMap[T, U](xs: ArrayObject[T], f: (T) => U): ArrayObject[U] = {
     xs.map[U](f)
 }

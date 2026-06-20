@@ -12,6 +12,16 @@ def floatArrayFill(size: Int, value: Float): FloatArray = {
     xs
 }
 
+def floatArrayTabulate(size: Int, f: (Int) => Float): FloatArray = {
+    val xs = new FloatArray(size)
+    var index = 0
+    while (index < size) {
+        xs.set(index, f(index))
+        index = index + 1
+    }
+    xs
+}
+
 def floatArrayMap(xs: FloatArray, f: (Float) => Float): FloatArray = {
     val mapped = new FloatArray(xs.length())
     var index = 0
@@ -236,6 +246,14 @@ class ArrayFloat(values: FloatArray) {
 
 def arrayFloatFill(size: Int, value: Float): ArrayFloat = {
     new ArrayFloat(floatArrayFill(size, value))
+}
+
+def arrayFloatEmpty(): ArrayFloat = {
+    new ArrayFloat(new FloatArray(0))
+}
+
+def arrayFloatTabulate(size: Int, f: (Int) => Float): ArrayFloat = {
+    new ArrayFloat(floatArrayTabulate(size, f))
 }
 
 def arrayFloatShuffle(xs: ArrayFloat, state: RandomState): ArrayFloat = {

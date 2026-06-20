@@ -1,0 +1,49 @@
+import collections.array
+
+class Student(name: String) {
+    override def toString(): String = {
+        name
+    }
+}
+
+def floatAt(index: Int): Float = {
+    if index == 0 {
+        1.5F
+    } else {
+        2.5F
+    }
+}
+
+def doubleAt(index: Int): Double = {
+    if index == 0 {
+        2.5
+    } else {
+        3.5
+    }
+}
+
+def main(): Int = {
+    val emptyInts = Array.empty[Int]()
+    val emptyStudents = Array.empty[Student]()
+    val ints = Array.tabulate[Int](5, index => index * 2)
+    val longs = Array.tabulate[Long](3, index => index.toLong() + 10L)
+    val floats = Array.tabulate[Float](2, floatAt)
+    val doubles = Array.tabulate[Double](2, doubleAt)
+    val bools = Array.tabulate[Bool](4, index => index % 2 == 0)
+    val students = Array.tabulate[Student](2, index => new Student("student-" + index.toString()))
+    val words = Array.tabulate[String](3, index => "go" + index.toString())
+
+    if emptyInts.isEmpty() &&
+       emptyStudents.isEmpty() &&
+       ints.toString() == "[0, 2, 4, 6, 8]" &&
+       longs.toString() == "[10, 11, 12]" &&
+       floats.toString() == "[1.500000, 2.500000]" &&
+       doubles.toString() == "[2.500000, 3.500000]" &&
+       bools.toString() == "[true, false, true, false]" &&
+       students.toString() == "[student-0, student-1]" &&
+       words.toString() == "[go0, go1, go2]" {
+        0
+    } else {
+        1
+    }
+}

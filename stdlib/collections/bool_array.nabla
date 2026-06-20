@@ -12,6 +12,16 @@ def boolArrayFill(size: Int, value: Bool): BoolArray = {
     xs
 }
 
+def boolArrayTabulate(size: Int, f: (Int) => Bool): BoolArray = {
+    val xs = new BoolArray(size)
+    var index = 0
+    while (index < size) {
+        xs.set(index, f(index))
+        index = index + 1
+    }
+    xs
+}
+
 def boolArrayCountTrue(xs: BoolArray): Int = {
     var index = 0
     var total = 0
@@ -307,6 +317,14 @@ def arrayBool(values: BoolArray): ArrayBool = {
 
 def arrayBoolFill(size: Int, value: Bool): ArrayBool = {
     arrayBool(boolArrayFill(size, value))
+}
+
+def arrayBoolEmpty(): ArrayBool = {
+    arrayBool(new BoolArray(0))
+}
+
+def arrayBoolTabulate(size: Int, f: (Int) => Bool): ArrayBool = {
+    arrayBool(boolArrayTabulate(size, f))
 }
 
 def arrayBoolMap(xs: ArrayBool, f: (Bool) => Bool): ArrayBool = {

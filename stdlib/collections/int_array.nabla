@@ -39,6 +39,16 @@ def intArrayFill(size: Int, value: Int): IntArray = {
     xs
 }
 
+def intArrayTabulate(size: Int, f: (Int) => Int): IntArray = {
+    val xs = new IntArray(size)
+    var index = 0
+    while (index < size) {
+        xs.set(index, f(index))
+        index = index + 1
+    }
+    xs
+}
+
 def intArrayRange(size: Int): IntArray = {
     val xs = new IntArray(size)
     var index = 0
@@ -1152,6 +1162,14 @@ class ArrayIntNested(values: IntArray, boundaries: IntArray) {
 
 def arrayIntFill(size: Int, value: Int): ArrayInt = {
     new ArrayInt(intArrayFill(size, value))
+}
+
+def arrayIntEmpty(): ArrayInt = {
+    new ArrayInt(new IntArray(0))
+}
+
+def arrayIntTabulate(size: Int, f: (Int) => Int): ArrayInt = {
+    new ArrayInt(intArrayTabulate(size, f))
 }
 
 def arrayIntMap(xs: ArrayInt, f: (Int) => Int): ArrayInt = {

@@ -12,6 +12,16 @@ def longArrayFill(size: Int, value: Long): LongArray = {
     xs
 }
 
+def longArrayTabulate(size: Int, f: (Int) => Long): LongArray = {
+    val xs = new LongArray(size)
+    var index = 0
+    while (index < size) {
+        xs.set(index, f(index))
+        index = index + 1
+    }
+    xs
+}
+
 def longArraySum(xs: LongArray): Long = {
     var index = 0
     var total = 0L
@@ -254,6 +264,14 @@ class ArrayLong(values: LongArray) {
 
 def arrayLongFill(size: Int, value: Long): ArrayLong = {
     new ArrayLong(longArrayFill(size, value))
+}
+
+def arrayLongEmpty(): ArrayLong = {
+    new ArrayLong(new LongArray(0))
+}
+
+def arrayLongTabulate(size: Int, f: (Int) => Long): ArrayLong = {
+    new ArrayLong(longArrayTabulate(size, f))
 }
 
 def arrayLongShuffle(xs: ArrayLong, state: RandomState): ArrayLong = {

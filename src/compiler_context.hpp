@@ -103,6 +103,16 @@ inline const std::vector<StdlibFunctionAlias>& stdlibFunctionAliases() {
         {"Array.fill", {"Float"}, "arrayFloatFill"},
         {"Array.fill", {"Double"}, "arrayDoubleFill"},
         {"Array.fill", {"Bool"}, "arrayBoolFill"},
+        {"Array.empty", {"Int"}, "arrayIntEmpty"},
+        {"Array.empty", {"Long"}, "arrayLongEmpty"},
+        {"Array.empty", {"Float"}, "arrayFloatEmpty"},
+        {"Array.empty", {"Double"}, "arrayDoubleEmpty"},
+        {"Array.empty", {"Bool"}, "arrayBoolEmpty"},
+        {"Array.tabulate", {"Int"}, "arrayIntTabulate"},
+        {"Array.tabulate", {"Long"}, "arrayLongTabulate"},
+        {"Array.tabulate", {"Float"}, "arrayFloatTabulate"},
+        {"Array.tabulate", {"Double"}, "arrayDoubleTabulate"},
+        {"Array.tabulate", {"Bool"}, "arrayBoolTabulate"},
         {"SetFromArray", {"Int"}, "setFromArrayInt"},
         {"SetFromArray", {"Long"}, "setFromArrayLong"},
         {"SetFromArray", {"Float"}, "setFromArrayFloat"},
@@ -205,6 +215,8 @@ inline std::optional<std::string> resolveStdlibFunctionAlias(
     if (typeArguments.size() == 1 && !isPrimitiveArrayElementType(typeArguments[0])) {
         if (name == "arrayMkString" && typeArguments[0] == "String") return "objectStringArrayMkString";
         if (name == "arrayFill" || name == "ArrayFill" || name == "Array.fill") return "objectArrayFill";
+        if (name == "Array.empty") return "objectArrayEmpty";
+        if (name == "Array.tabulate") return "objectArrayTabulate";
         if (name == "SetFromArray") return "setFromArray";
         if (name == "Set.fromArray") return "setFromArray";
         if (name == "arrayMap") return "objectArrayMapSame";

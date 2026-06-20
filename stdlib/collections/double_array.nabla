@@ -12,6 +12,16 @@ def doubleArrayFill(size: Int, value: Double): DoubleArray = {
     xs
 }
 
+def doubleArrayTabulate(size: Int, f: (Int) => Double): DoubleArray = {
+    val xs = new DoubleArray(size)
+    var index = 0
+    while (index < size) {
+        xs.set(index, f(index))
+        index = index + 1
+    }
+    xs
+}
+
 def doubleArrayMap(xs: DoubleArray, f: (Double) => Double): DoubleArray = {
     val mapped = new DoubleArray(xs.length())
     var index = 0
@@ -236,6 +246,14 @@ class ArrayDouble(values: DoubleArray) {
 
 def arrayDoubleFill(size: Int, value: Double): ArrayDouble = {
     new ArrayDouble(doubleArrayFill(size, value))
+}
+
+def arrayDoubleEmpty(): ArrayDouble = {
+    new ArrayDouble(new DoubleArray(0))
+}
+
+def arrayDoubleTabulate(size: Int, f: (Int) => Double): ArrayDouble = {
+    new ArrayDouble(doubleArrayTabulate(size, f))
 }
 
 def arrayDoubleShuffle(xs: ArrayDouble, state: RandomState): ArrayDouble = {

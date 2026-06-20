@@ -16,7 +16,7 @@
     <section class="module-hero">
       <p class="import">import collections.array</p>
       <h1>Array</h1>
-      <p>Tableaux generiques pour le code utilisateur. Importer collections.array donne acces a Array[T], Array.fill[T] et Array.range / Array.rangeUntil. Les anciens noms ArrayFill[T] et ArrayRange restent disponibles pour compatibilite. Les types bas niveau comme IntArray, ArrayInt, ObjectArray[T] et ArrayObject[T] restent des details de stdlib dans les cas courants.</p>
+      <p>Tableaux generiques pour le code utilisateur. Importer collections.array donne acces a Array[T], Array.empty[T](), Array.fill[T], Array.tabulate[T] et Array.range / Array.rangeUntil. Les anciens noms ArrayFill[T] et ArrayRange restent disponibles pour compatibilite. Les types bas niveau comme IntArray, ArrayInt, ObjectArray[T] et ArrayObject[T] restent des details de stdlib dans les cas courants.</p>
     </section>
     <section class="entries">
     <article class="entry" id="Array">
@@ -46,6 +46,14 @@
       <p>Cree un tableau d&#x27;entiers contenant 0, 1, ..., size - 1.</p>
 <p>Preferer Array.range(size) dans le nouveau code.</p>
     </article>
+    <article class="entry" id="empty">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>empty</h2>
+      <pre><code>def Array.empty[T](): Array[T]</code></pre>
+      <p>Cree un tableau vide.</p>
+    </article>
     <article class="entry" id="fill">
       <div class="entry-meta">
         <span class="kind">def</span> <span class="status recommended">Recommandee</span>
@@ -54,6 +62,14 @@
       <pre><code>def Array.fill[T](size: Int, value: T): Array[T]</code></pre>
       <p>Cree un tableau rempli avec la meme valeur.</p>
 <p>Pour T = Int, Long, Float, Double ou Bool, le compilateur redirige ce nom vers la specialisation primitive adaptee. Pour les autres types, Array[T] est represente par ArrayObject[T].</p>
+    </article>
+    <article class="entry" id="tabulate">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>tabulate</h2>
+      <pre><code>def Array.tabulate[T](size: Int, f: (Int) =&gt; T): Array[T]</code></pre>
+      <p>Cree un tableau en calculant chaque element depuis son index.</p>
     </article>
     <article class="entry" id="range">
       <div class="entry-meta">

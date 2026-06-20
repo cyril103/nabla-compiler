@@ -1,7 +1,8 @@
 /// @module Array
 /// Tableaux generiques pour le code utilisateur.
-/// Importer collections.array donne acces a Array[T], Array.fill[T] et
-/// Array.range / Array.rangeUntil. Les anciens noms ArrayFill[T] et
+/// Importer collections.array donne acces a Array[T], Array.empty[T](),
+/// Array.fill[T], Array.tabulate[T] et Array.range / Array.rangeUntil.
+/// Les anciens noms ArrayFill[T] et
 /// ArrayRange restent disponibles pour compatibilite. Les types bas niveau
 /// comme IntArray, ArrayInt, ObjectArray[T] et ArrayObject[T] restent
 /// des details de stdlib dans les cas courants.
@@ -37,6 +38,13 @@ def ArrayRange(size: Int): ArrayInt = {
 }
 
 object Array {
+    /// Cree un tableau vide.
+    /// @signature def Array.empty[T](): Array[T]
+    /// @status Recommandee
+    def empty[T](): ArrayObject[T] = {
+        objectArrayEmpty[T]()
+    }
+
     /// Cree un tableau rempli avec la meme valeur.
     /// @signature def Array.fill[T](size: Int, value: T): Array[T]
     /// @status Recommandee
@@ -46,6 +54,13 @@ object Array {
     /// autres types, Array[T] est represente par ArrayObject[T].
     def fill[T](size: Int, value: T): ArrayObject[T] = {
         objectArrayFill[T](size, value)
+    }
+
+    /// Cree un tableau en calculant chaque element depuis son index.
+    /// @signature def Array.tabulate[T](size: Int, f: (Int) => T): Array[T]
+    /// @status Recommandee
+    def tabulate[T](size: Int, f: (Int) => T): ArrayObject[T] = {
+        objectArrayTabulate[T](size, f)
     }
 
     /// Cree un tableau d'entiers contenant 0, 1, ..., size - 1.
