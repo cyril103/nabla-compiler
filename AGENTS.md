@@ -91,11 +91,12 @@ Le pipeline implemente actuellement :
 - fonctions globales appelables avec parametres;
 - surcharge V1.2 des fonctions globales par signature exacte, avec nom IR unique
   par variante, priorite aux variantes concretes sur les variantes generiques
-  inferees, wrappers `math.sqrt(Float)` / `math.sqrt(Double)` et references
-  resolues quand un type fonction est attendu en argument ou via une annotation
-  locale; les echecs et ambiguites de resolution listent la forme appelee et les
-  signatures candidates; les helpers internes de `math` commencent a consommer
-  les noms surcharges idiomatiques hors wrappers de compatibilite;
+  inferees, references typees capables d'inferer les variantes generiques,
+  wrappers `math.sqrt(Float)` / `math.sqrt(Double)` et references resolues quand
+  un type fonction est attendu en argument ou via une annotation locale; les
+  echecs et ambiguites de resolution listent la forme appelee et les signatures
+  candidates; les helpers internes de `math` commencent a consommer les noms
+  surcharges idiomatiques hors wrappers de compatibilite;
 - surcharge V1 des methodes de classe par signature exacte, avec nom IR unique
   par variante et resolution par les types d'arguments; les lambdas inferees en
   argument recoivent un type attendu quand la forme d'appel selectionne une
@@ -561,6 +562,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Prioriser les surcharges globales concretes sur les generiques inferables.
 - [x] Autoriser les references de fonctions surchargees quand un type fonction
   est attendu en argument.
+- [x] Inferer les references de fonctions generiques surchargees depuis le type
+  fonction attendu.
 - [x] Ajouter les annotations de type locales pour `val` / `var`.
 - [x] Enrichir les diagnostics de surcharge avec forme appelee et candidats.
 - [x] Ajouter une premiere surcharge des methodes de classe par signature exacte.
@@ -849,6 +852,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   - Fichiers / tests associes: `src/compiler_context.hpp`, `src/ast.cpp`,
     `tests/test_function_overload_generic_priority.nabla`,
     `tests/test_error_function_overload_generic_ambiguous.nabla`,
+    `make all-tests`.
+- `local` - Inferer les references de fonctions generiques surchargees depuis
+  le type fonction attendu: une reference concrete exacte reste prioritaire, une
+  reference generique compatible recoit ses arguments de type inferes, et
+  plusieurs generiques compatibles produisent un diagnostic d'ambiguite avec les
+  candidats.
+  - Fichiers / tests associes: `src/compiler_context.hpp`, `src/parser.cpp`,
+    `tests/test_function_overload_generic_reference.nabla`,
+    `tests/test_error_function_overload_generic_reference_ambiguous.nabla`,
     `make all-tests`.
 - `local` - Enrichir les descriptions utilisateur de la reference stdlib pour
   `io`, `math`, `strings` et `OptionInt`: conventions de retour I/O,
@@ -1423,7 +1435,6 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 Etendre la surcharge de fonctions au-dela de la V1 :
 
-- definir la strategie pour les references de fonctions generiques surchargees;
 - definir la strategie pour les methodes surchargees generiques;
 - ajouter une etape d'ambiguite explicite si une future resolution devient moins
   stricte que la signature exacte;

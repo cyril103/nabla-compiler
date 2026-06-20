@@ -168,8 +168,10 @@ Dans cet exemple, `pick(41)` utilise la signature concrete `Int`, tandis que
 `pick("generic")` utilise la signature generique. Les references de fonctions
 surchargees sont autorisees lorsqu'un type fonction est attendu, par exemple en
 argument de fonction d'ordre superieur ou via une annotation locale comme
-`val f: (Float) => Float = sqrt`. Sans type attendu explicite, elles restent
-refusees pour eviter une ambiguite silencieuse.
+`val f: (Float) => Float = sqrt`. Les references peuvent aussi inferer une
+signature generique depuis le type fonction attendu, avec la meme priorite pour
+les signatures concretes. Sans type attendu explicite, elles restent refusees
+pour eviter une ambiguite silencieuse.
 
 Les methodes de classe peuvent aussi etre surchargees par signature exacte :
 

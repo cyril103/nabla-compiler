@@ -98,10 +98,11 @@ Actions recommandees :
 9. Garder les diagnostics de compatibilite orientes vers les compagnons
    recommandes (`Array.fill`, `Set.fromArray`, `Option.some`, etc.).
 10. Poursuivre la surcharge par signature : la base couvre maintenant les
-    fonctions globales, y compris les generiques inferables, et les methodes de
-    classe par signature exacte; etendre progressivement aux references
-    generiques surchargees et aux diagnostics d'ambiguite plus riches si la
-    resolution devient moins stricte que l'exact match.
+    fonctions globales, y compris les generiques inferables et les references
+    typees, ainsi que les methodes de classe par signature exacte; etendre
+    progressivement aux methodes generiques surchargees et aux diagnostics
+    d'ambiguite plus riches si la resolution devient moins stricte que l'exact
+    match.
 11. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
    surface n'est pas propre.
 

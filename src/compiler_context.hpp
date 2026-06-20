@@ -609,6 +609,17 @@ inline std::optional<std::map<std::string, std::string>> genericFunctionSubstitu
     return substitution;
 }
 
+inline std::vector<std::string> orderedTypeArguments(
+    const std::vector<std::string>& typeParameters,
+    const std::map<std::string, std::string>& substitution) {
+    std::vector<std::string> arguments;
+    for (const auto& typeParameter : typeParameters) {
+        auto argument = substitution.find(typeParameter);
+        if (argument != substitution.end()) arguments.push_back(argument->second);
+    }
+    return arguments;
+}
+
 inline std::string substituteType(
     const std::string& type, const std::map<std::string, std::string>& substitution) {
     auto direct = substitution.find(type);
@@ -889,6 +900,32 @@ inline std::optional<std::map<std::string, std::string>> inferGenericFunctionSub
                 signature.typeParameters, substitution)) {
             return std::nullopt;
         }
+    }
+    for (const auto& typeParameter : signature.typeParameters) {
+        if (substitution.count(typeParameter) == 0) return std::nullopt;
+    }
+    return substitution;
+}
+
+inline std::optional<std::map<std::string, std::string>> inferGenericFunctionSubstitutionForFunctionType(
+    const CompilerContext::FunctionSignature& signature, const std::string& expectedType) {
+    if (signature.typeParameters.empty()) return std::map<std::string, std::string>{};
+    auto expectedFunction = functionTypeFromName(expectedType);
+    if (!expectedFunction) return std::nullopt;
+    if (signature.parameters.size() != expectedFunction->parameterTypes.size()) return std::nullopt;
+
+    std::map<std::string, std::string> substitution;
+    for (size_t i = 0; i < signature.parameters.size(); ++i) {
+        if (!inferTypeArgumentsFromTypes(
+                signature.parameters[i].type, expectedFunction->parameterTypes[i],
+                signature.typeParameters, substitution)) {
+            return std::nullopt;
+        }
+    }
+    if (!inferTypeArgumentsFromTypes(
+            signature.returnType, expectedFunction->returnType,
+            signature.typeParameters, substitution)) {
+        return std::nullopt;
     }
     for (const auto& typeParameter : signature.typeParameters) {
         if (substitution.count(typeParameter) == 0) return std::nullopt;

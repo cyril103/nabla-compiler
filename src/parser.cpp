@@ -897,28 +897,61 @@ std::unique_ptr<ASTNode> Parser::parseFunctionReferenceWithExpectedType(const st
             "référence de fonction attendue, appel trouvé: " + name);
     }
 
-    std::vector<std::string> matches;
+    struct FunctionReferenceOverloadMatch {
+        std::string overloadName;
+        std::vector<std::string> resolvedTypeArguments;
+    };
+    std::vector<FunctionReferenceOverloadMatch> concreteMatches;
+    std::vector<FunctionReferenceOverloadMatch> genericMatches;
     for (const auto& overloadName : overloadNames) {
         const auto* signature = findFunctionSignature(context, overloadName);
         if (!signature) continue;
-        CompilerContext::FunctionSignature candidate = *signature;
-        if (candidate.typeParameters.empty()) {
+        if (signature->typeParameters.empty()) {
             if (!typeArguments.empty()) continue;
-        } else {
-            auto substitution = genericFunctionSubstitutionFor(candidate, typeArguments);
-            if (!substitution) continue;
-            for (auto& parameter : candidate.parameters) {
-                parameter.type = substituteType(parameter.type, *substitution);
+            if (functionTypeNameMatchesSignature(expectedType, *signature)) {
+                concreteMatches.push_back({overloadName, {}});
             }
-            candidate.returnType = substituteType(candidate.returnType, *substitution);
+            continue;
         }
+
+        std::optional<std::map<std::string, std::string>> substitution;
+        if (typeArguments.empty()) {
+            substitution = inferGenericFunctionSubstitutionForFunctionType(*signature, expectedType);
+        } else {
+            substitution = genericFunctionSubstitutionFor(*signature, typeArguments);
+            if (!substitution) continue;
+        }
+        if (!substitution) continue;
+
+        CompilerContext::FunctionSignature candidate = *signature;
+        for (auto& parameter : candidate.parameters) {
+            parameter.type = substituteType(parameter.type, *substitution);
+        }
+        candidate.returnType = substituteType(candidate.returnType, *substitution);
         if (functionTypeNameMatchesSignature(expectedType, candidate)) {
-            matches.push_back(overloadName);
+            genericMatches.push_back({
+                overloadName,
+                orderedTypeArguments(signature->typeParameters, *substitution),
+            });
         }
     }
 
-    if (matches.size() != 1) {
+    std::optional<FunctionReferenceOverloadMatch> match;
+    if (concreteMatches.size() == 1) {
+        match = concreteMatches[0];
+    } else if (concreteMatches.empty() && genericMatches.size() == 1) {
+        match = genericMatches[0];
+    }
+    if (!match) {
         std::string candidates = formatFunctionOverloadCandidates(context, name);
+        if (concreteMatches.size() > 1 ||
+            (concreteMatches.empty() && genericMatches.size() > 1)) {
+            throw CompilerError(
+                ErrorKind::Parser, nameToken.location,
+                "référence de fonction surchargée ambiguë pour '" + name +
+                "' avec le type attendu " + expectedType +
+                (candidates.empty() ? "" : "\ncandidats:" + candidates));
+        }
         throw CompilerError(
             ErrorKind::Parser, nameToken.location,
             "aucune surcharge compatible pour la référence '" + name +
@@ -927,8 +960,8 @@ std::unique_ptr<ASTNode> Parser::parseFunctionReferenceWithExpectedType(const st
     }
     return located(
         std::make_unique<FunctionReferenceNode>(
-            name, expectedType, std::move(typeArguments),
-            std::vector<FunctionReferenceNode::Capture>{}, matches[0]),
+            name, expectedType, std::move(match->resolvedTypeArguments),
+            std::vector<FunctionReferenceNode::Capture>{}, match->overloadName),
         nameToken.location);
 }
 

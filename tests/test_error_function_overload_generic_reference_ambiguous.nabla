@@ -1,0 +1,12 @@
+def choose[T](value: T): T = {
+    value
+}
+
+def choose[U](value: U): U = {
+    value
+}
+
+def main(): Int = {
+    val f: (Int) => Int = choose
+    f(41)
+}

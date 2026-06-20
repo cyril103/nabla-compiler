@@ -120,17 +120,6 @@ std::vector<CompilerContext::ParameterInfo> substituteParameters(
     return substituted;
 }
 
-std::vector<std::string> orderedTypeArguments(
-    const std::vector<std::string>& typeParameters,
-    const std::map<std::string, std::string>& substitution) {
-    std::vector<std::string> arguments;
-    for (const auto& typeParameter : typeParameters) {
-        auto argument = substitution.find(typeParameter);
-        if (argument != substitution.end()) arguments.push_back(argument->second);
-    }
-    return arguments;
-}
-
 void validateArguments(
     const CompilerContext& context,
     const std::string& callableName,
