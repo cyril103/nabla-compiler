@@ -94,6 +94,8 @@ l'implementation, par exemple :
 - `abs(value: Int | Long | Float | Double)`
 - `min(left, right)` et `max(left, right)` pour `Int`, `Long`, `Float` et
   `Double`
+- `clamp(value, minimum, maximum)` pour `Int`, `Long`, `Float` et `Double`
+- `pow(base, exponent: Int)` pour `Int`, `Float` et `Double`
 
 ### Util
 

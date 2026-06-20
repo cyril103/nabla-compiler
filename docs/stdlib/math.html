@@ -16,7 +16,7 @@
     <section class="module-hero">
       <p class="import">import math</p>
       <h1>Math</h1>
-      <p>Fonctions mathematiques courantes. Les noms surcharges (`abs`, `min`, `max`, `sqrt`) forment l&#x27;API idiomatique. Les noms suffixes (`absInt`, `maxLong`, `sqrtDouble`, etc.) restent disponibles comme compatibilite explicite.</p>
+      <p>Fonctions mathematiques courantes. Les noms surcharges (`abs`, `min`, `max`, `clamp`, `pow`, `sqrt`) forment l&#x27;API idiomatique. Les noms suffixes (`absInt`, `maxLong`, `sqrtDouble`, etc.) restent disponibles comme compatibilite explicite.</p>
     </section>
     <section class="entries">
     <article class="entry" id="absInt">
@@ -171,6 +171,38 @@
       <pre><code>def clampInt(value: Int, minimum: Int, maximum: Int): Int</code></pre>
       <p>Contraint une valeur entiere dans l&#x27;intervalle donne.</p>
     </article>
+    <article class="entry" id="clamp">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>clamp</h2>
+      <pre><code>def clamp(value: Int, minimum: Int, maximum: Int): Int</code></pre>
+      <p>Contraint une valeur surchargee `Int` dans l&#x27;intervalle donne.</p>
+    </article>
+    <article class="entry" id="clamp-2">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>clamp</h2>
+      <pre><code>def clamp(value: Long, minimum: Long, maximum: Long): Long</code></pre>
+      <p>Contraint une valeur surchargee `Long` dans l&#x27;intervalle donne.</p>
+    </article>
+    <article class="entry" id="clamp-3">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>clamp</h2>
+      <pre><code>def clamp(value: Float, minimum: Float, maximum: Float): Float</code></pre>
+      <p>Contraint une valeur surchargee `Float` dans l&#x27;intervalle donne.</p>
+    </article>
+    <article class="entry" id="clamp-4">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>clamp</h2>
+      <pre><code>def clamp(value: Double, minimum: Double, maximum: Double): Double</code></pre>
+      <p>Contraint une valeur surchargee `Double` dans l&#x27;intervalle donne.</p>
+    </article>
     <article class="entry" id="isEvenInt">
       <div class="entry-meta">
         <span class="kind">def</span> <span class="status recommended">Recommandee</span>
@@ -229,6 +261,30 @@
       <pre><code>def powDouble(base: Double, exponent: Int): Double</code></pre>
       <p>Puissance flottante double precision avec exposant entier positif.</p>
 <p>Retourne `0.0` si `exponent` est negatif.</p>
+    </article>
+    <article class="entry" id="pow">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>pow</h2>
+      <pre><code>def pow(base: Int, exponent: Int): Int</code></pre>
+      <p>Puissance surchargee pour `Int`.</p>
+    </article>
+    <article class="entry" id="pow-2">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>pow</h2>
+      <pre><code>def pow(base: Float, exponent: Int): Float</code></pre>
+      <p>Puissance surchargee pour `Float`.</p>
+    </article>
+    <article class="entry" id="pow-3">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>pow</h2>
+      <pre><code>def pow(base: Double, exponent: Int): Double</code></pre>
+      <p>Puissance surchargee pour `Double`.</p>
     </article>
     <article class="entry" id="sqrtFloat">
       <div class="entry-meta">

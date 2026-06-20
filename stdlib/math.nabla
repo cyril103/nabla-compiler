@@ -1,6 +1,6 @@
 /// @module Math
 /// Fonctions mathematiques courantes.
-/// Les noms surcharges (`abs`, `min`, `max`, `sqrt`) forment l'API
+/// Les noms surcharges (`abs`, `min`, `max`, `clamp`, `pow`, `sqrt`) forment l'API
 /// idiomatique. Les noms suffixes (`absInt`, `maxLong`, `sqrtDouble`, etc.)
 /// restent disponibles comme compatibilite explicite.
 
@@ -232,6 +232,30 @@ def clampDouble(value: Double, minimum: Double, maximum: Double): Double = {
             value
         }
     }
+}
+
+/// Contraint une valeur surchargee `Int` dans l'intervalle donne.
+/// @status Recommandee
+def clamp(value: Int, minimum: Int, maximum: Int): Int = {
+    clampInt(value, minimum, maximum)
+}
+
+/// Contraint une valeur surchargee `Long` dans l'intervalle donne.
+/// @status Recommandee
+def clamp(value: Long, minimum: Long, maximum: Long): Long = {
+    clampLong(value, minimum, maximum)
+}
+
+/// Contraint une valeur surchargee `Float` dans l'intervalle donne.
+/// @status Recommandee
+def clamp(value: Float, minimum: Float, maximum: Float): Float = {
+    clampFloat(value, minimum, maximum)
+}
+
+/// Contraint une valeur surchargee `Double` dans l'intervalle donne.
+/// @status Recommandee
+def clamp(value: Double, minimum: Double, maximum: Double): Double = {
+    clampDouble(value, minimum, maximum)
 }
 
 def isCloseFloat(left: Float, right: Float, epsilon: Float): Bool = {
@@ -470,6 +494,24 @@ def powDouble(base: Double, exponent: Int): Double = {
         }
         result
     }
+}
+
+/// Puissance surchargee pour `Int`.
+/// @status Recommandee
+def pow(base: Int, exponent: Int): Int = {
+    powInt(base, exponent)
+}
+
+/// Puissance surchargee pour `Float`.
+/// @status Recommandee
+def pow(base: Float, exponent: Int): Float = {
+    powFloat(base, exponent)
+}
+
+/// Puissance surchargee pour `Double`.
+/// @status Recommandee
+def pow(base: Double, exponent: Int): Double = {
+    powDouble(base, exponent)
 }
 
 def factorialInt(value: Int): Int = {

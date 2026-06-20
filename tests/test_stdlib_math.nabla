@@ -20,9 +20,13 @@ def main(): Int = {
        isCloseFloat(hypotenuseFloat(3.0F, 4.0F), 5.0F, 0.000001F) &&
        isCloseDouble(hypotenuseDouble(3.0, 4.0), 5.0, 0.000000000000001) &&
        clampInt(-3, 0, 10) == 0 &&
+       clamp(-3, 0, 10) == 0 &&
        clampLong(-3L, 0L, 10L) == 0L &&
+       clamp(-3L, 0L, 10L) == 0L &&
        clampFloat(-3.0F, 0.0F, 10.0F) == 0.0F &&
+       clamp(-3.0F, 0.0F, 10.0F) == 0.0F &&
        clampDouble(-3.0, 0.0, 10.0) == 0.0 &&
+       clamp(-3.0, 0.0, 10.0) == 0.0 &&
        maxInt(1, 2) == 2 &&
        max(1, 2) == 2 &&
        max(1L, 2L) == 2L &&
@@ -63,6 +67,7 @@ def main(): Int = {
        lcmLong(7L, 6L) == 42L &&
         lcmInt(7, 6) == 42 &&
         powInt(2, 8) == 256 &&
+        pow(2, 8) == 256 &&
         powInt(2, 0) == 1 &&
         powInt(2, -1) == 0 &&
        absDiffInt(3, 7) == 4 &&
@@ -70,13 +75,16 @@ def main(): Int = {
        absDiffFloat(2.5F, 5.0F) == 2.5F &&
        absDiffDouble(2.5, 5.0) == 2.5 &&
        powFloat(2.0F, 4) == 16.0F &&
+       pow(2.0F, 4) == 16.0F &&
        powDouble(2.0, 5) == 32.0 &&
+       pow(2.0, 5) == 32.0 &&
        isCloseFloat(sqrtFloat(16.0F), 4.0F, 0.0001F) &&
        isCloseDouble(sqrtDouble(81.0), 9.0, 0.0001) &&
         factorialInt(6) == 720 &&
-        maxDouble(3.0, 2.5) == 3.0 &&
-        minDouble(-1.0, 2.0) == -1.0 &&
+       maxDouble(3.0, 2.5) == 3.0 &&
+       minDouble(-1.0, 2.0) == -1.0 &&
        clampInt(15, 0, 10) == 10 &&
+       clamp(15, 0, 10) == 10 &&
        signLong(-7L) == -1L &&
        signLong(0L) == 0L &&
        signLong(7L) == 1L {
