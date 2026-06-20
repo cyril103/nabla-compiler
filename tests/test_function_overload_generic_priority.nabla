@@ -1,0 +1,11 @@
+def pick(value: Int): Int = {
+    value + 1
+}
+
+def pick[T](value: T): Int = {
+    10
+}
+
+def main(): Int = {
+    pick(41) + pick("generic") - 10
+}

@@ -146,10 +146,30 @@ def main(): Int = {
 ```
 
 Une redéfinition avec exactement les memes types de parametres est refusee. Les
-references de fonctions surchargees sont autorisees lorsqu'un type fonction est
-attendu, par exemple en argument de fonction d'ordre superieur ou via une
-annotation locale comme `val f: (Float) => Float = sqrt`. Sans type attendu
-explicite, elles restent refusees pour eviter une ambiguite silencieuse.
+fonctions generiques peuvent participer a la resolution de surcharge : une
+signature concrete exacte est prioritaire sur une signature generique inferable,
+et une erreur d'ambiguite est levee si plusieurs generiques restent compatibles.
+
+```nabla
+def pick(value: Int): Int = {
+    value + 1
+}
+
+def pick[T](value: T): Int = {
+    10
+}
+
+def main(): Int = {
+    pick(41) + pick("generic") - 10
+}
+```
+
+Dans cet exemple, `pick(41)` utilise la signature concrete `Int`, tandis que
+`pick("generic")` utilise la signature generique. Les references de fonctions
+surchargees sont autorisees lorsqu'un type fonction est attendu, par exemple en
+argument de fonction d'ordre superieur ou via une annotation locale comme
+`val f: (Float) => Float = sqrt`. Sans type attendu explicite, elles restent
+refusees pour eviter une ambiguite silencieuse.
 
 Les methodes de classe peuvent aussi etre surchargees par signature exacte :
 

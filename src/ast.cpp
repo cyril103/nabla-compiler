@@ -1571,6 +1571,15 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
     }
     if (!overloadName) {
         const std::string displayName = diagnosticName.empty() ? name : diagnosticName;
+        const auto matches = exactFunctionOverloadMatches(context, name, actualArgumentTypes, typeArguments);
+        if (matches.concreteMatches.size() > 1 ||
+            (matches.concreteMatches.empty() && matches.genericMatches.size() > 1)) {
+            semanticError(
+                "appel de fonction surchargée ambigu pour '" +
+                formatFunctionCallShape(displayName, actualArgumentTypes) + "'" +
+                "\ncandidats:" + formatFunctionOverloadCandidates(context, displayName) +
+                recommendedStdlibFunctionSuffix(displayName));
+        }
         semanticError(
             formatNoMatchingFunctionOverloadMessage(context, displayName, actualArgumentTypes) +
             recommendedStdlibFunctionSuffix(displayName));

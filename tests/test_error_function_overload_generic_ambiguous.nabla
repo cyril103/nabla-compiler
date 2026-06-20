@@ -1,0 +1,11 @@
+def choose[T](value: T): Int = {
+    1
+}
+
+def choose[U](value: U): Int = {
+    2
+}
+
+def main(): Int = {
+    choose(42)
+}

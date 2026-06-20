@@ -996,8 +996,19 @@ inline std::optional<std::string> resolveExactFunctionOverload(
     const CompilerContext& context,
     const std::string& sourceName,
     const std::vector<std::string>& actualArgumentTypes,
+    const std::vector<std::string>& typeArguments = {});
+
+struct FunctionOverloadMatches {
+    std::vector<std::string> concreteMatches;
+    std::vector<std::string> genericMatches;
+};
+
+inline FunctionOverloadMatches exactFunctionOverloadMatches(
+    const CompilerContext& context,
+    const std::string& sourceName,
+    const std::vector<std::string>& actualArgumentTypes,
     const std::vector<std::string>& typeArguments = {}) {
-    std::vector<std::string> matches;
+    FunctionOverloadMatches matches;
     for (const auto& overloadName : functionOverloadNames(context, sourceName)) {
         const auto* signature = findFunctionSignature(context, overloadName);
         if (!signature) continue;
@@ -1027,9 +1038,28 @@ inline std::optional<std::string> resolveExactFunctionOverload(
                 break;
             }
         }
-        if (compatible) matches.push_back(overloadName);
+        if (compatible) {
+            if (signature->typeParameters.empty()) {
+                matches.concreteMatches.push_back(overloadName);
+            } else {
+                matches.genericMatches.push_back(overloadName);
+            }
+        }
     }
-    if (matches.size() == 1) return matches[0];
+    return matches;
+}
+
+inline std::optional<std::string> resolveExactFunctionOverload(
+    const CompilerContext& context,
+    const std::string& sourceName,
+    const std::vector<std::string>& actualArgumentTypes,
+    const std::vector<std::string>& typeArguments) {
+    const auto matches =
+        exactFunctionOverloadMatches(context, sourceName, actualArgumentTypes, typeArguments);
+    if (matches.concreteMatches.size() == 1) return matches.concreteMatches[0];
+    if (matches.concreteMatches.empty() && matches.genericMatches.size() == 1) {
+        return matches.genericMatches[0];
+    }
     return std::nullopt;
 }
 
