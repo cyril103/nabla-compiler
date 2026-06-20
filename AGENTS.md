@@ -298,7 +298,8 @@ Le pipeline implemente actuellement :
   `git diff --check`;
 - reference HTML de la stdlib generee depuis `///`, avec directive `@status`
   pour distinguer visuellement API recommandee, compatibilite et helpers
-  internes; `Array`, `Option` et `Set` affichent deja ces statuts.
+  internes; toutes les pages actuellement publiees affichent les statuts des
+  symboles documentes.
 - examples Project Euler 1 a 10 (`examples/euler1.nabla` ... `examples/euler10_functional.nabla`)
   comme banc progressif pour exercer le langage et la bibliotheque standard.
 - `examples/student_scores.nabla` comme exemple idiomatique vérifié pour
@@ -719,6 +720,12 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `stdlib/collections/array.nabla`, `stdlib/core/option.nabla`,
     `stdlib/collections/set.nabla`, `docs/stdlib/`, `docs/roadmap.md`,
     `make stdlib-docs`, `git diff --exit-code docs/stdlib`.
+- `local` - Etendre les statuts `Recommandee` aux modules stdlib publics restants
+  deja presents dans la reference HTML: `OptionInt`, `io`, `math` et `strings`,
+  sans publier de nouveaux symboles.
+  - Fichiers / tests associés: `stdlib/core/option_int.nabla`,
+    `stdlib/io.nabla`, `stdlib/math.nabla`, `stdlib/strings.nabla`,
+    `docs/stdlib/`, `docs/roadmap.md`, `make stdlib-docs`.
 - `local` - Ameliorer les diagnostics de compatibilite stdlib: les appels via
   anciens noms (`ArrayFill`, `SetFromArray`, `SetEmpty`, `optionSome`) gardent
   le nom source dans les erreurs meme apres resolution vers un helper interne,

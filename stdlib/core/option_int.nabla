@@ -6,6 +6,7 @@
 import core.option
 
 /// Option specialisee pour `Int`.
+/// @status Recommandee
 class OptionInt(defined: Bool, value: Int) {
     def isDefined(): Bool = {
         defined
@@ -53,11 +54,13 @@ class OptionInt(defined: Bool, value: Int) {
 }
 
 /// Construit une option entiere contenant `value`.
+/// @status Recommandee
 def optionIntSome(value: Int): OptionInt = {
     new OptionInt(true, value)
 }
 
 /// Construit une option entiere vide.
+/// @status Recommandee
 def optionIntNone(): OptionInt = {
     new OptionInt(false, 0)
 }

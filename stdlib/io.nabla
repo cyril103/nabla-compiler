@@ -4,46 +4,55 @@
 /// le programme decider comment reagir aux erreurs.
 
 /// Affiche une chaine suivie d'un retour a la ligne.
+/// @status Recommandee
 def println(value: String): Unit = {
     print(value)
 }
 
 /// Lit une ligne depuis l'entree standard.
+/// @status Recommandee
 def input(): String = {
     readLine()
 }
 
 /// Lit tout le contenu d'un fichier texte.
+/// @status Recommandee
 def readTextFile(path: String): String = {
     readFile(path)
 }
 
 /// Ecrit `content` dans un fichier texte en remplacant son contenu.
+/// @status Recommandee
 def writeTextFile(path: String, content: String): Int = {
     writeFile(path, content)
 }
 
 /// Ajoute `content` a la fin d'un fichier texte.
+/// @status Recommandee
 def appendTextFile(path: String, content: String): Int = {
     appendFile(path, content)
 }
 
 /// Renomme ou deplace un fichier texte.
+/// @status Recommandee
 def renameTextFile(from: String, to: String): Bool = {
     renameFile(from, to)
 }
 
 /// Cree un repertoire.
+/// @status Recommandee
 def createDirectory(path: String): Bool = {
     createDir(path)
 }
 
 /// Supprime un fichier texte.
+/// @status Recommandee
 def deleteTextFile(path: String): Bool = {
     deleteFile(path)
 }
 
 /// Indique si un chemin existe.
+/// @status Recommandee
 def pathExists(path: String): Bool = {
     fileExists(path)
 }

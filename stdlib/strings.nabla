@@ -4,11 +4,13 @@
 import collections.array
 
 /// Indique si une chaine contient au moins un caractere.
+/// @status Recommandee
 def stringNonEmpty(value: String): Bool = {
     value.nonEmpty()
 }
 
 /// Separe une chaine sur les espaces.
+/// @status Recommandee
 ///
 /// Les espaces de debut et de fin sont retires avant la separation.
 def words(text: String): ArrayObject[String] = {
