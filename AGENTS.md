@@ -760,6 +760,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Nettoyer la surface documentaire de `core.option` et
+  `core.option_int`: les pages HTML evitent maintenant les marqueurs Markdown
+  bruts, `optionSome` / `optionNone` pointent explicitement vers
+  `Option.some` / `Option.none`, `Option[T]` liste ses methodes principales et
+  `OptionInt` est presente comme specialisation utile plutot que choix par
+  defaut.
+  - Fichiers / tests associes: `stdlib/core/option.nabla`,
+    `stdlib/core/option_int.nabla`, `docs/stdlib/core/option.html`,
+    `docs/stdlib/core/option_int.html`, `AGENTS.md`, `make stdlib-docs`.
 - `local` - Nettoyer la surface documentaire de `collections.array`: la page
   HTML evite maintenant les marqueurs Markdown bruts, `ArrayFill` et
   `ArrayRange` pointent explicitement vers `Array.fill` et `Array.range`, et la

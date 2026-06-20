@@ -1,15 +1,15 @@
 /// @module Option Int
-/// Variante specialisee de `Option[Int]`.
+/// Variante specialisee de Option[Int].
 /// Elle evite de fournir une valeur par defaut lors de la creation d'une option
-/// vide pour les entiers. Preferer `Option[Int]` dans le code generique; garder
-/// `OptionInt` quand cette representation specialisee rend le code plus direct.
+/// vide pour les entiers. Preferer Option[Int] dans le code generique; garder
+/// OptionInt quand cette representation specialisee rend le code plus direct.
 
 import core.option
 
-/// Option specialisee pour `Int`.
+/// Option specialisee pour Int.
 ///
-/// Les methodes principales suivent `Option[T]`: `isDefined`, `isEmpty`,
-/// `nonEmpty`, `map`, `filter`, `orElse` et `getOrElse`.
+/// Les methodes principales suivent Option[T]: isDefined, isEmpty, nonEmpty,
+/// map, filter, orElse et getOrElse.
 /// @status Recommandee
 class OptionInt(defined: Bool, value: Int) {
     def isDefined(): Bool = {
@@ -57,7 +57,7 @@ class OptionInt(defined: Bool, value: Int) {
     }
 }
 
-/// Construit une option entiere contenant `value`.
+/// Construit une option entiere contenant value.
 /// @status Recommandee
 def optionIntSome(value: Int): OptionInt = {
     new OptionInt(true, value)

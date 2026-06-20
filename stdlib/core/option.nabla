@@ -1,13 +1,16 @@
 /// @module Option
 /// Valeur optionnelle generique.
-/// `Option[T]` represente soit une valeur presente, soit une absence. C'est le
+/// Option[T] represente soit une valeur presente, soit une absence. C'est le
 /// type a privilegier quand une operation peut ne rien produire sans que ce soit
-/// une erreur. Utiliser `Option.some[T](value)` pour construire une valeur
-/// presente et `Option.none[T](default)` pour construire une absence avec sa
-/// valeur interne de secours. Les anciens noms `optionSome[T](value)` et
-/// `optionNone[T](default)` restent disponibles pour compatibilite.
+/// une erreur. Utiliser Option.some[T](value) pour construire une valeur
+/// presente et Option.none[T](default) pour construire une absence avec sa
+/// valeur interne de secours. Les anciens noms optionSome[T](value) et
+/// optionNone[T](default) restent disponibles pour compatibilite.
 
 /// Conteneur optionnel generique.
+///
+/// Les methodes principales sont isDefined, isEmpty, nonEmpty, map, flatMap,
+/// foreach, filter, orElse et getOrElse.
 /// @status Recommandee
 class Option[T](defined: Bool, value: T) {
     def isDefined(): Bool = {
@@ -85,8 +88,7 @@ object Option {
     /// @signature def Option.none[T](default: T): Option[T]
     /// @status Recommandee
     ///
-    /// Le parametre `default` sert de valeur interne de secours pour le type
-    /// `T`.
+    /// Le parametre default sert de valeur interne de secours pour le type T.
     def none[T](default: T): Option[T] = {
         new Option[T](false, default)
     }
@@ -94,6 +96,8 @@ object Option {
 
 /// Construit une option contenant une valeur.
 /// @status Compatibilite
+///
+/// Preferer Option.some[T](value) dans le nouveau code.
 def optionSome[T](value: T): Option[T] = {
     Option.some[T](value)
 }
@@ -101,7 +105,8 @@ def optionSome[T](value: T): Option[T] = {
 /// Construit une option vide.
 /// @status Compatibilite
 ///
-/// Le parametre `default` sert de valeur interne de secours pour le type `T`.
+/// Preferer Option.none[T](default) dans le nouveau code.
+/// Le parametre default sert de valeur interne de secours pour le type T.
 def optionNone[T](default: T): Option[T] = {
     Option.none[T](default)
 }
