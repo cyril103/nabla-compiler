@@ -57,6 +57,8 @@ helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
   - `ArrayObject[T]`
 - `Set[T]`
 - Constructeurs/fabriques :
+  - `Set(value1, value2, ...)`
+  - `Set.apply[T](values: T*)`
   - `Set.empty[T]()`
   - `Set.fromArray[T](values)`
 

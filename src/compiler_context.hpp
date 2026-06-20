@@ -714,6 +714,14 @@ inline bool isTypeAssignable(
     const std::string& expectedType,
     std::set<std::string>& visiting) {
     if (actualType == expectedType) return true;
+    auto actualParameterized = parameterizedTypeFromName(actualType);
+    auto expectedParameterized = parameterizedTypeFromName(expectedType);
+    if (actualParameterized && expectedParameterized &&
+        actualParameterized->first == "Array" &&
+        expectedParameterized->first == "ArrayObject" &&
+        actualParameterized->second == expectedParameterized->second) {
+        return true;
+    }
     if (expectedType == "Any") return true;
     if (expectedType == "AnyVal") return isBuiltinValueType(actualType);
     if (expectedType == "AnyRef" && isBuiltinReferenceType(actualType)) return true;

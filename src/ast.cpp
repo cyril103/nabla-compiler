@@ -1750,6 +1750,30 @@ std::string FunctionCallNode::lowerToIR(IRBuilder& builder) const {
     for (const auto& typeArgument : resolvedTypeArguments) {
         concreteTypeArguments.push_back(builder.substituteActiveType(typeArgument));
     }
+    if (resolvedFunctionName == "Set.apply" && concreteTypeArguments.size() == 1 &&
+        loweredArguments.size() == 1) {
+        const std::string elementType = concreteTypeArguments[0];
+        const std::string concreteReturnType = builder.substituteActiveType(resolvedType);
+        if (elementType == "Int") {
+            return builder.emitCall("setFromArrayInt", loweredArguments, concreteReturnType);
+        }
+        if (elementType == "Long") {
+            return builder.emitCall("setFromArrayLong", loweredArguments, concreteReturnType);
+        }
+        if (elementType == "Float") {
+            return builder.emitCall("setFromArrayFloat", loweredArguments, concreteReturnType);
+        }
+        if (elementType == "Double") {
+            return builder.emitCall("setFromArrayDouble", loweredArguments, concreteReturnType);
+        }
+        if (elementType == "Bool") {
+            return builder.emitCall("setFromArrayBool", loweredArguments, concreteReturnType);
+        }
+        builder.registerFunctionSpecialization("setFromArray", {elementType}, concreteReturnType);
+        return builder.emitCall(
+            formatParameterizedType("setFromArray", {elementType}),
+            loweredArguments, concreteReturnType);
+    }
     if (!concreteTypeArguments.empty()) {
         const std::string concreteReturnType = builder.substituteActiveType(resolvedType);
         builder.registerFunctionSpecialization(resolvedFunctionName, concreteTypeArguments, concreteReturnType);

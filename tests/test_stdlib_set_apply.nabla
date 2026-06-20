@@ -1,0 +1,33 @@
+import collections.array
+import collections.set
+
+class Student(name: String) {
+    override def toString(): String = {
+        name
+    }
+}
+
+def main(): Int = {
+    val numbers = Set(3, 1, 3, 2)
+    val words = Set("go", "nabla")
+    val students = Set(new Student("ada"), new Student("ada"), new Student("linus"))
+    val empty = Set[Int]()
+
+    if numbers.toString() != "[3, 1, 2]" {
+        2
+    } else if numbers.size() != 3 {
+        3
+    } else if !numbers.contains(1) {
+        4
+    } else if numbers.contains(4) {
+        5
+    } else if words.toString() != "[go, nabla]" {
+        6
+    } else if students.toString() != "[ada, ada, linus]" {
+        7
+    } else if !empty.isEmpty() {
+        8
+    } else {
+        0
+    }
+}

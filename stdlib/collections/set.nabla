@@ -1,6 +1,7 @@
 /// @module Set
 /// Ensembles immuables avec valeurs uniques.
-/// Utiliser Set.empty[T]() pour construire progressivement un ensemble, ou
+/// Utiliser Set(values...) pour creer un ensemble depuis des elements,
+/// Set.empty[T]() pour construire progressivement un ensemble, ou
 /// Set.fromArray[T](values) pour dedupliquer un tableau. Les anciens noms
 /// SetEmpty[T]() et SetFromArray[T](values) restent disponibles pour
 /// compatibilite, mais ne sont plus l'API recommandee pour du code applicatif.
@@ -320,6 +321,13 @@ def setEmpty[T](): Set[T] = {
 }
 
 object Set {
+    /// Cree un ensemble depuis les elements donnes.
+    /// @signature def Set.apply[T](values: T*): Set[T]
+    /// @status Recommandee
+    def apply[T](values: T*): Set[T] = {
+        Set.fromArray[T](values)
+    }
+
     /// Cree un ensemble vide.
     /// @signature def Set.empty[T](): Set[T]
     /// @status Recommandee

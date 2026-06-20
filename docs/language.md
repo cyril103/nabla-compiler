@@ -696,10 +696,12 @@ def main(): Int = {
     values.set(3, 2)
 
     val deduped = Set.fromArray[Int](values)
+    val literal = Set(5, 5, 8)
     val numbers = Set.empty[Int]().add(3).add(1).add(3).add(2)
     val more = Set.empty[Int]().add(2).add(4).add(1)
     if numbers.union(more).toString() == "[3, 1, 2, 4]" &&
        deduped.toString() == "[1, 3, 2]" &&
+       literal.toString() == "[5, 8]" &&
        numbers.intersect(more).toString() == "[1, 2]" &&
        numbers.difference(more).toString() == "[3]" {
         42
@@ -711,6 +713,8 @@ def main(): Int = {
 
 Operations utiles :
 
+- `Set(value1, value2, ...): Set[T]`
+- `Set.apply[T](values: T*): Set[T]`
 - `Set.empty[T](): Set[T]`
 - `Set.fromArray[T](values: Array[T]): Set[T]`
 - `size()`
@@ -728,8 +732,8 @@ Operations utiles :
 Les noms de compatibilite `SetEmpty`, `SetFromArray`, ainsi que les noms bas
 niveau `setEmpty`, `setFromArray`, `ObjectArray[T]` et `ArrayObject[T]`,
 restent disponibles pour la stdlib et le code existant, mais `Set.empty`,
-`Set.fromArray` et `Array[T]` sont les noms recommandés dans le code
-utilisateur.
+`Set(...)`, `Set.apply`, `Set.fromArray` et `Array[T]` sont les noms
+recommandés dans le code utilisateur.
 
 ## Option
 

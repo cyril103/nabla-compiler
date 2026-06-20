@@ -1,0 +1,21 @@
+class Box[T](value: T) {
+    def get(): T = {
+        value
+    }
+}
+
+object Box {
+    def apply[T](value: T): Box[T] = {
+        new Box[T](value)
+    }
+}
+
+def main(): Int = {
+    val inferred = Box(42)
+    val explicit = Box[String]("go")
+    if inferred.get() == 42 && explicit.get() == "go" {
+        42
+    } else {
+        1
+    }
+}
