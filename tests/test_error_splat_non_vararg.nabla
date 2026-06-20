@@ -1,0 +1,10 @@
+import collections.array
+
+def size(values: Array[Int]): Int = {
+    values.size()
+}
+
+def main(): Int = {
+    val values = Array(1, 2)
+    size(values: _*)
+}

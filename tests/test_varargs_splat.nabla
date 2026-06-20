@@ -1,0 +1,27 @@
+import collections.array
+import collections.set
+
+def join(words: String*): String = {
+    words.mkString("-")
+}
+
+def copyValues[T](values: T*): Array[T] = {
+    values
+}
+
+def main(): Int = {
+    val words = Array("a", "b", "c")
+    val numbers = Array(1, 2, 3)
+    val copied = copyValues(numbers: _*)
+    val set = Set(numbers: _*)
+    val direct = Array.apply[String](words: _*)
+
+    if join(words: _*) == "a-b-c" &&
+       copied.toString() == "[1, 2, 3]" &&
+       set.toString() == "[1, 2, 3]" &&
+       direct.toString() == "[a, b, c]" {
+        0
+    } else {
+        1
+    }
+}

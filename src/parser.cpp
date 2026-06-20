@@ -1893,7 +1893,18 @@ std::unique_ptr<ASTNode> Parser::parseArgument(const std::string& expectedType) 
     if (auto functionReference = parseFunctionReferenceWithExpectedType(expectedType)) {
         return functionReference;
     }
-    return parseExpression();
+    auto expression = parseExpression();
+    if (peek().type == TokenType::COLON) {
+        const size_t colonIndex = index;
+        consume(TokenType::COLON, "");
+        if (peek().type == TokenType::IDENTIFIER && peek().value == "_") {
+            consume(TokenType::IDENTIFIER, "");
+            consume(TokenType::STAR, "'*' attendu après ': _'");
+            return located(std::make_unique<SplatNode>(std::move(expression)), tokens[colonIndex].location);
+        }
+        index = colonIndex;
+    }
+    return expression;
 }
 
 std::vector<std::string> Parser::expectedArgumentTypesForMethodCall(

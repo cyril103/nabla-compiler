@@ -1,0 +1,10 @@
+import collections.array
+
+def join(words: String*): String = {
+    words.mkString("-")
+}
+
+def main(): Int = {
+    val words = Array("a", "b")
+    join(words: _*, "c").length()
+}

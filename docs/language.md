@@ -142,6 +142,21 @@ def main(): Int = {
 }
 ```
 
+Un tableau existant peut etre deplie dans un parametre repete avec `: _*` :
+
+```nabla
+import collections.array
+
+def join(words: String*): String = {
+    words.mkString("-")
+}
+
+def main(): Int = {
+    val words = Array("a", "b", "c")
+    if join(words: _*) == "a-b-c" { 42 } else { 1 }
+}
+```
+
 Les fonctions globales peuvent etre surchargees par signature. Deux fonctions
 peuvent partager le meme nom si la liste de types de leurs parametres les
 distingue. L'appel est resolu statiquement depuis les types des arguments :

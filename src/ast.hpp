@@ -242,6 +242,16 @@ public:
     std::string lowerToIR(IRBuilder& builder) const override;
 };
 
+class SplatNode : public ASTNode {
+    std::unique_ptr<ASTNode> expression;
+public:
+    explicit SplatNode(std::unique_ptr<ASTNode> expr);
+    std::string getType() override;
+    void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
+    ASTNode* inner() const { return expression.get(); }
+};
+
 class FieldAccessNode : public ASTNode {
     std::string className;
     std::string fieldName;

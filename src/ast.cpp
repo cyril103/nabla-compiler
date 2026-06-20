@@ -142,6 +142,23 @@ void validateArguments(
         const auto& parameter = hasRepeated && i >= parameters.size() - 1
             ? parameters.back()
             : parameters[i];
+        auto* splat = dynamic_cast<SplatNode*>(arguments[i].get());
+        if (splat) {
+            const bool isOnlyRepeatedArgument =
+                hasRepeated && i == parameters.size() - 1 && i + 1 == arguments.size();
+            if (!isOnlyRepeatedArgument) {
+                throw CompilerError(
+                    ErrorKind::Semantic, arguments[i]->getLocation(),
+                    callableName + ": ': _*' est uniquement autorisé comme dernier argument d'un paramètre répété");
+            }
+            if (!isTypeAssignable(context, splat->getType(), parameter.type)) {
+                throw CompilerError(ErrorKind::Semantic, arguments[i]->getLocation(),
+                    callableName + ", paramètre '" + parameter.name + "': type '" +
+                    parameter.type + "' attendu, '" + splat->getType() + "' reçu" +
+                    recommendedStdlibFunctionSuffix(callableName));
+            }
+            continue;
+        }
         const std::string expectedType = hasRepeated && i >= parameters.size() - 1
             ? parameter.repeatedElementType
             : parameter.type;
@@ -237,6 +254,13 @@ std::vector<std::string> lowerCallArgumentsForParameters(
     }
 
     if (hasRepeated) {
+        if (arguments.size() == fixedCount + 1) {
+            if (auto* splat = dynamic_cast<SplatNode*>(arguments[fixedCount].get())) {
+                std::string loweredArgument = splat->lowerToIR(builder);
+                loweredArguments.push_back(loweredArgument);
+                return loweredArguments;
+            }
+        }
         loweredArguments.push_back(
             emitPackedArrayArgument(builder, arguments, fixedCount, parameters.back()));
         return loweredArguments;
@@ -246,6 +270,34 @@ std::vector<std::string> lowerCallArgumentsForParameters(
         loweredArguments.push_back(arguments[i]->lowerToIR(builder));
     }
     return loweredArguments;
+}
+
+std::optional<std::map<std::string, std::string>> inferGenericFunctionSubstitutionFromArguments(
+    const CompilerContext::FunctionSignature& signature,
+    const std::vector<std::unique_ptr<ASTNode>>& arguments) {
+    if (signature.typeParameters.empty()) return std::map<std::string, std::string>{};
+    if (!acceptsArgumentCount(signature, arguments.size())) return std::nullopt;
+
+    std::map<std::string, std::string> substitution;
+    for (size_t i = 0; i < arguments.size(); ++i) {
+        std::string expectedPattern;
+        if (hasRepeatedParameter(signature) && i >= signature.parameters.size() - 1) {
+            expectedPattern = dynamic_cast<SplatNode*>(arguments[i].get())
+                ? signature.parameters.back().type
+                : signature.parameters.back().repeatedElementType;
+        } else {
+            expectedPattern = signature.parameters[i].type;
+        }
+        if (!inferTypeArgumentsFromTypes(
+                expectedPattern, arguments[i]->getType(),
+                signature.typeParameters, substitution)) {
+            return std::nullopt;
+        }
+    }
+    for (const auto& typeParameter : signature.typeParameters) {
+        if (substitution.count(typeParameter) == 0) return std::nullopt;
+    }
+    return substitution;
 }
 }
 
@@ -1068,10 +1120,13 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             CompilerContext::FunctionSignature substitutedSignature = methodSignature;
             for (auto& parameter : substitutedSignature.parameters) {
                 parameter.type = substituteType(parameter.type, substitution);
+                if (parameter.isRepeated) {
+                    parameter.repeatedElementType = substituteType(parameter.repeatedElementType, substitution);
+                }
             }
             substitutedSignature.returnType = substituteType(substitutedSignature.returnType, substitution);
             methodSubstitution =
-                inferGenericFunctionSubstitution(substitutedSignature, actualArgumentTypes);
+                inferGenericFunctionSubstitutionFromArguments(substitutedSignature, arguments);
         }
         if (!methodSubstitution) {
             if (typeArguments.empty()) {
@@ -1705,7 +1760,7 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
     }
     std::optional<std::map<std::string, std::string>> substitution;
     if (typeArguments.empty()) {
-        substitution = inferGenericFunctionSubstitution(function->second, actualArgumentTypes);
+        substitution = inferGenericFunctionSubstitutionFromArguments(function->second, arguments);
     } else {
         substitution = genericFunctionSubstitutionFor(function->second, typeArguments);
     }
@@ -1879,6 +1934,13 @@ void FunctionValueCallNode::validateSemantics(CompilerContext& context) {
             calleeType + ": " + std::to_string(expectedArgumentCount) +
             " argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
     }
+    for (const auto& argument : arguments) {
+        if (dynamic_cast<SplatNode*>(argument.get())) {
+            throw CompilerError(
+                ErrorKind::Semantic, argument->getLocation(),
+                calleeType + ": ': _*' est uniquement autorisé pour un paramètre répété");
+        }
+    }
     resolvedType = functionType->returnType;
     resolvedParameterTypes = functionType->parameterTypes;
     for (size_t i = 0; i < arguments.size(); ++i) {
@@ -1928,6 +1990,13 @@ void FunctionExpressionCallNode::validateSemantics(CompilerContext& context) {
             callee->getType() + ": " + std::to_string(expectedArgumentCount) +
             " argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
     }
+    for (const auto& argument : arguments) {
+        if (dynamic_cast<SplatNode*>(argument.get())) {
+            throw CompilerError(
+                ErrorKind::Semantic, argument->getLocation(),
+                callee->getType() + ": ': _*' est uniquement autorisé pour un paramètre répété");
+        }
+    }
     resolvedType = functionType->returnType;
     resolvedParameterTypes = functionType->parameterTypes;
     for (size_t i = 0; i < arguments.size(); ++i) {
@@ -1952,6 +2021,21 @@ std::string FunctionExpressionCallNode::lowerToIR(IRBuilder& builder) const {
         loweredArguments.push_back(loweredArgument);
     }
     return builder.emitIndirectCall(loweredFunction, loweredArguments, resolvedType);
+}
+
+SplatNode::SplatNode(std::unique_ptr<ASTNode> expr)
+    : expression(std::move(expr)) {}
+
+std::string SplatNode::getType() {
+    return expression->getType();
+}
+
+void SplatNode::validateSemantics(CompilerContext& context) {
+    expression->validateSemantics(context);
+}
+
+std::string SplatNode::lowerToIR(IRBuilder& builder) const {
+    return expression->lowerToIR(builder);
 }
 
 FieldAccessNode::FieldAccessNode(std::string clName, std::string field, std::string fieldType)
