@@ -1064,6 +1064,8 @@ private:
             out << "    or rax, 1\n";
         } else if (className == "String" && methodName == "+") {
             out << "    call Runtime_stringConcat\n";
+        } else if (className == "String" && methodName == "hashCode") {
+            out << "    call Runtime_stringHashCode\n";
         } else if (className == "String" && methodName == "isEmpty") {
             out << "    cmp qword [rdi + 8], 0\n";
             out << "    sete al\n";

@@ -1,0 +1,312 @@
+/// @module Map
+/// Dictionnaires immuables cle-valeur.
+/// Utiliser Map("name" -> value) pour creer une map depuis des paires,
+/// Map.empty[K, V]() pour construire progressivement une map, ou
+/// Map.fromArray[K, V](entries) pour construire depuis un tableau de paires.
+
+import core.option
+import core.tuple
+import collections.object_array
+
+def mapIndexBucketCount[K, V](size: Int): Int = {
+    var capacity = 8
+    while capacity < size * 2 {
+        capacity = capacity * 2
+    }
+    capacity
+}
+
+def mapBucketIndex[K, V](hashCode: Int, capacity: Int): Int = {
+    var index = hashCode % capacity
+    if index < 0 {
+        index = index + capacity
+    } else {
+        index
+    }
+    index
+}
+
+def mapCreateBuckets[K, V](capacity: Int): ObjectArray[ArrayObject[Tuple2[K, V]]] = {
+    val buckets = new ObjectArray[ArrayObject[Tuple2[K, V]]](capacity)
+    var index = 0
+    while index < capacity {
+        buckets.set(index, new ArrayObject[Tuple2[K, V]](new ObjectArray[Tuple2[K, V]](0)))
+        index = index + 1
+    }
+    buckets
+}
+
+def mapAppendEntry[K, V](
+    entries: ArrayObject[Tuple2[K, V]],
+    entry: Tuple2[K, V]
+): ArrayObject[Tuple2[K, V]] = {
+    val appended = new ObjectArray[Tuple2[K, V]](entries.size() + 1)
+    var index = 0
+    while index < entries.size() {
+        appended.set(index, entries.get(index))
+        index = index + 1
+    }
+    appended.set(entries.size(), entry)
+    new ArrayObject[Tuple2[K, V]](appended)
+}
+
+def mapFindEntryIndex[K, V](entries: ArrayObject[Tuple2[K, V]], key: K): Int = {
+    var index = 0
+    var found = -1
+    while index < entries.size() {
+        if found == -1 && entries.get(index)._1 == key {
+            found = index
+        } else {
+            found
+        }
+        index = index + 1
+    }
+    found
+}
+
+def mapBucketContainsKey[K, V](bucket: ArrayObject[Tuple2[K, V]], key: K): Bool = {
+    mapFindEntryIndex[K, V](bucket, key) != -1
+}
+
+def mapReplaceEntry[K, V](
+    entries: ArrayObject[Tuple2[K, V]],
+    entry: Tuple2[K, V]
+): ArrayObject[Tuple2[K, V]] = {
+    val replaced = new ObjectArray[Tuple2[K, V]](entries.size())
+    val foundIndex = mapFindEntryIndex[K, V](entries, entry._1)
+    var index = 0
+    while index < entries.size() {
+        if index == foundIndex {
+            replaced.set(index, entry)
+        } else {
+            replaced.set(index, entries.get(index))
+        }
+        index = index + 1
+    }
+    new ArrayObject[Tuple2[K, V]](replaced)
+}
+
+def mapRemoveEntry[K, V](entries: ArrayObject[Tuple2[K, V]], key: K): ArrayObject[Tuple2[K, V]] = {
+    if !mapBucketContainsKey[K, V](entries, key) {
+        entries
+    } else {
+        val filtered = new ObjectArray[Tuple2[K, V]](entries.size() - 1)
+        var index = 0
+        var output = 0
+        var removed = false
+        while index < entries.size() {
+            val entry = entries.get(index)
+            if entry._1 == key && !removed {
+                removed = true
+            } else {
+                filtered.set(output, entry)
+                output = output + 1
+            }
+            index = index + 1
+        }
+        new ArrayObject[Tuple2[K, V]](filtered)
+    }
+}
+
+def mapInsertIntoBuckets[K, V](
+    buckets: ObjectArray[ArrayObject[Tuple2[K, V]]],
+    entry: Tuple2[K, V]
+): Unit = {
+    val bucketIndex = mapBucketIndex[K, V](entry._1.hashCode(), buckets.length())
+    val bucket = buckets.get(bucketIndex)
+    if mapBucketContainsKey[K, V](bucket, entry._1) {
+        buckets.set(bucketIndex, mapReplaceEntry[K, V](bucket, entry))
+    } else {
+        buckets.set(bucketIndex, mapAppendEntry[K, V](bucket, entry))
+    }
+}
+
+def mapBuildBuckets[K, V](
+    entries: ArrayObject[Tuple2[K, V]]
+): ObjectArray[ArrayObject[Tuple2[K, V]]] = {
+    val buckets = mapCreateBuckets[K, V](mapIndexBucketCount[K, V](entries.size()))
+    var index = 0
+    while index < entries.size() {
+        mapInsertIntoBuckets[K, V](buckets, entries.get(index))
+        index = index + 1
+    }
+    buckets
+}
+
+def mapContainsKeyFromBuckets[K, V](
+    buckets: ObjectArray[ArrayObject[Tuple2[K, V]]],
+    key: K
+): Bool = {
+    val bucketIndex = mapBucketIndex[K, V](key.hashCode(), buckets.length())
+    mapBucketContainsKey[K, V](buckets.get(bucketIndex), key)
+}
+
+def mapGetOptionFromBuckets[K, V](
+    buckets: ObjectArray[ArrayObject[Tuple2[K, V]]],
+    default: V,
+    key: K
+): Option[V] = {
+    val bucketIndex = mapBucketIndex[K, V](key.hashCode(), buckets.length())
+    val bucket = buckets.get(bucketIndex)
+    val entryIndex = mapFindEntryIndex[K, V](bucket, key)
+    if entryIndex == -1 {
+        Option.none[V](default)
+    } else {
+        Option.some[V](bucket.get(entryIndex)._2)
+    }
+}
+
+def mapFromArray[K, V](entries: ArrayObject[Tuple2[K, V]]): Map[K, V] = {
+    if entries.size() == 0 {
+        mapEmpty[K, V]()
+    } else {
+        val buckets = mapCreateBuckets[K, V](mapIndexBucketCount[K, V](entries.size()))
+        var uniqueCount = 0
+        var index = 0
+        while index < entries.size() {
+            val entry = entries.get(index)
+            if !mapContainsKeyFromBuckets[K, V](buckets, entry._1) {
+                uniqueCount = uniqueCount + 1
+            } else {
+                uniqueCount
+            }
+            mapInsertIntoBuckets[K, V](buckets, entry)
+            index = index + 1
+        }
+
+        val deduped = new ObjectArray[Tuple2[K, V]](uniqueCount)
+        var output = 0
+        var bucketIndex = 0
+        while bucketIndex < buckets.length() {
+            val bucket = buckets.get(bucketIndex)
+            index = 0
+            while index < bucket.size() {
+                deduped.set(output, bucket.get(index))
+                output = output + 1
+                index = index + 1
+            }
+            bucketIndex = bucketIndex + 1
+        }
+        new Map[K, V](new ArrayObject[Tuple2[K, V]](deduped))
+    }
+}
+
+def mapEmpty[K, V](): Map[K, V] = {
+    new Map[K, V](new ArrayObject[Tuple2[K, V]](new ObjectArray[Tuple2[K, V]](0)))
+}
+
+object Map {
+    /// Cree une map depuis les paires donnees.
+    /// @signature def Map.apply[K, V](entries: Tuple2[K, V]*): Map[K, V]
+    /// @status Recommandee
+    def apply[K, V](entries: Tuple2[K, V]*): Map[K, V] = {
+        mapFromArray[K, V](entries)
+    }
+
+    /// Cree une map vide.
+    /// @signature def Map.empty[K, V](): Map[K, V]
+    /// @status Recommandee
+    def empty[K, V](): Map[K, V] = {
+        mapEmpty[K, V]()
+    }
+
+    /// Cree une map depuis un tableau de paires.
+    /// @signature def Map.fromArray[K, V](entries: Array[Tuple2[K, V]]): Map[K, V]
+    /// @status Recommandee
+    def fromArray[K, V](entries: ArrayObject[Tuple2[K, V]]): Map[K, V] = {
+        mapFromArray[K, V](entries)
+    }
+}
+
+/// Dictionnaire immutable.
+/// @signature class Map[K, V]
+/// @status Recommandee
+///
+/// Les operations updated, removed et clear retournent une nouvelle map.
+/// Si plusieurs paires utilisent la meme cle, la derniere valeur gagne.
+class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) {
+    def size(): Int = {
+        entries.size()
+    }
+
+    def isEmpty(): Bool = {
+        entries.isEmpty()
+    }
+
+    def nonEmpty(): Bool = {
+        entries.nonEmpty()
+    }
+
+    def containsKey(key: K): Bool = {
+        mapContainsKeyFromBuckets[K, V](mapBuildBuckets[K, V](entries), key)
+    }
+
+    def getOption(default: V, key: K): Option[V] = {
+        mapGetOptionFromBuckets[K, V](mapBuildBuckets[K, V](entries), default, key)
+    }
+
+    def getOrElse(key: K, default: V): V = {
+        this.getOption(default, key).getOrElse(default)
+    }
+
+    def updated(key: K, value: V): Map[K, V] = {
+        mapFromArray[K, V](mapAppendEntry[K, V](entries, Tuple2(key, value)))
+    }
+
+    def removed(key: K): Map[K, V] = {
+        val buckets = mapBuildBuckets[K, V](entries)
+        val bucketIndex = mapBucketIndex[K, V](key.hashCode(), buckets.length())
+        buckets.set(bucketIndex, mapRemoveEntry[K, V](buckets.get(bucketIndex), key))
+
+        var kept = 0
+        var index = 0
+        while index < buckets.length() {
+            kept = kept + buckets.get(index).size()
+            index = index + 1
+        }
+
+        val filtered = new ObjectArray[Tuple2[K, V]](kept)
+        var output = 0
+        var bucketIndexOut = 0
+        while bucketIndexOut < buckets.length() {
+            val bucket = buckets.get(bucketIndexOut)
+            index = 0
+            while index < bucket.size() {
+                filtered.set(output, bucket.get(index))
+                output = output + 1
+                index = index + 1
+            }
+            bucketIndexOut = bucketIndexOut + 1
+        }
+        new Map[K, V](new ArrayObject[Tuple2[K, V]](filtered))
+    }
+
+    def clear(): Map[K, V] = {
+        mapEmpty[K, V]()
+    }
+
+    def keys(): ArrayObject[K] = {
+        val raw = new ObjectArray[K](entries.size())
+        var index = 0
+        while index < entries.size() {
+            raw.set(index, entries.get(index)._1)
+            index = index + 1
+        }
+        new ArrayObject[K](raw)
+    }
+
+    def values(): ArrayObject[V] = {
+        val raw = new ObjectArray[V](entries.size())
+        var index = 0
+        while index < entries.size() {
+            raw.set(index, entries.get(index)._2)
+            index = index + 1
+        }
+        new ArrayObject[V](raw)
+    }
+
+    def toArray(): ArrayObject[Tuple2[K, V]] = {
+        entries
+    }
+
+}

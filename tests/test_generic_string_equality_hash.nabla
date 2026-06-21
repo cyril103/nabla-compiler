@@ -1,0 +1,19 @@
+def sameValue[T](left: T, right: T): Bool = {
+    left == right
+}
+
+def sameHash[T](left: T, right: T): Bool = {
+    left.hashCode() == right.hashCode()
+}
+
+def main(): Int = {
+    val left = "na" + "bla"
+    val right = "nab" + "la"
+    if sameValue[String](left, right) &&
+       sameHash[String](left, right) &&
+       !sameValue[String](left, "other") {
+        42
+    } else {
+        1
+    }
+}

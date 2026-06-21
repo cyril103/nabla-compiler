@@ -1170,6 +1170,9 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
                 builder.unsupported(location, "l'appel de méthode " + receiverType + ".hashCode");
             }
             std::string loweredReceiver = receiver->lowerToIR(builder);
+            if (activeReceiverType == "String") {
+                return builder.emitMethodCall("String", "hashCode", loweredReceiver, {}, "Int");
+            }
             return builder.emitMethodCall("Any", "hashCode", loweredReceiver, {}, "Int");
         }
         if (methodName == "equals") {
@@ -1178,6 +1181,10 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
             }
             std::string loweredReceiver = receiver->lowerToIR(builder);
             std::string loweredArgument = arguments[0]->lowerToIR(builder);
+            if (activeReceiverType == "String" &&
+                builder.substituteActiveType(arguments[0]->getType()) == "String") {
+                return builder.emitMethodCall("String", "==", loweredReceiver, {loweredArgument}, "Bool");
+            }
             loweredArgument = boxValueForParameter(
                 builder, loweredArgument, arguments[0]->getType(), "Any");
             return builder.emitMethodCall("Any", "equals", loweredReceiver, {loweredArgument}, "Bool");
@@ -1188,6 +1195,14 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
             }
             const std::string loweredReceiver = receiver->lowerToIR(builder);
             std::string loweredArgument = arguments[0]->lowerToIR(builder);
+            if (activeReceiverType == "String" &&
+                builder.substituteActiveType(arguments[0]->getType()) == "String") {
+                std::string equalsResult =
+                    builder.emitMethodCall("String", "==", loweredReceiver, {loweredArgument}, "Bool");
+                if (methodName == "==") return equalsResult;
+                std::string falseValue = emitBoolConstant(builder, false);
+                return builder.emitBinary("==", equalsResult, falseValue, "Bool");
+            }
             loweredArgument = boxValueForParameter(
                 builder, loweredArgument, arguments[0]->getType(), "Any");
             std::string equalsResult =

@@ -1,0 +1,84 @@
+import collections.map
+import collections.array
+import collections.object_array
+
+class ConstantHash(name: String, hashValue: Int) {
+    override def hashCode(): Int = {
+        hashValue
+    }
+
+    override def toString(): String = {
+        name
+    }
+}
+
+def main(): Int = {
+    val scores = Map("alice" -> 10, "bob" -> 20, "alice" -> 30)
+    val updated = scores.updated("carol", 40).updated("bob", 25)
+    val removed = updated.removed("alice")
+    val missing = removed.removed("nobody")
+    val empty = Map.empty[String, Int]()
+
+    val first = new ConstantHash("first", 7)
+    val second = new ConstantHash("second", 7)
+    val third = new ConstantHash("third", 7)
+    val collisions = Map(first -> 1, second -> 2, first -> 3, third -> 4)
+
+    val raw = new ObjectArray[Tuple2[String, Int]](3)
+    raw.set(0, "x" -> 1)
+    raw.set(1, "y" -> 2)
+    raw.set(2, "x" -> 9)
+    val fromArray = Map.fromArray[String, Int](new ArrayObject[Tuple2[String, Int]](raw))
+
+    if scores.size() != 2 {
+        2
+    } else if !scores.containsKey("alice") {
+        3
+    } else if scores.containsKey("carol") {
+        4
+    } else if scores.getOrElse("alice", 0) != 30 {
+        5
+    } else if !scores.getOption(0, "bob").isDefined() {
+        6
+    } else if !scores.getOption(0, "nobody").isEmpty() {
+        7
+    } else if updated.size() != 3 {
+        8
+    } else if updated.getOrElse("bob", 0) != 25 {
+        9
+    } else if updated.getOrElse("carol", 0) != 40 {
+        10
+    } else if removed.size() != 2 {
+        11
+    } else if removed.containsKey("alice") {
+        12
+    } else if missing.size() != 2 {
+        13
+    } else if !empty.isEmpty() {
+        14
+    } else if !empty.clear().isEmpty() {
+        15
+    } else if collisions.size() != 3 {
+        16
+    } else if collisions.getOrElse(first, 0) != 3 {
+        17
+    } else if collisions.getOrElse(second, 0) != 2 {
+        18
+    } else if collisions.getOrElse(third, 0) != 4 {
+        19
+    } else if fromArray.size() != 2 {
+        20
+    } else if fromArray.getOrElse("x", 0) != 9 {
+        21
+    } else if fromArray.getOrElse("z", 42) != 42 {
+        22
+    } else if fromArray.toArray().size() != 2 {
+        23
+    } else if fromArray.keys().size() != 2 {
+        24
+    } else if fromArray.values().size() != 2 {
+        25
+    } else {
+        0
+    }
+}
