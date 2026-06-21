@@ -1,0 +1,10 @@
+import collections.array
+
+def main(): Int = {
+    val pairs = Array("a" -> 1, "b" -> 2)
+    if pairs.get(0)._1 == "a" && pairs.get(1)._2 == 2 {
+        0
+    } else {
+        1
+    }
+}

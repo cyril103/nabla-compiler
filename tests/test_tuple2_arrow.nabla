@@ -1,0 +1,8 @@
+def main(): Int = {
+    val pair: (String, Int) = "score" -> 42
+    if pair._1 == "score" && pair._2 == 42 {
+        0
+    } else {
+        1
+    }
+}

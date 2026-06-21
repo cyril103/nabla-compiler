@@ -97,8 +97,8 @@ reste de division `%` est disponible pour `Int` et `Long`.
 
 Nabla supporte pour l'instant les paires `Tuple2[A, B]`.
 
-Le type `(A, B)` est un alias syntaxique de `Tuple2[A, B]`, et l'expression
-`(a, b)` construit une valeur `Tuple2`.
+Le type `(A, B)` est un alias syntaxique de `Tuple2[A, B]`. Les expressions
+`(a, b)` et `a -> b` construisent une valeur `Tuple2`.
 
 ```nabla
 def label(value: Int): (String, Int) = {

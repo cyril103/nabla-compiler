@@ -11,7 +11,7 @@ enum class TokenType {
     KW_TRUE, KW_FALSE,
     IDENTIFIER, LPAREN, RPAREN, LBRACKET, RBRACKET, COLON, EQUAL, LBRACE, RBRACE, COMMA, DOT,
     INT_LITERAL, LONG_LITERAL, FLOAT_LITERAL, DOUBLE_LITERAL, STRING_LITERAL, CHAR_LITERAL,
-    PLUS, MINUS, STAR, SLASH, PERCENT, BANG, AND_AND, OR_OR, FAT_ARROW, EQEQ, NEQ, LT, GT, LTE, GTE, EOF_TOKEN
+    PLUS, MINUS, STAR, SLASH, PERCENT, BANG, AND_AND, OR_OR, FAT_ARROW, THIN_ARROW, EQEQ, NEQ, LT, GT, LTE, GTE, EOF_TOKEN
 };
 
 struct Token {
@@ -50,7 +50,11 @@ public:
             if (current == ',') { add(tokens, TokenType::COMMA, ",", start, 1); continue; }
             if (current == '.') { add(tokens, TokenType::DOT, ".", start, 1); continue; }
             if (current == '+') { add(tokens, TokenType::PLUS, "+", start, 1); continue; }
-            if (current == '-') { add(tokens, TokenType::MINUS, "-", start, 1); continue; }
+            if (current == '-') {
+                if (nextIs('>')) add(tokens, TokenType::THIN_ARROW, "->", start, 2);
+                else add(tokens, TokenType::MINUS, "-", start, 1);
+                continue;
+            }
             if (current == '*') { add(tokens, TokenType::STAR, "*", start, 1); continue; }
             if (current == '/') {
                 if (nextIs('/')) {

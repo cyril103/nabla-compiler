@@ -1635,8 +1635,28 @@ std::unique_ptr<ASTNode> Parser::parseLogicalOr() {
     return expr;
 }
 
+std::unique_ptr<ASTNode> Parser::parseTupleArrow() {
+    auto expr = parseLogicalOr();
+    while (peek().type == TokenType::THIN_ARROW) {
+        Token op = tokens[index++];
+        requireTupleModule();
+        auto right = parseLogicalOr();
+        std::vector<std::unique_ptr<ASTNode>> arguments;
+        arguments.push_back(std::move(expr));
+        arguments.push_back(std::move(right));
+        const std::string tupleType =
+            "Tuple2[" + arguments[0]->getType() + ", " + arguments[1]->getType() + "]";
+        expr = located(
+            std::make_unique<FunctionCallNode>(
+                "Tuple2.apply", std::move(arguments), std::vector<std::string>{},
+                tupleType, "Tuple2"),
+            op.location);
+    }
+    return expr;
+}
+
 std::unique_ptr<ASTNode> Parser::parseExpression() {
-    return parseLogicalOr();
+    return parseTupleArrow();
 }
 
 std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName, std::string objectName) {
