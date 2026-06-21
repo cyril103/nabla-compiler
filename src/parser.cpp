@@ -884,6 +884,30 @@ std::string Parser::inferLambdaReturnType(
     return returnType;
 }
 
+void Parser::requireTupleModule() {
+    const std::filesystem::path modulePath = context.stdlibDir / "core" / "tuple.nabla";
+    if (!std::filesystem::exists(modulePath)) return;
+    const std::string canonicalPath = std::filesystem::canonical(modulePath).string();
+    if (context.parsedFiles.find(canonicalPath) != context.parsedFiles.end()) return;
+    context.parsedFiles.insert(canonicalPath);
+
+    std::ifstream file(modulePath);
+    if (!file.is_open()) {
+        throw CompilerError(
+            ErrorKind::Parser, {modulePath.string(), 1, 1},
+            "impossible d'ouvrir '" + modulePath.string() + "'");
+    }
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+
+    Lexer lexer(buffer.str(), modulePath.string());
+    Parser parser(lexer.tokenize(), context, modulePath);
+    auto moduleAST = parser.parseProgram();
+    for (auto& element : moduleAST->elements) {
+        generatedFunctions.push_back(std::move(element));
+    }
+}
+
 std::unique_ptr<ASTNode> Parser::parseFunctionReferenceWithExpectedType(const std::string& expectedType) {
     if (!functionTypeFromName(expectedType) || peek().type != TokenType::IDENTIFIER) {
         return nullptr;
@@ -1015,8 +1039,32 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             "type attendu requis pour inférer le paramètre de lambda");
     }
     if (peek().type == TokenType::LPAREN) {
-        consume(TokenType::LPAREN, "");
+        Token start = consume(TokenType::LPAREN, "");
+        if (peek().type == TokenType::RPAREN) {
+            throw CompilerError(ErrorKind::Parser, start.location, "tuple vide non supporté");
+        }
         auto expr = parseExpression();
+        if (peek().type == TokenType::COMMA) {
+            requireTupleModule();
+            consume(TokenType::COMMA, "");
+            auto second = parseExpression();
+            if (peek().type == TokenType::COMMA) {
+                throw CompilerError(
+                    ErrorKind::Parser, peek().location,
+                    "tuples de plus de 2 éléments non supportés pour l'instant");
+            }
+            consume(TokenType::RPAREN, "Parenthèse fermante attendue après le tuple");
+            std::vector<std::unique_ptr<ASTNode>> arguments;
+            arguments.push_back(std::move(expr));
+            arguments.push_back(std::move(second));
+            const std::string tupleType =
+                "Tuple2[" + arguments[0]->getType() + ", " + arguments[1]->getType() + "]";
+            return located(
+                std::make_unique<FunctionCallNode>(
+                    "Tuple2.apply", std::move(arguments), std::vector<std::string>{},
+                    tupleType, "Tuple2"),
+                start.location);
+        }
         consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'expression");
         return expr;
     }
@@ -1455,6 +1503,22 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
                 expectedArgumentTypes = {receiverType};
             }
         }
+        if (peek().type != TokenType::LPAREN) {
+            if (!typeArguments.empty()) {
+                throw CompilerError(ErrorKind::Parser, methodToken.location, "appel attendu après les arguments de type");
+            }
+            if (method.empty() || method[0] != '_') {
+                throw CompilerError(
+                    ErrorKind::Parser, methodToken.location,
+                    "appel de méthode attendu après '" + method + "'");
+            }
+            expr = located(
+                std::make_unique<MethodCallNode>(
+                    std::move(expr), method, std::vector<std::unique_ptr<ASTNode>>{},
+                    std::vector<std::string>{}, initialReturnType, initialOwnerType),
+                methodToken.location);
+            continue;
+        }
         const size_t callParenIndex = index;
         consume(TokenType::LPAREN, "");
         std::vector<std::unique_ptr<ASTNode>> arguments;
@@ -1762,11 +1826,11 @@ std::pair<std::string, SourceLocation> Parser::parseType(const std::string& expe
     }
 
     Token start = consume(TokenType::LPAREN, "");
-    CompilerContext::FunctionType functionType;
+    std::vector<std::string> parenthesizedTypes;
     while (peek().type != TokenType::RPAREN) {
         auto [parameterType, parameterLocation] = parseType("Type de paramètre attendu dans le type fonction");
         (void) parameterLocation;
-        functionType.parameterTypes.push_back(parameterType);
+        parenthesizedTypes.push_back(parameterType);
         if (peek().type == TokenType::COMMA) {
             consume(TokenType::COMMA, "");
         } else if (peek().type != TokenType::RPAREN) {
@@ -1774,9 +1838,26 @@ std::pair<std::string, SourceLocation> Parser::parseType(const std::string& expe
         }
     }
     consume(TokenType::RPAREN, "Parenthèse fermante attendue dans le type fonction");
+    if (peek().type != TokenType::FAT_ARROW) {
+        if (parenthesizedTypes.empty()) {
+            throw CompilerError(ErrorKind::Parser, start.location, "type tuple vide non supporté");
+        }
+        if (parenthesizedTypes.size() == 1) {
+            return {parenthesizedTypes[0], start.location};
+        }
+        if (parenthesizedTypes.size() == 2) {
+            requireTupleModule();
+            return {formatParameterizedType("Tuple2", parenthesizedTypes), start.location};
+        }
+        throw CompilerError(
+            ErrorKind::Parser, start.location,
+            "types tuples de plus de 2 éléments non supportés pour l'instant");
+    }
     consume(TokenType::FAT_ARROW, "'=>' attendu dans le type fonction");
     auto [returnType, returnTypeLocation] = parseType("Type de retour attendu dans le type fonction");
     (void) returnTypeLocation;
+    CompilerContext::FunctionType functionType;
+    functionType.parameterTypes = std::move(parenthesizedTypes);
     functionType.returnType = returnType;
 
     auto functionName = functionNameForType(functionType);

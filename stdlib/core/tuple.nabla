@@ -1,0 +1,27 @@
+object Tuple2 {
+    def apply[A, B](_1: A, _2: B): Tuple2[A, B] = {
+        new Tuple2[A, B](_1, _2)
+    }
+}
+
+class Tuple2[A, B](_1Value: A, _2Value: B) {
+    def _1(): A = {
+        _1Value
+    }
+
+    def _2(): B = {
+        _2Value
+    }
+
+    def swap(): Tuple2[B, A] = {
+        Tuple2(_2Value, _1Value)
+    }
+
+    override def toString(): String = {
+        "(" + _1Value.toString() + ", " + _2Value.toString() + ")"
+    }
+
+    override def hashCode(): Int = {
+        (_1Value.hashCode() * 31) + _2Value.hashCode()
+    }
+}

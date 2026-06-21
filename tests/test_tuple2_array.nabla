@@ -1,0 +1,13 @@
+import collections.array
+
+def main(): Int = {
+    val pairs = Array.tabulate[(Int, String)](2, index => (index, "v" + index.toString()))
+    if pairs.get(0)._1 == 0 &&
+       pairs.get(0)._2 == "v0" &&
+       pairs.get(1)._1 == 1 &&
+       pairs.get(1)._2 == "v1" {
+        42
+    } else {
+        1
+    }
+}

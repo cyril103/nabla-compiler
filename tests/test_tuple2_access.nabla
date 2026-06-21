@@ -1,0 +1,11 @@
+def main(): Int = {
+    val pair = ("left", "right")
+    val swapped = pair.swap()
+    if pair.toString() == "(left, right)" &&
+       swapped._1 == "right" &&
+       swapped._2 == "left" {
+        42
+    } else {
+        1
+    }
+}

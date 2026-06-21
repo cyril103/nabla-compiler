@@ -58,6 +58,7 @@ private:
     std::string inferLambdaReturnType(
         ASTNode& body, const std::vector<FunctionDefNode::Parameter>& parameters,
         const std::vector<FunctionDefNode::Capture>& captures);
+    void requireTupleModule();
     std::unique_ptr<ASTNode> parseFunctionReferenceWithExpectedType(const std::string& expectedType);
     std::unique_ptr<ASTNode> parsePrimary();
     std::unique_ptr<ASTNode> parsePostfix();

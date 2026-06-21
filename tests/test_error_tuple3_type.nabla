@@ -1,0 +1,4 @@
+def main(): Int = {
+    val value: (Int, Int, Int) = (1, 2)
+    0
+}

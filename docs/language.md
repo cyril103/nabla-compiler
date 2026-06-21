@@ -93,6 +93,31 @@ de longueur, indexation et decoupe.
 Les types numeriques supportent `+`, `-`, `*`, `/` et les comparaisons. Le
 reste de division `%` est disponible pour `Int` et `Long`.
 
+## Tuples
+
+Nabla supporte pour l'instant les paires `Tuple2[A, B]`.
+
+Le type `(A, B)` est un alias syntaxique de `Tuple2[A, B]`, et l'expression
+`(a, b)` construit une valeur `Tuple2`.
+
+```nabla
+def label(value: Int): (String, Int) = {
+    ("score", value)
+}
+
+def main(): Int = {
+    val pair = label(42)
+    if pair._1 == "score" && pair._2 == 42 {
+        0
+    } else {
+        1
+    }
+}
+```
+
+Les paires exposent `_1`, `_2`, `swap()`, `toString()` et `hashCode()`. Les
+tuples vides et les tuples d'arite superieure a 2 ne sont pas encore supportes.
+
 ## Variables
 
 `val` declare une valeur non reassignee. `var` declare une variable mutable.

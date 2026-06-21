@@ -1,0 +1,12 @@
+def label(value: Int): (String, Int) = {
+    ("score", value)
+}
+
+def main(): Int = {
+    val pair = label(42)
+    if pair._1 == "score" && pair._2 == 42 {
+        0
+    } else {
+        1
+    }
+}

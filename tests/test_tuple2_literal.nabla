@@ -1,0 +1,4 @@
+def main(): Int = {
+    val pair = (40, 2)
+    pair._1 + pair._2
+}

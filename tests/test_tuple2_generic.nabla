@@ -1,0 +1,12 @@
+def makePair[A, B](left: A, right: B): (A, B) = {
+    (left, right)
+}
+
+def main(): Int = {
+    val pair = makePair[Int, String](40, "two")
+    if pair._1 == 40 && pair._2 == "two" {
+        42
+    } else {
+        1
+    }
+}
