@@ -1,0 +1,5 @@
+import collections.array
+
+def main(): Int = {
+    Array.tabulate(10, x => x + 1).sum()
+}

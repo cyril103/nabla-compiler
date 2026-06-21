@@ -25,6 +25,11 @@ bool isKnownConcreteTypeName(const std::string& type, const CompilerContext& con
     return context.classes.find(type) != context.classes.end();
 }
 
+bool shouldRetargetInferredFactoryAlias(const std::string& name) {
+    return name == "arrayFill" || name == "ArrayFill" ||
+           name == "Array.fill" || name == "Array.tabulate";
+}
+
 std::string formatFieldProviders(const std::set<std::string>& providers) {
     std::string message;
     bool first = true;
@@ -1208,6 +1213,26 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                         substitution = *inferredSubstitution;
                     }
                 }
+                if (functionTypeArguments.empty() && !substitution.empty() &&
+                    shouldRetargetInferredFactoryAlias(functionLookupName)) {
+                    const auto inferredTypeArguments =
+                        orderedTypeArguments(function->typeParameters, substitution);
+                    if (auto alias = resolveStdlibFunctionAlias(functionLookupName, inferredTypeArguments)) {
+                        auto aliasFunction = context.functions.find(*alias);
+                        if (aliasFunction != context.functions.end()) {
+                            functionLookupName = *alias;
+                            functionTypeArguments = aliasFunction->second.typeParameters.empty()
+                                ? std::vector<std::string>{}
+                                : inferredTypeArguments;
+                            function = &aliasFunction->second;
+                            substitution.clear();
+                            if (auto aliasSubstitution =
+                                    genericFunctionSubstitutionFor(*function, functionTypeArguments)) {
+                                substitution = *aliasSubstitution;
+                            }
+                        }
+                    }
+                }
                 initialReturnType = substituteType(function->returnType, substitution);
             }
             const std::string diagnosticFunctionName =
@@ -1353,6 +1378,26 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
                     if (auto inferredSubstitution =
                             inferGenericFunctionSubstitution(qualifiedFunction->second, actualArgumentTypes)) {
                         substitution = *inferredSubstitution;
+                    }
+                }
+                if (functionTypeArguments.empty() && !substitution.empty() &&
+                    shouldRetargetInferredFactoryAlias(functionLookupName)) {
+                    const auto inferredTypeArguments =
+                        orderedTypeArguments(qualifiedFunction->second.typeParameters, substitution);
+                    if (auto alias = resolveStdlibFunctionAlias(functionLookupName, inferredTypeArguments)) {
+                        auto aliasFunction = context.functions.find(*alias);
+                        if (aliasFunction != context.functions.end()) {
+                            functionLookupName = *alias;
+                            functionTypeArguments = aliasFunction->second.typeParameters.empty()
+                                ? std::vector<std::string>{}
+                                : inferredTypeArguments;
+                            qualifiedFunction = aliasFunction;
+                            substitution.clear();
+                            if (auto aliasSubstitution =
+                                    genericFunctionSubstitutionFor(qualifiedFunction->second, functionTypeArguments)) {
+                                substitution = *aliasSubstitution;
+                            }
+                        }
                     }
                 }
                 const std::string initialReturnType =
