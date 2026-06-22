@@ -226,10 +226,11 @@ Le pipeline implemente actuellement :
 - module de bibliotheque standard `core.option_int` avec `OptionInt`,
   `optionIntSome`, `optionIntNone`, `map`, `filter` et `orElse`;
 - module de bibliotheque standard `core.option` avec `Option[T]`,
-  `Option.some[T]`, `Option.none[T]`, `optionSome`, `optionNone`, `isDefined`,
-  `isEmpty`, `nonEmpty`, `map[U]`, `filter`, `flatMap[U]`, `foreach`, `orElse`
-  et `getOrElse`; les methodes internes construisent directement `Option[T]`
-  sans repasser par les wrappers publics de compatibilite;
+  `Option.some[T]`, `Option.none[T]()`, `Option.none[T](default)` par
+  compatibilite, `optionSome`, `optionNone`, `isDefined`, `isEmpty`, `nonEmpty`,
+  `map[U]`, `filter`, `flatMap[U]`, `foreach`, `orElse` et `getOrElse`; les
+  methodes internes construisent directement `Option[T]` sans repasser par les
+  wrappers publics de compatibilite;
 - premier module de bibliotheque standard `collections.int_array` avec
   `intArraySum`, `intArrayFill`, `intArrayRange`, `intArrayMap`,
   `intArrayFilter` et la facade objet `ArrayInt` avec `map`, `filter`,
@@ -271,10 +272,10 @@ Le pipeline implemente actuellement :
   opérations de présence à coût moyen réduit.
 - module de bibliotheque standard `collections.map` avec `Map[K, V]`,
   `Map.empty[K, V]`, `Map.fromArray[K, V]`, `apply[K, V]`, `size`, `isEmpty`,
-  `nonEmpty`, `containsKey`, `contains`, `getOption`, `getOrElse`, `updated`,
-  `removed`, `clear`, `keys`, `values`, `toArray`, `foreachEntry`,
-  `mapValues[U]`, `filterKeys`, `mkString` et `toString` pour la représentation
-  textuelle;
+  `nonEmpty`, `containsKey`, `contains`, `getOption(key)`,
+  `getOption(default, key)` par compatibilite, `getOrElse`, `updated`,
+  `removed`, `clear`, `keys`, `values`, `toArray`, `foreachEntry`, `mapValues[U]`,
+  `filterKeys`, `mkString` et `toString` pour la représentation textuelle;
 - module de bibliotheque standard `collections.array` comme point d'entree
   commun pour les tableaux specialises, avec `Array.fill[T]`, `Array.range`,
   `Array.rangeUntil`, `ArrayFill[T]`, `ArrayRange`, `arrayFill[T]`, `arrayMap[T]`,
@@ -532,6 +533,11 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Migrer les tests et exemples ordinaires de collections/options/set vers
   l'API publique recommandee (`Array.*`, `Option.*`, `Set.*`) en conservant les
   tests d'alias legacy.
+- [x] Ajouter `Option.none[T]()` et `Map.getOption(key)` comme formes publiques
+  naturelles, en conservant `Option.none[T](default)`, `optionNone[T](default)`
+  et `Map.getOption(default, key)` par compatibilite; couvert par
+  `tests/test_stdlib_option_none_empty.nabla` et
+  `tests/test_stdlib_map_get_option_empty.nabla`.
 
 ### P2 - Héritage Et Mixins
 
@@ -788,6 +794,14 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Ajouter la creation naturelle `Option.none[T]()` et la methode
+  `Map.getOption(key)` sans valeur de secours, tout en conservant les anciennes
+  formes avec `default` par compatibilite.
+  - Fichiers / tests associés: `stdlib/core/option.nabla`,
+    `stdlib/collections/map.nabla`, `tests/test_stdlib_option_none_empty.nabla`,
+    `tests/test_stdlib_map_get_option_empty.nabla`, `examples/student_scores.nabla`,
+    `docs/language.md`, `docs/stdlib-api.md`, `docs/next-session.md`,
+    `docs/stdlib/`, `AGENTS.md`.
 - `local` - Ajouter les méthodes publiques de confort `Map.contains`,
   `Map.foreachEntry`, `Map.mapValues[U]` et `Map.filterKeys`, avec
   classification dans `docs/stdlib-api.md`, test dédié et documentation HTML

@@ -23,7 +23,7 @@ helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
 
 - `Option[T]`
   - `Option.some[T](value)`
-  - `Option.none[T](default)`
+  - `Option.none[T]()`
   - `isDefined()`
   - `isEmpty()`
   - `getOrElse(default)`
@@ -33,8 +33,8 @@ helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
   - `foreach(...)`
   - `orElse(...)`
 - Constructeurs/fabriques :
-  - `optionSome[T](value)` et `optionNone[T](default)` restent disponibles par
-    compatibilite.
+  - `optionSome[T](value)`, `Option.none[T](default)` et
+    `optionNone[T](default)` restent disponibles par compatibilite.
 - `OptionInt` reste public tant que les generiques primitifs ne couvrent pas
   totalement les besoins de performance/representation.
 
@@ -69,7 +69,7 @@ helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
   - `Map.empty[K, V]()`
   - `Map.fromArray[K, V](entries)`
   - `contains(key)` / `containsKey(key)`
-  - `getOption(default, key)`
+  - `getOption(key)`
   - `getOrElse(key, default)`
   - `updated(key, value)`, `removed(key)`, `clear()`
   - `keys()`, `values()`, `toArray()`
@@ -166,6 +166,7 @@ nouveaux exemples devraient preferer la surface publique ci-dessus :
 - Compatibilite `randomSeedTime()` quand `randomSeedNow()` exprime mieux
   l'intention.
 - Compatibilite `randomIntInRange(...)` quand `randomIntRange(...)` suffit.
+- Compatibilite `Map.getOption(default, key)` quand `Map.getOption(key)` suffit.
 
 ## Details Internes
 

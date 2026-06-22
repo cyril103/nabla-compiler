@@ -143,6 +143,20 @@ def mapContainsKeyFromBuckets[K, V](
 
 def mapGetOptionFromBuckets[K, V](
     buckets: ObjectArray[ArrayObject[Tuple2[K, V]]],
+    key: K
+): Option[V] = {
+    val bucketIndex = mapBucketIndex[K, V](key.hashCode(), buckets.length())
+    val bucket = buckets.get(bucketIndex)
+    val entryIndex = mapFindEntryIndex[K, V](bucket, key)
+    if entryIndex == -1 {
+        Option.none[V]()
+    } else {
+        Option.some[V](bucket.get(entryIndex)._2)
+    }
+}
+
+def mapGetOptionFromBuckets[K, V](
+    buckets: ObjectArray[ArrayObject[Tuple2[K, V]]],
     default: V,
     key: K
 ): Option[V] = {
@@ -248,12 +262,24 @@ class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) {
         this.containsKey(key)
     }
 
+    /// Retourne la valeur associee a la cle, si elle existe.
+    /// @signature def getOption(key: K): Option[V]
+    /// @status Recommandee
+    def getOption(key: K): Option[V] = {
+        mapGetOptionFromBuckets[K, V](mapBuildBuckets[K, V](entries), key)
+    }
+
+    /// Retourne la valeur associee a la cle, si elle existe, avec une valeur interne de secours.
+    /// @signature def getOption(default: V, key: K): Option[V]
+    /// @status Compatibilite
+    ///
+    /// Preferer getOption(key) dans le nouveau code.
     def getOption(default: V, key: K): Option[V] = {
         mapGetOptionFromBuckets[K, V](mapBuildBuckets[K, V](entries), default, key)
     }
 
     def getOrElse(key: K, default: V): V = {
-        this.getOption(default, key).getOrElse(default)
+        this.getOption(key).getOrElse(default)
     }
 
     def updated(key: K, value: V): Map[K, V] = {

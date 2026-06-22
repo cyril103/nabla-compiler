@@ -67,7 +67,7 @@ def studentBadges(student: Student): Array[Option[String]] = {
     if excellent(student) {
         Array(Option.some[String](student.name()), Option.some[String]("honors"))
     } else {
-        Array(Option.some[String](student.name()), Option.none[String]("badge"))
+        Array(Option.some[String](student.name()), Option.none[String]())
     }
 }
 

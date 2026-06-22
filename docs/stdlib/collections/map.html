@@ -60,6 +60,23 @@
       <pre><code>def contains(key: K): Bool</code></pre>
       <p>Indique si la map contient la cle donnee.</p>
     </article>
+    <article class="entry" id="getOption">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>getOption</h2>
+      <pre><code>def getOption(key: K): Option[V]</code></pre>
+      <p>Retourne la valeur associee a la cle, si elle existe.</p>
+    </article>
+    <article class="entry" id="getOption-2">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status compat">Compatibilite</span>
+      </div>
+      <h2>getOption</h2>
+      <pre><code>def getOption(default: V, key: K): Option[V]</code></pre>
+      <p>Retourne la valeur associee a la cle, si elle existe, avec une valeur interne de secours.</p>
+<p>Preferer getOption(key) dans le nouveau code.</p>
+    </article>
     <article class="entry" id="foreachEntry">
       <div class="entry-meta">
         <span class="kind">def</span> <span class="status recommended">Recommandee</span>

@@ -1,0 +1,21 @@
+import core.option
+
+def main(): Int = {
+    val missingInt = Option.none[Int]()
+    val missingString = Option.none[String]()
+    val present = Option.some[Int](40)
+
+    if !missingInt.isEmpty() {
+        1
+    } else if missingInt.getOrElse(42) != 42 {
+        2
+    } else if !missingString.isEmpty() {
+        3
+    } else if missingString.getOrElse("fallback") != "fallback" {
+        4
+    } else if present.orElse(missingInt).getOrElse(0) != 40 {
+        5
+    } else {
+        0
+    }
+}

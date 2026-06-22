@@ -44,12 +44,17 @@ désormais :
 Le test associé est `tests/test_stdlib_map_comfort_methods.nabla`, et la
 documentation HTML de `Map` doit rester régénérée avec `make stdlib-docs`.
 
-### Option B - Améliorations de l'API `Option` et de `Map.getOption`
+### Option B - Améliorations de l'API `Option` et de `Map.getOption` (réalisée)
 
 Actuellement, `Option.none[T](default)` et `Option.some[T](value)` requièrent une valeur de secours lors de la création d'une instance `none` pour contourner des contraintes d'initialisation de type. De plus, `Map.getOption(default, key)` doit accepter cette même valeur de secours.
 L'objectif serait de :
 - Permettre la création d'un `none` naturel sans valeur par défaut : `Option.none[T]()`.
 - Mettre à jour `Map` pour proposer une méthode `getOption(key: K): Option[V]` naturelle qui renvoie un `Option.none[V]()`.
+
+Les anciennes formes `Option.none[T](default)`, `optionNone[T](default)` et
+`Map.getOption(default, key)` restent disponibles par compatibilité.
+Les tests associés sont `tests/test_stdlib_option_none_empty.nabla` et
+`tests/test_stdlib_map_get_option_empty.nabla`.
 
 ### Option C - Documentation utilisateur et interop
 
