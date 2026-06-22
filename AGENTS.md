@@ -432,7 +432,9 @@ Limites importantes :
 
 ## Commandes De Validation
 
-Executer avant chaque commit :
+Validation complete a executer avant chaque commit qui touche `src/`, le
+runtime, le parser, l'analyse semantique, l'IR, le backend, les conventions de
+typage, les imports ou une zone stdlib transverse :
 
 ```bash
 make all-tests
@@ -446,6 +448,23 @@ g++ -std=c++17 -Wall -Wextra -Werror \
   -o /tmp/nablac-werror
 git diff --check
 ```
+
+Pour un changement localise a la stdlib, aux docs ou aux tests, sans modification
+de `src/`, une validation ciblee est acceptable si elle couvre directement la
+surface modifiee :
+
+- compiler et executer les tests ajoutes ou modifies ;
+- executer les tests voisins du module touche, par exemple `tests/test_stdlib_map*.nabla`
+  pour `stdlib/collections/map.nabla` ;
+- executer `make stdlib-docs` puis `git diff --exit-code docs/stdlib` quand une
+  API publique, un commentaire `///`, `@signature` ou `@symbol` change ;
+- executer `make examples` si l'API publique touchee est utilisee par des
+  exemples ou si le changement affecte l'ergonomie utilisateur ;
+- executer `git diff --check` au minimum sur les fichiers modifies quand
+  l'environnement local produit du bruit CRLF global.
+
+La CI reste l'arbitre final pour la suite complete. En cas de doute sur la
+portee reelle d'un changement, preferer la validation complete.
 
 Les tests normaux utilisent un fichier voisin `<nom>.expected`. Un fichier
 optionnel `<nom>.stdout` valide la sortie console. Les fichiers dont le nom
