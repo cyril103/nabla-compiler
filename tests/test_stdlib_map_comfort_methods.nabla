@@ -1,0 +1,36 @@
+import collections.map
+
+def main(): Int = {
+    val scores = Map("alice" -> 10, "bob" -> 20, "carol" -> 30)
+    scores.foreachEntry((entry: Tuple2[String, Int]) => {
+        while false {
+            entry._2
+        }
+    })
+
+    val labels = scores.mapValues[String]("", (value: Int) => {
+        "score=" + value.toString()
+    })
+    val filtered = scores.filterKeys(key => key != "bob")
+    val filteredLabels = labels.filterKeys(key => key == "alice")
+
+    if !scores.contains("alice") {
+        1
+    } else if scores.contains("dave") {
+        2
+    } else if labels.getOrElse("carol", "") != "score=30" {
+        3
+    } else if filtered.size() != 2 {
+        4
+    } else if filtered.contains("bob") {
+        5
+    } else if filtered.getOrElse("alice", 0) != 10 {
+        6
+    } else if filteredLabels.size() != 1 {
+        7
+    } else if filteredLabels.getOrElse("alice", "") != "score=10" {
+        8
+    } else {
+        0
+    }
+}

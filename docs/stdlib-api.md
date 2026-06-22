@@ -63,6 +63,20 @@ helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
   - `Set(values: _*)` pour dedupliquer un tableau existant
   - `Set.empty[T]()`
   - `Set.fromArray[T](values)`
+- `Map[K, V]`
+  - `Map(value1 -> value2, ...)`
+  - `Map.apply[K, V](entries: Tuple2[K, V]*)`
+  - `Map.empty[K, V]()`
+  - `Map.fromArray[K, V](entries)`
+  - `contains(key)` / `containsKey(key)`
+  - `getOption(default, key)`
+  - `getOrElse(key, default)`
+  - `updated(key, value)`, `removed(key)`, `clear()`
+  - `keys()`, `values()`, `toArray()`
+  - `foreachEntry(f)`
+  - `mapValues[U](default, f)`
+  - `filterKeys(predicate)`
+  - `mkString(separator)` et `toString()`
 
 Les exemples doivent privilegier `Array[T]` et les fonctions de haut niveau. Les
 facades specialisees restent acceptables dans les tests de backend/runtime et les

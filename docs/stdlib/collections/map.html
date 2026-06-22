@@ -52,6 +52,38 @@
       <p>Dictionnaire immutable.</p>
 <p>Les operations updated, removed et clear retournent une nouvelle map. Si plusieurs paires utilisent la meme cle, la derniere valeur gagne.</p>
     </article>
+    <article class="entry" id="contains">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>contains</h2>
+      <pre><code>def contains(key: K): Bool</code></pre>
+      <p>Indique si la map contient la cle donnee.</p>
+    </article>
+    <article class="entry" id="foreachEntry">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>foreachEntry</h2>
+      <pre><code>def foreachEntry(f: (Tuple2[K, V]) =&gt; Unit): Unit</code></pre>
+      <p>Applique une fonction a chaque paire cle-valeur.</p>
+    </article>
+    <article class="entry" id="mapValues">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>mapValues</h2>
+      <pre><code>def mapValues[U](default: U, f: (V) =&gt; U): Map[K, U]</code></pre>
+      <p>Transforme les valeurs en conservant les cles.</p>
+    </article>
+    <article class="entry" id="filterKeys">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>filterKeys</h2>
+      <pre><code>def filterKeys(predicate: (K) =&gt; Bool): Map[K, V]</code></pre>
+      <p>Filtre les entrees selon leur cle.</p>
+    </article>
     <article class="entry" id="mkString">
       <div class="entry-meta">
         <span class="kind">def</span> <span class="status recommended">Recommandee</span>

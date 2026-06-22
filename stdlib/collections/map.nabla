@@ -241,6 +241,13 @@ class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) {
         mapContainsKeyFromBuckets[K, V](mapBuildBuckets[K, V](entries), key)
     }
 
+    /// Indique si la map contient la cle donnee.
+    /// @signature def contains(key: K): Bool
+    /// @status Recommandee
+    def contains(key: K): Bool = {
+        this.containsKey(key)
+    }
+
     def getOption(default: V, key: K): Option[V] = {
         mapGetOptionFromBuckets[K, V](mapBuildBuckets[K, V](entries), default, key)
     }
@@ -309,6 +316,58 @@ class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) {
         entries
     }
 
+    /// Applique une fonction a chaque paire cle-valeur.
+    /// @signature def foreachEntry(f: (Tuple2[K, V]) => Unit): Unit
+    /// @status Recommandee
+    def foreachEntry(f: (Tuple2[K, V]) => Unit): Unit = {
+        entries.foreach(f)
+    }
+
+    /// Transforme les valeurs en conservant les cles.
+    /// @signature def mapValues[U](default: U, f: (V) => U): Map[K, U]
+    /// @status Recommandee
+    def mapValues[U](default: U, f: (V) => U): Map[K, U] = {
+        val mapped = new ObjectArray[Tuple2[K, U]](entries.size())
+        var index = 0
+        while index < entries.size() {
+            val entry = entries.get(index)
+            mapped.set(index, Tuple2(entry._1, f(entry._2)))
+            index = index + 1
+        }
+        new Map[K, U](new ArrayObject[Tuple2[K, U]](mapped))
+    }
+
+    /// Filtre les entrees selon leur cle.
+    /// @signature def filterKeys(predicate: (K) => Bool): Map[K, V]
+    /// @status Recommandee
+    def filterKeys(predicate: (K) => Bool): Map[K, V] = {
+        var index = 0
+        var kept = 0
+        while index < entries.size() {
+            if predicate(entries.get(index)._1) {
+                kept = kept + 1
+            } else {
+                kept
+            }
+            index = index + 1
+        }
+
+        val filtered = new ObjectArray[Tuple2[K, V]](kept)
+        index = 0
+        var output = 0
+        while index < entries.size() {
+            val entry = entries.get(index)
+            if predicate(entry._1) {
+                filtered.set(output, entry)
+                output = output + 1
+            } else {
+                output
+            }
+            index = index + 1
+        }
+        new Map[K, V](new ArrayObject[Tuple2[K, V]](filtered))
+    }
+
     /// Convertit la map en chaine de caracteres en reliant chaque paire cle-valeur par un separateur.
     /// @signature def mkString(separator: String): String
     /// @status Recommandee
@@ -324,4 +383,3 @@ class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) {
     }
 
 }
-

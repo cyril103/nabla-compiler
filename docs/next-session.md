@@ -31,14 +31,18 @@ Dernier état connu :
 
 ## Suite recommandée
 
-### Option A - Méthodes de confort pour `Map`
+### Option A - Méthodes de confort pour `Map` (réalisée)
 
-Enrichir l'API publique de `Map[K, V]` dans `stdlib/collections/map.nabla` :
+L'API publique de `Map[K, V]` dans `stdlib/collections/map.nabla` inclut
+désormais :
 
 - `contains(key: K): Bool` comme alias convivial de `containsKey(key)`.
 - `foreachEntry(f: (Tuple2[K, V]) => Unit): Unit` pour itérer sur les entrées de la map.
 - `mapValues[U](default: U, f: (V) => U): Map[K, U]` pour transformer les valeurs d'une map en conservant les clés.
 - `filterKeys(predicate: (K) => Bool): Map[K, V]` pour filtrer les entrées de la map par clé.
+
+Le test associé est `tests/test_stdlib_map_comfort_methods.nabla`, et la
+documentation HTML de `Map` doit rester régénérée avec `make stdlib-docs`.
 
 ### Option B - Améliorations de l'API `Option` et de `Map.getOption`
 

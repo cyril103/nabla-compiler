@@ -271,9 +271,10 @@ Le pipeline implemente actuellement :
   opérations de présence à coût moyen réduit.
 - module de bibliotheque standard `collections.map` avec `Map[K, V]`,
   `Map.empty[K, V]`, `Map.fromArray[K, V]`, `apply[K, V]`, `size`, `isEmpty`,
-  `nonEmpty`, `containsKey`, `getOption`, `getOrElse`, `updated`, `removed`,
-  `clear`, `keys`, `values`, `toArray`, `mkString` et `toString` pour la
-  représentation textuelle;
+  `nonEmpty`, `containsKey`, `contains`, `getOption`, `getOrElse`, `updated`,
+  `removed`, `clear`, `keys`, `values`, `toArray`, `foreachEntry`,
+  `mapValues[U]`, `filterKeys`, `mkString` et `toString` pour la représentation
+  textuelle;
 - module de bibliotheque standard `collections.array` comme point d'entree
   commun pour les tableaux specialises, avec `Array.fill[T]`, `Array.range`,
   `Array.rangeUntil`, `ArrayFill[T]`, `ArrayRange`, `arrayFill[T]`, `arrayMap[T]`,
@@ -497,6 +498,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Améliorer les opérations de `collections.set` (contains, set op, setFromArray)
   avec un index hashé interne basé sur `hashCode()` pour réduire la complexité
   moyenne des recherches de présence.
+- [x] Enrichir `collections.map` avec les méthodes publiques `contains`,
+  `foreachEntry`, `mapValues[U]` et `filterKeys`, couvertes par
+  `tests/test_stdlib_map_comfort_methods.nabla`.
 - [x] Ajouter le module standard `util` avec `randomSeed`, `randomInt`,
   `randomIntRange` et `randomBool` pour une API pseudo-aléatoire
   deterministe.
@@ -765,6 +769,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Ajouter les méthodes publiques de confort `Map.contains`,
+  `Map.foreachEntry`, `Map.mapValues[U]` et `Map.filterKeys`, avec
+  classification dans `docs/stdlib-api.md`, test dédié et documentation HTML
+  régénérée.
+  - Fichiers / tests associés: `stdlib/collections/map.nabla`,
+    `tests/test_stdlib_map_comfort_methods.nabla`, `docs/stdlib-api.md`,
+    `docs/stdlib/collections/map.html`, `docs/next-session.md`, `AGENTS.md`.
 - `local` - Résoudre la limitation du compilateur lors de la génération de code pour les appels de méthode sur des paramètres de type génériques (comme `K.toString()` générant des références non résolues comme `K.toString` dans l'assembleur) en les redirigeant de manière dynamique vers `Any.toString()`, et implémenter `Map.toString` et `Map.mkString` dans le module `collections.map` de la bibliothèque standard.
   - Fichiers / tests associés: `src/ir.hpp`, `src/ir.cpp`, `src/ast.cpp`, `stdlib/collections/map.nabla`, `tests/test_tuple2_generic_tostring.nabla`, `tests/test_stdlib_map_tostring.nabla`, `docs/stdlib/collections/map.html`, `AGENTS.md`.
 - `local` - Configurer l'environnement de développement WSL 2 sous Windows avec installation d'Ubuntu et des dépendances (`g++`, `nasm`, `make`, `dos2unix`). Ajouter `.gitattributes` pour imposer les sauts de ligne `LF` sur les fichiers du projet et résoudre les écarts Windows/Linux pour la suite de tests.
