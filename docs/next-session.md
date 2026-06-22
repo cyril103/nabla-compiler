@@ -1,164 +1,59 @@
 # Note de reprise - prochaine session
 
-Cette note remplace l'ancienne note `tuples-next-session.md`. Elle garde le
-contexte utile apres les sessions Tuple2 puis Map.
+Cette note résume le travail accompli sur la résolution des appels génériques et Map.toString, et définit les prochaines étapes recommandées.
 
 ## Etat actuel
 
-### Tuple2
+### Tuple2 & Map (Stringification)
 
-La premiere brique tuple est en place :
+La conversion en chaîne de caractères pour `Tuple2` et `Map` est entièrement opérationnelle :
 
-- `stdlib/core/tuple.nabla` definit `Tuple2[A, B]`.
-- `(A, B)` est accepte comme alias de type vers `Tuple2[A, B]`.
-- `(a, b)` construit un `Tuple2`.
-- `a -> b` construit aussi un `Tuple2`.
-- Les acces `pair._1` et `pair._2` passent par les methodes de `Tuple2`.
-- Les tuples fonctionnent dans `Array` et comme type de retour.
-
-Tests importants :
-
-- `tests/test_tuple2_literal.nabla`
-- `tests/test_tuple2_type_alias.nabla`
-- `tests/test_tuple2_access.nabla`
-- `tests/test_tuple2_return.nabla`
-- `tests/test_tuple2_generic.nabla`
-- `tests/test_tuple2_array.nabla`
-- `tests/test_tuple2_arrow.nabla`
-- `tests/test_tuple2_arrow_array.nabla`
-- `tests/test_error_tuple_empty.nabla`
-- `tests/test_error_tuple3_literal.nabla`
-- `tests/test_error_tuple3_type.nabla`
-- `tests/test_error_tuple_access_3.nabla`
-
-### Map
-
-La premiere brique `Map` a ete ajoutee et poussee dans le commit :
-
-```text
-e88c9c5 Add stdlib Map
-```
-
-Surface disponible :
-
-- `import collections.map`
-- `Map("alice" -> 10, "bob" -> 20)`
-- `Map.empty[K, V]()`
-- `Map.fromArray[K, V](entries)`
-- `size`, `isEmpty`, `nonEmpty`
-- `containsKey`
-- `getOption(default, key)`
-- `getOrElse(key, default)`
-- `updated`
-- `removed`
-- `clear`
-- `keys`
-- `values`
-- `toArray`
-
-Fichiers principaux :
-
-- `stdlib/collections/map.nabla`
-- `tests/test_stdlib_map.nabla`
-- `tests/test_stdlib_map.expected`
-
-### Correctif compilateur associe
-
-Pour que `Map[String, V]` fonctionne correctement, on a corrige le lowering
-des appels generiques quand un parametre de type est substitue par `String`.
-
-Avant ce correctif, `K == other` et `K.hashCode()` retombaient sur `Any` dans
-du code generique, donc `String` utilisait l'identite au lieu du contenu.
-
-Fichiers touches :
-
-- `src/ast.cpp`
-- `src/ir_codegen.cpp`
-- `src/runtime_asm.cpp`
-
-Test de regression :
-
-- `tests/test_generic_string_equality_hash.nabla`
-- `tests/test_generic_string_equality_hash.expected`
+- **Correctif compilateur backend** : Résolution de la limitation sur les appels de méthode (comme `.toString()`) sur des récepteurs de type paramètre générique (ex. `K`). Les appels sur ces paramètres de type libre sont désormais abaissés vers `Any.toString()`, permettant une résolution dynamique propre via dynamic dispatch au runtime.
+- **Support Map** : `Map[K, V]` implémente désormais `mkString(separator: String): String` et `override def toString(): String`.
+- **Documentation stdlib** : La documentation HTML de `Map` a été régénérée avec succès dans `docs/stdlib/collections/map.html`.
+- **Tests** : 
+  - `tests/test_tuple2_generic_tostring.nabla` valide le correctif du compilateur.
+  - `tests/test_stdlib_map_tostring.nabla` valide la stringification des maps de différentes tailles et types.
+  - Tous les tests de la suite (`make all-tests`) et tous les exemples (`make examples`) passent à 100% sans régression.
 
 ## Verification de depart
 
-Depuis la racine du depot :
+Depuis la racine du dépôt :
 
 ```sh
-make all-tests
-git status --short
+wsl -d Ubuntu -u root bash -c "make all-tests < /dev/null"
+wsl -d Ubuntu -u root bash -c "make examples < /dev/null"
+git status
 ```
 
-Dernier etat connu :
+Dernier état connu :
+- Worktree propre après commit des modifications du compilateur, de la stdlib, des tests et de la documentation régénérée.
 
-- `make all-tests` vert.
-- worktree propre apres commit/push.
-- les fichiers parasites `test_*` aux racines de `/workspaces/dev_c` et du
-  depot ont ete supprimes.
+## Suite recommandée
 
-## Suite recommandee
+### Option A - Méthodes de confort pour `Map`
 
-### Option A - confort Map, risque faible
+Enrichir l'API publique de `Map[K, V]` dans `stdlib/collections/map.nabla` :
 
-Ajouter des methodes de confort a `Map` sans toucher au backend :
+- `contains(key: K): Bool` comme alias convivial de `containsKey(key)`.
+- `foreachEntry(f: (Tuple2[K, V]) => Unit): Unit` pour itérer sur les entrées de la map.
+- `mapValues[U](default: U, f: (V) => U): Map[K, U]` pour transformer les valeurs d'une map en conservant les clés.
+- `filterKeys(predicate: (K) => Bool): Map[K, V]` pour filtrer les entrées de la map par clé.
 
-- `contains(key)` comme alias de `containsKey(key)`.
-- `foreach(f: (K, V) => Unit)` ou `foreachEntry(f: (Tuple2[K, V]) => Unit)`.
-- `mapValues[U](default: U, f: (V) => U): Map[K, U]`.
-- `filterKeys(predicate: (K) => Bool): Map[K, V]`.
-- eventuellement `merge` / `union` avec convention "right wins".
+### Option B - Améliorations de l'API `Option` et de `Map.getOption`
 
-Cette voie est probablement la plus simple pour reprendre vite.
+Actuellement, `Option.none[T](default)` et `Option.some[T](value)` requièrent une valeur de secours lors de la création d'une instance `none` pour contourner des contraintes d'initialisation de type. De plus, `Map.getOption(default, key)` doit accepter cette même valeur de secours.
+L'objectif serait de :
+- Permettre la création d'un `none` naturel sans valeur par défaut : `Option.none[T]()`.
+- Mettre à jour `Map` pour proposer une méthode `getOption(key: K): Option[V]` naturelle qui renvoie un `Option.none[V]()`.
 
-### Option B - `Map.toString` / `mkString`, risque moyen
+### Option C - Documentation utilisateur et interop
 
-`Map.toString` et `mkString` ont ete volontairement laisses de cote.
-
-La raison : `entries.toString()` sur `ArrayObject[Tuple2[K, V]]` force
-`Tuple2[K, V].toString` dans un contexte generique, ce qui revele une limite
-backend autour des methodes generiques sur types parametres.
-
-Piste propre :
-
-- reproduire avec un test minimal sur `Tuple2[K, V].toString()` dans une classe
-  ou fonction generique ;
-- corriger la generation des appels de methodes generiques specialisees ;
-- ajouter ensuite `Map.mkString(separator)` et `override def toString()`.
-
-Eviter de bricoler une version ad hoc dans `Map` tant que le probleme backend
-n'est pas compris.
-
-### Option C - docs stdlib
-
-Mettre a jour la documentation utilisateur :
-
-- `docs/stdlib-api.md`
-- `docs/stdlib/` si la generation actuelle y ajoute les modules
-- eventuellement `docs/language.md` pour rappeler `->`, `(A, B)`, `(a, b)`
-
-Verifier aussi si `tools/generate_stdlib_docs.py` detecte automatiquement le
-nouveau module `collections.map`.
-
-### Option D - collections avec tuples publics
-
-Poursuivre l'interop tuples/collections :
-
-- ajouter `zip` public pour arrays generiques si l'architecture le permet ;
-- harmoniser `zipWithIndex` pour retourner des tuples publics dans plus de
-  facades ;
-- etudier `Map.keys().toSet()` ou une interop directe avec `Set`.
+Mettre à jour la documentation utilisateur globale :
+- Compléter `docs/language.md` pour documenter la syntaxe des tuples (`(A, B)`, `(a, b)`, `a -> b`) et l'usage de la collection `Map`.
+- Documenter l'interopérabilité directe entre `Map` et `Set` (ex. `map.keys().toSet()` ou construction directe).
 
 ## Points d'attention
 
-- `Map` reconstruit ses buckets a plusieurs endroits (`containsKey`,
-  `getOption`, `removed`). C'est acceptable pour la premiere brique, mais pas
-  optimal.
-- `Map.fromArray` deduplique par cle avec convention "derniere valeur gagne".
-  L'ordre de `toArray`, `keys` et `values` suit l'ordre des buckets, pas
-  l'ordre d'insertion.
-- `getOption(default, key)` existe parce que `Option.none[T]` demande une
-  valeur interne de secours. Une future API `Option.none[T]()` permettrait de
-  rendre `getOption(key)` plus naturel.
-- Les tuples de plus de 2 elements et le pattern matching tuple restent hors
-  scope pour l'instant.
+- **Performance de Map** : La structure actuelle reconstruit ses buckets à chaque opération en lecture/écriture (`containsKey`, `getOption`, `removed`). Une optimisation de la conservation des buckets pourrait être envisagée.
+- **Ordre de Map** : L'ordre de parcours (`toArray`, `keys`, `values`) dépend de l'ordre des buckets et non de l'ordre d'insertion.
