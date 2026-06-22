@@ -269,6 +269,11 @@ Le pipeline implemente actuellement :
   `remove`, `union`, `intersect`, `difference`, `setEmpty`, `setFromArray` et
   `toString`, en utilisant un index de seaux hashés (`hashCode()`) pour des
   opérations de présence à coût moyen réduit.
+- module de bibliotheque standard `collections.map` avec `Map[K, V]`,
+  `Map.empty[K, V]`, `Map.fromArray[K, V]`, `apply[K, V]`, `size`, `isEmpty`,
+  `nonEmpty`, `containsKey`, `getOption`, `getOrElse`, `updated`, `removed`,
+  `clear`, `keys`, `values`, `toArray`, `mkString` et `toString` pour la
+  représentation textuelle;
 - module de bibliotheque standard `collections.array` comme point d'entree
   commun pour les tableaux specialises, avec `Array.fill[T]`, `Array.range`,
   `Array.rangeUntil`, `ArrayFill[T]`, `ArrayRange`, `arrayFill[T]`, `arrayMap[T]`,
@@ -760,6 +765,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Résoudre la limitation du compilateur lors de la génération de code pour les appels de méthode sur des paramètres de type génériques (comme `K.toString()` générant des références non résolues comme `K.toString` dans l'assembleur) en les redirigeant de manière dynamique vers `Any.toString()`, et implémenter `Map.toString` et `Map.mkString` dans le module `collections.map` de la bibliothèque standard.
+  - Fichiers / tests associés: `src/ir.hpp`, `src/ir.cpp`, `src/ast.cpp`, `stdlib/collections/map.nabla`, `tests/test_tuple2_generic_tostring.nabla`, `tests/test_stdlib_map_tostring.nabla`, `docs/stdlib/collections/map.html`, `AGENTS.md`.
 - `local` - Configurer l'environnement de développement WSL 2 sous Windows avec installation d'Ubuntu et des dépendances (`g++`, `nasm`, `make`, `dos2unix`). Ajouter `.gitattributes` pour imposer les sauts de ligne `LF` sur les fichiers du projet et résoudre les écarts Windows/Linux pour la suite de tests.
   - Fichiers associés: `.gitattributes`, `docs/stdlib/`, `AGENTS.md`.
 - `local` - Nettoyer la surface documentaire de `io` et `strings`: les pages

@@ -309,4 +309,19 @@ class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) {
         entries
     }
 
+    /// Convertit la map en chaine de caracteres en reliant chaque paire cle-valeur par un separateur.
+    /// @signature def mkString(separator: String): String
+    /// @status Recommandee
+    def mkString(separator: String): String = {
+        entries.map[String](entry => entry._1.toString() + " -> " + entry._2.toString()).mkString(separator)
+    }
+
+    /// Retourne la representation sous forme de chaine de la map.
+    /// @signature override def toString(): String
+    /// @status Recommandee
+    override def toString(): String = {
+        "Map(" + this.mkString(", ") + ")"
+    }
+
 }
+

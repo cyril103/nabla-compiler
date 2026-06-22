@@ -1,0 +1,14 @@
+import core.tuple
+
+class Wrapper[K, V](pair: Tuple2[K, V]) {
+    def getPairString(): String = {
+        pair.toString()
+    }
+}
+
+def main(): Int = {
+    val p = Tuple2(10, 20)
+    val w = new Wrapper[Int, Int](p)
+    print(w.getPairString())
+    0
+}

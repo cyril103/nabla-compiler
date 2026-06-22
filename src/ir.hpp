@@ -156,6 +156,7 @@ public:
     void pushTypeSubstitution(const std::map<std::string, std::string>& substitution);
     void popTypeSubstitution();
     std::string substituteActiveType(const std::string& type) const;
+    bool isTypeParameter(const std::string& type) const;
     std::string makeLabel(const std::string& prefix);
     std::string makeTemporarySymbol(const std::string& prefix);
     void emitLabel(const std::string& label);

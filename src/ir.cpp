@@ -651,6 +651,14 @@ std::string IRBuilder::substituteActiveType(const std::string& type) const {
     return substituteType(type, activeTypeSubstitution);
 }
 
+bool IRBuilder::isTypeParameter(const std::string& type) const {
+    if (type.empty()) return false;
+    if (type.find('[') != std::string::npos) return false;
+    if (isBuiltinValueType(type) || isBuiltinReferenceType(type) || type == "Char") return false;
+    if (context && context->classes.count(type)) return false;
+    return true;
+}
+
 std::string IRBuilder::makeLabel(const std::string& prefix) {
     return prefix + "." + std::to_string(nextLabelId++);
 }

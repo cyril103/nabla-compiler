@@ -1,0 +1,13 @@
+import collections.map
+
+def main(): Int = {
+    val m1 = Map(1 -> "one", 2 -> "two")
+    val m2 = Map.empty[Int, String]()
+    val m3 = Map("a" -> 10)
+
+    print("m1: " + m1.toString())
+    print("m2: " + m2.toString())
+    print("m3: " + m3.toString())
+
+    42
+}
