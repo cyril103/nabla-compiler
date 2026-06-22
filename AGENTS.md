@@ -760,6 +760,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Configurer l'environnement de développement WSL 2 sous Windows avec installation d'Ubuntu et des dépendances (`g++`, `nasm`, `make`, `dos2unix`). Ajouter `.gitattributes` pour imposer les sauts de ligne `LF` sur les fichiers du projet et résoudre les écarts Windows/Linux pour la suite de tests.
+  - Fichiers associés: `.gitattributes`, `docs/stdlib/`, `AGENTS.md`.
 - `local` - Nettoyer la surface documentaire de `io` et `strings`: les pages
   HTML evitent maintenant les marqueurs Markdown bruts, les conventions de
   retour I/O affichent directement `Bool`, `Int`, `true`, `false` et `-1`, et

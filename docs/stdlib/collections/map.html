@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Map - Nabla stdlib</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header>
+    <a class="brand" href="../index.html">Nabla stdlib</a>
+    <span>Reference API publique</span>
+  </header>
+  <main>
+    <nav class="breadcrumb"><a href="../index.html">Modules</a> / collections.map</nav>
+    <section class="module-hero">
+      <p class="import">import collections.map</p>
+      <h1>Map</h1>
+      <p>Dictionnaires immuables cle-valeur. Utiliser Map(&quot;name&quot; -&gt; value) pour creer une map depuis des paires, Map.empty[K, V]() pour construire progressivement une map, ou Map.fromArray[K, V](entries) pour construire depuis un tableau de paires.</p>
+    </section>
+    <section class="entries">
+    <article class="entry" id="apply">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>apply</h2>
+      <pre><code>def Map.apply[K, V](entries: Tuple2[K, V]*): Map[K, V]</code></pre>
+      <p>Cree une map depuis les paires donnees.</p>
+    </article>
+    <article class="entry" id="empty">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>empty</h2>
+      <pre><code>def Map.empty[K, V](): Map[K, V]</code></pre>
+      <p>Cree une map vide.</p>
+    </article>
+    <article class="entry" id="fromArray">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>fromArray</h2>
+      <pre><code>def Map.fromArray[K, V](entries: Array[Tuple2[K, V]]): Map[K, V]</code></pre>
+      <p>Cree une map depuis un tableau de paires.</p>
+    </article>
+    <article class="entry" id="Map">
+      <div class="entry-meta">
+        <span class="kind">class</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>Map</h2>
+      <pre><code>class Map[K, V]</code></pre>
+      <p>Dictionnaire immutable.</p>
+<p>Les operations updated, removed et clear retournent une nouvelle map. Si plusieurs paires utilisent la meme cle, la derniere valeur gagne.</p>
+    </article>
+    </section>
+  </main>
+</body>
+</html>
