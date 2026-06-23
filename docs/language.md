@@ -1062,4 +1062,9 @@ Voir :
 - `examples/command_shell.nabla`
 - `examples/game_of_life.nabla`
 - `examples/student_scores.nabla`
+- `examples/stdlib_collections_cookbook.nabla`
+- `examples/stdlib_text_cookbook.nabla`
 - `examples/interactive_confirm.nabla`
+
+Voir aussi `docs/cookbook.md` pour des exemples courts centres sur la stdlib
+publique.

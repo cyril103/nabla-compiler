@@ -346,6 +346,11 @@ Le pipeline implemente actuellement :
   `Array[T]`, `Set[T]`, `Set.fromArray[T]`, opérations d'ensemble et héritage
   avec `override`; la friction restante porte surtout sur les collections
   polymorphes de type parent comme `Set[Person]`.
+- `examples/stdlib_collections_cookbook.nabla` et
+  `examples/stdlib_text_cookbook.nabla` comme cookbooks non interactifs verifies
+  pour `Array[T]`, `Set[T]`, `Map[K, V]`, `Option[T]`, `Sized` et les operations
+  texte, sans construction directe de `ObjectArray[T]`, `ArrayObject[T]` ou
+  `ArrayInt`.
 - les tests et exemples ordinaires privilegient maintenant `Array.range`,
   `Array.rangeUntil`, `Array.fill[T]`, `Option.some` / `Option.none`,
   `Set.fromArray` et `Set.empty`; les anciens noms restent couverts dans les
@@ -805,6 +810,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   sortie console attendus.
 - [x] Vérifier `examples/workshop_set_inheritance.nabla` avec un code de sortie
   et une sortie console attendus.
+- [x] Ajouter des cookbooks stdlib executables et verifies pour collections et
+  traitement texte, avec sorties console deterministes.
 - [x] Migrer `examples/workshop_set_inheritance.nabla` vers l'API publique
   `Array[T]` + `Set.fromArray[T]` au lieu de `ObjectArray[T]` / `ArrayObject[T]`
   dans son chemin principal.
@@ -831,6 +838,17 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Ajouter deux cookbooks stdlib publics non interactifs pour les
+  collections et le traitement de texte, avec oracles de code de sortie et
+  stdout deterministe, plus une courte page `docs/cookbook.md`.
+  - Fichiers / tests associes:
+    `examples/stdlib_collections_cookbook.nabla`,
+    `examples/stdlib_collections_cookbook.expected`,
+    `examples/stdlib_collections_cookbook.stdout`,
+    `examples/stdlib_text_cookbook.nabla`,
+    `examples/stdlib_text_cookbook.expected`,
+    `examples/stdlib_text_cookbook.stdout`, `docs/cookbook.md`,
+    `docs/language.md`, `docs/roadmap.md`, `AGENTS.md`, `make examples`.
 - `local` - Nettoyer la documentation publique stdlib/utilisateur apres
   l'ajout de `Sized`: `docs/stdlib-api.md`, `docs/language.md` et
   `docs/roadmap.md` presentent maintenant `Array[T]`, `Option[T]`, `Set[T]`,

@@ -1,0 +1,64 @@
+import io
+import collections.array
+import collections.set
+import collections.map
+import core.option
+import core.sized
+
+def showSized(label: String, value: Sized): Unit = {
+    println(label + ": " + value.size().toString())
+}
+
+def showOption(label: String, value: Option[Int]): Unit = {
+    if value.isDefined() {
+        println(label + ": " + value.getOrElse(0).toString())
+    } else {
+        println(label + ": none")
+    }
+}
+
+def keepPublicTask(task: String): Bool = {
+    task != "internal"
+}
+
+def labelTask(task: String): String = {
+    "task:" + task
+}
+
+def main(): Int = {
+    val tasks = Array("docs", "tests", "examples", "docs", "internal")
+    val publicTasks = tasks.filter(keepPublicTask)
+    val labels = publicTasks.map[String](labelTask)
+    val uniqueTasks = Set.fromArray[String](publicTasks)
+
+    val scores = Map("docs" -> 3, "tests" -> 5)
+        .updated("examples", 4)
+        .updated("docs", 6)
+    val publishedScores = scores.removed("internal")
+    val scoreLabels = publishedScores.mapValues[String]("", (score: Int) => {
+        "score=" + score.toString()
+    })
+    val visibleScoreLabels = scoreLabels.filterKeys(key => key != "tests")
+
+    println("Collections cookbook")
+    println(labels.mkString(","))
+    showSized("public tasks", uniqueTasks)
+    showSized("scores", publishedScores)
+    showOption("docs score", publishedScores.getOption("docs"))
+    showOption("missing score", publishedScores.getOption("missing"))
+    println("visible labels: " + visibleScoreLabels.getOrElse("docs", "none") + "," + visibleScoreLabels.getOrElse("examples", "none"))
+
+    if publicTasks.size() == 4 &&
+       labels.get(0) == "task:docs" &&
+       uniqueTasks.size() == 3 &&
+       uniqueTasks.contains("examples") &&
+       publishedScores.size() == 3 &&
+       publishedScores.getOrElse("docs", 0) == 6 &&
+       publishedScores.getOption("missing").isEmpty() &&
+       visibleScoreLabels.size() == 2 &&
+       visibleScoreLabels.getOrElse("examples", "") == "score=4" {
+        0
+    } else {
+        1
+    }
+}
