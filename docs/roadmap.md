@@ -55,6 +55,11 @@ pour reprendre facilement apres une pause.
   `Array[T]`, `Set[T]`, `Set.fromArray[T]`, opérations d'ensemble et héritage
   avec `override`; il couvre maintenant aussi les collections polymorphes de
   type parent avec dispatch runtime des overrides utilisateur.
+- `examples/stdlib_collections_cookbook.nabla` et
+  `examples/stdlib_text_cookbook.nabla` servent de cookbooks non interactifs
+  verifies pour la surface stdlib publique (`Array[T]`, `Set[T]`, `Map[K, V]`,
+  `Option[T]`, `Sized` et operations texte), sans construction directe des
+  representations de tableaux internes.
 - Support Vim minimal disponible dans `editor/vim`.
 - Suites `make all-tests`, `make examples` et `make tooling-tests` vertes au
   moment de cette mise a jour; la CI GitHub lance aussi les exemples publics.
@@ -105,6 +110,8 @@ Actions recommandees :
 8. Continuer a garder les exemples publics sur les facades idiomatiques
    (`Array[T]`, `Array.fill[T]`, `Set.fromArray[T]`,
    `Option.some[T]` / `Option.none[T]`) quand elles existent.
+   Les cookbooks doivent rester concis et ne pas laisser entendre que tous les
+   retours de tableaux masquent deja completement `ArrayObject[T]`.
 9. Garder les diagnostics de compatibilite orientes vers les compagnons
    recommandes (`Array.fill`, `Set.fromArray`, `Option.some`, etc.).
 10. Poursuivre la surcharge par signature : la base couvre maintenant les

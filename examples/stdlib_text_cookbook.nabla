@@ -1,0 +1,66 @@
+import io
+import collections.set
+import collections.map
+import core.option
+
+def normalizeWord(word: String): String = {
+    word.trim()
+}
+
+def keepWord(word: String): Bool = {
+    word.nonEmpty() && word != "and"
+}
+
+def firstLetter(word: String): String = {
+    word.substring(0, 1)
+}
+
+def countWords(words: Array[String]): Map[String, Int] = {
+    var counts = Map.empty[String, Int]()
+    var index = 0
+    while index < words.size() {
+        val word = words.get(index)
+        counts = counts.updated(word, counts.getOrElse(word, 0) + 1)
+        index = index + 1
+    }
+    counts
+}
+
+def showCount(label: String, value: Option[Int]): Unit = {
+    if value.isEmpty() {
+        println(label + ": none")
+    } else {
+        println(label + ": " + value.getOrElse(0).toString())
+    }
+}
+
+def main(): Int = {
+    val raw = "  nabla map set nabla option map and  "
+    val tokens = raw.trim().split(" ")
+    val words = tokens.map[String](normalizeWord).filter(keepWord)
+    val uniqueWords = Set.fromArray[String](words)
+    val counts = countWords(words)
+    val initials = words.map[String](firstLetter)
+    val totalLetters = words.fold[Int](0, (total, word) => total + word.length())
+
+    println("Text cookbook")
+    println("words: " + words.mkString("|"))
+    println("initials: " + initials.mkString("/"))
+    println("unique words: " + uniqueWords.size().toString())
+    showCount("nabla count", counts.getOption("nabla"))
+    showCount("missing count", counts.getOption("missing"))
+    println("total letters: " + totalLetters.toString())
+
+    if tokens.size() == 7 &&
+       words.size() == 6 &&
+       words.get(2) == "set" &&
+       uniqueWords.size() == 4 &&
+       counts.getOrElse("nabla", 0) == 2 &&
+       counts.getOption("missing").isEmpty() &&
+       initials.mkString("/") == "n/m/s/n/o/m" &&
+       totalLetters == 25 {
+        0
+    } else {
+        1
+    }
+}

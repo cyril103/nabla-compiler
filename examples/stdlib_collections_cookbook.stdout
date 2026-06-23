@@ -1,0 +1,7 @@
+Collections cookbook
+task:docs,task:tests,task:examples,task:docs
+public tasks: 3
+scores: 3
+docs score: 6
+missing score: none
+visible labels: score=6,score=4
