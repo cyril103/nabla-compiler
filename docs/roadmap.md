@@ -21,7 +21,9 @@ pour reprendre facilement apres une pause.
   abstraites, methodes concretes par defaut, composition par `with`, obligation
   d'implementation dans les classes concretes et rejet des conflits de defaults
   sans `override` explicite. Les classes generiques peuvent implementer des
-  traits non generiques, avec dispatch via le type du trait.
+  traits non generiques, avec dispatch via le type du trait. La stdlib expose
+  maintenant le trait public minimal `Sized`, implemente par `ArrayObject[T]`,
+  `Set[T]` et `Map[K, V]`.
   La conversion `toString()` est désormais disponible de façon uniforme pour les
   types primitifs usuels (`Int`, `Long`, `Float`, `Double`, `Bool`, `Char`) au niveau du
   backend runtime, y compris via un paramètre `Any`/`AnyVal` de fonction/méthode

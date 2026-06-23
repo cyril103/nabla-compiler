@@ -231,6 +231,9 @@ Le pipeline implemente actuellement :
   `map[U]`, `filter`, `flatMap[U]`, `foreach`, `orElse` et `getOrElse`; les
   methodes internes construisent directement `Option[T]` sans repasser par les
   wrappers publics de compatibilite;
+- module de bibliotheque standard `core.sized` avec le trait public `Sized`,
+  `size()`, `isEmpty()` et `nonEmpty()` pour les types ayant une taille
+  logique;
 - premier module de bibliotheque standard `collections.int_array` avec
   `intArraySum`, `intArrayFill`, `intArrayRange`, `intArrayMap`,
   `intArrayFilter` et la facade objet `ArrayInt` avec `map`, `filter`,
@@ -264,18 +267,21 @@ Le pipeline implemente actuellement :
   `shuffle`;
 - module de bibliotheque standard `collections.object_array` avec `ObjectArray[T]`,
   `ArrayObject[T]`, `objectArrayShuffle`, `objectArrayMkString`,
-  `objectStringArrayMkString` (compatibilité) et `ArrayObject[T].shuffle`.
+  `objectStringArrayMkString` (compatibilité) et `ArrayObject[T].shuffle`;
+  `ArrayObject[T]` implemente aussi le trait public `Sized`.
 - module de bibliotheque standard `collections.set` avec `Set[T]`,
   `Set.empty[T]`, `Set.fromArray[T]`, `SetEmpty[T]`, `SetFromArray[T]`, `add`,
   `remove`, `union`, `intersect`, `difference`, `setEmpty`, `setFromArray` et
   `toString`, en utilisant un index de seaux hashés (`hashCode()`) pour des
-  opérations de présence à coût moyen réduit.
+  opérations de présence à coût moyen réduit; `Set[T]` implemente aussi le
+  trait public `Sized`.
 - module de bibliotheque standard `collections.map` avec `Map[K, V]`,
   `Map.empty[K, V]`, `Map.fromArray[K, V]`, `apply[K, V]`, `size`, `isEmpty`,
   `nonEmpty`, `containsKey`, `contains`, `getOption(key)`,
   `getOption(default, key)` par compatibilite, `getOrElse`, `updated`,
   `removed`, `clear`, `keys`, `values`, `toArray`, `foreachEntry`, `mapValues[U]`,
   `filterKeys`, `mkString` et `toString` pour la représentation textuelle;
+  `Map[K, V]` implemente aussi le trait public `Sized`;
 - module de bibliotheque standard `collections.array` comme point d'entree
   commun pour les tableaux specialises, avec `Array.fill[T]`, `Array.range`,
   `Array.rangeUntil`, `ArrayFill[T]`, `ArrayRange`, `arrayFill[T]`, `arrayMap[T]`,
@@ -416,8 +422,10 @@ Limites importantes :
   `override` pour les implementations/remplacements de methodes de trait, et
   rejette les conflits de defaults multiples sans override explicite. Les traits
   non generiques peuvent etre implementes par des classes generiques et
-  redispatchent correctement via le type du trait. Les traits ne sont pas
-  instanciables et ne declarent ni champs, ni constructeurs, ni appels `super`.
+  redispatchent correctement via le type du trait. Le trait stdlib public
+  `Sized` couvre maintenant `ArrayObject[T]`, `Set[T]` et `Map[K, V]`. Les
+  traits ne sont pas instanciables et ne declarent ni champs, ni constructeurs,
+  ni appels `super`.
 - Les collections basées sur `Any` utilisent `==` pour l'égalité et
   `hashCode()` pour l'index interne. `==` / `!=` sur objets passent par
   `Any.equals(...)`, et `toString()`, `hashCode()` et `equals(...)`
@@ -573,6 +581,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   defaults.
 - [x] Autoriser les classes generiques a implementer des traits non generiques,
   avec dispatch des methodes abstraites et des defaults via le type du trait.
+- [x] Ajouter le trait stdlib public `Sized` et l'appliquer a `ArrayObject[T]`,
+  `Set[T]` et `Map[K, V]`.
 
 - [x] Formaliser `Int`, `Bool`, `Char`, `String`, `IntArray`, les types fonction canoniques et
   les types de classes.
@@ -809,6 +819,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Ajouter le trait stdlib public `Sized` et l'appliquer strictement a
+  `ArrayObject[T]`, `Set[T]` et `Map[K, V]`, avec tests TDD de dispatch via le
+  type du trait.
+  - Fichiers / tests associes: `stdlib/core/sized.nabla`,
+    `stdlib/collections/object_array.nabla`, `stdlib/collections/set.nabla`,
+    `stdlib/collections/map.nabla`,
+    `tests/test_stdlib_sized_trait_collections.nabla`,
+    `tests/test_stdlib_sized_trait_array_object.nabla`, `docs/stdlib-api.md`,
+    `docs/roadmap.md`, `AGENTS.md`.
 - `local` - Ajouter les traits riches V1 au langage, avec tests TDD couvrant les
   signatures abstraites, methodes par defaut, composition `with`, interdiction
   de l'instanciation/champs/constructeurs/`super`, obligation d'implementation

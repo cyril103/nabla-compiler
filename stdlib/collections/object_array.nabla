@@ -1,4 +1,5 @@
 import util
+import core.sized
 import collections.array_base
 
 def objectArrayFill[T](size: Int, value: T): ArrayObject[T] = {
@@ -92,20 +93,20 @@ def objectStringArrayMkString[T](xs: ArrayObject[String], separator: String): St
     objectArrayMkString(xs, separator)
 }
 
-class ArrayObject[T](values: ObjectArray[T]) {
+class ArrayObject[T](values: ObjectArray[T]) with Sized {
     def length(): Int = {
         objectArrayLength(values)
     }
 
-    def size(): Int = {
+    override def size(): Int = {
         arrayBaseSize[ObjectArray[T]](values, objectArrayLength[T])
     }
 
-    def isEmpty(): Bool = {
+    override def isEmpty(): Bool = {
         arrayBaseIsEmpty[ObjectArray[T]](values, objectArrayLength[T])
     }
 
-    def nonEmpty(): Bool = {
+    override def nonEmpty(): Bool = {
         arrayBaseNonEmpty[ObjectArray[T]](values, objectArrayLength[T])
     }
 

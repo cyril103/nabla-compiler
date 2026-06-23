@@ -5,6 +5,7 @@
 /// Map.fromArray[K, V](entries) pour construire depuis un tableau de paires.
 
 import core.option
+import core.sized
 import core.tuple
 import collections.object_array
 
@@ -238,17 +239,9 @@ object Map {
 ///
 /// Les operations updated, removed et clear retournent une nouvelle map.
 /// Si plusieurs paires utilisent la meme cle, la derniere valeur gagne.
-class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) {
-    def size(): Int = {
+class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) with Sized {
+    override def size(): Int = {
         entries.size()
-    }
-
-    def isEmpty(): Bool = {
-        entries.isEmpty()
-    }
-
-    def nonEmpty(): Bool = {
-        entries.nonEmpty()
     }
 
     def containsKey(key: K): Bool = {

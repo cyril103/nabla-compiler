@@ -1,0 +1,26 @@
+/// @module Sized
+/// Trait pour les types ayant une taille entiere.
+
+/// Type ayant une taille entiere.
+/// @signature trait Sized
+/// @status Recommandee
+trait Sized {
+    /// Retourne le nombre d'elements logiques.
+    /// @signature def size(): Int
+    /// @status Recommandee
+    def size(): Int
+
+    /// Indique si la collection est vide.
+    /// @signature def isEmpty(): Bool
+    /// @status Recommandee
+    def isEmpty(): Bool = {
+        this.size() == 0
+    }
+
+    /// Indique si la collection n'est pas vide.
+    /// @signature def nonEmpty(): Bool
+    /// @status Recommandee
+    def nonEmpty(): Bool = {
+        this.size() != 0
+    }
+}
