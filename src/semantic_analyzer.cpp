@@ -8,6 +8,52 @@ using MethodOwnerMap = std::map<std::string, std::set<std::string>>;
 using ClassFieldOwnerMap = std::map<std::string, std::set<std::string>>;
 using ParentMethodProviders = std::map<std::string, std::set<std::string>>;
 
+std::string methodConflictKey(
+    const std::string& sourceName,
+    const CompilerContext::FunctionSignature& signature,
+    const std::map<std::string, std::string>& substitution) {
+    std::string key = sourceName + "(";
+    for (size_t i = 0; i < signature.parameters.size(); ++i) {
+        if (i > 0) key += ",";
+        key += substituteType(signature.parameters[i].type, substitution);
+        if (signature.parameters[i].isRepeated) key += "*";
+    }
+    key += ")";
+    if (!signature.typeParameters.empty()) {
+        key += "[";
+        for (size_t i = 0; i < signature.typeParameters.size(); ++i) {
+            if (i > 0) key += ",";
+            key += signature.typeParameters[i];
+        }
+        key += "]";
+    }
+    return key;
+}
+
+bool typeHasTraitAncestor(
+    const CompilerContext& context,
+    const std::string& typeName,
+    std::set<std::string>& visiting) {
+    const std::string baseName = genericBaseName(typeName);
+    if (visiting.count(baseName)) return false;
+    auto classIt = context.classes.find(baseName);
+    if (classIt == context.classes.end()) return false;
+    if (classIt->second.isTrait) return true;
+    visiting.insert(baseName);
+    std::map<std::string, std::string> substitution;
+    if (auto genericSubstitution = genericSubstitutionFor(context, typeName)) {
+        substitution = *genericSubstitution;
+    }
+    for (const auto& parentType : classIt->second.parentTypes) {
+        if (typeHasTraitAncestor(context, substituteType(parentType, substitution), visiting)) {
+            visiting.erase(baseName);
+            return true;
+        }
+    }
+    visiting.erase(baseName);
+    return false;
+}
+
 std::string formatMethodProviders(const std::set<std::string>& providers) {
     std::string message;
     bool first = true;
@@ -77,9 +123,14 @@ void collectVisibleMethodsInHierarchy(
     }
 
     const std::string providerType = substituteType(receiverType, substitution);
-    for (const auto& [methodName, _] : classIt->second.methodOverloads) {
-        if (visibleMethods[methodName].empty()) {
-            visibleMethods[methodName].insert(providerType);
+    for (const auto& [sourceName, overloadNames] : classIt->second.methodOverloads) {
+        for (const auto& overloadName : overloadNames) {
+            auto methodIt = classIt->second.methods.find(overloadName);
+            if (methodIt == classIt->second.methods.end() || methodIt->second.isAbstract) continue;
+            const std::string methodKey = methodConflictKey(sourceName, methodIt->second, substitution);
+            if (visibleMethods[methodKey].empty()) {
+                visibleMethods[methodKey].insert(providerType);
+            }
         }
     }
 
@@ -168,6 +219,70 @@ void resolveInheritedConstructorSignatures(CompilerContext& context) {
     }
 }
 
+struct AbstractMethodRequirement {
+    std::string methodName;
+    const CompilerContext::FunctionSignature* signature;
+    std::map<std::string, std::string> classSubstitution;
+    std::string providerType;
+};
+
+void collectAbstractMethodRequirements(
+    const CompilerContext& context, const std::string& receiverType,
+    std::map<std::string, std::string> substitution,
+    std::set<std::string>& visiting,
+    std::vector<AbstractMethodRequirement>& requirements) {
+    const std::string classLookupName = genericBaseName(receiverType);
+    if (visiting.count(classLookupName)) return;
+
+    auto classIt = context.classes.find(classLookupName);
+    if (classIt == context.classes.end()) return;
+
+    if (auto classGenericSubstitution = genericSubstitutionFor(context, receiverType)) {
+        substitution = *classGenericSubstitution;
+    }
+
+    const std::string providerType = substituteType(receiverType, substitution);
+    for (const auto& [sourceName, overloadNames] : classIt->second.methodOverloads) {
+        for (const auto& overloadName : overloadNames) {
+            auto methodIt = classIt->second.methods.find(overloadName);
+            if (methodIt == classIt->second.methods.end() || !methodIt->second.isAbstract) continue;
+            requirements.push_back({sourceName, &methodIt->second, substitution, providerType});
+        }
+    }
+
+    visiting.insert(classLookupName);
+    for (const auto& parentType : classIt->second.parentTypes) {
+        const std::string concreteParentType = substituteType(parentType, substitution);
+        collectAbstractMethodRequirements(
+            context, concreteParentType, substitution, visiting, requirements);
+    }
+    visiting.erase(classLookupName);
+}
+
+std::vector<AbstractMethodRequirement> collectAbstractMethodRequirements(
+    const CompilerContext& context, const std::string& receiverType) {
+    std::map<std::string, std::string> substitution;
+    std::set<std::string> visiting;
+    std::vector<AbstractMethodRequirement> requirements;
+    collectAbstractMethodRequirements(context, receiverType, substitution, visiting, requirements);
+    return requirements;
+}
+
+bool hasConcreteImplementationForRequirement(
+    const CompilerContext& context, const std::string& className,
+    const AbstractMethodRequirement& requirement) {
+    const auto candidates = collectClassMethodLookupCandidates(context, className, requirement.methodName);
+    for (const auto& candidate : candidates) {
+        if (!candidate.signature || candidate.signature->isAbstract) continue;
+        if (overrideSignatureMatches(
+                context, *candidate.signature, *requirement.signature,
+                requirement.classSubstitution)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 }
 
 SemanticAnalyzer::SemanticAnalyzer(CompilerContext& context) : context(context) {}
@@ -201,6 +316,12 @@ void SemanticAnalyzer::validateDeclaredTypes() {
                     ErrorKind::Semantic, signature.location,
                     "la méthode '" + className + "." + methodName +
                     "' dépasse la limite de 5 paramètres");
+            }
+            if (signature.isAbstract && !classInfo.isTrait) {
+                throw CompilerError(
+                    ErrorKind::Semantic, signature.location,
+                    "méthode abstraite non autorisée dans la classe '" + className +
+                    "." + methodName + "'");
             }
             for (const auto& parameter : signature.parameters) {
                 if (!isKnownTypeInScope(parameter.type, methodTypeParameters)) {
@@ -307,8 +428,12 @@ void SemanticAnalyzer::validateDeclaredTypes() {
         ClassFieldOwnerMap inheritedFieldProviders;
         std::set<std::string> ownMethods;
         const auto classTypeSubstitution = classTypeTemplateSubstitution(context, className);
-        for (const auto& methodEntry : classInfo.methodOverloads) {
-            ownMethods.insert(methodEntry.first);
+        for (const auto& [sourceName, overloadNames] : classInfo.methodOverloads) {
+            for (const auto& overloadName : overloadNames) {
+                auto methodIt = classInfo.methods.find(overloadName);
+                if (methodIt == classInfo.methods.end() || methodIt->second.isAbstract) continue;
+                ownMethods.insert(methodConflictKey(sourceName, methodIt->second, classTypeSubstitution));
+            }
         }
         for (const auto& field : classInfo.fields) {
             inheritedFieldProviders[field.name].insert(className);
@@ -391,6 +516,17 @@ void SemanticAnalyzer::validateDeclaredTypes() {
                 "conflit d'héritage pour le champ '" + fieldName +
                 "' dans la classe '" + className + "': plusieurs définitions dans [" +
                 formatMethodProviders(providers) + "]");
+        }
+        if (!classInfo.isTrait) {
+            const auto abstractRequirements =
+                collectAbstractMethodRequirements(context, className);
+            for (const auto& requirement : abstractRequirements) {
+                if (hasConcreteImplementationForRequirement(context, className, requirement)) continue;
+                throw CompilerError(
+                    ErrorKind::Semantic, classInfo.location,
+                    "méthode abstraite héritée non implémentée dans la classe '" + className +
+                    "': " + requirement.providerType + "." + requirement.methodName);
+            }
         }
     }
 
@@ -475,6 +611,27 @@ void SemanticAnalyzer::validateParentTypes() const {
                 throw CompilerError(
                     ErrorKind::Semantic, classInfo.location,
                     "classe parente inconnue '" + parentName + "' pour la classe '" + className + "'");
+            }
+            if (classInfo.isTrait && !parentIt->second.isTrait) {
+                throw CompilerError(
+                    ErrorKind::Semantic, classInfo.location,
+                    "le trait '" + className + "' ne peut composer que des traits avec 'with'");
+            }
+            if (!classInfo.isTrait && classInfo.hasExplicitParent &&
+                !classInfo.parentTypes.empty() && parentType == classInfo.parentTypes[0] &&
+                parentIt->second.isTrait) {
+                throw CompilerError(
+                    ErrorKind::Semantic, classInfo.location,
+                    "le trait '" + parentName + "' doit être composé avec 'with'");
+            }
+            if (!classInfo.isTrait && !classInfo.typeParameters.empty()) {
+                std::set<std::string> visitingTraitAncestors;
+                if (typeHasTraitAncestor(context, parentType, visitingTraitAncestors)) {
+                    throw CompilerError(
+                        ErrorKind::Semantic, classInfo.location,
+                        "la classe générique '" + className +
+                        "' ne peut pas composer de trait en V1");
+                }
             }
             const std::size_t expectedArguments = parentIt->second.typeParameters.size();
             const std::size_t actualArguments = parentParameterization ? parentParameterization->second.size() : 0;

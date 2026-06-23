@@ -44,7 +44,7 @@ private:
     Token consume(TokenType expected, const std::string& err);
 
     void parseImport(std::unique_ptr<ProgramNode>& currentProgram);
-    void parseClassDefinition(std::unique_ptr<ProgramNode>& program);
+    void parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool isTrait = false);
     void parseObjectDefinition(std::unique_ptr<ProgramNode>& program);
     std::unique_ptr<ASTNode> parseIfExpression();
     std::unique_ptr<ASTNode> parseMatchExpression();
@@ -72,7 +72,8 @@ private:
     std::unique_ptr<ASTNode> parseExpression();
     std::unique_ptr<ASTNode> parseBlock();
     std::unique_ptr<ASTNode> parseStatement();
-    std::unique_ptr<ASTNode> parseFunctionDef(std::string clName, std::string objectName = "");
+    std::unique_ptr<ASTNode> parseFunctionDef(
+        std::string clName, std::string objectName = "", bool allowAbstractMethod = false);
     std::vector<std::unique_ptr<ASTNode>> parseArguments(
         const std::vector<std::string>& expectedTypes = {});
     std::vector<std::unique_ptr<ASTNode>> parseFunctionCallArguments(

@@ -1,0 +1,21 @@
+trait Left {
+    def label(): String = {
+        "left"
+    }
+}
+
+trait Right {
+    def label(): String = {
+        "right"
+    }
+}
+
+class Both() with Left with Right {
+    def label(value: Int): String = {
+        "other"
+    }
+}
+
+def main(): Int = {
+    0
+}

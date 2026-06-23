@@ -1,0 +1,19 @@
+trait Left {
+    def value(): Int = {
+        40
+    }
+}
+
+trait Right {
+    def value(extra: Int): Int = {
+        extra
+    }
+}
+
+class Both() with Left with Right {
+}
+
+def main(): Int = {
+    val both = new Both()
+    both.value() + both.value(2)
+}

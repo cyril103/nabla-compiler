@@ -478,6 +478,56 @@ class Child extends Base() {
 }
 ```
 
+## Traits
+
+`trait` declare un contrat nominal sans etat. Un trait peut contenir des
+signatures abstraites sans corps et des methodes concretes par defaut.
+
+```nabla
+trait Named {
+    def name(): String
+
+    def label(): String = {
+        "name:" + this.name()
+    }
+}
+
+class Person(value: String) with Named {
+    override def name(): String = {
+        value
+    }
+}
+```
+
+Les traits se composent avec `with`, sur une classe ou sur un autre trait :
+
+```nabla
+trait Sized {
+    def size(): Int
+
+    def nonEmpty(): Bool = {
+        this.size() > 0
+    }
+}
+
+trait NamedSized with Sized {
+    def name(): String
+}
+```
+
+Une classe concrete doit implementer toutes les methodes abstraites heritees
+depuis ses traits. L'implementation ou le remplacement d'une methode de trait
+doit etre marquee avec `override`, comme pour les methodes de classe heritees.
+Si deux traits apportent une methode concrete de meme signature, la classe doit
+fournir son propre `override`; Nabla ne fait pas de linearisation implicite.
+
+Limites de la version actuelle :
+
+- un trait ne peut pas etre instancie avec `new`;
+- un trait ne declare ni constructeur ni champ d'instance;
+- `super` est interdit dans un trait;
+- les traits n'ont pas d'etat runtime singleton.
+
 Quand une classe n'indique pas de parent, la racine implicite ajoutee est
 `AnyRef`. `AnyRef` herite de `Any`, et `AnyVal` herite aussi de `Any` pour les
 types primitifs builtin. La hierarchie de surface est donc :

@@ -87,6 +87,8 @@ std::unique_ptr<ProgramNode> Parser::parseProgram() {
             parseImport(program);
         } else if (peek().type == TokenType::KW_CLASS) {
             parseClassDefinition(program);
+        } else if (peek().type == TokenType::KW_TRAIT) {
+            parseClassDefinition(program, true);
         } else if (peek().type == TokenType::KW_OBJECT) {
             parseObjectDefinition(program);
         } else if (peek().type == TokenType::KW_DEF) {
@@ -144,9 +146,9 @@ void Parser::parseImport(std::unique_ptr<ProgramNode>& currentProgram) {
     for (auto& el : subProgram->elements) currentProgram->elements.push_back(std::move(el));
 }
 
-void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
-    Token classToken = consume(TokenType::KW_CLASS, "");
-    Token classNameToken = consume(TokenType::IDENTIFIER, "Nom de classe attendu");
+void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool isTrait) {
+    Token classToken = consume(isTrait ? TokenType::KW_TRAIT : TokenType::KW_CLASS, "");
+    Token classNameToken = consume(TokenType::IDENTIFIER, isTrait ? "Nom de trait attendu" : "Nom de classe attendu");
     std::string className = classNameToken.value;
     std::vector<std::string> typeParameters;
     if (peek().type == TokenType::LBRACKET) {
@@ -183,6 +185,7 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
     }
     context.classes[className].typeParameters = typeParameters;
     context.classes[className].location = classToken.location;
+    context.classes[className].isTrait = isTrait;
 
     bool hasExplicitParent = false;
     std::vector<std::string> parentConstructorArguments;
@@ -225,14 +228,20 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
         consume(TokenType::RPAREN, "");
     };
 
-    if (isTypedFieldHeader()) {
+    if (isTrait && peek().type == TokenType::LPAREN) {
+        throw CompilerError(
+            ErrorKind::Parser, peek().location,
+            "constructeur ou champs non autorisés dans le trait '" + className + "'");
+    }
+
+    if (!isTrait && isTypedFieldHeader()) {
         int offset = 8;
         parseClassFieldList(offset);
         consumedHeaderList = true;
         headerListIsTyped = true;
     }
 
-    if (peek().type == TokenType::KW_EXTENDS) {
+    if (!isTrait && peek().type == TokenType::KW_EXTENDS) {
         hasExplicitParent = true;
         consume(TokenType::KW_EXTENDS, "");
         auto [baseParentType, baseParentTypeLocation] = parseType("Type de parent attendu");
@@ -252,8 +261,21 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
         }
     }
 
+    if (peek().type == TokenType::KW_WITH) {
+        if (!isTrait && !hasExplicitParent && className != "Any" && className != "AnyVal" && className != "AnyRef") {
+            context.classes[className].parentTypes.push_back("AnyRef");
+        }
+        while (peek().type == TokenType::KW_WITH) {
+            consume(TokenType::KW_WITH, "");
+            auto [mixinType, mixinTypeLocation] = parseType("Type de mixin attendu");
+            (void) mixinTypeLocation;
+            context.classes[className].parentTypes.push_back(mixinType);
+        }
+    }
+
     context.classes[className].hasExplicitParent = hasExplicitParent;
-    if (!hasExplicitParent && className != "Any" && className != "AnyVal" && className != "AnyRef") {
+    if (!isTrait && !hasExplicitParent && context.classes[className].parentTypes.empty() &&
+        className != "Any" && className != "AnyVal" && className != "AnyRef") {
         context.classes[className].parentTypes.push_back("AnyRef");
     }
 
@@ -341,7 +363,9 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
         }
     }
 
-    if (!hasExplicitParent && !consumedHeaderList) {
+    if (isTrait) {
+        // V1 traits are stateless: no constructor signature and no instance fields.
+    } else if (!hasExplicitParent && !consumedHeaderList) {
         int offset = 8;
         parseClassFieldList(offset);
     } else if (hasExplicitParent && headerListIsTyped) {
@@ -363,9 +387,13 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program) {
         consume(TokenType::LBRACE, "");
         while (peek().type != TokenType::RBRACE) {
             if (peek().type == TokenType::KW_OVERRIDE || peek().type == TokenType::KW_DEF) {
-                program->elements.push_back(parseFunctionDef(className));
+                auto method = parseFunctionDef(className, "", isTrait);
+                if (method) program->elements.push_back(std::move(method));
             }
-            else throw CompilerError(ErrorKind::Parser, peek().location, "instruction inattendue dans la classe '" + peek().value + "'");
+            else throw CompilerError(
+                ErrorKind::Parser, peek().location,
+                std::string("instruction inattendue dans ") +
+                    (isTrait ? "le trait '" : "la classe '") + peek().value + "'");
         }
         consume(TokenType::RBRACE, "");
     }
@@ -1130,6 +1158,11 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         }
         Token superToken = consume(TokenType::KW_SUPER, "'super' invalide");
         const auto classIt = context.classes.find(currentParsingClass);
+        if (classIt != context.classes.end() && classIt->second.isTrait) {
+            throw CompilerError(
+                ErrorKind::Parser, superToken.location,
+                "'super' non autorisé dans un trait");
+        }
         if (classIt == context.classes.end() || classIt->second.parentTypes.empty() ||
             !classIt->second.hasExplicitParent) {
             throw CompilerError(
@@ -1659,7 +1692,8 @@ std::unique_ptr<ASTNode> Parser::parseExpression() {
     return parseTupleArrow();
 }
 
-std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName, std::string objectName) {
+std::unique_ptr<ASTNode> Parser::parseFunctionDef(
+    std::string clName, std::string objectName, bool allowAbstractMethod) {
     bool isOverride = false;
     if (peek().type == TokenType::KW_OVERRIDE) {
         if (clName.empty()) {
@@ -1744,8 +1778,9 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName, std::strin
     consume(TokenType::RPAREN, "");
     consume(TokenType::COLON, "");
     auto [returnType, returnTypeLocation] = parseType("Type de retour attendu");
+    const bool isAbstract = allowAbstractMethod && peek().type != TokenType::EQUAL;
     CompilerContext::FunctionSignature signature{
-        signatureParameters, returnType, typeParameters, defToken.location, returnTypeLocation, isOverride};
+        signatureParameters, returnType, typeParameters, defToken.location, returnTypeLocation, isOverride, isAbstract};
     std::string registeredFunctionName = functionName;
     if (!clName.empty()) {
         auto& overloads = context.classes[clName].methodOverloads[name];
@@ -1790,6 +1825,10 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(std::string clName, std::strin
         }
         overloads.push_back(registeredFunctionName);
         context.functions[registeredFunctionName] = signature;
+    }
+    if (isAbstract) {
+        localScopes.pop_back();
+        return nullptr;
     }
     consume(TokenType::EQUAL, ""); consume(TokenType::LBRACE, "");
     auto previousFunctionTypeParameters = currentFunctionTypeParameters;
@@ -1996,18 +2035,6 @@ std::optional<ClassMethodLookupResult> Parser::selectedOverloadedMethodCallForAr
     const auto methodCandidates = collectClassMethodLookupCandidates(context, receiverType, methodName);
     if (methodCandidates.size() <= 1) return std::nullopt;
 
-    std::set<std::string> providers;
-    for (const auto& candidate : methodCandidates) {
-        providers.insert(substituteType(candidate.ownerClassName, candidate.classSubstitution));
-    }
-    if (providers.size() > 1) {
-        throw CompilerError(
-            ErrorKind::Parser, location,
-            "conflit d'héritage pour la méthode '" + methodName + "' dans la classe '" +
-            genericBaseName(receiverType) + "': plusieurs définitions dans [" +
-            formatMethodProviders(providers) + "]");
-    }
-
     std::vector<ClassMethodLookupResult> concreteMatches;
     std::vector<ClassMethodLookupResult> genericMatches;
     for (const auto& candidate : methodCandidates) {
@@ -2040,7 +2067,19 @@ std::optional<ClassMethodLookupResult> Parser::selectedOverloadedMethodCallForAr
 
     const bool hasInferredLambdaArgument =
         std::find(argumentShape->begin(), argumentShape->end(), true) != argumentShape->end();
-    const size_t matchCount = concreteMatches.empty() ? genericMatches.size() : concreteMatches.size();
+    std::vector<ClassMethodLookupResult> matchedCandidates = concreteMatches.empty() ? genericMatches : concreteMatches;
+    std::set<std::string> providers;
+    for (const auto& candidate : matchedCandidates) {
+        providers.insert(substituteType(candidate.ownerClassName, candidate.classSubstitution));
+    }
+    if (providers.size() > 1) {
+        throw CompilerError(
+            ErrorKind::Parser, location,
+            "conflit d'héritage pour la méthode '" + methodName + "' dans la classe '" +
+            genericBaseName(receiverType) + "': plusieurs définitions dans [" +
+            formatMethodProviders(providers) + "]");
+    }
+    const size_t matchCount = matchedCandidates.size();
     if (matchCount > 1 && hasInferredLambdaArgument) {
         throw CompilerError(
             ErrorKind::Parser, location,
@@ -2079,6 +2118,7 @@ std::unique_ptr<ASTNode> Parser::parseArgument(const std::string& expectedType) 
 std::vector<std::string> Parser::expectedArgumentTypesForMethodCall(
     const std::string& receiverType, const std::string& methodName,
     const SourceLocation& location) const {
+    (void) location;
     if (receiverType == "Int" || receiverType == "Long" || receiverType == "Float" || receiverType == "Double") {
         const bool binaryMethod =
             methodName == "+" || methodName == "-" || methodName == "*" || methodName == "/" ||
@@ -2130,16 +2170,7 @@ std::vector<std::string> Parser::expectedArgumentTypesForMethodCall(
     const auto methodCandidates = collectClassMethodLookupCandidates(
         context, receiverType, methodName);
     if (methodCandidates.size() > 1) {
-        std::set<std::string> providers;
-        for (const auto& candidate : methodCandidates) {
-            providers.insert(substituteType(candidate.ownerClassName, candidate.classSubstitution));
-        }
-        if (providers.size() <= 1) return {};
-        throw CompilerError(
-            ErrorKind::Parser, location,
-            "conflit d'héritage pour la méthode '" + methodName + "' dans la classe '" +
-            genericBaseName(receiverType) + "': plusieurs définitions dans [" +
-            formatMethodProviders(providers) + "]");
+        return {};
     }
     if (methodCandidates.empty()) return {};
     const auto& methodLookup = methodCandidates.front();

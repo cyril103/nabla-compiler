@@ -743,6 +743,23 @@ private:
         return true;
     }
 
+    bool isAbstractTraitMethod(const std::string& className, const std::string& methodName) const {
+        const auto parameterizedMethod = parameterizedTypeFromName(methodName);
+        const std::string methodBaseName = parameterizedMethod ? parameterizedMethod->first : methodName;
+        auto classIt = context.classes.find(genericBaseName(className));
+        if (classIt == context.classes.end() || !classIt->second.isTrait) return false;
+        auto methodIt = classIt->second.methods.find(methodBaseName);
+        return methodIt != classIt->second.methods.end() && methodIt->second.isAbstract;
+    }
+
+    void emitTraitAbstractDispatchFallback(const std::string& className, const std::string& methodName) {
+        if (isAbstractTraitMethod(className, methodName)) {
+            out << "    jmp Runtime_trait_dispatch_error\n";
+            return;
+        }
+        out << "    call " << asmFunctionName(methodFunctionName(className, methodName)) << "\n";
+    }
+
     std::vector<DynamicDispatchTarget> dynamicDispatchTargets(
         const std::string& className, const std::string& methodName) const {
         std::vector<DynamicDispatchTarget> targets;
@@ -754,6 +771,7 @@ private:
         std::set<std::pair<std::string, std::string>> seen;
         for (const auto& [runtimeClassName, runtimeClass] : context.classes) {
             if (runtimeClassName == staticClassName) continue;
+            if (runtimeClass.isTrait) continue;
             if (!runtimeClass.typeParameters.empty()) continue;
             if (!isTypeAssignable(context, runtimeClassName, className)) continue;
 
@@ -763,6 +781,11 @@ private:
             if (targetOwnerName == staticClassName) continue;
             auto targetOwnerIt = context.classes.find(targetOwnerName);
             if (targetOwnerIt == context.classes.end()) continue;
+            const bool staticOwnerIsTrait = [&]() {
+                auto staticOwnerIt = context.classes.find(staticClassName);
+                return staticOwnerIt != context.classes.end() && staticOwnerIt->second.isTrait;
+            }();
+            if (staticOwnerIsTrait && targetOwnerIt->second.isTrait) continue;
             auto targetMethodIt = targetOwnerIt->second.methods.find(methodBaseName);
             if (targetMethodIt == targetOwnerIt->second.methods.end()) continue;
             if (!targetMethodIt->second.typeParameters.empty() && !parameterizedMethod) continue;
@@ -1122,7 +1145,7 @@ private:
         } else if (allowDynamicDispatch) {
             const auto targets = dynamicDispatchTargets(className, methodName);
             if (targets.empty()) {
-                out << "    call " << asmFunctionName(methodFunctionName(instruction.operation)) << "\n";
+                emitTraitAbstractDispatchFallback(className, methodName);
             } else {
                 const std::string dispatchPrefix =
                     ".L_dispatch_" + asmSymbolPart(function.name) + "_" +
@@ -1141,7 +1164,7 @@ private:
                     out << "    jmp " << doneLabel << "\n";
                 }
                 out << fallbackLabel << ":\n";
-                out << "    call " << asmFunctionName(methodFunctionName(instruction.operation)) << "\n";
+                emitTraitAbstractDispatchFallback(className, methodName);
                 out << doneLabel << ":\n";
             }
         } else {

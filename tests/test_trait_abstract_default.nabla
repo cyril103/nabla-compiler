@@ -1,0 +1,22 @@
+trait Named {
+    def name(): String
+
+    def label(): String = {
+        "name:" + this.name()
+    }
+}
+
+class Person(value: String) with Named {
+    override def name(): String = {
+        value
+    }
+}
+
+def main(): Int = {
+    val person: Named = new Person("ada")
+    if person.label() == "name:ada" {
+        42
+    } else {
+        1
+    }
+}

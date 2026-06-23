@@ -1,0 +1,30 @@
+trait Sized {
+    def size(): Int
+
+    def nonEmpty(): Bool = {
+        this.size() > 0
+    }
+}
+
+trait NamedSized with Sized {
+    def name(): String
+}
+
+class Box(value: String, count: Int) with NamedSized {
+    override def name(): String = {
+        value
+    }
+
+    override def size(): Int = {
+        count
+    }
+}
+
+def main(): Int = {
+    val box: NamedSized = new Box("items", 3)
+    if box.nonEmpty() && box.name() == "items" {
+        42
+    } else {
+        1
+    }
+}

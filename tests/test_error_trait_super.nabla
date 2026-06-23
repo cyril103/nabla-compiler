@@ -1,0 +1,11 @@
+trait Base {
+    def label(): String = {
+        "base"
+    }
+}
+
+trait Child with Base {
+    override def label(): String = {
+        super.label()
+    }
+}

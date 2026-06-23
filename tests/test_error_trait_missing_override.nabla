@@ -1,0 +1,13 @@
+trait Named {
+    def name(): String
+}
+
+class Person(value: String) with Named {
+    def name(): String = {
+        value
+    }
+}
+
+def main(): Int = {
+    0
+}

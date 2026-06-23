@@ -1,0 +1,1 @@
+tests/test_error_trait_super.nabla:9:9: parser error: 'super' non autorisé dans un trait

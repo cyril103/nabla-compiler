@@ -1,0 +1,8 @@
+trait Named {
+    def name(): String
+}
+
+def main(): Int = {
+    val named = new Named()
+    0
+}

@@ -1,0 +1,26 @@
+trait Left {
+    def label(): String = {
+        "left"
+    }
+}
+
+trait Right {
+    def label(): String = {
+        "right"
+    }
+}
+
+class Both() with Left with Right {
+    override def label(): String = {
+        "both"
+    }
+}
+
+def main(): Int = {
+    val both: Left = new Both()
+    if both.label() == "both" {
+        42
+    } else {
+        1
+    }
+}
