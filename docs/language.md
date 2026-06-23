@@ -515,6 +515,18 @@ trait NamedSized with Sized {
 }
 ```
 
+Une classe generique peut composer un trait non generique. Le type du trait
+reste nominal et les appels via une valeur du trait redispatchent vers
+l'implementation de la classe concrete :
+
+```nabla
+class Box[T](value: T) with Sized {
+    override def size(): Int = {
+        1
+    }
+}
+```
+
 Une classe concrete doit implementer toutes les methodes abstraites heritees
 depuis ses traits. L'implementation ou le remplacement d'une methode de trait
 doit etre marquee avec `override`, comme pour les methodes de classe heritees.

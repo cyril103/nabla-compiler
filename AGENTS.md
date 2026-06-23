@@ -415,8 +415,9 @@ Limites importantes :
   l'implementation des methodes abstraites dans les classes concretes, exige
   `override` pour les implementations/remplacements de methodes de trait, et
   rejette les conflits de defaults multiples sans override explicite. Les traits
-  ne sont pas instanciables et ne declarent ni champs, ni constructeurs, ni
-  appels `super`.
+  non generiques peuvent etre implementes par des classes generiques et
+  redispatchent correctement via le type du trait. Les traits ne sont pas
+  instanciables et ne declarent ni champs, ni constructeurs, ni appels `super`.
 - Les collections basées sur `Any` utilisent `==` pour l'égalité et
   `hashCode()` pour l'index interne. `==` / `!=` sur objets passent par
   `Any.equals(...)`, et `toString()`, `hashCode()` et `equals(...)`
@@ -570,6 +571,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   methodes par defaut, composition par `with`, obligation d'implementation par
   les classes concretes, `override` obligatoire et rejet des conflits de
   defaults.
+- [x] Autoriser les classes generiques a implementer des traits non generiques,
+  avec dispatch des methodes abstraites et des defaults via le type du trait.
 
 - [x] Formaliser `Int`, `Bool`, `Char`, `String`, `IntArray`, les types fonction canoniques et
   les types de classes.
@@ -815,6 +818,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `src/ast.cpp`, `src/ir_codegen.cpp`, `tests/test_trait_*.nabla`,
     `tests/test_error_trait_*.nabla`, `docs/language.md`, `docs/roadmap.md`,
     `AGENTS.md`.
+- `local` - Autoriser les classes generiques comme implementors de traits non
+  generiques, en supprimant le diagnostic temporaire V1 et en couvrant le
+  dispatch abstrait et les methodes par defaut sur type trait.
+  - Fichiers / tests associes: `src/semantic_analyzer.cpp`,
+    `tests/test_trait_generic_class_abstract.nabla`,
+    `tests/test_trait_generic_class_default_dispatch.nabla`,
+    `docs/language.md`, `docs/roadmap.md`, `AGENTS.md`.
 - `local` - Ajouter la creation naturelle `Option.none[T]()` et la methode
   `Map.getOption(key)` sans valeur de secours, tout en conservant les anciennes
   formes avec `default` par compatibilite.

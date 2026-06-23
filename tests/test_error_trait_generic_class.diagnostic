@@ -1,1 +1,0 @@
-tests/test_error_trait_generic_class.nabla:5:1: semantic error: la classe générique 'Box' ne peut pas composer de trait en V1

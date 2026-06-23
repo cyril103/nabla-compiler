@@ -30,30 +30,6 @@ std::string methodConflictKey(
     return key;
 }
 
-bool typeHasTraitAncestor(
-    const CompilerContext& context,
-    const std::string& typeName,
-    std::set<std::string>& visiting) {
-    const std::string baseName = genericBaseName(typeName);
-    if (visiting.count(baseName)) return false;
-    auto classIt = context.classes.find(baseName);
-    if (classIt == context.classes.end()) return false;
-    if (classIt->second.isTrait) return true;
-    visiting.insert(baseName);
-    std::map<std::string, std::string> substitution;
-    if (auto genericSubstitution = genericSubstitutionFor(context, typeName)) {
-        substitution = *genericSubstitution;
-    }
-    for (const auto& parentType : classIt->second.parentTypes) {
-        if (typeHasTraitAncestor(context, substituteType(parentType, substitution), visiting)) {
-            visiting.erase(baseName);
-            return true;
-        }
-    }
-    visiting.erase(baseName);
-    return false;
-}
-
 std::string formatMethodProviders(const std::set<std::string>& providers) {
     std::string message;
     bool first = true;
@@ -623,15 +599,6 @@ void SemanticAnalyzer::validateParentTypes() const {
                 throw CompilerError(
                     ErrorKind::Semantic, classInfo.location,
                     "le trait '" + parentName + "' doit être composé avec 'with'");
-            }
-            if (!classInfo.isTrait && !classInfo.typeParameters.empty()) {
-                std::set<std::string> visitingTraitAncestors;
-                if (typeHasTraitAncestor(context, parentType, visitingTraitAncestors)) {
-                    throw CompilerError(
-                        ErrorKind::Semantic, classInfo.location,
-                        "la classe générique '" + className +
-                        "' ne peut pas composer de trait en V1");
-                }
             }
             const std::size_t expectedArguments = parentIt->second.typeParameters.size();
             const std::size_t actualArguments = parentParameterization ? parentParameterization->second.size() : 0;

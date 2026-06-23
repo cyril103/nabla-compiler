@@ -1,0 +1,14 @@
+trait Sized {
+    def size(): Int
+}
+
+class Box[T](value: T, storedSize: Int) with Sized {
+    override def size(): Int = {
+        storedSize
+    }
+}
+
+def main(): Int = {
+    val sized: Sized = new Box[String]("payload", 42)
+    sized.size()
+}
