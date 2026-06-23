@@ -772,7 +772,6 @@ private:
         for (const auto& [runtimeClassName, runtimeClass] : context.classes) {
             if (runtimeClassName == staticClassName) continue;
             if (runtimeClass.isTrait) continue;
-            if (!runtimeClass.typeParameters.empty()) continue;
             if (!isTypeAssignable(context, runtimeClassName, className)) continue;
 
             auto methodLookup = resolveClassMethodInHierarchy(context, runtimeClassName, methodBaseName);

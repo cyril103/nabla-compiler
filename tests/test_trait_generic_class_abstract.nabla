@@ -1,0 +1,17 @@
+trait Sized {
+    def size(): Int
+}
+
+class Box[T](value: T) with Sized {
+    override def size(): Int = {
+        21
+    }
+}
+
+def doubleSize(s: Sized): Int = {
+    s.size() + s.size()
+}
+
+def main(): Int = {
+    doubleSize(new Box[Int](7))
+}

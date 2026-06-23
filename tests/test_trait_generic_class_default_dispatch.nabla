@@ -1,0 +1,22 @@
+trait Sized {
+    def size(): Int
+
+    def nonEmpty(): Bool = {
+        this.size() != 0
+    }
+}
+
+class Box[T](value: T) with Sized {
+    override def size(): Int = {
+        1
+    }
+}
+
+def main(): Int = {
+    val sized: Sized = new Box[String]("x")
+    if sized.nonEmpty() {
+        42
+    } else {
+        0
+    }
+}
