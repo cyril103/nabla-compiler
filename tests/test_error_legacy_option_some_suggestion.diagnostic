@@ -1,0 +1,1 @@
+tests/test_error_legacy_option_some_suggestion.nabla:4:5: semantic error: fonction inconnue: OptionSome. Nom recommande: 'Option.some'

@@ -1125,6 +1125,14 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   - Fichiers / tests associés: `stdlib/core/option_int.nabla`,
     `stdlib/io.nabla`, `stdlib/math.nabla`, `stdlib/strings.nabla`,
     `docs/stdlib/`, `docs/roadmap.md`, `make stdlib-docs`.
+- `local` - Etendre les suggestions de diagnostics stdlib vers les compagnons
+  publics pour les formes compatibilite manquantes `OptionSome`, `OptionNone`
+  et `ArrayRangeUntil`, avec tests d'erreur dédiés.
+  - Fichiers / tests associés: `src/compiler_context.hpp`,
+    `tests/test_error_legacy_option_some_suggestion.nabla`,
+    `tests/test_error_legacy_option_none_suggestion.nabla`,
+    `tests/test_error_legacy_array_range_until_suggestion.nabla`,
+    `docs/roadmap.md`, `make all-tests`.
 - `local` - Ameliorer les diagnostics de compatibilite stdlib: les appels via
   anciens noms (`ArrayFill`, `SetFromArray`, `SetEmpty`, `optionSome`) gardent
   le nom source dans les erreurs meme apres resolution vers un helper interne,

@@ -1,0 +1,5 @@
+import core.option
+
+def main(): Int = {
+    if OptionNone[Int]().isEmpty() { 0 } else { 1 }
+}
