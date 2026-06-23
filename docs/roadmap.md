@@ -22,8 +22,8 @@ pour reprendre facilement apres une pause.
   d'implementation dans les classes concretes et rejet des conflits de defaults
   sans `override` explicite. Les classes generiques peuvent implementer des
   traits non generiques, avec dispatch via le type du trait. La stdlib expose
-  maintenant le trait public minimal `Sized`, implemente par `ArrayObject[T]`,
-  `Set[T]` et `Map[K, V]`.
+  maintenant le trait public minimal `Sized`, visible via les collections
+  publiques qui exposent `size()`, `isEmpty()` et `nonEmpty()`.
   La conversion `toString()` est désormais disponible de façon uniforme pour les
   types primitifs usuels (`Int`, `Long`, `Float`, `Double`, `Bool`, `Char`) au niveau du
   backend runtime, y compris via un paramètre `Any`/`AnyVal` de fonction/méthode
@@ -32,6 +32,8 @@ pour reprendre facilement apres une pause.
   - collections typées et facade `Array[T]`
   - `collections.set` avec `Set[T]`, `add`, `remove`, `union`, `intersect`,
     `difference`
+  - `collections.map` avec `Map[K, V]`, recherche optionnelle, mises a jour
+    immutables et conversions cle/valeur
   - `Option[T]`
   - operations `String`
   - I/O console et fichiers texte
@@ -66,8 +68,9 @@ cas" en "langage ou l'utilisateur sait naturellement quelle API employer".
 Le cap prioritaire est donc la coherence de surface, pas l'accumulation de
 features.
 
-- API publique cible : `Array[T]`, `Option[T]`, `Set[T]`, `String`, classes,
-  methodes, lambdas et modules standards documentes.
+- API publique cible : `Array[T]`, `Option[T]`, `Set[T]`, `Map[K, V]`,
+  `Sized`, `String`, classes, methodes, lambdas et modules standards
+  documentes.
 - Details a cacher ou marquer internes : `IntArray`, `LongArray`,
   `FloatArray`, `DoubleArray`, `BoolArray`, `ObjectArray[T]`,
   `ArrayObject[T]`, helpers `arrayBase...` et fonctions specialisees de pont.
@@ -111,8 +114,8 @@ Actions recommandees :
     deja resolus; commencer la migration publique de la stdlib vers les noms
     surcharges idiomatiques et garder les diagnostics d'ambiguite riches si la
     resolution devient moins stricte que l'exact match.
-11. Reporter `Result[T]`, `Map[K,V]`, variance avancee et GC tant que cette
-   surface n'est pas propre.
+11. Reporter `Result[T]`, variance avancee et GC tant que cette surface n'est
+   pas propre.
 
 ### Revue de code (16/06/2026, corrigée)
 

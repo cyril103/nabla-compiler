@@ -340,10 +340,9 @@ object Set {
     /// @signature def Set.fromArray[T](values: Array[T]): Set[T]
     /// @status Recommandee
     ///
-    /// Pour Array[Int], Array[Long], Array[Float], Array[Double] et
-    /// Array[Bool], le compilateur redirige ce nom vers la specialisation
-    /// adaptee. Pour les autres types, Array[T] est represente par
-    /// ArrayObject[T].
+    /// Le compilateur accepte les facades Array[T] usuelles et choisit la
+    /// representation adaptee. Le code utilisateur n'a pas a nommer les
+    /// tableaux bas niveau pour construire un Set.
     def fromArray[T](values: ArrayObject[T]): Set[T] = {
         setFromArray[T](values)
     }
@@ -355,9 +354,9 @@ object Set {
 ///
 /// Preferer Set.fromArray[T](values) dans le nouveau code.
 ///
-/// Pour Array[Int], Array[Long], Array[Float], Array[Double] et Array[Bool],
-/// le compilateur redirige ce nom vers la specialisation adaptee. Pour les
-/// autres types, Array[T] est represente par ArrayObject[T].
+/// Le compilateur accepte les facades Array[T] usuelles et choisit la
+/// representation adaptee. Le code utilisateur n'a pas a nommer les tableaux
+/// bas niveau pour construire un Set.
 def SetFromArray[T](values: ArrayObject[T]): Set[T] = {
     Set.fromArray[T](values)
 }

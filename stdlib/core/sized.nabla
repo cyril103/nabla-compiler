@@ -1,5 +1,5 @@
 /// @module Sized
-/// Trait pour les types ayant une taille entiere.
+/// Trait public minimal pour les collections ayant une taille logique.
 
 /// Type ayant une taille entiere.
 /// @signature trait Sized

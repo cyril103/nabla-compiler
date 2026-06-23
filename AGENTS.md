@@ -42,7 +42,7 @@ features visibles.
 Principes de direction :
 
 - preferer une API publique simple et uniforme : `Array[T]`, `Option[T]`,
-  `Set[T]`, `String`, classes, methodes, lambdas;
+  `Set[T]`, `Map[K, V]`, `Sized`, `String`, classes, methodes, lambdas;
 - cacher progressivement les details d'implementation (`IntArray`,
   `LongArray`, `ObjectArray[T]`, `ArrayObject[T]`, helpers `arrayBase...`,
   fonctions specialisees internes) derriere des facades documentees;
@@ -64,15 +64,15 @@ Principes de direction :
 
 Priorites structurantes :
 
-1. Stabiliser l'API publique de `Array[T]`, `Option[T]` et `Set[T]` en suivant
-   `docs/stdlib-api.md`.
+1. Stabiliser l'API publique de `Array[T]`, `Option[T]`, `Set[T]`,
+   `Map[K, V]` et `Sized` en suivant `docs/stdlib-api.md`.
 2. Classer la stdlib en surface publique et modules/helpers internes dans
    `docs/stdlib-api.md` avant d'ajouter de nouveaux symboles.
 3. Maintenir la specification vivante `docs/internals.md` pour les types,
    le runtime et les regles de typage.
 4. Maintenir le check CI qui verifie que `make stdlib-docs` ne laisse aucun diff.
 5. Produire des exemples idiomatiques n'utilisant pas les API internes.
-6. Reporter les grosses nouvelles structures (`Result[T]`, `Map[K,V]`, GC,
+6. Reporter les grosses nouvelles structures (`Result[T]`, GC,
    variance avancee) tant que l'ergonomie des collections et options n'est pas
    stabilisee.
 
@@ -268,7 +268,9 @@ Le pipeline implemente actuellement :
 - module de bibliotheque standard `collections.object_array` avec `ObjectArray[T]`,
   `ArrayObject[T]`, `objectArrayShuffle`, `objectArrayMkString`,
   `objectStringArrayMkString` (compatibilité) et `ArrayObject[T].shuffle`;
-  `ArrayObject[T]` implemente aussi le trait public `Sized`.
+  `ArrayObject[T]` implemente aussi le trait public `Sized`, mais reste une
+  representation/compatibilite a eviter dans les exemples applicatifs quand
+  `Array[T]` suffit.
 - module de bibliotheque standard `collections.set` avec `Set[T]`,
   `Set.empty[T]`, `Set.fromArray[T]`, `SetEmpty[T]`, `SetFromArray[T]`, `add`,
   `remove`, `union`, `intersect`, `difference`, `setEmpty`, `setFromArray` et
@@ -295,6 +297,12 @@ Le pipeline implemente actuellement :
   `flatMapObject[U]` produisent
   `ArrayObject[U]` quand la sortie ne reste pas dans la meme primitive
   specialisee;
+- documentation utilisateur recentree sur `Array[T]`, `Option[T]`, `Set[T]`,
+  `Map[K, V]` et `Sized` comme surface recommandee; `ArrayObject[T]`,
+  `ArrayInt` et les tableaux bruts sont decrits comme compatibilite ou details
+  de representation, y compris pour les retours actuels de `String.split`,
+  `String.toCharArray`, `Set.toArray`, `Map.keys`, `Map.values` et
+  `Map.toArray`;
 - collection native `ObjectArray[T]` stockant des slots runtime de 64 bits, avec
   facade standard `ArrayObject[T]`, `objectArrayFill[T]`,
   `objectArrayMap[T, U]`, `objectArrayFilter[T]`, `objectArrayFold[T, U]`,
@@ -555,6 +563,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   et `Map.getOption(default, key)` par compatibilite; couvert par
   `tests/test_stdlib_option_none_empty.nabla` et
   `tests/test_stdlib_map_get_option_empty.nabla`.
+- [x] Clarifier la documentation utilisateur et la reference stdlib autour de
+  la surface publique `Array[T]`, `Option[T]`, `Set[T]`, `Map[K, V]` et
+  `Sized`, en classant `ArrayObject[T]`, `ArrayInt` et les tableaux bruts comme
+  compatibilite ou details de representation.
 
 ### P2 - Héritage Et Mixins
 
@@ -819,6 +831,19 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Nettoyer la documentation publique stdlib/utilisateur apres
+  l'ajout de `Sized`: `docs/stdlib-api.md`, `docs/language.md` et
+  `docs/roadmap.md` presentent maintenant `Array[T]`, `Option[T]`, `Set[T]`,
+  `Map[K, V]` et `Sized` comme surface recommandee; les facades specialisees,
+  `ArrayObject[T]` et les tableaux bruts sont decrits comme compatibilite ou
+  details de representation. Les commentaires `///` de `Array`, `Set`, `Map`
+  et `Sized` ont ete ajustes pour regenerer la reference HTML sans changer le
+  comportement.
+  - Fichiers / tests associes: `docs/stdlib-api.md`, `docs/language.md`,
+    `docs/roadmap.md`, `stdlib/collections/array.nabla`,
+    `stdlib/collections/set.nabla`, `stdlib/collections/map.nabla`,
+    `stdlib/core/sized.nabla`, `docs/stdlib/`, `AGENTS.md`,
+    `make stdlib-docs`.
 - `local` - Ajouter le trait stdlib public `Sized` et l'appliquer strictement a
   `ArrayObject[T]`, `Set[T]` et `Map[K, V]`, avec tests TDD de dispatch via le
   type du trait.

@@ -36,9 +36,6 @@ helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
   - `filter(...)`
   - `foreach(...)`
   - `orElse(...)`
-- Constructeurs/fabriques :
-  - `optionSome[T](value)`, `Option.none[T](default)` et
-    `optionNone[T](default)` restent disponibles par compatibilite.
 - `OptionInt` reste public tant que les generiques primitifs ne couvrent pas
   totalement les besoins de performance/representation.
 
@@ -53,13 +50,6 @@ helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
 - `Array.tabulate[T](size, f)`
 - `Array.range(size)`
 - `Array.rangeUntil(start, until)`
-- Facades specialisees exposees par compatibilite utile :
-  - `ArrayInt`
-  - `ArrayLong`
-  - `ArrayFloat`
-  - `ArrayDouble`
-  - `ArrayBool`
-  - `ArrayObject[T]`
 - `Set[T]`
 - Constructeurs/fabriques :
   - `Set(value1, value2, ...)`
@@ -90,6 +80,11 @@ Les exemples doivent privilegier `Array[T]` et les fonctions de haut niveau. Les
 facades specialisees restent acceptables dans les tests de backend/runtime et les
 zones de stdlib ou le type brut compte vraiment.
 
+Dans la documentation utilisateur, `ArrayObject[T]` et `ArrayInt` /
+`ArrayLong` / `ArrayFloat` / `ArrayDouble` / `ArrayBool` doivent etre presentes
+comme formes de compatibilite ou representations actuelles, pas comme choix
+idiomatiques.
+
 ### Strings
 
 - Methodes natives de `String` documentees dans `docs/language.md`.
@@ -99,6 +94,13 @@ zones de stdlib ou le type brut compte vraiment.
 
 La semantique actuelle est byte-based/ASCII ; le code utilisateur ne doit pas
 supposer une prise en charge Unicode complete.
+
+`String.toCharArray()` et `String.split(...)` retournent aujourd'hui une
+representation `ArrayObject[...]`. C'est un detail de representation visible
+tant que la facade `Array[T]` n'efface pas tous les retours specialises ; les
+exemples doivent continuer a manipuler ces valeurs par les operations communes
+de tableau (`size`, `get`, `mkString`, `foreach`, etc.) et preferer `Array[T]`
+pour construire de nouveaux tableaux.
 
 ### IO
 
@@ -174,6 +176,9 @@ nouveaux exemples devraient preferer la surface publique ci-dessus :
 - Compatibilite `randomSeedTime()` quand `randomSeedNow()` exprime mieux
   l'intention.
 - Compatibilite `randomIntInRange(...)` quand `randomIntRange(...)` suffit.
+- Compatibilite `optionSome[T](value)`, `Option.none[T](default)` et
+  `optionNone[T](default)` quand `Option.some[T](value)` ou `Option.none[T]()`
+  suffit.
 - Compatibilite `Map.getOption(default, key)` quand `Map.getOption(key)` suffit.
 
 ## Details Internes
@@ -214,6 +219,7 @@ Pour Nabla 0.1, la priorite est une surface petite et coherent :
 
 - `Array[T]` pour le code utilisateur ;
 - `Option[T]` pour les absences de valeur ;
+- `Set[T]`, `Map[K, V]` et le trait `Sized` pour les collections publiques ;
 - `String`, `Math`, `IO`, `Random` pour les programmes simples ;
 - classes, heritage, mixins et lambdas comme modele principal de composition.
 
