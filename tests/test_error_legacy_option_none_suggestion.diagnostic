@@ -1,0 +1,1 @@
+tests/test_error_legacy_option_none_suggestion.nabla:4:8: semantic error: fonction inconnue: OptionNone. Nom recommande: 'Option.none'

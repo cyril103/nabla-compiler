@@ -256,7 +256,7 @@ inline std::optional<std::string> recommendedStdlibFunctionName(const std::strin
         return "Array.fill";
     }
     if (name == "ArrayRange" || name == "arrayIntRange") return "Array.range";
-    if (name == "arrayIntRangeUntil") return "Array.rangeUntil";
+    if (name == "ArrayRangeUntil" || name == "arrayIntRangeUntil") return "Array.rangeUntil";
     if (name == "SetEmpty" || name == "setEmpty") return "Set.empty";
     if (name == "SetFromArray" || name == "setFromArray" ||
         name == "setFromArrayInt" || name == "setFromArrayLong" ||
@@ -264,8 +264,8 @@ inline std::optional<std::string> recommendedStdlibFunctionName(const std::strin
         name == "setFromArrayBool") {
         return "Set.fromArray";
     }
-    if (name == "optionSome") return "Option.some";
-    if (name == "optionNone") return "Option.none";
+    if (name == "OptionSome" || name == "optionSome") return "Option.some";
+    if (name == "OptionNone" || name == "optionNone") return "Option.none";
     return std::nullopt;
 }
 
