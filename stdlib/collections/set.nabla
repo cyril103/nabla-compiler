@@ -7,6 +7,7 @@
 /// compatibilite, mais ne sont plus l'API recommandee pour du code applicatif.
 
 import collections.object_array
+import core.sized
 import collections.int_array
 import collections.long_array
 import collections.float_array
@@ -377,16 +378,16 @@ def SetEmpty[T](): Set[T] = {
 /// retournent un nouvel ensemble. L'instance d'origine n'est pas modifiee.
 /// L'egalite repose sur == et l'index interne utilise hashCode(), ce qui permet
 /// aux overrides utilisateur de participer a la deduplication.
-class Set[T](values: ArrayObject[T]) {
-    def size(): Int = {
+class Set[T](values: ArrayObject[T]) with Sized {
+    override def size(): Int = {
         values.size()
     }
 
-    def isEmpty(): Bool = {
+    override def isEmpty(): Bool = {
         values.isEmpty()
     }
 
-    def nonEmpty(): Bool = {
+    override def nonEmpty(): Bool = {
         values.nonEmpty()
     }
 

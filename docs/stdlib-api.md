@@ -21,6 +21,10 @@ helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
 
 ### Core
 
+- `Sized`
+  - `size()`
+  - `isEmpty()`
+  - `nonEmpty()`
 - `Option[T]`
   - `Option.some[T](value)`
   - `Option.none[T]()`
@@ -77,6 +81,10 @@ helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
   - `mapValues[U](default, f)`
   - `filterKeys(predicate)`
   - `mkString(separator)` et `toString()`
+
+`ArrayObject[T]`, `Set[T]` et `Map[K, V]` implementent `Sized` pour permettre
+les appels communs `size()`, `isEmpty()` et `nonEmpty()` via un contrat nominal
+minimal.
 
 Les exemples doivent privilegier `Array[T]` et les fonctions de haut niveau. Les
 facades specialisees restent acceptables dans les tests de backend/runtime et les

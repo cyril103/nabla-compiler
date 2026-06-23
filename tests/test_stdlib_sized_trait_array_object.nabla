@@ -1,0 +1,16 @@
+import core.sized
+import collections.array
+
+def main(): Int = {
+    val labels: Sized = Array.fill[String](3, "tag")
+
+    if labels.size() != 3 {
+        1
+    } else if labels.isEmpty() {
+        2
+    } else if !labels.nonEmpty() {
+        3
+    } else {
+        42
+    }
+}

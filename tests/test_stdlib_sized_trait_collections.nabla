@@ -1,0 +1,34 @@
+import core.sized
+import collections.set
+import collections.map
+
+def sizedScore(value: Sized): Int = {
+    var score = value.size()
+    if value.isEmpty() {
+        score = score + 10
+    } else {
+        score = score + 20
+    }
+    if value.nonEmpty() {
+        score = score + 100
+    } else {
+        score = score + 200
+    }
+    score
+}
+
+def main(): Int = {
+    val names: Sized = Set("alice", "bob", "alice")
+    val emptyScores: Sized = Map.empty[String, Int]()
+    val scores: Sized = Map("alice" -> 10, "bob" -> 20)
+
+    if sizedScore(names) != 122 {
+        1
+    } else if sizedScore(emptyScores) != 210 {
+        2
+    } else if sizedScore(scores) != 122 {
+        3
+    } else {
+        42
+    }
+}
