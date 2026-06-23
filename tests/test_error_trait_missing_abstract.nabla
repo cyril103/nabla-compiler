@@ -1,0 +1,10 @@
+trait Named {
+    def name(): String
+}
+
+class Person() with Named {
+}
+
+def main(): Int = {
+    0
+}

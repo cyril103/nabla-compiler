@@ -1,0 +1,1 @@
+tests/test_error_trait_field.nabla:1:10: parser error: constructeur ou champs non autorisés dans le trait 'Bad'

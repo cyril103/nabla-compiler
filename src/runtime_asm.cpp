@@ -67,6 +67,10 @@ void emit(std::ostream& out) {
         << "    mov rdi, 253\n"
         << "    mov rax, 60\n"
         << "    syscall\n\n";
+    out << "Runtime_trait_dispatch_error:\n"
+        << "    mov rdi, 251\n"
+        << "    mov rax, 60\n"
+        << "    syscall\n\n";
     out << "Runtime_division_by_zero:\n"
         << "    mov rdi, 252\n"
         << "    mov rax, 60\n"

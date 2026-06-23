@@ -1,0 +1,1 @@
+tests/test_error_trait_instantiate.nabla:6:17: semantic error: trait non instanciable dans 'new': Named

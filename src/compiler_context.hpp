@@ -31,6 +31,7 @@ struct CompilerContext {
         SourceLocation location;
         SourceLocation returnTypeLocation;
         bool isOverride = false;
+        bool isAbstract = false;
     };
 
     struct FieldInfo {
@@ -47,6 +48,7 @@ struct CompilerContext {
         std::vector<std::string> parentConstructorArguments;
         std::vector<FieldInfo> inheritedConstructorSignature;
         bool hasExplicitParent = false;
+        bool isTrait = false;
         std::vector<std::string> typeParameters;
         SourceLocation location;
     };

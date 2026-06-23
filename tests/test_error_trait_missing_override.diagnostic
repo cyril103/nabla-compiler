@@ -1,0 +1,1 @@
+tests/test_error_trait_missing_override.nabla:6:5: semantic error: override obligatoire pour 'Person.name' : utilisez 'override' pour redéfinir une méthode héritée

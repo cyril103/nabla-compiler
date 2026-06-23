@@ -409,6 +409,14 @@ Limites importantes :
   Les constructeurs hérités peuvent désormais être exposés avec une signature
   typée dans `extends Parent(...)`: le préfixe reprend les champs du parent
   direct, et le suffixe déclare les champs propres de l'enfant.
+- Les traits riches V1 existent comme contrats nominaux sans etat: `trait`
+  accepte des signatures abstraites sans corps et des methodes concretes par
+  defaut, se compose par `with` dans les classes et les traits, impose
+  l'implementation des methodes abstraites dans les classes concretes, exige
+  `override` pour les implementations/remplacements de methodes de trait, et
+  rejette les conflits de defaults multiples sans override explicite. Les traits
+  ne sont pas instanciables et ne declarent ni champs, ni constructeurs, ni
+  appels `super`.
 - Les collections basées sur `Any` utilisent `==` pour l'égalité et
   `hashCode()` pour l'index interne. `==` / `!=` sur objets passent par
   `Any.equals(...)`, et `toString()`, `hashCode()` et `equals(...)`
@@ -558,6 +566,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Formaliser la résolution des conflits hérités pour les champs et méthodes
   provenant d'instances génériques distinctes du même ancêtre.
 - [x] Formaliser la résolution des membres hérités (champs + ordre de résolution) pour supprimer les ambiguïtés restantes.
+- [x] Ajouter les traits riches V1: declarations `trait`, signatures abstraites,
+  methodes par defaut, composition par `with`, obligation d'implementation par
+  les classes concretes, `override` obligatoire et rejet des conflits de
+  defaults.
 
 - [x] Formaliser `Int`, `Bool`, `Char`, `String`, `IntArray`, les types fonction canoniques et
   les types de classes.
@@ -794,6 +806,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Ajouter les traits riches V1 au langage, avec tests TDD couvrant les
+  signatures abstraites, methodes par defaut, composition `with`, interdiction
+  de l'instanciation/champs/constructeurs/`super`, obligation d'implementation
+  et conflits de defaults.
+  - Fichiers / tests associés: `src/lexer.hpp`, `src/parser.cpp`,
+    `src/parser.hpp`, `src/compiler_context.hpp`, `src/semantic_analyzer.cpp`,
+    `src/ast.cpp`, `src/ir_codegen.cpp`, `tests/test_trait_*.nabla`,
+    `tests/test_error_trait_*.nabla`, `docs/language.md`, `docs/roadmap.md`,
+    `AGENTS.md`.
 - `local` - Ajouter la creation naturelle `Option.none[T]()` et la methode
   `Map.getOption(key)` sans valeur de secours, tout en conservant les anciennes
   formes avec `default` par compatibilite.

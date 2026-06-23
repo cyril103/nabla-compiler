@@ -549,6 +549,9 @@ void NewNode::validateSemantics(CompilerContext& context) {
     if (classIt == context.classes.end()) {
         semanticError("classe inconnue dans 'new': " + className);
     }
+    if (classIt->second.isTrait) {
+        semanticError("trait non instanciable dans 'new': " + className);
+    }
     std::map<std::string, std::string> substitution;
     if (auto genericSubstitution = genericSubstitutionFor(context, className)) {
         substitution = *genericSubstitution;
@@ -1063,27 +1066,6 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
     }
 
     const auto methodCandidates = collectClassMethodLookupCandidates(context, receiverType, methodName);
-    if (methodCandidates.size() > 1) {
-        std::set<std::string> providers;
-        for (const auto& candidate : methodCandidates) {
-            providers.insert(substituteType(candidate.ownerClassName, candidate.classSubstitution));
-        }
-        if (providers.size() > 1) {
-            semanticError(
-                "conflit d'héritage pour la méthode '" + methodName + "' dans la classe '" +
-                genericBaseName(receiverType) + "': plusieurs définitions dans [" +
-                [&providers]() {
-                    std::string message;
-                    bool first = true;
-                    for (const auto& provider : providers) {
-                        if (!first) message += ", ";
-                        message += provider;
-                        first = false;
-                    }
-                    return message;
-                }() + "]");
-        }
-    }
     if (methodCandidates.empty()) {
         semanticError("méthode inconnue: " + receiverType + "." + methodName);
     }
@@ -1097,6 +1079,28 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             exactClassMethodOverloadMatches(context, receiverType, methodName, actualArgumentTypes, typeArguments);
         if (matches.concreteMatches.size() > 1 ||
             (matches.concreteMatches.empty() && matches.genericMatches.size() > 1)) {
+            const auto& conflictingMatches = matches.concreteMatches.empty()
+                ? matches.genericMatches
+                : matches.concreteMatches;
+            std::set<std::string> providers;
+            for (const auto& candidate : conflictingMatches) {
+                providers.insert(substituteType(candidate.ownerClassName, candidate.classSubstitution));
+            }
+            if (providers.size() > 1) {
+                semanticError(
+                    "conflit d'héritage pour la méthode '" + methodName + "' dans la classe '" +
+                    genericBaseName(receiverType) + "': plusieurs définitions dans [" +
+                    [&providers]() {
+                        std::string message;
+                        bool first = true;
+                        for (const auto& provider : providers) {
+                            if (!first) message += ", ";
+                            message += provider;
+                            first = false;
+                        }
+                        return message;
+                    }() + "]");
+            }
             semanticError(
                 "appel de méthode surchargée ambigu pour '" +
                 formatFunctionCallShape(receiverType + "." + methodName, actualArgumentTypes) + "'" +

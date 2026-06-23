@@ -1,0 +1,1 @@
+tests/test_error_trait_missing_abstract.nabla:5:1: semantic error: méthode abstraite héritée non implémentée dans la classe 'Person': Named.name
