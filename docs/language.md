@@ -80,12 +80,17 @@ systeme de types mais ne sont pas des classes utilisateur instanciables.
 
 Collections et types standard :
 
-- `IntArray`, `LongArray`, `FloatArray`, `DoubleArray`, `BoolArray`
-- `ObjectArray[T]`
 - `Array[T]`
-- `ArrayInt`, `ArrayLong`, `ArrayFloat`, `ArrayDouble`, `ArrayBool`
-- `ArrayObject[T]`
 - `Option[T]`
+- `Set[T]`
+- `Map[K, V]`
+- `Sized`
+
+Les noms comme `IntArray`, `LongArray`, `FloatArray`, `DoubleArray`,
+`BoolArray`, `ObjectArray[T]`, `ArrayInt`, `ArrayLong`, `ArrayFloat`,
+`ArrayDouble`, `ArrayBool` et `ArrayObject[T]` existent encore pour la
+compatibilite, les tests bas niveau et l'implementation de la stdlib. Le code
+applicatif devrait privilegier `Array[T]` et les compagnons publics.
 
 Les chaines et caracteres sont actuellement byte-based/ASCII pour les operations
 de longueur, indexation et decoupe.
@@ -642,6 +647,12 @@ Operations disponibles sur `String` :
 - `nonEmpty(): Bool`
 - `+`, `==`, `!=`
 
+`toCharArray()` et `split(...)` exposent actuellement `ArrayObject[...]`. C'est
+la representation actuelle des tableaux de types non primitifs ; le code
+utilisateur devrait surtout utiliser les operations communes (`size`, `get`,
+`mkString`, `foreach`, etc.) et garder `Array[T]` pour construire ses propres
+tableaux.
+
 ```nabla
 import collections.array
 
@@ -777,8 +788,10 @@ def main(): Int = {
 ```
 
 `Array[Int]`, `Array[Long]`, `Array[Float]`, `Array[Double]` et `Array[Bool]`
-sont specialises vers des facades primitives. Les autres types passent par
-`ArrayObject[T]`.
+sont specialises en interne vers des facades primitives. Les autres types
+passent aujourd'hui par `ArrayObject[T]`. Ces noms de representation peuvent
+apparaitre dans certains retours ou diagnostics, mais ne sont pas l'API
+idiomatique.
 
 Le module `collections.set` fournit une structure `Set[T]` immutable basée sur
 un tableau interne, avec déduplication par `==` et table de hachage interne
@@ -831,6 +844,57 @@ niveau `setEmpty`, `setFromArray`, `ObjectArray[T]` et `ArrayObject[T]`,
 restent disponibles pour la stdlib et le code existant, mais `Set.empty`,
 `Set(...)`, `Set.apply`, `Set.fromArray` et `Array[T]` sont les noms
 recommandés dans le code utilisateur.
+
+`toArray()` retourne encore `ArrayObject[T]`, qui est la representation actuelle
+du tableau generique d'objets. Pour construire ou passer des tableaux dans le
+code applicatif, preferer la facade `Array[T]`.
+
+## Map
+
+Le module `collections.map` fournit `Map[K, V]`, un dictionnaire immutable. Les
+cles sont comparees avec `==` et indexees avec `hashCode()`, comme pour
+`Set[T]`.
+
+```nabla
+import collections.map
+
+def main(): Int = {
+    val scores = Map("ada" -> 42, "linus" -> 39)
+    val updated = scores.updated("linus", 41)
+    if updated.contains("ada") &&
+       updated.getOrElse("linus", 0) == 41 &&
+       updated.size() == 2 {
+        42
+    } else {
+        1
+    }
+}
+```
+
+Operations utiles :
+
+- `Map(value1 -> value2, ...): Map[K, V]`
+- `Map.apply[K, V](entries: Tuple2[K, V]*): Map[K, V]`
+- `Map.empty[K, V](): Map[K, V]`
+- `Map.fromArray[K, V](entries: Array[Tuple2[K, V]]): Map[K, V]`
+- `size()`
+- `isEmpty()` / `nonEmpty()`
+- `contains(key)` / `containsKey(key)`
+- `getOption(key): Option[V]`
+- `getOrElse(key, default): V`
+- `updated(key, value): Map[K, V]`
+- `removed(key): Map[K, V]`
+- `clear(): Map[K, V]`
+- `keys()`, `values()`, `toArray()`
+- `foreachEntry(f)`
+- `mapValues[U](default, f)`
+- `filterKeys(predicate)`
+- `mkString(separator)` / `toString()`
+
+Les tableaux retournes par `keys()`, `values()` et `toArray()` utilisent
+actuellement `ArrayObject[...]` pour les entrees generiques. C'est un detail de
+representation ; les exemples et le code applicatif devraient utiliser
+`Map(...)`, `Map.empty`, `Map.fromArray` et `Array[T]` comme surface publique.
 
 ## Option
 

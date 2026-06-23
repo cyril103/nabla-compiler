@@ -16,7 +16,7 @@
     <section class="module-hero">
       <p class="import">import collections.array</p>
       <h1>Array</h1>
-      <p>Tableaux generiques pour le code utilisateur. Importer collections.array donne acces a Array[T], Array.empty[T](), Array.fill[T], Array.tabulate[T] et Array.range / Array.rangeUntil. Les anciens noms ArrayFill[T] et ArrayRange restent disponibles pour compatibilite. Les types bas niveau comme IntArray, ArrayInt, ObjectArray[T] et ArrayObject[T] restent des details de stdlib dans les cas courants.</p>
+      <p>Tableaux generiques pour le code utilisateur. Importer collections.array donne acces a Array[T], Array.empty[T](), Array.fill[T], Array.tabulate[T] et Array.range / Array.rangeUntil. Les anciens noms ArrayFill[T] et ArrayRange restent disponibles pour compatibilite. Les types bas niveau comme IntArray, ArrayInt, ObjectArray[T] et ArrayObject[T] sont des details de representation dans les cas courants.</p>
     </section>
     <section class="entries">
     <article class="entry" id="Array">
@@ -69,7 +69,7 @@
       <h2>fill</h2>
       <pre><code>def Array.fill[T](size: Int, value: T): Array[T]</code></pre>
       <p>Cree un tableau rempli avec la meme valeur.</p>
-<p>Pour T = Int, Long, Float, Double ou Bool, le compilateur redirige ce nom vers la specialisation primitive adaptee. Pour les autres types, Array[T] est represente par ArrayObject[T].</p>
+<p>Pour T = Int, Long, Float, Double ou Bool, le compilateur choisit une specialisation primitive. Les autres types utilisent la representation generique actuelle, sans que le code utilisateur doive la nommer.</p>
     </article>
     <article class="entry" id="tabulate">
       <div class="entry-meta">

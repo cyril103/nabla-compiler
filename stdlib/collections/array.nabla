@@ -2,10 +2,10 @@
 /// Tableaux generiques pour le code utilisateur.
 /// Importer collections.array donne acces a Array[T], Array.empty[T](),
 /// Array.fill[T], Array.tabulate[T] et Array.range / Array.rangeUntil.
-/// Les anciens noms ArrayFill[T] et
-/// ArrayRange restent disponibles pour compatibilite. Les types bas niveau
-/// comme IntArray, ArrayInt, ObjectArray[T] et ArrayObject[T] restent
-/// des details de stdlib dans les cas courants.
+/// Les anciens noms ArrayFill[T] et ArrayRange restent disponibles pour
+/// compatibilite. Les types bas niveau comme IntArray, ArrayInt,
+/// ObjectArray[T] et ArrayObject[T] sont des details de representation dans
+/// les cas courants.
 
 /// @symbol class Array[T](size: Int)
 /// @status Recommandee
@@ -56,9 +56,9 @@ object Array {
     /// @signature def Array.fill[T](size: Int, value: T): Array[T]
     /// @status Recommandee
     ///
-    /// Pour T = Int, Long, Float, Double ou Bool, le compilateur
-    /// redirige ce nom vers la specialisation primitive adaptee. Pour les
-    /// autres types, Array[T] est represente par ArrayObject[T].
+    /// Pour T = Int, Long, Float, Double ou Bool, le compilateur choisit une
+    /// specialisation primitive. Les autres types utilisent la representation
+    /// generique actuelle, sans que le code utilisateur doive la nommer.
     def fill[T](size: Int, value: T): ArrayObject[T] = {
         objectArrayFill[T](size, value)
     }

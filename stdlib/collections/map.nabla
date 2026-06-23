@@ -3,6 +3,8 @@
 /// Utiliser Map("name" -> value) pour creer une map depuis des paires,
 /// Map.empty[K, V]() pour construire progressivement une map, ou
 /// Map.fromArray[K, V](entries) pour construire depuis un tableau de paires.
+/// Les tableaux generiques visibles dans certains retours sont une
+/// representation actuelle ; l'API recommandee reste Map et Array[T].
 
 import core.option
 import core.sized
