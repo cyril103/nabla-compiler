@@ -1,0 +1,26 @@
+def render(value: Any): String = {
+    value.toString()
+}
+
+def hashed(value: Any): Int = {
+    value.hashCode()
+}
+
+def same(left: Any, right: Any): Bool = {
+    left.equals(right)
+}
+
+def main(): Int = {
+    val first = "nabla"
+    val second = "nabla"
+    val other = "compiler"
+    if render(first) == "nabla" &&
+       hashed(first) == hashed(second) &&
+       hashed(first) != hashed(other) &&
+       same(first, second) &&
+       !same(first, other) {
+        42
+    } else {
+        1
+    }
+}

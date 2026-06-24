@@ -186,11 +186,13 @@ Le pipeline implemente actuellement :
   `Float` / `Double` portes par l'IR typee, conversion `Int.toLong`,
   litteraux `Char` ASCII et
   litteraux `String`;
-- chaines `String` stockees comme buffers de bytes, avec `length` et
-  `charAt(index): Char`, `toCharArray(): ArrayObject[Char]`, `toInt`,
-  `substring(from, until)`, `repeat(count)`, `trim`, `split(separator)`,
-  `indexOf`, `contains`, `isEmpty`, `nonEmpty`,
-  `startsWith`, `endsWith`, `+`, `==` et `!=`;
+- chaines `String` stockees comme objets heap tagges pointant vers des buffers
+  de bytes, avec `length` et `charAt(index): Char`,
+  `toCharArray(): ArrayObject[Char]`, `toInt`, `substring(from, until)`,
+  `repeat(count)`, `trim`, `split(separator)`, `indexOf`, `contains`,
+  `isEmpty`, `nonEmpty`, `startsWith`, `endsWith`, `+`, `==` et `!=`; le tag
+  permet a `Any.toString`, `Any.hashCode` et `Any.equals` de conserver la
+  semantique de contenu quand une chaine est manipulee via `Any`;
 - jointure texte de tableaux via `ArrayInt` / `ArrayLong` /
   `ArrayBool.mkString(separator)` et `arrayMkString[Int/Long/Bool/String]`;
 - affichage console de `String` via la primitive globale `print`;
@@ -826,6 +828,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Redispatcher `Any.toString()`, `Any.hashCode()` et `Any.equals(...)` vers
   les overrides utilisateur pour les valeurs parent-typées ou génériques
   utilisées par `Set[T]`.
+- [x] Tagger explicitement les objets `String` runtime et aligner les littéraux
+  de chaînes afin que `String` conserve `toString`, `hashCode` et `equals` par
+  contenu quand une valeur est manipulée via `Any`.
 - [x] Ajouter `object Name { def ... }` comme namespace statique et supporter
   les compagnons de surface `class Name` + `object Name`.
 - [x] Ajouter un test d'outillage pour vérifier le diagnostic quand une commande
@@ -838,6 +843,14 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Durcir le dispatch racine de `String` effacé vers `Any`: les objets
+  `String` portent maintenant un tag runtime dédié, les littéraux sont alignés
+  sur 8 octets, et `Any.toString` / `Any.hashCode` / `Any.equals` reconnaissent
+  les chaînes pour conserver le rendu, le hash et l'égalité par contenu.
+  - Fichiers / tests associes: `src/runtime_values.hpp`,
+    `src/runtime_asm.cpp`, `src/ir_codegen.cpp`,
+    `tests/test_any_string_dispatch.nabla`, `docs/internals.md`,
+    `docs/plans/string-any-dispatch.md`, `AGENTS.md`.
 - `local` - Ajouter deux cookbooks stdlib publics non interactifs pour les
   collections et le traitement de texte, avec oracles de code de sortie et
   stdout deterministe, plus une courte page `docs/cookbook.md`.

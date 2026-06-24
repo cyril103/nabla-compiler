@@ -127,6 +127,15 @@ Les identifiants de classes commencent à `1000` pour éviter les tags runtime
 boxed. Les closures réutilisent leur propre convention de header pour stocker
 le pointeur de code.
 
+Les objets `String` utilisent un tag runtime réservé dans leur slot 0. Ce tag
+permet aux méthodes racine `Any.toString`, `Any.hashCode` et `Any.equals` de
+reconnaître les chaînes même après effacement statique vers `Any` ou `AnyRef` :
+`toString` rend la chaîne elle-même, `hashCode` réutilise le hash byte-based de
+`String`, et `equals` compare le contenu lorsque les deux opérandes sont des
+chaînes. Les littéraux de chaînes placent leur objet sur un alignement 8 octets
+afin que les tests de tag immédiat ne puissent pas confondre un pointeur de
+chaîne avec un entier taggé.
+
 ### Slots nuls
 
 Les tableaux d'objets utilisent des slots nuls pour les cases non initialisées.
@@ -175,10 +184,11 @@ spécialisés sont des détails d'implémentation.
 `Char` représente un caractère ASCII. Une future prise en charge Unicode devra
 réviser explicitement ces conventions.
 
-Une valeur `String` est une reference heap vers un buffer de bytes runtime. Les
-operations `+`, `==` et `!=` sont des primitives specialisees sur cette
-representation byte-based; `toCharArray()` produit un `ArrayObject[Char]` afin
-de ne pas exposer de tableau natif specialise pour les caracteres.
+Une valeur `String` est une reference heap vers un objet taggé contenant la
+longueur et un pointeur vers un buffer de bytes runtime. Les operations `+`,
+`==` et `!=` sont des primitives specialisees sur cette representation
+byte-based; `toCharArray()` produit un `ArrayObject[Char]` afin de ne pas
+exposer de tableau natif specialise pour les caracteres.
 
 ## Fonctions, Lambdas Et Closures
 
