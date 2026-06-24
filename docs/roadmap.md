@@ -101,7 +101,8 @@ Actions recommandees :
    d'élargir la surface publique.
 2. Durcir l'héritage/runtime : conflits champs/méthodes visibles, dispatch
    dynamique via type parent ou `Any`, `super` statique, règles d'égalité et
-   hash dans les hiérarchies.
+   hash dans les hiérarchies, avec des régressions couvrant aussi
+   `Array[Parent]` et `Set.fromArray[Parent]`.
 3. Continuer le nettoyage de la référence stdlib générée en affinant les
    descriptions utilisateur et en évitant d'ajouter de nouveaux helpers
    documentés sans classification préalable.
