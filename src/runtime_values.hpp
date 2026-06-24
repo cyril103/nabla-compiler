@@ -17,6 +17,7 @@ constexpr long long kBoxedDoubleTag = 14;
 constexpr long long kBoxedBoolTag = 15;
 constexpr long long kBoxedCharTag = 16;
 constexpr long long kBoxedUnitTag = 17;
+constexpr long long kStringTag = 18;
 constexpr long long kObjectHeaderSlots = 1;
 constexpr long long kSlotSizeBytes = 8;
 

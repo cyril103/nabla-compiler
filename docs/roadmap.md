@@ -27,7 +27,9 @@ pour reprendre facilement apres une pause.
   La conversion `toString()` est désormais disponible de façon uniforme pour les
   types primitifs usuels (`Int`, `Long`, `Float`, `Double`, `Bool`, `Char`) au niveau du
   backend runtime, y compris via un paramètre `Any`/`AnyVal` de fonction/méthode
-  grâce au boxing heap minimal.
+  grâce au boxing heap minimal. Les chaînes `String` portent aussi un tag runtime
+  dédié afin de conserver `toString`, `hashCode` et `equals` par contenu quand
+  elles sont manipulées via `Any`.
 - Standard library deja utile :
   - collections typées et facade `Array[T]`
   - `collections.set` avec `Set[T]`, `add`, `remove`, `union`, `intersect`,

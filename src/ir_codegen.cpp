@@ -597,7 +597,9 @@ private:
         } else {
             out << label << "_chars: db 0\n";
         }
-        out << label << "_obj: dq 0, " << instruction.operands[0].size() << ", " << label << "_chars\n";
+        out << "    align 8\n";
+        out << label << "_obj: dq " << RuntimeValues::kStringTag << ", " << instruction.operands[0].size()
+            << ", " << label << "_chars\n";
         out << "section .text\n";
         out << "    mov rax, " << label << "_obj\n";
         storeRegister(instruction.result, "rax");
