@@ -19,7 +19,7 @@ STDLIB_DIR = ROOT / "stdlib"
 OUTPUT_DIR = ROOT / "docs" / "stdlib"
 
 
-DECL_RE = re.compile(r"^\s*(def|class)\s+(.+?)\s*(?:=\s*\{|$)")
+DECL_RE = re.compile(r"^\s*(?:override\s+)?(def|class)\s+(.+?)\s*(?:=\s*\{|$)")
 
 
 @dataclass

@@ -16,7 +16,7 @@
     <section class="module-hero">
       <p class="import">import collections.map</p>
       <h1>Map</h1>
-      <p>Dictionnaires immuables cle-valeur. Utiliser Map(&quot;name&quot; -&gt; value) pour creer une map depuis des paires, Map.empty[K, V]() pour construire progressivement une map, ou Map.fromArray[K, V](entries) pour construire depuis un tableau de paires. Les tableaux generiques visibles dans certains retours sont une representation actuelle ; l&#x27;API recommandee reste Map et Array[T].</p>
+      <p>Dictionnaires immuables cle-valeur. Utiliser Map(&quot;name&quot; -&gt; value) pour creer une map depuis des paires, Map.empty[K, V]() pour construire progressivement une map, ou Map.fromArray[K, V](entries) pour construire depuis un tableau de paires. Les tableaux generiques visibles dans certains retours sont une representation actuelle ; l&#x27;API recommandee reste Map et Array[T]. Les helpers map... et les ObjectArray internes ne sont pas une surface applicative idiomatique.</p>
     </section>
     <section class="entries">
     <article class="entry" id="apply">
@@ -52,6 +52,15 @@
       <p>Dictionnaire immutable.</p>
 <p>Les operations updated, removed et clear retournent une nouvelle map. Si plusieurs paires utilisent la meme cle, la derniere valeur gagne.</p>
     </article>
+    <article class="entry" id="containsKey">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>containsKey</h2>
+      <pre><code>def containsKey(key: K): Bool</code></pre>
+      <p>Indique si la map contient la cle donnee.</p>
+<p>Alias historique de contains(key), encore public pour lisibilite.</p>
+    </article>
     <article class="entry" id="contains">
       <div class="entry-meta">
         <span class="kind">def</span> <span class="status recommended">Recommandee</span>
@@ -76,6 +85,65 @@
       <pre><code>def getOption(default: V, key: K): Option[V]</code></pre>
       <p>Retourne la valeur associee a la cle, si elle existe, avec une valeur interne de secours.</p>
 <p>Preferer getOption(key) dans le nouveau code.</p>
+    </article>
+    <article class="entry" id="getOrElse">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>getOrElse</h2>
+      <pre><code>def getOrElse(key: K, default: V): V</code></pre>
+      <p>Retourne la valeur associee a la cle ou default si elle est absente.</p>
+    </article>
+    <article class="entry" id="updated">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>updated</h2>
+      <pre><code>def updated(key: K, value: V): Map[K, V]</code></pre>
+      <p>Retourne une nouvelle map avec key associee a value.</p>
+    </article>
+    <article class="entry" id="removed">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>removed</h2>
+      <pre><code>def removed(key: K): Map[K, V]</code></pre>
+      <p>Retourne une nouvelle map sans key.</p>
+    </article>
+    <article class="entry" id="clear">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>clear</h2>
+      <pre><code>def clear(): Map[K, V]</code></pre>
+      <p>Retourne une map vide du meme type.</p>
+    </article>
+    <article class="entry" id="keys">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>keys</h2>
+      <pre><code>def keys(): Array[K]</code></pre>
+      <p>Retourne les cles sous forme de tableau.</p>
+<p>La representation visible actuelle est ArrayObject[K]. Manipuler le resultat via les operations communes et preferer Array[T] pour les nouvelles constructions applicatives.</p>
+    </article>
+    <article class="entry" id="values">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>values</h2>
+      <pre><code>def values(): Array[V]</code></pre>
+      <p>Retourne les valeurs sous forme de tableau.</p>
+<p>La representation visible actuelle est ArrayObject[V].</p>
+    </article>
+    <article class="entry" id="toArray">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>toArray</h2>
+      <pre><code>def toArray(): Array[Tuple2[K, V]]</code></pre>
+      <p>Retourne les paires cle-valeur sous forme de tableau.</p>
+<p>La representation visible actuelle est ArrayObject[Tuple2[K, V]].</p>
     </article>
     <article class="entry" id="foreachEntry">
       <div class="entry-meta">
@@ -108,6 +176,14 @@
       <h2>mkString</h2>
       <pre><code>def mkString(separator: String): String</code></pre>
       <p>Convertit la map en chaine de caracteres en reliant chaque paire cle-valeur par un separateur.</p>
+    </article>
+    <article class="entry" id="toString">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>toString</h2>
+      <pre><code>def toString(): String</code></pre>
+      <p>Retourne la representation sous forme de chaine de la map.</p>
     </article>
     </section>
   </main>

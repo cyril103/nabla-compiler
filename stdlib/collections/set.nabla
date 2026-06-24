@@ -5,6 +5,8 @@
 /// Set.fromArray[T](values) pour dedupliquer un tableau. Les anciens noms
 /// SetEmpty[T]() et SetFromArray[T](values) restent disponibles pour
 /// compatibilite, mais ne sont plus l'API recommandee pour du code applicatif.
+/// toArray() retourne encore la representation generique actuelle ; preferer
+/// Array[T] pour construire ou passer de nouveaux tableaux.
 
 import collections.object_array
 import core.sized
@@ -390,10 +392,16 @@ class Set[T](values: ArrayObject[T]) with Sized {
         values.nonEmpty()
     }
 
+    /// Indique si l'ensemble contient la valeur donnee.
+    /// @signature def contains(value: T): Bool
+    /// @status Recommandee
     def contains(value: T): Bool = {
         setContains[T](values, value)
     }
 
+    /// Retourne un nouvel ensemble contenant value.
+    /// @signature def add(value: T): Set[T]
+    /// @status Recommandee
     def add(value: T): Set[T] = {
         if setContains[T](values, value) {
             this
@@ -402,34 +410,62 @@ class Set[T](values: ArrayObject[T]) with Sized {
         }
     }
 
+    /// Retourne un nouvel ensemble sans value.
+    /// @signature def remove(value: T): Set[T]
+    /// @status Recommandee
     def remove(value: T): Set[T] = {
         new Set[T](setWithout[T](values, value))
     }
 
+    /// Retourne l'union de deux ensembles.
+    /// @signature def union(other: Set[T]): Set[T]
+    /// @status Recommandee
     def union(other: Set[T]): Set[T] = {
         new Set[T](setUnion[T](values, other.toArray()))
     }
 
+    /// Retourne l'intersection de deux ensembles.
+    /// @signature def intersect(other: Set[T]): Set[T]
+    /// @status Recommandee
     def intersect(other: Set[T]): Set[T] = {
         new Set[T](setIntersect[T](values, other.toArray()))
     }
 
+    /// Retourne les elements de this absents de other.
+    /// @signature def difference(other: Set[T]): Set[T]
+    /// @status Recommandee
     def difference(other: Set[T]): Set[T] = {
         new Set[T](setDifference[T](values, other.toArray()))
     }
 
+    /// Retourne un ensemble vide du meme type d'elements.
+    /// @signature def clear(): Set[T]
+    /// @status Recommandee
     def clear(): Set[T] = {
         setEmpty[T]()
     }
 
+    /// Retourne les elements sous forme de tableau.
+    /// @signature def toArray(): Array[T]
+    /// @status Recommandee
+    ///
+    /// La representation visible actuelle est ArrayObject[T]. Manipuler le
+    /// resultat via les operations communes et preferer Array[T] pour les
+    /// nouvelles constructions applicatives.
     def toArray(): ArrayObject[T] = {
         values
     }
 
+    /// Joint les elements avec un separateur.
+    /// @signature def mkString(separator: String): String
+    /// @status Recommandee
     def mkString(separator: String): String = {
         values.mkString(separator)
     }
 
+    /// Retourne la representation sous forme de chaine de l'ensemble.
+    /// @signature def toString(): String
+    /// @status Recommandee
     override def toString(): String = {
         values.toString()
     }

@@ -5,7 +5,8 @@
 /// Les anciens noms ArrayFill[T] et ArrayRange restent disponibles pour
 /// compatibilite. Les types bas niveau comme IntArray, ArrayInt,
 /// ObjectArray[T] et ArrayObject[T] sont des details de representation dans
-/// les cas courants.
+/// les cas courants : ils peuvent apparaitre dans certains retours ou
+/// diagnostics, mais les exemples applicatifs devraient nommer Array[T].
 
 /// @symbol class Array[T](size: Int)
 /// @status Recommandee
@@ -48,6 +49,10 @@ object Array {
     /// Cree un tableau vide.
     /// @signature def Array.empty[T](): Array[T]
     /// @status Recommandee
+    ///
+    /// La representation concrete peut encore etre ArrayObject[T] pour les
+    /// types generiques. Le code utilisateur doit la manipuler comme un
+    /// Array[T] via les operations communes.
     def empty[T](): ArrayObject[T] = {
         objectArrayEmpty[T]()
     }
@@ -66,6 +71,9 @@ object Array {
     /// Cree un tableau en calculant chaque element depuis son index.
     /// @signature def Array.tabulate[T](size: Int, f: (Int) => T): Array[T]
     /// @status Recommandee
+    ///
+    /// Comme Array.fill, cette fabrique garde le nom public Array[T] meme si la
+    /// representation visible est specialisee ou generique selon T.
     def tabulate[T](size: Int, f: (Int) => T): ArrayObject[T] = {
         objectArrayTabulate[T](size, f)
     }
