@@ -41,6 +41,100 @@ std::string formatMethodProviders(const std::set<std::string>& providers) {
     return message;
 }
 
+std::string formatMethodSignature(
+    const std::string& ownerClassName,
+    const std::string& sourceName,
+    const CompilerContext::FunctionSignature& signature,
+    const std::map<std::string, std::string>& classSubstitution) {
+    std::string message = ownerClassName + "." + sourceName;
+    if (!signature.typeParameters.empty()) {
+        message += "[";
+        for (size_t i = 0; i < signature.typeParameters.size(); ++i) {
+            if (i > 0) message += ", ";
+            message += signature.typeParameters[i];
+        }
+        message += "]";
+    }
+    message += "(";
+    for (size_t i = 0; i < signature.parameters.size(); ++i) {
+        if (i > 0) message += ", ";
+        message += substituteType(signature.parameters[i].type, classSubstitution);
+        if (signature.parameters[i].isRepeated) message += "*";
+    }
+    message += "): ";
+    message += substituteType(signature.returnType, classSubstitution);
+    return message;
+}
+
+std::string formatMethodLookupCandidates(
+    const std::vector<ClassMethodLookupResult>& candidates,
+    const std::string& sourceName) {
+    std::string message;
+    bool first = true;
+    for (const auto& candidate : candidates) {
+        if (!candidate.signature) continue;
+        if (!first) message += ", ";
+        message += formatMethodSignature(
+            candidate.ownerClassName, sourceName, *candidate.signature, candidate.classSubstitution);
+        first = false;
+    }
+    return message;
+}
+
+void collectInheritedMethodSummaries(
+    const CompilerContext& context,
+    const std::string& receiverType,
+    std::set<std::string>& visiting,
+    std::set<std::string>& summaries) {
+    const std::string classLookupName = genericBaseName(receiverType);
+    if (visiting.count(classLookupName)) return;
+    auto classIt = context.classes.find(classLookupName);
+    if (classIt == context.classes.end()) return;
+
+    std::map<std::string, std::string> classSubstitution;
+    if (auto genericSubstitution = genericSubstitutionFor(context, receiverType)) {
+        classSubstitution = *genericSubstitution;
+    }
+
+    if (classLookupName != "Any") {
+        for (const auto& [sourceName, overloadNames] : classIt->second.methodOverloads) {
+            for (const auto& overloadName : overloadNames) {
+                auto methodIt = classIt->second.methods.find(overloadName);
+                if (methodIt == classIt->second.methods.end()) continue;
+                summaries.insert(formatMethodSignature(
+                    classLookupName, sourceName, methodIt->second, classSubstitution));
+            }
+        }
+    }
+
+    visiting.insert(classLookupName);
+    for (const auto& parentType : classIt->second.parentTypes) {
+        collectInheritedMethodSummaries(
+            context, substituteType(parentType, classSubstitution), visiting, summaries);
+    }
+    visiting.erase(classLookupName);
+}
+
+std::string formatInheritedMethodsForParents(
+    const CompilerContext& context,
+    const CompilerContext::ClassInfo& classInfo,
+    const std::map<std::string, std::string>& classTypeSubstitution) {
+    std::set<std::string> summaries;
+    std::set<std::string> visiting;
+    for (const auto& parentType : classInfo.parentTypes) {
+        collectInheritedMethodSummaries(
+            context, substituteType(parentType, classTypeSubstitution), visiting, summaries);
+    }
+    std::string message;
+    bool first = true;
+    for (const auto& summary : summaries) {
+        if (!first) message += ", ";
+        message += summary;
+        first = false;
+    }
+    return message;
+}
+
 std::string methodTypeWithSubstitution(
     const std::string& type,
     const std::map<std::string, std::string>& classSubstitution,
@@ -451,10 +545,13 @@ void SemanticAnalyzer::validateDeclaredTypes() {
             }
             bool hasInheritedMethod = false;
             bool hasCompatibleInheritedMethod = false;
+            std::vector<ClassMethodLookupResult> inheritedCandidatesForName;
             for (const auto& parentType : classInfo.parentTypes) {
                 const std::string concreteParentType = substituteType(parentType, classTypeSubstitution);
                 const auto inheritedCandidates = collectClassMethodLookupCandidates(
                     context, concreteParentType, methodName);
+                inheritedCandidatesForName.insert(
+                    inheritedCandidatesForName.end(), inheritedCandidates.begin(), inheritedCandidates.end());
                 if (!inheritedCandidates.empty()) {
                     hasInheritedMethod = true;
                     for (const auto& inheritedCandidate : inheritedCandidates) {
@@ -467,16 +564,26 @@ void SemanticAnalyzer::validateDeclaredTypes() {
                 }
             }
             if (signature.isOverride && !hasInheritedMethod) {
-                throw CompilerError(
-                    ErrorKind::Semantic, signature.location,
+                std::string message =
                     "override invalide pour '" + className + "." + methodName +
-                    "' : aucune méthode héritée correspondante");
+                    "' : aucune méthode héritée nommée '" + methodName + "'";
+                const std::string inheritedMethods =
+                    formatInheritedMethodsForParents(context, classInfo, classTypeSubstitution);
+                if (!inheritedMethods.empty()) {
+                    message += "\nméthodes héritées disponibles: " + inheritedMethods;
+                }
+                throw CompilerError(ErrorKind::Semantic, signature.location, message);
             }
             if (signature.isOverride && hasInheritedMethod && !hasCompatibleInheritedMethod) {
-                throw CompilerError(
-                    ErrorKind::Semantic, signature.location,
+                std::string message =
                     "override invalide pour '" + className + "." + methodName +
-                    "' : signature incompatible avec la méthode héritée");
+                    "' : signature incompatible avec la méthode héritée";
+                const std::string candidates = formatMethodLookupCandidates(
+                    inheritedCandidatesForName, methodName);
+                if (!candidates.empty()) {
+                    message += "\nsignatures héritées candidates: " + candidates;
+                }
+                throw CompilerError(ErrorKind::Semantic, signature.location, message);
             }
             if (!signature.isOverride && hasCompatibleInheritedMethod) {
                 throw CompilerError(
