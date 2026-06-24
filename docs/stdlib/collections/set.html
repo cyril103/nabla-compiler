@@ -16,7 +16,7 @@
     <section class="module-hero">
       <p class="import">import collections.set</p>
       <h1>Set</h1>
-      <p>Ensembles immuables avec valeurs uniques. Utiliser Set(values...) pour creer un ensemble depuis des elements, Set.empty[T]() pour construire progressivement un ensemble, ou Set.fromArray[T](values) pour dedupliquer un tableau. Les anciens noms SetEmpty[T]() et SetFromArray[T](values) restent disponibles pour compatibilite, mais ne sont plus l&#x27;API recommandee pour du code applicatif.</p>
+      <p>Ensembles immuables avec valeurs uniques. Utiliser Set(values...) pour creer un ensemble depuis des elements, Set.empty[T]() pour construire progressivement un ensemble, ou Set.fromArray[T](values) pour dedupliquer un tableau. Les anciens noms SetEmpty[T]() et SetFromArray[T](values) restent disponibles pour compatibilite, mais ne sont plus l&#x27;API recommandee pour du code applicatif. toArray() retourne encore la representation generique actuelle ; preferer Array[T] pour construire ou passer de nouveaux tableaux.</p>
     </section>
     <section class="entries">
     <article class="entry" id="apply">
@@ -71,6 +71,87 @@
       <pre><code>class Set[T]</code></pre>
       <p>Ensemble immutable.</p>
 <p>Les operations comme add, remove, union, intersect et difference retournent un nouvel ensemble. L&#x27;instance d&#x27;origine n&#x27;est pas modifiee. L&#x27;egalite repose sur == et l&#x27;index interne utilise hashCode(), ce qui permet aux overrides utilisateur de participer a la deduplication.</p>
+    </article>
+    <article class="entry" id="contains">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>contains</h2>
+      <pre><code>def contains(value: T): Bool</code></pre>
+      <p>Indique si l&#x27;ensemble contient la valeur donnee.</p>
+    </article>
+    <article class="entry" id="add">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>add</h2>
+      <pre><code>def add(value: T): Set[T]</code></pre>
+      <p>Retourne un nouvel ensemble contenant value.</p>
+    </article>
+    <article class="entry" id="remove">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>remove</h2>
+      <pre><code>def remove(value: T): Set[T]</code></pre>
+      <p>Retourne un nouvel ensemble sans value.</p>
+    </article>
+    <article class="entry" id="union">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>union</h2>
+      <pre><code>def union(other: Set[T]): Set[T]</code></pre>
+      <p>Retourne l&#x27;union de deux ensembles.</p>
+    </article>
+    <article class="entry" id="intersect">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>intersect</h2>
+      <pre><code>def intersect(other: Set[T]): Set[T]</code></pre>
+      <p>Retourne l&#x27;intersection de deux ensembles.</p>
+    </article>
+    <article class="entry" id="difference">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>difference</h2>
+      <pre><code>def difference(other: Set[T]): Set[T]</code></pre>
+      <p>Retourne les elements de this absents de other.</p>
+    </article>
+    <article class="entry" id="clear">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>clear</h2>
+      <pre><code>def clear(): Set[T]</code></pre>
+      <p>Retourne un ensemble vide du meme type d&#x27;elements.</p>
+    </article>
+    <article class="entry" id="toArray">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>toArray</h2>
+      <pre><code>def toArray(): Array[T]</code></pre>
+      <p>Retourne les elements sous forme de tableau.</p>
+<p>La representation visible actuelle est ArrayObject[T]. Manipuler le resultat via les operations communes et preferer Array[T] pour les nouvelles constructions applicatives.</p>
+    </article>
+    <article class="entry" id="mkString">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>mkString</h2>
+      <pre><code>def mkString(separator: String): String</code></pre>
+      <p>Joint les elements avec un separateur.</p>
+    </article>
+    <article class="entry" id="toString">
+      <div class="entry-meta">
+        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+      </div>
+      <h2>toString</h2>
+      <pre><code>def toString(): String</code></pre>
+      <p>Retourne la representation sous forme de chaine de l&#x27;ensemble.</p>
     </article>
     </section>
   </main>

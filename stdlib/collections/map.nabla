@@ -4,7 +4,9 @@
 /// Map.empty[K, V]() pour construire progressivement une map, ou
 /// Map.fromArray[K, V](entries) pour construire depuis un tableau de paires.
 /// Les tableaux generiques visibles dans certains retours sont une
-/// representation actuelle ; l'API recommandee reste Map et Array[T].
+/// representation actuelle ; l'API recommandee reste Map et Array[T]. Les
+/// helpers map... et les ObjectArray internes ne sont pas une surface
+/// applicative idiomatique.
 
 import core.option
 import core.sized
@@ -246,6 +248,11 @@ class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) with Sized {
         entries.size()
     }
 
+    /// Indique si la map contient la cle donnee.
+    /// @signature def containsKey(key: K): Bool
+    /// @status Recommandee
+    ///
+    /// Alias historique de contains(key), encore public pour lisibilite.
     def containsKey(key: K): Bool = {
         mapContainsKeyFromBuckets[K, V](mapBuildBuckets[K, V](entries), key)
     }
@@ -273,14 +280,23 @@ class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) with Sized {
         mapGetOptionFromBuckets[K, V](mapBuildBuckets[K, V](entries), default, key)
     }
 
+    /// Retourne la valeur associee a la cle ou default si elle est absente.
+    /// @signature def getOrElse(key: K, default: V): V
+    /// @status Recommandee
     def getOrElse(key: K, default: V): V = {
         this.getOption(key).getOrElse(default)
     }
 
+    /// Retourne une nouvelle map avec key associee a value.
+    /// @signature def updated(key: K, value: V): Map[K, V]
+    /// @status Recommandee
     def updated(key: K, value: V): Map[K, V] = {
         mapFromArray[K, V](mapAppendEntry[K, V](entries, Tuple2(key, value)))
     }
 
+    /// Retourne une nouvelle map sans key.
+    /// @signature def removed(key: K): Map[K, V]
+    /// @status Recommandee
     def removed(key: K): Map[K, V] = {
         val buckets = mapBuildBuckets[K, V](entries)
         val bucketIndex = mapBucketIndex[K, V](key.hashCode(), buckets.length())
@@ -309,10 +325,20 @@ class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) with Sized {
         new Map[K, V](new ArrayObject[Tuple2[K, V]](filtered))
     }
 
+    /// Retourne une map vide du meme type.
+    /// @signature def clear(): Map[K, V]
+    /// @status Recommandee
     def clear(): Map[K, V] = {
         mapEmpty[K, V]()
     }
 
+    /// Retourne les cles sous forme de tableau.
+    /// @signature def keys(): Array[K]
+    /// @status Recommandee
+    ///
+    /// La representation visible actuelle est ArrayObject[K]. Manipuler le
+    /// resultat via les operations communes et preferer Array[T] pour les
+    /// nouvelles constructions applicatives.
     def keys(): ArrayObject[K] = {
         val raw = new ObjectArray[K](entries.size())
         var index = 0
@@ -323,6 +349,11 @@ class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) with Sized {
         new ArrayObject[K](raw)
     }
 
+    /// Retourne les valeurs sous forme de tableau.
+    /// @signature def values(): Array[V]
+    /// @status Recommandee
+    ///
+    /// La representation visible actuelle est ArrayObject[V].
     def values(): ArrayObject[V] = {
         val raw = new ObjectArray[V](entries.size())
         var index = 0
@@ -333,6 +364,11 @@ class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) with Sized {
         new ArrayObject[V](raw)
     }
 
+    /// Retourne les paires cle-valeur sous forme de tableau.
+    /// @signature def toArray(): Array[Tuple2[K, V]]
+    /// @status Recommandee
+    ///
+    /// La representation visible actuelle est ArrayObject[Tuple2[K, V]].
     def toArray(): ArrayObject[Tuple2[K, V]] = {
         entries
     }
@@ -397,7 +433,7 @@ class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) with Sized {
     }
 
     /// Retourne la representation sous forme de chaine de la map.
-    /// @signature override def toString(): String
+    /// @signature def toString(): String
     /// @status Recommandee
     override def toString(): String = {
         "Map(" + this.mkString(", ") + ")"

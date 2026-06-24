@@ -17,6 +17,11 @@ La reference HTML generee par `make stdlib-docs` reste volontairement opt-in :
 seules les declarations precedees de commentaires `///` sont publiees. Les
 helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
 
+Quand une signature publique abstraite mentionne `Array[T]`, l'implementation
+peut encore retourner une facade specialisee (`ArrayInt`, `ArrayObject[T]`,
+etc.). La documentation doit presenter ces noms comme representation actuelle,
+pas comme cible idiomatique pour le code applicatif.
+
 ## Surface Publique Recommandee
 
 ### Core
@@ -51,6 +56,11 @@ helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
 - `Array.range(size)`
 - `Array.rangeUntil(start, until)`
 - `Set[T]`
+  - `contains(value)`
+  - `add(value)`, `remove(value)`, `union(other)`, `intersect(other)`,
+    `difference(other)`, `clear()`
+  - `toArray()`
+  - `mkString(separator)` et `toString()`
 - Constructeurs/fabriques :
   - `Set(value1, value2, ...)`
   - `Set.apply[T](values: T*)`

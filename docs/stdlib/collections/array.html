@@ -16,7 +16,7 @@
     <section class="module-hero">
       <p class="import">import collections.array</p>
       <h1>Array</h1>
-      <p>Tableaux generiques pour le code utilisateur. Importer collections.array donne acces a Array[T], Array.empty[T](), Array.fill[T], Array.tabulate[T] et Array.range / Array.rangeUntil. Les anciens noms ArrayFill[T] et ArrayRange restent disponibles pour compatibilite. Les types bas niveau comme IntArray, ArrayInt, ObjectArray[T] et ArrayObject[T] sont des details de representation dans les cas courants.</p>
+      <p>Tableaux generiques pour le code utilisateur. Importer collections.array donne acces a Array[T], Array.empty[T](), Array.fill[T], Array.tabulate[T] et Array.range / Array.rangeUntil. Les anciens noms ArrayFill[T] et ArrayRange restent disponibles pour compatibilite. Les types bas niveau comme IntArray, ArrayInt, ObjectArray[T] et ArrayObject[T] sont des details de representation dans les cas courants : ils peuvent apparaitre dans certains retours ou diagnostics, mais les exemples applicatifs devraient nommer Array[T].</p>
     </section>
     <section class="entries">
     <article class="entry" id="Array">
@@ -61,6 +61,7 @@
       <h2>empty</h2>
       <pre><code>def Array.empty[T](): Array[T]</code></pre>
       <p>Cree un tableau vide.</p>
+<p>La representation concrete peut encore etre ArrayObject[T] pour les types generiques. Le code utilisateur doit la manipuler comme un Array[T] via les operations communes.</p>
     </article>
     <article class="entry" id="fill">
       <div class="entry-meta">
@@ -78,6 +79,7 @@
       <h2>tabulate</h2>
       <pre><code>def Array.tabulate[T](size: Int, f: (Int) =&gt; T): Array[T]</code></pre>
       <p>Cree un tableau en calculant chaque element depuis son index.</p>
+<p>Comme Array.fill, cette fabrique garde le nom public Array[T] meme si la representation visible est specialisee ou generique selon T.</p>
     </article>
     <article class="entry" id="range">
       <div class="entry-meta">
