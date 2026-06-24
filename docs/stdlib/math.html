@@ -4,155 +4,208 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Math - Nabla stdlib</title>
-  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <a class="brand" href="../index.html">Nabla stdlib</a>
-    <span>Reference API publique</span>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <header class="topbar">
+    <a class="brand" href="index.html">Nabla stdlib</a>
+    <nav class="topnav" aria-label="Navigation principale">
+      <a href="index.html">Modules</a>
+      <a href="https://github.com/cyril103/nabla-compiler">GitHub</a>
+    </nav>
   </header>
-  <main>
-    <nav class="breadcrumb"><a href="../index.html">Modules</a> / math</nav>
+  <main id="contenu">
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="index.html">Modules</a> / math</nav>
     <section class="module-hero">
-      <p class="import">import math</p>
+      <p class="eyebrow">Module</p>
       <h1>Math</h1>
+      <p class="import"><code>import math</code></p>
       <p>Fonctions mathematiques courantes. Les operations communes utilisent les noms surcharges idiomatiques (`abs`, `min`, `max`, `clamp`, `pow`, `sqrt`).</p>
+      <figure class="example">
+        <figcaption>Borner une valeur</figcaption>
+        <pre><code>import math
+
+clamp(abs(-12), 0, 10)</code></pre>
+      </figure>
     </section>
-    <section class="entries">
-    <article class="entry" id="abs">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>abs</h2>
-      <pre><code>def abs(value: Int): Int</code></pre>
-      <p>Valeur absolue d&#x27;un entier.</p>
-    </article>
-    <article class="entry" id="abs-2">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>abs</h2>
-      <pre><code>def abs(value: Long): Long</code></pre>
-      <p>Valeur absolue d&#x27;un entier long.</p>
-    </article>
-    <article class="entry" id="abs-3">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>abs</h2>
-      <pre><code>def abs(value: Float): Float</code></pre>
-      <p>Valeur absolue d&#x27;un flottant simple precision.</p>
-    </article>
-    <article class="entry" id="abs-4">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>abs</h2>
-      <pre><code>def abs(value: Double): Double</code></pre>
-      <p>Valeur absolue d&#x27;un flottant double precision.</p>
-    </article>
-    <article class="entry" id="max">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>max</h2>
-      <pre><code>def max(left: Int, right: Int): Int</code></pre>
-      <p>Plus grande des deux valeurs entieres.</p>
-    </article>
-    <article class="entry" id="min">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>min</h2>
-      <pre><code>def min(left: Int, right: Int): Int</code></pre>
-      <p>Plus petite des deux valeurs entieres.</p>
-    </article>
-    <article class="entry" id="clamp">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>clamp</h2>
-      <pre><code>def clamp(value: Int, minimum: Int, maximum: Int): Int</code></pre>
-      <p>Contraint une valeur entiere dans l&#x27;intervalle donne.</p>
-    </article>
-    <article class="entry" id="isEven">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>isEven</h2>
-      <pre><code>def isEven(value: Int): Bool</code></pre>
-      <p>Indique si un entier est pair.</p>
-    </article>
-    <article class="entry" id="isOdd">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>isOdd</h2>
-      <pre><code>def isOdd(value: Int): Bool</code></pre>
-      <p>Indique si un entier est impair.</p>
-    </article>
-    <article class="entry" id="gcd">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>gcd</h2>
-      <pre><code>def gcd(left: Int, right: Int): Int</code></pre>
-      <p>Plus grand commun diviseur de deux entiers.</p>
-    </article>
-    <article class="entry" id="lcm">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>lcm</h2>
-      <pre><code>def lcm(left: Int, right: Int): Int</code></pre>
-      <p>Plus petit commun multiple de deux entiers.</p>
-    </article>
-    <article class="entry" id="pow">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>pow</h2>
-      <pre><code>def pow(base: Int, exponent: Int): Int</code></pre>
-      <p>Puissance entiere positive.</p>
+    <div class="doc-shell">
+      <aside class="sidebar" aria-label="Sommaire des symboles publics">
+        <h2>API publique</h2>
+      <section class="toc-group">
+        <h3>Methodes</h3>
+        <ul>
+        <li><a href="#abs" title="def abs(value: Int): Int"><span>abs</span><code>def abs(value: Int): Int</code></a></li>
+        <li><a href="#abs-2" title="def abs(value: Long): Long"><span>abs</span><code>def abs(value: Long): Long</code></a></li>
+        <li><a href="#abs-3" title="def abs(value: Float): Float"><span>abs</span><code>def abs(value: Float): Float</code></a></li>
+        <li><a href="#abs-4" title="def abs(value: Double): Double"><span>abs</span><code>def abs(value: Double): Double</code></a></li>
+        <li><a href="#max" title="def max(left: Int, right: Int): Int"><span>max</span><code>def max(left: Int, right: Int): Int</code></a></li>
+        <li><a href="#min" title="def min(left: Int, right: Int): Int"><span>min</span><code>def min(left: Int, right: Int): Int</code></a></li>
+        <li><a href="#clamp" title="def clamp(value: Int, minimum: Int, maximum: Int): Int"><span>clamp</span><code>def clamp(value: Int, minimum: Int, maximum: Int): Int</code></a></li>
+        <li><a href="#isEven" title="def isEven(value: Int): Bool"><span>isEven</span><code>def isEven(value: Int): Bool</code></a></li>
+        <li><a href="#isOdd" title="def isOdd(value: Int): Bool"><span>isOdd</span><code>def isOdd(value: Int): Bool</code></a></li>
+        <li><a href="#gcd" title="def gcd(left: Int, right: Int): Int"><span>gcd</span><code>def gcd(left: Int, right: Int): Int</code></a></li>
+        <li><a href="#lcm" title="def lcm(left: Int, right: Int): Int"><span>lcm</span><code>def lcm(left: Int, right: Int): Int</code></a></li>
+        <li><a href="#pow" title="def pow(base: Int, exponent: Int): Int"><span>pow</span><code>def pow(base: Int, exponent: Int): Int</code></a></li>
+        <li><a href="#pow-2" title="def pow(base: Float, exponent: Int): Float"><span>pow</span><code>def pow(base: Float, exponent: Int): Float</code></a></li>
+        <li><a href="#pow-3" title="def pow(base: Double, exponent: Int): Double"><span>pow</span><code>def pow(base: Double, exponent: Int): Double</code></a></li>
+        <li><a href="#sqrt" title="def sqrt(value: Float): Float"><span>sqrt</span><code>def sqrt(value: Float): Float</code></a></li>
+        <li><a href="#sqrt-2" title="def sqrt(value: Double): Double"><span>sqrt</span><code>def sqrt(value: Double): Double</code></a></li>
+        </ul>
+      </section>
+      </aside>
+      <section class="content entries" aria-label="Reference detaillee">
+        <article class="entry" id="abs">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>abs</h2>
+          <pre class="signature"><code>def abs(value: Int): Int</code></pre>
+          <p>Valeur absolue d&#x27;un entier.</p>
+
+        </article>
+        <article class="entry" id="abs-2">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>abs</h2>
+          <pre class="signature"><code>def abs(value: Long): Long</code></pre>
+          <p>Valeur absolue d&#x27;un entier long.</p>
+
+        </article>
+        <article class="entry" id="abs-3">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>abs</h2>
+          <pre class="signature"><code>def abs(value: Float): Float</code></pre>
+          <p>Valeur absolue d&#x27;un flottant simple precision.</p>
+
+        </article>
+        <article class="entry" id="abs-4">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>abs</h2>
+          <pre class="signature"><code>def abs(value: Double): Double</code></pre>
+          <p>Valeur absolue d&#x27;un flottant double precision.</p>
+
+        </article>
+        <article class="entry" id="max">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>max</h2>
+          <pre class="signature"><code>def max(left: Int, right: Int): Int</code></pre>
+          <p>Plus grande des deux valeurs entieres.</p>
+
+        </article>
+        <article class="entry" id="min">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>min</h2>
+          <pre class="signature"><code>def min(left: Int, right: Int): Int</code></pre>
+          <p>Plus petite des deux valeurs entieres.</p>
+
+        </article>
+        <article class="entry" id="clamp">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>clamp</h2>
+          <pre class="signature"><code>def clamp(value: Int, minimum: Int, maximum: Int): Int</code></pre>
+          <p>Contraint une valeur entiere dans l&#x27;intervalle donne.</p>
+
+        </article>
+        <article class="entry" id="isEven">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>isEven</h2>
+          <pre class="signature"><code>def isEven(value: Int): Bool</code></pre>
+          <p>Indique si un entier est pair.</p>
+
+        </article>
+        <article class="entry" id="isOdd">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>isOdd</h2>
+          <pre class="signature"><code>def isOdd(value: Int): Bool</code></pre>
+          <p>Indique si un entier est impair.</p>
+
+        </article>
+        <article class="entry" id="gcd">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>gcd</h2>
+          <pre class="signature"><code>def gcd(left: Int, right: Int): Int</code></pre>
+          <p>Plus grand commun diviseur de deux entiers.</p>
+
+        </article>
+        <article class="entry" id="lcm">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>lcm</h2>
+          <pre class="signature"><code>def lcm(left: Int, right: Int): Int</code></pre>
+          <p>Plus petit commun multiple de deux entiers.</p>
+
+        </article>
+        <article class="entry" id="pow">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>pow</h2>
+          <pre class="signature"><code>def pow(base: Int, exponent: Int): Int</code></pre>
+          <p>Puissance entiere positive.</p>
 <p>Retourne `0` si `exponent` est negatif.</p>
-    </article>
-    <article class="entry" id="pow-2">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>pow</h2>
-      <pre><code>def pow(base: Float, exponent: Int): Float</code></pre>
-      <p>Puissance flottante simple precision avec exposant entier positif.</p>
+
+        </article>
+        <article class="entry" id="pow-2">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>pow</h2>
+          <pre class="signature"><code>def pow(base: Float, exponent: Int): Float</code></pre>
+          <p>Puissance flottante simple precision avec exposant entier positif.</p>
 <p>Retourne `0.0F` si `exponent` est negatif.</p>
-    </article>
-    <article class="entry" id="pow-3">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>pow</h2>
-      <pre><code>def pow(base: Double, exponent: Int): Double</code></pre>
-      <p>Puissance flottante double precision avec exposant entier positif.</p>
+
+        </article>
+        <article class="entry" id="pow-3">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>pow</h2>
+          <pre class="signature"><code>def pow(base: Double, exponent: Int): Double</code></pre>
+          <p>Puissance flottante double precision avec exposant entier positif.</p>
 <p>Retourne `0.0` si `exponent` est negatif.</p>
-    </article>
-    <article class="entry" id="sqrt">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>sqrt</h2>
-      <pre><code>def sqrt(value: Float): Float</code></pre>
-      <p>Racine carree simple precision.</p>
+
+        </article>
+        <article class="entry" id="sqrt">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>sqrt</h2>
+          <pre class="signature"><code>def sqrt(value: Float): Float</code></pre>
+          <p>Racine carree simple precision.</p>
 <p>Retourne `-1.0F` si `value` est negatif. Le calcul utilise une approximation iterative fixe.</p>
-    </article>
-    <article class="entry" id="sqrt-2">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>sqrt</h2>
-      <pre><code>def sqrt(value: Double): Double</code></pre>
-      <p>Racine carree double precision.</p>
+
+        </article>
+        <article class="entry" id="sqrt-2">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>sqrt</h2>
+          <pre class="signature"><code>def sqrt(value: Double): Double</code></pre>
+          <p>Racine carree double precision.</p>
 <p>Retourne `-1.0` si `value` est negatif. Le calcul utilise une approximation iterative fixe.</p>
-    </article>
-    </section>
+
+        </article>
+      </section>
+    </div>
   </main>
 </body>
 </html>

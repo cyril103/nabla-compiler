@@ -7,6 +7,21 @@
 /// compatibilite, mais ne sont plus l'API recommandee pour du code applicatif.
 /// toArray() retourne encore la representation generique actuelle ; preferer
 /// Array[T] pour construire ou passer de nouveaux tableaux.
+///
+/// @example Creer et tester un ensemble
+/// import collections.set
+///
+/// val tags = Set("stable", "fast", "stable")
+/// tags.contains("fast")
+/// @end
+///
+/// @example Composer deux ensembles
+/// import collections.set
+///
+/// val left = Set(1, 2, 3)
+/// val right = Set(3, 4)
+/// left.union(right).size()
+/// @end
 
 import collections.object_array
 import core.sized

@@ -7,14 +7,19 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <header class="topbar">
     <a class="brand" href="index.html">Nabla stdlib</a>
-    <span>Reference API publique</span>
+    <nav class="topnav" aria-label="Navigation principale">
+      <a href="index.html">Modules</a>
+      <a href="https://github.com/cyril103/nabla-compiler">GitHub</a>
+    </nav>
   </header>
-  <main>
-    <section class="module-hero">
+  <main id="contenu">
+    <section class="module-hero index-hero">
+      <p class="eyebrow">Reference API publique</p>
       <h1>Bibliotheque standard Nabla</h1>
-      <p>Reference generee depuis les commentaires <code>///</code> de la stdlib. Les helpers internes non documentes restent hors de cette surface publique.</p>
+      <p>Documentation generee depuis les commentaires <code>///</code> de la stdlib. Comme dans une reference Scala, chaque module liste les types, fabriques et methodes utilisables avec leurs signatures et exemples.</p>
     </section>
     <section class="module-grid">
       <a class="module-card" href="collections/array.html">
@@ -35,7 +40,7 @@
       <a class="module-card" href="core/option.html">
         <span>core.option</span>
         <strong>Option</strong>
-        <small>6 symbole(s) public(s)</small>
+        <small>15 symbole(s) public(s)</small>
       </a>
       <a class="module-card" href="core/option_int.html">
         <span>core.option_int</span>
@@ -45,7 +50,7 @@
       <a class="module-card" href="core/sized.html">
         <span>core.sized</span>
         <strong>Sized</strong>
-        <small>3 symbole(s) public(s)</small>
+        <small>4 symbole(s) public(s)</small>
       </a>
       <a class="module-card" href="io.html">
         <span>io</span>

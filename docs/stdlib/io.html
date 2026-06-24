@@ -4,101 +4,135 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>IO - Nabla stdlib</title>
-  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <a class="brand" href="../index.html">Nabla stdlib</a>
-    <span>Reference API publique</span>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <header class="topbar">
+    <a class="brand" href="index.html">Nabla stdlib</a>
+    <nav class="topnav" aria-label="Navigation principale">
+      <a href="index.html">Modules</a>
+      <a href="https://github.com/cyril103/nabla-compiler">GitHub</a>
+    </nav>
   </header>
-  <main>
-    <nav class="breadcrumb"><a href="../index.html">Modules</a> / io</nav>
+  <main id="contenu">
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="index.html">Modules</a> / io</nav>
     <section class="module-hero">
-      <p class="import">import io</p>
+      <p class="eyebrow">Module</p>
       <h1>IO</h1>
+      <p class="import"><code>import io</code></p>
       <p>Fonctions d&#x27;entree-sortie simples. Les operations de fichier retournent un Bool ou un code Int pour laisser le programme decider comment reagir aux erreurs. Les fonctions de ce module sont des wrappers utilisateur autour des primitives runtime bas niveau.</p>
+
     </section>
-    <section class="entries">
-    <article class="entry" id="println">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>println</h2>
-      <pre><code>def println(value: String): Unit</code></pre>
-      <p>Affiche une chaine suivie d&#x27;un retour a la ligne.</p>
-    </article>
-    <article class="entry" id="input">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>input</h2>
-      <pre><code>def input(): String</code></pre>
-      <p>Lit une ligne depuis l&#x27;entree standard.</p>
-    </article>
-    <article class="entry" id="readTextFile">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>readTextFile</h2>
-      <pre><code>def readTextFile(path: String): String</code></pre>
-      <p>Lit tout le contenu d&#x27;un fichier texte.</p>
+    <div class="doc-shell">
+      <aside class="sidebar" aria-label="Sommaire des symboles publics">
+        <h2>API publique</h2>
+      <section class="toc-group">
+        <h3>Methodes</h3>
+        <ul>
+        <li><a href="#println" title="def println(value: String): Unit"><span>println</span><code>def println(value: String): Unit</code></a></li>
+        <li><a href="#input" title="def input(): String"><span>input</span><code>def input(): String</code></a></li>
+        <li><a href="#readTextFile" title="def readTextFile(path: String): String"><span>readTextFile</span><code>def readTextFile(path: String): String</code></a></li>
+        <li><a href="#writeTextFile" title="def writeTextFile(path: String, content: String): Int"><span>writeTextFile</span><code>def writeTextFile(path: String, content: String): Int</code></a></li>
+        <li><a href="#appendTextFile" title="def appendTextFile(path: String, content: String): Int"><span>appendTextFile</span><code>def appendTextFile(path: String, content: String): Int</code></a></li>
+        <li><a href="#renameTextFile" title="def renameTextFile(from: String, to: String): Bool"><span>renameTextFile</span><code>def renameTextFile(from: String, to: String): Bool</code></a></li>
+        <li><a href="#createDirectory" title="def createDirectory(path: String): Bool"><span>createDirectory</span><code>def createDirectory(path: String): Bool</code></a></li>
+        <li><a href="#deleteTextFile" title="def deleteTextFile(path: String): Bool"><span>deleteTextFile</span><code>def deleteTextFile(path: String): Bool</code></a></li>
+        <li><a href="#pathExists" title="def pathExists(path: String): Bool"><span>pathExists</span><code>def pathExists(path: String): Bool</code></a></li>
+        </ul>
+      </section>
+      </aside>
+      <section class="content entries" aria-label="Reference detaillee">
+        <article class="entry" id="println">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>println</h2>
+          <pre class="signature"><code>def println(value: String): Unit</code></pre>
+          <p>Affiche une chaine suivie d&#x27;un retour a la ligne.</p>
+
+        </article>
+        <article class="entry" id="input">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>input</h2>
+          <pre class="signature"><code>def input(): String</code></pre>
+          <p>Lit une ligne depuis l&#x27;entree standard.</p>
+
+        </article>
+        <article class="entry" id="readTextFile">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>readTextFile</h2>
+          <pre class="signature"><code>def readTextFile(path: String): String</code></pre>
+          <p>Lit tout le contenu d&#x27;un fichier texte.</p>
 <p>Si le fichier ne peut pas etre lu, la primitive runtime retourne une chaine vide.</p>
-    </article>
-    <article class="entry" id="writeTextFile">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>writeTextFile</h2>
-      <pre><code>def writeTextFile(path: String, content: String): Int</code></pre>
-      <p>Ecrit content dans un fichier texte en remplacant son contenu.</p>
+
+        </article>
+        <article class="entry" id="writeTextFile">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>writeTextFile</h2>
+          <pre class="signature"><code>def writeTextFile(path: String, content: String): Int</code></pre>
+          <p>Ecrit content dans un fichier texte en remplacant son contenu.</p>
 <p>Retourne le nombre de bytes ecrits, ou -1 en cas d&#x27;erreur runtime.</p>
-    </article>
-    <article class="entry" id="appendTextFile">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>appendTextFile</h2>
-      <pre><code>def appendTextFile(path: String, content: String): Int</code></pre>
-      <p>Ajoute content a la fin d&#x27;un fichier texte.</p>
+
+        </article>
+        <article class="entry" id="appendTextFile">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>appendTextFile</h2>
+          <pre class="signature"><code>def appendTextFile(path: String, content: String): Int</code></pre>
+          <p>Ajoute content a la fin d&#x27;un fichier texte.</p>
 <p>Retourne le nombre de bytes ecrits, ou -1 en cas d&#x27;erreur runtime.</p>
-    </article>
-    <article class="entry" id="renameTextFile">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>renameTextFile</h2>
-      <pre><code>def renameTextFile(from: String, to: String): Bool</code></pre>
-      <p>Renomme ou deplace un fichier texte.</p>
+
+        </article>
+        <article class="entry" id="renameTextFile">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>renameTextFile</h2>
+          <pre class="signature"><code>def renameTextFile(from: String, to: String): Bool</code></pre>
+          <p>Renomme ou deplace un fichier texte.</p>
 <p>Retourne true si l&#x27;operation reussit, false sinon.</p>
-    </article>
-    <article class="entry" id="createDirectory">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>createDirectory</h2>
-      <pre><code>def createDirectory(path: String): Bool</code></pre>
-      <p>Cree un repertoire.</p>
+
+        </article>
+        <article class="entry" id="createDirectory">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>createDirectory</h2>
+          <pre class="signature"><code>def createDirectory(path: String): Bool</code></pre>
+          <p>Cree un repertoire.</p>
 <p>Retourne true si le repertoire est cree, false sinon.</p>
-    </article>
-    <article class="entry" id="deleteTextFile">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>deleteTextFile</h2>
-      <pre><code>def deleteTextFile(path: String): Bool</code></pre>
-      <p>Supprime un fichier texte.</p>
+
+        </article>
+        <article class="entry" id="deleteTextFile">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>deleteTextFile</h2>
+          <pre class="signature"><code>def deleteTextFile(path: String): Bool</code></pre>
+          <p>Supprime un fichier texte.</p>
 <p>Retourne true si la suppression reussit, false sinon.</p>
-    </article>
-    <article class="entry" id="pathExists">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>pathExists</h2>
-      <pre><code>def pathExists(path: String): Bool</code></pre>
-      <p>Indique si un chemin existe.</p>
+
+        </article>
+        <article class="entry" id="pathExists">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>pathExists</h2>
+          <pre class="signature"><code>def pathExists(path: String): Bool</code></pre>
+          <p>Indique si un chemin existe.</p>
 <p>Retourne true pour un fichier ou repertoire existant.</p>
-    </article>
-    </section>
+
+        </article>
+      </section>
+    </div>
   </main>
 </body>
 </html>
