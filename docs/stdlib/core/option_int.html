@@ -7,44 +7,71 @@
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
-  <header>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <header class="topbar">
     <a class="brand" href="../index.html">Nabla stdlib</a>
-    <span>Reference API publique</span>
+    <nav class="topnav" aria-label="Navigation principale">
+      <a href="../index.html">Modules</a>
+      <a href="https://github.com/cyril103/nabla-compiler">GitHub</a>
+    </nav>
   </header>
-  <main>
-    <nav class="breadcrumb"><a href="../index.html">Modules</a> / core.option_int</nav>
+  <main id="contenu">
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="../index.html">Modules</a> / core.option_int</nav>
     <section class="module-hero">
-      <p class="import">import core.option_int</p>
+      <p class="eyebrow">Module</p>
       <h1>Option Int</h1>
+      <p class="import"><code>import core.option_int</code></p>
       <p>Variante specialisee de Option[Int]. Elle evite de fournir une valeur par defaut lors de la creation d&#x27;une option vide pour les entiers. Preferer Option[Int] dans le code generique; garder OptionInt quand cette representation specialisee rend le code plus direct.</p>
+
     </section>
-    <section class="entries">
-    <article class="entry" id="OptionInt">
-      <div class="entry-meta">
-        <span class="kind">class</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>OptionInt</h2>
-      <pre><code>class OptionInt(defined: Bool, value: Int)</code></pre>
-      <p>Option specialisee pour Int.</p>
+    <div class="doc-shell">
+      <aside class="sidebar" aria-label="Sommaire des symboles publics">
+        <h2>API publique</h2>
+      <section class="toc-group">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="#OptionInt" title="class OptionInt(defined: Bool, value: Int)"><span>OptionInt</span><code>class OptionInt(defined: Bool, value: Int)</code></a></li>
+        </ul>
+      </section>
+      <section class="toc-group">
+        <h3>Methodes</h3>
+        <ul>
+        <li><a href="#optionIntSome" title="def optionIntSome(value: Int): OptionInt"><span>optionIntSome</span><code>def optionIntSome(value: Int): OptionInt</code></a></li>
+        <li><a href="#optionIntNone" title="def optionIntNone(): OptionInt"><span>optionIntNone</span><code>def optionIntNone(): OptionInt</code></a></li>
+        </ul>
+      </section>
+      </aside>
+      <section class="content entries" aria-label="Reference detaillee">
+        <article class="entry" id="OptionInt">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>OptionInt</h2>
+          <pre class="signature"><code>class OptionInt(defined: Bool, value: Int)</code></pre>
+          <p>Option specialisee pour Int.</p>
 <p>Les methodes principales suivent Option[T]: isDefined, isEmpty, nonEmpty, map, filter, orElse et getOrElse.</p>
-    </article>
-    <article class="entry" id="optionIntSome">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>optionIntSome</h2>
-      <pre><code>def optionIntSome(value: Int): OptionInt</code></pre>
-      <p>Construit une option entiere contenant value.</p>
-    </article>
-    <article class="entry" id="optionIntNone">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>optionIntNone</h2>
-      <pre><code>def optionIntNone(): OptionInt</code></pre>
-      <p>Construit une option entiere vide.</p>
-    </article>
-    </section>
+
+        </article>
+        <article class="entry" id="optionIntSome">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>optionIntSome</h2>
+          <pre class="signature"><code>def optionIntSome(value: Int): OptionInt</code></pre>
+          <p>Construit une option entiere contenant value.</p>
+
+        </article>
+        <article class="entry" id="optionIntNone">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>optionIntNone</h2>
+          <pre class="signature"><code>def optionIntNone(): OptionInt</code></pre>
+          <p>Construit une option entiere vide.</p>
+
+        </article>
+      </section>
+    </div>
   </main>
 </body>
 </html>

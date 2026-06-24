@@ -7,185 +7,265 @@
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
-  <header>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <header class="topbar">
     <a class="brand" href="../index.html">Nabla stdlib</a>
-    <span>Reference API publique</span>
+    <nav class="topnav" aria-label="Navigation principale">
+      <a href="../index.html">Modules</a>
+      <a href="https://github.com/cyril103/nabla-compiler">GitHub</a>
+    </nav>
   </header>
-  <main>
-    <nav class="breadcrumb"><a href="../index.html">Modules</a> / collections.map</nav>
+  <main id="contenu">
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="../index.html">Modules</a> / collections.map</nav>
     <section class="module-hero">
-      <p class="import">import collections.map</p>
+      <p class="eyebrow">Module</p>
       <h1>Map</h1>
+      <p class="import"><code>import collections.map</code></p>
       <p>Dictionnaires immuables cle-valeur. Utiliser Map(&quot;name&quot; -&gt; value) pour creer une map depuis des paires, Map.empty[K, V]() pour construire progressivement une map, ou Map.fromArray[K, V](entries) pour construire depuis un tableau de paires. Les tableaux generiques visibles dans certains retours sont une representation actuelle ; l&#x27;API recommandee reste Map et Array[T]. Les helpers map... et les ObjectArray internes ne sont pas une surface applicative idiomatique.</p>
+      <figure class="example">
+        <figcaption>Construire, lire et mettre a jour</figcaption>
+        <pre><code>import collections.map
+
+val scores = Map(&quot;alice&quot; -&gt; 10, &quot;bob&quot; -&gt; 7)
+val updated = scores.updated(&quot;bob&quot;, 8)
+updated.getOrElse(&quot;bob&quot;, 0)</code></pre>
+      </figure>
+      <figure class="example">
+        <figcaption>Parcourir les valeurs</figcaption>
+        <pre><code>import collections.map
+
+val sizes = Map(&quot;a&quot; -&gt; 1, &quot;bb&quot; -&gt; 2)
+sizes.values().size()</code></pre>
+      </figure>
     </section>
-    <section class="entries">
-    <article class="entry" id="apply">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>apply</h2>
-      <pre><code>def Map.apply[K, V](entries: Tuple2[K, V]*): Map[K, V]</code></pre>
-      <p>Cree une map depuis les paires donnees.</p>
-    </article>
-    <article class="entry" id="empty">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>empty</h2>
-      <pre><code>def Map.empty[K, V](): Map[K, V]</code></pre>
-      <p>Cree une map vide.</p>
-    </article>
-    <article class="entry" id="fromArray">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>fromArray</h2>
-      <pre><code>def Map.fromArray[K, V](entries: Array[Tuple2[K, V]]): Map[K, V]</code></pre>
-      <p>Cree une map depuis un tableau de paires.</p>
-    </article>
-    <article class="entry" id="Map">
-      <div class="entry-meta">
-        <span class="kind">class</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>Map</h2>
-      <pre><code>class Map[K, V]</code></pre>
-      <p>Dictionnaire immutable.</p>
+    <div class="doc-shell">
+      <aside class="sidebar" aria-label="Sommaire des symboles publics">
+        <h2>API publique</h2>
+      <section class="toc-group">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="#Map" title="class Map[K, V]"><span>Map</span><code>class Map[K, V]</code></a></li>
+        </ul>
+      </section>
+      <section class="toc-group">
+        <h3>Constructeurs et fabriques</h3>
+        <ul>
+        <li><a href="#apply" title="def Map.apply[K, V](entries: Tuple2[K, V]*): Map[K, V]"><span>apply</span><code>def Map.apply[K, V](entries: Tuple2[K, V]*): Map[K, V]</code></a></li>
+        <li><a href="#empty" title="def Map.empty[K, V](): Map[K, V]"><span>empty</span><code>def Map.empty[K, V](): Map[K, V]</code></a></li>
+        <li><a href="#fromArray" title="def Map.fromArray[K, V](entries: Array[Tuple2[K, V]]): Map[K, V]"><span>fromArray</span><code>def Map.fromArray[K, V](entries: Array[Tuple2[K, V]]): Map[K, V]</code></a></li>
+        </ul>
+      </section>
+      <section class="toc-group">
+        <h3>Methodes</h3>
+        <ul>
+        <li><a href="#containsKey" title="def containsKey(key: K): Bool"><span>containsKey</span><code>def containsKey(key: K): Bool</code></a></li>
+        <li><a href="#contains" title="def contains(key: K): Bool"><span>contains</span><code>def contains(key: K): Bool</code></a></li>
+        <li><a href="#getOption" title="def getOption(key: K): Option[V]"><span>getOption</span><code>def getOption(key: K): Option[V]</code></a></li>
+        <li><a href="#getOption-2" title="def getOption(default: V, key: K): Option[V]"><span>getOption</span><code>def getOption(default: V, key: K): Option[V]</code></a></li>
+        <li><a href="#getOrElse" title="def getOrElse(key: K, default: V): V"><span>getOrElse</span><code>def getOrElse(key: K, default: V): V</code></a></li>
+        <li><a href="#updated" title="def updated(key: K, value: V): Map[K, V]"><span>updated</span><code>def updated(key: K, value: V): Map[K, V]</code></a></li>
+        <li><a href="#removed" title="def removed(key: K): Map[K, V]"><span>removed</span><code>def removed(key: K): Map[K, V]</code></a></li>
+        <li><a href="#clear" title="def clear(): Map[K, V]"><span>clear</span><code>def clear(): Map[K, V]</code></a></li>
+        <li><a href="#keys" title="def keys(): Array[K]"><span>keys</span><code>def keys(): Array[K]</code></a></li>
+        <li><a href="#values" title="def values(): Array[V]"><span>values</span><code>def values(): Array[V]</code></a></li>
+        <li><a href="#toArray" title="def toArray(): Array[Tuple2[K, V]]"><span>toArray</span><code>def toArray(): Array[Tuple2[K, V]]</code></a></li>
+        <li><a href="#foreachEntry" title="def foreachEntry(f: (Tuple2[K, V]) =&gt; Unit): Unit"><span>foreachEntry</span><code>def foreachEntry(f: (Tuple2[K, V]) =&gt; Unit): Unit</code></a></li>
+        <li><a href="#mapValues" title="def mapValues[U](default: U, f: (V) =&gt; U): Map[K, U]"><span>mapValues</span><code>def mapValues[U](default: U, f: (V) =&gt; U): Map[K, U]</code></a></li>
+        <li><a href="#filterKeys" title="def filterKeys(predicate: (K) =&gt; Bool): Map[K, V]"><span>filterKeys</span><code>def filterKeys(predicate: (K) =&gt; Bool): Map[K, V]</code></a></li>
+        <li><a href="#mkString" title="def mkString(separator: String): String"><span>mkString</span><code>def mkString(separator: String): String</code></a></li>
+        <li><a href="#toString" title="def toString(): String"><span>toString</span><code>def toString(): String</code></a></li>
+        </ul>
+      </section>
+      </aside>
+      <section class="content entries" aria-label="Reference detaillee">
+        <article class="entry" id="apply">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>apply</h2>
+          <pre class="signature"><code>def Map.apply[K, V](entries: Tuple2[K, V]*): Map[K, V]</code></pre>
+          <p>Cree une map depuis les paires donnees.</p>
+
+        </article>
+        <article class="entry" id="empty">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>empty</h2>
+          <pre class="signature"><code>def Map.empty[K, V](): Map[K, V]</code></pre>
+          <p>Cree une map vide.</p>
+
+        </article>
+        <article class="entry" id="fromArray">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>fromArray</h2>
+          <pre class="signature"><code>def Map.fromArray[K, V](entries: Array[Tuple2[K, V]]): Map[K, V]</code></pre>
+          <p>Cree une map depuis un tableau de paires.</p>
+
+        </article>
+        <article class="entry" id="Map">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>Map</h2>
+          <pre class="signature"><code>class Map[K, V]</code></pre>
+          <p>Dictionnaire immutable.</p>
 <p>Les operations updated, removed et clear retournent une nouvelle map. Si plusieurs paires utilisent la meme cle, la derniere valeur gagne.</p>
-    </article>
-    <article class="entry" id="containsKey">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>containsKey</h2>
-      <pre><code>def containsKey(key: K): Bool</code></pre>
-      <p>Indique si la map contient la cle donnee.</p>
+
+        </article>
+        <article class="entry" id="containsKey">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>containsKey</h2>
+          <pre class="signature"><code>def containsKey(key: K): Bool</code></pre>
+          <p>Indique si la map contient la cle donnee.</p>
 <p>Alias historique de contains(key), encore public pour lisibilite.</p>
-    </article>
-    <article class="entry" id="contains">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>contains</h2>
-      <pre><code>def contains(key: K): Bool</code></pre>
-      <p>Indique si la map contient la cle donnee.</p>
-    </article>
-    <article class="entry" id="getOption">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>getOption</h2>
-      <pre><code>def getOption(key: K): Option[V]</code></pre>
-      <p>Retourne la valeur associee a la cle, si elle existe.</p>
-    </article>
-    <article class="entry" id="getOption-2">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status compat">Compatibilite</span>
-      </div>
-      <h2>getOption</h2>
-      <pre><code>def getOption(default: V, key: K): Option[V]</code></pre>
-      <p>Retourne la valeur associee a la cle, si elle existe, avec une valeur interne de secours.</p>
+
+        </article>
+        <article class="entry" id="contains">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>contains</h2>
+          <pre class="signature"><code>def contains(key: K): Bool</code></pre>
+          <p>Indique si la map contient la cle donnee.</p>
+
+        </article>
+        <article class="entry" id="getOption">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>getOption</h2>
+          <pre class="signature"><code>def getOption(key: K): Option[V]</code></pre>
+          <p>Retourne la valeur associee a la cle, si elle existe.</p>
+
+        </article>
+        <article class="entry" id="getOption-2">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status compat">Compatibilite</span>
+          </div>
+          <h2>getOption</h2>
+          <pre class="signature"><code>def getOption(default: V, key: K): Option[V]</code></pre>
+          <p>Retourne la valeur associee a la cle, si elle existe, avec une valeur interne de secours.</p>
 <p>Preferer getOption(key) dans le nouveau code.</p>
-    </article>
-    <article class="entry" id="getOrElse">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>getOrElse</h2>
-      <pre><code>def getOrElse(key: K, default: V): V</code></pre>
-      <p>Retourne la valeur associee a la cle ou default si elle est absente.</p>
-    </article>
-    <article class="entry" id="updated">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>updated</h2>
-      <pre><code>def updated(key: K, value: V): Map[K, V]</code></pre>
-      <p>Retourne une nouvelle map avec key associee a value.</p>
-    </article>
-    <article class="entry" id="removed">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>removed</h2>
-      <pre><code>def removed(key: K): Map[K, V]</code></pre>
-      <p>Retourne une nouvelle map sans key.</p>
-    </article>
-    <article class="entry" id="clear">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>clear</h2>
-      <pre><code>def clear(): Map[K, V]</code></pre>
-      <p>Retourne une map vide du meme type.</p>
-    </article>
-    <article class="entry" id="keys">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>keys</h2>
-      <pre><code>def keys(): Array[K]</code></pre>
-      <p>Retourne les cles sous forme de tableau.</p>
+
+        </article>
+        <article class="entry" id="getOrElse">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>getOrElse</h2>
+          <pre class="signature"><code>def getOrElse(key: K, default: V): V</code></pre>
+          <p>Retourne la valeur associee a la cle ou default si elle est absente.</p>
+
+        </article>
+        <article class="entry" id="updated">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>updated</h2>
+          <pre class="signature"><code>def updated(key: K, value: V): Map[K, V]</code></pre>
+          <p>Retourne une nouvelle map avec key associee a value.</p>
+
+        </article>
+        <article class="entry" id="removed">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>removed</h2>
+          <pre class="signature"><code>def removed(key: K): Map[K, V]</code></pre>
+          <p>Retourne une nouvelle map sans key.</p>
+
+        </article>
+        <article class="entry" id="clear">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>clear</h2>
+          <pre class="signature"><code>def clear(): Map[K, V]</code></pre>
+          <p>Retourne une map vide du meme type.</p>
+
+        </article>
+        <article class="entry" id="keys">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>keys</h2>
+          <pre class="signature"><code>def keys(): Array[K]</code></pre>
+          <p>Retourne les cles sous forme de tableau.</p>
 <p>La representation visible actuelle est ArrayObject[K]. Manipuler le resultat via les operations communes et preferer Array[T] pour les nouvelles constructions applicatives.</p>
-    </article>
-    <article class="entry" id="values">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>values</h2>
-      <pre><code>def values(): Array[V]</code></pre>
-      <p>Retourne les valeurs sous forme de tableau.</p>
+
+        </article>
+        <article class="entry" id="values">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>values</h2>
+          <pre class="signature"><code>def values(): Array[V]</code></pre>
+          <p>Retourne les valeurs sous forme de tableau.</p>
 <p>La representation visible actuelle est ArrayObject[V].</p>
-    </article>
-    <article class="entry" id="toArray">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>toArray</h2>
-      <pre><code>def toArray(): Array[Tuple2[K, V]]</code></pre>
-      <p>Retourne les paires cle-valeur sous forme de tableau.</p>
+
+        </article>
+        <article class="entry" id="toArray">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>toArray</h2>
+          <pre class="signature"><code>def toArray(): Array[Tuple2[K, V]]</code></pre>
+          <p>Retourne les paires cle-valeur sous forme de tableau.</p>
 <p>La representation visible actuelle est ArrayObject[Tuple2[K, V]].</p>
-    </article>
-    <article class="entry" id="foreachEntry">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>foreachEntry</h2>
-      <pre><code>def foreachEntry(f: (Tuple2[K, V]) =&gt; Unit): Unit</code></pre>
-      <p>Applique une fonction a chaque paire cle-valeur.</p>
-    </article>
-    <article class="entry" id="mapValues">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>mapValues</h2>
-      <pre><code>def mapValues[U](default: U, f: (V) =&gt; U): Map[K, U]</code></pre>
-      <p>Transforme les valeurs en conservant les cles.</p>
-    </article>
-    <article class="entry" id="filterKeys">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>filterKeys</h2>
-      <pre><code>def filterKeys(predicate: (K) =&gt; Bool): Map[K, V]</code></pre>
-      <p>Filtre les entrees selon leur cle.</p>
-    </article>
-    <article class="entry" id="mkString">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>mkString</h2>
-      <pre><code>def mkString(separator: String): String</code></pre>
-      <p>Convertit la map en chaine de caracteres en reliant chaque paire cle-valeur par un separateur.</p>
-    </article>
-    <article class="entry" id="toString">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>toString</h2>
-      <pre><code>def toString(): String</code></pre>
-      <p>Retourne la representation sous forme de chaine de la map.</p>
-    </article>
-    </section>
+
+        </article>
+        <article class="entry" id="foreachEntry">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>foreachEntry</h2>
+          <pre class="signature"><code>def foreachEntry(f: (Tuple2[K, V]) =&gt; Unit): Unit</code></pre>
+          <p>Applique une fonction a chaque paire cle-valeur.</p>
+
+        </article>
+        <article class="entry" id="mapValues">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>mapValues</h2>
+          <pre class="signature"><code>def mapValues[U](default: U, f: (V) =&gt; U): Map[K, U]</code></pre>
+          <p>Transforme les valeurs en conservant les cles.</p>
+
+        </article>
+        <article class="entry" id="filterKeys">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>filterKeys</h2>
+          <pre class="signature"><code>def filterKeys(predicate: (K) =&gt; Bool): Map[K, V]</code></pre>
+          <p>Filtre les entrees selon leur cle.</p>
+
+        </article>
+        <article class="entry" id="mkString">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>mkString</h2>
+          <pre class="signature"><code>def mkString(separator: String): String</code></pre>
+          <p>Convertit la map en chaine de caracteres en reliant chaque paire cle-valeur par un separateur.</p>
+
+        </article>
+        <article class="entry" id="toString">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>toString</h2>
+          <pre class="signature"><code>def toString(): String</code></pre>
+          <p>Retourne la representation sous forme de chaine de la map.</p>
+
+        </article>
+      </section>
+    </div>
   </main>
 </body>
 </html>

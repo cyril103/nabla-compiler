@@ -7,153 +7,225 @@
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
-  <header>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <header class="topbar">
     <a class="brand" href="../index.html">Nabla stdlib</a>
-    <span>Reference API publique</span>
+    <nav class="topnav" aria-label="Navigation principale">
+      <a href="../index.html">Modules</a>
+      <a href="https://github.com/cyril103/nabla-compiler">GitHub</a>
+    </nav>
   </header>
-  <main>
-    <nav class="breadcrumb"><a href="../index.html">Modules</a> / collections.set</nav>
+  <main id="contenu">
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="../index.html">Modules</a> / collections.set</nav>
     <section class="module-hero">
-      <p class="import">import collections.set</p>
+      <p class="eyebrow">Module</p>
       <h1>Set</h1>
+      <p class="import"><code>import collections.set</code></p>
       <p>Ensembles immuables avec valeurs uniques. Utiliser Set(values...) pour creer un ensemble depuis des elements, Set.empty[T]() pour construire progressivement un ensemble, ou Set.fromArray[T](values) pour dedupliquer un tableau. Les anciens noms SetEmpty[T]() et SetFromArray[T](values) restent disponibles pour compatibilite, mais ne sont plus l&#x27;API recommandee pour du code applicatif. toArray() retourne encore la representation generique actuelle ; preferer Array[T] pour construire ou passer de nouveaux tableaux.</p>
+      <figure class="example">
+        <figcaption>Creer et tester un ensemble</figcaption>
+        <pre><code>import collections.set
+
+val tags = Set(&quot;stable&quot;, &quot;fast&quot;, &quot;stable&quot;)
+tags.contains(&quot;fast&quot;)</code></pre>
+      </figure>
+      <figure class="example">
+        <figcaption>Composer deux ensembles</figcaption>
+        <pre><code>import collections.set
+
+val left = Set(1, 2, 3)
+val right = Set(3, 4)
+left.union(right).size()</code></pre>
+      </figure>
     </section>
-    <section class="entries">
-    <article class="entry" id="apply">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>apply</h2>
-      <pre><code>def Set.apply[T](values: T*): Set[T]</code></pre>
-      <p>Cree un ensemble depuis les elements donnes.</p>
-    </article>
-    <article class="entry" id="empty">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>empty</h2>
-      <pre><code>def Set.empty[T](): Set[T]</code></pre>
-      <p>Cree un ensemble vide.</p>
-    </article>
-    <article class="entry" id="fromArray">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>fromArray</h2>
-      <pre><code>def Set.fromArray[T](values: Array[T]): Set[T]</code></pre>
-      <p>Deduplique un tableau en ensemble.</p>
+    <div class="doc-shell">
+      <aside class="sidebar" aria-label="Sommaire des symboles publics">
+        <h2>API publique</h2>
+      <section class="toc-group">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="#Set" title="class Set[T]"><span>Set</span><code>class Set[T]</code></a></li>
+        </ul>
+      </section>
+      <section class="toc-group">
+        <h3>Constructeurs et fabriques</h3>
+        <ul>
+        <li><a href="#apply" title="def Set.apply[T](values: T*): Set[T]"><span>apply</span><code>def Set.apply[T](values: T*): Set[T]</code></a></li>
+        <li><a href="#empty" title="def Set.empty[T](): Set[T]"><span>empty</span><code>def Set.empty[T](): Set[T]</code></a></li>
+        <li><a href="#fromArray" title="def Set.fromArray[T](values: Array[T]): Set[T]"><span>fromArray</span><code>def Set.fromArray[T](values: Array[T]): Set[T]</code></a></li>
+        </ul>
+      </section>
+      <section class="toc-group">
+        <h3>Methodes</h3>
+        <ul>
+        <li><a href="#SetFromArray" title="def SetFromArray[T](values: Array[T]): Set[T]"><span>SetFromArray</span><code>def SetFromArray[T](values: Array[T]): Set[T]</code></a></li>
+        <li><a href="#SetEmpty" title="def SetEmpty[T](): Set[T]"><span>SetEmpty</span><code>def SetEmpty[T](): Set[T]</code></a></li>
+        <li><a href="#contains" title="def contains(value: T): Bool"><span>contains</span><code>def contains(value: T): Bool</code></a></li>
+        <li><a href="#add" title="def add(value: T): Set[T]"><span>add</span><code>def add(value: T): Set[T]</code></a></li>
+        <li><a href="#remove" title="def remove(value: T): Set[T]"><span>remove</span><code>def remove(value: T): Set[T]</code></a></li>
+        <li><a href="#union" title="def union(other: Set[T]): Set[T]"><span>union</span><code>def union(other: Set[T]): Set[T]</code></a></li>
+        <li><a href="#intersect" title="def intersect(other: Set[T]): Set[T]"><span>intersect</span><code>def intersect(other: Set[T]): Set[T]</code></a></li>
+        <li><a href="#difference" title="def difference(other: Set[T]): Set[T]"><span>difference</span><code>def difference(other: Set[T]): Set[T]</code></a></li>
+        <li><a href="#clear" title="def clear(): Set[T]"><span>clear</span><code>def clear(): Set[T]</code></a></li>
+        <li><a href="#toArray" title="def toArray(): Array[T]"><span>toArray</span><code>def toArray(): Array[T]</code></a></li>
+        <li><a href="#mkString" title="def mkString(separator: String): String"><span>mkString</span><code>def mkString(separator: String): String</code></a></li>
+        <li><a href="#toString" title="def toString(): String"><span>toString</span><code>def toString(): String</code></a></li>
+        </ul>
+      </section>
+      </aside>
+      <section class="content entries" aria-label="Reference detaillee">
+        <article class="entry" id="apply">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>apply</h2>
+          <pre class="signature"><code>def Set.apply[T](values: T*): Set[T]</code></pre>
+          <p>Cree un ensemble depuis les elements donnes.</p>
+
+        </article>
+        <article class="entry" id="empty">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>empty</h2>
+          <pre class="signature"><code>def Set.empty[T](): Set[T]</code></pre>
+          <p>Cree un ensemble vide.</p>
+
+        </article>
+        <article class="entry" id="fromArray">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>fromArray</h2>
+          <pre class="signature"><code>def Set.fromArray[T](values: Array[T]): Set[T]</code></pre>
+          <p>Deduplique un tableau en ensemble.</p>
 <p>Le compilateur accepte les facades Array[T] usuelles et choisit la representation adaptee. Le code utilisateur n&#x27;a pas a nommer les tableaux bas niveau pour construire un Set.</p>
-    </article>
-    <article class="entry" id="SetFromArray">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status compat">Compatibilite</span>
-      </div>
-      <h2>SetFromArray</h2>
-      <pre><code>def SetFromArray[T](values: Array[T]): Set[T]</code></pre>
-      <p>Deduplique un tableau en ensemble.</p>
+
+        </article>
+        <article class="entry" id="SetFromArray">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status compat">Compatibilite</span>
+          </div>
+          <h2>SetFromArray</h2>
+          <pre class="signature"><code>def SetFromArray[T](values: Array[T]): Set[T]</code></pre>
+          <p>Deduplique un tableau en ensemble.</p>
 <p>Preferer Set.fromArray[T](values) dans le nouveau code.</p>
 <p>Le compilateur accepte les facades Array[T] usuelles et choisit la representation adaptee. Le code utilisateur n&#x27;a pas a nommer les tableaux bas niveau pour construire un Set.</p>
-    </article>
-    <article class="entry" id="SetEmpty">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status compat">Compatibilite</span>
-      </div>
-      <h2>SetEmpty</h2>
-      <pre><code>def SetEmpty[T](): Set[T]</code></pre>
-      <p>Cree un ensemble vide.</p>
+
+        </article>
+        <article class="entry" id="SetEmpty">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status compat">Compatibilite</span>
+          </div>
+          <h2>SetEmpty</h2>
+          <pre class="signature"><code>def SetEmpty[T](): Set[T]</code></pre>
+          <p>Cree un ensemble vide.</p>
 <p>Preferer Set.empty[T]() dans le nouveau code.</p>
-    </article>
-    <article class="entry" id="Set">
-      <div class="entry-meta">
-        <span class="kind">class</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>Set</h2>
-      <pre><code>class Set[T]</code></pre>
-      <p>Ensemble immutable.</p>
+
+        </article>
+        <article class="entry" id="Set">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>Set</h2>
+          <pre class="signature"><code>class Set[T]</code></pre>
+          <p>Ensemble immutable.</p>
 <p>Les operations comme add, remove, union, intersect et difference retournent un nouvel ensemble. L&#x27;instance d&#x27;origine n&#x27;est pas modifiee. L&#x27;egalite repose sur == et l&#x27;index interne utilise hashCode(), ce qui permet aux overrides utilisateur de participer a la deduplication.</p>
-    </article>
-    <article class="entry" id="contains">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>contains</h2>
-      <pre><code>def contains(value: T): Bool</code></pre>
-      <p>Indique si l&#x27;ensemble contient la valeur donnee.</p>
-    </article>
-    <article class="entry" id="add">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>add</h2>
-      <pre><code>def add(value: T): Set[T]</code></pre>
-      <p>Retourne un nouvel ensemble contenant value.</p>
-    </article>
-    <article class="entry" id="remove">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>remove</h2>
-      <pre><code>def remove(value: T): Set[T]</code></pre>
-      <p>Retourne un nouvel ensemble sans value.</p>
-    </article>
-    <article class="entry" id="union">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>union</h2>
-      <pre><code>def union(other: Set[T]): Set[T]</code></pre>
-      <p>Retourne l&#x27;union de deux ensembles.</p>
-    </article>
-    <article class="entry" id="intersect">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>intersect</h2>
-      <pre><code>def intersect(other: Set[T]): Set[T]</code></pre>
-      <p>Retourne l&#x27;intersection de deux ensembles.</p>
-    </article>
-    <article class="entry" id="difference">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>difference</h2>
-      <pre><code>def difference(other: Set[T]): Set[T]</code></pre>
-      <p>Retourne les elements de this absents de other.</p>
-    </article>
-    <article class="entry" id="clear">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>clear</h2>
-      <pre><code>def clear(): Set[T]</code></pre>
-      <p>Retourne un ensemble vide du meme type d&#x27;elements.</p>
-    </article>
-    <article class="entry" id="toArray">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>toArray</h2>
-      <pre><code>def toArray(): Array[T]</code></pre>
-      <p>Retourne les elements sous forme de tableau.</p>
+
+        </article>
+        <article class="entry" id="contains">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>contains</h2>
+          <pre class="signature"><code>def contains(value: T): Bool</code></pre>
+          <p>Indique si l&#x27;ensemble contient la valeur donnee.</p>
+
+        </article>
+        <article class="entry" id="add">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>add</h2>
+          <pre class="signature"><code>def add(value: T): Set[T]</code></pre>
+          <p>Retourne un nouvel ensemble contenant value.</p>
+
+        </article>
+        <article class="entry" id="remove">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>remove</h2>
+          <pre class="signature"><code>def remove(value: T): Set[T]</code></pre>
+          <p>Retourne un nouvel ensemble sans value.</p>
+
+        </article>
+        <article class="entry" id="union">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>union</h2>
+          <pre class="signature"><code>def union(other: Set[T]): Set[T]</code></pre>
+          <p>Retourne l&#x27;union de deux ensembles.</p>
+
+        </article>
+        <article class="entry" id="intersect">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>intersect</h2>
+          <pre class="signature"><code>def intersect(other: Set[T]): Set[T]</code></pre>
+          <p>Retourne l&#x27;intersection de deux ensembles.</p>
+
+        </article>
+        <article class="entry" id="difference">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>difference</h2>
+          <pre class="signature"><code>def difference(other: Set[T]): Set[T]</code></pre>
+          <p>Retourne les elements de this absents de other.</p>
+
+        </article>
+        <article class="entry" id="clear">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>clear</h2>
+          <pre class="signature"><code>def clear(): Set[T]</code></pre>
+          <p>Retourne un ensemble vide du meme type d&#x27;elements.</p>
+
+        </article>
+        <article class="entry" id="toArray">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>toArray</h2>
+          <pre class="signature"><code>def toArray(): Array[T]</code></pre>
+          <p>Retourne les elements sous forme de tableau.</p>
 <p>La representation visible actuelle est ArrayObject[T]. Manipuler le resultat via les operations communes et preferer Array[T] pour les nouvelles constructions applicatives.</p>
-    </article>
-    <article class="entry" id="mkString">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>mkString</h2>
-      <pre><code>def mkString(separator: String): String</code></pre>
-      <p>Joint les elements avec un separateur.</p>
-    </article>
-    <article class="entry" id="toString">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>toString</h2>
-      <pre><code>def toString(): String</code></pre>
-      <p>Retourne la representation sous forme de chaine de l&#x27;ensemble.</p>
-    </article>
-    </section>
+
+        </article>
+        <article class="entry" id="mkString">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>mkString</h2>
+          <pre class="signature"><code>def mkString(separator: String): String</code></pre>
+          <p>Joint les elements avec un separateur.</p>
+
+        </article>
+        <article class="entry" id="toString">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>toString</h2>
+          <pre class="signature"><code>def toString(): String</code></pre>
+          <p>Retourne la representation sous forme de chaine de l&#x27;ensemble.</p>
+
+        </article>
+      </section>
+    </div>
   </main>
 </body>
 </html>

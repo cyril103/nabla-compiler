@@ -7,6 +7,21 @@
 /// representation actuelle ; l'API recommandee reste Map et Array[T]. Les
 /// helpers map... et les ObjectArray internes ne sont pas une surface
 /// applicative idiomatique.
+///
+/// @example Construire, lire et mettre a jour
+/// import collections.map
+///
+/// val scores = Map("alice" -> 10, "bob" -> 7)
+/// val updated = scores.updated("bob", 8)
+/// updated.getOrElse("bob", 0)
+/// @end
+///
+/// @example Parcourir les valeurs
+/// import collections.map
+///
+/// val sizes = Map("a" -> 1, "bb" -> 2)
+/// sizes.values().size()
+/// @end
 
 import core.option
 import core.sized

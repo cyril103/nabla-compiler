@@ -7,6 +7,21 @@
 /// ObjectArray[T] et ArrayObject[T] sont des details de representation dans
 /// les cas courants : ils peuvent apparaitre dans certains retours ou
 /// diagnostics, mais les exemples applicatifs devraient nommer Array[T].
+///
+/// @example Creer et parcourir un tableau
+/// import collections.array
+///
+/// val xs = Array.fill[Int](3, 10)
+/// xs.set(1, 42)
+/// xs.sum()
+/// @end
+///
+/// @example Fabriquer une sequence d'indices
+/// import collections.array
+///
+/// val indexes = Array.rangeUntil(2, 5)
+/// indexes.mkString(", ")
+/// @end
 
 /// @symbol class Array[T](size: Int)
 /// @status Recommandee

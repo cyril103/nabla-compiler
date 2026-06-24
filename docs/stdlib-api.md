@@ -15,7 +15,9 @@ surface publique, pas les helpers historiques.
 
 La reference HTML generee par `make stdlib-docs` reste volontairement opt-in :
 seules les declarations precedees de commentaires `///` sont publiees. Les
-helpers sans commentaire public doivent rester absents de `docs/stdlib/`.
+helpers sans commentaire public doivent rester absents de `docs/stdlib/`. Les
+commentaires publics peuvent inclure des blocs `@example ... @end` ; ces blocs
+sont rendus comme exemples de code sur la page du module ou du symbole.
 
 Quand une signature publique abstraite mentionne `Array[T]`, l'implementation
 peut encore retourner une facade specialisee (`ArrayInt`, `ArrayObject[T]`,
@@ -209,7 +211,9 @@ modules prives, mais ils ne doivent pas etre documentes comme API utilisateur.
 ## Regles Pour Les Nouveaux Symboles Stdlib
 
 1. Choisir d'abord la categorie : public, compat temporaire ou interne.
-2. Ajouter un commentaire `///` uniquement pour les symboles publics.
+2. Ajouter un commentaire `///` uniquement pour les symboles publics. Pour les
+   modules ou methodes tres utilises, ajouter au moins un bloc `@example ...
+   @end` court et idiomatique.
 3. Si un symbole est interne, preferer un nom explicite (`arrayBase...`,
    `...Raw`, `...Unchecked`) et ne pas l'utiliser dans les exemples utilisateur.
 4. Ajouter un test positif sur la surface publique.

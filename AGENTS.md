@@ -338,9 +338,10 @@ Le pipeline implemente actuellement :
   procédure ayant servi à figer le périmètre 0.1;
 - reference HTML de la stdlib generee depuis `///`, avec directive `@status`
   pour distinguer visuellement API recommandee, compatibilite et helpers
-  internes; toutes les pages actuellement publiees affichent les statuts des
-  symboles documentes, et les modules `io`, `math`, `strings`, `util` et
-  `OptionInt` explicitent leurs conventions utilisateur principales.
+  internes; les pages publiees utilisent une mise en page type reference Scala
+  avec sidebar par types/fabriques/methodes, signatures ancrees, blocs
+  `@example ... @end`, chemins CSS relatifs verifies et test d'outillage dedie
+  aux liens/IDs/layout HTML.
 - examples Project Euler 1 a 10 (`examples/euler1.nabla` ... `examples/euler10_functional.nabla`)
   comme banc progressif pour exercer le langage et la bibliotheque standard.
 - `examples/student_scores.nabla` comme exemple idiomatique vérifié pour
@@ -850,6 +851,19 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Refaire la reference HTML de la stdlib dans un style proche Scala:
+  chemins CSS corriges pour les modules racine, sidebar par types/fabriques/
+  methodes, signatures ancrees, support `trait`/`object` documentes, blocs
+  `@example ... @end`, exemples sur `Array`, `Option`, `Map`, `Set` et `Math`,
+  et test d'outillage contre liens casses, IDs dupliques et pages sans layout
+  API.
+  - Fichiers associés: `tools/generate_stdlib_docs.py`,
+    `tests/test_stdlib_docs_html.py`, `Makefile`, `stdlib/collections/array.nabla`,
+    `stdlib/collections/map.nabla`, `stdlib/collections/set.nabla`,
+    `stdlib/core/option.nabla`, `stdlib/math.nabla`, `docs/stdlib/`,
+    `docs/stdlib-api.md`, `docs/plans/scala-style-stdlib-html.md`,
+    `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Rendre le heap runtime configurable sans modifier l'allocateur:
   `nablac --heap-size <octets>` conserve 8 MiB par défaut, rejette les valeurs

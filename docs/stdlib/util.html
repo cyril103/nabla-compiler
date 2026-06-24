@@ -4,120 +4,165 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Util - Nabla stdlib</title>
-  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <a class="brand" href="../index.html">Nabla stdlib</a>
-    <span>Reference API publique</span>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <header class="topbar">
+    <a class="brand" href="index.html">Nabla stdlib</a>
+    <nav class="topnav" aria-label="Navigation principale">
+      <a href="index.html">Modules</a>
+      <a href="https://github.com/cyril103/nabla-compiler">GitHub</a>
+    </nav>
   </header>
-  <main>
-    <nav class="breadcrumb"><a href="../index.html">Modules</a> / util</nav>
+  <main id="contenu">
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="index.html">Modules</a> / util</nav>
     <section class="module-hero">
-      <p class="import">import util</p>
+      <p class="eyebrow">Module</p>
       <h1>Util</h1>
+      <p class="import"><code>import util</code></p>
       <p>Generateur pseudo-aleatoire deterministe. Les fonctions retournent la valeur generee avec le nouvel etat. Conserver et reutiliser cet etat permet de produire une sequence reproductible; utiliser randomSeedNow() quand une seed temporelle suffit.</p>
+
     </section>
-    <section class="entries">
-    <article class="entry" id="RandomState">
-      <div class="entry-meta">
-        <span class="kind">class</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>RandomState</h2>
-      <pre><code>class RandomState(seedValue: Int)</code></pre>
-      <p>Etat immuable du generateur pseudo-aleatoire.</p>
-    </article>
-    <article class="entry" id="RandomResult">
-      <div class="entry-meta">
-        <span class="kind">class</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>RandomResult</h2>
-      <pre><code>class RandomResult[T](valueValue: T, stateValue: RandomState)</code></pre>
-      <p>Resultat generique d&#x27;un tirage aleatoire.</p>
+    <div class="doc-shell">
+      <aside class="sidebar" aria-label="Sommaire des symboles publics">
+        <h2>API publique</h2>
+      <section class="toc-group">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="#RandomState" title="class RandomState(seedValue: Int)"><span>RandomState</span><code>class RandomState(seedValue: Int)</code></a></li>
+        <li><a href="#RandomResult" title="class RandomResult[T](valueValue: T, stateValue: RandomState)"><span>RandomResult</span><code>class RandomResult[T](valueValue: T, stateValue: RandomState)</code></a></li>
+        <li><a href="#RandomIntResult" title="class RandomIntResult extends RandomResult[Int](valueValue, stateValue)"><span>RandomIntResult</span><code>class RandomIntResult extends RandomResult[Int](valueValue, stateValue)</code></a></li>
+        <li><a href="#RandomBoolResult" title="class RandomBoolResult extends RandomResult[Bool](valueValue, stateValue)"><span>RandomBoolResult</span><code>class RandomBoolResult extends RandomResult[Bool](valueValue, stateValue)</code></a></li>
+        <li><a href="#RandomChoiceResult" title="class RandomChoiceResult[T] extends RandomResult[T](valueValue, stateValue)"><span>RandomChoiceResult</span><code>class RandomChoiceResult[T] extends RandomResult[T](valueValue, stateValue)</code></a></li>
+        </ul>
+      </section>
+      <section class="toc-group">
+        <h3>Methodes</h3>
+        <ul>
+        <li><a href="#randomSeed" title="def randomSeed(seed: Int): RandomState"><span>randomSeed</span><code>def randomSeed(seed: Int): RandomState</code></a></li>
+        <li><a href="#randomSeedNow" title="def randomSeedNow(): RandomState"><span>randomSeedNow</span><code>def randomSeedNow(): RandomState</code></a></li>
+        <li><a href="#randomSeedTime" title="def randomSeedTime(): RandomState"><span>randomSeedTime</span><code>def randomSeedTime(): RandomState</code></a></li>
+        <li><a href="#randomInt" title="def randomInt(state: RandomState): RandomIntResult"><span>randomInt</span><code>def randomInt(state: RandomState): RandomIntResult</code></a></li>
+        <li><a href="#randomIntInRange" title="def randomIntInRange(state: RandomState, minimum: Int, maximum: Int): RandomIntResult"><span>randomIntInRange</span><code>def randomIntInRange(state: RandomState, minimum: Int, maximum: Int): RandomIntResult</code></a></li>
+        <li><a href="#randomIntRange" title="def randomIntRange(state: RandomState, minimum: Int, maximum: Int): RandomIntResult"><span>randomIntRange</span><code>def randomIntRange(state: RandomState, minimum: Int, maximum: Int): RandomIntResult</code></a></li>
+        <li><a href="#randomBool" title="def randomBool(state: RandomState): RandomBoolResult"><span>randomBool</span><code>def randomBool(state: RandomState): RandomBoolResult</code></a></li>
+        </ul>
+      </section>
+      </aside>
+      <section class="content entries" aria-label="Reference detaillee">
+        <article class="entry" id="RandomState">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>RandomState</h2>
+          <pre class="signature"><code>class RandomState(seedValue: Int)</code></pre>
+          <p>Etat immuable du generateur pseudo-aleatoire.</p>
+
+        </article>
+        <article class="entry" id="RandomResult">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>RandomResult</h2>
+          <pre class="signature"><code>class RandomResult[T](valueValue: T, stateValue: RandomState)</code></pre>
+          <p>Resultat generique d&#x27;un tirage aleatoire.</p>
 <p>value() donne la valeur tiree et state() donne l&#x27;etat a utiliser pour le tirage suivant.</p>
-    </article>
-    <article class="entry" id="RandomIntResult">
-      <div class="entry-meta">
-        <span class="kind">class</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>RandomIntResult</h2>
-      <pre><code>class RandomIntResult extends RandomResult[Int](valueValue, stateValue)</code></pre>
-      <p>Resultat d&#x27;un tirage entier.</p>
-    </article>
-    <article class="entry" id="RandomBoolResult">
-      <div class="entry-meta">
-        <span class="kind">class</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>RandomBoolResult</h2>
-      <pre><code>class RandomBoolResult extends RandomResult[Bool](valueValue, stateValue)</code></pre>
-      <p>Resultat d&#x27;un tirage booleen.</p>
-    </article>
-    <article class="entry" id="RandomChoiceResult">
-      <div class="entry-meta">
-        <span class="kind">class</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>RandomChoiceResult</h2>
-      <pre><code>class RandomChoiceResult[T] extends RandomResult[T](valueValue, stateValue)</code></pre>
-      <p>Resultat d&#x27;un choix aleatoire dans une collection.</p>
-    </article>
-    <article class="entry" id="randomSeed">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>randomSeed</h2>
-      <pre><code>def randomSeed(seed: Int): RandomState</code></pre>
-      <p>Cree un etat pseudo-aleatoire depuis une seed explicite.</p>
-    </article>
-    <article class="entry" id="randomSeedNow">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>randomSeedNow</h2>
-      <pre><code>def randomSeedNow(): RandomState</code></pre>
-      <p>Cree un etat pseudo-aleatoire depuis l&#x27;horloge runtime.</p>
-    </article>
-    <article class="entry" id="randomSeedTime">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status compat">Compatibilite</span>
-      </div>
-      <h2>randomSeedTime</h2>
-      <pre><code>def randomSeedTime(): RandomState</code></pre>
-      <p>Alias de compatibilite pour randomSeedNow().</p>
-    </article>
-    <article class="entry" id="randomInt">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>randomInt</h2>
-      <pre><code>def randomInt(state: RandomState): RandomIntResult</code></pre>
-      <p>Tire un entier pseudo-aleatoire positif.</p>
-    </article>
-    <article class="entry" id="randomIntInRange">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status compat">Compatibilite</span>
-      </div>
-      <h2>randomIntInRange</h2>
-      <pre><code>def randomIntInRange(state: RandomState, minimum: Int, maximum: Int): RandomIntResult</code></pre>
-      <p>Alias de compatibilite pour randomIntRange.</p>
-    </article>
-    <article class="entry" id="randomIntRange">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>randomIntRange</h2>
-      <pre><code>def randomIntRange(state: RandomState, minimum: Int, maximum: Int): RandomIntResult</code></pre>
-      <p>Tire un entier dans l&#x27;intervalle inclusif minimum..maximum.</p>
+
+        </article>
+        <article class="entry" id="RandomIntResult">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>RandomIntResult</h2>
+          <pre class="signature"><code>class RandomIntResult extends RandomResult[Int](valueValue, stateValue)</code></pre>
+          <p>Resultat d&#x27;un tirage entier.</p>
+
+        </article>
+        <article class="entry" id="RandomBoolResult">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>RandomBoolResult</h2>
+          <pre class="signature"><code>class RandomBoolResult extends RandomResult[Bool](valueValue, stateValue)</code></pre>
+          <p>Resultat d&#x27;un tirage booleen.</p>
+
+        </article>
+        <article class="entry" id="RandomChoiceResult">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>RandomChoiceResult</h2>
+          <pre class="signature"><code>class RandomChoiceResult[T] extends RandomResult[T](valueValue, stateValue)</code></pre>
+          <p>Resultat d&#x27;un choix aleatoire dans une collection.</p>
+
+        </article>
+        <article class="entry" id="randomSeed">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>randomSeed</h2>
+          <pre class="signature"><code>def randomSeed(seed: Int): RandomState</code></pre>
+          <p>Cree un etat pseudo-aleatoire depuis une seed explicite.</p>
+
+        </article>
+        <article class="entry" id="randomSeedNow">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>randomSeedNow</h2>
+          <pre class="signature"><code>def randomSeedNow(): RandomState</code></pre>
+          <p>Cree un etat pseudo-aleatoire depuis l&#x27;horloge runtime.</p>
+
+        </article>
+        <article class="entry" id="randomSeedTime">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status compat">Compatibilite</span>
+          </div>
+          <h2>randomSeedTime</h2>
+          <pre class="signature"><code>def randomSeedTime(): RandomState</code></pre>
+          <p>Alias de compatibilite pour randomSeedNow().</p>
+
+        </article>
+        <article class="entry" id="randomInt">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>randomInt</h2>
+          <pre class="signature"><code>def randomInt(state: RandomState): RandomIntResult</code></pre>
+          <p>Tire un entier pseudo-aleatoire positif.</p>
+
+        </article>
+        <article class="entry" id="randomIntInRange">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status compat">Compatibilite</span>
+          </div>
+          <h2>randomIntInRange</h2>
+          <pre class="signature"><code>def randomIntInRange(state: RandomState, minimum: Int, maximum: Int): RandomIntResult</code></pre>
+          <p>Alias de compatibilite pour randomIntRange.</p>
+
+        </article>
+        <article class="entry" id="randomIntRange">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>randomIntRange</h2>
+          <pre class="signature"><code>def randomIntRange(state: RandomState, minimum: Int, maximum: Int): RandomIntResult</code></pre>
+          <p>Tire un entier dans l&#x27;intervalle inclusif minimum..maximum.</p>
 <p>Si les bornes sont donnees dans l&#x27;ordre inverse, elles sont normalisees avant le tirage.</p>
-    </article>
-    <article class="entry" id="randomBool">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>randomBool</h2>
-      <pre><code>def randomBool(state: RandomState): RandomBoolResult</code></pre>
-      <p>Tire un booleen pseudo-aleatoire.</p>
-    </article>
-    </section>
+
+        </article>
+        <article class="entry" id="randomBool">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>randomBool</h2>
+          <pre class="signature"><code>def randomBool(state: RandomState): RandomBoolResult</code></pre>
+          <p>Tire un booleen pseudo-aleatoire.</p>
+
+        </article>
+      </section>
+    </div>
   </main>
 </body>
 </html>

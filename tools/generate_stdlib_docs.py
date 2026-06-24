@@ -10,16 +10,21 @@ from __future__ import annotations
 
 import html
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-
 
 ROOT = Path(__file__).resolve().parents[1]
 STDLIB_DIR = ROOT / "stdlib"
 OUTPUT_DIR = ROOT / "docs" / "stdlib"
 
+DECL_RE = re.compile(r"^\s*(?:override\s+)?(def|class|trait|object)\s+(.+?)\s*(?:=\s*\{|\{|$)")
+SLUG_RE = re.compile(r"[^A-Za-z0-9_.-]+")
 
-DECL_RE = re.compile(r"^\s*(?:override\s+)?(def|class)\s+(.+?)\s*(?:=\s*\{|$)")
+
+@dataclass
+class Example:
+    title: str | None
+    lines: list[str]
 
 
 @dataclass
@@ -29,6 +34,7 @@ class Entry:
     signature: str
     status: str | None
     description: list[str]
+    examples: list[Example] = field(default_factory=list)
 
 
 @dataclass
@@ -37,6 +43,7 @@ class ModuleDoc:
     import_name: str
     title: str
     description: list[str]
+    examples: list[Example]
     entries: list[Entry]
 
 
@@ -53,11 +60,13 @@ def clean_doc_line(line: str) -> str:
     text = line.strip()
     if text.startswith("///"):
         text = text[3:]
-    return text.strip()
+    if text.startswith(" "):
+        text = text[1:]
+    return text.rstrip()
 
 
 def symbol_name(kind: str, signature_tail: str) -> str:
-    if kind == "class":
+    if kind in {"class", "trait", "object"}:
         return signature_tail.split("(", 1)[0].split("[", 1)[0].split()[0]
     return signature_tail.split("(", 1)[0].split("[", 1)[0].strip()
 
@@ -72,7 +81,39 @@ def split_summary(lines: list[str]) -> tuple[str | None, list[str], list[str]]:
     return None, [], lines
 
 
-def extract_metadata(lines: list[str], fallback: str) -> tuple[str, str | None, list[str]]:
+def extract_examples(lines: list[str]) -> tuple[list[str], list[Example]]:
+    kept: list[str] = []
+    examples: list[Example] = []
+    current_title: str | None = None
+    current_lines: list[str] | None = None
+
+    for line in lines:
+        if line.startswith("@example"):
+            if current_lines is not None:
+                examples.append(Example(current_title, current_lines))
+            raw_title = line[len("@example") :].strip()
+            current_title = raw_title or None
+            current_lines = []
+            continue
+        if line == "@end":
+            if current_lines is not None:
+                examples.append(Example(current_title, current_lines))
+                current_title = None
+                current_lines = None
+            else:
+                kept.append(line)
+            continue
+        if current_lines is not None:
+            current_lines.append(line)
+        else:
+            kept.append(line)
+
+    if current_lines is not None:
+        examples.append(Example(current_title, current_lines))
+    return kept, examples
+
+
+def extract_metadata(lines: list[str], fallback: str) -> tuple[str, str | None, list[str], list[Example]]:
     kept: list[str] = []
     signature = fallback
     status: str | None = None
@@ -83,7 +124,8 @@ def extract_metadata(lines: list[str], fallback: str) -> tuple[str, str | None, 
             status = line[8:].strip()
         else:
             kept.append(line)
-    return signature, status, kept
+    kept, examples = extract_examples(kept)
+    return signature, status, kept, examples
 
 
 def entry_from_signature(signature: str, description: list[str]) -> Entry:
@@ -91,13 +133,14 @@ def entry_from_signature(signature: str, description: list[str]) -> Entry:
     if not declaration:
         raise ValueError(f"Invalid documented symbol signature: {signature}")
     kind = declaration.group(1)
-    signature, status, description = extract_metadata(description, signature)
+    signature, status, description, examples = extract_metadata(description, signature)
     return Entry(
         kind=kind,
         name=symbol_name(kind, declaration.group(2).strip()),
         signature=signature,
         status=status,
         description=description,
+        examples=examples,
     )
 
 
@@ -106,14 +149,17 @@ def parse_module(path: Path) -> ModuleDoc:
     pending_doc: list[str] = []
     module_title: str | None = None
     module_description: list[str] = []
+    module_examples: list[Example] = []
     entries: list[Entry] = []
 
     def finish_module_doc() -> None:
-        nonlocal module_title, module_description, pending_doc
+        nonlocal module_title, module_description, module_examples, pending_doc
         if pending_doc and pending_doc[0].startswith("@module "):
-            title, module_doc_lines, _ = split_summary(pending_doc)
+            title, module_doc_lines, remaining_doc_lines = split_summary(pending_doc)
+            module_doc_lines, examples = extract_examples(module_doc_lines + remaining_doc_lines)
             module_title = title
             module_description = module_doc_lines
+            module_examples = examples
             pending_doc = []
 
     def finish_symbol_doc() -> None:
@@ -144,9 +190,11 @@ def parse_module(path: Path) -> ModuleDoc:
                 signature = signature[:-1].rstrip()
             if signature.endswith("="):
                 signature = signature[:-1].rstrip()
-            signature, status, doc_lines = extract_metadata(doc_lines, signature)
+            signature, status, doc_lines, examples = extract_metadata(doc_lines, signature)
 
             if title is not None:
+                module_doc_lines, module_examples = extract_examples(module_doc_lines + doc_lines)
+                doc_lines = []
                 module_title = title
                 module_description = module_doc_lines
             if doc_lines:
@@ -157,6 +205,7 @@ def parse_module(path: Path) -> ModuleDoc:
                         signature=signature,
                         status=status,
                         description=doc_lines,
+                        examples=examples,
                     )
                 )
             pending_doc = []
@@ -172,8 +221,14 @@ def parse_module(path: Path) -> ModuleDoc:
         import_name=import_name,
         title=module_title or title_from_module(import_name),
         description=module_description,
+        examples=module_examples,
         entries=entries,
     )
+
+
+def slug(value: str) -> str:
+    cleaned = SLUG_RE.sub("-", value.strip()).strip("-")
+    return cleaned or "entry"
 
 
 def render_paragraphs(lines: list[str]) -> str:
@@ -191,60 +246,20 @@ def render_paragraphs(lines: list[str]) -> str:
     return "\n".join(f"<p>{html.escape(paragraph)}</p>" for paragraph in paragraphs)
 
 
-def page_template(title: str, body: str, depth: int = 0) -> str:
-    prefix = "../" * depth
-    return f"""<!doctype html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{html.escape(title)} - Nabla stdlib</title>
-  <link rel="stylesheet" href="{prefix}style.css">
-</head>
-<body>
-  <header>
-    <a class="brand" href="{prefix}index.html">Nabla stdlib</a>
-    <span>Reference API publique</span>
-  </header>
-  <main>
-{body}
-  </main>
-</body>
-</html>
-"""
-
-
-def render_module(module: ModuleDoc) -> str:
-    seen_entry_ids: dict[str, int] = {}
-    rendered_entries: list[str] = []
-    for entry in module.entries:
-        seen_count = seen_entry_ids.get(entry.name, 0) + 1
-        seen_entry_ids[entry.name] = seen_count
-        entry_id = entry.name if seen_count == 1 else f"{entry.name}-{seen_count}"
-        rendered_entries.append(
-            f"""    <article class="entry" id="{html.escape(entry_id)}">
-      <div class="entry-meta">
-        <span class="kind">{html.escape(entry.kind)}</span>{render_status(entry.status)}
-      </div>
-      <h2>{html.escape(entry.name)}</h2>
-      <pre><code>{html.escape(entry.signature)}</code></pre>
-      {render_paragraphs(entry.description)}
-    </article>"""
+def render_examples(examples: list[Example]) -> str:
+    if not examples:
+        return ""
+    rendered: list[str] = []
+    for index, example in enumerate(examples, start=1):
+        title = example.title or ("Exemple" if len(examples) == 1 else f"Exemple {index}")
+        code = "\n".join(example.lines).strip("\n")
+        rendered.append(
+            f"""      <figure class="example">
+        <figcaption>{html.escape(title)}</figcaption>
+        <pre><code>{html.escape(code)}</code></pre>
+      </figure>"""
         )
-    entries = "\n".join(rendered_entries)
-    if not entries:
-        entries = "    <p class=\"empty\">Aucun symbole public documente.</p>"
-
-    body = f"""    <nav class="breadcrumb"><a href="../index.html">Modules</a> / {html.escape(module.import_name)}</nav>
-    <section class="module-hero">
-      <p class="import">import {html.escape(module.import_name)}</p>
-      <h1>{html.escape(module.title)}</h1>
-      {render_paragraphs(module.description)}
-    </section>
-    <section class="entries">
-{entries}
-    </section>"""
-    return page_template(module.title, body, depth=1)
+    return "\n".join(rendered)
 
 
 def render_status(status: str | None) -> str:
@@ -260,19 +275,123 @@ def render_status(status: str | None) -> str:
     return f' <span class="status {css_class}">{html.escape(status)}</span>'
 
 
+def entry_group(entry: Entry) -> str:
+    if entry.kind in {"class", "trait", "object"}:
+        return "Types"
+    if entry.kind == "def" and re.match(r"def\s+[A-Z][A-Za-z0-9_]*\.", entry.signature):
+        return "Constructeurs et fabriques"
+    return "Methodes"
+
+
+def output_depth(output: Path) -> int:
+    return len(output.relative_to(OUTPUT_DIR).parents) - 1
+
+
+def page_template(title: str, body: str, depth: int = 0) -> str:
+    prefix = "../" * depth
+    return f"""<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{html.escape(title)} - Nabla stdlib</title>
+  <link rel="stylesheet" href="{prefix}style.css">
+</head>
+<body>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <header class="topbar">
+    <a class="brand" href="{prefix}index.html">Nabla stdlib</a>
+    <nav class="topnav" aria-label="Navigation principale">
+      <a href="{prefix}index.html">Modules</a>
+      <a href="https://github.com/cyril103/nabla-compiler">GitHub</a>
+    </nav>
+  </header>
+  <main id="contenu">
+{body}
+  </main>
+</body>
+</html>
+"""
+
+
+def render_entry_link(entry: Entry, entry_id: str) -> str:
+    signature = html.escape(entry.signature)
+    return f"""        <li><a href="#{html.escape(entry_id)}" title="{signature}"><span>{html.escape(entry.name)}</span><code>{signature}</code></a></li>"""
+
+
+def render_module(module: ModuleDoc, depth: int) -> str:
+    seen_entry_ids: dict[str, int] = {}
+    entry_ids: list[str] = []
+    rendered_entries: list[str] = []
+    grouped_links: dict[str, list[str]] = {"Types": [], "Constructeurs et fabriques": [], "Methodes": []}
+
+    for entry in module.entries:
+        seen_count = seen_entry_ids.get(entry.name, 0) + 1
+        seen_entry_ids[entry.name] = seen_count
+        base_id = slug(entry.name)
+        entry_id = base_id if seen_count == 1 else f"{base_id}-{seen_count}"
+        entry_ids.append(entry_id)
+        grouped_links.setdefault(entry_group(entry), []).append(render_entry_link(entry, entry_id))
+        rendered_entries.append(
+            f"""        <article class="entry" id="{html.escape(entry_id)}">
+          <div class="entry-meta">
+            <span class="kind">{html.escape(entry.kind)}</span>{render_status(entry.status)}
+          </div>
+          <h2>{html.escape(entry.name)}</h2>
+          <pre class="signature"><code>{html.escape(entry.signature)}</code></pre>
+          {render_paragraphs(entry.description)}
+{render_examples(entry.examples)}
+        </article>"""
+        )
+
+    toc_groups = []
+    for group, links in grouped_links.items():
+        if links:
+            toc_groups.append(
+                f"""      <section class="toc-group">
+        <h3>{html.escape(group)}</h3>
+        <ul>
+{chr(10).join(links)}
+        </ul>
+      </section>"""
+            )
+    toc = "\n".join(toc_groups) or "      <p class=\"empty\">Aucun symbole public documente.</p>"
+    entries = "\n".join(rendered_entries) or "        <p class=\"empty\">Aucun symbole public documente.</p>"
+
+    body = f"""    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="{'../' * depth}index.html">Modules</a> / {html.escape(module.import_name)}</nav>
+    <section class="module-hero">
+      <p class="eyebrow">Module</p>
+      <h1>{html.escape(module.title)}</h1>
+      <p class="import"><code>import {html.escape(module.import_name)}</code></p>
+      {render_paragraphs(module.description)}
+{render_examples(module.examples)}
+    </section>
+    <div class="doc-shell">
+      <aside class="sidebar" aria-label="Sommaire des symboles publics">
+        <h2>API publique</h2>
+{toc}
+      </aside>
+      <section class="content entries" aria-label="Reference detaillee">
+{entries}
+      </section>
+    </div>"""
+    return page_template(module.title, body, depth=depth)
+
+
 def render_index(modules: list[ModuleDoc]) -> str:
+    visible_modules = [module for module in modules if module.entries or module.description]
     cards = "\n".join(
         f"""      <a class="module-card" href="{html.escape(module.import_name.replace('.', '/'))}.html">
         <span>{html.escape(module.import_name)}</span>
         <strong>{html.escape(module.title)}</strong>
         <small>{len(module.entries)} symbole(s) public(s)</small>
       </a>"""
-        for module in modules
-        if module.entries or module.description
+        for module in visible_modules
     )
-    body = f"""    <section class="module-hero">
+    body = f"""    <section class="module-hero index-hero">
+      <p class="eyebrow">Reference API publique</p>
       <h1>Bibliotheque standard Nabla</h1>
-      <p>Reference generee depuis les commentaires <code>///</code> de la stdlib. Les helpers internes non documentes restent hors de cette surface publique.</p>
+      <p>Documentation generee depuis les commentaires <code>///</code> de la stdlib. Comme dans une reference Scala, chaque module liste les types, fabriques et methodes utilisables avec leurs signatures et exemples.</p>
     </section>
     <section class="module-grid">
 {cards}
@@ -284,83 +403,216 @@ STYLE = """
 :root {
   color-scheme: light;
   --text: #172026;
-  --muted: #5a6872;
-  --line: #d7dde2;
-  --surface: #f6f8fa;
-  --accent: #176d79;
+  --muted: #5d6875;
+  --line: #dce3ea;
+  --surface: #f7f9fb;
+  --surface-strong: #eef4f8;
+  --panel: #ffffff;
+  --accent: #0f6c80;
+  --accent-strong: #0b4f63;
+  --code: #101820;
+  --shadow: 0 18px 45px rgba(22, 35, 48, 0.08);
 }
 
 * { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 body {
   margin: 0;
   color: var(--text);
-  font: 16px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: white;
-}
-
-header {
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  padding: 14px clamp(18px, 4vw, 48px);
-  color: var(--muted);
+  font: 16px/1.55 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: linear-gradient(180deg, #f9fbfd 0, #fff 280px);
 }
 
 a { color: var(--accent); text-decoration: none; }
-a:hover { text-decoration: underline; }
-.brand { font-weight: 700; color: var(--text); }
+a:hover { color: var(--accent-strong); text-decoration: underline; }
+a:focus-visible,
+.module-card:focus-visible,
+.toc-group a:focus-visible {
+  outline: 3px solid rgba(15, 108, 128, 0.35);
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+code, pre { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+.skip-link {
+  position: absolute;
+  left: 16px;
+  top: 10px;
+  z-index: 100;
+  transform: translateY(-140%);
+  background: var(--accent-strong);
+  color: white;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 800;
+}
+.skip-link:focus-visible { transform: translateY(0); }
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid rgba(220, 227, 234, 0.9);
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 14px clamp(18px, 4vw, 48px);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+}
+.brand { font-weight: 800; color: var(--text); letter-spacing: -0.02em; }
+.topnav { display: flex; gap: 18px; color: var(--muted); font-size: 0.95rem; }
+.topnav a { color: var(--muted); }
 
 main {
-  max-width: 1080px;
+  max-width: 1320px;
   margin: 0 auto;
-  padding: 32px clamp(18px, 4vw, 48px) 64px;
+  padding: 34px clamp(18px, 4vw, 48px) 72px;
 }
 
-.breadcrumb { margin-bottom: 24px; color: var(--muted); }
+.breadcrumb { margin-bottom: 22px; color: var(--muted); font-size: 0.95rem; }
 .module-hero {
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 28px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  padding: clamp(24px, 4vw, 44px);
   margin-bottom: 28px;
 }
-.module-hero h1 {
-  font-size: clamp(2rem, 4vw, 3.4rem);
-  line-height: 1.05;
-  margin: 0 0 14px;
-}
-.import {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  color: var(--muted);
+.index-hero { max-width: 920px; }
+.eyebrow {
+  color: var(--accent);
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
   margin: 0 0 10px;
 }
+.module-hero h1 {
+  font-size: clamp(2.2rem, 5vw, 4.2rem);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+  margin: 0 0 18px;
+}
+.import {
+  color: var(--muted);
+  margin: 0 0 18px;
+}
+.import code {
+  color: var(--code);
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 10px;
+}
+.module-hero p { max-width: 78ch; }
+
 .module-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
 }
 .module-card {
   border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 16px;
+  border-radius: 18px;
+  padding: 20px;
   color: var(--text);
+  background: var(--panel);
+  box-shadow: 0 10px 28px rgba(22, 35, 48, 0.05);
+  transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+}
+.module-card:hover {
+  transform: translateY(-2px);
+  border-color: #b7cad7;
+  box-shadow: var(--shadow);
+  text-decoration: none;
 }
 .module-card span,
 .module-card small,
-.kind {
+.kind,
+.empty { color: var(--muted); }
+.module-card strong {
+  display: block;
+  font-size: 1.28rem;
+  margin: 5px 0;
+}
+
+.doc-shell {
+  display: grid;
+  grid-template-columns: minmax(240px, 310px) minmax(0, 1fr);
+  align-items: start;
+  gap: 28px;
+}
+.sidebar {
+  position: sticky;
+  top: 82px;
+  max-height: calc(100vh - 112px);
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--panel);
+  padding: 18px;
+}
+.sidebar h2 {
+  margin: 0 0 14px;
+  font-size: 1rem;
+}
+.toc-group + .toc-group { margin-top: 18px; }
+.toc-group h3 {
+  margin: 0 0 8px;
   color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.toc-group ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.toc-group a {
+  display: grid;
+  gap: 2px;
+  border-radius: 12px;
+  padding: 8px 10px;
+  color: var(--text);
+}
+.toc-group a:hover { background: var(--surface); text-decoration: none; }
+.toc-group span { font-weight: 700; }
+.toc-group code {
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.78rem;
+}
+
+.entries { display: grid; gap: 18px; }
+.entry {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--panel);
+  padding: clamp(20px, 3vw, 30px);
+  scroll-margin-top: 92px;
 }
 .entry-meta {
   display: flex;
   gap: 10px;
   align-items: center;
   flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.kind {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 .status {
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 2px 8px;
   font-size: 0.78rem;
-  font-weight: 650;
+  font-weight: 700;
 }
 .status.recommended {
   color: #0f5d3f;
@@ -377,30 +629,47 @@ main {
   background: #f8edf4;
   border-color: #e5bdd6;
 }
-.module-card strong {
-  display: block;
-  font-size: 1.25rem;
-  margin: 4px 0;
-}
-.entry {
-  border-bottom: 1px solid var(--line);
-  padding: 22px 0;
-}
 .entry h2 {
-  margin: 0 0 10px;
-  font-size: 1.5rem;
+  margin: 0 0 12px;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  letter-spacing: -0.025em;
 }
-pre {
+.signature,
+.example pre {
   overflow-x: auto;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 12px;
+  background: #0f1720;
+  color: #edf7ff;
+  border: 1px solid #1f2c39;
+  border-radius: 14px;
+  padding: 14px 16px;
 }
-code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+.signature code,
+.example code { color: inherit; }
+.example {
+  margin: 18px 0 0;
 }
-.empty { color: var(--muted); }
+.example figcaption {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 750;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 900px) {
+  .topbar { position: static; }
+  .doc-shell { grid-template-columns: 1fr; }
+  .sidebar { position: static; max-height: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .module-card:hover { transform: none; }
+}
 """
 
 
@@ -410,17 +679,14 @@ def write_file(path: Path, content: str) -> None:
 
 
 def main() -> None:
-    modules = [
-        parse_module(path)
-        for path in sorted(STDLIB_DIR.rglob("*.nabla"))
-    ]
+    modules = [parse_module(path) for path in sorted(STDLIB_DIR.rglob("*.nabla"))]
     write_file(OUTPUT_DIR / "style.css", STYLE.strip() + "\n")
     write_file(OUTPUT_DIR / "index.html", render_index(modules))
     for module in modules:
         if not module.entries and not module.description:
             continue
         output = OUTPUT_DIR / (module.import_name.replace(".", "/") + ".html")
-        write_file(output, render_module(module))
+        write_file(output, render_module(module, output_depth(output)))
     print(f"Generated stdlib docs in {OUTPUT_DIR}")
 
 

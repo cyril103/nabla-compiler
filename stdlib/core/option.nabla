@@ -6,6 +6,19 @@
 /// presente et Option.none[T]() pour construire une absence. Les anciens noms
 /// optionSome[T](value), Option.none[T](default) et optionNone[T](default)
 /// restent disponibles pour compatibilite.
+///
+/// @example Transformer une valeur presente
+/// import core.option
+///
+/// val value = Option.some[Int](41)
+/// value.map[Int](0, x => x + 1).getOrElse(0)
+/// @end
+///
+/// @example Fournir une valeur par defaut
+/// import core.option
+///
+/// Option.none[Int]().getOrElse(42)
+/// @end
 
 import collections.object_array
 
@@ -15,18 +28,32 @@ import collections.object_array
 /// foreach, filter, orElse et getOrElse.
 /// @status Recommandee
 class Option[T](defined: Bool, value: T) {
+    /// Indique si une valeur est presente.
+    /// @signature def isDefined(): Bool
+    /// @status Recommandee
     def isDefined(): Bool = {
         defined
     }
 
+    /// Indique si l'option est vide.
+    /// @signature def isEmpty(): Bool
+    /// @status Recommandee
     def isEmpty(): Bool = {
         !defined
     }
 
+    /// Indique si une valeur est presente.
+    /// @signature def nonEmpty(): Bool
+    /// @status Recommandee
     def nonEmpty(): Bool = {
         defined
     }
 
+    /// Transforme la valeur presente et propage None sinon.
+    /// @signature def map[U](default: U, transform: (T) => U): Option[U]
+    /// @status Recommandee
+    ///
+    /// Le parametre default sert de valeur interne pour le cas vide.
     def map[U](default: U, transform: (T) => U): Option[U] = {
         if defined {
             new Option[U](true, transform(value))
@@ -35,6 +62,9 @@ class Option[T](defined: Bool, value: T) {
         }
     }
 
+    /// Enchaine une fonction qui retourne deja une option.
+    /// @signature def flatMap[U](default: U, transform: (T) => Option[U]): Option[U]
+    /// @status Recommandee
     def flatMap[U](default: U, transform: (T) => Option[U]): Option[U] = {
         if defined {
             transform(value)
@@ -43,6 +73,9 @@ class Option[T](defined: Bool, value: T) {
         }
     }
 
+    /// Execute f uniquement quand une valeur est presente.
+    /// @signature def foreach(f: (T) => Unit): Unit
+    /// @status Recommandee
     def foreach(f: (T) => Unit): Unit = {
         if defined {
             f(value)
@@ -53,6 +86,9 @@ class Option[T](defined: Bool, value: T) {
         }
     }
 
+    /// Conserve la valeur presente seulement si predicate est vrai.
+    /// @signature def filter(predicate: (T) => Bool): Option[T]
+    /// @status Recommandee
     def filter(predicate: (T) => Bool): Option[T] = {
         if defined && predicate(value) {
             this
@@ -61,6 +97,9 @@ class Option[T](defined: Bool, value: T) {
         }
     }
 
+    /// Retourne cette option si elle est definie, sinon other.
+    /// @signature def orElse(other: Option[T]): Option[T]
+    /// @status Recommandee
     def orElse(other: Option[T]): Option[T] = {
         if defined {
             this
@@ -69,6 +108,9 @@ class Option[T](defined: Bool, value: T) {
         }
     }
 
+    /// Extrait la valeur presente ou retourne default.
+    /// @signature def getOrElse(default: T): T
+    /// @status Recommandee
     def getOrElse(default: T): T = {
         if defined {
             value

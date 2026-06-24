@@ -7,43 +7,80 @@
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
-  <header>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <header class="topbar">
     <a class="brand" href="../index.html">Nabla stdlib</a>
-    <span>Reference API publique</span>
+    <nav class="topnav" aria-label="Navigation principale">
+      <a href="../index.html">Modules</a>
+      <a href="https://github.com/cyril103/nabla-compiler">GitHub</a>
+    </nav>
   </header>
-  <main>
-    <nav class="breadcrumb"><a href="../index.html">Modules</a> / core.sized</nav>
+  <main id="contenu">
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="../index.html">Modules</a> / core.sized</nav>
     <section class="module-hero">
-      <p class="import">import core.sized</p>
+      <p class="eyebrow">Module</p>
       <h1>Sized</h1>
+      <p class="import"><code>import core.sized</code></p>
       <p>Trait public minimal pour les collections ayant une taille logique.</p>
+
     </section>
-    <section class="entries">
-    <article class="entry" id="size">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>size</h2>
-      <pre><code>def size(): Int</code></pre>
-      <p>Retourne le nombre d&#x27;elements logiques.</p>
-    </article>
-    <article class="entry" id="isEmpty">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>isEmpty</h2>
-      <pre><code>def isEmpty(): Bool</code></pre>
-      <p>Indique si la collection est vide.</p>
-    </article>
-    <article class="entry" id="nonEmpty">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>nonEmpty</h2>
-      <pre><code>def nonEmpty(): Bool</code></pre>
-      <p>Indique si la collection n&#x27;est pas vide.</p>
-    </article>
-    </section>
+    <div class="doc-shell">
+      <aside class="sidebar" aria-label="Sommaire des symboles publics">
+        <h2>API publique</h2>
+      <section class="toc-group">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="#Sized" title="trait Sized"><span>Sized</span><code>trait Sized</code></a></li>
+        </ul>
+      </section>
+      <section class="toc-group">
+        <h3>Methodes</h3>
+        <ul>
+        <li><a href="#size" title="def size(): Int"><span>size</span><code>def size(): Int</code></a></li>
+        <li><a href="#isEmpty" title="def isEmpty(): Bool"><span>isEmpty</span><code>def isEmpty(): Bool</code></a></li>
+        <li><a href="#nonEmpty" title="def nonEmpty(): Bool"><span>nonEmpty</span><code>def nonEmpty(): Bool</code></a></li>
+        </ul>
+      </section>
+      </aside>
+      <section class="content entries" aria-label="Reference detaillee">
+        <article class="entry" id="Sized">
+          <div class="entry-meta">
+            <span class="kind">trait</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>Sized</h2>
+          <pre class="signature"><code>trait Sized</code></pre>
+          <p>Type ayant une taille entiere.</p>
+
+        </article>
+        <article class="entry" id="size">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>size</h2>
+          <pre class="signature"><code>def size(): Int</code></pre>
+          <p>Retourne le nombre d&#x27;elements logiques.</p>
+
+        </article>
+        <article class="entry" id="isEmpty">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>isEmpty</h2>
+          <pre class="signature"><code>def isEmpty(): Bool</code></pre>
+          <p>Indique si la collection est vide.</p>
+
+        </article>
+        <article class="entry" id="nonEmpty">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>nonEmpty</h2>
+          <pre class="signature"><code>def nonEmpty(): Bool</code></pre>
+          <p>Indique si la collection n&#x27;est pas vide.</p>
+
+        </article>
+      </section>
+    </div>
   </main>
 </body>
 </html>

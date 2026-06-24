@@ -88,13 +88,13 @@ features.
   `nablac --heap-size <octets>`.
 - Typage a garder simple : sous-typage nominal pour les classes, generiques
   invariants par defaut, conversions explicites ou helpers stdlib.
-- Documentation : la reference HTML doit devenir une doc utilisateur claire,
+- Documentation : la reference HTML doit rester une doc utilisateur claire,
   avec une separation visible entre API publique et helpers internes. Le
-  generateur accepte maintenant `@status` pour afficher des badges de statut;
-  toutes les pages de reference actuellement publiees affichent les symboles
-  recommandes, avec les alias de compatibilite distingues dans `Array`,
-  `Option` et `Set`. Le perimetre cible de Nabla 0.1 est fixe dans
-  `docs/releases/0.1.md`.
+  generateur accepte `@status` pour afficher des badges de statut et
+  `@example ... @end` pour rendre des exemples de code; les pages publiees
+  utilisent une mise en page type reference Scala avec sidebar par
+  types/fabriques/methodes, signatures ancrees et chemins CSS relatifs verifies.
+  Le perimetre cible de Nabla 0.1 est fixe dans `docs/releases/0.1.md`.
 
 Actions recommandees :
 

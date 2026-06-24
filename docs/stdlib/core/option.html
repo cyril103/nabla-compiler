@@ -7,71 +7,212 @@
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
-  <header>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <header class="topbar">
     <a class="brand" href="../index.html">Nabla stdlib</a>
-    <span>Reference API publique</span>
+    <nav class="topnav" aria-label="Navigation principale">
+      <a href="../index.html">Modules</a>
+      <a href="https://github.com/cyril103/nabla-compiler">GitHub</a>
+    </nav>
   </header>
-  <main>
-    <nav class="breadcrumb"><a href="../index.html">Modules</a> / core.option</nav>
+  <main id="contenu">
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="../index.html">Modules</a> / core.option</nav>
     <section class="module-hero">
-      <p class="import">import core.option</p>
+      <p class="eyebrow">Module</p>
       <h1>Option</h1>
+      <p class="import"><code>import core.option</code></p>
       <p>Valeur optionnelle generique. Option[T] represente soit une valeur presente, soit une absence. C&#x27;est le type a privilegier quand une operation peut ne rien produire sans que ce soit une erreur. Utiliser Option.some[T](value) pour construire une valeur presente et Option.none[T]() pour construire une absence. Les anciens noms optionSome[T](value), Option.none[T](default) et optionNone[T](default) restent disponibles pour compatibilite.</p>
+      <figure class="example">
+        <figcaption>Transformer une valeur presente</figcaption>
+        <pre><code>import core.option
+
+val value = Option.some[Int](41)
+value.map[Int](0, x =&gt; x + 1).getOrElse(0)</code></pre>
+      </figure>
+      <figure class="example">
+        <figcaption>Fournir une valeur par defaut</figcaption>
+        <pre><code>import core.option
+
+Option.none[Int]().getOrElse(42)</code></pre>
+      </figure>
     </section>
-    <section class="entries">
-    <article class="entry" id="Option">
-      <div class="entry-meta">
-        <span class="kind">class</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>Option</h2>
-      <pre><code>class Option[T](defined: Bool, value: T)</code></pre>
-      <p>Conteneur optionnel generique.</p>
+    <div class="doc-shell">
+      <aside class="sidebar" aria-label="Sommaire des symboles publics">
+        <h2>API publique</h2>
+      <section class="toc-group">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="#Option" title="class Option[T](defined: Bool, value: T)"><span>Option</span><code>class Option[T](defined: Bool, value: T)</code></a></li>
+        </ul>
+      </section>
+      <section class="toc-group">
+        <h3>Constructeurs et fabriques</h3>
+        <ul>
+        <li><a href="#some" title="def Option.some[T](value: T): Option[T]"><span>some</span><code>def Option.some[T](value: T): Option[T]</code></a></li>
+        <li><a href="#none" title="def Option.none[T](): Option[T]"><span>none</span><code>def Option.none[T](): Option[T]</code></a></li>
+        <li><a href="#none-2" title="def Option.none[T](default: T): Option[T]"><span>none</span><code>def Option.none[T](default: T): Option[T]</code></a></li>
+        </ul>
+      </section>
+      <section class="toc-group">
+        <h3>Methodes</h3>
+        <ul>
+        <li><a href="#isDefined" title="def isDefined(): Bool"><span>isDefined</span><code>def isDefined(): Bool</code></a></li>
+        <li><a href="#isEmpty" title="def isEmpty(): Bool"><span>isEmpty</span><code>def isEmpty(): Bool</code></a></li>
+        <li><a href="#nonEmpty" title="def nonEmpty(): Bool"><span>nonEmpty</span><code>def nonEmpty(): Bool</code></a></li>
+        <li><a href="#map" title="def map[U](default: U, transform: (T) =&gt; U): Option[U]"><span>map</span><code>def map[U](default: U, transform: (T) =&gt; U): Option[U]</code></a></li>
+        <li><a href="#flatMap" title="def flatMap[U](default: U, transform: (T) =&gt; Option[U]): Option[U]"><span>flatMap</span><code>def flatMap[U](default: U, transform: (T) =&gt; Option[U]): Option[U]</code></a></li>
+        <li><a href="#foreach" title="def foreach(f: (T) =&gt; Unit): Unit"><span>foreach</span><code>def foreach(f: (T) =&gt; Unit): Unit</code></a></li>
+        <li><a href="#filter" title="def filter(predicate: (T) =&gt; Bool): Option[T]"><span>filter</span><code>def filter(predicate: (T) =&gt; Bool): Option[T]</code></a></li>
+        <li><a href="#orElse" title="def orElse(other: Option[T]): Option[T]"><span>orElse</span><code>def orElse(other: Option[T]): Option[T]</code></a></li>
+        <li><a href="#getOrElse" title="def getOrElse(default: T): T"><span>getOrElse</span><code>def getOrElse(default: T): T</code></a></li>
+        <li><a href="#optionSome" title="def optionSome[T](value: T): Option[T]"><span>optionSome</span><code>def optionSome[T](value: T): Option[T]</code></a></li>
+        <li><a href="#optionNone" title="def optionNone[T](default: T): Option[T]"><span>optionNone</span><code>def optionNone[T](default: T): Option[T]</code></a></li>
+        </ul>
+      </section>
+      </aside>
+      <section class="content entries" aria-label="Reference detaillee">
+        <article class="entry" id="Option">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>Option</h2>
+          <pre class="signature"><code>class Option[T](defined: Bool, value: T)</code></pre>
+          <p>Conteneur optionnel generique.</p>
 <p>Les methodes principales sont isDefined, isEmpty, nonEmpty, map, flatMap, foreach, filter, orElse et getOrElse.</p>
-    </article>
-    <article class="entry" id="some">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>some</h2>
-      <pre><code>def Option.some[T](value: T): Option[T]</code></pre>
-      <p>Construit une option contenant une valeur.</p>
-    </article>
-    <article class="entry" id="none">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>none</h2>
-      <pre><code>def Option.none[T](): Option[T]</code></pre>
-      <p>Construit une option vide.</p>
-    </article>
-    <article class="entry" id="none-2">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status compat">Compatibilite</span>
-      </div>
-      <h2>none</h2>
-      <pre><code>def Option.none[T](default: T): Option[T]</code></pre>
-      <p>Construit une option vide avec une valeur interne de secours.</p>
+
+        </article>
+        <article class="entry" id="isDefined">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>isDefined</h2>
+          <pre class="signature"><code>def isDefined(): Bool</code></pre>
+          <p>Indique si une valeur est presente.</p>
+
+        </article>
+        <article class="entry" id="isEmpty">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>isEmpty</h2>
+          <pre class="signature"><code>def isEmpty(): Bool</code></pre>
+          <p>Indique si l&#x27;option est vide.</p>
+
+        </article>
+        <article class="entry" id="nonEmpty">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>nonEmpty</h2>
+          <pre class="signature"><code>def nonEmpty(): Bool</code></pre>
+          <p>Indique si une valeur est presente.</p>
+
+        </article>
+        <article class="entry" id="map">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>map</h2>
+          <pre class="signature"><code>def map[U](default: U, transform: (T) =&gt; U): Option[U]</code></pre>
+          <p>Transforme la valeur presente et propage None sinon.</p>
+<p>Le parametre default sert de valeur interne pour le cas vide.</p>
+
+        </article>
+        <article class="entry" id="flatMap">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>flatMap</h2>
+          <pre class="signature"><code>def flatMap[U](default: U, transform: (T) =&gt; Option[U]): Option[U]</code></pre>
+          <p>Enchaine une fonction qui retourne deja une option.</p>
+
+        </article>
+        <article class="entry" id="foreach">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>foreach</h2>
+          <pre class="signature"><code>def foreach(f: (T) =&gt; Unit): Unit</code></pre>
+          <p>Execute f uniquement quand une valeur est presente.</p>
+
+        </article>
+        <article class="entry" id="filter">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>filter</h2>
+          <pre class="signature"><code>def filter(predicate: (T) =&gt; Bool): Option[T]</code></pre>
+          <p>Conserve la valeur presente seulement si predicate est vrai.</p>
+
+        </article>
+        <article class="entry" id="orElse">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>orElse</h2>
+          <pre class="signature"><code>def orElse(other: Option[T]): Option[T]</code></pre>
+          <p>Retourne cette option si elle est definie, sinon other.</p>
+
+        </article>
+        <article class="entry" id="getOrElse">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>getOrElse</h2>
+          <pre class="signature"><code>def getOrElse(default: T): T</code></pre>
+          <p>Extrait la valeur presente ou retourne default.</p>
+
+        </article>
+        <article class="entry" id="some">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>some</h2>
+          <pre class="signature"><code>def Option.some[T](value: T): Option[T]</code></pre>
+          <p>Construit une option contenant une valeur.</p>
+
+        </article>
+        <article class="entry" id="none">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>none</h2>
+          <pre class="signature"><code>def Option.none[T](): Option[T]</code></pre>
+          <p>Construit une option vide.</p>
+
+        </article>
+        <article class="entry" id="none-2">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status compat">Compatibilite</span>
+          </div>
+          <h2>none</h2>
+          <pre class="signature"><code>def Option.none[T](default: T): Option[T]</code></pre>
+          <p>Construit une option vide avec une valeur interne de secours.</p>
 <p>Preferer Option.none[T]() dans le nouveau code.</p>
-    </article>
-    <article class="entry" id="optionSome">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status compat">Compatibilite</span>
-      </div>
-      <h2>optionSome</h2>
-      <pre><code>def optionSome[T](value: T): Option[T]</code></pre>
-      <p>Construit une option contenant une valeur.</p>
+
+        </article>
+        <article class="entry" id="optionSome">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status compat">Compatibilite</span>
+          </div>
+          <h2>optionSome</h2>
+          <pre class="signature"><code>def optionSome[T](value: T): Option[T]</code></pre>
+          <p>Construit une option contenant une valeur.</p>
 <p>Preferer Option.some[T](value) dans le nouveau code.</p>
-    </article>
-    <article class="entry" id="optionNone">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status compat">Compatibilite</span>
-      </div>
-      <h2>optionNone</h2>
-      <pre><code>def optionNone[T](default: T): Option[T]</code></pre>
-      <p>Construit une option vide.</p>
+
+        </article>
+        <article class="entry" id="optionNone">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status compat">Compatibilite</span>
+          </div>
+          <h2>optionNone</h2>
+          <pre class="signature"><code>def optionNone[T](default: T): Option[T]</code></pre>
+          <p>Construit une option vide.</p>
 <p>Preferer Option.none[T]() dans le nouveau code. Le parametre default sert de valeur interne de secours pour le type T.</p>
-    </article>
-    </section>
+
+        </article>
+      </section>
+    </div>
   </main>
 </body>
 </html>

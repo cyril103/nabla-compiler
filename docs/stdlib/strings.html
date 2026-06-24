@@ -4,39 +4,59 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Strings - Nabla stdlib</title>
-  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <a class="brand" href="../index.html">Nabla stdlib</a>
-    <span>Reference API publique</span>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <header class="topbar">
+    <a class="brand" href="index.html">Nabla stdlib</a>
+    <nav class="topnav" aria-label="Navigation principale">
+      <a href="index.html">Modules</a>
+      <a href="https://github.com/cyril103/nabla-compiler">GitHub</a>
+    </nav>
   </header>
-  <main>
-    <nav class="breadcrumb"><a href="../index.html">Modules</a> / strings</nav>
+  <main id="contenu">
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="index.html">Modules</a> / strings</nav>
     <section class="module-hero">
-      <p class="import">import strings</p>
+      <p class="eyebrow">Module</p>
       <h1>Strings</h1>
+      <p class="import"><code>import strings</code></p>
       <p>Helpers pour travailler avec les chaines. Les operations natives de String restent documentees dans le guide du langage; ce module ajoute des fonctions de convenance composees au-dessus de ces primitives.</p>
+
     </section>
-    <section class="entries">
-    <article class="entry" id="stringNonEmpty">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>stringNonEmpty</h2>
-      <pre><code>def stringNonEmpty(value: String): Bool</code></pre>
-      <p>Indique si une chaine contient au moins un caractere.</p>
-    </article>
-    <article class="entry" id="words">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>words</h2>
-      <pre><code>def words(text: String): ArrayObject[String]</code></pre>
-      <p>Separe une chaine sur les espaces.</p>
+    <div class="doc-shell">
+      <aside class="sidebar" aria-label="Sommaire des symboles publics">
+        <h2>API publique</h2>
+      <section class="toc-group">
+        <h3>Methodes</h3>
+        <ul>
+        <li><a href="#stringNonEmpty" title="def stringNonEmpty(value: String): Bool"><span>stringNonEmpty</span><code>def stringNonEmpty(value: String): Bool</code></a></li>
+        <li><a href="#words" title="def words(text: String): ArrayObject[String]"><span>words</span><code>def words(text: String): ArrayObject[String]</code></a></li>
+        </ul>
+      </section>
+      </aside>
+      <section class="content entries" aria-label="Reference detaillee">
+        <article class="entry" id="stringNonEmpty">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>stringNonEmpty</h2>
+          <pre class="signature"><code>def stringNonEmpty(value: String): Bool</code></pre>
+          <p>Indique si une chaine contient au moins un caractere.</p>
+
+        </article>
+        <article class="entry" id="words">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>words</h2>
+          <pre class="signature"><code>def words(text: String): ArrayObject[String]</code></pre>
+          <p>Separe une chaine sur les espaces.</p>
 <p>Les espaces de debut et de fin sont retires avant la separation. La separation se fait sur le caractere espace simple; les segments vides sont ensuite filtres.</p>
-    </article>
-    </section>
+
+        </article>
+      </section>
+    </div>
   </main>
 </body>
 </html>

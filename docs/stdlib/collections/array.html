@@ -7,97 +7,155 @@
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
-  <header>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <header class="topbar">
     <a class="brand" href="../index.html">Nabla stdlib</a>
-    <span>Reference API publique</span>
+    <nav class="topnav" aria-label="Navigation principale">
+      <a href="../index.html">Modules</a>
+      <a href="https://github.com/cyril103/nabla-compiler">GitHub</a>
+    </nav>
   </header>
-  <main>
-    <nav class="breadcrumb"><a href="../index.html">Modules</a> / collections.array</nav>
+  <main id="contenu">
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="../index.html">Modules</a> / collections.array</nav>
     <section class="module-hero">
-      <p class="import">import collections.array</p>
+      <p class="eyebrow">Module</p>
       <h1>Array</h1>
+      <p class="import"><code>import collections.array</code></p>
       <p>Tableaux generiques pour le code utilisateur. Importer collections.array donne acces a Array[T], Array.empty[T](), Array.fill[T], Array.tabulate[T] et Array.range / Array.rangeUntil. Les anciens noms ArrayFill[T] et ArrayRange restent disponibles pour compatibilite. Les types bas niveau comme IntArray, ArrayInt, ObjectArray[T] et ArrayObject[T] sont des details de representation dans les cas courants : ils peuvent apparaitre dans certains retours ou diagnostics, mais les exemples applicatifs devraient nommer Array[T].</p>
+      <figure class="example">
+        <figcaption>Creer et parcourir un tableau</figcaption>
+        <pre><code>import collections.array
+
+val xs = Array.fill[Int](3, 10)
+xs.set(1, 42)
+xs.sum()</code></pre>
+      </figure>
+      <figure class="example">
+        <figcaption>Fabriquer une sequence d&#x27;indices</figcaption>
+        <pre><code>import collections.array
+
+val indexes = Array.rangeUntil(2, 5)
+indexes.mkString(&quot;, &quot;)</code></pre>
+      </figure>
     </section>
-    <section class="entries">
-    <article class="entry" id="Array">
-      <div class="entry-meta">
-        <span class="kind">class</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>Array</h2>
-      <pre><code>class Array[T](size: Int)</code></pre>
-      <p>Tableau mutable de taille fixe.</p>
+    <div class="doc-shell">
+      <aside class="sidebar" aria-label="Sommaire des symboles publics">
+        <h2>API publique</h2>
+      <section class="toc-group">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="#Array" title="class Array[T](size: Int)"><span>Array</span><code>class Array[T](size: Int)</code></a></li>
+        </ul>
+      </section>
+      <section class="toc-group">
+        <h3>Constructeurs et fabriques</h3>
+        <ul>
+        <li><a href="#apply" title="def Array.apply[T](values: T*): Array[T]"><span>apply</span><code>def Array.apply[T](values: T*): Array[T]</code></a></li>
+        <li><a href="#empty" title="def Array.empty[T](): Array[T]"><span>empty</span><code>def Array.empty[T](): Array[T]</code></a></li>
+        <li><a href="#fill" title="def Array.fill[T](size: Int, value: T): Array[T]"><span>fill</span><code>def Array.fill[T](size: Int, value: T): Array[T]</code></a></li>
+        <li><a href="#tabulate" title="def Array.tabulate[T](size: Int, f: (Int) =&gt; T): Array[T]"><span>tabulate</span><code>def Array.tabulate[T](size: Int, f: (Int) =&gt; T): Array[T]</code></a></li>
+        <li><a href="#range" title="def Array.range(size: Int): Array[Int]"><span>range</span><code>def Array.range(size: Int): Array[Int]</code></a></li>
+        <li><a href="#rangeUntil" title="def Array.rangeUntil(start: Int, until: Int): Array[Int]"><span>rangeUntil</span><code>def Array.rangeUntil(start: Int, until: Int): Array[Int]</code></a></li>
+        </ul>
+      </section>
+      <section class="toc-group">
+        <h3>Methodes</h3>
+        <ul>
+        <li><a href="#ArrayFill" title="def ArrayFill[T](size: Int, value: T): Array[T]"><span>ArrayFill</span><code>def ArrayFill[T](size: Int, value: T): Array[T]</code></a></li>
+        <li><a href="#ArrayRange" title="def ArrayRange(size: Int): Array[Int]"><span>ArrayRange</span><code>def ArrayRange(size: Int): Array[Int]</code></a></li>
+        </ul>
+      </section>
+      </aside>
+      <section class="content entries" aria-label="Reference detaillee">
+        <article class="entry" id="Array">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>Array</h2>
+          <pre class="signature"><code>class Array[T](size: Int)</code></pre>
+          <p>Tableau mutable de taille fixe.</p>
 <p>Array[T] est le nom public a utiliser. Le compilateur choisit la representation adaptee selon T.</p>
-    </article>
-    <article class="entry" id="ArrayFill">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status compat">Compatibilite</span>
-      </div>
-      <h2>ArrayFill</h2>
-      <pre><code>def ArrayFill[T](size: Int, value: T): Array[T]</code></pre>
-      <p>Cree un tableau rempli avec la meme valeur.</p>
+
+        </article>
+        <article class="entry" id="ArrayFill">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status compat">Compatibilite</span>
+          </div>
+          <h2>ArrayFill</h2>
+          <pre class="signature"><code>def ArrayFill[T](size: Int, value: T): Array[T]</code></pre>
+          <p>Cree un tableau rempli avec la meme valeur.</p>
 <p>Preferer Array.fill[T](size, value) dans le nouveau code.</p>
-    </article>
-    <article class="entry" id="ArrayRange">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status compat">Compatibilite</span>
-      </div>
-      <h2>ArrayRange</h2>
-      <pre><code>def ArrayRange(size: Int): Array[Int]</code></pre>
-      <p>Cree un tableau d&#x27;entiers contenant 0, 1, ..., size - 1.</p>
+
+        </article>
+        <article class="entry" id="ArrayRange">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status compat">Compatibilite</span>
+          </div>
+          <h2>ArrayRange</h2>
+          <pre class="signature"><code>def ArrayRange(size: Int): Array[Int]</code></pre>
+          <p>Cree un tableau d&#x27;entiers contenant 0, 1, ..., size - 1.</p>
 <p>Preferer Array.range(size) dans le nouveau code.</p>
-    </article>
-    <article class="entry" id="apply">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>apply</h2>
-      <pre><code>def Array.apply[T](values: T*): Array[T]</code></pre>
-      <p>Cree un tableau avec les elements donnes.</p>
-    </article>
-    <article class="entry" id="empty">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>empty</h2>
-      <pre><code>def Array.empty[T](): Array[T]</code></pre>
-      <p>Cree un tableau vide.</p>
+
+        </article>
+        <article class="entry" id="apply">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>apply</h2>
+          <pre class="signature"><code>def Array.apply[T](values: T*): Array[T]</code></pre>
+          <p>Cree un tableau avec les elements donnes.</p>
+
+        </article>
+        <article class="entry" id="empty">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>empty</h2>
+          <pre class="signature"><code>def Array.empty[T](): Array[T]</code></pre>
+          <p>Cree un tableau vide.</p>
 <p>La representation concrete peut encore etre ArrayObject[T] pour les types generiques. Le code utilisateur doit la manipuler comme un Array[T] via les operations communes.</p>
-    </article>
-    <article class="entry" id="fill">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>fill</h2>
-      <pre><code>def Array.fill[T](size: Int, value: T): Array[T]</code></pre>
-      <p>Cree un tableau rempli avec la meme valeur.</p>
+
+        </article>
+        <article class="entry" id="fill">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>fill</h2>
+          <pre class="signature"><code>def Array.fill[T](size: Int, value: T): Array[T]</code></pre>
+          <p>Cree un tableau rempli avec la meme valeur.</p>
 <p>Pour T = Int, Long, Float, Double ou Bool, le compilateur choisit une specialisation primitive. Les autres types utilisent la representation generique actuelle, sans que le code utilisateur doive la nommer.</p>
-    </article>
-    <article class="entry" id="tabulate">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>tabulate</h2>
-      <pre><code>def Array.tabulate[T](size: Int, f: (Int) =&gt; T): Array[T]</code></pre>
-      <p>Cree un tableau en calculant chaque element depuis son index.</p>
+
+        </article>
+        <article class="entry" id="tabulate">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>tabulate</h2>
+          <pre class="signature"><code>def Array.tabulate[T](size: Int, f: (Int) =&gt; T): Array[T]</code></pre>
+          <p>Cree un tableau en calculant chaque element depuis son index.</p>
 <p>Comme Array.fill, cette fabrique garde le nom public Array[T] meme si la representation visible est specialisee ou generique selon T.</p>
-    </article>
-    <article class="entry" id="range">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>range</h2>
-      <pre><code>def Array.range(size: Int): Array[Int]</code></pre>
-      <p>Cree un tableau d&#x27;entiers contenant 0, 1, ..., size - 1.</p>
-    </article>
-    <article class="entry" id="rangeUntil">
-      <div class="entry-meta">
-        <span class="kind">def</span> <span class="status recommended">Recommandee</span>
-      </div>
-      <h2>rangeUntil</h2>
-      <pre><code>def Array.rangeUntil(start: Int, until: Int): Array[Int]</code></pre>
-      <p>Cree un tableau d&#x27;entiers contenant start, ..., until - 1.</p>
-    </article>
-    </section>
+
+        </article>
+        <article class="entry" id="range">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>range</h2>
+          <pre class="signature"><code>def Array.range(size: Int): Array[Int]</code></pre>
+          <p>Cree un tableau d&#x27;entiers contenant 0, 1, ..., size - 1.</p>
+
+        </article>
+        <article class="entry" id="rangeUntil">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>rangeUntil</h2>
+          <pre class="signature"><code>def Array.rangeUntil(start: Int, until: Int): Array[Int]</code></pre>
+          <p>Cree un tableau d&#x27;entiers contenant start, ..., until - 1.</p>
+
+        </article>
+      </section>
+    </div>
   </main>
 </body>
 </html>

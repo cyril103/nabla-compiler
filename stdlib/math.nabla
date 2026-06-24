@@ -2,6 +2,12 @@
 /// Fonctions mathematiques courantes.
 /// Les operations communes utilisent les noms surcharges idiomatiques
 /// (`abs`, `min`, `max`, `clamp`, `pow`, `sqrt`).
+///
+/// @example Borner une valeur
+/// import math
+///
+/// clamp(abs(-12), 0, 10)
+/// @end
 
 /// Valeur absolue d'un entier.
 /// @status Recommandee
