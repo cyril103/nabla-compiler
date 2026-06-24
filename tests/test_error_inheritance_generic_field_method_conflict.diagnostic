@@ -1,0 +1,1 @@
+tests/test_error_inheritance_generic_field_method_conflict.nabla:13:1: semantic error: conflit d'héritage pour le membre 'value' dans la classe 'Conflict': champ et méthode visibles dans [Holder[Int].<field>, Named.<method>]

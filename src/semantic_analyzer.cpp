@@ -41,6 +41,34 @@ std::string formatMethodProviders(const std::set<std::string>& providers) {
     return message;
 }
 
+std::string sourceNameFromMethodConflictKey(const std::string& methodKey) {
+    const auto paren = methodKey.find('(');
+    if (paren == std::string::npos) return methodKey;
+    return methodKey.substr(0, paren);
+}
+
+std::string formatMemberProviders(
+    const std::set<std::string>& fieldProviders,
+    const std::set<std::string>& methodProviders) {
+    std::set<std::string> providers;
+    for (const auto& provider : fieldProviders) {
+        providers.insert(provider + ".<field>");
+    }
+    for (const auto& provider : methodProviders) {
+        providers.insert(provider + ".<method>");
+    }
+    return formatMethodProviders(providers);
+}
+
+bool hasMethodProviderDistinctFromFieldProviders(
+    const std::set<std::string>& fieldProviders,
+    const std::set<std::string>& methodProviders) {
+    for (const auto& methodProvider : methodProviders) {
+        if (!fieldProviders.count(methodProvider)) return true;
+    }
+    return false;
+}
+
 std::string formatMethodSignature(
     const std::string& ownerClassName,
     const std::string& sourceName,
@@ -495,14 +523,18 @@ void SemanticAnalyzer::validateDeclaredTypes() {
         if (className == "Any") continue;
 
         ParentMethodProviders inheritedProviders;
+        ParentMethodProviders visibleMethodMemberProviders;
         ClassFieldOwnerMap inheritedFieldProviders;
         std::set<std::string> ownMethods;
+        std::set<std::string> ownMethodSourceNames;
         const auto classTypeSubstitution = classTypeTemplateSubstitution(context, className);
         for (const auto& [sourceName, overloadNames] : classInfo.methodOverloads) {
             for (const auto& overloadName : overloadNames) {
                 auto methodIt = classInfo.methods.find(overloadName);
                 if (methodIt == classInfo.methods.end() || methodIt->second.isAbstract) continue;
                 ownMethods.insert(methodConflictKey(sourceName, methodIt->second, classTypeSubstitution));
+                ownMethodSourceNames.insert(sourceName);
+                visibleMethodMemberProviders[sourceName].insert(className);
             }
         }
         for (const auto& field : classInfo.fields) {
@@ -519,6 +551,11 @@ void SemanticAnalyzer::validateDeclaredTypes() {
                 if (ownMethods.count(methodName)) continue;
                 inheritedProviders[methodName].insert(ownerClasses.begin(), ownerClasses.end());
             }
+            for (const auto& [methodKey, ownerClasses] : visibleMethods) {
+                const std::string sourceName = sourceNameFromMethodConflictKey(methodKey);
+                if (ownMethodSourceNames.count(sourceName)) continue;
+                visibleMethodMemberProviders[sourceName].insert(ownerClasses.begin(), ownerClasses.end());
+            }
             ClassFieldOwnerMap visibleFields;
             std::map<std::string, std::string> fieldTypes;
             collectVisibleFieldsInHierarchy(
@@ -534,6 +571,20 @@ void SemanticAnalyzer::validateDeclaredTypes() {
                 "conflit d'héritage pour la méthode '" + methodName +
                 "' dans la classe '" + className + "': plusieurs définitions dans [" +
                 formatMethodProviders(providers) + "]");
+        }
+        for (const auto& [sourceName, methodProviders] : visibleMethodMemberProviders) {
+            auto fieldProviders = inheritedFieldProviders.find(sourceName);
+            if (fieldProviders == inheritedFieldProviders.end()) continue;
+            if (fieldProviders->second.size() > 1) continue;
+            if (!hasMethodProviderDistinctFromFieldProviders(fieldProviders->second, methodProviders)) {
+                continue;
+            }
+            throw CompilerError(
+                ErrorKind::Semantic, classInfo.location,
+                "conflit d'héritage pour le membre '" + sourceName +
+                "' dans la classe '" + className +
+                "': champ et méthode visibles dans [" +
+                formatMemberProviders(fieldProviders->second, methodProviders) + "]");
         }
         for (const auto& [registeredMethodName, signature] : classInfo.methods) {
             std::string methodName = registeredMethodName;

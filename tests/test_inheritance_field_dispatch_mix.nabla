@@ -1,0 +1,43 @@
+class Counter(seed: Int) {
+    def current(): Int = {
+        seed
+    }
+
+    def label(): String = {
+        "counter"
+    }
+}
+
+class NamedCounter extends Counter() {
+    override def current(): Int = {
+        super.current() + 1
+    }
+
+    override def label(): String = {
+        "named:" + seed.toString()
+    }
+
+    def directSeed(): Int = {
+        seed
+    }
+}
+
+def read(counter: Counter): Int = {
+    counter.current()
+}
+
+def describe(counter: Counter): String = {
+    counter.label()
+}
+
+def main(): Int = {
+    val counter = new NamedCounter(41)
+    if counter.directSeed() == 41 &&
+       counter.current() == 42 &&
+       read(counter) == 42 &&
+       describe(counter) == "named:41" {
+        42
+    } else {
+        1
+    }
+}

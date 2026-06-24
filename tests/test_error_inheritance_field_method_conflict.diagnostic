@@ -1,0 +1,1 @@
+tests/test_error_inheritance_field_method_conflict.nabla:13:1: semantic error: conflit d'héritage pour le membre 'value' dans la classe 'Both': champ et méthode visibles dans [Left.<field>, Right.<method>]
