@@ -41,7 +41,20 @@
 2. Run the narrow compile/run command and confirm it fails if the behavior regresses.
 3. No production change should be needed if the current compiler already supports it; keep it as a regression test.
 
-### Task 3: Document dispatch/equality runtime boundaries
+### Task 3: Extend collection-level parent dispatch regressions
+
+**Objective:** Prove that `Array[Parent]` and `Set.fromArray[Parent]` preserve child override dispatch for `toString`, `hashCode`, and `equals` when values enter generic collection code through parent-typed APIs.
+
+**Files:**
+- Create: `tests/test_inheritance_parent_collections_dispatch.nabla`
+- Create: `tests/test_inheritance_parent_collections_dispatch.expected`
+
+**TDD steps:**
+1. Add a positive program that builds `Array[Account]` and `Set.fromArray[Account]` from `PremiumAccount` children.
+2. Assert `Array.get`, `Array.map`, set deduplication, set lookup, and set rendering all use child/runtime overrides through parent-typed values.
+3. Run the narrow compile/run command. If current behavior already passes, keep the program as a post-0.1 regression guard with no production change.
+
+### Task 4: Document dispatch/equality runtime boundaries
 
 **Objective:** Update `docs/internals.md` with the current post-0.1 rules for class IDs, dynamic dispatch, `super`, `Any`/`String`, and equality/hash semantics.
 
@@ -50,7 +63,7 @@
 
 **Verification:** Documentation should match current tests and code; do not claim full Scala linearization, GC, or stable ABI.
 
-### Task 4: Refresh post-0.1 roadmap and agent guide
+### Task 5: Refresh post-0.1 roadmap and agent guide
 
 **Objective:** Move project status away from release-candidate language and record the post-0.1 hardening focus.
 

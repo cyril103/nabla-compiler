@@ -846,6 +846,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Étendre le hardening post-0.1 aux collections parent-typées:
+  `Array[Parent]` et `Set.fromArray[Parent]` ont maintenant une régression
+  dédiée prouvant que des instances enfant conservent `toString`, `hashCode` et
+  `equals` dynamiques après passage par les APIs génériques de collections.
+  - Fichiers associés: `tests/test_inheritance_parent_collections_dispatch.nabla`,
+    `tests/test_inheritance_parent_collections_dispatch.expected`,
+    `docs/plans/inheritance-runtime-hardening.md`, `docs/roadmap.md`,
+    `AGENTS.md`.
+
 - `local` - Démarrer le hardening post-0.1 de l'héritage/runtime: les
   hiérarchies composées rejettent maintenant un nom de membre visible à la fois
   comme champ et comme méthode, un test positif couvre champs hérités + dispatch

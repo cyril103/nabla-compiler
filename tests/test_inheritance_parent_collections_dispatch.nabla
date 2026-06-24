@@ -1,0 +1,69 @@
+import collections.array
+import collections.set
+
+class Account(idValue: Int, nameValue: String) {
+    def id(): Int = {
+        idValue
+    }
+
+    override def toString(): String = {
+        "account"
+    }
+
+    override def hashCode(): Int = {
+        -1
+    }
+
+    override def equals(other: Any): Bool = {
+        false
+    }
+}
+
+class PremiumAccount extends Account(idValue: Int, nameValue: String) {
+    override def toString(): String = {
+        nameValue
+    }
+
+    override def hashCode(): Int = {
+        idValue
+    }
+
+    override def equals(other: Any): Bool = {
+        idValue == other.hashCode()
+    }
+}
+
+def label(value: Account): String = {
+    value.toString()
+}
+
+def accountHash(value: Account): Int = {
+    value.hashCode()
+}
+
+def sameAccount(left: Account, right: Account): Bool = {
+    left == right
+}
+
+def main(): Int = {
+    val adaOne = new PremiumAccount(7, "ada")
+    val adaTwo = new PremiumAccount(7, "ada-copy")
+    val bob = new PremiumAccount(11, "bob")
+    val accounts = Array[Account](adaOne, bob)
+    val names = accounts.map[String](label)
+    val accountSet = Set.fromArray[Account](Array[Account](adaOne, bob, adaTwo))
+
+    if accounts.get(0).toString() == "ada" &&
+       accounts.get(1).toString() == "bob" &&
+       names.mkString(",") == "ada,bob" &&
+       accountHash(accounts.get(0)) == 7 &&
+       accountHash(accounts.get(1)) == 11 &&
+       sameAccount(adaOne, adaTwo) &&
+       accountSet.size() == 2 &&
+       accountSet.contains(adaTwo) &&
+       accountSet.toString() == "[ada, bob]" {
+        42
+    } else {
+        1
+    }
+}
