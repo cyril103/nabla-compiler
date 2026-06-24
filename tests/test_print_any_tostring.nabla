@@ -1,0 +1,43 @@
+class Person(name: String) {
+    override def toString(): String = {
+        "Person(" + name + ")"
+    }
+}
+
+def renderTwice(value: Any): Unit = {
+    print(value)
+    print("|")
+    print(value)
+}
+
+def renderGeneric[T](value: T): Unit = {
+    print(value)
+}
+
+def main(): Int = {
+    print(42)
+    print("|")
+    print(7L)
+    print("|")
+    print(1.5F)
+    print("|")
+    print(2.25)
+    print("|")
+    print(true)
+    print("|")
+    print('A')
+    print("|")
+    print("hello")
+    print("|")
+    print(new Person("Ada"))
+    print("|")
+    val bob: Any = new Person("Bob")
+    print(bob)
+    print("|")
+    renderTwice(bob)
+    print("|")
+    renderGeneric[Int](99)
+    print("|")
+    renderGeneric[Person](new Person("Eve"))
+    0
+}

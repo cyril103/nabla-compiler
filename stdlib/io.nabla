@@ -4,9 +4,9 @@
 /// le programme decider comment reagir aux erreurs. Les fonctions de ce module
 /// sont des wrappers utilisateur autour des primitives runtime bas niveau.
 
-/// Affiche une chaine suivie d'un retour a la ligne.
+/// Affiche une valeur via sa methode toString() suivie d'un retour a la ligne.
 /// @status Recommandee
-def println(value: String): Unit = {
+def println(value: Any): Unit = {
     print(value)
 }
 

@@ -449,7 +449,9 @@ Limites importantes :
   `hashCode()` pour l'index interne. `==` / `!=` sur objets passent par
   `Any.equals(...)`, et `toString()`, `hashCode()` et `equals(...)`
   redispatchent vers les overrides utilisateur même quand la valeur passe par
-  `Any`, un type parent ou un paramètre générique spécialisé.
+  `Any`, un type parent ou un paramètre générique spécialisé. La primitive
+  globale `print(value)` suit la même règle : elle accepte `Any`, abaisse la
+  valeur vers `Any.toString()` puis appelle le runtime d'écriture de chaîne.
 - Les `object` existent comme namespaces statiques: leurs `def` sont abaissés
   vers des fonctions globales qualifiées (`Name.method`) et peuvent servir de
   compagnons de surface à une `class Name`. Ils ne sont pas encore des valeurs
@@ -851,6 +853,17 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Faire accepter `Any` par `print(value)` et abaisser l'argument vers
+  `Any.toString()` avant l'appel runtime, afin que primitives, chaînes, valeurs
+  typées `Any` et classes utilisateur avec override `toString()` s'impriment sans
+  conversion explicite. Le helper stdlib `io.println` suit la même signature
+  `println(value: Any)`.
+  - Fichiers associés: `src/ast.cpp`, `stdlib/io.nabla`,
+    `tests/test_print_any_tostring.nabla`,
+    `tests/test_stdlib_io_println_any.nabla`, `docs/language.md`,
+    `docs/internals.md`, `docs/roadmap.md`,
+    `docs/plans/print-any-tostring.md`, `docs/stdlib/`, `AGENTS.md`.
 
 - `local` - Refaire la reference HTML de la stdlib dans un style proche Scala:
   chemins CSS corriges pour les modules racine, sidebar par types/fabriques/

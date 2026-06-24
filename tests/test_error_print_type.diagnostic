@@ -1,1 +1,1 @@
-tests/test_error_print_type.nabla:2:11: semantic error: print, paramètre 'value': type 'String' attendu, 'Int' reçu
+tests/test_error_print_type.nabla:2:5: semantic error: print: 1 argument(s) attendu(s), 0 reçu(s)

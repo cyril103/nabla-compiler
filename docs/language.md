@@ -936,7 +936,7 @@ Les noms de compatibilite `optionSome[T](value)`, `Option.none[T](default)` et
 
 Le module `io` expose les helpers recommandes pour les entrees/sorties :
 
-- `println(value: String): Unit`
+- `println(value: Any): Unit` — convertit la valeur avec `toString()` avant l'affichage
 - `input(): String`
 - `readTextFile(path: String): String`
 - `writeTextFile(path: String, content: String): Int`
@@ -958,12 +958,15 @@ def main(): Int = {
 }
 ```
 
-Les primitives globales `print(value: String)`, `readLine(): String`,
+Les primitives globales `print(value: Any)`, `readLine(): String`,
 `readFile(path: String): String`, `writeFile(path: String, content: String): Int`,
 `appendFile(path: String, content: String): Int`, `deleteFile(path: String): Bool`,
 `renameFile(path: String, to: String): Bool`, `createDir(path: String): Bool`
 et `fileExists(path: String): Bool`
-existent aussi, mais le module `io` est l'interface recommandee.
+existent aussi, mais le module `io` est l'interface recommandee. `print` abaisse
+son argument vers `Any.toString()` puis imprime la chaine obtenue : les primitives
+conservent leur rendu specialise et les classes utilisateur passent par leur
+override de `toString()` quand il existe.
 
 Lecture et ecriture de fichiers texte :
 

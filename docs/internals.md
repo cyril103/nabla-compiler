@@ -59,9 +59,11 @@ parent explicite hérite implicitement de `AnyRef`, pas directement de `Any`.
 Cette hiérarchie est une convention de type, pas une promesse de représentation
 objet uniforme : les chemins spécialisés peuvent conserver des valeurs
 immédiates ou brutes. Quand une primitive builtin est passée à un paramètre
-`Any` ou `AnyVal` d'une fonction ou méthode, le lowering IR insère un boxing
-heap explicite afin que les méthodes dynamiques communes comme `toString()`
-puissent retrouver le type runtime d'origine.
+`Any` ou `AnyVal` d'une fonction ou méthode, ou à la primitive globale
+`print(value)`, le lowering IR insère un boxing heap explicite afin que les
+méthodes dynamiques communes comme `toString()` puissent retrouver le type
+runtime d'origine. `print(value)` est ensuite abaissé en appel à
+`Any.toString()` suivi du runtime d'écriture de chaîne.
 
 ### Valeurs taggées
 
