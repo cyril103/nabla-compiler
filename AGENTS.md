@@ -317,7 +317,7 @@ Le pipeline implemente actuellement :
   affectations;
 - support de l'héritage de méthodes via `extends` + `with` (un parent explicite
   puis mixins), avec validation des parents, détection de conflits de méthodes
-  héritées et détection de cycles;
+  héritées, détection de conflits champ/méthode visibles et détection de cycles;
 - appel de la méthode parente via `super`, y compris en présence de chaînes
   d'héritage et de mixins; diagnostic explicite quand `super` est utilisé sans
   parent explicite.
@@ -334,9 +334,8 @@ Le pipeline implemente actuellement :
 - CI GitHub avec `make all-tests`, `make examples`, `make tooling-tests`,
   vérification `make stdlib-docs` sans diff, compilation `-Werror` et
   `git diff --check`;
-- checklist de release candidate 0.1 maintenue dans `docs/releases/0.1.md`,
-  avec matrice locale explicite, criteres de contenu et procedure de tag
-  proposee pour `v0.1.0`;
+- `v0.1.0` est tagué; `docs/releases/0.1.md` conserve la checklist et la
+  procédure ayant servi à figer le périmètre 0.1;
 - reference HTML de la stdlib generee depuis `///`, avec directive `@status`
   pour distinguer visuellement API recommandee, compatibilite et helpers
   internes; toutes les pages actuellement publiees affichent les statuts des
@@ -846,6 +845,23 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+
+- `local` - Démarrer le hardening post-0.1 de l'héritage/runtime: les
+  hiérarchies composées rejettent maintenant un nom de membre visible à la fois
+  comme champ et comme méthode, un test positif couvre champs hérités + dispatch
+  virtuel via type parent, et `docs/internals.md` précise les limites actuelles
+  du dispatch, de `super` et des pseudo-vtables.
+  - Fichiers associés: `src/semantic_analyzer.cpp`,
+    `tests/test_error_inheritance_field_method_conflict.nabla`,
+    `tests/test_error_inheritance_field_method_conflict.diagnostic`,
+    `tests/test_error_inheritance_generic_field_method_conflict.nabla`,
+    `tests/test_error_inheritance_generic_field_method_conflict.diagnostic`,
+    `tests/test_error_inheritance_own_method_field_conflict.nabla`,
+    `tests/test_error_inheritance_own_method_field_conflict.diagnostic`,
+    `tests/test_inheritance_field_dispatch_mix.nabla`,
+    `tests/test_inheritance_field_dispatch_mix.expected`,
+    `docs/plans/inheritance-runtime-hardening.md`, `docs/internals.md`,
+    `docs/roadmap.md`, `AGENTS.md`.
 - `local` - Preparer la checklist de release candidate 0.1 sans changement de
   comportement: `docs/releases/0.1.md` decrit maintenant la matrice locale, les
   criteres de contenu, la procedure de tag `v0.1.0` et la politique de gel de

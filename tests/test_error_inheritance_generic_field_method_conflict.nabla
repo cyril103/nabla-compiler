@@ -1,0 +1,17 @@
+class Holder[T](value: T) {
+    def stored(): T = {
+        value
+    }
+}
+
+class Named() {
+    def value(): Int = {
+        7
+    }
+}
+
+class Conflict extends Holder[Int] with Named()
+
+def main(): Int = {
+    0
+}

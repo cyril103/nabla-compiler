@@ -1,0 +1,21 @@
+class Left(value: Int) {
+    def leftValue(): Int = {
+        value
+    }
+}
+
+class Right() {
+    def value(): Int = {
+        7
+    }
+}
+
+class Both extends Left with Right() {
+    def total(): Int = {
+        0
+    }
+}
+
+def main(): Int = {
+    0
+}

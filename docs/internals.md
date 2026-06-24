@@ -218,7 +218,8 @@ de champs d'objet, d'initialisation lazy/eager ni d'identité manipulable.
 
 ## Classes, Héritage Et `Any`
 
-Les classes sans parent explicite héritent implicitement de `Any`.
+Les classes sans parent explicite héritent implicitement de `AnyRef`. `AnyRef`
+remonte ensuite vers `Any` dans la hiérarchie racine.
 
 `Any` fournit actuellement :
 
@@ -232,14 +233,30 @@ signalés explicitement. Une redéfinition de méthode héritée requiert `overr
 et sa signature est validée strictement : arité, paramètres, retour, paramètres
 génériques de méthode et substitutions des types hérités.
 
+Les noms de membres visibles doivent rester non ambigus. Deux champs hérités du
+même nom sont rejetés, deux méthodes concrètes héritées avec la même signature
+sont rejetées, et un champ visible ne peut pas partager son nom source avec une
+méthode visible provenant d'un autre provider. Cette règle évite qu'un accès nu
+comme `value` masque silencieusement un appel potentiel `value()` dans une
+hiérarchie composée par `extends ... with ...`.
+
 Les types de classes sont nominaux. Deux classes avec le meme layout ne sont pas
 interchangeables sans relation d'heritage, et les classes generiques instanciees
 restent distinguees par leurs arguments de type dans les signatures et les corps
 IR specialises. Les champs herites sont integres au layout avant les champs
 propres afin que les offsets restent coherents dans les appels parent-types.
 
-`super` cible la classe parente immédiate dans une méthode de classe. Son usage
-hors classe ou sans parent explicite valide doit produire un diagnostic dédié.
+Le slot 0 des objets utilisateur contient un identifiant de classe runtime. Le
+backend l'utilise comme dispatch table implicite pour les appels virtuels quand
+le type statique est un parent ou `Any`/`AnyRef`; il n'existe pas encore de vraie
+structure vtable stabilisée ni d'ABI publique. Les overrides de `toString`,
+`hashCode` et `equals` participent à ce dispatch, ce qui rend `Set[Parent]` et
+les comparaisons via `Any` cohérents dans les cas couverts par les tests.
+
+`super` cible statiquement la classe parente immédiate dans une méthode de
+classe. Il ne suit pas le dispatch virtuel et ne modélise pas une linéarisation
+Scala complète des mixins. Son usage hors classe ou sans parent explicite valide
+doit produire un diagnostic dédié.
 
 ## Génériques
 
