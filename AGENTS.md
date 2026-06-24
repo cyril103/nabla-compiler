@@ -334,6 +334,9 @@ Le pipeline implemente actuellement :
 - CI GitHub avec `make all-tests`, `make examples`, `make tooling-tests`,
   vérification `make stdlib-docs` sans diff, compilation `-Werror` et
   `git diff --check`;
+- checklist de release candidate 0.1 maintenue dans `docs/releases/0.1.md`,
+  avec matrice locale explicite, criteres de contenu et procedure de tag
+  proposee pour `v0.1.0`;
 - reference HTML de la stdlib generee depuis `///`, avec directive `@status`
   pour distinguer visuellement API recommandee, compatibilite et helpers
   internes; toutes les pages actuellement publiees affichent les statuts des
@@ -843,6 +846,12 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   (`extends` + `with`) et améliorer le diagnostic associé.
 
 ## Journal Des Jalons
+- `local` - Preparer la checklist de release candidate 0.1 sans changement de
+  comportement: `docs/releases/0.1.md` decrit maintenant la matrice locale, les
+  criteres de contenu, la procedure de tag `v0.1.0` et la politique de gel de
+  fonctionnalites.
+  - Fichiers associes: `docs/releases/0.1.md`,
+    `docs/plans/rc-0.1-checklist.md`, `docs/roadmap.md`, `AGENTS.md`.
 - `local` - Durcir le dispatch racine de `String` effacé vers `Any`: les objets
   `String` portent maintenant un tag runtime dédié, les littéraux sont alignés
   sur 8 octets, et `Any.toString` / `Any.hashCode` / `Any.equals` reconnaissent
@@ -1695,12 +1704,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Etendre la surcharge de fonctions au-dela de la V1 :
+Preparer le tag `v0.1.0` depuis `master` en mode gel de fonctionnalites :
 
-- evaluer une forme idiomatique pour les constantes math sans argument
-  (`piFloat`, `piDouble`, etc.), qui ne peuvent pas encore etre surchargees par
-  type de retour seul;
-- ajouter une etape d'ambiguite explicite si une future resolution devient moins
-  stricte que la signature exacte;
+- relire `docs/releases/0.1.md`, `docs/stdlib-api.md` et la reference HTML
+  generee pour verifier que la surface visible correspond a la release;
+- executer la matrice RC complete de `docs/releases/0.1.md` apres chaque merge
+  restant;
+- limiter les changements avant tag aux corrections de bug, diagnostics,
+  documentation et exemples;
+- reporter les nouvelles features visibles, y compris l'extension de la
+  surcharge de fonctions au-dela de la V1, apres `v0.1.0`;
 - garder les helpers internes specialises de collections tant qu'ils expriment
   des contraintes runtime/IR reelles.

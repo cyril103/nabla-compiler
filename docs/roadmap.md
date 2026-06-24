@@ -96,35 +96,39 @@ features.
 
 Actions recommandees :
 
-1. Continuer le nettoyage de la référence stdlib générée en affinant les
+1. Passer en gel de fonctionnalites pour preparer `v0.1.0`: relire
+   `docs/releases/0.1.md`, executer la matrice RC complete sur `master` apres
+   les derniers merges, puis ne plus accepter que corrections de bug,
+   diagnostics, documentation et exemples avant le tag.
+2. Continuer le nettoyage de la référence stdlib générée en affinant les
    descriptions utilisateur et en évitant d'ajouter de nouveaux helpers
    documentés sans classification préalable.
-2. Maintenir le check CI pour `make stdlib-docs` et la référence HTML générée.
-3. Maintenir le check CI `make examples` pour garantir que les exemples publics
+3. Maintenir le check CI pour `make stdlib-docs` et la référence HTML générée.
+4. Maintenir le check CI `make examples` pour garantir que les exemples publics
    restent compilables et que leurs sorties attendues ne dérivent pas.
-4. Maintenir et enrichir `docs/internals.md`, la specification vivante pour
+5. Maintenir et enrichir `docs/internals.md`, la specification vivante pour
    types, runtime, IR et conventions de stdlib.
-5. Utiliser `docs/stdlib-api.md` pour distinguer API publique, compatibilite
+6. Utiliser `docs/stdlib-api.md` pour distinguer API publique, compatibilite
    temporaire et helpers internes avant d'ajouter de nouveaux symboles.
-6. Revoir la doc stdlib pour masquer ou signaler les helpers internes.
-7. Stabiliser `Array[T]`, `Option[T]` et `Set[T]` comme surfaces utilisateur
+7. Revoir la doc stdlib pour masquer ou signaler les helpers internes.
+8. Stabiliser `Array[T]`, `Option[T]` et `Set[T]` comme surfaces utilisateur
    principales.
-8. Continuer a garder les exemples publics sur les facades idiomatiques
+9. Continuer a garder les exemples publics sur les facades idiomatiques
    (`Array[T]`, `Array.fill[T]`, `Set.fromArray[T]`,
    `Option.some[T]` / `Option.none[T]`) quand elles existent.
    Les cookbooks doivent rester concis et ne pas laisser entendre que tous les
    retours de tableaux masquent deja completement `ArrayObject[T]`.
-9. Garder les diagnostics de compatibilite orientes vers les compagnons
+10. Garder les diagnostics de compatibilite orientes vers les compagnons
    recommandes (`Array.fill`, `Array.rangeUntil`, `Set.fromArray`,
    `Option.some`, `Option.none`, etc.).
-10. Poursuivre la surcharge par signature : la base couvre maintenant les
+11. Poursuivre la surcharge par signature apres `v0.1.0` : la base couvre maintenant les
     fonctions globales, y compris les generiques inferables et les references
     typees, ainsi que les methodes de classe concretes ou generiques par
     signature exacte, y compris l'inference de lambdas apres arguments generiques
     deja resolus; commencer la migration publique de la stdlib vers les noms
     surcharges idiomatiques et garder les diagnostics d'ambiguite riches si la
     resolution devient moins stricte que l'exact match.
-11. Reporter `Result[T]`, variance avancee et GC tant que cette surface n'est
+12. Reporter `Result[T]`, variance avancee et GC tant que cette surface n'est
    pas propre.
 
 ### Revue de code (16/06/2026, corrigée)
