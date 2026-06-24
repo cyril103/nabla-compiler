@@ -1,1 +1,2 @@
 tests/test_error_override_return_type.nabla:8:14: semantic error: override invalide pour 'Child.value' : signature incompatible avec la méthode héritée
+signatures héritées candidates: Parent.value(): Int

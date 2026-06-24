@@ -1,1 +1,1 @@
-tests/test_error_super_without_parent.nabla:9:9: parser error: 'super' non autorisé dans une classe sans parent explicite
+tests/test_error_super_without_parent.nabla:9:9: parser error: 'super' non autorisé dans la classe 'Child' sans parent explicite; ajoutez 'extends Parent(...)' avant d'appeler super

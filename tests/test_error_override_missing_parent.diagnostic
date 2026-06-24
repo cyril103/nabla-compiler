@@ -1,1 +1,1 @@
-tests/test_error_override_missing_parent.nabla:2:14: semantic error: override invalide pour 'Child.value' : aucune méthode héritée correspondante
+tests/test_error_override_missing_parent.nabla:2:14: semantic error: override invalide pour 'Child.value' : aucune méthode héritée nommée 'value'

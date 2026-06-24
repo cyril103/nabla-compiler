@@ -1165,9 +1165,13 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         }
         if (classIt == context.classes.end() || classIt->second.parentTypes.empty() ||
             !classIt->second.hasExplicitParent) {
+            const std::string className = currentParsingClass.empty()
+                ? "<hors classe>"
+                : currentParsingClass;
             throw CompilerError(
                 ErrorKind::Parser, superToken.location,
-                "'super' non autorisé dans une classe sans parent explicite");
+                "'super' non autorisé dans la classe '" + className +
+                "' sans parent explicite; ajoutez 'extends Parent(...)' avant d'appeler super");
         }
         return located(
             std::make_unique<SuperNode>(classIt->second.parentTypes[0]),
