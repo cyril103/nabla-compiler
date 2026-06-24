@@ -1,0 +1,6 @@
+import collections.array
+
+def main(): Int = {
+    val xs = Array.fill[Int](4, 10)
+    xs.sum() + 2
+}

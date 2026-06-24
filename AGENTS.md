@@ -405,7 +405,8 @@ Limites importantes :
   `Array[Option[String]]` et les tableaux d'objets utilisateur, tandis que les
   operations avancees restent a faire; la monomorphisation complete des classes
   generiques reste a durcir;
-- le runtime initialise un tas de 8 MiB par `mmap`, avec allocations bump
+- le runtime initialise par défaut un tas de 8 MiB par `mmap`, configurable à la
+  compilation avec `nablac --heap-size <octets>`, avec allocations bump
   alignees sur 8 octets et verification de depassement, mais pas de
   ramasse-miettes;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
@@ -763,6 +764,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 - [x] Verifier les depassements du tas.
 - [x] Initialiser le tas runtime via `mmap` et aligner les allocations bump.
+- [x] Permettre de configurer la capacité du heap par exécutable avec
+  `nablac --heap-size <octets>` tout en gardant 8 MiB par défaut.
 - [ ] Definir de vraies vtables ou stabiliser le header runtime actuel.
 - [x] Extraire le runtime ASM commun du backend IR.
 - [x] Stabiliser la representation de `String`.
@@ -843,8 +846,22 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `objectStringArrayMkString` pour `ArrayObject[String]`.
 - [x] Valider explicitement les ambiguïtés de résolution de méthode héritée
   (`extends` + `with`) et améliorer le diagnostic associé.
+- [x] Rendre configurable la capacité du heap runtime par exécutable avec
+  `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Rendre le heap runtime configurable sans modifier l'allocateur:
+  `nablac --heap-size <octets>` conserve 8 MiB par défaut, rejette les valeurs
+  invalides ou inférieures à 4096 octets, et propage la capacité choisie dans
+  `heap_capacity` du runtime assembleur généré.
+  - Fichiers associés: `src/main.cpp`, `src/runtime_asm.cpp`,
+    `src/runtime_asm.hpp`, `src/ir_codegen.cpp`, `src/ir_codegen.hpp`,
+    `tests/test_configurable_heap_size.nabla`,
+    `tests/test_configurable_heap_size.expected`,
+    `tests/test_configurable_heap_size.sh`, `Makefile`,
+    `docs/plans/configurable-runtime-heap.md`, `docs/internals.md`,
+    `docs/language.md`, `docs/roadmap.md`, `README.md`, `AGENTS.md`.
 
 - `local` - Étendre le hardening post-0.1 aux collections parent-typées:
   `Array[Parent]` et `Set.fromArray[Parent]` ont maintenant une régression
@@ -1729,15 +1746,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Prochaine Etape Recommandee
 
-Preparer le tag `v0.1.0` depuis `master` en mode gel de fonctionnalites :
+Le tag `v0.1.0` existe déjà; poursuivre en phase post-release avec des
+changements étroits qui clarifient le comportement observable sans élargir trop
+vite la surface publique :
 
-- relire `docs/releases/0.1.md`, `docs/stdlib-api.md` et la reference HTML
-  generee pour verifier que la surface visible correspond a la release;
-- executer la matrice RC complete de `docs/releases/0.1.md` apres chaque merge
-  restant;
-- limiter les changements avant tag aux corrections de bug, diagnostics,
-  documentation et exemples;
-- reporter les nouvelles features visibles, y compris l'extension de la
-  surcharge de fonctions au-dela de la V1, apres `v0.1.0`;
-- garder les helpers internes specialises de collections tant qu'ils expriment
-  des contraintes runtime/IR reelles.
+- consolider les limites runtime documentées (`--heap-size`, erreurs runtime,
+  dispatch via `Any`, layout objets/tableaux) avec tests de régression;
+- continuer le durcissement héritage/dispatch et les règles d'égalité/hash dans
+  les hiérarchies complexes;
+- améliorer les diagnostics et la documentation utilisateur avant de créer de
+  nouvelles abstractions comme `Result[T]`, variance avancée ou GC;
+- conserver les helpers internes spécialisés de collections tant qu'ils
+  expriment des contraintes runtime/IR réelles.

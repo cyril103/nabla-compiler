@@ -33,8 +33,9 @@ une exécution native proche du matériel.
   classe runtime pour le dispatch dynamique simple des overrides utilisateur,
   puis viennent les champs. Lors d'un appel de méthode, `RDI` reçoit l'objet
   courant comme `this`.
-* **Bump Allocator Interne :** Le runtime initialise un tas de 8 MiB avec
-  `mmap`, aligne les allocations sur 8 octets et vérifie les dépassements.
+* **Bump Allocator Interne :** Le runtime initialise par défaut un tas de 8 MiB
+  avec `mmap`, configurable à la compilation via `--heap-size <octets>`, aligne
+  les allocations sur 8 octets et vérifie les dépassements.
 * **Système d'Import Résolutif :** Gestion des dépendances par graphe de fichiers
   avec détection des inclusions cycliques pour éviter la duplication de code généré.
 * **Fonctions et Méthodes Paramétrées :** Les signatures sont validées

@@ -83,7 +83,9 @@ features.
   `ArrayObject[T]`, helpers `arrayBase...` et fonctions specialisees de pont.
 - Runtime a formaliser en continu : valeurs raw `Float`/`Double`, objets heap,
   tableaux natifs, slots nuls, conventions d'erreur et limites memoire. Les
-  constantes d'encodage `Int`/`Long`/`Bool` sont deja centralisees dans le code.
+  constantes d'encodage `Int`/`Long`/`Bool` sont deja centralisees dans le code,
+  et la capacité du heap peut être ajustée par exécutable avec
+  `nablac --heap-size <octets>`.
 - Typage a garder simple : sous-typage nominal pour les classes, generiques
   invariants par defaut, conversions explicites ou helpers stdlib.
 - Documentation : la reference HTML doit devenir une doc utilisateur claire,
@@ -210,8 +212,9 @@ Actions suggérées pour la suite :
 
 - Introduire un type `Result[T]` ou une convention d'erreurs plus riche pour
   l'I/O et le parsing.
-- Agrandir ou rendre configurable le heap runtime actuellement initialise a
-  8 MiB.
+- Agrandir le heap runtime au-delà de la valeur par défaut de 8 MiB est possible
+  à la compilation avec `nablac --heap-size <octets>`; le chantier long terme
+  reste la stratégie mémoire complète (libération/GC éventuel).
 - Refactoriser les primitives runtime I/O pour eviter la duplication autour des
   chemins C.
 - Ajouter un support editeur supplementaire :

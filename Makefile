@@ -208,6 +208,7 @@ examples-full: examples
 
 tooling-tests: nablac
 	@tests/test_missing_external_tools.sh
+	@tests/test_configurable_heap_size.sh
 
 stdlib-docs:
 	tools/generate_stdlib_docs.py
