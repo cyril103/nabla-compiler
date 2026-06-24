@@ -1583,13 +1583,8 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
         if (arguments.size() != 1) {
             semanticError("print: 1 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
         }
-        if (arguments[0]->getType() != "String") {
-            throw CompilerError(
-                ErrorKind::Semantic, arguments[0]->getLocation(),
-                "print, paramètre 'value': type 'String' attendu, '" +
-                arguments[0]->getType() + "' reçu");
-        }
         resolvedType = "Unit";
+        resolvedParameterTypes = {"Any"};
         return;
     }
     if (name == "readLine") {
@@ -1809,6 +1804,19 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
 }
 
 std::string FunctionCallNode::lowerToIR(IRBuilder& builder) const {
+    if (name == "print") {
+        if (arguments.size() != 1) {
+            builder.unsupported(location, "l'appel de print");
+        }
+        std::string loweredArgument = arguments[0]->lowerToIR(builder);
+        const std::string concreteArgumentType = builder.substituteActiveType(arguments[0]->getType());
+        loweredArgument = boxValueForParameter(
+            builder, loweredArgument, concreteArgumentType, "Any");
+        std::string loweredString = builder.emitMethodCall(
+            "Any", "toString", loweredArgument, {}, "String");
+        return builder.emitCall("print", {loweredString}, "Unit");
+    }
+
     std::vector<std::string> loweredArguments = resolvedParameters.empty()
         ? std::vector<std::string>{}
         : lowerCallArgumentsForParameters(builder, arguments, resolvedParameters);

@@ -27,7 +27,9 @@ pour reprendre facilement apres une pause.
   La conversion `toString()` est désormais disponible de façon uniforme pour les
   types primitifs usuels (`Int`, `Long`, `Float`, `Double`, `Bool`, `Char`) au niveau du
   backend runtime, y compris via un paramètre `Any`/`AnyVal` de fonction/méthode
-  grâce au boxing heap minimal. Les chaînes `String` portent aussi un tag runtime
+  grâce au boxing heap minimal. La primitive globale `print(value)` accepte aussi
+  `Any` et imprime le résultat de `value.toString()`, avec dispatch dynamique
+  vers les overrides utilisateur. Les chaînes `String` portent aussi un tag runtime
   dédié afin de conserver `toString`, `hashCode` et `equals` par contenu quand
   elles sont manipulées via `Any`.
 - Standard library deja utile :

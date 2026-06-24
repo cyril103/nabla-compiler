@@ -1,0 +1,13 @@
+import io
+
+class Label(text: String) {
+    override def toString(): String = {
+        "Label(" + text + ")"
+    }
+}
+
+def main(): Int = {
+    println(7)
+    println(new Label("ok"))
+    0
+}
