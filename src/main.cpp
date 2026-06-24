@@ -12,6 +12,7 @@
 #include <cstring>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -29,8 +30,37 @@ static std::filesystem::path findProjectRoot(const std::filesystem::path& start)
     return start.parent_path();
 }
 
+static constexpr std::uint64_t kDefaultHeapCapacityBytes = 8388608ULL;
+static constexpr std::uint64_t kMinimumHeapCapacityBytes = 4096ULL;
+
 static void printUsage(const char* programName) {
-    std::cerr << "Usage: " << programName << " [--keep-asm|--keep-temp|--emit-ir|--backend-ir] <fichier.nabla>\n";
+    std::cerr << "Usage: " << programName
+              << " [--keep-asm|--keep-temp|--emit-ir|--backend-ir] [--heap-size <octets>] <fichier.nabla>\n";
+}
+
+static bool parseHeapSize(const std::string& value, std::uint64_t& heapCapacityBytes) {
+    if (value.empty()) {
+        return false;
+    }
+    for (char c : value) {
+        if (c < '0' || c > '9') {
+            return false;
+        }
+    }
+
+    size_t parsedLength = 0;
+    unsigned long long parsed = 0;
+    try {
+        parsed = std::stoull(value, &parsedLength, 10);
+    } catch (...) {
+        return false;
+    }
+
+    if (parsedLength != value.size() || parsed < kMinimumHeapCapacityBytes) {
+        return false;
+    }
+    heapCapacityBytes = static_cast<std::uint64_t>(parsed);
+    return true;
 }
 
 int runCommand(const std::vector<std::string>& args) {
@@ -68,6 +98,7 @@ int main(int argc, char* argv[]) {
     bool keepAsm = false;
     bool keepTemp = false;
     bool emitIR = false;
+    std::uint64_t heapCapacityBytes = kDefaultHeapCapacityBytes;
     std::string sourcePath;
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
@@ -80,6 +111,13 @@ int main(int argc, char* argv[]) {
             emitIR = true;
         } else if (arg == "--backend-ir") {
             // Kept for compatibility; IR is now the default backend.
+        } else if (arg == "--heap-size") {
+            if (i + 1 >= argc || !parseHeapSize(argv[i + 1], heapCapacityBytes)) {
+                std::cerr << "Argument invalide pour --heap-size : entier en octets attendu (minimum "
+                          << kMinimumHeapCapacityBytes << ")\n";
+                return 1;
+            }
+            ++i;
         } else if (arg == "--help" || arg == "-h") {
             printUsage(argv[0]);
             return 0;
@@ -135,7 +173,7 @@ int main(int argc, char* argv[]) {
 
         std::ofstream asmFile(asmFilename);
         irProgram = IRBuilder().build(*globalAST, context);
-        IRCodeGenerator().generateASM(irProgram, context, asmFile);
+        IRCodeGenerator(heapCapacityBytes).generateASM(irProgram, context, asmFile);
         asmFile.close();
 
         if (runCommand({"nasm", "-f", "elf64", asmFilename, "-o", objFilename}) != 0 ||

@@ -277,6 +277,12 @@ Certaines opérations runtime utilisent des codes de sortie dédiés, par exempl
 - accès hors bornes sur chaînes/tableaux ;
 - dépassement du heap.
 
+Le heap runtime est un bump allocator alloué par `mmap`. Sa capacité par défaut
+reste `8388608` octets (8 MiB), mais le compilateur accepte
+`--heap-size <octets>` pour générer un exécutable avec une autre valeur dans le
+symbole assembleur `heap_capacity`. Les valeurs non entières ou inférieures à
+4096 octets sont rejetées par `nablac` avant la génération.
+
 Ces codes doivent rester documentés au fur et à mesure qu'ils deviennent une
 surface observable par l'utilisateur.
 

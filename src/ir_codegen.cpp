@@ -1176,9 +1176,12 @@ private:
 };
 }
 
+IRCodeGenerator::IRCodeGenerator(std::uint64_t heapCapacityBytes)
+    : heapCapacityBytes(heapCapacityBytes) {}
+
 void IRCodeGenerator::generateASM(
     const IRProgram& program, const CompilerContext& context, std::ostream& out) const {
-    RuntimeASM::emit(out);
+    RuntimeASM::emit(out, heapCapacityBytes);
     for (const auto& function : program.functions) {
         FunctionEmitter(function, context, out).emit();
     }

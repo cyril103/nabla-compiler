@@ -1041,8 +1041,9 @@ projet, puis dans `stdlib/`.
 ## Limites Actuelles
 
 - Les chaines sont byte-based/ASCII, pas encore Unicode.
-- La memoire utilise un heap `mmap` de 8 MiB avec bump allocator, sans
-  liberation ni GC.
+- La memoire utilise par défaut un heap `mmap` de 8 MiB avec bump allocator,
+  sans liberation ni GC. `nablac --heap-size <octets>` permet de compiler un
+  exécutable avec une autre capacité de heap (minimum 4096 octets).
 - Les objets utilisateur stockent un identifiant de classe runtime dans leur
   header et les appels de méthodes utilisateur sont virtuels par défaut quand
   la valeur est manipulée via un type parent, y compris pour un parent générique

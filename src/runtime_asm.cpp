@@ -3,9 +3,9 @@
 #include <ostream>
 
 namespace RuntimeASM {
-void emit(std::ostream& out) {
+void emit(std::ostream& out, std::uint64_t heapCapacityBytes) {
     out << "section .data\n"
-        << "    heap_capacity: dq 8388608\n"
+        << "    heap_capacity: dq " << heapCapacityBytes << "\n"
         << "    heap_start: dq 0\n"
         << "    heap_pointer: dq 0\n"
         << "    heap_end: dq 0\n"
