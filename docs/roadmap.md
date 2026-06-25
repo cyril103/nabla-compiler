@@ -1,7 +1,7 @@
 # Nabla Roadmap
 
 Ce document capture l'etat courant du projet et les prochaines pistes de travail
-pour reprendre facilement apres une pause.
+pour garder un cap clair après le tag `v0.1.0`.
 
 ## Etat Actuel
 
@@ -71,7 +71,7 @@ pour reprendre facilement apres une pause.
 - Suites `make all-tests`, `make examples` et `make tooling-tests` vertes au
   moment de cette mise a jour; la CI GitHub lance aussi les exemples publics.
 
-## Priorites Prochaine Session
+## Priorités Post-0.1
 
 ### Fil conducteur produit/langage
 
@@ -99,7 +99,8 @@ features.
   `@example ... @end` pour rendre des exemples de code; les pages publiees
   utilisent une mise en page type reference Scala avec sidebar par
   types/fabriques/methodes, signatures ancrees et chemins CSS relatifs verifies.
-  Le perimetre cible de Nabla 0.1 est fixe dans `docs/releases/0.1.md`.
+  Le périmètre livré par Nabla 0.1 et la matrice de validation 0.1.x sont
+  conservés dans `docs/releases/0.1.md`.
 
 Actions recommandees :
 
@@ -141,77 +142,24 @@ Actions recommandees :
 13. Reporter `Result[T]`, variance avancee et GC tant que cette surface n'est
    pas propre.
 
-### Revue de code (16/06/2026, corrigée)
+## Jalons Récents Pris En Compte
 
-- Corrigé — Représentation des `Bool` correcte et explicite :
-  - `src/runtime_values.hpp` centralise les valeurs runtime `false = 1` et
-    `true = 3`.
-  - `src/ast.cpp` émet maintenant les constantes booléennes IR directement avec
-    ces valeurs taggées.
-  - `src/ir_codegen.cpp` valide que les constantes IR `Bool` sont déjà taggées
-    avant de les écrire en assembleur, au lieu de les faire passer par
-    l'encodage `Int`.
-  - `tests/test_bool_runtime_encoding_regression.nabla` couvre constantes,
-    comparaisons, retours de fonctions, opérateurs logiques et `BoolArray`.
-- Corrigé — Vérification incomplète de `override` :
-  - Le flag `override` est parsé et stocké (`src/parser.cpp:1252`) puis seules les règles de présence/supériorité sont contrôlées en semantique (`src/semantic_analyzer.cpp:205`).
-  - La validation compare maintenant arité, paramètres, retour et paramètres génériques de méthode, avec substitutions des types hérités.
-- Corrigé — Initialisation des tableaux natifs par défaut à valeur fixe `1` :
-  - `src/ir_codegen.cpp:746` remplit maintenant chaque slot des tableaux natifs selon le type d’élément.
-  - Le backend initialise désormais `FloatArray`, `DoubleArray` et `ObjectArray[T]` avec `0`, et conserve `1` pour les zéros/faux taggés de `Int`, `Long` et `Bool`.
-- Corrigé — Fallbacks silencieux vers `Int` quand un type est inconnu :
-  - `src/parser.cpp:1071` utilise maintenant un marqueur `<unresolved>` pour les identifiants non résolus.
-  - `src/ir_codegen.cpp:211` échoue maintenant explicitement si un type IR est vide ou introuvable.
-- P3 — Corrigé : la référence HTML de la stdlib est vérifiée par la CI :
-  - `.github/workflows/ci.yml` lance maintenant `make stdlib-docs` puis
-    `git diff --exit-code docs/stdlib` pour empêcher une documentation générée
-    désynchronisée.
-- P3 — Corrigé : les exemples publics sont vérifiés par la CI :
-  - `.github/workflows/ci.yml` lance maintenant `make examples` entre la suite
-    générale et les tests d'outillage.
+Ces jalons sont déjà intégrés et ne doivent plus être traités comme des notes de
+reprise séparées :
 
-Actions suggérées pour la suite :
-
-1. Finaliser la sémantique d'héritage.
-   - Valider la résolution des champs hérités et les conflits de noms entre
-     champs/méthodes.
-   - Ajouter une erreur explicite quand un membre est ambigu.
-2. Consolider le système `super`.
-   - Confirmer les cas `super` dans chaînes de mixins / héritage.
-   - Définir règles et tests pour les masquages explicites.
-3. Améliorer l’ergonomie héritage/collisions de types.
-   - Corrigé : `extends Parent(field: Type, extra: Type)` expose une signature
-     constructeur héritée lisible ; le préfixe initialise le parent direct et
-     le suffixe déclare les champs propres.
-   - Rendre la résolution des champs/méthodes héritées plus prédictible dans les
-     exemples concrets.
-4. Revenir sur le chantier `match` avancé.
-   - Finaliser les motifs nommés et les gardes (`motif if condition`).
-   - Ajouter des diagnostics propres pour les erreurs de portée/typage des gardes.
-5. Réduire la friction entre héritage et collections.
-   - Corrigé : `Array[Person]` peut alimenter `Set.fromArray[Person]` avec des
-     instances `Student`, `Instructor`, `Volunteer` sans dupliquer les
-     spécialisations IR.
-   - Corrigé : les appels de méthodes utilisateur redispatchent vers l'override
-     runtime quand la valeur est manipulée via un type parent, y compris pour un
-     parent générique instancié et une méthode générique spécialisée, tout en
-     gardant `super` statique.
-   - Corrigé : `Any.toString()`, `Any.hashCode()` et `Any.equals(...)`
-     redispatchent vers les overrides utilisateur, ce qui stabilise `==` / `!=`
-     et l'index hashé de `Set[Parent]` avec des instances de sous-types.
-   - Reste à clarifier : stratégie complète de vtables et éventuelles règles
-     d'égalité plus strictes pour les hiérarchies complexes.
-   - Documenter des motifs d’exemple pour utiliser ce cas facilement.
-6. Ajouter les objets statiques façon Scala.
-   - Corrigé : `object Name { def ... }` est supporté comme namespace statique
-     abaissé vers des fonctions globales qualifiées (`Name.method(...)`).
-   - Corrigé : un `object` peut partager son nom avec une `class` pour servir de
-     compagnon de surface (`Box.of(...)`).
-   - Reste à clarifier : vrais singletons runtime, champs d'objet et stratégie
-     d'initialisation.
-7. Ajouter des tests “mélange” héritage + autres fonctionnalités.
-   - Cas de régression couvrant `super`, champs hérités, shadowing contrôlé
-     et conflit translatif.
+- `v0.1.0` est tagué ; l'ancienne checklist de préparation du tag a été
+  transformée en notes de release et matrice de validation 0.1.x dans
+  `docs/releases/0.1.md`.
+- Les diagnostics d'héritage, `override`, `super`, conflits champ/méthode et
+  noms legacy de stdlib sont couverts par des tests négatifs exacts.
+- `Any.toString`, `Any.hashCode`, `Any.equals`, `String` taggé et `print(value)`
+  via `Any.toString()` sont stabilisés pour les cas couverts.
+- Le runtime heap est configurable avec `nablac --heap-size <octets>`.
+- `Sized` et `Iterable[T]` sont exposés comme traits publics minimaux de
+  collections.
+- Les exemples publics principaux privilégient désormais `Array[T]`,
+  `Array.fill[T]`, `Set.fromArray[T]`, `Option.some` / `Option.none` et les
+  méthodes publiques, plutôt que les représentations internes.
 
 ## Pistes Plus Larges
 

@@ -341,8 +341,8 @@ Le pipeline implemente actuellement :
 - CI GitHub avec `make all-tests`, `make examples`, `make tooling-tests`,
   vérification `make stdlib-docs` sans diff, compilation `-Werror` et
   `git diff --check`;
-- `v0.1.0` est tagué; `docs/releases/0.1.md` conserve la checklist et la
-  procédure ayant servi à figer le périmètre 0.1;
+- `v0.1.0` est tagué; `docs/releases/0.1.md` conserve les notes de release
+  et la matrice de validation 0.1.x;
 - reference HTML de la stdlib generee depuis `///`, avec directive `@status`
   pour distinguer visuellement API recommandee, compatibilite et helpers
   internes; les pages publiees utilisent une mise en page type reference Scala
@@ -881,7 +881,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `tests/test_print_any_tostring.nabla`,
     `tests/test_stdlib_io_println_any.nabla`, `docs/language.md`,
     `docs/internals.md`, `docs/roadmap.md`,
-    `docs/plans/print-any-tostring.md`, `docs/stdlib/`, `AGENTS.md`.
+    `docs/stdlib/`, `AGENTS.md`.
 
 - `local` - Refaire la reference HTML de la stdlib dans un style proche Scala:
   chemins CSS corriges pour les modules racine, sidebar par types/fabriques/
@@ -893,7 +893,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `tests/test_stdlib_docs_html.py`, `Makefile`, `stdlib/collections/array.nabla`,
     `stdlib/collections/map.nabla`, `stdlib/collections/set.nabla`,
     `stdlib/core/option.nabla`, `stdlib/math.nabla`, `docs/stdlib/`,
-    `docs/stdlib-api.md`, `docs/plans/scala-style-stdlib-html.md`,
+    `docs/stdlib-api.md`,
     `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Rendre le heap runtime configurable sans modifier l'allocateur:
@@ -905,7 +905,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `tests/test_configurable_heap_size.nabla`,
     `tests/test_configurable_heap_size.expected`,
     `tests/test_configurable_heap_size.sh`, `Makefile`,
-    `docs/plans/configurable-runtime-heap.md`, `docs/internals.md`,
+    `docs/internals.md`,
     `docs/language.md`, `docs/roadmap.md`, `README.md`, `AGENTS.md`.
 
 - `local` - Étendre le hardening post-0.1 aux collections parent-typées:
@@ -914,7 +914,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `equals` dynamiques après passage par les APIs génériques de collections.
   - Fichiers associés: `tests/test_inheritance_parent_collections_dispatch.nabla`,
     `tests/test_inheritance_parent_collections_dispatch.expected`,
-    `docs/plans/inheritance-runtime-hardening.md`, `docs/roadmap.md`,
+    `docs/roadmap.md`,
     `AGENTS.md`.
 
 - `local` - Démarrer le hardening post-0.1 de l'héritage/runtime: les
@@ -931,14 +931,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `tests/test_error_inheritance_own_method_field_conflict.diagnostic`,
     `tests/test_inheritance_field_dispatch_mix.nabla`,
     `tests/test_inheritance_field_dispatch_mix.expected`,
-    `docs/plans/inheritance-runtime-hardening.md`, `docs/internals.md`,
+    `docs/internals.md`,
     `docs/roadmap.md`, `AGENTS.md`.
-- `local` - Preparer la checklist de release candidate 0.1 sans changement de
-  comportement: `docs/releases/0.1.md` decrit maintenant la matrice locale, les
-  criteres de contenu, la procedure de tag `v0.1.0` et la politique de gel de
-  fonctionnalites.
-  - Fichiers associes: `docs/releases/0.1.md`,
-    `docs/plans/rc-0.1-checklist.md`, `docs/roadmap.md`, `AGENTS.md`.
+- `local` - Figer puis publier le jalon 0.1 sans changement de comportement:
+  `docs/releases/0.1.md` conserve maintenant les notes de release, la matrice
+  de validation 0.1.x et la politique post-0.1. Le plan temporaire de
+  préparation du tag a été retiré après publication.
+  - Fichiers associes: `docs/releases/0.1.md`, `docs/roadmap.md`, `AGENTS.md`.
 - `local` - Durcir le dispatch racine de `String` effacé vers `Any`: les objets
   `String` portent maintenant un tag runtime dédié, les littéraux sont alignés
   sur 8 octets, et `Any.toString` / `Any.hashCode` / `Any.equals` reconnaissent
@@ -946,7 +945,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   - Fichiers / tests associes: `src/runtime_values.hpp`,
     `src/runtime_asm.cpp`, `src/ir_codegen.cpp`,
     `tests/test_any_string_dispatch.nabla`, `docs/internals.md`,
-    `docs/plans/string-any-dispatch.md`, `AGENTS.md`.
+    `AGENTS.md`.
 - `local` - Ajouter deux cookbooks stdlib publics non interactifs pour les
   collections et le traitement de texte, avec oracles de code de sortie et
   stdout deterministe, plus une courte page `docs/cookbook.md`.
@@ -1002,15 +1001,14 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   - Fichiers / tests associés: `stdlib/core/option.nabla`,
     `stdlib/collections/map.nabla`, `tests/test_stdlib_option_none_empty.nabla`,
     `tests/test_stdlib_map_get_option_empty.nabla`, `examples/student_scores.nabla`,
-    `docs/language.md`, `docs/stdlib-api.md`, `docs/next-session.md`,
-    `docs/stdlib/`, `AGENTS.md`.
+    `docs/language.md`, `docs/stdlib-api.md`, `docs/stdlib/`, `AGENTS.md`.
 - `local` - Ajouter les méthodes publiques de confort `Map.contains`,
   `Map.foreachEntry`, `Map.mapValues[U]` et `Map.filterKeys`, avec
   classification dans `docs/stdlib-api.md`, test dédié et documentation HTML
   régénérée.
   - Fichiers / tests associés: `stdlib/collections/map.nabla`,
     `tests/test_stdlib_map_comfort_methods.nabla`, `docs/stdlib-api.md`,
-    `docs/stdlib/collections/map.html`, `docs/next-session.md`, `AGENTS.md`.
+    `docs/stdlib/collections/map.html`, `AGENTS.md`.
 - `local` - Résoudre la limitation du compilateur lors de la génération de code pour les appels de méthode sur des paramètres de type génériques (comme `K.toString()` générant des références non résolues comme `K.toString` dans l'assembleur) en les redirigeant de manière dynamique vers `Any.toString()`, et implémenter `Map.toString` et `Map.mkString` dans le module `collections.map` de la bibliothèque standard.
   - Fichiers / tests associés: `src/ir.hpp`, `src/ir.cpp`, `src/ast.cpp`, `stdlib/collections/map.nabla`, `tests/test_tuple2_generic_tostring.nabla`, `tests/test_stdlib_map_tostring.nabla`, `docs/stdlib/collections/map.html`, `AGENTS.md`.
 - `local` - Configurer l'environnement de développement WSL 2 sous Windows avec installation d'Ubuntu et des dépendances (`g++`, `nasm`, `make`, `dos2unix`). Ajouter `.gitattributes` pour imposer les sauts de ligne `LF` sur les fichiers du projet et résoudre les écarts Windows/Linux pour la suite de tests.
