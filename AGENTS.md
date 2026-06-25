@@ -358,6 +358,9 @@ Le pipeline implemente actuellement :
   `Array[T]`, `Set[T]`, `Set.fromArray[T]`, opérations d'ensemble et héritage
   avec `override`; la friction restante porte surtout sur les collections
   polymorphes de type parent comme `Set[Person]`.
+- `examples/game_of_life.nabla` comme exemple interactif compile par
+  `make examples` pour `Array[T]` et `Array.fill[T]`, sans import applicatif de
+  `IntArray` ni des helpers `intArray...`.
 - `examples/stdlib_collections_cookbook.nabla` et
   `examples/stdlib_text_cookbook.nabla` comme cookbooks non interactifs verifies
   pour `Array[T]`, `Set[T]`, `Map[K, V]`, `Option[T]`, `Sized` et les operations
@@ -860,6 +863,14 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Migrer `examples/game_of_life.nabla` vers la facade publique
+  `collections.array`: signatures `Array[Int]`, allocations
+  `Array.fill[Int]` et somme via methode publique, sans changer le comportement
+  interactif compile par `make examples`.
+  - Fichiers associés: `examples/game_of_life.nabla`, `docs/roadmap.md`,
+    `AGENTS.md`.
+  - Validation: `make examples-quick`.
 
 - `local` - Faire accepter `Any` par `print(value)` et abaisser l'argument vers
   `Any.toString()` avant l'appel runtime, afin que primitives, chaînes, valeurs
