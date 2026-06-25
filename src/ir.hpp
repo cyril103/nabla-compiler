@@ -166,6 +166,7 @@ public:
     void bindThis();
     void bindClosure();
     void bindCapture(const std::string& symbol, int captureIndex, const std::string& type);
+    const class CompilerContext& getContext() const;
     [[noreturn]] void unsupported(const SourceLocation& location, const std::string& feature) const;
 
 private:

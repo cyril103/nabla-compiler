@@ -69,6 +69,7 @@ sizes.values().size()</code></pre>
         <li><a href="#keys" title="def keys(): Array[K]"><span>keys</span><code>def keys(): Array[K]</code></a></li>
         <li><a href="#values" title="def values(): Array[V]"><span>values</span><code>def values(): Array[V]</code></a></li>
         <li><a href="#toArray" title="def toArray(): Array[Tuple2[K, V]]"><span>toArray</span><code>def toArray(): Array[Tuple2[K, V]]</code></a></li>
+        <li><a href="#foreach" title="def foreach(f: (Tuple2[K, V]) =&gt; Unit): Unit"><span>foreach</span><code>def foreach(f: (Tuple2[K, V]) =&gt; Unit): Unit</code></a></li>
         <li><a href="#foreachEntry" title="def foreachEntry(f: (Tuple2[K, V]) =&gt; Unit): Unit"><span>foreachEntry</span><code>def foreachEntry(f: (Tuple2[K, V]) =&gt; Unit): Unit</code></a></li>
         <li><a href="#mapValues" title="def mapValues[U](default: U, f: (V) =&gt; U): Map[K, U]"><span>mapValues</span><code>def mapValues[U](default: U, f: (V) =&gt; U): Map[K, U]</code></a></li>
         <li><a href="#filterKeys" title="def filterKeys(predicate: (K) =&gt; Bool): Map[K, V]"><span>filterKeys</span><code>def filterKeys(predicate: (K) =&gt; Bool): Map[K, V]</code></a></li>
@@ -217,6 +218,15 @@ sizes.values().size()</code></pre>
           <pre class="signature"><code>def toArray(): Array[Tuple2[K, V]]</code></pre>
           <p>Retourne les paires cle-valeur sous forme de tableau.</p>
 <p>La representation visible actuelle est ArrayObject[Tuple2[K, V]].</p>
+
+        </article>
+        <article class="entry" id="foreach">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>foreach</h2>
+          <pre class="signature"><code>def foreach(f: (Tuple2[K, V]) =&gt; Unit): Unit</code></pre>
+          <p>Applique une fonction a chaque paire cle-valeur.</p>
 
         </article>
         <article class="entry" id="foreachEntry">

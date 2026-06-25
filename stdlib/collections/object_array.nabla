@@ -1,5 +1,6 @@
 import util
 import core.sized
+import core.iterable
 import collections.array_base
 
 def objectArrayFill[T](size: Int, value: T): ArrayObject[T] = {
@@ -93,7 +94,7 @@ def objectStringArrayMkString[T](xs: ArrayObject[String], separator: String): St
     objectArrayMkString(xs, separator)
 }
 
-class ArrayObject[T](values: ObjectArray[T]) with Sized {
+class ArrayObject[T](values: ObjectArray[T]) with Sized with Iterable[T] {
     def length(): Int = {
         objectArrayLength(values)
     }
@@ -214,7 +215,7 @@ class ArrayObject[T](values: ObjectArray[T]) with Sized {
         new ArrayObject[U](flattened)
     }
 
-    def foreach(f: (T) => Unit): Unit = {
+    override def foreach(f: (T) => Unit): Unit = {
         arrayBaseForeach[T, ObjectArray[T]](values, objectArrayLength[T], objectArrayGet[T], f)
     }
 

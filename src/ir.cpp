@@ -352,6 +352,13 @@ void IRBuilder::registerFunctionSpecialization(
     functionSpecializations.push_back({functionName, typeArguments, returnType});
 }
 
+const CompilerContext& IRBuilder::getContext() const {
+    if (!context) {
+        throw CompilerError(ErrorKind::Codegen, SourceLocation{}, "contexte IR indisponible");
+    }
+    return *context;
+}
+
 void IRBuilder::emitPendingSpecializations(const ProgramNode& root) {
     size_t nextFunctionSpecialization = 0;
     size_t nextMethodSpecialization = 0;

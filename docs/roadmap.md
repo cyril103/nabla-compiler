@@ -21,9 +21,9 @@ pour reprendre facilement apres une pause.
   abstraites, methodes concretes par defaut, composition par `with`, obligation
   d'implementation dans les classes concretes et rejet des conflits de defaults
   sans `override` explicite. Les classes generiques peuvent implementer des
-  traits non generiques, avec dispatch via le type du trait. La stdlib expose
-  maintenant le trait public minimal `Sized`, visible via les collections
-  publiques qui exposent `size()`, `isEmpty()` et `nonEmpty()`.
+  traits, y compris des traits generiques instancies comme `Iterable[T]`, avec
+  dispatch via le type du trait. La stdlib expose maintenant `Sized` et
+  `Iterable[T]` comme contrats publics minimaux pour les collections.
   La conversion `toString()` est désormais disponible de façon uniforme pour les
   types primitifs usuels (`Int`, `Long`, `Float`, `Double`, `Bool`, `Char`) au niveau du
   backend runtime, y compris via un paramètre `Any`/`AnyVal` de fonction/méthode
@@ -78,7 +78,7 @@ Le cap prioritaire est donc la coherence de surface, pas l'accumulation de
 features.
 
 - API publique cible : `Array[T]`, `Option[T]`, `Set[T]`, `Map[K, V]`,
-  `Sized`, `String`, classes, methodes, lambdas et modules standards
+  `Sized`, `Iterable[T]`, `String`, classes, methodes, lambdas et modules standards
   documentes.
 - Details a cacher ou marquer internes : `IntArray`, `LongArray`,
   `FloatArray`, `DoubleArray`, `BoolArray`, `ObjectArray[T]`,

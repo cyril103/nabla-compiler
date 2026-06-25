@@ -1,5 +1,6 @@
 import collections.object_array
 import collections.array_base
+import core.iterable
 import util
 
 def longArrayFill(size: Int, value: Long): LongArray = {
@@ -184,20 +185,20 @@ def longArraySet(values: LongArray, index: Int, value: Long): Unit = {
     values.set(index, value)
 }
 
-class ArrayLong(values: LongArray) {
+class ArrayLong(values: LongArray) with Iterable[Long] {
     def length(): Int = {
         longArrayLength(values)
     }
 
-    def size(): Int = {
+    override def size(): Int = {
         arrayBaseSize[LongArray](values, longArrayLength)
     }
 
-    def isEmpty(): Bool = {
+    override def isEmpty(): Bool = {
         arrayBaseIsEmpty[LongArray](values, longArrayLength)
     }
 
-    def nonEmpty(): Bool = {
+    override def nonEmpty(): Bool = {
         arrayBaseNonEmpty[LongArray](values, longArrayLength)
     }
 
@@ -253,7 +254,7 @@ class ArrayLong(values: LongArray) {
         arrayBaseFold[Long, Long, LongArray](values, longArrayLength, longArrayGet, initial, combine)
     }
 
-    def foreach(f: (Long) => Unit): Unit = {
+    override def foreach(f: (Long) => Unit): Unit = {
         arrayBaseForeach[Long, LongArray](values, longArrayLength, longArrayGet, f)
     }
 

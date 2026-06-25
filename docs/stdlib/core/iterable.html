@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Iterable - Nabla stdlib</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <header class="topbar">
+    <a class="brand" href="../index.html">Nabla stdlib</a>
+    <nav class="topnav" aria-label="Navigation principale">
+      <a href="../index.html">Modules</a>
+      <a href="https://github.com/cyril103/nabla-compiler">GitHub</a>
+    </nav>
+  </header>
+  <main id="contenu">
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="../index.html">Modules</a> / core.iterable</nav>
+    <section class="module-hero">
+      <p class="eyebrow">Module</p>
+      <h1>Iterable</h1>
+      <p class="import"><code>import core.iterable</code></p>
+      <p>Trait public minimal pour les collections parcourables.</p>
+
+    </section>
+    <div class="doc-shell">
+      <aside class="sidebar" aria-label="Sommaire des symboles publics">
+        <h2>API publique</h2>
+      <section class="toc-group">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="#Iterable" title="trait Iterable[T]"><span>Iterable</span><code>trait Iterable[T]</code></a></li>
+        </ul>
+      </section>
+      <section class="toc-group">
+        <h3>Methodes</h3>
+        <ul>
+        <li><a href="#foreach" title="def foreach(f: (T) =&gt; Unit): Unit"><span>foreach</span><code>def foreach(f: (T) =&gt; Unit): Unit</code></a></li>
+        </ul>
+      </section>
+      </aside>
+      <section class="content entries" aria-label="Reference detaillee">
+        <article class="entry" id="Iterable">
+          <div class="entry-meta">
+            <span class="kind">trait</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>Iterable</h2>
+          <pre class="signature"><code>trait Iterable[T]</code></pre>
+          <p>Collection parcourable element par element.</p>
+<p>Iterable[T] herite de Sized : un consommateur polymorphe peut donc utiliser size(), isEmpty() et nonEmpty() en plus de foreach.</p>
+
+        </article>
+        <article class="entry" id="foreach">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>foreach</h2>
+          <pre class="signature"><code>def foreach(f: (T) =&gt; Unit): Unit</code></pre>
+          <p>Applique f a chaque element.</p>
+
+        </article>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

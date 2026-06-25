@@ -61,6 +61,14 @@ bool isObjectArrayFacadeType(const std::string& type) {
            parameterizedType->second.size() == 1;
 }
 
+bool isAbstractTraitMethod(
+    const CompilerContext& context, const std::string& ownerType, const std::string& methodName) {
+    auto ownerIt = context.classes.find(genericBaseName(ownerType));
+    if (ownerIt == context.classes.end() || !ownerIt->second.isTrait) return false;
+    auto methodIt = ownerIt->second.methods.find(methodName);
+    return methodIt != ownerIt->second.methods.end() && methodIt->second.isAbstract;
+}
+
 std::string primitiveArrayFacadeStorageType(const std::string& type) {
     if (type == "ArrayLong") return "LongArray";
     if (type == "ArrayFloat") return "FloatArray";
@@ -1532,7 +1540,8 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         !resolvedOwnerType.empty() && ( !concreteTypeArguments.empty() || concreteReceiverType != resolvedOwnerType );
     const bool shouldSpecializeAsConcreteClass =
         shouldRegisterMethodSpecialization && !receiverBaseChanged;
-    if (shouldRegisterMethodSpecialization) {
+    if (shouldRegisterMethodSpecialization &&
+        !isAbstractTraitMethod(builder.getContext(), resolvedOwnerType, loweredSourceMethodName)) {
         const std::string concreteClassName =
             shouldSpecializeAsConcreteClass ? concreteReceiverType : resolvedOwnerType;
         builder.registerMethodSpecialization(

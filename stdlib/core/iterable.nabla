@@ -1,0 +1,17 @@
+/// @module Iterable
+/// Trait public minimal pour les collections parcourables.
+
+import core.sized
+
+/// Collection parcourable element par element.
+/// @signature trait Iterable[T]
+/// @status Recommandee
+///
+/// Iterable[T] herite de Sized : un consommateur polymorphe peut donc utiliser
+/// size(), isEmpty() et nonEmpty() en plus de foreach.
+trait Iterable[T] with Sized {
+    /// Applique f a chaque element.
+    /// @signature def foreach(f: (T) => Unit): Unit
+    /// @status Recommandee
+    def foreach(f: (T) => Unit): Unit
+}

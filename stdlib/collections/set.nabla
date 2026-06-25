@@ -25,6 +25,7 @@
 
 import collections.object_array
 import core.sized
+import core.iterable
 import collections.int_array
 import collections.long_array
 import collections.float_array
@@ -394,7 +395,7 @@ def SetEmpty[T](): Set[T] = {
 /// retournent un nouvel ensemble. L'instance d'origine n'est pas modifiee.
 /// L'egalite repose sur == et l'index interne utilise hashCode(), ce qui permet
 /// aux overrides utilisateur de participer a la deduplication.
-class Set[T](values: ArrayObject[T]) with Sized {
+class Set[T](values: ArrayObject[T]) with Sized with Iterable[T] {
     override def size(): Int = {
         values.size()
     }
@@ -469,6 +470,13 @@ class Set[T](values: ArrayObject[T]) with Sized {
     /// nouvelles constructions applicatives.
     def toArray(): ArrayObject[T] = {
         values
+    }
+
+    /// Applique une fonction a chaque element.
+    /// @signature def foreach(f: (T) => Unit): Unit
+    /// @status Recommandee
+    override def foreach(f: (T) => Unit): Unit = {
+        values.foreach(f)
     }
 
     /// Joint les elements avec un separateur.

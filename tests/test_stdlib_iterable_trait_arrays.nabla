@@ -1,0 +1,27 @@
+import core.iterable
+import collections.array
+
+
+def visitInts(values: Iterable[Int]): Int = {
+    values.foreach((value: Int) => {
+        print(value.toString())
+    })
+    values.size()
+}
+
+def visitText(values: Iterable[String]): Int = {
+    values.foreach((value: String) => {
+        print(value)
+    })
+    values.size()
+}
+
+def main(): Int = {
+    val ints: Iterable[Int] = Array.rangeUntil(1, 4)
+    val words: Iterable[String] = Array.fill[String](2, "ab")
+    if words.nonEmpty() {
+        visitInts(ints) + visitText(words)
+    } else {
+        1
+    }
+}
