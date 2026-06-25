@@ -28,7 +28,7 @@ def main(): Int = {
     val filledStudents = Array.fill[Student](2, new Student("grace"))
     val words = Array.fill[String](2, "go")
     val range = Array.range(4)
-    val rangeUntil = Array.rangeUntil(2, 5)
+    val rangeUntil = Array.range(2, 5)
 
     if emptyInts.toString() == "[4, 5, 6]" &&
        doubles.toString() == "[1.500000, 2.500000]" &&

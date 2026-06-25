@@ -727,7 +727,7 @@ def main(): Int = {
     val empty = Array.empty[Int]()
     val squares = Array.tabulate[Int](4, index => index * index)
     val indexes = Array.range(3)
-    val oneBased = Array.rangeUntil(1, 4)
+    val oneBased = Array.range(1, 4)
     if scores.mkString(",") == "10,20,30" &&
        weights.toString() == "[1.500000, 2.500000]" &&
        doubled.mkString(",") == "14,14,14" &&
@@ -752,7 +752,7 @@ Pour creer un tableau de n'importe quel type `T`, l'API recommandee est donc :
 - `Array.tabulate[T](size, f)` pour creer un tableau en calculant chaque
   element depuis son index ;
 - `Array.range(size)` pour obtenir `[0, 1, ..., size - 1]` en `Array[Int]` ;
-- `Array.rangeUntil(start, until)` pour obtenir `[start, ..., until - 1]` en
+- `Array.range(start, until)` pour obtenir `[start, ..., until - 1]` en
   `Array[Int]`.
 
 Exemple avec un type utilisateur :
@@ -796,8 +796,9 @@ comme `arrayFill[Int](...)`, `arrayIntRange(size)`,
 `arrayIntRangeUntil(start, until)`, `new IntArray(size)` ou
 `new ObjectArray[T](size)` restent disponibles pour compatibilite et pour la
 stdlib, mais `Array[T]`, `Array(...)`, `Array.apply`, `Array.empty`,
-`Array.fill`, `Array.tabulate`, `Array.range` et `Array.rangeUntil` sont les
-noms a privilegier dans le code utilisateur.
+`Array.fill`, `Array.tabulate` et les surcharges `Array.range` sont les noms a
+privilegier dans le code utilisateur. `Array.rangeUntil(start, until)` reste
+disponible comme alias de compatibilite.
 
 `intRangeUntil(start, until)` produit une plage `Int` paresseuse. Ses operations
 `foreach`, `fold`, `map` et `max` evitent de construire un `IntArray`

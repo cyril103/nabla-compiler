@@ -124,9 +124,9 @@ Le pipeline implemente actuellement :
   `get`, `set`, `map` et `foreach`;
 - constructeur ergonomique `new Array[T](size)` pour les types primitifs et
   objets utilisateur via les facades `Array[T]`, avec noms utilisateur
-  `Array.fill[T](size, value)`, `Array.range(size)` et
-  `Array.rangeUntil(start, until)` pour eviter d'exposer `IntArray` /
-  `ArrayInt` / `ObjectArray[T]` dans les cas simples;
+  `Array.fill[T](size, value)` et les surcharges `Array.range(size)` /
+  `Array.range(start, until)` pour eviter d'exposer `IntArray` / `ArrayInt` /
+  `ObjectArray[T]` dans les cas simples;
 - declarations de classes generiques simples comme `Box[T]`, instanciables avec
   `Box[Int]` ou `Box[String]`, avec substitution des champs, retours de methodes
   et types fonction comme `(T) => T`;
@@ -296,8 +296,9 @@ Le pipeline implemente actuellement :
   implementation de `Iterable[T]`; `Nil[T](defaultValue)` reste une compatibilite
   V0 en attendant `object Nil`, `Nothing` et variance;
 - module de bibliotheque standard `collections.array` comme point d'entree
-  commun pour les tableaux specialises, avec `Array.fill[T]`, `Array.range`,
-  `Array.rangeUntil`, `ArrayFill[T]`, `ArrayRange`, `arrayFill[T]`, `arrayMap[T]`,
+  commun pour les tableaux specialises, avec `Array.fill[T]`, les surcharges
+  `Array.range`, `Array.rangeUntil` comme alias de compatibilite,
+  `ArrayFill[T]`, `ArrayRange`, `arrayFill[T]`, `arrayMap[T]`,
   `arrayMap[T, U]`, `arrayFilter[T]`, `arrayFold[T]`, `arrayFold[T, U]`,
   `arrayFlatMap[T]`, `arrayFlatMap[T, U]` et `arrayForeach[T]` resolus vers les
   specialisations `ArrayInt`, `ArrayLong`, `ArrayFloat`, `ArrayDouble` ou
@@ -373,8 +374,8 @@ Le pipeline implemente actuellement :
   pour `Array[T]`, `Set[T]`, `Map[K, V]`, `List[T]`, `Option[T]`, `Sized` et les operations
   texte, sans construction directe de `ObjectArray[T]`, `ArrayObject[T]` ou
   `ArrayInt`.
-- les tests et exemples ordinaires privilegient maintenant `Array.range`,
-  `Array.rangeUntil`, `Array.fill[T]`, `Option.some` / `Option.none`,
+- les tests et exemples ordinaires privilegient maintenant les surcharges
+  `Array.range`, `Array.fill[T]`, `Option.some` / `Option.none`,
   `Set.fromArray` et `Set.empty`; les anciens noms restent couverts dans les
   tests explicitement dedies aux alias ou diagnostics legacy.
 
@@ -879,6 +880,20 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Recommander `Array.range(start, until)` comme surcharge publique
+  de plage bornee: `Array.rangeUntil(start, until)` reste un alias de
+  compatibilite, les diagnostics legacy `ArrayRangeUntil` / `arrayIntRangeUntil`
+  pointent vers `Array.range`, et les exemples/tests ordinaires migrent vers la
+  surcharge recommandee.
+  - Fichiers / tests associes: `stdlib/collections/array.nabla`,
+    `src/compiler_context.hpp`, `tests/test_stdlib_array_int_range_overload.nabla`,
+    `tests/test_error_legacy_array_range_until_suggestion.diagnostic`,
+    `examples/euler5_fold.nabla`, `examples/euler6.nabla`, `docs/language.md`,
+    `docs/stdlib-api.md`, `docs/stdlib/`, `AGENTS.md`.
+  - Validation: `make all-tests`, `make examples`, `make tooling-tests`,
+    `make stdlib-docs`, `g++ -std=c++17 -Wall -Wextra -Werror ...`,
+    `git diff --check`.
 
 - `local` - Migrer `examples/game_of_life.nabla` vers la facade publique
   `collections.array`: signatures `Array[Int]`, allocations
