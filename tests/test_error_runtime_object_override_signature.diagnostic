@@ -1,0 +1,2 @@
+tests/test_error_runtime_object_override_signature.nabla:6:14: semantic error: override invalide pour 'Bad.id' : signature incompatible avec la méthode héritée
+signatures héritées candidates: Marker.id(): Int

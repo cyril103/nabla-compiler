@@ -1,0 +1,1 @@
+tests/test_error_static_object_as_value.nabla:6:17: semantic error: l'objet statique 'Math' est un namespace, pas une valeur; ajoutez 'with Trait' pour déclarer un singleton runtime

@@ -1,0 +1,7 @@
+object Tools {
+    def answer(): Int = { 42 }
+}
+
+def main(): Int = {
+    Tools.answer()
+}

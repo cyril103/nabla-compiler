@@ -1,0 +1,1 @@
+tests/test_error_runtime_object_non_trait_parent.nabla:5:8: semantic error: l'objet runtime 'Single' ne peut composer que des traits avec 'with'

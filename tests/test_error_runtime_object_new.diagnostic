@@ -1,0 +1,1 @@
+tests/test_error_runtime_object_new.nabla:11:21: semantic error: objet runtime 'Enabled' non instanciable avec 'new'; utilisez la valeur singleton 'Enabled'

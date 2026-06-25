@@ -1,0 +1,11 @@
+class Concrete() {
+    def value(): Int = { 42 }
+}
+
+object Single with Concrete {
+    override def value(): Int = { 1 }
+}
+
+def main(): Int = {
+    1
+}

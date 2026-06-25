@@ -751,10 +751,21 @@ void SemanticAnalyzer::validateParentTypes() const {
                     ErrorKind::Semantic, classInfo.location,
                     "classe parente inconnue '" + parentName + "' pour la classe '" + className + "'");
             }
+            if (context.runtimeObjects.count(parentName)) {
+                throw CompilerError(
+                    ErrorKind::Semantic, classInfo.location,
+                    "objet runtime '" + parentName +
+                    "' non utilisable comme parent de classe; utilisez sa valeur singleton '" + parentName + "'");
+            }
             if (classInfo.isTrait && !parentIt->second.isTrait) {
                 throw CompilerError(
                     ErrorKind::Semantic, classInfo.location,
                     "le trait '" + className + "' ne peut composer que des traits avec 'with'");
+            }
+            if (context.runtimeObjects.count(className) && parentName != "AnyRef" && !parentIt->second.isTrait) {
+                throw CompilerError(
+                    ErrorKind::Semantic, classInfo.location,
+                    "l'objet runtime '" + className + "' ne peut composer que des traits avec 'with'");
             }
             if (!classInfo.isTrait && classInfo.hasExplicitParent &&
                 !classInfo.parentTypes.empty() && parentType == classInfo.parentTypes[0] &&

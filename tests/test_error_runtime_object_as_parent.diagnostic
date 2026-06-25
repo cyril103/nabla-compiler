@@ -1,0 +1,1 @@
+tests/test_error_runtime_object_as_parent.nabla:9:1: semantic error: objet runtime 'Enabled' non utilisable comme parent de classe; utilisez sa valeur singleton 'Enabled'

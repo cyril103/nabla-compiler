@@ -79,6 +79,9 @@ std::string IRProgram::format() const {
                 case IROpcode::IndirectCall:
                     out << "indirect_call " << join(instruction.operands, ", ");
                     break;
+                case IROpcode::SingletonObjectRef:
+                    out << "singleton_object " << instruction.operation;
+                    break;
                 case IROpcode::MethodCall:
                     out << "call_method " << instruction.operation << "(" << join(instruction.operands, ", ") << ")";
                     break;
@@ -292,6 +295,12 @@ std::string IRBuilder::emitIndirectCall(
     operands.insert(operands.end(), arguments.begin(), arguments.end());
     std::string result = nextValue();
     emit({IROpcode::IndirectCall, result, substituteActiveType(type), "", operands});
+    return result;
+}
+
+std::string IRBuilder::emitSingletonObjectRef(const std::string& objectName) {
+    std::string result = nextValue();
+    emit({IROpcode::SingletonObjectRef, result, objectName, objectName, {}});
     return result;
 }
 

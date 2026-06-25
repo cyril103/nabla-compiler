@@ -382,6 +382,15 @@ public:
     const std::string& getName() const { return name; }
 };
 
+class SingletonObjectNode : public ASTNode {
+    std::string name;
+public:
+    explicit SingletonObjectNode(std::string objectName);
+    std::string getType() override;
+    void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
+};
+
 class VarDeclNode : public ASTNode {
     std::string name;
     std::string symbolName;

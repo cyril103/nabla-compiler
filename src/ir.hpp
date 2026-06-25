@@ -13,6 +13,7 @@ enum class IROpcode {
     FunctionReference,
     ClosureLoad,
     IndirectCall,
+    SingletonObjectRef,
     MethodCall,
     StaticMethodCall,
     NewObject,
@@ -99,6 +100,7 @@ public:
     std::string emitIndirectCall(
         const std::string& callee, const std::vector<std::string>& arguments,
         const std::string& type = "Int");
+    std::string emitSingletonObjectRef(const std::string& objectName);
     std::string emitMethodCall(
         const std::string& className, const std::string& methodName, const std::string& receiver,
         const std::vector<std::string>& arguments, const std::string& type = "Int");

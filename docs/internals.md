@@ -212,13 +212,40 @@ Les captures sont matérialisées côté IR/runtime comme valeurs stockées dans
 structure de closure. Les limites de paramètres restent liées à la convention
 d'appel actuelle.
 
-## Objets Statiques
+## Objets Statiques Et Singletons Runtime
 
 Les `object` source sont abaissés comme namespaces de fonctions globales
 qualifiées. Par exemple `object Math { def abs(...) }` enregistre une fonction
 `Math.abs` dans `CompilerContext::functions`, et l'appel `Math.abs(...)` devient
-un appel de fonction normal côté IR. Il n'y a pas encore de singleton runtime,
-de champs d'objet, d'initialisation lazy/eager ni d'identité manipulable.
+un appel de fonction normal côté IR.
+
+Un `object Name with Trait` est le singleton runtime V0. Le parser enregistre
+`Name` dans `CompilerContext::runtimeObjects` et cree une entree `ClassInfo`
+sans champs, avec parent implicite `AnyRef` puis les traits de la clause `with`.
+Les `def` du bloc sont enregistrées comme méthodes de classe `Name`, pas comme
+fonctions statiques. Les validations d'héritage class-like s'appliquent donc :
+traits uniquement apres `with`, méthodes abstraites obligatoires, `override`
+obligatoire pour les membres hérités, signature stricte et conflits de defaults
+explicites.
+
+Une reference source nue a un singleton runtime produit un noeud AST
+`SingletonObjectNode`, abaissé en opcode IR `SingletonObjectRef`. Le backend
+émet une cellule statique alignée dans `.data` :
+
+```text
+singleton.Name: dq <class-id>
+```
+
+Cette adresse est la valeur runtime stable du singleton. Elle est assignable a
+`Name`, aux traits composés, a `AnyRef` et a `Any`, et le slot 0 contient le
+même identifiant de classe que les objets heap pour permettre le redispatch de
+méthodes utilisateur et de `Any.toString` / `Any.hashCode` / `Any.equals`.
+
+V0 ne fournit pas encore de champs d'objet, constructeur, `extends`,
+arguments de type, initialisation lazy/eager, ni vraie ABI de singleton. Un
+singleton runtime ne peut pas être instancié via `new` ni utilisé comme parent
+de classe. Un `object` sans `with` reste uniquement un namespace statique;
+l'utiliser comme valeur produit un diagnostic dédié.
 
 ## Classes, Héritage Et `Any`
 
