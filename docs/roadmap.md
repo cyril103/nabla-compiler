@@ -59,6 +59,9 @@ pour reprendre facilement apres une pause.
   `Array[T]`, `Set[T]`, `Set.fromArray[T]`, opérations d'ensemble et héritage
   avec `override`; il couvre maintenant aussi les collections polymorphes de
   type parent avec dispatch runtime des overrides utilisateur.
+- `examples/game_of_life.nabla` sert d'exemple interactif compilé par
+  `make examples` pour `Array[T]` et `Array.fill[T]`, sans exposer
+  `IntArray` ni les helpers `intArray...` dans son code applicatif.
 - `examples/stdlib_collections_cookbook.nabla` et
   `examples/stdlib_text_cookbook.nabla` servent de cookbooks non interactifs
   verifies pour la surface stdlib publique (`Array[T]`, `Set[T]`, `Map[K, V]`,
