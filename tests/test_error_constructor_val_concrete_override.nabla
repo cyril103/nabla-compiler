@@ -1,0 +1,10 @@
+class Base() {
+    def id(): Int = {
+        1
+    }
+}
+
+class Child(val id: Int) extends Base() {
+}
+
+def main(): Int = { 0 }

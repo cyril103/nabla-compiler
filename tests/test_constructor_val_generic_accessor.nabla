@@ -1,0 +1,8 @@
+class Box[T](val value: T) {
+}
+
+def main(): Int = {
+    val i = new Box[Int](42)
+    val s = new Box[String]("ok")
+    if i.value() == 42 && s.value() == "ok" { 42 } else { 1 }
+}

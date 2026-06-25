@@ -1,0 +1,7 @@
+class Point(val x: Int, val y: Int) {
+}
+
+def main(): Int = {
+    val p = new Point(40, 2)
+    p.x() + p.y()
+}

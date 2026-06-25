@@ -244,6 +244,13 @@ méthode visible provenant d'un autre provider. Cette règle évite qu'un accès
 comme `value` masque silencieusement un appel potentiel `value()` dans une
 hiérarchie composée par `extends ... with ...`.
 
+Un paramètre constructeur `val` reste un champ de layout normal, mais il ajoute
+aussi une signature de méthode synthétique zéro-argument dans
+`ClassInfo::methods` / `methodOverloads`. Le parser génère ensuite un corps
+synthétique qui lit le champ via `FieldLoad`. Ces accesseurs peuvent implémenter
+une méthode abstraite de trait de même signature, mais ils ne dispensent pas du
+mot-clé `override` lorsqu'ils masqueraient une méthode concrète héritée.
+
 Les types de classes sont nominaux. Deux classes avec le meme layout ne sont pas
 interchangeables sans relation d'heritage, et les classes generiques instanciees
 restent distinguees par leurs arguments de type dans les signatures et les corps

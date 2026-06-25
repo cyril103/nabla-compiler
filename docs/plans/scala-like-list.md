@@ -8,6 +8,8 @@
 
 **Tech Stack:** C++17 compiler (`src/parser.cpp`, `src/ast.*`, `src/semantic_analyzer.cpp`, `src/ir.*`, `src/ir_codegen.cpp`), stdlib Nabla (`stdlib/collections/*.nabla`, `stdlib/core/*.nabla`), docs générées (`tools/generate_stdlib_docs.py`), tests `.nabla` / `.expected` / `.stdout`.
 
+**Status:** Phase 1 livrée : les paramètres constructeur `val` génèrent des accesseurs synthétiques zéro-argument, y compris pour les classes génériques, et peuvent satisfaire des méthodes abstraites de trait.
+
 ---
 
 ## Constat actuel
@@ -37,7 +39,7 @@ class Cons[T](headValue: T, tailValue: List[T]) with List[T] {
 Les probes locales ont montré :
 
 - `trait List[T]` + classes génériques `Nil[T]` / `Cons[T]` + dispatch via trait : faisable.
-- `class Cons[T](head: T) with List[T] {}` ne satisfait pas `def head(): T` : les champs constructeur ne créent pas encore d'accesseurs.
+- `class Cons[T](val head: T) with List[T] {}` satisfait désormais `def head(): T` via un accesseur synthétique.
 - `xs.head` ne parse pas : l'accès externe passe aujourd'hui par des méthodes `xs.head()`.
 - `object Nil with List[Int]` ne parse pas : `object` est aujourd'hui un namespace statique, sans identité runtime ni `extends` / `with`.
 - `Nil` Scala-like exige à terme `Nothing` + variance (`List[+T]`) ou une règle spéciale d'assignabilité.
@@ -148,7 +150,7 @@ def main(): Int = { 0 }
 `tests/test_error_constructor_val_duplicate_method.diagnostic` should expect a semantic error similar to:
 
 ```text
-tests/test_error_constructor_val_duplicate_method.nabla:2:5: semantic error: méthode 'name' déjà fournie par l'accesseur de constructeur 'val name'
+tests/test_error_constructor_val_duplicate_method.nabla:2:9: parser error: méthode déjà déclarée avec cette signature dans 'Bad': name
 ```
 
 Exact wording can be adjusted, but keep it specific and stable.
@@ -328,7 +330,7 @@ If the class body defines `def name(): ...` and constructor has `val name: ...`,
 Suggested diagnostic:
 
 ```text
-semantic error: méthode 'name' déjà fournie par l'accesseur de constructeur 'val name'
+parser error: méthode déjà déclarée avec cette signature dans 'Bad': name
 ```
 
 **Step 3: Satisfy inherited abstract methods without requiring source `override`**

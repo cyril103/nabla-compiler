@@ -596,6 +596,7 @@ void SemanticAnalyzer::validateDeclaredTypes() {
             }
             bool hasInheritedMethod = false;
             bool hasCompatibleInheritedMethod = false;
+            bool hasCompatibleConcreteInheritedMethod = false;
             std::vector<ClassMethodLookupResult> inheritedCandidatesForName;
             for (const auto& parentType : classInfo.parentTypes) {
                 const std::string concreteParentType = substituteType(parentType, classTypeSubstitution);
@@ -610,6 +611,9 @@ void SemanticAnalyzer::validateDeclaredTypes() {
                                 context, signature, *inheritedCandidate.signature,
                                 inheritedCandidate.classSubstitution)) {
                             hasCompatibleInheritedMethod = true;
+                            if (!inheritedCandidate.signature->isAbstract) {
+                                hasCompatibleConcreteInheritedMethod = true;
+                            }
                         }
                     }
                 }
@@ -636,7 +640,8 @@ void SemanticAnalyzer::validateDeclaredTypes() {
                 }
                 throw CompilerError(ErrorKind::Semantic, signature.location, message);
             }
-            if (!signature.isOverride && hasCompatibleInheritedMethod) {
+            if (!signature.isOverride && hasCompatibleInheritedMethod &&
+                (!signature.isSyntheticAccessor || hasCompatibleConcreteInheritedMethod)) {
                 throw CompilerError(
                     ErrorKind::Semantic, signature.location,
                     "override obligatoire pour '" + className + "." + methodName +

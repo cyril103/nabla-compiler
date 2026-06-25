@@ -199,14 +199,43 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool is
         if (peek().type != TokenType::LPAREN) return false;
         if (index + 1 >= tokens.size()) return false;
         if (tokens[index + 1].type == TokenType::RPAREN) return true;
+        if (tokens[index + 1].type == TokenType::KW_VAL) {
+            return index + 3 < tokens.size() &&
+                   tokens[index + 2].type == TokenType::IDENTIFIER &&
+                   tokens[index + 3].type == TokenType::COLON;
+        }
         return tokens[index + 1].type == TokenType::IDENTIFIER &&
                index + 2 < tokens.size() &&
                tokens[index + 2].type == TokenType::COLON;
     };
 
+    auto registerConstructorValAccessor = [&](const Token& fieldToken, const std::string& fieldType) {
+        auto& classInfo = context.classes[className];
+        CompilerContext::FunctionSignature signature{
+            {}, fieldType, {}, fieldToken.location, fieldToken.location, false, false, true};
+        auto& overloads = classInfo.methodOverloads[fieldToken.value];
+        for (const auto& overloadName : overloads) {
+            const auto existingMethod = classInfo.methods.find(overloadName);
+            if (existingMethod != classInfo.methods.end() &&
+                functionSignatureParametersMatch(existingMethod->second, signature)) {
+                throw CompilerError(
+                    ErrorKind::Parser, fieldToken.location,
+                    "méthode déjà déclarée avec cette signature dans '" +
+                    className + "': " + fieldToken.value);
+            }
+        }
+        overloads.push_back(fieldToken.value);
+        classInfo.methods[fieldToken.value] = signature;
+    };
+
     auto parseClassFieldList = [&](int& offset) {
         consume(TokenType::LPAREN, "");
         while (peek().type != TokenType::RPAREN) {
+            bool hasAccessor = false;
+            if (peek().type == TokenType::KW_VAL) {
+                consume(TokenType::KW_VAL, "");
+                hasAccessor = true;
+            }
             Token fieldToken = consume(TokenType::IDENTIFIER, "Nom d'attribut attendu");
             std::string fieldName = fieldToken.value;
             consume(TokenType::COLON, "");
@@ -217,7 +246,10 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool is
                     "champ déjà déclaré dans '" + className + "': " + fieldName);
             }
             context.classLayouts[className][fieldName] = offset;
-            context.classes[className].fields.push_back({fieldName, fieldType, fieldTypeLocation});
+            context.classes[className].fields.push_back({fieldName, fieldType, fieldTypeLocation, hasAccessor});
+            if (hasAccessor) {
+                registerConstructorValAccessor(fieldToken, fieldType);
+            }
             offset += 8;
             if (peek().type == TokenType::COMMA) {
                 consume(TokenType::COMMA, "");
@@ -396,6 +428,20 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool is
                     (isTrait ? "le trait '" : "la classe '") + peek().value + "'");
         }
         consume(TokenType::RBRACE, "");
+    }
+    if (!isTrait) {
+        for (const auto& field : context.classes[className].fields) {
+            if (!field.hasAccessor) continue;
+            auto body = located(
+                std::make_unique<FieldAccessNode>(className, field.name, field.type),
+                field.location);
+            std::vector<std::string> ownerTypeParameters = context.classes[className].typeParameters;
+            generatedFunctions.push_back(located(std::make_unique<FunctionDefNode>(
+                className, field.name, field.type, std::vector<std::string>{},
+                std::vector<FunctionDefNode::Parameter>{}, std::move(body),
+                std::vector<FunctionDefNode::Capture>{}, std::move(ownerTypeParameters)),
+                field.location));
+        }
     }
     currentFunctionTypeParameters = previousTypeParameters;
     currentParsingClass.clear();
