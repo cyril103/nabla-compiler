@@ -8,7 +8,7 @@
 
 **Tech Stack:** C++17 compiler (`src/parser.cpp`, `src/ast.*`, `src/semantic_analyzer.cpp`, `src/ir.*`, `src/ir_codegen.cpp`), stdlib Nabla (`stdlib/collections/*.nabla`, `stdlib/core/*.nabla`), docs générées (`tools/generate_stdlib_docs.py`), tests `.nabla` / `.expected` / `.stdout`.
 
-**Status:** Phase 1 livrée : les paramètres constructeur `val` génèrent des accesseurs synthétiques zéro-argument, y compris pour les classes génériques, et peuvent satisfaire des méthodes abstraites de trait.
+**Status:** Phase 1 livrée : les paramètres constructeur `val` génèrent des accesseurs synthétiques zéro-argument, y compris pour les classes génériques, et peuvent satisfaire des méthodes abstraites de trait. Phase 2 livrée en V0 : `collections.list` expose `List[T]`, `Nil[T](defaultValue)`, `Cons[T]`, les fabriques `List.empty` / `List.cons`, les opérations compagnon `fold` / `map` / `filter` et `fromArray`. Les opérations génériques restent sur le compagnon plutôt qu'en méthodes de trait tant que le dispatch dynamique de méthodes génériques via trait n'est pas durci.
 
 ---
 

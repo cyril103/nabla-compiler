@@ -268,6 +268,8 @@ def render_status(status: str | None) -> str:
     normalized = status.lower()
     if "compat" in normalized:
         css_class = "compat"
+    elif "experiment" in normalized:
+        css_class = "experimental"
     elif "interne" in normalized:
         css_class = "internal"
     else:
@@ -623,6 +625,11 @@ main {
   color: #7a4d00;
   background: #fff5dc;
   border-color: #efd18b;
+}
+.status.experimental {
+  color: #155f7a;
+  background: #e8f6fb;
+  border-color: #a9d9e9;
 }
 .status.internal {
   color: #6b425b;

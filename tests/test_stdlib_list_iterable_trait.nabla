@@ -1,0 +1,18 @@
+import core.iterable
+import collections.list
+
+def visit(values: Iterable[Int]): Int = {
+    values.foreach((value: Int) => {
+        print(value.toString())
+    })
+    values.size()
+}
+
+def main(): Int = {
+    val xs: Iterable[Int] = List.cons[Int](1, List.cons[Int](41, List.empty[Int](0)))
+    if visit(xs) == 2 && xs.nonEmpty() {
+        42
+    } else {
+        1
+    }
+}
