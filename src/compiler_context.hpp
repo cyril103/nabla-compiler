@@ -32,12 +32,14 @@ struct CompilerContext {
         SourceLocation returnTypeLocation;
         bool isOverride = false;
         bool isAbstract = false;
+        bool isSyntheticAccessor = false;
     };
 
     struct FieldInfo {
         std::string name;
         std::string type;
         SourceLocation location;
+        bool hasAccessor = false;
     };
 
     struct ClassInfo {

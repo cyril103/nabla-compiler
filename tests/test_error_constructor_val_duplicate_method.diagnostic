@@ -1,0 +1,1 @@
+tests/test_error_constructor_val_duplicate_method.nabla:2:9: parser error: méthode déjà déclarée avec cette signature dans 'Bad': name

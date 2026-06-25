@@ -1,0 +1,1 @@
+tests/test_error_constructor_val_concrete_override.nabla:7:17: semantic error: override obligatoire pour 'Child.id' : utilisez 'override' pour redéfinir une méthode héritée

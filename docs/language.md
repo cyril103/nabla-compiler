@@ -352,17 +352,12 @@ match value {
 
 ## Classes
 
-Une classe declare ses champs dans le constructeur primaire.
+Une classe declare ses champs dans le constructeur primaire. Par défaut, ces
+champs sont visibles dans les méthodes de la classe. Un paramètre constructeur
+préfixé par `val` expose aussi un accesseur public zéro-argument du même nom.
 
 ```nabla
-class Student(nameValue: String, scoreValue: Int) {
-    def name(): String = {
-        nameValue
-    }
-
-    def score(): Int = {
-        scoreValue
-    }
+class Student(val name: String, val score: Int) {
 }
 
 def main(): Int = {
@@ -371,7 +366,9 @@ def main(): Int = {
 }
 ```
 
-`this` est disponible implicitement dans les methodes.
+`this` est disponible implicitement dans les methodes. L'accesseur généré par
+`val score: Int` se consomme comme une méthode, par exemple `ada.score()` ;
+l'accès propriété sans parenthèses (`ada.score`) n'est pas encore supporté.
 
 ## Objets Statiques
 
@@ -497,12 +494,13 @@ trait Named {
     }
 }
 
-class Person(value: String) with Named {
-    override def name(): String = {
-        value
-    }
+class Person(val name: String) with Named {
 }
 ```
+
+Un accesseur `val` généré peut satisfaire une méthode abstraite de trait de même
+signature, sans écrire `override`. Une redéfinition manuelle d'une méthode
+concrète héritée continue en revanche à exiger `override`.
 
 Les traits se composent avec `with`, sur une classe ou sur un autre trait :
 

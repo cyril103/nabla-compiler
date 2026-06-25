@@ -1,0 +1,7 @@
+class Bad(val name: String) {
+    def name(): String = {
+        "manual"
+    }
+}
+
+def main(): Int = { 0 }

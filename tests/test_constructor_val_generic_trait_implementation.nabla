@@ -1,0 +1,14 @@
+trait HasValue[T] {
+    def value(): T
+}
+
+class Box[T](val value: T) with HasValue[T] {
+}
+
+def readInt(value: HasValue[Int]): Int = {
+    value.value()
+}
+
+def main(): Int = {
+    readInt(new Box[Int](42))
+}

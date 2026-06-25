@@ -1,0 +1,14 @@
+trait Named {
+    def name(): String
+}
+
+class Person(val name: String) with Named {
+}
+
+def label(value: Named): String = {
+    value.name()
+}
+
+def main(): Int = {
+    if label(new Person("Ada")) == "Ada" { 42 } else { 1 }
+}
