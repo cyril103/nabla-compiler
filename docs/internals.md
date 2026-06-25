@@ -170,7 +170,9 @@ ASM.
 
 La surface utilisateur cible est la façade `Array[T]` et les wrappers standard
 comme `ArrayInt`, `ArrayObject[T]`, etc. Les fonctions `arrayBase...` et helpers
-spécialisés sont des détails d'implémentation.
+spécialisés sont des détails d'implémentation. Les façades publiques de tableaux,
+`Set[T]` et `Map[K, V]` implémentent `Iterable[...]`; ce contrat hérite de
+`Sized` et fournit `foreach` comme point commun polymorphe.
 
 ## Chaînes Et Caractères
 
@@ -250,8 +252,9 @@ propres afin que les offsets restent coherents dans les appels parent-types.
 
 Le slot 0 des objets utilisateur contient un identifiant de classe runtime. Le
 backend l'utilise comme dispatch table implicite pour les appels virtuels quand
-le type statique est un parent ou `Any`/`AnyRef`; il n'existe pas encore de vraie
-structure vtable stabilisée ni d'ABI publique. Les overrides de `toString`,
+le type statique est un parent, un trait instancié comme `Iterable[Int]`, ou
+`Any`/`AnyRef`; il n'existe pas encore de vraie structure vtable stabilisée ni
+d'ABI publique. Les overrides de `toString`,
 `hashCode` et `equals` participent à ce dispatch, ce qui rend `Set[Parent]` et
 les comparaisons via `Any` cohérents dans les cas couverts par les tests.
 

@@ -1,0 +1,25 @@
+import core.iterable
+import collections.set
+import collections.map
+
+
+def visitNames(values: Iterable[String]): Int = {
+    values.foreach((value: String) => {
+        print(value)
+    })
+    values.size()
+}
+
+def visitEntries(entries: Iterable[Tuple2[String, Int]]): Int = {
+    entries.foreach((entry: Tuple2[String, Int]) => {
+        print(entry._1)
+        print(entry._2.toString())
+    })
+    entries.size()
+}
+
+def main(): Int = {
+    val names: Iterable[String] = Set("a")
+    val scores: Iterable[Tuple2[String, Int]] = Map("bb" -> 3)
+    visitNames(names) + visitEntries(scores)
+}

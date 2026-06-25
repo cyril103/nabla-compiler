@@ -25,6 +25,7 @@
 
 import core.option
 import core.sized
+import core.iterable
 import core.tuple
 import collections.object_array
 
@@ -258,7 +259,7 @@ object Map {
 ///
 /// Les operations updated, removed et clear retournent une nouvelle map.
 /// Si plusieurs paires utilisent la meme cle, la derniere valeur gagne.
-class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) with Sized {
+class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) with Sized with Iterable[Tuple2[K, V]] {
     override def size(): Int = {
         entries.size()
     }
@@ -389,10 +390,17 @@ class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) with Sized {
     }
 
     /// Applique une fonction a chaque paire cle-valeur.
+    /// @signature def foreach(f: (Tuple2[K, V]) => Unit): Unit
+    /// @status Recommandee
+    override def foreach(f: (Tuple2[K, V]) => Unit): Unit = {
+        entries.foreach(f)
+    }
+
+    /// Applique une fonction a chaque paire cle-valeur.
     /// @signature def foreachEntry(f: (Tuple2[K, V]) => Unit): Unit
     /// @status Recommandee
     def foreachEntry(f: (Tuple2[K, V]) => Unit): Unit = {
-        entries.foreach(f)
+        this.foreach(f)
     }
 
     /// Transforme les valeurs en conservant les cles.

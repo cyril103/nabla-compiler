@@ -739,10 +739,138 @@ private:
         if (classIt == context.classes.end()) return false;
         auto methodIt = classIt->second.methods.find(methodBaseName);
         if (methodIt != classIt->second.methods.end() &&
-            !methodIt->second.typeParameters.empty() && !parameterizedMethod) {
+            !methodIt->second.typeParameters.empty() && !parameterizedMethod &&
+            !classIt->second.isTrait) {
             return false;
         }
         return true;
+    }
+
+    bool unifyRuntimeGenericType(
+        const std::string& patternType,
+        const std::string& expectedType,
+        const std::set<std::string>& typeParameters,
+        std::map<std::string, std::string>& bindings) const {
+        if (typeParameters.count(patternType)) {
+            auto bindingIt = bindings.find(patternType);
+            if (bindingIt == bindings.end()) {
+                bindings[patternType] = expectedType;
+                return true;
+            }
+            return bindingIt->second == expectedType;
+        }
+
+        auto patternParameterized = parameterizedTypeFromName(patternType);
+        auto expectedParameterized = parameterizedTypeFromName(expectedType);
+        if (!patternParameterized || !expectedParameterized) return patternType == expectedType;
+        if (patternParameterized->first != expectedParameterized->first ||
+            patternParameterized->second.size() != expectedParameterized->second.size()) {
+            return false;
+        }
+        for (size_t i = 0; i < patternParameterized->second.size(); ++i) {
+            if (!unifyRuntimeGenericType(
+                    patternParameterized->second[i], expectedParameterized->second[i],
+                    typeParameters, bindings)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool runtimeGenericTypeCanReachExpected(
+        const std::string& currentType,
+        const std::string& expectedType,
+        const std::set<std::string>& typeParameters,
+        std::map<std::string, std::string> bindings,
+        std::set<std::string>& visiting) const {
+        auto directBindings = bindings;
+        if (unifyRuntimeGenericType(currentType, expectedType, typeParameters, directBindings)) {
+            return true;
+        }
+
+        const std::string currentBaseName = genericBaseName(currentType);
+        if (visiting.count(currentBaseName)) return false;
+        auto classIt = context.classes.find(currentBaseName);
+        if (classIt == context.classes.end()) return false;
+
+        std::map<std::string, std::string> classSubstitution;
+        if (auto genericSubstitution = genericSubstitutionFor(context, currentType)) {
+            classSubstitution = *genericSubstitution;
+        }
+        classSubstitution.insert(bindings.begin(), bindings.end());
+
+        visiting.insert(currentBaseName);
+        for (const auto& parentType : classIt->second.parentTypes) {
+            const std::string symbolicParentType = substituteType(parentType, classSubstitution);
+            if (runtimeGenericTypeCanReachExpected(
+                    symbolicParentType, expectedType, typeParameters, bindings, visiting)) {
+                visiting.erase(currentBaseName);
+                return true;
+            }
+        }
+        visiting.erase(currentBaseName);
+        return false;
+    }
+
+    bool runtimeTypeCanReachBase(
+        const std::string& currentType,
+        const std::string& expectedBaseName,
+        std::set<std::string>& visiting) const {
+        const std::string currentBaseName = genericBaseName(currentType);
+        if (currentBaseName == expectedBaseName) return true;
+        if (visiting.count(currentBaseName)) return false;
+        auto classIt = context.classes.find(currentBaseName);
+        if (classIt == context.classes.end()) return false;
+
+        std::map<std::string, std::string> classSubstitution;
+        if (auto genericSubstitution = genericSubstitutionFor(context, currentType)) {
+            classSubstitution = *genericSubstitution;
+        }
+
+        visiting.insert(currentBaseName);
+        for (const auto& parentType : classIt->second.parentTypes) {
+            const std::string parent = substituteType(parentType, classSubstitution);
+            if (runtimeTypeCanReachBase(parent, expectedBaseName, visiting)) {
+                visiting.erase(currentBaseName);
+                return true;
+            }
+        }
+        visiting.erase(currentBaseName);
+        return false;
+    }
+
+    bool runtimeClassCanImplementStaticType(
+        const std::string& runtimeClassName, const std::string& staticType) const {
+        if (isTypeAssignable(context, runtimeClassName, staticType)) return true;
+
+        auto runtimeClassIt = context.classes.find(runtimeClassName);
+        if (runtimeClassIt == context.classes.end() ||
+            runtimeClassIt->second.typeParameters.empty()) {
+            return false;
+        }
+
+        std::set<std::string> typeParameters(
+            runtimeClassIt->second.typeParameters.begin(),
+            runtimeClassIt->second.typeParameters.end());
+        const std::string symbolicRuntimeType =
+            formatParameterizedType(runtimeClassName, runtimeClassIt->second.typeParameters);
+        std::map<std::string, std::string> bindings;
+        std::set<std::string> visiting;
+        if (runtimeGenericTypeCanReachExpected(
+                symbolicRuntimeType, staticType, typeParameters, bindings, visiting)) {
+            return true;
+        }
+
+        if (parameterizedTypeFromName(staticType)) {
+            return false;
+        }
+
+        auto staticClassIt = context.classes.find(genericBaseName(staticType));
+        if (staticClassIt == context.classes.end() || !staticClassIt->second.isTrait) {
+            return false;
+        }
+        visiting.clear();
+        return runtimeTypeCanReachBase(symbolicRuntimeType, genericBaseName(staticType), visiting);
     }
 
     bool isAbstractTraitMethod(const std::string& className, const std::string& methodName) const {
@@ -770,22 +898,27 @@ private:
         const std::string staticClassName = genericBaseName(className);
         const auto parameterizedMethod = parameterizedTypeFromName(methodName);
         const std::string methodBaseName = parameterizedMethod ? parameterizedMethod->first : methodName;
+        const bool staticOwnerIsTrait = [&]() {
+            auto staticOwnerIt = context.classes.find(staticClassName);
+            return staticOwnerIt != context.classes.end() && staticOwnerIt->second.isTrait;
+        }();
         std::set<std::pair<std::string, std::string>> seen;
         for (const auto& [runtimeClassName, runtimeClass] : context.classes) {
             if (runtimeClassName == staticClassName) continue;
             if (runtimeClass.isTrait) continue;
-            if (!isTypeAssignable(context, runtimeClassName, className)) continue;
 
-            auto methodLookup = resolveClassMethodInHierarchy(context, runtimeClassName, methodBaseName);
+            const std::string runtimeLookupType = runtimeClass.typeParameters.empty()
+                ? runtimeClassName
+                : formatParameterizedType(runtimeClassName, runtimeClass.typeParameters);
+            auto methodLookup = resolveClassMethodInHierarchy(context, runtimeLookupType, methodBaseName);
             if (!methodLookup) continue;
+            if (!runtimeClassCanImplementStaticType(runtimeClassName, className)) {
+                continue;
+            }
             const std::string targetOwnerName = genericBaseName(methodLookup->ownerClassName);
             if (targetOwnerName == staticClassName) continue;
             auto targetOwnerIt = context.classes.find(targetOwnerName);
             if (targetOwnerIt == context.classes.end()) continue;
-            const bool staticOwnerIsTrait = [&]() {
-                auto staticOwnerIt = context.classes.find(staticClassName);
-                return staticOwnerIt != context.classes.end() && staticOwnerIt->second.isTrait;
-            }();
             if (staticOwnerIsTrait && targetOwnerIt->second.isTrait) continue;
             auto targetMethodIt = targetOwnerIt->second.methods.find(methodBaseName);
             if (targetMethodIt == targetOwnerIt->second.methods.end()) continue;

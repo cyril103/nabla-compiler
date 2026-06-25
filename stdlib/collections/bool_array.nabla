@@ -1,5 +1,6 @@
 import collections.object_array
 import collections.array_base
+import core.iterable
 import util
 
 def boolArrayFill(size: Int, value: Bool): BoolArray = {
@@ -224,7 +225,7 @@ def boolArraySet(values: BoolArray, index: Int, value: Bool): Unit = {
     values.set(index, value)
 }
 
-class ArrayBool extends ArrayPrimitiveBase[Bool, BoolArray](rawValues, lengthFn, getFn, setFn, toStringFn) {
+class ArrayBool extends ArrayPrimitiveBase[Bool, BoolArray] with Iterable[Bool](rawValues, lengthFn, getFn, setFn, toStringFn) {
 
     override def length(): Int = {
         arrayBaseSize[BoolArray](rawValues, lengthFn)

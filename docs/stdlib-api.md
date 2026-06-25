@@ -32,6 +32,9 @@ pas comme cible idiomatique pour le code applicatif.
   - `size()`
   - `isEmpty()`
   - `nonEmpty()`
+- `Iterable[T]`
+  - herite de `Sized`
+  - `foreach(f)`
 - `Option[T]`
   - `Option.some[T](value)`
   - `Option.none[T]()`
@@ -84,9 +87,10 @@ pas comme cible idiomatique pour le code applicatif.
   - `filterKeys(predicate)`
   - `mkString(separator)` et `toString()`
 
-`ArrayObject[T]`, `Set[T]` et `Map[K, V]` implementent `Sized` pour permettre
-les appels communs `size()`, `isEmpty()` et `nonEmpty()` via un contrat nominal
-minimal.
+`ArrayObject[T]`, les facades de tableaux specialisees, `Set[T]` et
+`Map[K, V]` implementent `Iterable[...]` pour permettre un `foreach` polymorphe.
+`Iterable[T]` herite de `Sized`, donc les appels communs `size()`, `isEmpty()` et
+`nonEmpty()` restent disponibles via le meme contrat nominal minimal.
 
 Les exemples doivent privilegier `Array[T]` et les fonctions de haut niveau. Les
 facades specialisees restent acceptables dans les tests de backend/runtime et les

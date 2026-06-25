@@ -1,0 +1,29 @@
+trait Sized {
+    def size(): Int
+}
+
+trait Iterable[T] with Sized {
+    def foreach(f: (T) => Unit): Unit
+}
+
+class PairBox[T](first: T, second: T) with Iterable[T] {
+    override def size(): Int = {
+        2
+    }
+
+    override def foreach(f: (T) => Unit): Unit = {
+        f(first)
+        f(second)
+    }
+}
+
+def visitValues(values: Iterable[Int]): Int = {
+    values.foreach((value: Int) => {
+        print(value.toString())
+    })
+    values.size()
+}
+
+def main(): Int = {
+    visitValues(new PairBox[Int](10, 30))
+}

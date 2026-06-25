@@ -1,5 +1,6 @@
 import collections.object_array
 import collections.array_base
+import core.iterable
 import util
 
 def doubleArrayFill(size: Int, value: Double): DoubleArray = {
@@ -170,20 +171,20 @@ def doubleArraySet(values: DoubleArray, index: Int, value: Double): Unit = {
     values.set(index, value)
 }
 
-class ArrayDouble(values: DoubleArray) {
+class ArrayDouble(values: DoubleArray) with Iterable[Double] {
     def length(): Int = {
         doubleArrayLength(values)
     }
 
-    def size(): Int = {
+    override def size(): Int = {
         arrayBaseSize[DoubleArray](values, doubleArrayLength)
     }
 
-    def isEmpty(): Bool = {
+    override def isEmpty(): Bool = {
         arrayBaseIsEmpty[DoubleArray](values, doubleArrayLength)
     }
 
-    def nonEmpty(): Bool = {
+    override def nonEmpty(): Bool = {
         arrayBaseNonEmpty[DoubleArray](values, doubleArrayLength)
     }
 
@@ -235,7 +236,7 @@ class ArrayDouble(values: DoubleArray) {
         arrayBaseFold[Double, Double, DoubleArray](values, doubleArrayLength, doubleArrayGet, initial, combine)
     }
 
-    def foreach(f: (Double) => Unit): Unit = {
+    override def foreach(f: (Double) => Unit): Unit = {
         arrayBaseForeach[Double, DoubleArray](values, doubleArrayLength, doubleArrayGet, f)
     }
 

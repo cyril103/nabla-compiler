@@ -1,5 +1,6 @@
 import collections.object_array
 import collections.array_base
+import core.iterable
 import util
 
 def floatArrayFill(size: Int, value: Float): FloatArray = {
@@ -170,20 +171,20 @@ def floatArraySet(values: FloatArray, index: Int, value: Float): Unit = {
     values.set(index, value)
 }
 
-class ArrayFloat(values: FloatArray) {
+class ArrayFloat(values: FloatArray) with Iterable[Float] {
     def length(): Int = {
         floatArrayLength(values)
     }
 
-    def size(): Int = {
+    override def size(): Int = {
         arrayBaseSize[FloatArray](values, floatArrayLength)
     }
 
-    def isEmpty(): Bool = {
+    override def isEmpty(): Bool = {
         arrayBaseIsEmpty[FloatArray](values, floatArrayLength)
     }
 
-    def nonEmpty(): Bool = {
+    override def nonEmpty(): Bool = {
         arrayBaseNonEmpty[FloatArray](values, floatArrayLength)
     }
 
@@ -235,7 +236,7 @@ class ArrayFloat(values: FloatArray) {
         arrayBaseFold[Float, Float, FloatArray](values, floatArrayLength, floatArrayGet, initial, combine)
     }
 
-    def foreach(f: (Float) => Unit): Unit = {
+    override def foreach(f: (Float) => Unit): Unit = {
         arrayBaseForeach[Float, FloatArray](values, floatArrayLength, floatArrayGet, f)
     }
 

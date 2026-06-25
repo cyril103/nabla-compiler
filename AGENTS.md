@@ -42,7 +42,7 @@ features visibles.
 Principes de direction :
 
 - preferer une API publique simple et uniforme : `Array[T]`, `Option[T]`,
-  `Set[T]`, `Map[K, V]`, `Sized`, `String`, classes, methodes, lambdas;
+  `Set[T]`, `Map[K, V]`, `Sized`, `Iterable[T]`, `String`, classes, methodes, lambdas;
 - cacher progressivement les details d'implementation (`IntArray`,
   `LongArray`, `ObjectArray[T]`, `ArrayObject[T]`, helpers `arrayBase...`,
   fonctions specialisees internes) derriere des facades documentees;
@@ -236,6 +236,9 @@ Le pipeline implemente actuellement :
 - module de bibliotheque standard `core.sized` avec le trait public `Sized`,
   `size()`, `isEmpty()` et `nonEmpty()` pour les types ayant une taille
   logique;
+- module de bibliotheque standard `core.iterable` avec le trait public generique
+  `Iterable[T]`, qui herite de `Sized` et ajoute `foreach(f: (T) => Unit)` pour
+  les collections parcourables polymorphes;
 - premier module de bibliotheque standard `collections.int_array` avec
   `intArraySum`, `intArrayFill`, `intArrayRange`, `intArrayMap`,
   `intArrayFilter` et la facade objet `ArrayInt` avec `map`, `filter`,
@@ -305,6 +308,10 @@ Le pipeline implemente actuellement :
   de representation, y compris pour les retours actuels de `String.split`,
   `String.toCharArray`, `Set.toArray`, `Map.keys`, `Map.values` et
   `Map.toArray`;
+- `ArrayObject[T]`, les facades de tableaux specialisees, `Set[T]` et
+  `Map[K, V]` implementent le trait public `Iterable[...]`; `Iterable[T]`
+  herite de `Sized` et expose `foreach`, `size`, `isEmpty` et `nonEmpty` comme
+  contrat commun de collection;
 - collection native `ObjectArray[T]` stockant des slots runtime de 64 bits, avec
   facade standard `ArrayObject[T]`, `objectArrayFill[T]`,
   `objectArrayMap[T, U]`, `objectArrayFilter[T]`, `objectArrayFold[T, U]`,
