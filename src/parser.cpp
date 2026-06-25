@@ -456,10 +456,48 @@ void Parser::parseObjectDefinition(std::unique_ptr<ProgramNode>& program) {
     }
     context.objects.insert(objectName);
 
+    if (peek().type == TokenType::KW_EXTENDS) {
+        throw CompilerError(
+            ErrorKind::Parser, peek().location,
+            "un objet runtime V0 ne supporte pas 'extends'; utilisez 'with Trait'");
+    }
+
+    std::vector<std::string> parentTypes;
+    while (peek().type == TokenType::KW_WITH) {
+        consume(TokenType::KW_WITH, "");
+        auto [parentType, parentTypeLocation] = parseType("Type de trait attendu après 'with'");
+        (void) parentTypeLocation;
+        parentTypes.push_back(parentType);
+    }
+
+    const bool isRuntimeObject = !parentTypes.empty();
+    if (isRuntimeObject) {
+        if (context.classes.count(objectName)) {
+            throw CompilerError(
+                ErrorKind::Parser, objectNameToken.location,
+                "objet runtime '" + objectName + "' en conflit avec une classe ou un trait du même nom");
+        }
+        context.runtimeObjects.insert(objectName);
+        auto& classInfo = context.classes[objectName];
+        classInfo.location = objectNameToken.location;
+        classInfo.isTrait = false;
+        classInfo.hasExplicitParent = false;
+        classInfo.parentTypes.push_back("AnyRef");
+        classInfo.parentTypes.insert(classInfo.parentTypes.end(), parentTypes.begin(), parentTypes.end());
+    }
+
+    const std::string previousParsingClass = currentParsingClass;
+    if (isRuntimeObject) currentParsingClass = objectName;
+
     consume(TokenType::LBRACE, "'{' attendu après le nom de l'objet");
     while (peek().type != TokenType::RBRACE) {
-        if (peek().type == TokenType::KW_DEF) {
-            program->elements.push_back(parseFunctionDef("", objectName));
+        if (peek().type == TokenType::KW_DEF || (isRuntimeObject && peek().type == TokenType::KW_OVERRIDE)) {
+            if (isRuntimeObject) {
+                auto method = parseFunctionDef(objectName, "", false);
+                if (method) program->elements.push_back(std::move(method));
+            } else {
+                program->elements.push_back(parseFunctionDef("", objectName));
+            }
         } else if (peek().type == TokenType::KW_OVERRIDE) {
             throw CompilerError(
                 ErrorKind::Parser, peek().location,
@@ -467,10 +505,13 @@ void Parser::parseObjectDefinition(std::unique_ptr<ProgramNode>& program) {
         } else {
             throw CompilerError(
                 ErrorKind::Parser, peek().location,
-                "seules les déclarations 'def' sont autorisées dans un objet statique");
+                isRuntimeObject
+                    ? "seules les déclarations 'def' sont autorisées dans un objet runtime"
+                    : "seules les déclarations 'def' sont autorisées dans un objet statique");
         }
     }
     consume(TokenType::RBRACE, "'}' attendu après l'objet");
+    currentParsingClass = previousParsingClass;
 }
 
 std::unique_ptr<ASTNode> Parser::parseIfExpression() {
@@ -1391,6 +1432,14 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                         field->ownerClassName, name, field->type),
                     nameToken.location);
             }
+        }
+        if (context.runtimeObjects.count(name)) {
+            if (!typeArguments.empty()) {
+                throw CompilerError(
+                    ErrorKind::Parser, nameToken.location,
+                    "un objet runtime ne supporte pas d'arguments de type: " + name);
+            }
+            return located(std::make_unique<SingletonObjectNode>(name), nameToken.location);
         }
         auto overloadNames = functionOverloadNames(context, name);
         if (!overloadNames.empty()) {

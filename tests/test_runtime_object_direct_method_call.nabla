@@ -1,0 +1,13 @@
+trait Flag {
+    def enabled(): Bool
+}
+
+object Enabled with Flag {
+    override def enabled(): Bool = {
+        true
+    }
+}
+
+def main(): Int = {
+    if Enabled.enabled() { 42 } else { 1 }
+}

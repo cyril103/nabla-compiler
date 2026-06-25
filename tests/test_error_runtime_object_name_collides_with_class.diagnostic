@@ -1,0 +1,1 @@
+tests/test_error_runtime_object_name_collides_with_class.nabla:9:8: parser error: objet runtime 'Only' en conflit avec une classe ou un trait du même nom

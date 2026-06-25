@@ -1,0 +1,15 @@
+trait Marker {
+    def id(): Int
+}
+
+class Only() {
+    def id(): Int = { 1 }
+}
+
+object Only with Marker {
+    override def id(): Int = { 42 }
+}
+
+def main(): Int = {
+    1
+}

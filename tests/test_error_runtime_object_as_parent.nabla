@@ -1,0 +1,14 @@
+trait Flag {
+    def enabled(): Bool
+}
+
+object Enabled with Flag {
+    override def enabled(): Bool = { true }
+}
+
+class Child extends Enabled() {
+}
+
+def main(): Int = {
+    0
+}

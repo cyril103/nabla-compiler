@@ -1,0 +1,1 @@
+tests/test_error_runtime_object_extends.nabla:5:13: parser error: un objet runtime V0 ne supporte pas 'extends'; utilisez 'with Trait'

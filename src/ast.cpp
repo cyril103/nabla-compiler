@@ -557,6 +557,11 @@ void NewNode::validateSemantics(CompilerContext& context) {
     if (classIt == context.classes.end()) {
         semanticError("classe inconnue dans 'new': " + className);
     }
+    if (context.runtimeObjects.count(classLookupName)) {
+        semanticError(
+            "objet runtime '" + classLookupName +
+            "' non instanciable avec 'new'; utilisez la valeur singleton '" + classLookupName + "'");
+    }
     if (classIt->second.isTrait) {
         semanticError("trait non instanciable dans 'new': " + className);
     }
@@ -2512,6 +2517,11 @@ std::string IdentifierNode::getType() {
 
 void IdentifierNode::validateSemantics(CompilerContext& context) {
     if (symbolName == name && symbolName != "this") {
+        if (context.objects.count(name) && !context.runtimeObjects.count(name)) {
+            semanticError(
+                "l'objet statique '" + name +
+                "' est un namespace, pas une valeur; ajoutez 'with Trait' pour déclarer un singleton runtime");
+        }
         semanticError("variable non déclarée: " + name);
     }
     auto symbol = context.semanticSymbolTypes.find(symbolName);
@@ -2523,6 +2533,23 @@ void IdentifierNode::validateSemantics(CompilerContext& context) {
 
 std::string IdentifierNode::lowerToIR(IRBuilder& builder) const {
     return builder.emitLoad(symbolName, type);
+}
+
+SingletonObjectNode::SingletonObjectNode(std::string objectName)
+    : name(std::move(objectName)) {}
+
+std::string SingletonObjectNode::getType() {
+    return name;
+}
+
+void SingletonObjectNode::validateSemantics(CompilerContext& context) {
+    if (!context.runtimeObjects.count(name)) {
+        semanticError("objet runtime inconnu: " + name);
+    }
+}
+
+std::string SingletonObjectNode::lowerToIR(IRBuilder& builder) const {
+    return builder.emitSingletonObjectRef(name);
 }
 
 VarDeclNode::VarDeclNode(

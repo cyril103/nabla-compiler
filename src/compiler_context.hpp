@@ -60,6 +60,7 @@ struct CompilerContext {
     std::map<std::string, FunctionSignature> functions;
     std::map<std::string, std::vector<std::string>> functionOverloads;
     std::set<std::string> objects;
+    std::set<std::string> runtimeObjects;
     std::set<std::string> parsedFiles;
     std::filesystem::path rootDir;
     std::filesystem::path stdlibDir;

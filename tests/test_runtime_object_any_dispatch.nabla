@@ -1,0 +1,52 @@
+trait Named {
+    def name(): String
+}
+
+object RuntimeName with Named {
+    override def name(): String = {
+        "runtime"
+    }
+
+    override def toString(): String = {
+        "RuntimeName"
+    }
+
+    override def hashCode(): Int = {
+        77
+    }
+
+    override def equals(other: Any): Bool = {
+        this.toString() == other.toString()
+    }
+}
+
+def render(value: Any): String = {
+    value.toString()
+}
+
+def hashed(value: Any): Int = {
+    value.hashCode()
+}
+
+def same(left: Any, right: Any): Bool = {
+    left.equals(right)
+}
+
+def acceptsAnyRef(value: AnyRef): String = {
+    value.toString()
+}
+
+def main(): Int = {
+    val asNamed: Named = RuntimeName
+    val asAnyRef: AnyRef = RuntimeName
+    val asAny: Any = RuntimeName
+    if asNamed.name() == "runtime" &&
+       acceptsAnyRef(asAnyRef) == "RuntimeName" &&
+       render(asAny) == "RuntimeName" &&
+       hashed(asAny) == 77 &&
+       same(asAny, RuntimeName) {
+        42
+    } else {
+        1
+    }
+}

@@ -1,0 +1,12 @@
+trait Marker {
+}
+
+object Bad with Marker {
+    override def value(): Int = {
+        1
+    }
+}
+
+def main(): Int = {
+    0
+}

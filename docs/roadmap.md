@@ -32,6 +32,13 @@ pour garder un cap clair après le tag `v0.1.0`.
   vers les overrides utilisateur. Les chaînes `String` portent aussi un tag runtime
   dédié afin de conserver `toString`, `hashCode` et `equals` par contenu quand
   elles sont manipulées via `Any`.
+- `object Name { ... }` reste un namespace statique et supporte les compagnons
+  de surface. `object Name with Trait { ... }` est maintenant un singleton
+  runtime V0: valeur stable assignable aux traits, a `AnyRef` et a `Any`, avec
+  validation class-like des méthodes abstraites, `override`, signatures et
+  conflits de defaults. Cette V0 exclut encore champs, constructeurs,
+  `extends`, arguments de type et initialisation dédiée; ces singletons ne sont
+  pas instanciables avec `new` et ne peuvent pas servir de parents de classe.
 - Standard library deja utile :
   - collections typées et facade `Array[T]`
   - `collections.set` avec `Set[T]`, `add`, `remove`, `union`, `intersect`,
@@ -164,6 +171,9 @@ reprise séparées :
 - Les exemples publics principaux privilégient désormais `Array[T]`,
   `Array.fill[T]`, `Set.fromArray[T]`, `Option.some` / `Option.none` et les
   méthodes publiques, plutôt que les représentations internes.
+- Les objets runtime V0 sont couverts par des tests de valeur singleton, dispatch
+  via trait, assignabilité `Any` / `AnyRef`, diagnostic de namespace statique
+  utilisé comme valeur et diagnostics d'héritage class-like.
 
 ## Pistes Plus Larges
 

@@ -42,6 +42,20 @@ std::string asmFunctionName(const std::string& name) {
     return asmSymbolName(name);
 }
 
+std::string singletonObjectLabel(const std::string& name) {
+    return asmSymbolName("singleton." + name);
+}
+
+long long classIdForContext(const CompilerContext& context, const std::string& className) {
+    const std::string classBaseName = genericBaseName(className);
+    long long nextClassId = 1000;
+    for (const auto& [candidateName, _] : context.classes) {
+        if (candidateName == classBaseName) return nextClassId;
+        ++nextClassId;
+    }
+    return 0;
+}
+
 std::string asmLabelName(const std::string& functionName, const std::string& label) {
     return "L_ir_" + asmFunctionName(functionName) + "_" + asmFunctionName(label);
 }
@@ -152,6 +166,7 @@ public:
             codegenError("le backend IR limite les fonctions globales a 6 parametres");
         }
 
+        out << "section .text\n";
         out << asmFunctionName(function.name) << ":\n";
         out << "    push rbp\n    mov rbp, rsp\n";
         if (!frame.empty()) out << "    sub rsp, " << frame.byteSize() << "\n";
@@ -259,6 +274,9 @@ private:
                 break;
             case IROpcode::IndirectCall:
                 emitIndirectCall(instruction);
+                break;
+            case IROpcode::SingletonObjectRef:
+                emitSingletonObjectRef(instruction);
                 break;
             case IROpcode::MethodCall:
                 emitMethodCall(instruction, true);
@@ -640,6 +658,11 @@ private:
         storeRegister(instruction.result, "rax");
     }
 
+    void emitSingletonObjectRef(const IRInstruction& instruction) {
+        out << "    mov rax, " << singletonObjectLabel(instruction.operation) << "\n";
+        storeRegister(instruction.result, "rax");
+    }
+
     void emitFunctionReference(const IRInstruction& instruction) {
         const size_t objectSize = 16 + instruction.operands.size() * 8;
         out << "    mov rdi, " << objectSize << "\n";
@@ -722,13 +745,7 @@ private:
     }
 
     long long classIdFor(const std::string& className) const {
-        const std::string classBaseName = genericBaseName(className);
-        long long nextClassId = 1000;
-        for (const auto& [candidateName, _] : context.classes) {
-            if (candidateName == classBaseName) return nextClassId;
-            ++nextClassId;
-        }
-        return 0;
+        return classIdForContext(context, className);
     }
 
     bool canUseRuntimeClassDispatch(const std::string& className, const std::string& methodName) const {
@@ -1315,6 +1332,13 @@ IRCodeGenerator::IRCodeGenerator(std::uint64_t heapCapacityBytes)
 void IRCodeGenerator::generateASM(
     const IRProgram& program, const CompilerContext& context, std::ostream& out) const {
     RuntimeASM::emit(out, heapCapacityBytes);
+    if (!context.runtimeObjects.empty()) {
+        out << "section .data\n";
+        for (const auto& objectName : context.runtimeObjects) {
+            out << "    align 8\n";
+            out << singletonObjectLabel(objectName) << ": dq " << classIdForContext(context, objectName) << "\n";
+        }
+    }
     for (const auto& function : program.functions) {
         FunctionEmitter(function, context, out).emit();
     }

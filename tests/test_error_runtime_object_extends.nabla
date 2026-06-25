@@ -1,0 +1,11 @@
+trait Marker {
+    def id(): Int
+}
+
+object Only extends Marker {
+    override def id(): Int = { 42 }
+}
+
+def main(): Int = {
+    1
+}

@@ -471,8 +471,13 @@ Limites importantes :
   valeur vers `Any.toString()` puis appelle le runtime d'écriture de chaîne.
 - Les `object` existent comme namespaces statiques: leurs `def` sont abaissés
   vers des fonctions globales qualifiées (`Name.method`) et peuvent servir de
-  compagnons de surface à une `class Name`. Ils ne sont pas encore des valeurs
-  singleton runtime avec champs, identité ou initialisation dédiée.
+  compagnons de surface à une `class Name`. Les `object Name with Trait`
+  existent comme singletons runtime V0: ils sont des valeurs stables assignables
+  a leurs traits, a `AnyRef` et a `Any`, avec méthodes validées comme celles
+  d'une classe pour les abstraits, `override`, signatures et conflits de
+  defaults. Les singletons runtime V0 n'ont pas encore champs, constructeur,
+  `extends`, arguments de type ou initialisation dédiée; ils ne sont pas
+  instanciables avec `new` et ne peuvent pas servir de parents de classe.
 
 ## Invariants D'Architecture
 
@@ -858,6 +863,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   contenu quand une valeur est manipulée via `Any`.
 - [x] Ajouter `object Name { def ... }` comme namespace statique et supporter
   les compagnons de surface `class Name` + `object Name`.
+- [x] Ajouter `object Name with Trait { ... }` comme singleton runtime V0,
+  assignable comme valeur a ses traits, a `AnyRef` et a `Any`, avec diagnostics
+  class-like pour abstraits manquants, `override`, signatures et conflits de
+  defaults.
 - [x] Ajouter un test d'outillage pour vérifier le diagnostic quand une commande
   externe requise (`nasm`) est absente du `PATH`.
 - [x] Ajouter le support `write` / `append` multi-mots dans
@@ -1318,6 +1327,18 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `tests/test_object_companion_namespace.nabla`,
     `tests/test_error_object_override.nabla`, `docs/language.md`,
     `docs/internals.md`, `docs/roadmap.md`.
+- `local` - Ajouter les singletons runtime V0: `object Name with Trait { ... }`
+  produit une valeur singleton stable assignable aux traits, a `AnyRef` et a
+  `Any`, tout en conservant les `object` sans `with` comme namespaces statiques.
+  Les validations class-like couvrent abstraits manquants, `override` sans
+  methode hereditee, signature incompatible et conflits de defaults.
+  - Fichiers / tests associes: `src/parser.cpp`, `src/ast.cpp`, `src/ast.hpp`,
+    `src/compiler_context.hpp`, `src/semantic_analyzer.cpp`, `src/ir.cpp`,
+    `src/ir.hpp`, `src/ir_codegen.cpp`,
+    `tests/test_runtime_object_*.nabla`,
+    `tests/test_error_runtime_object_*.nabla`,
+    `tests/test_error_static_object_as_value.nabla`, `docs/language.md`,
+    `docs/internals.md`, `docs/roadmap.md`, `AGENTS.md`.
 - `local` - Ajouter l'égalité personnalisée de base pour les objets: `Any`
   expose `equals(other: Any): Bool`, `==` / `!=` sur objets s'abaissent vers
   `Any.equals(...)`, et `Any.toString()` / `Any.hashCode()` / `Any.equals(...)`

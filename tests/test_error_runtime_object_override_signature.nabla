@@ -1,0 +1,13 @@
+trait Marker {
+    def id(): Int
+}
+
+object Bad with Marker {
+    override def id(): String = {
+        "bad"
+    }
+}
+
+def main(): Int = {
+    0
+}

@@ -1,0 +1,10 @@
+trait Named {
+    def name(): String
+}
+
+object Missing with Named {
+}
+
+def main(): Int = {
+    0
+}

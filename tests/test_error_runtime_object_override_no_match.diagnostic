@@ -1,0 +1,1 @@
+tests/test_error_runtime_object_override_no_match.nabla:5:14: semantic error: override invalide pour 'Bad.value' : aucune méthode héritée nommée 'value'

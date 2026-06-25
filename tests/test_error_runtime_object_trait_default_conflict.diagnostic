@@ -1,0 +1,1 @@
+tests/test_error_runtime_object_trait_default_conflict.nabla:13:8: semantic error: conflit d'héritage pour la méthode 'label()' dans la classe 'Both': plusieurs définitions dans [Left, Right]

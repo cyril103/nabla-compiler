@@ -373,9 +373,9 @@ l'accès propriété sans parenthèses (`ada.score`) n'est pas encore supporté.
 ## Objets Statiques
 
 Un `object` déclare un namespace statique inspiré des objets compagnons Scala.
-Dans l'implémentation actuelle, un objet ne possède pas encore d'identité
-runtime, de champs, ni de valeur singleton manipulable : seules des fonctions
-statiques sont autorisées dans son bloc.
+Sans clause `with`, un objet ne possède pas d'identité runtime, de champs, ni de
+valeur singleton manipulable : seules des fonctions statiques sont autorisées
+dans son bloc.
 
 ```nabla
 object MathTools {
@@ -406,6 +406,35 @@ object Box {
 
 Si un objet expose une methode `apply`, `Name(...)` est un raccourci pour
 `Name.apply(...)`. C'est notamment utilise par `Array(1, 2, 3)`.
+
+Un `object` qui compose au moins un trait avec `with` devient en revanche un
+singleton runtime V0. Il est utilisable comme valeur, assignable a ses traits,
+a `AnyRef` et a `Any`, et ses methodes redispatchent comme celles d'une classe.
+Il ne supporte pas `extends`, les champs, les constructeurs, les arguments de
+type, ni l'initialisation dédiée. Un singleton runtime ne s'instancie pas avec
+`new` et ne peut pas servir de parent de classe.
+
+```nabla
+trait Named {
+    def name(): String
+}
+
+object RuntimeName with Named {
+    override def name(): String = {
+        "runtime"
+    }
+}
+
+def main(): Int = {
+    val named: Named = RuntimeName
+    if named.name() == "runtime" { 42 } else { 1 }
+}
+```
+
+Les méthodes d'un singleton runtime suivent les règles de validation de classe :
+les méthodes abstraites des traits doivent être implémentées, `override` est
+obligatoire pour les membres hérités, les signatures doivent correspondre, et
+les conflits de méthodes concrètes héritées doivent être résolus explicitement.
 
 ## Héritage
 
@@ -1051,8 +1080,9 @@ projet, puis dans `stdlib/`.
   instancié, une méthode générique spécialisée et les méthodes de base
   `Any.toString` / `Any.hashCode` / `Any.equals`. `super` reste un appel
   statique. Les vraies vtables ne sont pas encore formalisées.
-- Les `object` sont pour l'instant des namespaces statiques, pas des singletons
-  runtime avec champs ou identité.
+- Les `object` sans `with` restent des namespaces statiques. Les `object` avec
+  `with Trait` sont des singletons runtime V0, mais sans champs, constructeur,
+  `extends`, arguments de type ou initialisation dédiée.
 - La monomorphisation des classes generiques est encore limitee aux cas
   supportes par la suite actuelle.
 - Les fonctions generiques ne sont pas encore des valeurs polymorphes.

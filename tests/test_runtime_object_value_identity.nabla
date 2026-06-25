@@ -1,0 +1,15 @@
+trait Marker {
+    def id(): Int
+}
+
+object Only with Marker {
+    override def id(): Int = {
+        42
+    }
+}
+
+def main(): Int = {
+    val a: Marker = Only
+    val b: Marker = Only
+    if a.id() == 42 && b.id() == 42 && a == b { 42 } else { 1 }
+}
