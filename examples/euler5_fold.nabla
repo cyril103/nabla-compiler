@@ -17,7 +17,7 @@ def lcm(left: Int, right: Int): Int = {
 }
 
 def main(): Int = {
-    val value = Array.rangeUntil(1, 21)
+    val value = Array.range(1, 21)
         .fold(1, (accumulator, divisor) => lcm(accumulator, divisor))
 
     print(value.toString())

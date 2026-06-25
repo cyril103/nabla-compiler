@@ -1,7 +1,7 @@
 /// @module Array
 /// Tableaux generiques pour le code utilisateur.
 /// Importer collections.array donne acces a Array[T], Array.empty[T](),
-/// Array.fill[T], Array.tabulate[T] et Array.range / Array.rangeUntil.
+/// Array.fill[T], Array.tabulate[T] et Array.range.
 /// Les anciens noms ArrayFill[T] et ArrayRange restent disponibles pour
 /// compatibilite. Les types bas niveau comme IntArray, ArrayInt,
 /// ObjectArray[T] et ArrayObject[T] sont des details de representation dans
@@ -19,7 +19,7 @@
 /// @example Fabriquer une sequence d'indices
 /// import collections.array
 ///
-/// val indexes = Array.rangeUntil(2, 5)
+/// val indexes = Array.range(2, 5)
 /// indexes.mkString(", ")
 /// @end
 
@@ -101,8 +101,17 @@ object Array {
     }
 
     /// Cree un tableau d'entiers contenant start, ..., until - 1.
-    /// @signature def Array.rangeUntil(start: Int, until: Int): Array[Int]
+    /// @signature def Array.range(start: Int, until: Int): Array[Int]
     /// @status Recommandee
+    def range(start: Int, until: Int): ArrayInt = {
+        new ArrayInt(intArrayRangeUntil(start, until))
+    }
+
+    /// Cree un tableau d'entiers contenant start, ..., until - 1.
+    /// @signature def Array.rangeUntil(start: Int, until: Int): Array[Int]
+    /// @status Compatibilite
+    ///
+    /// Preferer Array.range(start, until) dans le nouveau code.
     def rangeUntil(start: Int, until: Int): ArrayInt = {
         new ArrayInt(intArrayRangeUntil(start, until))
     }

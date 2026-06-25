@@ -59,7 +59,8 @@ pas comme cible idiomatique pour le code applicatif.
 - `Array.fill[T](size, value)`
 - `Array.tabulate[T](size, f)`
 - `Array.range(size)`
-- `Array.rangeUntil(start, until)`
+- `Array.range(start, until)`
+- `Array.rangeUntil(start, until)` — alias de compatibilite
 - `Set[T]`
   - `contains(value)`
   - `add(value)`, `remove(value)`, `union(other)`, `intersect(other)`,

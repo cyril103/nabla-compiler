@@ -21,7 +21,7 @@
       <p class="eyebrow">Module</p>
       <h1>Array</h1>
       <p class="import"><code>import collections.array</code></p>
-      <p>Tableaux generiques pour le code utilisateur. Importer collections.array donne acces a Array[T], Array.empty[T](), Array.fill[T], Array.tabulate[T] et Array.range / Array.rangeUntil. Les anciens noms ArrayFill[T] et ArrayRange restent disponibles pour compatibilite. Les types bas niveau comme IntArray, ArrayInt, ObjectArray[T] et ArrayObject[T] sont des details de representation dans les cas courants : ils peuvent apparaitre dans certains retours ou diagnostics, mais les exemples applicatifs devraient nommer Array[T].</p>
+      <p>Tableaux generiques pour le code utilisateur. Importer collections.array donne acces a Array[T], Array.empty[T](), Array.fill[T], Array.tabulate[T] et Array.range. Les anciens noms ArrayFill[T] et ArrayRange restent disponibles pour compatibilite. Les types bas niveau comme IntArray, ArrayInt, ObjectArray[T] et ArrayObject[T] sont des details de representation dans les cas courants : ils peuvent apparaitre dans certains retours ou diagnostics, mais les exemples applicatifs devraient nommer Array[T].</p>
       <figure class="example">
         <figcaption>Creer et parcourir un tableau</figcaption>
         <pre><code>import collections.array
@@ -34,7 +34,7 @@ xs.sum()</code></pre>
         <figcaption>Fabriquer une sequence d&#x27;indices</figcaption>
         <pre><code>import collections.array
 
-val indexes = Array.rangeUntil(2, 5)
+val indexes = Array.range(2, 5)
 indexes.mkString(&quot;, &quot;)</code></pre>
       </figure>
     </section>
@@ -55,6 +55,7 @@ indexes.mkString(&quot;, &quot;)</code></pre>
         <li><a href="#fill" title="def Array.fill[T](size: Int, value: T): Array[T]"><span>fill</span><code>def Array.fill[T](size: Int, value: T): Array[T]</code></a></li>
         <li><a href="#tabulate" title="def Array.tabulate[T](size: Int, f: (Int) =&gt; T): Array[T]"><span>tabulate</span><code>def Array.tabulate[T](size: Int, f: (Int) =&gt; T): Array[T]</code></a></li>
         <li><a href="#range" title="def Array.range(size: Int): Array[Int]"><span>range</span><code>def Array.range(size: Int): Array[Int]</code></a></li>
+        <li><a href="#range-2" title="def Array.range(start: Int, until: Int): Array[Int]"><span>range</span><code>def Array.range(start: Int, until: Int): Array[Int]</code></a></li>
         <li><a href="#rangeUntil" title="def Array.rangeUntil(start: Int, until: Int): Array[Int]"><span>rangeUntil</span><code>def Array.rangeUntil(start: Int, until: Int): Array[Int]</code></a></li>
         </ul>
       </section>
@@ -145,13 +146,23 @@ indexes.mkString(&quot;, &quot;)</code></pre>
           <p>Cree un tableau d&#x27;entiers contenant 0, 1, ..., size - 1.</p>
 
         </article>
-        <article class="entry" id="rangeUntil">
+        <article class="entry" id="range-2">
           <div class="entry-meta">
             <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>range</h2>
+          <pre class="signature"><code>def Array.range(start: Int, until: Int): Array[Int]</code></pre>
+          <p>Cree un tableau d&#x27;entiers contenant start, ..., until - 1.</p>
+
+        </article>
+        <article class="entry" id="rangeUntil">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status compat">Compatibilite</span>
           </div>
           <h2>rangeUntil</h2>
           <pre class="signature"><code>def Array.rangeUntil(start: Int, until: Int): Array[Int]</code></pre>
           <p>Cree un tableau d&#x27;entiers contenant start, ..., until - 1.</p>
+<p>Preferer Array.range(start, until) dans le nouveau code.</p>
 
         </article>
       </section>

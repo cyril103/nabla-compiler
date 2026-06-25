@@ -141,7 +141,7 @@ Actions recommandees :
    Les cookbooks doivent rester concis et ne pas laisser entendre que tous les
    retours de tableaux masquent deja completement `ArrayObject[T]`.
 11. Garder les diagnostics de compatibilite orientes vers les compagnons
-   recommandes (`Array.fill`, `Array.rangeUntil`, `Set.fromArray`,
+   recommandes (`Array.fill`, `Array.range`, `Set.fromArray`,
    `Option.some`, `Option.none`, etc.).
 12. Poursuivre la surcharge par signature apres `v0.1.0` : la base couvre maintenant les
     fonctions globales, y compris les generiques inferables et les references

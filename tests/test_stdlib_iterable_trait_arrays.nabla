@@ -17,7 +17,7 @@ def visitText(values: Iterable[String]): Int = {
 }
 
 def main(): Int = {
-    val ints: Iterable[Int] = Array.rangeUntil(1, 4)
+    val ints: Iterable[Int] = Array.range(1, 4)
     val words: Iterable[String] = Array.fill[String](2, "ab")
     if words.nonEmpty() {
         visitInts(ints) + visitText(words)
