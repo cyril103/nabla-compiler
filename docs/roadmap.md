@@ -38,6 +38,9 @@ pour garder un cap clair après le tag `v0.1.0`.
     `difference`
   - `collections.map` avec `Map[K, V]`, recherche optionnelle, mises a jour
     immutables et conversions cle/valeur
+  - `collections.list` V0 experimentale avec `List[T]`, `Nil[T](defaultValue)`,
+    `Cons[T]`, fabriques `List.empty` / `List.cons`, operations compagnon
+    `fold`, `map`, `filter` et conversion depuis `Array[T]`
   - `Option[T]`
   - operations `String`
   - I/O console et fichiers texte
@@ -62,10 +65,11 @@ pour garder un cap clair après le tag `v0.1.0`.
 - `examples/game_of_life.nabla` sert d'exemple interactif compilé par
   `make examples` pour `Array[T]` et `Array.fill[T]`, sans exposer
   `IntArray` ni les helpers `intArray...` dans son code applicatif.
-- `examples/stdlib_collections_cookbook.nabla` et
+- `examples/stdlib_collections_cookbook.nabla`,
+  `examples/stdlib_list_cookbook.nabla` et
   `examples/stdlib_text_cookbook.nabla` servent de cookbooks non interactifs
   verifies pour la surface stdlib publique (`Array[T]`, `Set[T]`, `Map[K, V]`,
-  `Option[T]`, `Sized` et operations texte), sans construction directe des
+  `List[T]`, `Option[T]`, `Sized` et operations texte), sans construction directe des
   representations de tableaux internes.
 - Support Vim minimal disponible dans `editor/vim`.
 - Suites `make all-tests`, `make examples` et `make tooling-tests` vertes au
@@ -81,8 +85,8 @@ Le cap prioritaire est donc la coherence de surface, pas l'accumulation de
 features.
 
 - API publique cible : `Array[T]`, `Option[T]`, `Set[T]`, `Map[K, V]`,
-  `Sized`, `Iterable[T]`, `String`, classes, methodes, lambdas et modules standards
-  documentes.
+  `List[T]` experimentale, `Sized`, `Iterable[T]`, `String`, classes, methodes,
+  lambdas et modules standards documentes.
 - Details a cacher ou marquer internes : `IntArray`, `LongArray`,
   `FloatArray`, `DoubleArray`, `BoolArray`, `ObjectArray[T]`,
   `ArrayObject[T]`, helpers `arrayBase...` et fonctions specialisees de pont.

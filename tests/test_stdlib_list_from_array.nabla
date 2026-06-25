@@ -1,0 +1,12 @@
+import collections.array
+import collections.list
+
+def main(): Int = {
+    val values = Array(10, 20, 12)
+    val list = List.fromArray[Int](values, 0)
+    if list.size() == 3 && List.fold[Int, Int](list, 0, (acc: Int, value: Int) => { acc + value }) == 42 && list.mkString("-") == "10-20-12" {
+        42
+    } else {
+        1
+    }
+}

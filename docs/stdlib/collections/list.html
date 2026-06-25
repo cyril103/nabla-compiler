@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>List - Nabla stdlib</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <header class="topbar">
+    <a class="brand" href="../index.html">Nabla stdlib</a>
+    <nav class="topnav" aria-label="Navigation principale">
+      <a href="../index.html">Modules</a>
+      <a href="https://github.com/cyril103/nabla-compiler">GitHub</a>
+    </nav>
+  </header>
+  <main id="contenu">
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="../index.html">Modules</a> / collections.list</nav>
+    <section class="module-hero">
+      <p class="eyebrow">Module</p>
+      <h1>List</h1>
+      <p class="import"><code>import collections.list</code></p>
+      <p>Liste chainee immutable experimentale. List[T] est inspiree de Scala, mais la V0 utilise encore Nil[T](defaultValue) au lieu d&#x27;un singleton Nil polymorphe. Utiliser List.empty[T](defaultValue) et List.cons[T](head, tail) pour construire les listes.</p>
+      <figure class="example">
+        <figcaption>Construire et lire une liste</figcaption>
+        <pre><code>import collections.list
+
+val xs = List.cons[Int](1, List.cons[Int](2, List.empty[Int](0)))
+xs.head() + xs.tail().head()</code></pre>
+      </figure>
+    </section>
+    <div class="doc-shell">
+      <aside class="sidebar" aria-label="Sommaire des symboles publics">
+        <h2>API publique</h2>
+      <section class="toc-group">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="#List" title="trait List[T]"><span>List</span><code>trait List[T]</code></a></li>
+        <li><a href="#Nil" title="class Nil[T](defaultValue: T) with List[T]"><span>Nil</span><code>class Nil[T](defaultValue: T) with List[T]</code></a></li>
+        <li><a href="#Cons" title="class Cons[T](val head: T, val tail: List[T]) with List[T]"><span>Cons</span><code>class Cons[T](val head: T, val tail: List[T]) with List[T]</code></a></li>
+        </ul>
+      </section>
+      <section class="toc-group">
+        <h3>Constructeurs et fabriques</h3>
+        <ul>
+        <li><a href="#empty" title="def List.empty[T](defaultValue: T): List[T]"><span>empty</span><code>def List.empty[T](defaultValue: T): List[T]</code></a></li>
+        <li><a href="#cons" title="def List.cons[T](head: T, tail: List[T]): List[T]"><span>cons</span><code>def List.cons[T](head: T, tail: List[T]): List[T]</code></a></li>
+        <li><a href="#fold" title="def List.fold[T, U](values: List[T], initial: U, f: (U, T) =&gt; U): U"><span>fold</span><code>def List.fold[T, U](values: List[T], initial: U, f: (U, T) =&gt; U): U</code></a></li>
+        <li><a href="#map" title="def List.map[T, U](values: List[T], defaultValue: U, f: (T) =&gt; U): List[U]"><span>map</span><code>def List.map[T, U](values: List[T], defaultValue: U, f: (T) =&gt; U): List[U]</code></a></li>
+        <li><a href="#filter" title="def List.filter[T](values: List[T], defaultValue: T, predicate: (T) =&gt; Bool): List[T]"><span>filter</span><code>def List.filter[T](values: List[T], defaultValue: T, predicate: (T) =&gt; Bool): List[T]</code></a></li>
+        <li><a href="#fromArray" title="def List.fromArray[T](values: Array[T], defaultValue: T): List[T]"><span>fromArray</span><code>def List.fromArray[T](values: Array[T], defaultValue: T): List[T]</code></a></li>
+        </ul>
+      </section>
+      <section class="toc-group">
+        <h3>Methodes</h3>
+        <ul>
+        <li><a href="#isEmpty" title="def isEmpty(): Bool"><span>isEmpty</span><code>def isEmpty(): Bool</code></a></li>
+        <li><a href="#nonEmpty" title="def nonEmpty(): Bool"><span>nonEmpty</span><code>def nonEmpty(): Bool</code></a></li>
+        <li><a href="#head" title="def head(): T"><span>head</span><code>def head(): T</code></a></li>
+        <li><a href="#tail" title="def tail(): List[T]"><span>tail</span><code>def tail(): List[T]</code></a></li>
+        <li><a href="#headOption" title="def headOption(): Option[T]"><span>headOption</span><code>def headOption(): Option[T]</code></a></li>
+        <li><a href="#prepend" title="def prepend(value: T): List[T]"><span>prepend</span><code>def prepend(value: T): List[T]</code></a></li>
+        <li><a href="#mkString" title="def mkString(separator: String): String"><span>mkString</span><code>def mkString(separator: String): String</code></a></li>
+        </ul>
+      </section>
+      </aside>
+      <section class="content entries" aria-label="Reference detaillee">
+        <article class="entry" id="List">
+          <div class="entry-meta">
+            <span class="kind">trait</span> <span class="status experimental">Experimentale</span>
+          </div>
+          <h2>List</h2>
+          <pre class="signature"><code>trait List[T]</code></pre>
+          <p>Liste chainee immutable.</p>
+
+        </article>
+        <article class="entry" id="isEmpty">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>isEmpty</h2>
+          <pre class="signature"><code>def isEmpty(): Bool</code></pre>
+          <p>Indique si la liste est vide.</p>
+
+        </article>
+        <article class="entry" id="nonEmpty">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>nonEmpty</h2>
+          <pre class="signature"><code>def nonEmpty(): Bool</code></pre>
+          <p>Indique si la liste contient au moins un element.</p>
+
+        </article>
+        <article class="entry" id="head">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimentale</span>
+          </div>
+          <h2>head</h2>
+          <pre class="signature"><code>def head(): T</code></pre>
+          <p>Retourne la tete de liste, ou la valeur par defaut du Nil V0.</p>
+
+        </article>
+        <article class="entry" id="tail">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>tail</h2>
+          <pre class="signature"><code>def tail(): List[T]</code></pre>
+          <p>Retourne la queue de liste.</p>
+
+        </article>
+        <article class="entry" id="headOption">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>headOption</h2>
+          <pre class="signature"><code>def headOption(): Option[T]</code></pre>
+          <p>Retourne la tete si elle existe.</p>
+
+        </article>
+        <article class="entry" id="prepend">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>prepend</h2>
+          <pre class="signature"><code>def prepend(value: T): List[T]</code></pre>
+          <p>Ajoute une valeur en tete.</p>
+
+        </article>
+        <article class="entry" id="mkString">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimentale</span>
+          </div>
+          <h2>mkString</h2>
+          <pre class="signature"><code>def mkString(separator: String): String</code></pre>
+          <p>Concatene les elements separes par separator.</p>
+
+        </article>
+        <article class="entry" id="Nil">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status compat">Compatibilite</span>
+          </div>
+          <h2>Nil</h2>
+          <pre class="signature"><code>class Nil[T](defaultValue: T) with List[T]</code></pre>
+          <p>Liste vide V0.</p>
+<p>Nil[T](defaultValue) est une representation temporaire : la valeur par defaut sert seulement a donner un resultat a head() tant que le langage ne dispose pas de singleton Nil polymorphe.</p>
+
+        </article>
+        <article class="entry" id="Cons">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>Cons</h2>
+          <pre class="signature"><code>class Cons[T](val head: T, val tail: List[T]) with List[T]</code></pre>
+          <p>Cellule non vide.</p>
+
+        </article>
+        <article class="entry" id="empty">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimentale</span>
+          </div>
+          <h2>empty</h2>
+          <pre class="signature"><code>def List.empty[T](defaultValue: T): List[T]</code></pre>
+          <p>Construit une liste vide V0.</p>
+
+        </article>
+        <article class="entry" id="cons">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>cons</h2>
+          <pre class="signature"><code>def List.cons[T](head: T, tail: List[T]): List[T]</code></pre>
+          <p>Ajoute un element en tete.</p>
+
+        </article>
+        <article class="entry" id="fold">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>fold</h2>
+          <pre class="signature"><code>def List.fold[T, U](values: List[T], initial: U, f: (U, T) =&gt; U): U</code></pre>
+          <p>Replie une liste de gauche a droite.</p>
+
+        </article>
+        <article class="entry" id="map">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>map</h2>
+          <pre class="signature"><code>def List.map[T, U](values: List[T], defaultValue: U, f: (T) =&gt; U): List[U]</code></pre>
+          <p>Transforme chaque element.</p>
+
+        </article>
+        <article class="entry" id="filter">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>filter</h2>
+          <pre class="signature"><code>def List.filter[T](values: List[T], defaultValue: T, predicate: (T) =&gt; Bool): List[T]</code></pre>
+          <p>Conserve les elements qui verifient predicate.</p>
+
+        </article>
+        <article class="entry" id="fromArray">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimentale</span>
+          </div>
+          <h2>fromArray</h2>
+          <pre class="signature"><code>def List.fromArray[T](values: Array[T], defaultValue: T): List[T]</code></pre>
+          <p>Convertit un Array[T] public en List[T].</p>
+
+        </article>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

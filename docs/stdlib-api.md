@@ -86,9 +86,19 @@ pas comme cible idiomatique pour le code applicatif.
   - `mapValues[U](default, f)`
   - `filterKeys(predicate)`
   - `mkString(separator)` et `toString()`
+- `List[T]` (**experimentale**)
+  - `List.empty[T](defaultValue)` et `List.cons[T](head, tail)`
+  - `isEmpty()`, `nonEmpty()`, `size()`, `foreach(f)`, `head()`, `tail()`,
+    `headOption()`, `prepend(value)` et `mkString(separator)`
+  - operations generiques via compagnon : `List.fold[T, U](values, initial, f)`,
+    `List.map[T, U](values, defaultValue, f)`,
+    `List.filter[T](values, defaultValue, predicate)` et
+    `List.fromArray[T](values, defaultValue)`
+  - `Nil[T](defaultValue)` est temporaire jusqu'au design de `object Nil`,
+    `Nothing` et variance ; `Array[T]` reste la collection indexee principale.
 
-`ArrayObject[T]`, les facades de tableaux specialisees, `Set[T]` et
-`Map[K, V]` implementent `Iterable[...]` pour permettre un `foreach` polymorphe.
+`ArrayObject[T]`, les facades de tableaux specialisees, `Set[T]`, `Map[K, V]` et
+`List[T]` implementent `Iterable[...]` pour permettre un `foreach` polymorphe.
 `Iterable[T]` herite de `Sized`, donc les appels communs `size()`, `isEmpty()` et
 `nonEmpty()` restent disponibles via le meme contrat nominal minimal.
 

@@ -289,6 +289,12 @@ Le pipeline implemente actuellement :
   `removed`, `clear`, `keys`, `values`, `toArray`, `foreachEntry`, `mapValues[U]`,
   `filterKeys`, `mkString` et `toString` pour la représentation textuelle;
   `Map[K, V]` implemente aussi le trait public `Sized`;
+- module de bibliotheque standard `collections.list` experimental avec
+  `List[T]`, `Nil[T](defaultValue)`, `Cons[T]`, `List.empty[T]`,
+  `List.cons[T]`, `List.fold[T, U]`, `List.map[T, U]`, `List.filter[T]`,
+  `List.fromArray[T]`, `head`, `tail`, `headOption`, `prepend`, `mkString` et
+  implementation de `Iterable[T]`; `Nil[T](defaultValue)` reste une compatibilite
+  V0 en attendant `object Nil`, `Nothing` et variance;
 - module de bibliotheque standard `collections.array` comme point d'entree
   commun pour les tableaux specialises, avec `Array.fill[T]`, `Array.range`,
   `Array.rangeUntil`, `ArrayFill[T]`, `ArrayRange`, `arrayFill[T]`, `arrayMap[T]`,
@@ -303,13 +309,13 @@ Le pipeline implemente actuellement :
   `ArrayObject[U]` quand la sortie ne reste pas dans la meme primitive
   specialisee;
 - documentation utilisateur recentree sur `Array[T]`, `Option[T]`, `Set[T]`,
-  `Map[K, V]` et `Sized` comme surface recommandee; `ArrayObject[T]`,
+  `Map[K, V]`, `List[T]` experimental et `Sized` comme surface recommandee; `ArrayObject[T]`,
   `ArrayInt` et les tableaux bruts sont decrits comme compatibilite ou details
   de representation, y compris pour les retours actuels de `String.split`,
   `String.toCharArray`, `Set.toArray`, `Map.keys`, `Map.values` et
   `Map.toArray`;
-- `ArrayObject[T]`, les facades de tableaux specialisees, `Set[T]` et
-  `Map[K, V]` implementent le trait public `Iterable[...]`; `Iterable[T]`
+- `ArrayObject[T]`, les facades de tableaux specialisees, `Set[T]`,
+  `Map[K, V]` et `List[T]` implementent le trait public `Iterable[...]`; `Iterable[T]`
   herite de `Sized` et expose `foreach`, `size`, `isEmpty` et `nonEmpty` comme
   contrat commun de collection;
 - collection native `ObjectArray[T]` stockant des slots runtime de 64 bits, avec
@@ -361,9 +367,10 @@ Le pipeline implemente actuellement :
 - `examples/game_of_life.nabla` comme exemple interactif compile par
   `make examples` pour `Array[T]` et `Array.fill[T]`, sans import applicatif de
   `IntArray` ni des helpers `intArray...`.
-- `examples/stdlib_collections_cookbook.nabla` et
+- `examples/stdlib_collections_cookbook.nabla`,
+  `examples/stdlib_list_cookbook.nabla` et
   `examples/stdlib_text_cookbook.nabla` comme cookbooks non interactifs verifies
-  pour `Array[T]`, `Set[T]`, `Map[K, V]`, `Option[T]`, `Sized` et les operations
+  pour `Array[T]`, `Set[T]`, `Map[K, V]`, `List[T]`, `Option[T]`, `Sized` et les operations
   texte, sans construction directe de `ObjectArray[T]`, `ArrayObject[T]` ou
   `ArrayInt`.
 - les tests et exemples ordinaires privilegient maintenant `Array.range`,
