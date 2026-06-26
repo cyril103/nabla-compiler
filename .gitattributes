@@ -1,6 +1,6 @@
-# Force Nabla source files and test oracle files to always use LF line endings
-*.nabla text eol=lf
-*.expected text eol=lf
-*.stdout text eol=lf
-*.ir text eol=lf
-*.diagnostic text eol=lf
+# Keep the repository stable across Windows, WSL and Linux.
+* text=auto eol=lf
+
+# Windows-native scripts should keep CRLF if they are added later.
+*.bat text eol=crlf
+*.cmd text eol=crlf

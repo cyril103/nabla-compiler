@@ -897,6 +897,12 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Stabiliser les fins de ligne du depot avec une regle
+  `.gitattributes` globale en LF, en gardant des exceptions CRLF pour les
+  scripts Windows natifs futurs.
+  - Fichiers / tests associes: `.gitattributes`, `AGENTS.md`,
+    `git add --renormalize .`.
+
 - `local` - Ajouter les appels postfixes directs sur les expressions de type
   fonction: une fonction retournant `Fn(...)` peut etre appelee immediatement
   avec une seconde liste d'arguments, sans passer par une variable intermediaire.
