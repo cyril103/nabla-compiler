@@ -456,11 +456,14 @@ Limites importantes :
   d'exposer `ObjectArray[T]` / `ArrayObject[T]` dans le chemin applicatif
   principal. Les appels de méthodes utilisateur sont virtuels par défaut quand
   une valeur est manipulée par son type parent, y compris parent générique
-  instancié et méthode générique spécialisée; `super` reste statique. La méthode
-  `toString()`, `hashCode()` et `equals(...)` redispatchent aussi depuis `Any`
-  pour stabiliser l'égalité et l'index hashé de `Set[Parent]`. La friction
-  restante concerne les vtables complètes et les règles avancées d'égalité dans
-  les hiérarchies complexes.
+  instancié et méthode générique spécialisée; `super` reste statique. Le slot 0
+  des objets utilisateur pointe désormais vers une vtable backend, avec des
+  slots par propriétaire statique + méthode résolue afin de couvrir les
+  surcharges, defaults de traits, `Iterable[T]`, `Sized`, parents génériques et
+  méthodes génériques spécialisées. La méthode `toString()`, `hashCode()` et
+  `equals(...)` redispatchent aussi depuis `Any` pour stabiliser l'égalité et
+  l'index hashé de `Set[Parent]`. La friction restante concerne les règles
+  avancées d'égalité dans les hiérarchies complexes.
 - Le mot-clé `override` est supporté pour marquer explicitement les
   redéfinitions de méthodes héritées, et il est obligatoire quand une méthode
   redéfinit une méthode provenant d'un parent.
@@ -814,7 +817,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Initialiser le tas runtime via `mmap` et aligner les allocations bump.
 - [x] Permettre de configurer la capacité du heap par exécutable avec
   `nablac --heap-size <octets>` tout en gardant 8 MiB par défaut.
-- [ ] Definir de vraies vtables ou stabiliser le header runtime actuel.
+- [x] Definir de vraies vtables backend pour les objets utilisateur et
+  singletons runtime, tout en conservant les tags runtime reserves pour les
+  primitives boxees et `String`.
 - [x] Extraire le runtime ASM commun du backend IR.
 - [x] Stabiliser la representation de `String`.
 - [x] Ajouter `String.charAt(index): Char` sur la representation byte-based.
@@ -902,6 +907,25 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Finaliser le passage du dispatch dynamique vers des vtables backend:
+  le slot 0 des objets utilisateur et singletons runtime pointe vers une table
+  de fonctions, les slots sont indexés par propriétaire statique + méthode
+  résolue pour éviter les collisions d'overloads, et les entrées couvrent
+  parents génériques instanciés, méthodes génériques spécialisées, defaults de
+  traits, `Sized`, `Iterable[T]`, `Any.toString` / `Any.hashCode` /
+  `Any.equals`, ainsi que les facades `ArrayObject[Char]` et
+  `ArrayObject[String]` retournées par `String.toCharArray` / `String.split`.
+  - Fichiers / tests associes: `src/ir.hpp`, `src/ir.cpp`,
+    `src/ir_codegen.cpp`, `src/runtime_asm.hpp`, `src/runtime_asm.cpp`,
+    `tests/test_inheritance_dynamic_dispatch_generic_parent.nabla`,
+    `tests/test_inheritance_dynamic_dispatch_generic_method.nabla`,
+    `tests/test_trait_default_overload_no_conflict.nabla`,
+    `tests/test_stdlib_iterable_trait_arrays.nabla`,
+    `tests/test_stdlib_iterable_trait_set_map.nabla`,
+    `tests/test_stdlib_list_iterable_trait.nabla`,
+    `tests/test_string_to_char_array.nabla`, `tests/test_string_split.nabla`,
+    `make all-tests`, `make examples`.
 
 - `local` - Ajouter une syntaxe de `def` curryfiee V0 pour une liste de
   parametres supplementaire: `def sum(f)(a, b): Int = ...` s'abaisse vers une

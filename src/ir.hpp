@@ -1,7 +1,7 @@
 #pragma once
-
 #include "compiler_error.hpp"
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -210,4 +210,5 @@ private:
     void emitMethodSpecialization(const MethodSpecialization& specialization, const class ProgramNode& root);
     void registerOverrideMethodSpecializations(const MethodSpecialization& specialization);
     void emitFunctionSpecialization(const FunctionSpecialization& specialization, const class ProgramNode& root);
+    void registerAllMethodSpecializationsForClass(const std::string& className, std::set<std::string>& visited);
 };

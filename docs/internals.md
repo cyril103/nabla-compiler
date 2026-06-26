@@ -114,20 +114,21 @@ Les objets sont alloués dans le heap runtime par bump allocation. Le layout est
 linéaire par slots de 8 octets :
 
 ```text
-slot 0      : identifiant de classe runtime pour les objets utilisateur
+slot 0      : pointeur vers la vtable backend pour les objets utilisateur
 slot 1..n   : champs de constructeur et champs hérités
 ```
 
-Les vraies vtables ne sont pas encore formalisées. Le header sert aujourd'hui
-au dispatch dynamique des méthodes utilisateur quand une valeur est manipulée
-via un type parent, y compris pour des parents génériques instanciés et des
-méthodes génériques spécialisées. Les appels à `Any.toString`,
-`Any.hashCode` et `Any.equals` utilisent le même identifiant de classe pour
-redispatcher vers les overrides utilisateur avant de tomber sur le fallback
-runtime. `super` est abaissé comme appel statique.
-Les identifiants de classes commencent à `1000` pour éviter les tags runtime
-boxed. Les closures réutilisent leur propre convention de header pour stocker
-le pointeur de code.
+Les vtables sont générées par le backend ASM pour les classes concrètes,
+spécialisations génériques nécessaires et singletons runtime. Les slots sont
+indexés par propriétaire statique + méthode résolue, afin de distinguer les
+overloads et les méthodes génériques spécialisées. Elles servent au dispatch
+dynamique des méthodes utilisateur quand une valeur est manipulée via un type
+parent, un trait comme `Iterable[Int]`, `Sized`, `Any` ou `AnyRef`. Les appels à
+`Any.toString`, `Any.hashCode` et `Any.equals` passent par ces mêmes entrées
+pour redispatcher vers les overrides utilisateur avant de tomber sur le fallback
+runtime des valeurs taggées. `super` est abaissé comme appel statique. Les
+closures réutilisent leur propre convention de header pour stocker le pointeur
+de code.
 
 Les objets `String` utilisent un tag runtime réservé dans leur slot 0. Ce tag
 permet aux méthodes racine `Any.toString`, `Any.hashCode` et `Any.equals` de
@@ -299,13 +300,13 @@ restent distinguees par leurs arguments de type dans les signatures et les corps
 IR specialises. Les champs herites sont integres au layout avant les champs
 propres afin que les offsets restent coherents dans les appels parent-types.
 
-Le slot 0 des objets utilisateur contient un identifiant de classe runtime. Le
-backend l'utilise comme dispatch table implicite pour les appels virtuels quand
-le type statique est un parent, un trait instancié comme `Iterable[Int]`, ou
-`Any`/`AnyRef`; il n'existe pas encore de vraie structure vtable stabilisée ni
-d'ABI publique. Les overrides de `toString`,
-`hashCode` et `equals` participent à ce dispatch, ce qui rend `Set[Parent]` et
-les comparaisons via `Any` cohérents dans les cas couverts par les tests.
+Le slot 0 des objets utilisateur contient un pointeur de vtable backend. Le
+backend l'utilise pour les appels virtuels quand le type statique est un parent,
+un trait instancié comme `Iterable[Int]`, ou `Any`/`AnyRef`. Les overrides de
+`toString`, `hashCode` et `equals` participent à ce dispatch, ce qui rend
+`Set[Parent]` et les comparaisons via `Any` cohérents dans les cas couverts par
+les tests. Cette vtable reste une convention interne du backend, pas une ABI
+publique stable.
 
 `super` cible statiquement la classe parente immédiate dans une méthode de
 classe. Il ne suit pas le dispatch virtuel et ne modélise pas une linéarisation

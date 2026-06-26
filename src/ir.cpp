@@ -1,6 +1,8 @@
 #include "ir.hpp"
 #include "ast.hpp"
+#include "compiler_context.hpp"
 #include <sstream>
+#include <set>
 
 namespace {
 std::string join(const std::vector<std::string>& values, const std::string& separator) {
@@ -300,6 +302,8 @@ std::string IRBuilder::emitIndirectCall(
 
 std::string IRBuilder::emitSingletonObjectRef(const std::string& objectName) {
     std::string result = nextValue();
+    std::set<std::string> visited;
+    registerAllMethodSpecializationsForClass(objectName, visited);
     emit({IROpcode::SingletonObjectRef, result, objectName, objectName, {}});
     return result;
 }
@@ -452,6 +456,8 @@ std::string IRBuilder::emitNewObject(
     std::string result = nextValue();
     const std::string type = resultType.empty() ? className : resultType;
     const std::string substitutedType = substituteActiveType(type);
+    std::set<std::string> visited;
+    registerAllMethodSpecializationsForClass(substitutedType, visited);
     emit({IROpcode::NewObject, result, substitutedType, substitutedType, arguments});
     return result;
 }
@@ -722,4 +728,67 @@ std::string IRBuilder::nextValue() {
 
 void IRBuilder::emit(IRInstruction instruction) {
     currentFunction->instructions.push_back(std::move(instruction));
+}
+
+void IRBuilder::registerAllMethodSpecializationsForClass(const std::string& className, std::set<std::string>& visited) {
+    if (!context) return;
+    std::string baseName = genericBaseName(className);
+    if (visited.count(baseName)) return;
+    visited.insert(baseName);
+
+    auto classIt = context->classes.find(baseName);
+    if (classIt == context->classes.end()) return;
+
+    std::map<std::string, std::string> classSubstitution;
+    if (auto genericSubstitution = genericSubstitutionFor(*context, className)) {
+        classSubstitution = *genericSubstitution;
+    }
+
+    for (const auto& [methodName, methodSig] : classIt->second.methods) {
+        auto lookup = resolveClassMethodInHierarchy(*context, className, methodName);
+        if (!lookup || !lookup->signature) continue;
+
+        std::string targetOwner = lookup->ownerClassName;
+        auto ownerIt = context->classes.find(targetOwner);
+        if (ownerIt == context->classes.end()) continue;
+
+        bool isGenericOwner = !ownerIt->second.typeParameters.empty();
+        bool isGenericMethod = !lookup->signature->typeParameters.empty();
+        bool isTrait = ownerIt->second.isTrait;
+        bool isAbstract = lookup->signature->isAbstract;
+
+        if (isGenericMethod || isTrait || isAbstract) {
+            continue;
+        }
+
+        if (isGenericOwner) {
+            std::string concreteOwner = targetOwner;
+            std::vector<std::string> args;
+            for (const auto& tp : ownerIt->second.typeParameters) {
+                auto substIt = lookup->classSubstitution.find(tp);
+                if (substIt != lookup->classSubstitution.end()) {
+                    args.push_back(substIt->second);
+                } else {
+                    args.push_back(tp);
+                }
+            }
+            concreteOwner = formatParameterizedType(targetOwner, args);
+
+            std::vector<std::string> argTypes;
+            for (const auto& param : lookup->signature->parameters) {
+                argTypes.push_back(substituteType(param.type, lookup->classSubstitution));
+            }
+            std::string retType = substituteType(lookup->signature->returnType, lookup->classSubstitution);
+
+            registerMethodSpecialization(
+                concreteOwner, targetOwner, methodName,
+                {},
+                argTypes, retType);
+        }
+    }
+
+    for (const auto& parentType : classIt->second.parentTypes) {
+        std::string concreteParent = substituteType(parentType, classSubstitution);
+        registerAllMethodSpecializationsForClass(concreteParent, visited);
+    }
 }

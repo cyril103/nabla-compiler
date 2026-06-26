@@ -124,10 +124,9 @@ Actions recommandees :
 1. Basculer en phase post-`v0.1.0`: le tag 0.1 existe, donc les prochains
    changements doivent clarifier ou durcir le comportement observable avant
    d'élargir la surface publique.
-2. Durcir l'héritage/runtime : conflits champs/méthodes visibles, dispatch
-   dynamique via type parent ou `Any`, `super` statique, règles d'égalité et
-   hash dans les hiérarchies, avec des régressions couvrant aussi
-   `Array[Parent]` et `Set.fromArray[Parent]`.
+2. Durcir l'héritage/runtime : conflits champs/méthodes visibles, `super`
+   statique, règles d'égalité et hash dans les hiérarchies complexes, avec des
+   régressions couvrant aussi `Array[Parent]` et `Set.fromArray[Parent]`.
 3. Continuer le nettoyage de la référence stdlib générée en affinant les
    descriptions utilisateur et en évitant d'ajouter de nouveaux helpers
    documentés sans classification préalable.
@@ -180,6 +179,10 @@ reprise séparées :
 - Les objets runtime V0 sont couverts par des tests de valeur singleton, dispatch
   via trait, assignabilité `Any` / `AnyRef`, diagnostic de namespace statique
   utilisé comme valeur et diagnostics d'héritage class-like.
+- Le dispatch dynamique repose désormais sur des vtables backend internes:
+  objet slot 0 vers table de fonctions, slots par propriétaire statique +
+  méthode résolue, couverture de `Any`, traits `Sized` / `Iterable[T]`, parents
+  génériques instanciés, méthodes génériques spécialisées et defaults de traits.
 - Les proprietes `def` sans parametres sont supportees pour les fonctions
   globales, methodes de classes/objets, overrides et membres abstraits de trait,
   avec acces externe `Object.member` / `value.member` et compatibilite conservee

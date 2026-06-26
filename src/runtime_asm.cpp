@@ -3,7 +3,7 @@
 #include <ostream>
 
 namespace RuntimeASM {
-void emit(std::ostream& out, std::uint64_t heapCapacityBytes) {
+void emitData(std::ostream& out, std::uint64_t heapCapacityBytes) {
     out << "section .data\n"
         << "    heap_capacity: dq " << heapCapacityBytes << "\n"
         << "    heap_start: dq 0\n"
@@ -13,6 +13,14 @@ void emit(std::ostream& out, std::uint64_t heapCapacityBytes) {
         << "    align 8\n"
         << "    floatToStringAbsMask: dq 0x7fffffffffffffff\n"
         << "    floatToStringScale: dq 1000000.0\n\n";
+}
+
+void emit(std::ostream& out, std::uint64_t heapCapacityBytes) {
+    emitData(out, heapCapacityBytes);
+    emitText(out);
+}
+
+void emitText(std::ostream& out) {
     out << "section .text\nglobal _start\n\n";
     out << "_start:\n"
         << "    call Runtime_initHeap\n"

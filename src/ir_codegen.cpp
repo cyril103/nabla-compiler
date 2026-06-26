@@ -6,6 +6,7 @@
 #include <cctype>
 #include <climits>
 #include <map>
+#include <optional>
 #include <ostream>
 #include <set>
 #include <sstream>
@@ -73,6 +74,38 @@ std::string methodFunctionName(const std::string& className, const std::string& 
 std::string methodFunctionName(const std::string& qualifiedMember) {
     auto [className, methodName] = splitQualifiedMember(qualifiedMember);
     return methodFunctionName(className, methodName);
+}
+
+std::string methodSourceName(const std::string& resolvedMethodName) {
+    size_t generic = resolvedMethodName.find('[');
+    size_t overload = resolvedMethodName.find('$');
+    size_t end = std::min(
+        generic == std::string::npos ? resolvedMethodName.size() : generic,
+        overload == std::string::npos ? resolvedMethodName.size() : overload);
+    return resolvedMethodName.substr(0, end);
+}
+
+std::string methodSpecializationBaseName(const std::string& resolvedMethodName) {
+    size_t generic = resolvedMethodName.find('[');
+    if (generic == std::string::npos) return resolvedMethodName;
+    return resolvedMethodName.substr(0, generic);
+}
+
+bool vtableSlotParametersMatch(
+    const CompilerContext::FunctionSignature& candidate,
+    const CompilerContext::FunctionSignature& slot) {
+    if (candidate.parameters.size() != slot.parameters.size()) return false;
+    std::set<std::string> candidateTypeParameters(
+        candidate.typeParameters.begin(), candidate.typeParameters.end());
+    std::set<std::string> slotTypeParameters(slot.typeParameters.begin(), slot.typeParameters.end());
+    for (size_t i = 0; i < candidate.parameters.size(); ++i) {
+        const std::string& candidateType = candidate.parameters[i].type;
+        const std::string& slotType = slot.parameters[i].type;
+        if (candidateType == slotType) continue;
+        if (candidateTypeParameters.count(candidateType) && slotTypeParameters.count(slotType)) continue;
+        return false;
+    }
+    return true;
 }
 
 long long boxedInt(const std::string& value) {
@@ -155,8 +188,9 @@ private:
 class FunctionEmitter {
 public:
     FunctionEmitter(
-        const IRFunction& function, const CompilerContext& context, std::ostream& out)
-        : function(function), context(context), out(out) {
+        const IRFunction& function, const CompilerContext& context, std::ostream& out,
+        const std::map<std::string, int>& methodOffsets)
+        : function(function), context(context), methodOffsets(methodOffsets), out(out) {
         collectPhiLabels();
         collectSlots();
     }
@@ -189,6 +223,7 @@ public:
 private:
     const IRFunction& function;
     const CompilerContext& context;
+    const std::map<std::string, int>& methodOffsets;
     std::ostream& out;
     CallingConvention callingConvention;
     StackFrame frame;
@@ -500,9 +535,6 @@ private:
         if (instruction.type == "Double") {
             const std::string label = "nabla_double_" + asmSymbolPart(function.name) + "_" +
                                       asmSymbolPart(instruction.result);
-            out << "section .data\n";
-            out << label << ": dq __float64__(" << normalizeFloatConstant(instruction.operands[0]) << ")\n";
-            out << "section .text\n";
             out << "    mov rax, [" << label << "]\n";
             storeRegister(instruction.result, "rax");
             return;
@@ -510,9 +542,6 @@ private:
         if (instruction.type == "Float") {
             const std::string label = "nabla_float_" + asmSymbolPart(function.name) + "_" +
                                       asmSymbolPart(instruction.result);
-            out << "section .data\n";
-            out << label << ": dd __float32__(" << normalizeFloatConstant(instruction.operands[0]) << ")\n";
-            out << "section .text\n";
             out << "    xor rax, rax\n";
             out << "    mov eax, [" << label << "]\n";
             storeRegister(instruction.result, "rax");
@@ -609,17 +638,7 @@ private:
     void emitStringLiteral(const IRInstruction& instruction) {
         const std::string label = "nabla_string_" + asmSymbolPart(function.name) + "_" +
                                   asmSymbolPart(instruction.result);
-        out << "section .data\n";
-        if (!instruction.operands[0].empty()) {
-            out << label << "_chars: db " << asmDataBytes(instruction.operands[0]) << "\n";
-        } else {
-            out << label << "_chars: db 0\n";
-        }
-        out << "    align 8\n";
-        out << label << "_obj: dq " << RuntimeValues::kStringTag << ", " << instruction.operands[0].size()
-            << ", " << label << "_chars\n";
-        out << "section .text\n";
-        out << "    mov rax, " << label << "_obj\n";
+        out << "    lea rax, [" << label << "_obj]\n";
         storeRegister(instruction.result, "rax");
     }
 
@@ -971,7 +990,8 @@ private:
         out << "    mov rdi, " << objectSizeFor(instruction.operation) << "\n";
         out << "    call Runtime_alloc\n";
         out << "    mov rbx, rax\n";
-        out << "    mov qword [rbx], " << classIdFor(instruction.operation) << "\n";
+        out << "    lea rax, [vtable_" << asmSymbolName(instruction.operation) << "]\n";
+        out << "    mov [rbx], rax\n";
         for (size_t i = 0; i < instruction.operands.size(); ++i) {
             loadValue(instruction.operands[i], "rax");
             out << "    mov [rbx + " << fieldOffsets[i] << "], rax\n";
@@ -1198,14 +1218,11 @@ private:
             out << "    call Char_method_toString\n";
         } else if (className == "Any" &&
                    (methodName == "toString" || methodName == "hashCode" || methodName == "equals")) {
-            const auto targets = allowDynamicDispatch
-                ? dynamicDispatchTargets(className, methodName)
-                : std::vector<DynamicDispatchTarget>{};
             const std::string fallbackMethod =
                 methodName == "toString" ? "Any_toString" :
                 methodName == "hashCode" ? "Any_hashCode" :
                 "Any_equals";
-            if (targets.empty()) {
+            if (!allowDynamicDispatch) {
                 out << "    call " << fallbackMethod << "\n";
             } else {
                 const std::string dispatchPrefix =
@@ -1213,19 +1230,18 @@ private:
                     asmSymbolPart(instruction.result);
                 const std::string fallbackLabel = dispatchPrefix + "_fallback";
                 const std::string doneLabel = dispatchPrefix + "_done";
+                auto it = methodOffsets.find("Any." + methodName);
+                if (it == methodOffsets.end()) {
+                    codegenError("sélecteur de méthode inconnu pour le dispatch dynamique: " + methodName);
+                }
+                int offset = it->second;
                 out << "    test rdi, 1\n";
                 out << "    jnz " << fallbackLabel << "\n";
                 out << "    mov r10, [rdi]\n";
-                for (size_t i = 0; i < targets.size(); ++i) {
-                    out << "    cmp r10, " << classIdFor(targets[i].runtimeClassName) << "\n";
-                    out << "    je " << dispatchPrefix << "_" << i << "\n";
-                }
-                out << "    jmp " << fallbackLabel << "\n";
-                for (size_t i = 0; i < targets.size(); ++i) {
-                    out << dispatchPrefix << "_" << i << ":\n";
-                    out << "    call " << asmFunctionName(methodFunctionName(targets[i].targetOwnerName, methodName)) << "\n";
-                    out << "    jmp " << doneLabel << "\n";
-                }
+                out << "    cmp r10, 100\n";
+                out << "    jbe " << fallbackLabel << "\n";
+                out << "    call [r10 + " << offset << "]\n";
+                out << "    jmp " << doneLabel << "\n";
                 out << fallbackLabel << ":\n";
                 out << "    call " << fallbackMethod << "\n";
                 out << doneLabel << ":\n";
@@ -1285,8 +1301,12 @@ private:
             out << "    call Runtime_stringToInt\n";
         } else if (className == "String" && methodName == "toCharArray") {
             out << "    call Runtime_stringToCharArray\n";
+            out << "    lea r10, [vtable_" << asmSymbolName("ArrayObject[Char]") << "]\n";
+            out << "    mov [rax], r10\n";
         } else if (className == "String" && methodName == "split") {
             out << "    call Runtime_stringSplit\n";
+            out << "    lea r10, [vtable_" << asmSymbolName("ArrayObject[String]") << "]\n";
+            out << "    mov [rax], r10\n";
         } else if (className == "String" && methodName == "substring") {
             out << "    call Runtime_stringSubstring\n";
         } else if (className == "String" && methodName == "repeat") {
@@ -1294,30 +1314,13 @@ private:
         } else if (className == "String" && methodName == "trim") {
             out << "    call Runtime_stringTrim\n";
         } else if (allowDynamicDispatch) {
-            const auto targets = dynamicDispatchTargets(className, methodName);
-            if (targets.empty()) {
-                emitTraitAbstractDispatchFallback(className, methodName);
-            } else {
-                const std::string dispatchPrefix =
-                    ".L_dispatch_" + asmSymbolPart(function.name) + "_" +
-                    asmSymbolPart(instruction.result);
-                const std::string fallbackLabel = dispatchPrefix + "_fallback";
-                const std::string doneLabel = dispatchPrefix + "_done";
-                out << "    mov r10, [rdi]\n";
-                for (size_t i = 0; i < targets.size(); ++i) {
-                    out << "    cmp r10, " << classIdFor(targets[i].runtimeClassName) << "\n";
-                    out << "    je " << dispatchPrefix << "_" << i << "\n";
-                }
-                out << "    jmp " << fallbackLabel << "\n";
-                for (size_t i = 0; i < targets.size(); ++i) {
-                    out << dispatchPrefix << "_" << i << ":\n";
-                    out << "    call " << asmFunctionName(methodFunctionName(targets[i].targetOwnerName, methodName)) << "\n";
-                    out << "    jmp " << doneLabel << "\n";
-                }
-                out << fallbackLabel << ":\n";
-                emitTraitAbstractDispatchFallback(className, methodName);
-                out << doneLabel << ":\n";
+            auto it = methodOffsets.find(className + "." + methodName);
+            if (it == methodOffsets.end()) {
+                codegenError("sélecteur de méthode inconnu pour le dispatch dynamique: " + methodName);
             }
+            int offset = it->second;
+            out << "    mov r10, [rdi]\n";
+            out << "    call [r10 + " << offset << "]\n";
         } else {
             out << "    call " << asmFunctionName(methodFunctionName(instruction.operation)) << "\n";
         }
@@ -1331,15 +1334,200 @@ IRCodeGenerator::IRCodeGenerator(std::uint64_t heapCapacityBytes)
 
 void IRCodeGenerator::generateASM(
     const IRProgram& program, const CompilerContext& context, std::ostream& out) const {
-    RuntimeASM::emit(out, heapCapacityBytes);
-    if (!context.runtimeObjects.empty()) {
-        out << "section .data\n";
-        for (const auto& objectName : context.runtimeObjects) {
-            out << "    align 8\n";
-            out << singletonObjectLabel(objectName) << ": dq " << classIdForContext(context, objectName) << "\n";
+    out << "default rel\n";
+    RuntimeASM::emitData(out, heapCapacityBytes);
+
+    std::set<std::string> emittedFunctions;
+    for (const auto& function : program.functions) {
+        emittedFunctions.insert(function.name);
+    }
+
+    // Collect vtable slots by static owner and resolved method name. The owner
+    // is part of the key so unrelated trait overloads with the same source name
+    // do not share one slot.
+    std::set<std::string> uniqueSignatures;
+    uniqueSignatures.insert("Any.toString");
+    uniqueSignatures.insert("Any.hashCode");
+    uniqueSignatures.insert("Any.equals");
+    for (const auto& function : program.functions) {
+        if (function.name.rfind("method.", 0) == 0) {
+            uniqueSignatures.insert(function.name.substr(7));
+        }
+        for (const auto& instruction : function.instructions) {
+            if (instruction.opcode == IROpcode::MethodCall) {
+                uniqueSignatures.insert(instruction.operation);
+            }
         }
     }
+
+    std::map<std::string, int> methodOffsets;
+    int offset = 0;
+    for (const auto& sig : uniqueSignatures) {
+        methodOffsets[sig] = offset;
+        offset += 8;
+    }
+
+    // Generate Vtables and all constants in section .data
+    std::set<std::string> concreteClassesToEmit;
+
+    // 1. Non-generic classes from context
+    for (const auto& [className, classInfo] : context.classes) {
+        if (classInfo.isTrait || className == "Any" || className == "AnyVal" || className == "AnyRef") {
+            continue;
+        }
+        if (classInfo.typeParameters.empty()) {
+            concreteClassesToEmit.insert(className);
+        }
+    }
+
+    // 2. Concrete classes instantiated in the program (including generic specializations)
     for (const auto& function : program.functions) {
-        FunctionEmitter(function, context, out).emit();
+        for (const auto& instruction : function.instructions) {
+            if (instruction.opcode == IROpcode::NewObject) {
+                concreteClassesToEmit.insert(instruction.operation);
+            } else if (instruction.opcode == IROpcode::MethodCall ||
+                       instruction.opcode == IROpcode::StaticMethodCall) {
+                auto [methodClassName, _] = splitQualifiedMember(instruction.operation);
+                const auto classIt = context.classes.find(genericBaseName(methodClassName));
+                if (classIt != context.classes.end() && !classIt->second.isTrait) {
+                    concreteClassesToEmit.insert(methodClassName);
+                }
+            }
+        }
+    }
+
+    for (const std::string& className : concreteClassesToEmit) {
+        out << "vtable_" << asmSymbolName(className) << ":\n";
+
+        for (const auto& [slotKey, _] : methodOffsets) {
+            auto [slotOwner, slotMethodName] = splitQualifiedMember(slotKey);
+            const std::string sourceName = methodSourceName(slotMethodName);
+            const std::string slotResolvedBaseName = methodSpecializationBaseName(slotMethodName);
+
+            std::string targetFunc = "Runtime_trait_dispatch_error";
+            if (slotOwner == "Any" && sourceName == "toString") {
+                targetFunc = "Any_toString";
+            } else if (slotOwner == "Any" && sourceName == "hashCode") {
+                targetFunc = "Any_hashCode";
+            } else if (slotOwner == "Any" && sourceName == "equals") {
+                targetFunc = "Any_equals";
+            }
+
+            const auto slotOwnerIt = context.classes.find(genericBaseName(slotOwner));
+            std::optional<CompilerContext::FunctionSignature> slotSignature;
+            const bool slotOwnerHasUnboundClassTypeParameters =
+                slotOwnerIt != context.classes.end() &&
+                !slotOwnerIt->second.typeParameters.empty() &&
+                !genericSubstitutionFor(context, slotOwner).has_value();
+            if (slotOwnerIt != context.classes.end()) {
+                auto slotMethodIt = slotOwnerIt->second.methods.find(slotResolvedBaseName);
+                if (slotMethodIt == slotOwnerIt->second.methods.end()) {
+                    slotMethodIt = slotOwnerIt->second.methods.find(sourceName);
+                }
+                if (slotMethodIt != slotOwnerIt->second.methods.end()) {
+                    slotSignature = slotMethodIt->second;
+                    if (auto slotSubstitution = genericSubstitutionFor(context, slotOwner)) {
+                        for (auto& parameter : slotSignature->parameters) {
+                            parameter.type = substituteType(parameter.type, *slotSubstitution);
+                        }
+                        slotSignature->returnType =
+                            substituteType(slotSignature->returnType, *slotSubstitution);
+                    }
+                }
+            }
+
+            for (const auto& candidate :
+                 collectClassMethodLookupCandidates(context, className, sourceName)) {
+                if (!candidate.signature) continue;
+                CompilerContext::FunctionSignature candidateSignature = *candidate.signature;
+                for (auto& parameter : candidateSignature.parameters) {
+                    parameter.type = substituteType(parameter.type, candidate.classSubstitution);
+                }
+                candidateSignature.returnType =
+                    substituteType(candidateSignature.returnType, candidate.classSubstitution);
+                if (slotSignature &&
+                    !vtableSlotParametersMatch(candidateSignature, *slotSignature)) {
+                    if (!slotOwnerHasUnboundClassTypeParameters ||
+                        candidateSignature.parameters.size() != slotSignature->parameters.size()) {
+                        continue;
+                    }
+                }
+
+                std::string targetOwner = candidate.ownerClassName;
+                auto ownerIt = context.classes.find(targetOwner);
+                std::string concreteOwner = targetOwner;
+                if (ownerIt != context.classes.end() && !ownerIt->second.typeParameters.empty()) {
+                    std::vector<std::string> args;
+                    for (const auto& tp : ownerIt->second.typeParameters) {
+                        auto substIt = candidate.classSubstitution.find(tp);
+                        args.push_back(substIt != candidate.classSubstitution.end() ? substIt->second : tp);
+                    }
+                    concreteOwner = formatParameterizedType(targetOwner, args);
+                }
+
+                const std::string targetMethodName =
+                    candidateSignature.typeParameters.empty() ? candidate.methodName : slotMethodName;
+                const std::string candidateFunction = methodFunctionName(concreteOwner, targetMethodName);
+                if (emittedFunctions.count(candidateFunction)) {
+                    targetFunc = asmFunctionName(candidateFunction);
+                    break;
+                }
+            }
+            if (targetFunc == "Runtime_trait_dispatch_error" &&
+                slotSignature && !slotSignature->isAbstract) {
+                const std::string fallbackFunction = methodFunctionName(slotOwner, slotMethodName);
+                if (emittedFunctions.count(fallbackFunction)) {
+                    targetFunc = asmFunctionName(fallbackFunction);
+                }
+            }
+            out << "    dq " << targetFunc << "\n";
+        }
+    }
+
+    if (!context.runtimeObjects.empty()) {
+        for (const auto& objectName : context.runtimeObjects) {
+            out << singletonObjectLabel(objectName) << ": dq vtable_" << asmSymbolName(objectName) << "\n";
+        }
+    }
+
+    // Emit all double constants, float constants, and string literals in section .data
+    for (const auto& function : program.functions) {
+        for (const auto& instruction : function.instructions) {
+            if (instruction.opcode == IROpcode::Constant) {
+                if (instruction.type == "Double") {
+                    const std::string label = "nabla_double_" + asmSymbolPart(function.name) + "_" +
+                                              asmSymbolPart(instruction.result);
+                    out << label << ": dq __float64__(" << normalizeFloatConstant(instruction.operands[0]) << ")\n";
+                } else if (instruction.type == "Float") {
+                    const std::string label = "nabla_float_" + asmSymbolPart(function.name) + "_" +
+                                              asmSymbolPart(instruction.result);
+                    out << label << ": dd __float32__(" << normalizeFloatConstant(instruction.operands[0]) << "), 0\n";
+                }
+            } else if (instruction.opcode == IROpcode::StringLiteral) {
+                const std::string label = "nabla_string_" + asmSymbolPart(function.name) + "_" +
+                                          asmSymbolPart(instruction.result);
+                int size = instruction.operands[0].size();
+                int padding = (8 - (size % 8)) % 8;
+                if (!instruction.operands[0].empty()) {
+                    out << label << "_chars: db " << asmDataBytes(instruction.operands[0]);
+                    for (int p = 0; p < padding; ++p) {
+                        out << ", 0";
+                    }
+                    out << "\n";
+                } else {
+                    out << label << "_chars: db 0, 0, 0, 0, 0, 0, 0, 0\n";
+                }
+                out << "    align 8\n";
+                out << label << "_obj: dq " << RuntimeValues::kStringTag << ", " << instruction.operands[0].size()
+                    << ", " << label << "_chars\n";
+            }
+        }
+    }
+
+    // Emit all code in section .text (runtime helper functions first, then user functions)
+    RuntimeASM::emitText(out);
+
+    for (const auto& function : program.functions) {
+        FunctionEmitter(function, context, out, methodOffsets).emit();
     }
 }

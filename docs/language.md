@@ -1075,12 +1075,13 @@ projet, puis dans `stdlib/`.
 - La memoire utilise par défaut un heap `mmap` de 8 MiB avec bump allocator,
   sans liberation ni GC. `nablac --heap-size <octets>` permet de compiler un
   exécutable avec une autre capacité de heap (minimum 4096 octets).
-- Les objets utilisateur stockent un identifiant de classe runtime dans leur
+- Les objets utilisateur stockent un pointeur de vtable backend dans leur
   header et les appels de méthodes utilisateur sont virtuels par défaut quand
   la valeur est manipulée via un type parent, y compris pour un parent générique
-  instancié, une méthode générique spécialisée et les méthodes de base
-  `Any.toString` / `Any.hashCode` / `Any.equals`. `super` reste un appel
-  statique. Les vraies vtables ne sont pas encore formalisées.
+  instancié, une méthode générique spécialisée, un trait comme `Iterable[T]` ou
+  `Sized`, et les méthodes de base `Any.toString` / `Any.hashCode` /
+  `Any.equals`. `super` reste un appel statique. Cette vtable est une convention
+  interne du backend, pas une ABI publique stable.
 - Les `object` sans `with` restent des namespaces statiques. Les `object` avec
   `with Trait` sont des singletons runtime V0, mais sans champs, constructeur,
   `extends`, arguments de type ou initialisation dédiée.
