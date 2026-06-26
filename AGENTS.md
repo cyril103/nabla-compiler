@@ -894,6 +894,14 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Aligner `docs/internals.md` avec les conventions livrees pour
+  proprietes `def` zero-argument et fonctions locales de bloc: les proprietes
+  restent des fonctions/methodes zero-argument sans memoisation, et les helpers
+  locaux V0 s'abaissent en fonctions cachees avec limites explicites sur
+  captures/generiques/overloads.
+  - Fichiers / tests associes: `docs/internals.md`, `docs/roadmap.md`,
+    `AGENTS.md`.
+
 - `local` - Nettoyer `docs/plans/` apres les jalons post-0.1 deja livres:
   les plans historiques `local-def-lambda-lowering`,
   `parameterless-def-properties`, `runtime-singleton-object` et
