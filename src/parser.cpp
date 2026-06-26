@@ -2066,8 +2066,16 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
     }
     std::vector<FunctionDefNode::Parameter> parameters;
     std::vector<CompilerContext::ParameterInfo> signatureParameters;
+    std::vector<FunctionDefNode::Parameter> curriedParameters;
+    std::vector<CompilerContext::ParameterInfo> curriedSignatureParameters;
+    std::vector<ParsedSymbol> curriedScopedParameters;
     localScopes.emplace_back();
-    if (peek().type == TokenType::LPAREN) {
+    auto parseParameterList = [&](std::vector<FunctionDefNode::Parameter>& parsedParameters,
+                                  std::vector<CompilerContext::ParameterInfo>& parsedSignatureParameters,
+                                  std::vector<ParsedSymbol>* scopedParameters,
+                                  std::map<std::string, ParsedSymbol>* targetScope,
+                                  bool allowRepeated,
+                                  const std::string& repeatedError) {
         consume(TokenType::LPAREN, "");
         while (peek().type != TokenType::RPAREN) {
             Token parameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre attendu");
@@ -2078,6 +2086,9 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
             std::string repeatedElementType;
             std::string parameterType = declaredParameterType;
             if (peek().type == TokenType::STAR) {
+                if (!allowRepeated) {
+                    throw CompilerError(ErrorKind::Parser, peek().location, repeatedError);
+                }
                 consume(TokenType::STAR, "");
                 isRepeated = true;
                 repeatedElementType = declaredParameterType;
@@ -2088,13 +2099,14 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
                         "un paramètre répété doit être le dernier paramètre");
                 }
             }
-            if (localScopes.back().count(parameterName)) {
+            if (targetScope && targetScope->count(parameterName)) {
                 throw CompilerError(ErrorKind::Parser, parameterToken.location, "paramètre déjà déclaré: " + parameterName);
             }
             std::string symbolName = parameterName + "#" + std::to_string(nextSymbolId++);
-            localScopes.back()[parameterName] = {symbolName, parameterType, false};
-            parameters.push_back({parameterName, symbolName, parameterType});
-            signatureParameters.push_back({
+            if (targetScope) (*targetScope)[parameterName] = {symbolName, parameterType, false};
+            if (scopedParameters) scopedParameters->push_back({symbolName, parameterType, false});
+            parsedParameters.push_back({parameterName, symbolName, parameterType});
+            parsedSignatureParameters.push_back({
                 parameterName, parameterType, parameterTypeLocation, isRepeated, repeatedElementType});
             if (peek().type == TokenType::COMMA) {
                 consume(TokenType::COMMA, "");
@@ -2103,9 +2115,44 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
             }
         }
         consume(TokenType::RPAREN, "");
+    };
+    if (peek().type == TokenType::LPAREN) {
+        parseParameterList(
+            parameters, signatureParameters, nullptr, &localScopes.back(), true,
+            "paramètre répété non supporté ici");
+    }
+    if (peek().type == TokenType::LPAREN) {
+        parseParameterList(
+            curriedParameters, curriedSignatureParameters, &curriedScopedParameters, nullptr, false,
+            "les paramètres répétés ne sont pas encore supportés dans une liste curryfiée");
+        if (!clName.empty()) {
+            throw CompilerError(
+                ErrorKind::Parser, nameToken.location,
+                "les méthodes curryfiées ne sont pas encore supportées");
+        }
+        if (peek().type == TokenType::LPAREN) {
+            throw CompilerError(
+                ErrorKind::Parser, peek().location,
+                "une seule liste de paramètres curryfiée est supportée pour l'instant");
+        }
     }
     consume(TokenType::COLON, "");
-    auto [returnType, returnTypeLocation] = parseType("Type de retour attendu");
+    auto [declaredReturnType, returnTypeLocation] = parseType("Type de retour attendu");
+    std::string returnType = declaredReturnType;
+    if (!curriedSignatureParameters.empty()) {
+        CompilerContext::FunctionType curriedFunctionType;
+        for (const auto& parameter : curriedSignatureParameters) {
+            curriedFunctionType.parameterTypes.push_back(parameter.type);
+        }
+        curriedFunctionType.returnType = declaredReturnType;
+        auto functionReturnType = functionNameForType(curriedFunctionType);
+        if (!functionReturnType) {
+            throw CompilerError(
+                ErrorKind::Parser, nameToken.location,
+                "type fonction curryfié non supporté pour l'instant");
+        }
+        returnType = *functionReturnType;
+    }
     const bool isAbstract = allowAbstractMethod && peek().type != TokenType::EQUAL;
     CompilerContext::FunctionSignature signature{
         signatureParameters, returnType, typeParameters, defToken.location, returnTypeLocation, isOverride, isAbstract};
@@ -2167,7 +2214,47 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
     currentFunctionTypeParameters.insert(
         currentFunctionTypeParameters.end(), typeParameters.begin(), typeParameters.end());
     std::unique_ptr<ASTNode> body;
-    if (peek().type == TokenType::LBRACE) {
+    if (!curriedSignatureParameters.empty()) {
+        const size_t outerScopeCount = localScopes.size();
+        lambdaCaptureScopes.push_back({outerScopeCount, {}});
+        localScopes.emplace_back();
+        for (size_t i = 0; i < curriedScopedParameters.size(); ++i) {
+            localScopes.back()[curriedParameters[i].name] = curriedScopedParameters[i];
+        }
+        std::unique_ptr<ASTNode> curriedBody;
+        if (peek().type == TokenType::LBRACE) {
+            consume(TokenType::LBRACE, "");
+            curriedBody = parseBlock();
+            consume(TokenType::RBRACE, "");
+        } else {
+            curriedBody = parseExpression();
+        }
+        localScopes.pop_back();
+
+        std::vector<FunctionDefNode::Capture> captures;
+        for (const auto& [capturedSymbolName, capture] : lambdaCaptureScopes.back().capturesBySymbol) {
+            (void) capturedSymbolName;
+            captures.push_back({capture.name, capture.symbolName, capture.type});
+        }
+        lambdaCaptureScopes.pop_back();
+
+        std::string lambdaName = "lambda." + std::to_string(context.nextLambdaId++);
+        context.functions[lambdaName] = {
+            curriedSignatureParameters, declaredReturnType, currentFunctionTypeParameters,
+            nameToken.location, returnTypeLocation};
+        generatedFunctions.push_back(located(std::make_unique<FunctionDefNode>(
+            "", lambdaName, declaredReturnType, currentFunctionTypeParameters,
+            std::move(curriedParameters), std::move(curriedBody), captures), nameToken.location));
+
+        std::vector<FunctionReferenceNode::Capture> referenceCaptures;
+        for (const auto& capture : captures) {
+            referenceCaptures.push_back({capture.name, capture.symbolName, capture.type});
+        }
+        body = located(
+            std::make_unique<FunctionReferenceNode>(
+                lambdaName, returnType, currentFunctionTypeParameters, std::move(referenceCaptures)),
+            nameToken.location);
+    } else if (peek().type == TokenType::LBRACE) {
         consume(TokenType::LBRACE, "");
         body = parseBlock();
         consume(TokenType::RBRACE, "");

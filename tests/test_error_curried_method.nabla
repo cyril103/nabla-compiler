@@ -1,0 +1,9 @@
+class Box(value: Int) {
+    def add(offset: Int)(extra: Int): Int = {
+        value + offset + extra
+    }
+}
+
+def main(): Int = {
+    0
+}

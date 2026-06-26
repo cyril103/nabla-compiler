@@ -1,0 +1,1 @@
+tests/test_error_curried_method.nabla:2:9: parser error: les méthodes curryfiées ne sont pas encore supportées

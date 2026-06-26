@@ -115,7 +115,8 @@ Le pipeline implemente actuellement :
 - types fonction-valeur canoniques `Fn(...)->...`, references de fonctions
   nommees et appels indirects, avec lambdas sans capture `(x: Int) => { ... }` et
   `(acc: Int, value: Int) => { ... }`, y compris l'appel direct d'une expression
-  retournant une fonction comme `makeAdder(10)(32)`;
+  retournant une fonction comme `makeAdder(10)(32)`, ainsi que les `def`
+  curryfies globaux a une liste supplementaire comme `def sum(f)(a, b): Int`;
 - closures avec capture par valeur pour les lambdas de types fonction
   canoniques;
 - representation interne canonique des types fonction sous forme `Fn(...)->...`;
@@ -394,6 +395,9 @@ Limites importantes :
 
 - les fonctions globales sont limitees a 6 parametres et les methodes a 5,
   conformement a la convention d'appel actuelle;
+- les `def` curryfies V0 sont limites aux fonctions globales et objets
+  statiques; les methodes de classe/trait curryfiees sont encore rejetees
+  explicitement;
 - `Float` et `Double` couvrent les litteraux, operations, comparaisons,
   fonctions, lambdas, champs, collections specialisees et `toString`;
 - `String` et `Char` sont actuellement byte-based/ASCII pour les operations de
@@ -554,6 +558,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter des tests pour fonctions, methodes et erreurs d'appel.
 - [x] Supporter les appels postfixes directs sur une expression de type
   fonction, par exemple `makeAdder(10)(32)`.
+- [x] Ajouter une premiere syntaxe de `def` curryfiee a une liste de parametres
+  supplementaire, abaissee vers un retour de type fonction.
 
 ### P1 - Diagnostics Sources
 
@@ -896,6 +902,14 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter une syntaxe de `def` curryfiee V0 pour une liste de
+  parametres supplementaire: `def sum(f)(a, b): Int = ...` s'abaisse vers une
+  fonction retournant une closure de type `Fn(...)->...`, appelable directement
+  avec `sum(...)(...)`; les methodes curryfiees restent rejetees en V0.
+  - Fichiers / tests associes: `src/parser.cpp`,
+    `tests/test_curried_function_def.nabla`,
+    `tests/test_error_curried_method.nabla`, `AGENTS.md`.
 
 - `local` - Stabiliser les fins de ligne du depot avec une regle
   `.gitattributes` globale en LF, en gardant des exceptions CRLF pour les

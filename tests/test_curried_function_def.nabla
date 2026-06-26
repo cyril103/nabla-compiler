@@ -1,0 +1,13 @@
+def sum(f: (Int) => Int)(a: Int, b: Int): Int = {
+    var total = 0
+    var i = a
+    while i <= b {
+        total = f(i) + total
+        i = i + 1
+    }
+    total
+}
+
+def main(): Int = {
+    sum(x => x * x)(1, 2)
+}
