@@ -1,0 +1,7 @@
+def loop: Bool = loop
+
+def x: Bool = loop
+
+def main(): Int = {
+    42
+}
