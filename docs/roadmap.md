@@ -189,6 +189,9 @@ reprise séparées :
   direct, la recursion directe, les references comme valeurs fonction et les
   appels vers des helpers locaux deja declares, avec captures et contextes
   generiques explicitement reportes.
+- `docs/plans/` est reserve aux plans actifs: les plans historiques des jalons
+  deja livres ont ete retires, et les prochains chantiers doivent creer un plan
+  court centre sur le delta restant.
 
 ## Pistes Plus Larges
 
