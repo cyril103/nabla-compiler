@@ -894,6 +894,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Nettoyer `docs/plans/` apres les jalons post-0.1 deja livres:
+  les plans historiques `local-def-lambda-lowering`,
+  `parameterless-def-properties`, `runtime-singleton-object` et
+  `scala-like-list` sont retires de l'arbre actif; `docs/plans/README.md`
+  rappelle que les prochains chantiers doivent creer un plan court centre sur
+  le delta restant.
+  - Fichiers / tests associes: `docs/plans/README.md`, suppressions sous
+    `docs/plans/`, `AGENTS.md`, `docs/roadmap.md`.
+
 - `local` - Utiliser les fonctions locales pour cacher une premiere tranche de
   helpers stdlib non documentes: `util.randomStep` devient un detail local de
   `randomInt`, et la conversion `Bool` -> `String` de `collections.bool_array`
@@ -912,9 +921,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   en V0.
   - Fichiers / tests associes: `src/parser.cpp`, `src/parser.hpp`,
     `src/ast.cpp`, `src/ast.hpp`, `tests/test_local_def_*.nabla`,
-    `tests/test_error_local_def_*.nabla`,
-    `docs/plans/local-def-lambda-lowering.md`, `docs/roadmap.md`,
-    `AGENTS.md`.
+    `tests/test_error_local_def_*.nabla`, `docs/roadmap.md`, `AGENTS.md`.
   - Validation: `make all-tests`.
 
 - `local` - Ajouter les proprietes `def` sans parametres: le parseur accepte
