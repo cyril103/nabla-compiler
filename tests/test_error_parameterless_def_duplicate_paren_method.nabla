@@ -1,0 +1,9 @@
+class Bad() {
+    def value: Int = 1
+
+    def value(): Int = {
+        2
+    }
+}
+
+def main(): Int = { 0 }

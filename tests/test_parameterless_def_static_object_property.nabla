@@ -1,0 +1,9 @@
+object Config {
+    def base(x: Int): Int = x
+    def base: Int = 40
+    def bonus: Int = 2
+}
+
+def main(): Int = {
+    Config.base + Config.bonus()
+}

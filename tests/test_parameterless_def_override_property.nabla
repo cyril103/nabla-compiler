@@ -1,0 +1,15 @@
+class Base() {
+    def value: Int = 1
+}
+
+class Child() extends Base() {
+    override def value: Int = 42
+}
+
+def read(value: Base): Int = {
+    value.value
+}
+
+def main(): Int = {
+    read(new Child())
+}

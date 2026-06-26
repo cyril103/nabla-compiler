@@ -1,0 +1,9 @@
+def pi: Double = 3.14
+
+def main(): Int = {
+    if pi > 3.0 {
+        if pi < 3.2 { 42 } else { 1 }
+    } else {
+        1
+    }
+}

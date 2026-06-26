@@ -1,0 +1,1 @@
+tests/test_error_parameterless_def_duplicate_paren_method.nabla:4:9: parser error: méthode déjà déclarée avec cette signature dans 'Bad': value

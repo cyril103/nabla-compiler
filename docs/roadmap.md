@@ -9,6 +9,11 @@ pour garder un cap clair après le tag `v0.1.0`.
   Le compilateur signale explicitement une commande externe introuvable comme
   `nasm` ou `ld`.
 - Typage statique avec fonctions, methodes, classes, generiques simples et lambdas.
+- Les `def` sans liste de parametres declarent des proprietes calculees
+  zero-argument reutilisant les fonctions/methodes existantes: `def pi: Double`
+  est utilisable comme `pi`, `Config.base` appelle `Config.base()`,
+  `value.head` appelle `value.head()`, et les membres abstraits de trait peuvent
+  s'ecrire `def head: T`.
 - Surcharge V1 des fonctions globales non generiques par signature exacte :
   plusieurs `def` peuvent partager un nom si leurs types de parametres
   different; les appels sont abaisses vers un symbole IR unique.
@@ -174,6 +179,10 @@ reprise séparées :
 - Les objets runtime V0 sont couverts par des tests de valeur singleton, dispatch
   via trait, assignabilité `Any` / `AnyRef`, diagnostic de namespace statique
   utilisé comme valeur et diagnostics d'héritage class-like.
+- Les proprietes `def` sans parametres sont supportees pour les fonctions
+  globales, methodes de classes/objets, overrides et membres abstraits de trait,
+  avec acces externe `Object.member` / `value.member` et compatibilite conservee
+  avec `Object.member()` / `value.member()`.
 
 ## Pistes Plus Larges
 

@@ -1,0 +1,17 @@
+trait ListLike[T] {
+    def head: T
+    def tail: ListLike[T]
+}
+
+class EmptyLike[T](val defaultValue: T) with ListLike[T] {
+    override def head: T = defaultValue
+    override def tail: ListLike[T] = this
+}
+
+class ConsLike[T](val head: T, val tail: ListLike[T]) with ListLike[T] {
+}
+
+def main(): Int = {
+    val xs: ListLike[Int] = new ConsLike[Int](40, new ConsLike[Int](2, new EmptyLike[Int](0)))
+    xs.head + xs.tail.head
+}
