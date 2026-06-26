@@ -89,6 +89,11 @@ Le pipeline implemente actuellement :
   avec protection contre les cycles;
 - objets avec champs de constructeur et appels de methodes parametres;
 - fonctions globales appelables avec parametres;
+- proprietes calculees `def` sans liste de parametres, abaissees comme des
+  fonctions/methodes zero-argument: `def pi: Double = 3.14` s'utilise comme
+  `pi`, `Config.base` appelle `Config.base()`, `value.head` appelle
+  `value.head()`, et les membres abstraits de trait peuvent s'ecrire
+  `def head: T`;
 - surcharge V1.2 des fonctions globales par signature exacte, avec nom IR unique
   par variante, priorite aux variantes concretes sur les variantes generiques
   inferees, references typees capables d'inferer les variantes generiques, et
@@ -627,6 +632,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   methodes par defaut, composition par `with`, obligation d'implementation par
   les classes concretes, `override` obligatoire et rejet des conflits de
   defaults.
+- [x] Ajouter les proprietes `def` sans parametres pour fonctions globales,
+  methodes de classes/objets, overrides et signatures abstraites de traits,
+  avec acces sucre `name` / `receiver.name` vers les appels zero-argument.
 - [x] Autoriser les classes generiques a implementer des traits non generiques,
   avec dispatch des methodes abstraites et des defaults via le type du trait.
 - [x] Ajouter le trait stdlib public `Sized` et l'appliquer a `ArrayObject[T]`,
@@ -880,6 +888,17 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter les proprietes `def` sans parametres: le parseur accepte
+  `def name: T = expr`, `def name: T = { ... }` et les signatures abstraites
+  `def name: T`; la resolution abaisse les usages nus globaux,
+  `Object.member` pour les namespaces statiques, et `receiver.name` vers les
+  appels zero-argument existants, tout en conservant `receiver.name()` et en
+  detectant les doublons avec `def name(): T`.
+  - Fichiers / tests associes: `src/parser.cpp`, `src/ast.cpp`,
+    `tests/test_parameterless_def_*.nabla`,
+    `tests/test_error_parameterless_def_duplicate_paren_method.nabla`,
+    `docs/roadmap.md`, `make nablac`.
 
 - `local` - Recommander `Array.range(start, until)` comme surcharge publique
   de plage bornee: `Array.rangeUntil(start, until)` reste un alias de

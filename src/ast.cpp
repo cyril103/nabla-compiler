@@ -624,7 +624,7 @@ void NewNode::validateSemantics(CompilerContext& context) {
                     "Constructeur de '" + className + "': champ '" + fields[i].first +
                     "' non initialisé");
             }
-            if (args[i]->getType() != expectedType) {
+            if (!isTypeAssignable(context, args[i]->getType(), expectedType)) {
                 throw CompilerError(ErrorKind::Semantic, args[i]->getLocation(),
                     "Constructeur de '" + className + "', champ '" + fields[i].first +
                     "': type '" + expectedType + "' attendu, '" + args[i]->getType() + "' reçu");
@@ -640,7 +640,7 @@ void NewNode::validateSemantics(CompilerContext& context) {
     }
     for (size_t i = 0; i < args.size(); ++i) {
         const std::string expectedType = substituteType(fields[i].second, substitution);
-        if (args[i]->getType() != expectedType) {
+        if (!isTypeAssignable(context, args[i]->getType(), expectedType)) {
             throw CompilerError(ErrorKind::Semantic, args[i]->getLocation(),
                 "Constructeur de '" + className + "', champ '" + fields[i].first +
                 "': type '" + expectedType + "' attendu, '" + args[i]->getType() + "' reçu");

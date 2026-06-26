@@ -75,6 +75,13 @@ std::optional<ClassFieldLookupResult> resolveClassFieldInHierarchy(
         fieldType->second,
     };
 }
+
+std::optional<ClassMethodLookupResult> resolveZeroArgumentMethod(
+    const CompilerContext& context, const std::string& receiverType,
+    const std::string& methodName, const std::vector<std::string>& typeArguments) {
+    if (!typeArguments.empty()) return std::nullopt;
+    return resolveExactClassMethodOverload(context, receiverType, methodName, {});
+}
 }
 
 Parser::Parser(const std::vector<Token>& tokens, CompilerContext& ctx, const std::filesystem::path& currentFile)
@@ -1443,6 +1450,21 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         }
         auto overloadNames = functionOverloadNames(context, name);
         if (!overloadNames.empty()) {
+            if (auto zeroArgOverload = resolveExactFunctionOverload(context, name, {}, typeArguments)) {
+                const auto& signature = context.functions[*zeroArgOverload];
+                if (signature.parameters.empty() && signature.typeParameters.empty()) {
+                    if (!typeArguments.empty()) {
+                        throw CompilerError(
+                            ErrorKind::Parser, nameToken.location,
+                            "la fonction '" + name + "' n'accepte pas d'arguments de type");
+                    }
+                    return located(
+                        std::make_unique<FunctionCallNode>(
+                            name, std::vector<std::unique_ptr<ASTNode>>{},
+                            std::vector<std::string>{}, signature.returnType),
+                        nameToken.location);
+                }
+            }
             if (overloadNames.size() > 1) {
                 throw CompilerError(
                     ErrorKind::Parser, nameToken.location,
@@ -1541,12 +1563,31 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
                     "' ne supporte pas ces arguments de type" +
                     recommendedStdlibFunctionSuffix(qualifiedFunctionName));
             }
+            if (peek().type != TokenType::LPAREN) {
+                if (auto zeroArgOverload = resolveExactFunctionOverload(
+                        context, functionLookupName, {}, functionTypeArguments)) {
+                    const auto* zeroArgSignature = findFunctionSignature(context, *zeroArgOverload);
+                    if (zeroArgSignature && zeroArgSignature->parameters.empty() &&
+                        zeroArgSignature->typeParameters.empty()) {
+                        functionLookupName = *zeroArgOverload;
+                        functionTypeArguments.clear();
+                    }
+                }
+            }
             auto qualifiedFunction = context.functions.find(functionLookupName);
             if (qualifiedFunction != context.functions.end()) {
-                consume(TokenType::LPAREN, "");
-                std::vector<std::unique_ptr<ASTNode>> arguments =
-                    parseFunctionCallArguments(qualifiedFunction->second, functionTypeArguments);
-                consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
+                std::vector<std::unique_ptr<ASTNode>> arguments;
+                if (peek().type == TokenType::LPAREN) {
+                    consume(TokenType::LPAREN, "");
+                    arguments = parseFunctionCallArguments(qualifiedFunction->second, functionTypeArguments);
+                    consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
+                } else if (functionTypeArguments.empty() && qualifiedFunction->second.parameters.empty() &&
+                           qualifiedFunction->second.typeParameters.empty()) {
+                    // Static namespace property sugar: `Object.name` is `Object.name()` for
+                    // non-generic zero-argument defs, mirroring bare `name` and `receiver.name`.
+                } else {
+                    consume(TokenType::LPAREN, "");
+                }
 
                 std::map<std::string, std::string> substitution;
                 if (auto genericSubstitution =
@@ -1638,6 +1679,26 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
         if (peek().type != TokenType::LPAREN) {
             if (!typeArguments.empty()) {
                 throw CompilerError(ErrorKind::Parser, methodToken.location, "appel attendu après les arguments de type");
+            }
+            if (methodSignature && methodSignature->parameters.empty()) {
+                expr = located(
+                    std::make_unique<MethodCallNode>(
+                        std::move(expr), method, std::vector<std::unique_ptr<ASTNode>>{},
+                        std::vector<std::string>{}, initialReturnType, initialOwnerType),
+                    methodToken.location);
+                continue;
+            }
+            if (auto zeroArgMethod = resolveZeroArgumentMethod(context, receiverType, method, typeArguments)) {
+                methodSignature = zeroArgMethod->signature;
+                initialOwnerType = zeroArgMethod->ownerClassName;
+                classSubstitution = zeroArgMethod->classSubstitution;
+                initialReturnType = substituteType(methodSignature->returnType, classSubstitution);
+                expr = located(
+                    std::make_unique<MethodCallNode>(
+                        std::move(expr), method, std::vector<std::unique_ptr<ASTNode>>{},
+                        std::vector<std::string>{}, initialReturnType, initialOwnerType),
+                    methodToken.location);
+                continue;
             }
             if (method.empty() || method[0] != '_') {
                 throw CompilerError(
@@ -1837,44 +1898,46 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
         }
         consume(TokenType::RBRACKET, "']' attendu après les paramètres de type");
     }
-    consume(TokenType::LPAREN, "");
     std::vector<FunctionDefNode::Parameter> parameters;
     std::vector<CompilerContext::ParameterInfo> signatureParameters;
     localScopes.emplace_back();
-    while (peek().type != TokenType::RPAREN) {
-        Token parameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre attendu");
-        std::string parameterName = parameterToken.value;
-        consume(TokenType::COLON, "':' attendu après le nom du paramètre");
-        auto [declaredParameterType, parameterTypeLocation] = parseType("Type de paramètre attendu");
-        bool isRepeated = false;
-        std::string repeatedElementType;
-        std::string parameterType = declaredParameterType;
-        if (peek().type == TokenType::STAR) {
-            consume(TokenType::STAR, "");
-            isRepeated = true;
-            repeatedElementType = declaredParameterType;
-            parameterType = canonicalTypeName(formatParameterizedType("Array", {declaredParameterType}));
+    if (peek().type == TokenType::LPAREN) {
+        consume(TokenType::LPAREN, "");
+        while (peek().type != TokenType::RPAREN) {
+            Token parameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre attendu");
+            std::string parameterName = parameterToken.value;
+            consume(TokenType::COLON, "':' attendu après le nom du paramètre");
+            auto [declaredParameterType, parameterTypeLocation] = parseType("Type de paramètre attendu");
+            bool isRepeated = false;
+            std::string repeatedElementType;
+            std::string parameterType = declaredParameterType;
+            if (peek().type == TokenType::STAR) {
+                consume(TokenType::STAR, "");
+                isRepeated = true;
+                repeatedElementType = declaredParameterType;
+                parameterType = canonicalTypeName(formatParameterizedType("Array", {declaredParameterType}));
+                if (peek().type == TokenType::COMMA) {
+                    throw CompilerError(
+                        ErrorKind::Parser, parameterToken.location,
+                        "un paramètre répété doit être le dernier paramètre");
+                }
+            }
+            if (localScopes.back().count(parameterName)) {
+                throw CompilerError(ErrorKind::Parser, parameterToken.location, "paramètre déjà déclaré: " + parameterName);
+            }
+            std::string symbolName = parameterName + "#" + std::to_string(nextSymbolId++);
+            localScopes.back()[parameterName] = {symbolName, parameterType, false};
+            parameters.push_back({parameterName, symbolName, parameterType});
+            signatureParameters.push_back({
+                parameterName, parameterType, parameterTypeLocation, isRepeated, repeatedElementType});
             if (peek().type == TokenType::COMMA) {
-                throw CompilerError(
-                    ErrorKind::Parser, parameterToken.location,
-                    "un paramètre répété doit être le dernier paramètre");
+                consume(TokenType::COMMA, "");
+            } else if (peek().type != TokenType::RPAREN) {
+                throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ')' attendu après le paramètre");
             }
         }
-        if (localScopes.back().count(parameterName)) {
-            throw CompilerError(ErrorKind::Parser, parameterToken.location, "paramètre déjà déclaré: " + parameterName);
-        }
-        std::string symbolName = parameterName + "#" + std::to_string(nextSymbolId++);
-        localScopes.back()[parameterName] = {symbolName, parameterType, false};
-        parameters.push_back({parameterName, symbolName, parameterType});
-        signatureParameters.push_back({
-            parameterName, parameterType, parameterTypeLocation, isRepeated, repeatedElementType});
-        if (peek().type == TokenType::COMMA) {
-            consume(TokenType::COMMA, "");
-        } else if (peek().type != TokenType::RPAREN) {
-            throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ')' attendu après le paramètre");
-        }
+        consume(TokenType::RPAREN, "");
     }
-    consume(TokenType::RPAREN, "");
     consume(TokenType::COLON, "");
     auto [returnType, returnTypeLocation] = parseType("Type de retour attendu");
     const bool isAbstract = allowAbstractMethod && peek().type != TokenType::EQUAL;
@@ -1929,7 +1992,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
         localScopes.pop_back();
         return nullptr;
     }
-    consume(TokenType::EQUAL, ""); consume(TokenType::LBRACE, "");
+    consume(TokenType::EQUAL, "");
     auto previousFunctionTypeParameters = currentFunctionTypeParameters;
     currentFunctionTypeParameters.clear();
     if (!clName.empty()) {
@@ -1937,9 +2000,15 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
     }
     currentFunctionTypeParameters.insert(
         currentFunctionTypeParameters.end(), typeParameters.begin(), typeParameters.end());
-    auto body = parseBlock();
+    std::unique_ptr<ASTNode> body;
+    if (peek().type == TokenType::LBRACE) {
+        consume(TokenType::LBRACE, "");
+        body = parseBlock();
+        consume(TokenType::RBRACE, "");
+    } else {
+        body = parseExpression();
+    }
     currentFunctionTypeParameters = previousFunctionTypeParameters;
-    consume(TokenType::RBRACE, "");
     localScopes.pop_back();
     std::vector<std::string> ownerTypeParameters;
     if (!clName.empty()) ownerTypeParameters = context.classes[clName].typeParameters;

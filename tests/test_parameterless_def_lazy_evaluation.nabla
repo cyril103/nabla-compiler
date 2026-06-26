@@ -1,0 +1,8 @@
+def tick: Int = {
+    print("tick")
+    21
+}
+
+def main(): Int = {
+    tick + tick
+}
