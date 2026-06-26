@@ -192,6 +192,9 @@ reprise séparées :
 - `docs/plans/` est reserve aux plans actifs: les plans historiques des jalons
   deja livres ont ete retires, et les prochains chantiers doivent creer un plan
   court centre sur le delta restant.
+- `docs/internals.md` documente les conventions internes courantes pour les
+  proprietes `def` zero-argument et les fonctions locales de bloc, afin de ne
+  pas les confondre avec des valeurs memoisees ou des lambdas source.
 
 ## Pistes Plus Larges
 

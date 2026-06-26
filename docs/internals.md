@@ -194,7 +194,22 @@ longueur et un pointeur vers un buffer de bytes runtime. Les operations `+`,
 byte-based; `toCharArray()` produit un `ArrayObject[Char]` afin de ne pas
 exposer de tableau natif specialise pour les caracteres.
 
-## Fonctions, Lambdas Et Closures
+## Fonctions, `def`, Lambdas Et Closures
+
+Les `def` source restent le concept utilisateur pour les fonctions, méthodes et
+propriétés calculées. Un `def name: T = expr` sans liste de paramètres est
+représenté comme une fonction ou méthode zéro-argument ordinaire; les usages
+`name`, `Object.name` ou `value.name` sont résolus comme appels zéro-argument
+quand le symbole cible est unique et non ambigu. Il n'y a pas de stockage ni de
+mémoïsation implicite: le corps est évalué à chaque appel.
+
+Les fonctions locales de bloc `def name(args...): R = { ... }` sont abaissées en
+symboles de fonction cachés non surchargés. Les appels directs restent des appels
+de fonction directs vers ce symbole caché; une référence en position valeur
+réutilise le chemin `FunctionReferenceNode` / `Fn`. La V0 autorise récursion
+directe et appels vers des helpers locaux déclarés précédemment, mais rejette
+captures implicites, fonctions locales génériques, contextes génériques et
+overloads locaux dans une même portée.
 
 Les types fonction sont canoniques sous la forme interne :
 
