@@ -8,7 +8,8 @@ pour garder un cap clair après le tag `v0.1.0`.
 - Backend natif Linux x86_64 via assembleur, avec backend IR utilise par defaut.
   Le compilateur signale explicitement une commande externe introuvable comme
   `nasm` ou `ld`.
-- Typage statique avec fonctions, methodes, classes, generiques simples et lambdas.
+- Typage statique avec fonctions, fonctions locales de bloc, methodes, classes,
+  generiques simples et lambdas.
 - Les `def` sans liste de parametres declarent des proprietes calculees
   zero-argument reutilisant les fonctions/methodes existantes: `def pi: Double`
   est utilisable comme `pi`, `Config.base` appelle `Config.base()`,
@@ -183,6 +184,11 @@ reprise séparées :
   globales, methodes de classes/objets, overrides et membres abstraits de trait,
   avec acces externe `Object.member` / `value.member` et compatibilite conservee
   avec `Object.member()` / `value.member()`.
+- Les fonctions locales `def` avec parametres sont supportees dans les blocs via
+  des fonctions cachees non exposees comme API publique; elles couvrent l'appel
+  direct, la recursion directe, les references comme valeurs fonction et les
+  appels vers des helpers locaux deja declares, avec captures et contextes
+  generiques explicitement reportes.
 
 ## Pistes Plus Larges
 

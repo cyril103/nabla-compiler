@@ -1,0 +1,9 @@
+def main(): Int = {
+    def helper(value: Int): Int = {
+        value
+    }
+    def helper(value: Bool): Int = {
+        0
+    }
+    helper(42)
+}

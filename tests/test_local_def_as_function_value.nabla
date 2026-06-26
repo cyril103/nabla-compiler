@@ -1,0 +1,10 @@
+def applyOnce(value: Int, f: (Int) => Int): Int = {
+    f(value)
+}
+
+def main(): Int = {
+    def twice(value: Int): Int = {
+        value * 2
+    }
+    applyOnce(21, twice)
+}

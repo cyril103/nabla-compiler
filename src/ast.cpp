@@ -2508,6 +2508,22 @@ std::string FunctionDefNode::lowerSpecializedFunctionToIR(
     return "";
 }
 
+LocalFunctionDeclNode::LocalFunctionDeclNode(std::string functionName)
+    : name(std::move(functionName)) {}
+
+std::string LocalFunctionDeclNode::getType() {
+    return "Unit";
+}
+
+void LocalFunctionDeclNode::validateSemantics(CompilerContext& context) {
+    (void) context;
+}
+
+std::string LocalFunctionDeclNode::lowerToIR(IRBuilder& builder) const {
+    (void) name;
+    return builder.emitConstant("0", "Unit");
+}
+
 IdentifierNode::IdentifierNode(std::string n, std::string symbol, std::string resolvedType)
     : name(std::move(n)), symbolName(std::move(symbol)), type(std::move(resolvedType)) {}
 

@@ -1,0 +1,9 @@
+def main(): Int = {
+    def inc(value: Int): Int = {
+        value + 1
+    }
+    def twiceInc(value: Int): Int = {
+        inc(inc(value))
+    }
+    twiceInc(40)
+}
