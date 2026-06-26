@@ -894,6 +894,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Utiliser les fonctions locales pour cacher une premiere tranche de
+  helpers stdlib non documentes: `util.randomStep` devient un detail local de
+  `randomInt`, et la conversion `Bool` -> `String` de `collections.bool_array`
+  est definie au plus pres de `boolArrayMkString` / `arrayBool` au lieu de
+  rester un symbole module-level.
+  - Fichiers / tests associes: `stdlib/util.nabla`,
+    `stdlib/collections/bool_array.nabla`, `AGENTS.md`, `make nablac`, tests
+    cibles util/bool.
+
 - `local` - Ajouter les fonctions locales `def` avec parametres dans les blocs:
   les helpers sont enregistres comme fonctions cachees non surchargees,
   appelables directement, recursifs sur eux-memes, capables d'appeler les
@@ -1114,7 +1123,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `docs/stdlib/collections/set.html`, `AGENTS.md`, `make stdlib-docs`.
 - `local` - Nettoyer la surface documentaire de `stdlib/util.nabla`: les types
   de resultat et les fonctions recommandees sont maintenant publies dans la
-  reference HTML avec `@status`, tandis que `randomStep` reste interne et que
+  reference HTML avec `@status`, tandis que la primitive de pas pseudo-aleatoire
+  est cachee comme fonction locale de `randomInt` et que
   `randomSeedTime` / `randomIntInRange` sont classes en compatibilite.
   - Fichiers / tests associes: `stdlib/util.nabla`, `docs/stdlib-api.md`,
     `docs/stdlib/`, `AGENTS.md`, `make stdlib-docs`,

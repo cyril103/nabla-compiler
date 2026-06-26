@@ -65,16 +65,16 @@ def boolArrayAny(xs: BoolArray): Bool = {
     any
 }
 
-def boolToString(value: Bool): String = {
-    if value {
-        "true"
-    } else {
-        "false"
-    }
-}
-
 def boolArrayMkString(xs: BoolArray, separator: String): String = {
-    arrayBaseMkString[Bool, BoolArray](xs, (values) => values.length(), (values, index) => values.get(index), separator, (value) => boolToString(value))
+    def boolToString(value: Bool): String = {
+        if value {
+            "true"
+        } else {
+            "false"
+        }
+    }
+
+    arrayBaseMkString[Bool, BoolArray](xs, (values) => values.length(), (values, index) => values.get(index), separator, boolToString)
 }
 
 def boolArrayMap(xs: BoolArray, f: (Bool) => Bool): BoolArray = {
@@ -313,6 +313,14 @@ class ArrayBool extends ArrayPrimitiveBase[Bool, BoolArray] with Iterable[Bool](
 }
 
 def arrayBool(values: BoolArray): ArrayBool = {
+    def boolToString(value: Bool): String = {
+        if value {
+            "true"
+        } else {
+            "false"
+        }
+    }
+
     new ArrayBool(values, boolArrayLength, boolArrayGet, boolArraySet, boolToString)
 }
 
