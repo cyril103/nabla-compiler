@@ -89,6 +89,11 @@ Le pipeline implemente actuellement :
   avec protection contre les cycles;
 - objets avec champs de constructeur et appels de methodes parametres;
 - fonctions globales appelables avec parametres;
+- fonctions locales `def` dans les blocs, abaissees en fonctions cachees non
+  surchargees et reutilisables comme valeurs fonction; elles supportent l'appel
+  direct, la recursion sur elles-memes et les appels vers des helpers locaux
+  declares plus haut dans le bloc, mais pas encore les captures ni les contextes
+  generiques;
 - proprietes calculees `def` sans liste de parametres, abaissees comme des
   fonctions/methodes zero-argument: `def pi: Double = 3.14` s'utilise comme
   `pi`, `Config.base` appelle `Config.base()`, `value.head` appelle
@@ -888,6 +893,20 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter les fonctions locales `def` avec parametres dans les blocs:
+  les helpers sont enregistres comme fonctions cachees non surchargees,
+  appelables directement, recursifs sur eux-memes, capables d'appeler les
+  helpers locaux declares plus haut et referencables comme valeurs fonction via
+  l'infrastructure existante de `Fn`. Les captures, surcharges locales,
+  fonctions locales generiques et contextes generiques sont rejetes explicitement
+  en V0.
+  - Fichiers / tests associes: `src/parser.cpp`, `src/parser.hpp`,
+    `src/ast.cpp`, `src/ast.hpp`, `tests/test_local_def_*.nabla`,
+    `tests/test_error_local_def_*.nabla`,
+    `docs/plans/local-def-lambda-lowering.md`, `docs/roadmap.md`,
+    `AGENTS.md`.
+  - Validation: `make all-tests`.
 
 - `local` - Ajouter les proprietes `def` sans parametres: le parseur accepte
   `def name: T = expr`, `def name: T = { ... }` et les signatures abstraites

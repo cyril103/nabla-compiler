@@ -668,6 +668,9 @@ std::unique_ptr<ASTNode> Parser::parseBlock() {
 }
 
 std::unique_ptr<ASTNode> Parser::parseStatement() {
+    if (peek().type == TokenType::KW_DEF) {
+        return parseLocalFunctionDef();
+    }
     if (peek().type == TokenType::KW_VAL || peek().type == TokenType::KW_VAR) {
         Token declarationToken = peek();
         bool isMutable = (peek().type == TokenType::KW_VAR);
@@ -1295,10 +1298,28 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             (void) initialScopeIndex;
             std::string fieldFunctionType;
             std::string fieldOwnerType;
+            if (initialSymbol && initialSymbol->isForbiddenCapture) {
+                throw CompilerError(
+                    ErrorKind::Parser, nameToken.location,
+                    "les fonctions locales ne capturent pas encore les variables ou paramètres englobants: " + name);
+            }
             if (initialSymbol && !typeArguments.empty()) {
                 throw CompilerError(
                     ErrorKind::Parser, nameToken.location,
                     "les arguments de type ne sont supportés que pour les fonctions nommées");
+            }
+            if (initialSymbol && initialSymbol->isLocalFunction) {
+                auto functionType = functionTypeFromName(initialSymbol->type);
+                if (functionType) expectedArgumentTypes = functionType->parameterTypes;
+                consume(TokenType::LPAREN, "");
+                auto arguments = parseArguments(expectedArgumentTypes);
+                consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
+                return located(
+                    std::make_unique<FunctionCallNode>(
+                        initialSymbol->internalName, std::move(arguments),
+                        std::vector<std::string>{},
+                        functionType ? functionType->returnType : "Int", name),
+                    nameToken.location);
             }
             std::string functionLookupName = name;
             std::vector<std::string> functionTypeArguments = typeArguments;
@@ -1424,10 +1445,22 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         }
         auto [symbol, scopeIndex] = findLocalWithScope(name);
         if (symbol) {
+            if (symbol->isForbiddenCapture) {
+                throw CompilerError(
+                    ErrorKind::Parser, nameToken.location,
+                    "les fonctions locales ne capturent pas encore les variables ou paramètres englobants: " + name);
+            }
             if (!typeArguments.empty()) {
                 throw CompilerError(
                     ErrorKind::Parser, nameToken.location,
                     "les arguments de type ne sont supportés que pour les fonctions nommées");
+            }
+            if (symbol->isLocalFunction) {
+                return located(
+                    std::make_unique<FunctionReferenceNode>(
+                        name, symbol->type, std::vector<std::string>{},
+                        std::vector<FunctionReferenceNode::Capture>{}, symbol->internalName),
+                    nameToken.location);
             }
             captureIfNeeded(name, *symbol, scopeIndex);
             return located(std::make_unique<IdentifierNode>(name, symbol->internalName, symbol->type), nameToken.location);
@@ -1850,6 +1883,123 @@ std::unique_ptr<ASTNode> Parser::parseTupleArrow() {
 
 std::unique_ptr<ASTNode> Parser::parseExpression() {
     return parseTupleArrow();
+}
+
+std::unique_ptr<ASTNode> Parser::parseLocalFunctionDef() {
+    if (localScopes.empty()) {
+        throw CompilerError(ErrorKind::Parser, peek().location, "déclaration 'def' locale hors d'un bloc");
+    }
+
+    Token defToken = consume(TokenType::KW_DEF, "");
+    Token nameToken = consume(TokenType::IDENTIFIER, "Nom de fonction locale attendu");
+    const std::string name = nameToken.value;
+    if (localScopes.back().count(name)) {
+        throw CompilerError(ErrorKind::Parser, nameToken.location, "symbole déjà déclaré dans cette portée: " + name);
+    }
+    if (peek().type == TokenType::LBRACKET) {
+        throw CompilerError(
+            ErrorKind::Parser, peek().location,
+            "les fonctions locales génériques ne sont pas encore supportées");
+    }
+    if (!currentFunctionTypeParameters.empty()) {
+        throw CompilerError(
+            ErrorKind::Parser, nameToken.location,
+            "les fonctions locales dans un contexte générique ne sont pas encore supportées");
+    }
+
+    std::vector<FunctionDefNode::Parameter> parameters;
+    std::vector<CompilerContext::ParameterInfo> signatureParameters;
+    std::map<std::string, ParsedSymbol> functionScope;
+
+    consume(TokenType::LPAREN, "'(' attendu après le nom de fonction locale");
+    while (peek().type != TokenType::RPAREN) {
+        Token parameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre attendu");
+        const std::string parameterName = parameterToken.value;
+        consume(TokenType::COLON, "':' attendu après le nom du paramètre");
+        auto [parameterType, parameterTypeLocation] = parseType("Type de paramètre attendu");
+        if (peek().type == TokenType::STAR) {
+            throw CompilerError(
+                ErrorKind::Parser, peek().location,
+                "les paramètres répétés ne sont pas encore supportés sur les fonctions locales");
+        }
+        if (functionScope.count(parameterName)) {
+            throw CompilerError(ErrorKind::Parser, parameterToken.location, "paramètre déjà déclaré: " + parameterName);
+        }
+        const std::string symbolName = parameterName + "#" + std::to_string(nextSymbolId++);
+        functionScope[parameterName] = {symbolName, parameterType, false};
+        parameters.push_back({parameterName, symbolName, parameterType});
+        signatureParameters.push_back({parameterName, parameterType, parameterTypeLocation});
+        if (peek().type == TokenType::COMMA) {
+            consume(TokenType::COMMA, "");
+        } else if (peek().type != TokenType::RPAREN) {
+            throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ')' attendu après le paramètre");
+        }
+    }
+    consume(TokenType::RPAREN, "Parenthèse fermante attendue après les paramètres de fonction locale");
+    consume(TokenType::COLON, "':' attendu avant le type de retour de fonction locale");
+    auto [returnType, returnTypeLocation] = parseType("Type de retour attendu");
+
+    CompilerContext::FunctionType functionTypeInfo;
+    for (const auto& parameter : signatureParameters) functionTypeInfo.parameterTypes.push_back(parameter.type);
+    functionTypeInfo.returnType = returnType;
+    auto functionType = functionNameForType(functionTypeInfo);
+    if (!functionType) {
+        throw CompilerError(
+            ErrorKind::Parser, nameToken.location,
+            "type fonction local non supporté pour l'instant");
+    }
+
+    const std::string mangledName =
+        "local." + name + "." + std::to_string(context.nextLambdaId++);
+    CompilerContext::FunctionSignature signature{
+        signatureParameters, returnType, std::vector<std::string>{},
+        defToken.location, returnTypeLocation, false, false};
+    context.functions[mangledName] = signature;
+    localScopes.back()[name] = {mangledName, *functionType, false, true};
+
+    functionScope[name] = {mangledName, *functionType, false, true};
+
+    consume(TokenType::EQUAL, "'=' attendu après la signature de fonction locale");
+
+    auto savedLocalScopes = std::move(localScopes);
+    auto savedTypeParameters = currentFunctionTypeParameters;
+    auto savedParsingClass = currentParsingClass;
+    localScopes.clear();
+    for (const auto& savedScope : savedLocalScopes) {
+        std::map<std::string, ParsedSymbol> visibleScope;
+        for (const auto& [sourceName, symbol] : savedScope) {
+            if (symbol.isLocalFunction) {
+                visibleScope[sourceName] = symbol;
+            } else {
+                visibleScope[sourceName] = {
+                    symbol.internalName, symbol.type, symbol.isMutable, false, true};
+            }
+        }
+        if (!visibleScope.empty()) localScopes.push_back(std::move(visibleScope));
+    }
+    localScopes.push_back(std::move(functionScope));
+    currentFunctionTypeParameters.clear();
+    currentParsingClass.clear();
+
+    std::unique_ptr<ASTNode> body;
+    if (peek().type == TokenType::LBRACE) {
+        consume(TokenType::LBRACE, "");
+        body = parseBlock();
+        consume(TokenType::RBRACE, "Fin du bloc de fonction locale attendue");
+    } else {
+        body = parseExpression();
+    }
+
+    localScopes = std::move(savedLocalScopes);
+    currentFunctionTypeParameters = std::move(savedTypeParameters);
+    currentParsingClass = std::move(savedParsingClass);
+
+    generatedFunctions.push_back(located(std::make_unique<FunctionDefNode>(
+        "", mangledName, returnType, std::vector<std::string>{},
+        std::move(parameters), std::move(body), std::vector<FunctionDefNode::Capture>{}),
+        defToken.location));
+
+    return located(std::make_unique<LocalFunctionDeclNode>(name), defToken.location);
 }
 
 std::unique_ptr<ASTNode> Parser::parseFunctionDef(

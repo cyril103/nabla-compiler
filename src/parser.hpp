@@ -24,6 +24,8 @@ private:
         std::string internalName;
         std::string type;
         bool isMutable;
+        bool isLocalFunction = false;
+        bool isForbiddenCapture = false;
     };
     struct CapturedSymbol {
         std::string name;
@@ -72,6 +74,7 @@ private:
     std::unique_ptr<ASTNode> parseExpression();
     std::unique_ptr<ASTNode> parseBlock();
     std::unique_ptr<ASTNode> parseStatement();
+    std::unique_ptr<ASTNode> parseLocalFunctionDef();
     std::unique_ptr<ASTNode> parseFunctionDef(
         std::string clName, std::string objectName = "", bool allowAbstractMethod = false);
     std::vector<std::unique_ptr<ASTNode>> parseArguments(

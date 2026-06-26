@@ -1,0 +1,1 @@
+tests/test_error_local_def_not_visible.nabla:9:5: semantic error: fonction inconnue: helper

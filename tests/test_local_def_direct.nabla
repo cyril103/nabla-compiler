@@ -1,0 +1,6 @@
+def main(): Int = {
+    def addOne(value: Int): Int = {
+        value + 1
+    }
+    addOne(41)
+}

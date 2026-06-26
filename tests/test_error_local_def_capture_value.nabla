@@ -1,0 +1,7 @@
+def main(): Int = {
+    val base = 10
+    def add(value: Int): Int = {
+        value + base
+    }
+    add(32)
+}

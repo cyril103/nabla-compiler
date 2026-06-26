@@ -1,0 +1,1 @@
+tests/test_error_local_def_capture_value.nabla:4:17: parser error: les fonctions locales ne capturent pas encore les variables ou paramètres englobants: base

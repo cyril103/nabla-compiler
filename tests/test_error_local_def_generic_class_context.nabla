@@ -1,0 +1,13 @@
+class Box[T](value: T) {
+    def getOr(value: T): T = {
+        def id(item: T): T = {
+            item
+        }
+        id(value)
+    }
+}
+
+def main(): Int = {
+    val box = new Box[Int](41)
+    box.getOr(42)
+}

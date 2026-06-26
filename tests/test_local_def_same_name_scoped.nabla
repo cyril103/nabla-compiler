@@ -1,0 +1,17 @@
+def first(): Int = {
+    def helper(value: Int): Int = {
+        value + 1
+    }
+    helper(20)
+}
+
+def second(): Int = {
+    def helper(value: Int): Int = {
+        value * 2
+    }
+    helper(10)
+}
+
+def main(): Int = {
+    first() + second() + 1
+}

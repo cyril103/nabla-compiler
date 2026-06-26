@@ -1,0 +1,6 @@
+def main(): Int = {
+    def id[T](value: T): T = {
+        value
+    }
+    0
+}
