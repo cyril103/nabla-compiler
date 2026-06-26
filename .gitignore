@@ -11,3 +11,6 @@ nablac
 
 # macOS
 .DS_Store
+
+# Editor local settings
+.vscode/

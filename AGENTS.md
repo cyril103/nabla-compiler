@@ -114,7 +114,8 @@ Le pipeline implemente actuellement :
   lus d'une methode generique, et les cas ambigus produisent un diagnostic dedie;
 - types fonction-valeur canoniques `Fn(...)->...`, references de fonctions
   nommees et appels indirects, avec lambdas sans capture `(x: Int) => { ... }` et
-  `(acc: Int, value: Int) => { ... }`;
+  `(acc: Int, value: Int) => { ... }`, y compris l'appel direct d'une expression
+  retournant une fonction comme `makeAdder(10)(32)`;
 - closures avec capture par valeur pour les lambdas de types fonction
   canoniques;
 - representation interne canonique des types fonction sous forme `Fn(...)->...`;
@@ -551,6 +552,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Valider nombre et types des arguments.
 - [x] Definir la convention d'appel x86-64 Nabla.
 - [x] Ajouter des tests pour fonctions, methodes et erreurs d'appel.
+- [x] Supporter les appels postfixes directs sur une expression de type
+  fonction, par exemple `makeAdder(10)(32)`.
 
 ### P1 - Diagnostics Sources
 
@@ -893,6 +896,12 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter les appels postfixes directs sur les expressions de type
+  fonction: une fonction retournant `Fn(...)` peut etre appelee immediatement
+  avec une seconde liste d'arguments, sans passer par une variable intermediaire.
+  - Fichiers / tests associes: `src/parser.cpp`,
+    `tests/test_function_returning_function_direct_call.nabla`.
 
 - `local` - Aligner `docs/internals.md` avec les conventions livrees pour
   proprietes `def` zero-argument et fonctions locales de bloc: les proprietes

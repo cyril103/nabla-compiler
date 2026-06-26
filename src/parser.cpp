@@ -1554,7 +1554,23 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
 
 std::unique_ptr<ASTNode> Parser::parsePostfix() {
     auto expr = parsePrimary();
-    while (peek().type == TokenType::DOT) {
+    while (peek().type == TokenType::DOT || peek().type == TokenType::LPAREN) {
+        if (peek().type == TokenType::LPAREN) {
+            Token callToken = consume(TokenType::LPAREN, "");
+            std::vector<std::string> expectedArgumentTypes;
+            std::string initialReturnType = "Int";
+            if (auto functionType = functionTypeFromName(expr->getType())) {
+                expectedArgumentTypes = functionType->parameterTypes;
+                initialReturnType = functionType->returnType;
+            }
+            auto arguments = parseArguments(expectedArgumentTypes);
+            consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
+            expr = located(
+                std::make_unique<FunctionExpressionCallNode>(
+                    "expression", std::move(expr), std::move(arguments), initialReturnType),
+                callToken.location);
+            continue;
+        }
         consume(TokenType::DOT, "");
         Token methodToken = consume(TokenType::IDENTIFIER, "Nom de méthode attendu après '.'");
         std::string method = methodToken.value;

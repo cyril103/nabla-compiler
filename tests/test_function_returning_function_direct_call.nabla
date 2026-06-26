@@ -1,0 +1,9 @@
+def makeAdder(x: Int): (Int, Int) => Int = {
+    (a: Int, b: Int) => {
+        x + a + b
+    }
+}
+
+def main(): Int = {
+    makeAdder(10)(20, 12)
+}
