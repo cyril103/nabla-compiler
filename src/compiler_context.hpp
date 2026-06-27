@@ -120,11 +120,6 @@ inline const std::vector<StdlibFunctionAlias>& stdlibFunctionAliases() {
         {"Array.tabulate", {"Float"}, "arrayFloatTabulate"},
         {"Array.tabulate", {"Double"}, "arrayDoubleTabulate"},
         {"Array.tabulate", {"Bool"}, "arrayBoolTabulate"},
-        {"SetFromArray", {"Int"}, "setFromArrayInt"},
-        {"SetFromArray", {"Long"}, "setFromArrayLong"},
-        {"SetFromArray", {"Float"}, "setFromArrayFloat"},
-        {"SetFromArray", {"Double"}, "setFromArrayDouble"},
-        {"SetFromArray", {"Bool"}, "setFromArrayBool"},
         {"Set.fromArray", {"Int"}, "setFromArrayInt"},
         {"Set.fromArray", {"Long"}, "setFromArrayLong"},
         {"Set.fromArray", {"Float"}, "setFromArrayFloat"},
@@ -224,7 +219,6 @@ inline std::optional<std::string> resolveStdlibFunctionAlias(
         if (name == "arrayFill" || name == "ArrayFill" || name == "Array.fill") return "objectArrayFill";
         if (name == "Array.empty") return "objectArrayEmpty";
         if (name == "Array.tabulate") return "objectArrayTabulate";
-        if (name == "SetFromArray") return "setFromArray";
         if (name == "Set.fromArray") return "setFromArray";
         if (name == "arrayMap") return "objectArrayMapSame";
         if (name == "arrayFilter") return "objectArrayFilter";

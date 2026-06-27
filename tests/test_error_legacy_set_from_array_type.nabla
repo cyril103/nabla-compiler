@@ -1,7 +1,0 @@
-import collections.array
-import collections.set
-
-def main(): Int = {
-    val values = Array.fill[String](2, "x")
-    SetFromArray[Int](values).size()
-}

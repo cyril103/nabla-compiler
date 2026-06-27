@@ -289,8 +289,8 @@ Le pipeline implemente actuellement :
   representation/compatibilite a eviter dans les exemples applicatifs quand
   `Array[T]` suffit.
 - module de bibliotheque standard `collections.set` avec `Set[T]`,
-  `Set.empty[T]`, `Set.fromArray[T]`, `SetEmpty[T]`, `SetFromArray[T]`, `add`,
-  `remove`, `union`, `intersect`, `difference`, `setEmpty`, `setFromArray` et
+  `Set.empty[T]`, `Set.fromArray[T]`, `add`, `remove`, `union`, `intersect`,
+  `difference`, `setEmpty`, `setFromArray` et
   `toString`, en utilisant un index de seaux hashés (`hashCode()`) pour des
   opérations de présence à coût moyen réduit; `Set[T]` implemente aussi le
   trait public `Sized`.
@@ -388,8 +388,9 @@ Le pipeline implemente actuellement :
   `ArrayInt`.
 - les tests et exemples ordinaires privilegient maintenant les surcharges
   `Array.range`, `Array.fill[T]`, `Option.some` / `Option.none`,
-  `Set.fromArray` et `Set.empty`; les anciens noms restent couverts dans les
-  tests explicitement dedies aux alias ou diagnostics legacy.
+  `Set.fromArray` et `Set.empty`; les anciens noms encore toleres ou desormais
+  rejetes restent couverts dans les tests explicitement dedies aux alias ou
+  diagnostics legacy.
 
 Limites importantes :
 
@@ -913,6 +914,16 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Retirer les fabriques publiques de compatibilite `SetEmpty[T]()` et
+  `SetFromArray[T](values)`: la surface utilisateur passe uniquement par
+  `Set.empty[T]()` et `Set.fromArray[T](values)`, tandis que les helpers bas
+  niveau `setEmpty` / `setFromArray` restent internes. Les anciens noms ont des
+  diagnostics inconnus avec recommandation vers les compagnons publics.
+  - Fichiers / tests associes: `stdlib/collections/set.nabla`,
+    `src/compiler_context.hpp`, `tests/test_error_set_*compat_removed.nabla`,
+    `docs/stdlib-api.md`, `docs/language.md`,
+    `docs/plans/remove-set-compat-factories.md`, `make all-tests`.
 
 - `local` - Nettoyer `docs/plans/` apres livraison des nettoyages stdlib
   `List`/`Option`/`Map`: les plans termines de suppression des compatibilites a

@@ -1,5 +1,5 @@
 import collections.set
 
 def main(): Int = {
-    SetEmpty[Int](1).size()
+    SetEmpty[Int]().size()
 }

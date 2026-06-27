@@ -873,11 +873,10 @@ Operations utiles :
 - `toArray(): ArrayObject[T]`
 - `toString(): String`
 
-Les noms de compatibilite `SetEmpty`, `SetFromArray`, ainsi que les noms bas
-niveau `setEmpty`, `setFromArray`, `ObjectArray[T]` et `ArrayObject[T]`,
-restent disponibles pour la stdlib et le code existant, mais `Set.empty`,
-`Set(...)`, `Set.apply`, `Set.fromArray` et `Array[T]` sont les noms
-recommandés dans le code utilisateur.
+Les noms bas niveau `setEmpty`, `setFromArray`, `ObjectArray[T]` et
+`ArrayObject[T]` restent visibles dans certains diagnostics et modules importes.
+Le code utilisateur devrait preferer `Set.empty[T]()` et
+`Set.fromArray[T](values)`.
 
 `toArray()` retourne encore `ArrayObject[T]`, qui est la representation actuelle
 du tableau generique d'objets. Pour construire ou passer des tableaux dans le

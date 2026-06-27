@@ -21,7 +21,7 @@
       <p class="eyebrow">Module</p>
       <h1>Set</h1>
       <p class="import"><code>import collections.set</code></p>
-      <p>Ensembles immuables avec valeurs uniques. Utiliser Set(values...) pour creer un ensemble depuis des elements, Set.empty[T]() pour construire progressivement un ensemble, ou Set.fromArray[T](values) pour dedupliquer un tableau. Les anciens noms SetEmpty[T]() et SetFromArray[T](values) restent disponibles pour compatibilite, mais ne sont plus l&#x27;API recommandee pour du code applicatif. toArray() retourne encore la representation generique actuelle ; preferer Array[T] pour construire ou passer de nouveaux tableaux.</p>
+      <p>Ensembles immuables avec valeurs uniques. Utiliser Set(values...) pour creer un ensemble depuis des elements, Set.empty[T]() pour construire progressivement un ensemble, ou Set.fromArray[T](values) pour dedupliquer un tableau. toArray() retourne encore la representation generique actuelle ; preferer Array[T] pour construire ou passer de nouveaux tableaux.</p>
       <figure class="example">
         <figcaption>Creer et tester un ensemble</figcaption>
         <pre><code>import collections.set
@@ -58,8 +58,6 @@ left.union(right).size()</code></pre>
       <section class="toc-group">
         <h3>Methodes</h3>
         <ul>
-        <li><a href="#SetFromArray" title="def SetFromArray[T](values: Array[T]): Set[T]"><span>SetFromArray</span><code>def SetFromArray[T](values: Array[T]): Set[T]</code></a></li>
-        <li><a href="#SetEmpty" title="def SetEmpty[T](): Set[T]"><span>SetEmpty</span><code>def SetEmpty[T](): Set[T]</code></a></li>
         <li><a href="#contains" title="def contains(value: T): Bool"><span>contains</span><code>def contains(value: T): Bool</code></a></li>
         <li><a href="#add" title="def add(value: T): Set[T]"><span>add</span><code>def add(value: T): Set[T]</code></a></li>
         <li><a href="#remove" title="def remove(value: T): Set[T]"><span>remove</span><code>def remove(value: T): Set[T]</code></a></li>
@@ -101,27 +99,6 @@ left.union(right).size()</code></pre>
           <pre class="signature"><code>def Set.fromArray[T](values: Array[T]): Set[T]</code></pre>
           <p>Deduplique un tableau en ensemble.</p>
 <p>Le compilateur accepte les facades Array[T] usuelles et choisit la representation adaptee. Le code utilisateur n&#x27;a pas a nommer les tableaux bas niveau pour construire un Set.</p>
-
-        </article>
-        <article class="entry" id="SetFromArray">
-          <div class="entry-meta">
-            <span class="kind">def</span> <span class="status compat">Compatibilite</span>
-          </div>
-          <h2>SetFromArray</h2>
-          <pre class="signature"><code>def SetFromArray[T](values: Array[T]): Set[T]</code></pre>
-          <p>Deduplique un tableau en ensemble.</p>
-<p>Preferer Set.fromArray[T](values) dans le nouveau code.</p>
-<p>Le compilateur accepte les facades Array[T] usuelles et choisit la representation adaptee. Le code utilisateur n&#x27;a pas a nommer les tableaux bas niveau pour construire un Set.</p>
-
-        </article>
-        <article class="entry" id="SetEmpty">
-          <div class="entry-meta">
-            <span class="kind">def</span> <span class="status compat">Compatibilite</span>
-          </div>
-          <h2>SetEmpty</h2>
-          <pre class="signature"><code>def SetEmpty[T](): Set[T]</code></pre>
-          <p>Cree un ensemble vide.</p>
-<p>Preferer Set.empty[T]() dans le nouveau code.</p>
 
         </article>
         <article class="entry" id="Set">

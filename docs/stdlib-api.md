@@ -201,8 +201,6 @@ nouveaux exemples devraient preferer la surface publique ci-dessus :
   fabrique `Array` exprime mieux l'intention.
 - Helpers `arrayIntMap`, `arrayObjectMap`, etc. quand une methode de facade
   existe (`xs.map(...)`, `xs.filter(...)`, `xs.fold(...)`, etc.).
-- Compatibilite `SetEmpty[T]()` et `SetFromArray[T](values)` quand
-  `Set.empty[T]()` ou `Set.fromArray[T](values)` suffit.
 - Fonctions bas niveau `setEmpty`, `setFromArray` et variantes specialisees
   quand la fabrique de `Set` exprime mieux l'intention.
 - Compatibilite `randomSeedTime()` quand `randomSeedNow()` exprime mieux
