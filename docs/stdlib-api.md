@@ -93,7 +93,9 @@ pas comme cible idiomatique pour le code applicatif.
 - `List[T]` (**experimentale**)
   - `List.empty[T](defaultValue)` et `List.cons[T](head, tail)`
   - `isEmpty()`, `nonEmpty()`, `size()`, `foreach(f)`, `head()`, `tail()`,
-    `headOption()`, `prepend(value)` et `mkString(separator)`
+    `headOption()`, `prepend(value)`, `prepended(value)`, `appended(value)`,
+    `concat(suffix)`, `reverse()`, `reverseConcat(suffix)`, `take(n)`,
+    `drop(n)`, `slice(from, until)` et `mkString(separator)`
   - operations generiques via compagnon : `List.fold[T, U](values, initial, f)`,
     `List.map[T, U](values, defaultValue, f)`,
     `List.filter[T](values, defaultValue, predicate)` et

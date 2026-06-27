@@ -1,0 +1,15 @@
+import collections.list
+
+def main(): Int = {
+    val xs = List.cons[Int](1, List.cons[Int](2, List.cons[Int](3, List.empty[Int](0))))
+    val ys = List.cons[Int](4, List.cons[Int](5, List.empty[Int](0)))
+    val combined = xs.concat(ys)
+    val appended = xs.appended(4)
+    val reversed = xs.reverse()
+    val seeded = xs.reverseConcat(ys)
+    if combined.mkString(",") == "1,2,3,4,5" && appended.mkString(",") == "1,2,3,4" && reversed.mkString(",") == "3,2,1" && seeded.mkString(",") == "3,2,1,4,5" {
+        42
+    } else {
+        1
+    }
+}

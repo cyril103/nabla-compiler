@@ -1,0 +1,15 @@
+import collections.list
+
+def main(): Int = {
+    val xs = List.cons[Int](10, List.cons[Int](20, List.cons[Int](30, List.cons[Int](40, List.empty[Int](0)))))
+    val taken = xs.take(2)
+    val dropped = xs.drop(2)
+    val sliced = xs.slice(1, 3)
+    val none = xs.take(0)
+    val all = xs.drop(0)
+    if taken.mkString(",") == "10,20" && dropped.mkString(",") == "30,40" && sliced.mkString(",") == "20,30" && none.isEmpty() && all.mkString(",") == "10,20,30,40" {
+        42
+    } else {
+        1
+    }
+}
