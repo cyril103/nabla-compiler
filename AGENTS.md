@@ -915,6 +915,14 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Nettoyer `docs/plans/` apres livraison du retrait des fabriques
+  publiques legacy `SetEmpty` / `SetFromArray`: le plan actif a ete retire de
+  l'arbre, dont le perimetre reste documente dans ce journal, les tests et
+  l'historique de PR.
+  - Fichiers / tests associes: `docs/plans/README.md`, `AGENTS.md`,
+    suppression de `docs/plans/remove-set-compat-factories.md`,
+    `make all-tests`.
+
 - `local` - Retirer les fabriques publiques de compatibilite `SetEmpty[T]()` et
   `SetFromArray[T](values)`: la surface utilisateur passe uniquement par
   `Set.empty[T]()` et `Set.fromArray[T](values)`, tandis que les helpers bas
