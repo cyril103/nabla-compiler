@@ -1,8 +1,8 @@
 import collections.list
 
 def main(): Int = {
-    val empty = List.empty[Int](0)
-    val xs = List.cons[Int](10, List.cons[Int](20, List.cons[Int](30, List.empty[Int](0))))
+    val empty = List.empty[Int]()
+    val xs = List.cons[Int](10, List.cons[Int](20, List.cons[Int](30, List.empty[Int]())))
     val prepended = xs.prepended(5)
     if empty.reverse().isEmpty() && empty.reverseConcat(xs).mkString(",") == "10,20,30" && xs.take(-1).isEmpty() && xs.drop(-2).mkString(",") == "10,20,30" && xs.slice(-1, 2).mkString(",") == "10,20" && xs.slice(3, 1).isEmpty() && prepended.mkString(",") == "5,10,20,30" {
         42

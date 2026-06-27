@@ -303,7 +303,7 @@ Le pipeline implemente actuellement :
   `Map[K, V]` implemente aussi le trait public `Sized`;
 - module de bibliotheque standard `collections.list` experimental avec
   `List[T]`, le singleton runtime `Nil: List[Nothing]` assignable a `List[T]`,
-  `Cons[T]`, `List.empty[T]()` (avec surcharge de compatibilite `defaultValue`),
+  `Cons[T]`, `List.empty[T]()`,
   `List.cons[T]`, `List.fold[T, U]`, `List.map[T, U]`, `List.filter[T]`,
   `List.fromArray[T]`, `head`, `tail`, `headOption`, `prepend`, `prepended`,
   `appended`, `concat`, `reverse`, `reverseConcat`, `take`, `drop`, `slice`,
@@ -915,14 +915,26 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Retirer les surcharges de compatibilite `defaultValue` de
+  `collections.list`: `List.empty`, `List.map`, `List.filter`, `List.fromArray`
+  et leurs helpers internes utilisent desormais seulement la forme Scala-like
+  sans valeur factice, rendue possible par `Nil: List[Nothing]`. Les anciens
+  appels avec argument ignore sont couverts par des diagnostics d'arite exacts.
+  - Fichiers / tests associes: `stdlib/collections/list.nabla`,
+    `tests/test_stdlib_list_operations.nabla`,
+    `tests/test_stdlib_list_from_array.nabla`,
+    `tests/test_error_list_*defaultvalue_compat_removed.nabla`,
+    `docs/stdlib-api.md`, `docs/stdlib/collections/list.html`,
+    `docs/plans/remove-list-defaultvalue-compat.md`, `make all-tests`.
+
 - `local` - Remplacer la representation temporaire de la liste vide par le
   singleton runtime Scala-like `object Nil with List[Nothing]`: `Nil` est une
   valeur `AnyRef`, assignable a `List[T]` via `Nothing`, et les fabriques
   recommandees n'ont plus besoin de `defaultValue` (`List.empty[T]()`,
   `List.map(values, f)`, `List.filter(values, predicate)`,
-  `List.fromArray(values)`). Les surcharges historiques avec `defaultValue`
-  restent en compatibilite et l'assignabilite accepte maintenant les arguments
-  generiques compatibles par bottom type (`List[Nothing]` vers `List[Int]`).
+  `List.fromArray(values)`). L'assignabilite accepte maintenant les arguments
+  generiques compatibles par bottom type (`List[Nothing]` vers `List[Int]`) sans
+  ouvrir la variance generique globale.
   - Fichiers / tests associes: `src/compiler_context.hpp`,
     `src/semantic_analyzer.cpp`, `stdlib/collections/list.nabla`,
     `tests/test_stdlib_list_nil_singleton_basic.nabla`,

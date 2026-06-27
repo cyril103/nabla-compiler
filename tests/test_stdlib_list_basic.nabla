@@ -1,7 +1,7 @@
 import collections.list
 
 def main(): Int = {
-    val xs = List.cons[Int](1, List.cons[Int](41, List.empty[Int](0)))
+    val xs = List.cons[Int](1, List.cons[Int](41, List.empty[Int]()))
     if xs.size() == 2 && xs.head() == 1 && xs.tail().head() == 41 && xs.headOption().getOrElse(0) == 1 {
         42
     } else {

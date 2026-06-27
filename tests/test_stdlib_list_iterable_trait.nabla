@@ -9,7 +9,7 @@ def visit(values: Iterable[Int]): Int = {
 }
 
 def main(): Int = {
-    val xs: Iterable[Int] = List.cons[Int](1, List.cons[Int](41, List.empty[Int](0)))
+    val xs: Iterable[Int] = List.cons[Int](1, List.cons[Int](41, List.empty[Int]()))
     if visit(xs) == 2 && xs.nonEmpty() {
         42
     } else {

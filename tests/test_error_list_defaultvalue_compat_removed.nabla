@@ -1,0 +1,10 @@
+import collections.array
+import collections.list
+
+def main(): Int = {
+    val xs = List.empty[Int](0)
+    val ys = List.map[Int, Int](xs, 0, (x: Int) => { x + 1 })
+    val zs = List.filter[Int](ys, 0, (x: Int) => { x > 0 })
+    val from = List.fromArray[Int](Array(1, 2), 0)
+    zs.size() + from.size()
+}

@@ -93,16 +93,14 @@ pas comme cible idiomatique pour le code applicatif.
 - `List[T]` (**experimentale**)
   - `Nil` est le singleton vide runtime, declare comme `List[Nothing]` et
     assignable a `List[T]`.
-  - `List.empty[T]()` / compatibilite `List.empty[T](defaultValue)`, et
-    `List.cons[T](head, tail)`
+  - `List.empty[T]()` et `List.cons[T](head, tail)`
   - `isEmpty()`, `nonEmpty()`, `size()`, `foreach(f)`, `head()`, `tail()`,
     `headOption()`, `prepend(value)`, `prepended(value)`, `appended(value)`,
     `concat(suffix)`, `reverse()`, `reverseConcat(suffix)`, `take(n)`,
     `drop(n)`, `slice(from, until)` et `mkString(separator)`
   - operations generiques via compagnon : `List.fold[T, U](values, initial, f)`,
-    `List.map[T, U](values, f)` / compatibilite avec `defaultValue`,
-    `List.filter[T](values, predicate)` / compatibilite avec `defaultValue`, et
-    `List.fromArray[T](values)` / compatibilite avec `defaultValue`
+    `List.map[T, U](values, f)`, `List.filter[T](values, predicate)` et
+    `List.fromArray[T](values)`
   - `Array[T]` reste la collection indexee principale.
 
 `ArrayObject[T]`, les facades de tableaux specialisees, `Set[T]`, `Map[K, V]` et

@@ -1,0 +1,6 @@
+import collections.list
+
+def main(): Int = {
+    val xs = List.cons[Int](1, Nil)
+    List.filter[Int](xs, 0, (x: Int) => { x > 0 }).size()
+}
