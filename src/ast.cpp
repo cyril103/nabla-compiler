@@ -35,7 +35,8 @@ std::string emitBoolConstant(IRBuilder& builder, bool value) {
 bool isKnownBuiltinType(const std::string& type) {
     return type == "Int" || type == "Long" || type == "Float" || type == "Double" || type == "Bool" ||
            type == "Char" || type == "String" || type == "Unit" || type == "Any" ||
-           type == "AnyVal" || type == "AnyRef" || type == "IntArray" || type == "LongArray" ||
+           type == "AnyVal" || type == "AnyRef" || type == "Nothing" ||
+           type == "IntArray" || type == "LongArray" ||
            type == "FloatArray" || type == "DoubleArray" || type == "BoolArray";
 }
 
@@ -1578,6 +1579,7 @@ FunctionCallNode::FunctionCallNode(
 
 std::string FunctionCallNode::getType() {
     if (name == "print") return "Unit";
+    if (name == "panic" || name == "error") return "Nothing";
     if (name == "readLine") return "String";
     if (name == "readFile") return "String";
     if (name == "writeFile") return "Int";
@@ -1599,6 +1601,20 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
         }
         resolvedType = "Unit";
         resolvedParameterTypes = {"Any"};
+        return;
+    }
+    if (name == "panic" || name == "error") {
+        if (arguments.size() != 1) {
+            semanticError(name + ": 1 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
+        }
+        if (arguments[0]->getType() != "String") {
+            throw CompilerError(
+                ErrorKind::Semantic, arguments[0]->getLocation(),
+                name + ", paramètre 'message': type 'String' attendu, '" +
+                arguments[0]->getType() + "' reçu");
+        }
+        resolvedType = "Nothing";
+        resolvedParameterTypes = {"String"};
         return;
     }
     if (name == "readLine") {
@@ -1829,6 +1845,12 @@ std::string FunctionCallNode::lowerToIR(IRBuilder& builder) const {
         std::string loweredString = builder.emitMethodCall(
             "Any", "toString", loweredArgument, {}, "String");
         return builder.emitCall("print", {loweredString}, "Unit");
+    }
+    if (name == "panic" || name == "error") {
+        if (arguments.size() != 1) {
+            builder.unsupported(location, "l'appel de " + name);
+        }
+        return builder.emitCall("panic", {arguments[0]->lowerToIR(builder)}, "Nothing");
     }
 
     std::vector<std::string> loweredArguments = resolvedParameters.empty()
@@ -2111,6 +2133,10 @@ void IfNode::validateSemantics(CompilerContext& context) {
         semanticError("la condition d'un 'if' doit être de type Bool");
     }
     if (thenBranch->getType() == elseBranch->getType()) {
+        resolvedType = thenBranch->getType();
+    } else if (thenBranch->getType() == "Nothing") {
+        resolvedType = elseBranch->getType();
+    } else if (elseBranch->getType() == "Nothing") {
         resolvedType = thenBranch->getType();
     } else {
         resolvedType = "Unit";

@@ -47,7 +47,8 @@ Le type system expose une hiérarchie Scala-like :
 ```text
 Any
 ├── AnyVal
-└── AnyRef
+├── AnyRef
+└── Nothing
 ```
 
 `AnyVal` et `AnyRef` sont des types builtin abstraits. Les primitives `Unit`,
@@ -55,6 +56,12 @@ Any
 et `Any`. Les références heap (`String`, tableaux, fonctions/closures et classes
 utilisateur) sont assignables a `AnyRef` et `Any`. Une classe utilisateur sans
 parent explicite hérite implicitement de `AnyRef`, pas directement de `Any`.
+`Nothing` est le bottom type builtin : la relation d'assignabilite accepte
+`Nothing` pour tout type attendu, mais aucune expression normale ne produit de
+valeur `Nothing`. Les primitives globales `panic(message: String)` et
+`error(message: String)` l'utilisent pour typer les chemins qui ne retournent
+pas; le backend les abaisse vers `Runtime_panic`, qui termine le processus avec
+le statut `250`.
 
 Cette hiérarchie est une convention de type, pas une promesse de représentation
 objet uniforme : les chemins spécialisés peuvent conserver des valeurs

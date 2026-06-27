@@ -6,7 +6,8 @@
 namespace {
 bool isBuiltinTypeName(const std::string& type) {
     return type == "Int" || type == "Long" || type == "Float" || type == "Double" ||
-           type == "Bool" || type == "Char" || type == "String" || type == "Unit" || type == "IntArray" ||
+           type == "Bool" || type == "Char" || type == "String" || type == "Unit" ||
+           type == "Nothing" || type == "IntArray" ||
            type == "LongArray" || type == "FloatArray" || type == "DoubleArray" ||
            type == "BoolArray";
 }
@@ -166,7 +167,8 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool is
                 typeParameterToken.value == "Float" || typeParameterToken.value == "Double" ||
                 typeParameterToken.value == "Bool" || typeParameterToken.value == "Char" ||
                 typeParameterToken.value == "String" ||
-                typeParameterToken.value == "Unit" || typeParameterToken.value == "IntArray" ||
+                typeParameterToken.value == "Unit" || typeParameterToken.value == "Nothing" ||
+                typeParameterToken.value == "IntArray" ||
                 typeParameterToken.value == "LongArray" || typeParameterToken.value == "FloatArray" ||
                 typeParameterToken.value == "DoubleArray" || typeParameterToken.value == "BoolArray") {
                 throw CompilerError(
@@ -2043,7 +2045,8 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
                 typeParameterToken.value == "Float" || typeParameterToken.value == "Double" ||
                 typeParameterToken.value == "Bool" || typeParameterToken.value == "Char" ||
                 typeParameterToken.value == "String" ||
-                typeParameterToken.value == "Unit" || typeParameterToken.value == "IntArray" ||
+                typeParameterToken.value == "Unit" || typeParameterToken.value == "Nothing" ||
+                typeParameterToken.value == "IntArray" ||
                 typeParameterToken.value == "LongArray" || typeParameterToken.value == "FloatArray" ||
                 typeParameterToken.value == "DoubleArray" || typeParameterToken.value == "BoolArray") {
                 throw CompilerError(

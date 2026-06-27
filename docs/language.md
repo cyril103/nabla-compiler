@@ -74,9 +74,14 @@ Types racines Scala-like :
   `Int`, `Long`, `Float`, `Double` et `Char`.
 - `AnyRef` est le supertype des references heap : `String`, tableaux,
   fonctions/closures et classes utilisateur.
+- `Nothing` est le type bottom : il est assignable a tout type attendu, mais
+  aucune valeur concrete de type `Nothing` ne peut etre construite.
 
 `AnyVal` et `AnyRef` sont des types builtin abstraits. Ils structurent le
 systeme de types mais ne sont pas des classes utilisateur instanciables.
+`Nothing` sert aux expressions qui ne terminent pas normalement, notamment
+`panic(message)` et son alias `error(message)`, qui quittent le programme avec
+le statut runtime `250`.
 
 Collections et types standard :
 
@@ -579,7 +584,8 @@ types primitifs builtin. La hierarchie de surface est donc :
 ```text
 Any
 ├── AnyVal  // Unit, Bool, Int, Long, Float, Double, Char
-└── AnyRef  // String, tableaux, fonctions/closures, classes utilisateur
+├── AnyRef  // String, tableaux, fonctions/closures, classes utilisateur
+└── Nothing // bottom type, sous-type assignable a tous les types
 ```
 
 `Any` apporte des methodes de base disponibles sur toute classe reference :

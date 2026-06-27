@@ -719,6 +719,7 @@ inline bool isTypeAssignable(
     const std::string& expectedType,
     std::set<std::string>& visiting) {
     if (actualType == expectedType) return true;
+    if (actualType == "Nothing") return true;
     auto actualParameterized = parameterizedTypeFromName(actualType);
     auto expectedParameterized = parameterizedTypeFromName(expectedType);
     if (actualParameterized && expectedParameterized &&

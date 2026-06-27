@@ -1,0 +1,4 @@
+def main(): Int = {
+    val impossible: Nothing = 1
+    0
+}

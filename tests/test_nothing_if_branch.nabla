@@ -1,0 +1,4 @@
+def main(): Int = {
+    val value: Int = if true { 42 } else { panic("unreachable") }
+    value
+}
