@@ -1,0 +1,1 @@
+tests/test_error_option_none_function_compat_removed.nabla:4:5: semantic error: fonction inconnue: optionNone. Nom recommande: 'Option.none'

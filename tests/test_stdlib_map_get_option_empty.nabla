@@ -13,7 +13,7 @@ def main(): Int = {
         3
     } else if missing.getOrElse(42) != 42 {
         4
-    } else if scores.getOption(0, "bob").getOrElse(0) != 20 {
+    } else if scores.getOption("bob").getOrElse(0) != 20 {
         5
     } else {
         0

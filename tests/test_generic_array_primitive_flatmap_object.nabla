@@ -28,7 +28,7 @@ def boolWords(value: Bool): ArrayObject[Option[String]] = {
     if value {
         words.set(1, Option.some("true"))
     } else {
-        words.set(1, Option.none("false"))
+        words.set(1, Option.none[String]())
     }
     words
 }

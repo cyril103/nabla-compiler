@@ -22,7 +22,7 @@ def labels(student: Student): ArrayObject[Option[String]] = {
     if student.score() > 20 {
         values.set(1, Option.some("top"))
     } else {
-        values.set(1, Option.none("missing"))
+        values.set(1, Option.none[String]())
     }
     values
 }

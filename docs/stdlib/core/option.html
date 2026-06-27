@@ -21,7 +21,7 @@
       <p class="eyebrow">Module</p>
       <h1>Option</h1>
       <p class="import"><code>import core.option</code></p>
-      <p>Valeur optionnelle generique. Option[T] represente soit une valeur presente, soit une absence. C&#x27;est le type a privilegier quand une operation peut ne rien produire sans que ce soit une erreur. Utiliser Option.some[T](value) pour construire une valeur presente et Option.none[T]() pour construire une absence. Les anciens noms optionSome[T](value), Option.none[T](default) et optionNone[T](default) restent disponibles pour compatibilite.</p>
+      <p>Valeur optionnelle generique. Option[T] represente soit une valeur presente, soit une absence. C&#x27;est le type a privilegier quand une operation peut ne rien produire sans que ce soit une erreur. Utiliser Option.some[T](value) pour construire une valeur presente et Option.none[T]() pour construire une absence. L&#x27;ancien nom optionSome[T](value) reste disponible pour compatibilite.</p>
       <figure class="example">
         <figcaption>Transformer une valeur presente</figcaption>
         <pre><code>import core.option
@@ -50,7 +50,6 @@ Option.none[Int]().getOrElse(42)</code></pre>
         <ul>
         <li><a href="#some" title="def Option.some[T](value: T): Option[T]"><span>some</span><code>def Option.some[T](value: T): Option[T]</code></a></li>
         <li><a href="#none" title="def Option.none[T](): Option[T]"><span>none</span><code>def Option.none[T](): Option[T]</code></a></li>
-        <li><a href="#none-2" title="def Option.none[T](default: T): Option[T]"><span>none</span><code>def Option.none[T](default: T): Option[T]</code></a></li>
         </ul>
       </section>
       <section class="toc-group">
@@ -66,7 +65,6 @@ Option.none[Int]().getOrElse(42)</code></pre>
         <li><a href="#orElse" title="def orElse(other: Option[T]): Option[T]"><span>orElse</span><code>def orElse(other: Option[T]): Option[T]</code></a></li>
         <li><a href="#getOrElse" title="def getOrElse(default: T): T"><span>getOrElse</span><code>def getOrElse(default: T): T</code></a></li>
         <li><a href="#optionSome" title="def optionSome[T](value: T): Option[T]"><span>optionSome</span><code>def optionSome[T](value: T): Option[T]</code></a></li>
-        <li><a href="#optionNone" title="def optionNone[T](default: T): Option[T]"><span>optionNone</span><code>def optionNone[T](default: T): Option[T]</code></a></li>
         </ul>
       </section>
       </aside>
@@ -181,16 +179,6 @@ Option.none[Int]().getOrElse(42)</code></pre>
           <p>Construit une option vide.</p>
 
         </article>
-        <article class="entry" id="none-2">
-          <div class="entry-meta">
-            <span class="kind">def</span> <span class="status compat">Compatibilite</span>
-          </div>
-          <h2>none</h2>
-          <pre class="signature"><code>def Option.none[T](default: T): Option[T]</code></pre>
-          <p>Construit une option vide avec une valeur interne de secours.</p>
-<p>Preferer Option.none[T]() dans le nouveau code.</p>
-
-        </article>
         <article class="entry" id="optionSome">
           <div class="entry-meta">
             <span class="kind">def</span> <span class="status compat">Compatibilite</span>
@@ -199,16 +187,6 @@ Option.none[Int]().getOrElse(42)</code></pre>
           <pre class="signature"><code>def optionSome[T](value: T): Option[T]</code></pre>
           <p>Construit une option contenant une valeur.</p>
 <p>Preferer Option.some[T](value) dans le nouveau code.</p>
-
-        </article>
-        <article class="entry" id="optionNone">
-          <div class="entry-meta">
-            <span class="kind">def</span> <span class="status compat">Compatibilite</span>
-          </div>
-          <h2>optionNone</h2>
-          <pre class="signature"><code>def optionNone[T](default: T): Option[T]</code></pre>
-          <p>Construit une option vide.</p>
-<p>Preferer Option.none[T]() dans le nouveau code. Le parametre default sert de valeur interne de secours pour le type T.</p>
 
         </article>
       </section>

@@ -208,10 +208,7 @@ nouveaux exemples devraient preferer la surface publique ci-dessus :
 - Compatibilite `randomSeedTime()` quand `randomSeedNow()` exprime mieux
   l'intention.
 - Compatibilite `randomIntInRange(...)` quand `randomIntRange(...)` suffit.
-- Compatibilite `optionSome[T](value)`, `Option.none[T](default)` et
-  `optionNone[T](default)` quand `Option.some[T](value)` ou `Option.none[T]()`
-  suffit.
-- Compatibilite `Map.getOption(default, key)` quand `Map.getOption(key)` suffit.
+- Compatibilite `optionSome[T](value)` quand `Option.some[T](value)` suffit.
 
 ## Details Internes
 

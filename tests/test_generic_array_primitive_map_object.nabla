@@ -29,7 +29,7 @@ def maybePositive(value: Int): Option[String] = {
     if value > 0 {
         Option.some("positive")
     } else {
-        Option.none("zero")
+        Option.none[String]()
     }
 }
 

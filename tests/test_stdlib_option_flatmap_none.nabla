@@ -1,5 +1,5 @@
 import core.option
 
 def main(): Int = {
-    Option.none[Int](40).flatMap(0, value => Option.some[Int](value + 2)).getOrElse(42)
+    Option.none[Int]().flatMap(0, value => Option.some[Int](value + 2)).getOrElse(42)
 }

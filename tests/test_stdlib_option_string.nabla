@@ -2,6 +2,6 @@ import core.option
 
 def main(): Int = {
     val some = Option.some[String]("hello")
-    val none = Option.none[String]("fallback")
+    val none = Option.none[String]()
     some.getOrElse("x").length() + none.getOrElse("fallback").length() + 29
 }

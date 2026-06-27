@@ -1,0 +1,5 @@
+import core.option
+
+def main(): Int = {
+    Option.none[Int](0).getOrElse(42)
+}

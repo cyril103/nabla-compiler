@@ -29,7 +29,7 @@ def maybeFlag(value: Bool): Option[String] = {
     if value {
         Option.some("yes")
     } else {
-        Option.none("no")
+        Option.none[String]()
     }
 }
 

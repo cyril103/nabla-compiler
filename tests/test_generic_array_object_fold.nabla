@@ -38,7 +38,7 @@ def main(): Int = {
     words.set(1, "hello")
     val longest = words.fold[String]("", keepLonger)
 
-    val none = Option.none("missing")
+    val none = Option.none[String]()
     val some = Option.some("yes")
     val options = Array.fill[Option[String]](2, none)
     options.set(1, some)

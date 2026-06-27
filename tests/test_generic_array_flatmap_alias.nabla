@@ -19,7 +19,7 @@ def longWords(value: Long): ArrayObject[String] = {
 
 def wordOptions(value: String): ArrayObject[Option[String]] = {
     val values = arrayFill[Option[String]](2, optionSome(value))
-    values.set(1, optionNone("missing"))
+    values.set(1, Option.none[String]())
     values
 }
 

@@ -23,7 +23,7 @@ def main(): Int = {
     val topStudents = students.filter(student => student.score() > 20)
 
     val some = Option.some("yes")
-    val none = Option.none("no")
+    val none = Option.none[String]()
     val options = Array.fill[Option[String]](3, some)
     options.set(2, none)
     val defined = options.filter(value => value.isDefined())

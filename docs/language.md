@@ -963,8 +963,8 @@ Operations courantes :
 - `filter(predicate)`
 - `orElse(fallback)`
 
-Les noms de compatibilite `optionSome[T](value)`, `Option.none[T](default)` et
-`optionNone[T](default)` restent disponibles pour le code existant.
+Le nom de compatibilite `optionSome[T](value)` reste disponible pour le code
+existant, mais les nouvelles absences doivent utiliser `Option.none[T]()`.
 
 ## Entree Et Sortie
 
