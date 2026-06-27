@@ -914,6 +914,14 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Nettoyer `docs/plans/` apres livraison des nettoyages stdlib
+  `List`/`Option`/`Map`: les plans termines de suppression des compatibilites a
+  valeur factice ont ete retires de l'arbre actif, dont le perimetre reste
+  documente dans ce journal, les tests et l'historique des PRs.
+  - Fichiers / tests associes: `docs/plans/README.md`, `AGENTS.md`,
+    suppression de `docs/plans/remove-list-defaultvalue-compat.md` et
+    `docs/plans/remove-option-map-default-compat.md`, `make all-tests`.
+
 - `local` - Retirer les formes de compatibilite a valeur factice pour
   `Option`/`Map`: `Option.none[T](default)`, `optionNone[T](default)` et
   `Map.getOption(default, key)`. Les appels positifs utilisent desormais
@@ -922,8 +930,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   - Fichiers / tests associes: `stdlib/core/option.nabla`,
     `stdlib/collections/map.nabla`, `tests/test_error_option_none_*`,
     `tests/test_error_map_getoption_default_compat_removed.nabla`,
-    `docs/stdlib-api.md`, `docs/language.md`,
-    `docs/plans/remove-option-map-default-compat.md`, `make all-tests`.
+    `docs/stdlib-api.md`, `docs/language.md`, `make all-tests`.
 
 - `local` - Retirer les surcharges de compatibilite `defaultValue` de
   `collections.list`: `List.empty`, `List.map`, `List.filter`, `List.fromArray`
@@ -935,7 +942,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `tests/test_stdlib_list_from_array.nabla`,
     `tests/test_error_list_*defaultvalue_compat_removed.nabla`,
     `docs/stdlib-api.md`, `docs/stdlib/collections/list.html`,
-    `docs/plans/remove-list-defaultvalue-compat.md`, `make all-tests`.
+    `make all-tests`.
 
 - `local` - Remplacer la representation temporaire de la liste vide par le
   singleton runtime Scala-like `object Nil with List[Nothing]`: `Nil` est une
