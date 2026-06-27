@@ -936,9 +936,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `local` - Enrichir `collections.list` avec une couche de methodes inspirees
   de Scala `List`: `prepended`, `appended`, `concat` (spelling Nabla de `:::`),
   `reverse`, `reverseConcat` (equivalent de `reverse_:::`), `take`, `drop` et
-  `slice`. La V0 conserve `Nil[T](defaultValue)` et ajoute un hook interne
-  `emptyDefault()` pour reconstruire des listes vides de meme type sans exposer
-  encore `object Nil extends List[Nothing]` ni la variance.
+  `slice`. Ce jalon avait d'abord utilise une representation temporaire pour la
+  liste vide; elle est maintenant remplacee par le jalon `Nil` singleton
+  ci-dessus, et les details historiques vivent dans l'historique des PRs plutôt
+  que dans `docs/plans/`.
   - Fichiers / tests associes: `stdlib/collections/list.nabla`,
     `tests/test_stdlib_list_scala_concat_reverse.nabla`,
     `tests/test_stdlib_list_scala_take_drop_slice.nabla`,
@@ -1011,9 +1012,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - `local` - Nettoyer `docs/plans/` apres les jalons post-0.1 deja livres:
   les plans historiques `local-def-lambda-lowering`,
   `parameterless-def-properties`, `runtime-singleton-object` et
-  `scala-like-list` sont retires de l'arbre actif; `docs/plans/README.md`
-  rappelle que les prochains chantiers doivent creer un plan court centre sur
-  le delta restant.
+  `scala-like-list` ont ete retires de l'arbre actif. Le cleanup courant retire
+  aussi les plans termines `scala-inspired-list-methods` et
+  `nil-singleton-list-nothing`; `docs/plans/README.md` rappelle que les prochains
+  chantiers doivent creer un plan court centre sur le delta restant.
   - Fichiers / tests associes: `docs/plans/README.md`, suppressions sous
     `docs/plans/`, `AGENTS.md`, `docs/roadmap.md`.
 
