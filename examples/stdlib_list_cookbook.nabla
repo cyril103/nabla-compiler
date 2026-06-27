@@ -9,7 +9,8 @@ def main(): Int = {
     val xs = List.cons[Int](1, List.cons[Int](2, List.cons[Int](39, List.empty[Int](0))))
     val doubled = List.map[Int, Int](xs, 0, (x: Int) => { x * 2 })
     val kept = List.filter[Int](doubled, 0, (x: Int) => { x > 2 })
-    if xs.mkString(",") == "1,2,39" && kept.mkString("|") == "4|78" && total(kept) == 82 {
+    val scalaLike = xs.appended(4).reverse().take(2).mkString("|")
+    if xs.mkString(",") == "1,2,39" && kept.mkString("|") == "4|78" && scalaLike == "4|39" && total(kept) == 82 {
         42
     } else {
         1

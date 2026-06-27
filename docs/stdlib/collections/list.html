@@ -61,6 +61,14 @@ xs.head() + xs.tail().head()</code></pre>
         <li><a href="#tail" title="def tail(): List[T]"><span>tail</span><code>def tail(): List[T]</code></a></li>
         <li><a href="#headOption" title="def headOption(): Option[T]"><span>headOption</span><code>def headOption(): Option[T]</code></a></li>
         <li><a href="#prepend" title="def prepend(value: T): List[T]"><span>prepend</span><code>def prepend(value: T): List[T]</code></a></li>
+        <li><a href="#prepended" title="def prepended(value: T): List[T]"><span>prepended</span><code>def prepended(value: T): List[T]</code></a></li>
+        <li><a href="#appended" title="def appended(value: T): List[T]"><span>appended</span><code>def appended(value: T): List[T]</code></a></li>
+        <li><a href="#concat" title="def concat(suffix: List[T]): List[T]"><span>concat</span><code>def concat(suffix: List[T]): List[T]</code></a></li>
+        <li><a href="#reverse" title="def reverse(): List[T]"><span>reverse</span><code>def reverse(): List[T]</code></a></li>
+        <li><a href="#reverseConcat" title="def reverseConcat(suffix: List[T]): List[T]"><span>reverseConcat</span><code>def reverseConcat(suffix: List[T]): List[T]</code></a></li>
+        <li><a href="#take" title="def take(n: Int): List[T]"><span>take</span><code>def take(n: Int): List[T]</code></a></li>
+        <li><a href="#drop" title="def drop(n: Int): List[T]"><span>drop</span><code>def drop(n: Int): List[T]</code></a></li>
+        <li><a href="#slice" title="def slice(from: Int, until: Int): List[T]"><span>slice</span><code>def slice(from: Int, until: Int): List[T]</code></a></li>
         <li><a href="#mkString" title="def mkString(separator: String): String"><span>mkString</span><code>def mkString(separator: String): String</code></a></li>
         </ul>
       </section>
@@ -127,6 +135,78 @@ xs.head() + xs.tail().head()</code></pre>
           <h2>prepend</h2>
           <pre class="signature"><code>def prepend(value: T): List[T]</code></pre>
           <p>Ajoute une valeur en tete.</p>
+
+        </article>
+        <article class="entry" id="prepended">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>prepended</h2>
+          <pre class="signature"><code>def prepended(value: T): List[T]</code></pre>
+          <p>Ajoute une valeur en tete avec le nom Scala `prepended`.</p>
+
+        </article>
+        <article class="entry" id="appended">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimentale</span>
+          </div>
+          <h2>appended</h2>
+          <pre class="signature"><code>def appended(value: T): List[T]</code></pre>
+          <p>Ajoute une valeur en fin de liste.</p>
+
+        </article>
+        <article class="entry" id="concat">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>concat</h2>
+          <pre class="signature"><code>def concat(suffix: List[T]): List[T]</code></pre>
+          <p>Concatene cette liste avec suffix, comme le `:::` de Scala avec un nom Nabla.</p>
+
+        </article>
+        <article class="entry" id="reverse">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>reverse</h2>
+          <pre class="signature"><code>def reverse(): List[T]</code></pre>
+          <p>Inverse cette liste.</p>
+
+        </article>
+        <article class="entry" id="reverseConcat">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimentale</span>
+          </div>
+          <h2>reverseConcat</h2>
+          <pre class="signature"><code>def reverseConcat(suffix: List[T]): List[T]</code></pre>
+          <p>Inverse cette liste puis la place devant suffix, equivalent pratique de `reverse_:::`.</p>
+
+        </article>
+        <article class="entry" id="take">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>take</h2>
+          <pre class="signature"><code>def take(n: Int): List[T]</code></pre>
+          <p>Garde au plus les n premiers elements.</p>
+
+        </article>
+        <article class="entry" id="drop">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>drop</h2>
+          <pre class="signature"><code>def drop(n: Int): List[T]</code></pre>
+          <p>Ignore les n premiers elements.</p>
+
+        </article>
+        <article class="entry" id="slice">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>slice</h2>
+          <pre class="signature"><code>def slice(from: Int, until: Int): List[T]</code></pre>
+          <p>Retourne les elements dans l&#x27;intervalle [from, until).</p>
 
         </article>
         <article class="entry" id="mkString">

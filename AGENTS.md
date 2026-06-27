@@ -304,7 +304,9 @@ Le pipeline implemente actuellement :
 - module de bibliotheque standard `collections.list` experimental avec
   `List[T]`, `Nil[T](defaultValue)`, `Cons[T]`, `List.empty[T]`,
   `List.cons[T]`, `List.fold[T, U]`, `List.map[T, U]`, `List.filter[T]`,
-  `List.fromArray[T]`, `head`, `tail`, `headOption`, `prepend`, `mkString` et
+  `List.fromArray[T]`, `head`, `tail`, `headOption`, `prepend`, `prepended`,
+  `appended`, `concat`, `reverse`, `reverseConcat`, `take`, `drop`, `slice`,
+  `mkString` et
   implementation de `Iterable[T]`; `Nil[T](defaultValue)` reste une compatibilite
   V0 en attendant `object Nil`, `Nothing` et variance;
 - module de bibliotheque standard `collections.array` comme point d'entree
@@ -913,6 +915,20 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Enrichir `collections.list` avec une couche de methodes inspirees
+  de Scala `List`: `prepended`, `appended`, `concat` (spelling Nabla de `:::`),
+  `reverse`, `reverseConcat` (equivalent de `reverse_:::`), `take`, `drop` et
+  `slice`. La V0 conserve `Nil[T](defaultValue)` et ajoute un hook interne
+  `emptyDefault()` pour reconstruire des listes vides de meme type sans exposer
+  encore `object Nil extends List[Nothing]` ni la variance.
+  - Fichiers / tests associes: `stdlib/collections/list.nabla`,
+    `tests/test_stdlib_list_scala_concat_reverse.nabla`,
+    `tests/test_stdlib_list_scala_take_drop_slice.nabla`,
+    `tests/test_stdlib_list_scala_edge_cases.nabla`,
+    `examples/stdlib_list_cookbook.nabla`, `docs/stdlib-api.md`,
+    `docs/stdlib/collections/list.html`, `make all-tests`, `make examples`,
+    `make tooling-tests`, `make stdlib-docs`.
 
 - `local` - Ajouter le type bottom `Nothing`: le parser et l'analyse semantique
   le reconnaissent comme type builtin, l'assignabilite l'accepte vers tout type

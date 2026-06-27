@@ -42,6 +42,8 @@ trait List[T] with Iterable[T] {
     /// @status Recommandee
     def tail(): List[T]
 
+    def emptyDefault(): T
+
     /// Retourne la tete si elle existe.
     /// @signature def headOption(): Option[T]
     /// @status Recommandee
@@ -52,6 +54,62 @@ trait List[T] with Iterable[T] {
     /// @status Recommandee
     def prepend(value: T): List[T] = {
         listCons[T](value, this)
+    }
+
+    /// Ajoute une valeur en tete avec le nom Scala `prepended`.
+    /// @signature def prepended(value: T): List[T]
+    /// @status Recommandee
+    def prepended(value: T): List[T] = {
+        this.prepend(value)
+    }
+
+    /// Ajoute une valeur en fin de liste.
+    /// @signature def appended(value: T): List[T]
+    /// @status Experimentale
+    def appended(value: T): List[T] = {
+        listAppend[T](this, value)
+    }
+
+    /// Concatene cette liste avec suffix, comme le `:::` de Scala avec un nom Nabla.
+    /// @signature def concat(suffix: List[T]): List[T]
+    /// @status Recommandee
+    def concat(suffix: List[T]): List[T] = {
+        listConcat[T](this, suffix)
+    }
+
+    /// Inverse cette liste.
+    /// @signature def reverse(): List[T]
+    /// @status Recommandee
+    def reverse(): List[T] = {
+        listReverseInto[T](this, listEmpty[T](this.emptyDefault()))
+    }
+
+    /// Inverse cette liste puis la place devant suffix, equivalent pratique de `reverse_:::`.
+    /// @signature def reverseConcat(suffix: List[T]): List[T]
+    /// @status Experimentale
+    def reverseConcat(suffix: List[T]): List[T] = {
+        listReverseInto[T](this, suffix)
+    }
+
+    /// Garde au plus les n premiers elements.
+    /// @signature def take(n: Int): List[T]
+    /// @status Recommandee
+    def take(n: Int): List[T] = {
+        listTake[T](this, n)
+    }
+
+    /// Ignore les n premiers elements.
+    /// @signature def drop(n: Int): List[T]
+    /// @status Recommandee
+    def drop(n: Int): List[T] = {
+        listDrop[T](this, n)
+    }
+
+    /// Retourne les elements dans l'intervalle [from, until).
+    /// @signature def slice(from: Int, until: Int): List[T]
+    /// @status Recommandee
+    def slice(from: Int, until: Int): List[T] = {
+        listSlice[T](this, from, until)
     }
 
     /// Concatene les elements separes par separator.
@@ -89,6 +147,10 @@ class Nil[T](defaultValue: T) with List[T] {
         this
     }
 
+    override def emptyDefault(): T = {
+        defaultValue
+    }
+
     override def headOption(): Option[T] = {
         Option.none[T]()
     }
@@ -116,6 +178,10 @@ class Cons[T](val head: T, val tail: List[T]) with List[T] {
 
     override def headOption(): Option[T] = {
         Option.some[T](head)
+    }
+
+    override def emptyDefault(): T = {
+        tail.emptyDefault()
     }
 
     override def mkString(separator: String): String = {
@@ -178,6 +244,54 @@ def listEmpty[T](defaultValue: T): List[T] = {
 
 def listCons[T](head: T, tail: List[T]): List[T] = {
     new Cons[T](head, tail)
+}
+
+def listAppend[T](values: List[T], value: T): List[T] = {
+    if values.isEmpty() {
+        listCons[T](value, listEmpty[T](values.emptyDefault()))
+    } else {
+        listCons[T](values.head(), listAppend[T](values.tail(), value))
+    }
+}
+
+def listConcat[T](prefix: List[T], suffix: List[T]): List[T] = {
+    if prefix.isEmpty() {
+        suffix
+    } else {
+        listCons[T](prefix.head(), listConcat[T](prefix.tail(), suffix))
+    }
+}
+
+def listReverseInto[T](values: List[T], suffix: List[T]): List[T] = {
+    if values.isEmpty() {
+        suffix
+    } else {
+        listReverseInto[T](values.tail(), listCons[T](values.head(), suffix))
+    }
+}
+
+def listTake[T](values: List[T], n: Int): List[T] = {
+    if n <= 0 || values.isEmpty() {
+        listEmpty[T](values.emptyDefault())
+    } else {
+        listCons[T](values.head(), listTake[T](values.tail(), n - 1))
+    }
+}
+
+def listDrop[T](values: List[T], n: Int): List[T] = {
+    if n <= 0 || values.isEmpty() {
+        values
+    } else {
+        listDrop[T](values.tail(), n - 1)
+    }
+}
+
+def listSlice[T](values: List[T], from: Int, until: Int): List[T] = {
+    if from <= 0 {
+        listTake[T](values, until)
+    } else {
+        listTake[T](listDrop[T](values, from), until - from)
+    }
 }
 
 def listFold[T, U](values: List[T], initial: U, f: (U, T) => U): U = {
