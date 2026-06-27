@@ -671,6 +671,8 @@ private:
             out << "    call Runtime_stringToInt\n";
         } else if (instruction.operation == "timeSeed") {
             out << "    call Runtime_timeSeed\n";
+        } else if (instruction.operation == "panic") {
+            out << "    call Runtime_panic\n";
         } else {
             out << "    call " << asmFunctionName(instruction.operation) << "\n";
         }

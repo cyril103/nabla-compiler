@@ -28,6 +28,9 @@ pas comme cible idiomatique pour le code applicatif.
 
 ### Core
 
+- `panic(message: String): Nothing` / `error(message: String): Nothing`
+  - primitives compilateur pour les chemins qui ne retournent pas normalement;
+    elles quittent l'executable avec le statut runtime `250`.
 - `Sized`
   - `size()`
   - `isEmpty()`

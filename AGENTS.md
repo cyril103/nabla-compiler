@@ -444,6 +444,10 @@ Limites importantes :
   alignees sur 8 octets et verification de depassement, mais pas de
   ramasse-miettes;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
+- `Nothing` est un type bottom builtin assignable a tout type attendu sans
+  valeur instanciable; les primitives globales `panic(message: String)` et
+  `error(message: String)` produisent `Nothing`, typent les branches qui ne
+  retournent pas et terminent le runtime avec le statut 250;
 - `match` supporte désormais les motifs litteraux, les motifs nommes (`identifiant`)
   et des gardes de branche de la forme `motif if condition`, ainsi que la branche
   finale `_` (avec ou sans garde selon la position; la branche finale `_` ne
@@ -820,6 +824,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Definir de vraies vtables backend pour les objets utilisateur et
   singletons runtime, tout en conservant les tags runtime reserves pour les
   primitives boxees et `String`.
+- [x] Ajouter le type bottom `Nothing` et les primitives `panic` / `error` pour
+  les chemins qui ne retournent pas.
 - [x] Extraire le runtime ASM commun du backend IR.
 - [x] Stabiliser la representation de `String`.
 - [x] Ajouter `String.charAt(index): Char` sur la representation byte-based.
@@ -907,6 +913,20 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter le type bottom `Nothing`: le parser et l'analyse semantique
+  le reconnaissent comme type builtin, l'assignabilite l'accepte vers tout type
+  attendu, les expressions `if` prennent le type de la branche normale quand
+  l'autre branche est `Nothing`, et les primitives `panic(message)` / `error(message)`
+  s'abaissent vers `Runtime_panic` (exit 250). Tests positifs pour retour et
+  branche `if`, plus diagnostic negatif pour tentative de construire un
+  `Nothing` depuis `Int`.
+  - Fichiers / tests associes: `src/compiler_context.hpp`, `src/parser.cpp`,
+    `src/ast.cpp`, `src/ir_codegen.cpp`, `src/runtime_asm.cpp`,
+    `tests/test_nothing_panic_return.nabla`,
+    `tests/test_nothing_if_branch.nabla`,
+    `tests/test_error_nothing_value.nabla`, `docs/language.md`,
+    `docs/internals.md`, `docs/stdlib-api.md`, `make all-tests`.
 
 - `local` - Finaliser le passage du dispatch dynamique vers des vtables backend:
   le slot 0 des objets utilisateur et singletons runtime pointe vers une table

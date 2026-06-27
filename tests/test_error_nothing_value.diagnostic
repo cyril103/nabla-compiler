@@ -1,0 +1,1 @@
+tests/test_error_nothing_value.nabla:2:5: semantic error: Déclaration invalide pour 'impossible': type 'Nothing' attendu, 'Int' reçu

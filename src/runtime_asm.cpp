@@ -75,6 +75,10 @@ void emitText(std::ostream& out) {
         << "    mov rdi, 253\n"
         << "    mov rax, 60\n"
         << "    syscall\n\n";
+    out << "Runtime_panic:\n"
+        << "    mov rdi, 250\n"
+        << "    mov rax, 60\n"
+        << "    syscall\n\n";
     out << "Runtime_trait_dispatch_error:\n"
         << "    mov rdi, 251\n"
         << "    mov rax, 60\n"
