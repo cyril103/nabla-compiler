@@ -1,0 +1,6 @@
+import collections.array
+import collections.set
+
+def main(): Int = {
+    SetFromArray[Int](Array(1, 2, 2)).size()
+}
