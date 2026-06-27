@@ -1,0 +1,6 @@
+import collections.map
+
+def main(): Int = {
+    val scores = Map("alice" -> 10)
+    scores.getOption(0, "alice").getOrElse(0)
+}

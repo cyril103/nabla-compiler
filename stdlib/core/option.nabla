@@ -3,9 +3,8 @@
 /// Option[T] represente soit une valeur presente, soit une absence. C'est le
 /// type a privilegier quand une operation peut ne rien produire sans que ce soit
 /// une erreur. Utiliser Option.some[T](value) pour construire une valeur
-/// presente et Option.none[T]() pour construire une absence. Les anciens noms
-/// optionSome[T](value), Option.none[T](default) et optionNone[T](default)
-/// restent disponibles pour compatibilite.
+/// presente et Option.none[T]() pour construire une absence. L'ancien nom
+/// optionSome[T](value) reste disponible pour compatibilite.
 ///
 /// @example Transformer une valeur presente
 /// import core.option
@@ -134,15 +133,6 @@ object Option {
     def none[T](): Option[T] = {
         new Option[T](false, new ObjectArray[T](1).get(0))
     }
-
-    /// Construit une option vide avec une valeur interne de secours.
-    /// @signature def Option.none[T](default: T): Option[T]
-    /// @status Compatibilite
-    ///
-    /// Preferer Option.none[T]() dans le nouveau code.
-    def none[T](default: T): Option[T] = {
-        new Option[T](false, default)
-    }
 }
 
 /// Construit une option contenant une valeur.
@@ -151,13 +141,4 @@ object Option {
 /// Preferer Option.some[T](value) dans le nouveau code.
 def optionSome[T](value: T): Option[T] = {
     Option.some[T](value)
-}
-
-/// Construit une option vide.
-/// @status Compatibilite
-///
-/// Preferer Option.none[T]() dans le nouveau code.
-/// Le parametre default sert de valeur interne de secours pour le type T.
-def optionNone[T](default: T): Option[T] = {
-    Option.none[T](default)
 }

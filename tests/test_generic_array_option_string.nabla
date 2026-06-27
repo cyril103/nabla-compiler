@@ -7,7 +7,7 @@ def firstDefined(values: Array[Option[String]]): String = {
 
 def main(): Int = {
     val some = Option.some("hello")
-    val none = Option.none("fallback")
+    val none = Option.none[String]()
     val values = Array.fill[Option[String]](3, some)
     values.set(1, none)
 

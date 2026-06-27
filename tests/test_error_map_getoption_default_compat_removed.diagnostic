@@ -1,0 +1,1 @@
+tests/test_error_map_getoption_default_compat_removed.nabla:5:12: semantic error: Map[String,Int].getOption: 1 argument(s) attendu(s), 2 reçu(s)

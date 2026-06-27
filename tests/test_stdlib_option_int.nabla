@@ -2,6 +2,6 @@ import core.option
 
 def main(): Int = {
     val some = Option.some[Int](7)
-    val none = Option.none[Int](11)
+    val none = Option.none[Int]()
     some.getOrElse(0) + none.getOrElse(35)
 }

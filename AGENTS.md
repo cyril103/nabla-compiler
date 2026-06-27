@@ -240,8 +240,8 @@ Le pipeline implemente actuellement :
 - module de bibliotheque standard `core.option_int` avec `OptionInt`,
   `optionIntSome`, `optionIntNone`, `map`, `filter` et `orElse`;
 - module de bibliotheque standard `core.option` avec `Option[T]`,
-  `Option.some[T]`, `Option.none[T]()`, `Option.none[T](default)` par
-  compatibilite, `optionSome`, `optionNone`, `isDefined`, `isEmpty`, `nonEmpty`,
+  `Option.some[T]`, `Option.none[T]()`, `optionSome` par compatibilite,
+  `isDefined`, `isEmpty`, `nonEmpty`,
   `map[U]`, `filter`, `flatMap[U]`, `foreach`, `orElse` et `getOrElse`; les
   methodes internes construisent directement `Option[T]` sans repasser par les
   wrappers publics de compatibilite;
@@ -296,8 +296,7 @@ Le pipeline implemente actuellement :
   trait public `Sized`.
 - module de bibliotheque standard `collections.map` avec `Map[K, V]`,
   `Map.empty[K, V]`, `Map.fromArray[K, V]`, `apply[K, V]`, `size`, `isEmpty`,
-  `nonEmpty`, `containsKey`, `contains`, `getOption(key)`,
-  `getOption(default, key)` par compatibilite, `getOrElse`, `updated`,
+  `nonEmpty`, `containsKey`, `contains`, `getOption(key)`, `getOrElse`, `updated`,
   `removed`, `clear`, `keys`, `values`, `toArray`, `foreachEntry`, `mapValues[U]`,
   `filterKeys`, `mkString` et `toString` pour la représentation textuelle;
   `Map[K, V]` implemente aussi le trait public `Sized`;
@@ -622,8 +621,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   l'API publique recommandee (`Array.*`, `Option.*`, `Set.*`) en conservant les
   tests d'alias legacy.
 - [x] Ajouter `Option.none[T]()` et `Map.getOption(key)` comme formes publiques
-  naturelles, en conservant `Option.none[T](default)`, `optionNone[T](default)`
-  et `Map.getOption(default, key)` par compatibilite; couvert par
+  naturelles; les anciennes formes avec valeur factice ont ensuite ete retirees
+  par diagnostics d'arite exacts; couvert par
   `tests/test_stdlib_option_none_empty.nabla` et
   `tests/test_stdlib_map_get_option_empty.nabla`.
 - [x] Clarifier la documentation utilisateur et la reference stdlib autour de
@@ -914,6 +913,17 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Retirer les formes de compatibilite a valeur factice pour
+  `Option`/`Map`: `Option.none[T](default)`, `optionNone[T](default)` et
+  `Map.getOption(default, key)`. Les appels positifs utilisent desormais
+  `Option.none[T]()` et `Map.getOption(key)`, tandis que les anciens chemins ont
+  des diagnostics dedies.
+  - Fichiers / tests associes: `stdlib/core/option.nabla`,
+    `stdlib/collections/map.nabla`, `tests/test_error_option_none_*`,
+    `tests/test_error_map_getoption_default_compat_removed.nabla`,
+    `docs/stdlib-api.md`, `docs/language.md`,
+    `docs/plans/remove-option-map-default-compat.md`, `make all-tests`.
 
 - `local` - Retirer les surcharges de compatibilite `defaultValue` de
   `collections.list`: `List.empty`, `List.map`, `List.filter`, `List.fromArray`
@@ -1235,8 +1245,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `make stdlib-docs`.
 - `local` - Nettoyer la surface documentaire de `core.option` et
   `core.option_int`: les pages HTML evitent maintenant les marqueurs Markdown
-  bruts, `optionSome` / `optionNone` pointent explicitement vers
-  `Option.some` / `Option.none`, `Option[T]` liste ses methodes principales et
+  bruts, `optionSome` pointe explicitement vers `Option.some`, `Option[T]`
+  liste ses methodes principales et
   `OptionInt` est presente comme specialisation utile plutot que choix par
   defaut.
   - Fichiers / tests associes: `stdlib/core/option.nabla`,
@@ -1273,11 +1283,12 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `make all-tests`.
 - `local` - Nettoyer la premiere couche Collections/Core dans les usages
   ordinaires: les tests et exemples migrent de `arrayIntRange`,
-  `array<Type>Fill`, `optionSome` / `optionNone`, `SetFromArray` / `SetEmpty`
-  vers `Array.range`, `Array.fill[T]`, `Option.some` / `Option.none`,
-  `Set.fromArray` et `Set.empty`. Les tests `*_alias*` et
+  `array<Type>Fill`, des anciens helpers `Option` et de `SetFromArray` /
+  `SetEmpty` vers `Array.range`, `Array.fill[T]`, `Option.some` /
+  `Option.none`, `Set.fromArray` et `Set.empty`. Les tests `*_alias*` et
   `test_error_legacy_*` restent en place pour couvrir les chemins de
-  compatibilite. `Option[T]` evite aussi ses wrappers de compat dans ses methodes
+  compatibilite encore supportes ou les diagnostics de migration. `Option[T]`
+  evite aussi ses wrappers de compat dans ses methodes
   internes, et `Array.range` / `Array.rangeUntil` descendent directement vers les
   helpers bruts internes.
   - Fichiers / tests associes: `stdlib/collections/array.nabla`,
@@ -1485,10 +1496,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
     `examples/student_scores.nabla`, `docs/language.md`,
     `docs/stdlib-api.md`.
 - `local` - Exposer le compagnon standard `object Option` comme surface
-  idiomatique: `Option.some[T](value)` et `Option.none[T](default)`, tout en
-  gardant `optionSome` / `optionNone` comme compatibilite. L'absence garde pour
-  l'instant une valeur interne de secours, conformement a la representation
-  actuelle de `Option[T]`.
+  idiomatique: `Option.some[T](value)` et la forme historique
+  `Option.none[T](default)`, avec `optionSome` / `optionNone` comme
+  compatibilite initiale. Les formes d'absence avec valeur factice, y compris
+  `optionNone`, ont ensuite ete retirees au profit de `Option.none[T]()`.
   - Fichiers / tests associés: `stdlib/core/option.nabla`,
     `tests/test_stdlib_option_string.nabla`, `tests/test_stdlib_option_int.nabla`,
     `tests/test_stdlib_option_map_int.nabla`,

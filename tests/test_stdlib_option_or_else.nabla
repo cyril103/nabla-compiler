@@ -1,7 +1,7 @@
 import core.option
 
 def main(): Int = {
-    val first = Option.none[Int](0)
+    val first = Option.none[Int]()
     val second = Option.some[Int](42)
     first.orElse(second).getOrElse(0)
 }
