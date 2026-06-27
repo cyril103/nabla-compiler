@@ -302,13 +302,12 @@ Le pipeline implemente actuellement :
   `filterKeys`, `mkString` et `toString` pour la représentation textuelle;
   `Map[K, V]` implemente aussi le trait public `Sized`;
 - module de bibliotheque standard `collections.list` experimental avec
-  `List[T]`, `Nil[T](defaultValue)`, `Cons[T]`, `List.empty[T]`,
+  `List[T]`, le singleton runtime `Nil: List[Nothing]` assignable a `List[T]`,
+  `Cons[T]`, `List.empty[T]()` (avec surcharge de compatibilite `defaultValue`),
   `List.cons[T]`, `List.fold[T, U]`, `List.map[T, U]`, `List.filter[T]`,
   `List.fromArray[T]`, `head`, `tail`, `headOption`, `prepend`, `prepended`,
   `appended`, `concat`, `reverse`, `reverseConcat`, `take`, `drop`, `slice`,
-  `mkString` et
-  implementation de `Iterable[T]`; `Nil[T](defaultValue)` reste une compatibilite
-  V0 en attendant `object Nil`, `Nothing` et variance;
+  `mkString` et implementation de `Iterable[T]`;
 - module de bibliotheque standard `collections.array` comme point d'entree
   commun pour les tableaux specialises, avec `Array.fill[T]`, les surcharges
   `Array.range`, `Array.rangeUntil` comme alias de compatibilite,
@@ -915,6 +914,24 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Remplacer la representation temporaire de la liste vide par le
+  singleton runtime Scala-like `object Nil with List[Nothing]`: `Nil` est une
+  valeur `AnyRef`, assignable a `List[T]` via `Nothing`, et les fabriques
+  recommandees n'ont plus besoin de `defaultValue` (`List.empty[T]()`,
+  `List.map(values, f)`, `List.filter(values, predicate)`,
+  `List.fromArray(values)`). Les surcharges historiques avec `defaultValue`
+  restent en compatibilite et l'assignabilite accepte maintenant les arguments
+  generiques compatibles par bottom type (`List[Nothing]` vers `List[Int]`).
+  - Fichiers / tests associes: `src/compiler_context.hpp`,
+    `src/semantic_analyzer.cpp`, `stdlib/collections/list.nabla`,
+    `tests/test_stdlib_list_nil_singleton_basic.nabla`,
+    `tests/test_stdlib_list_nil_singleton_factories.nabla`,
+    `tests/test_stdlib_list_nil_singleton_runtime_object.nabla`,
+    `tests/test_nil_does_not_break_subtype_overload.nabla`,
+    `tests/test_error_nil_no_global_generic_covariance.nabla`,
+    `examples/stdlib_list_cookbook.nabla`, `docs/stdlib-api.md`,
+    `docs/stdlib/collections/list.html`, `make all-tests`.
 
 - `local` - Enrichir `collections.list` avec une couche de methodes inspirees
   de Scala `List`: `prepended`, `appended`, `concat` (spelling Nabla de `:::`),

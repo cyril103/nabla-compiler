@@ -1,14 +1,15 @@
 /// @module List
 /// Liste chainee immutable experimentale.
 ///
-/// List[T] est inspiree de Scala, mais la V0 utilise encore Nil[T](defaultValue)
-/// au lieu d'un singleton Nil polymorphe. Utiliser List.empty[T](defaultValue)
-/// et List.cons[T](head, tail) pour construire les listes.
+/// List[T] est inspiree de Scala. La liste vide est le singleton runtime
+/// `Nil`, declare comme `List[Nothing]` et assignable a `List[T]`.
+/// Utiliser `List.empty[T]()` et `List.cons[T](head, tail)` pour construire
+/// les listes.
 ///
 /// @example Construire et lire une liste
 /// import collections.list
 ///
-/// val xs = List.cons[Int](1, List.cons[Int](2, List.empty[Int](0)))
+/// val xs = List.cons[Int](1, List.cons[Int](2, Nil))
 /// xs.head() + xs.tail().head()
 /// @end
 
@@ -32,7 +33,7 @@ trait List[T] with Iterable[T] {
         !this.isEmpty()
     }
 
-    /// Retourne la tete de liste, ou la valeur par defaut du Nil V0.
+    /// Retourne la tete de liste.
     /// @signature def head(): T
     /// @status Experimentale
     def head(): T
@@ -41,8 +42,6 @@ trait List[T] with Iterable[T] {
     /// @signature def tail(): List[T]
     /// @status Recommandee
     def tail(): List[T]
-
-    def emptyDefault(): T
 
     /// Retourne la tete si elle existe.
     /// @signature def headOption(): Option[T]
@@ -81,7 +80,7 @@ trait List[T] with Iterable[T] {
     /// @signature def reverse(): List[T]
     /// @status Recommandee
     def reverse(): List[T] = {
-        listReverseInto[T](this, listEmpty[T](this.emptyDefault()))
+        listReverseInto[T](this, listEmpty[T]())
     }
 
     /// Inverse cette liste puis la place devant suffix, equivalent pratique de `reverse_:::`.
@@ -118,13 +117,14 @@ trait List[T] with Iterable[T] {
     def mkString(separator: String): String
 }
 
-/// Liste vide V0.
+/// Liste vide singleton, Scala-like.
 ///
-/// Nil[T](defaultValue) est une representation temporaire : la valeur par
-/// defaut sert seulement a donner un resultat a head() tant que le langage ne
-/// dispose pas de singleton Nil polymorphe.
-/// @status Compatibilite
-class Nil[T](defaultValue: T) with List[T] {
+/// `Nil` est un objet runtime qui implemente `List[Nothing]`. Comme `Nothing`
+/// est le type bottom, `Nil` peut etre utilise partout ou une `List[T]` est
+/// attendue.
+/// @signature object Nil extends List[Nothing]
+/// @status Recommandee
+object Nil with List[Nothing] {
     override def isEmpty(): Bool = {
         true
     }
@@ -133,26 +133,22 @@ class Nil[T](defaultValue: T) with List[T] {
         0
     }
 
-    override def foreach(f: (T) => Unit): Unit = {
+    override def foreach(f: (Nothing) => Unit): Unit = {
         while false {
             0
         }
     }
 
-    override def head(): T = {
-        defaultValue
+    override def head(): Nothing = {
+        panic("Nil.head")
     }
 
-    override def tail(): List[T] = {
-        this
+    override def tail(): List[Nothing] = {
+        Nil
     }
 
-    override def emptyDefault(): T = {
-        defaultValue
-    }
-
-    override def headOption(): Option[T] = {
-        Option.none[T]()
+    override def headOption(): Option[Nothing] = {
+        Option.none[Nothing]()
     }
 
     override def mkString(separator: String): String = {
@@ -180,10 +176,6 @@ class Cons[T](val head: T, val tail: List[T]) with List[T] {
         Option.some[T](head)
     }
 
-    override def emptyDefault(): T = {
-        tail.emptyDefault()
-    }
-
     override def mkString(separator: String): String = {
         if tail.isEmpty() {
             head.toString()
@@ -194,11 +186,18 @@ class Cons[T](val head: T, val tail: List[T]) with List[T] {
 }
 
 object List {
-    /// Construit une liste vide V0.
+    /// Construit une liste vide.
+    /// @signature def List.empty[T](): List[T]
+    /// @status Recommandee
+    def empty[T](): List[T] = {
+        listEmpty[T]()
+    }
+
+    /// Construit une liste vide. Compatibilite V0: defaultValue est ignore.
     /// @signature def List.empty[T](defaultValue: T): List[T]
-    /// @status Experimentale
+    /// @status Compatibilite
     def empty[T](defaultValue: T): List[T] = {
-        listEmpty[T](defaultValue)
+        listEmpty[T]()
     }
 
     /// Ajoute un element en tete.
@@ -216,30 +215,55 @@ object List {
     }
 
     /// Transforme chaque element.
-    /// @signature def List.map[T, U](values: List[T], defaultValue: U, f: (T) => U): List[U]
+    /// @signature def List.map[T, U](values: List[T], f: (T) => U): List[U]
     /// @status Recommandee
+    def map[T, U](values: List[T], f: (T) => U): List[U] = {
+        listMap[T, U](values, f)
+    }
+
+    /// Transforme chaque element. Compatibilite V0: defaultValue est ignore.
+    /// @signature def List.map[T, U](values: List[T], defaultValue: U, f: (T) => U): List[U]
+    /// @status Compatibilite
     def map[T, U](values: List[T], defaultValue: U, f: (T) => U): List[U] = {
-        listMap[T, U](values, defaultValue, f)
+        listMap[T, U](values, f)
     }
 
     /// Conserve les elements qui verifient predicate.
-    /// @signature def List.filter[T](values: List[T], defaultValue: T, predicate: (T) => Bool): List[T]
+    /// @signature def List.filter[T](values: List[T], predicate: (T) => Bool): List[T]
     /// @status Recommandee
+    def filter[T](values: List[T], predicate: (T) => Bool): List[T] = {
+        listFilter[T](values, predicate)
+    }
+
+    /// Conserve les elements qui verifient predicate. Compatibilite V0: defaultValue est ignore.
+    /// @signature def List.filter[T](values: List[T], defaultValue: T, predicate: (T) => Bool): List[T]
+    /// @status Compatibilite
     def filter[T](values: List[T], defaultValue: T, predicate: (T) => Bool): List[T] = {
-        listFilter[T](values, defaultValue, predicate)
+        listFilter[T](values, predicate)
     }
 
     /// Convertit un Array[T] public en List[T].
+    /// @signature def List.fromArray[T](values: Array[T]): List[T]
+    /// @status Recommandee
+    def fromArray[T](values: Array[T]): List[T] = {
+        listFromArrayFrom[T](values, 0)
+    }
+
+    /// Convertit un Array[T] public en List[T]. Compatibilite V0: defaultValue est ignore.
     /// @signature def List.fromArray[T](values: Array[T], defaultValue: T): List[T]
-    /// @status Experimentale
+    /// @status Compatibilite
     def fromArray[T](values: Array[T], defaultValue: T): List[T] = {
-        listFromArrayFrom[T](values, defaultValue, 0)
+        listFromArrayFrom[T](values, 0)
     }
 
 }
 
+def listEmpty[T](): List[T] = {
+    Nil
+}
+
 def listEmpty[T](defaultValue: T): List[T] = {
-    new Nil[T](defaultValue)
+    Nil
 }
 
 def listCons[T](head: T, tail: List[T]): List[T] = {
@@ -248,7 +272,7 @@ def listCons[T](head: T, tail: List[T]): List[T] = {
 
 def listAppend[T](values: List[T], value: T): List[T] = {
     if values.isEmpty() {
-        listCons[T](value, listEmpty[T](values.emptyDefault()))
+        listCons[T](value, listEmpty[T]())
     } else {
         listCons[T](values.head(), listAppend[T](values.tail(), value))
     }
@@ -272,7 +296,7 @@ def listReverseInto[T](values: List[T], suffix: List[T]): List[T] = {
 
 def listTake[T](values: List[T], n: Int): List[T] = {
     if n <= 0 || values.isEmpty() {
-        listEmpty[T](values.emptyDefault())
+        listEmpty[T]()
     } else {
         listCons[T](values.head(), listTake[T](values.tail(), n - 1))
     }
@@ -302,30 +326,42 @@ def listFold[T, U](values: List[T], initial: U, f: (U, T) => U): U = {
     }
 }
 
-def listMap[T, U](values: List[T], defaultValue: U, f: (T) => U): List[U] = {
+def listMap[T, U](values: List[T], f: (T) => U): List[U] = {
     if values.isEmpty() {
-        listEmpty[U](defaultValue)
+        listEmpty[U]()
     } else {
-        listCons[U](f(values.head()), listMap[T, U](values.tail(), defaultValue, f))
+        listCons[U](f(values.head()), listMap[T, U](values.tail(), f))
     }
 }
 
-def listFilter[T](values: List[T], defaultValue: T, predicate: (T) => Bool): List[T] = {
+def listMap[T, U](values: List[T], defaultValue: U, f: (T) => U): List[U] = {
+    listMap[T, U](values, f)
+}
+
+def listFilter[T](values: List[T], predicate: (T) => Bool): List[T] = {
     if values.isEmpty() {
-        listEmpty[T](defaultValue)
+        listEmpty[T]()
     } else {
         if predicate(values.head()) {
-            listCons[T](values.head(), listFilter[T](values.tail(), defaultValue, predicate))
+            listCons[T](values.head(), listFilter[T](values.tail(), predicate))
         } else {
-            listFilter[T](values.tail(), defaultValue, predicate)
+            listFilter[T](values.tail(), predicate)
         }
     }
 }
 
-def listFromArrayFrom[T](values: Array[T], defaultValue: T, index: Int): List[T] = {
+def listFilter[T](values: List[T], defaultValue: T, predicate: (T) => Bool): List[T] = {
+    listFilter[T](values, predicate)
+}
+
+def listFromArrayFrom[T](values: Array[T], index: Int): List[T] = {
     if index >= values.size() {
-        listEmpty[T](defaultValue)
+        listEmpty[T]()
     } else {
-        listCons[T](values.get(index), listFromArrayFrom[T](values, defaultValue, index + 1))
+        listCons[T](values.get(index), listFromArrayFrom[T](values, index + 1))
     }
+}
+
+def listFromArrayFrom[T](values: Array[T], defaultValue: T, index: Int): List[T] = {
+    listFromArrayFrom[T](values, index)
 }

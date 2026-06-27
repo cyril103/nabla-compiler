@@ -1,0 +1,1 @@
+tests/test_error_nil_no_global_generic_covariance.nabla:7:5: semantic error: Déclaration invalide pour 'animals': type 'Box[Animal]' attendu, 'Box[Cat]' reçu

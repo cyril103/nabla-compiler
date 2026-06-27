@@ -1,0 +1,9 @@
+class Animal() {}
+class Cat extends Animal() {}
+class Box[T](val value: T) {}
+
+def main(): Int = {
+    val cats: Box[Cat] = new Box[Cat](new Cat())
+    val animals: Box[Animal] = cats
+    42
+}
