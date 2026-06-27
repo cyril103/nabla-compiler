@@ -193,12 +193,6 @@ object List {
         listEmpty[T]()
     }
 
-    /// Construit une liste vide. Compatibilite V0: defaultValue est ignore.
-    /// @signature def List.empty[T](defaultValue: T): List[T]
-    /// @status Compatibilite
-    def empty[T](defaultValue: T): List[T] = {
-        listEmpty[T]()
-    }
 
     /// Ajoute un element en tete.
     /// @signature def List.cons[T](head: T, tail: List[T]): List[T]
@@ -221,12 +215,6 @@ object List {
         listMap[T, U](values, f)
     }
 
-    /// Transforme chaque element. Compatibilite V0: defaultValue est ignore.
-    /// @signature def List.map[T, U](values: List[T], defaultValue: U, f: (T) => U): List[U]
-    /// @status Compatibilite
-    def map[T, U](values: List[T], defaultValue: U, f: (T) => U): List[U] = {
-        listMap[T, U](values, f)
-    }
 
     /// Conserve les elements qui verifient predicate.
     /// @signature def List.filter[T](values: List[T], predicate: (T) => Bool): List[T]
@@ -235,24 +223,11 @@ object List {
         listFilter[T](values, predicate)
     }
 
-    /// Conserve les elements qui verifient predicate. Compatibilite V0: defaultValue est ignore.
-    /// @signature def List.filter[T](values: List[T], defaultValue: T, predicate: (T) => Bool): List[T]
-    /// @status Compatibilite
-    def filter[T](values: List[T], defaultValue: T, predicate: (T) => Bool): List[T] = {
-        listFilter[T](values, predicate)
-    }
 
     /// Convertit un Array[T] public en List[T].
     /// @signature def List.fromArray[T](values: Array[T]): List[T]
     /// @status Recommandee
     def fromArray[T](values: Array[T]): List[T] = {
-        listFromArrayFrom[T](values, 0)
-    }
-
-    /// Convertit un Array[T] public en List[T]. Compatibilite V0: defaultValue est ignore.
-    /// @signature def List.fromArray[T](values: Array[T], defaultValue: T): List[T]
-    /// @status Compatibilite
-    def fromArray[T](values: Array[T], defaultValue: T): List[T] = {
         listFromArrayFrom[T](values, 0)
     }
 
@@ -262,9 +237,6 @@ def listEmpty[T](): List[T] = {
     Nil
 }
 
-def listEmpty[T](defaultValue: T): List[T] = {
-    Nil
-}
 
 def listCons[T](head: T, tail: List[T]): List[T] = {
     new Cons[T](head, tail)
@@ -334,9 +306,6 @@ def listMap[T, U](values: List[T], f: (T) => U): List[U] = {
     }
 }
 
-def listMap[T, U](values: List[T], defaultValue: U, f: (T) => U): List[U] = {
-    listMap[T, U](values, f)
-}
 
 def listFilter[T](values: List[T], predicate: (T) => Bool): List[T] = {
     if values.isEmpty() {
@@ -350,18 +319,10 @@ def listFilter[T](values: List[T], predicate: (T) => Bool): List[T] = {
     }
 }
 
-def listFilter[T](values: List[T], defaultValue: T, predicate: (T) => Bool): List[T] = {
-    listFilter[T](values, predicate)
-}
-
 def listFromArrayFrom[T](values: Array[T], index: Int): List[T] = {
     if index >= values.size() {
         listEmpty[T]()
     } else {
         listCons[T](values.get(index), listFromArrayFrom[T](values, index + 1))
     }
-}
-
-def listFromArrayFrom[T](values: Array[T], defaultValue: T, index: Int): List[T] = {
-    listFromArrayFrom[T](values, index)
 }

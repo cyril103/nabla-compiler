@@ -5,9 +5,9 @@ def sum(values: List[Int]): Int = {
 }
 
 def main(): Int = {
-    val xs = List.cons[Int](1, List.cons[Int](2, List.cons[Int](39, List.empty[Int](0))))
-    val ys = List.map[Int, Int](xs, 0, (x: Int) => { x + 1 })
-    val zs = List.filter[Int](ys, 0, (x: Int) => { x > 3 })
+    val xs = List.cons[Int](1, List.cons[Int](2, List.cons[Int](39, List.empty[Int]())))
+    val ys = List.map[Int, Int](xs, (x: Int) => { x + 1 })
+    val zs = List.filter[Int](ys, (x: Int) => { x > 3 })
     if sum(xs) == 42 && sum(ys) == 45 && sum(zs) == 40 && xs.mkString(",") == "1,2,39" {
         42
     } else {
