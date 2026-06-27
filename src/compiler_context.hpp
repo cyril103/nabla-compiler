@@ -723,6 +723,12 @@ inline bool isTypeAssignable(
     auto actualParameterized = parameterizedTypeFromName(actualType);
     auto expectedParameterized = parameterizedTypeFromName(expectedType);
     if (actualParameterized && expectedParameterized &&
+        actualParameterized->first == "List" && expectedParameterized->first == "List" &&
+        actualParameterized->second.size() == 1 && expectedParameterized->second.size() == 1 &&
+        actualParameterized->second[0] == "Nothing") {
+        return true;
+    }
+    if (actualParameterized && expectedParameterized &&
         actualParameterized->first == "Array" &&
         expectedParameterized->first == "ArrayObject" &&
         actualParameterized->second == expectedParameterized->second) {
@@ -761,6 +767,19 @@ inline bool isTypeAssignable(
     const std::string& expectedType) {
     std::set<std::string> visiting;
     return isTypeAssignable(context, actualType, expectedType, visiting);
+}
+
+inline bool exactOrBottomListAssignable(
+    const CompilerContext& context,
+    const std::string& actualType,
+    const std::string& expectedType) {
+    if (actualType == expectedType) return true;
+    const auto expectedParameterized = parameterizedTypeFromName(expectedType);
+    if (!expectedParameterized || expectedParameterized->first != "List" ||
+        expectedParameterized->second.size() != 1) {
+        return false;
+    }
+    return isTypeAssignable(context, actualType, expectedType);
 }
 
 inline void collectClassMethodLookupCandidates(
@@ -864,7 +883,7 @@ inline ClassMethodOverloadMatches exactClassMethodOverloadMatches(
         bool compatible = true;
         for (size_t i = 0; i < actualArgumentTypes.size(); ++i) {
             const std::string expectedType = expectedArgumentTypeAt(signature, i, substitution);
-            if (expectedType != actualArgumentTypes[i]) {
+            if (!exactOrBottomListAssignable(context, actualArgumentTypes[i], expectedType)) {
                 compatible = false;
                 break;
             }
@@ -1169,7 +1188,7 @@ inline FunctionOverloadMatches exactFunctionOverloadMatches(
         bool compatible = true;
         for (size_t i = 0; i < actualArgumentTypes.size(); ++i) {
             const std::string expectedType = expectedArgumentTypeAt(*signature, i, substitution);
-            if (expectedType != actualArgumentTypes[i]) {
+            if (!exactOrBottomListAssignable(context, actualArgumentTypes[i], expectedType)) {
                 compatible = false;
                 break;
             }

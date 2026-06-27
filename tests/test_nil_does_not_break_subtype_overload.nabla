@@ -1,0 +1,14 @@
+class Animal() {}
+class Cat extends Animal() {}
+
+def pick(value: Animal): Int = {
+    1
+}
+
+def pick(value: Cat): Int = {
+    42
+}
+
+def main(): Int = {
+    pick(new Cat())
+}

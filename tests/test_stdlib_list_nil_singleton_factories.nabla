@@ -1,0 +1,16 @@
+import collections.list
+import collections.array
+
+def main(): Int = {
+    val empty = List.empty[Int]()
+    val xs = List.cons[Int](1, List.cons[Int](2, List.cons[Int](39, Nil)))
+    val mapped = List.map[Int, Int](xs, (x: Int) => { x + 1 })
+    val filtered = List.filter[Int](mapped, (x: Int) => { x > 3 })
+    val arr = Array(5, 6, 31)
+    val fromArr = List.fromArray[Int](arr)
+    if empty.isEmpty() && filtered.mkString(",") == "40" && fromArr.mkString(",") == "5,6,31" {
+        42
+    } else {
+        1
+    }
+}

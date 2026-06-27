@@ -51,9 +51,9 @@ pour garder un cap clair après le tag `v0.1.0`.
     `difference`
   - `collections.map` avec `Map[K, V]`, recherche optionnelle, mises a jour
     immutables et conversions cle/valeur
-  - `collections.list` V0 experimentale avec `List[T]`, `Nil[T](defaultValue)`,
-    `Cons[T]`, fabriques `List.empty` / `List.cons`, operations compagnon
-    `fold`, `map`, `filter` et conversion depuis `Array[T]`
+  - `collections.list` V0 experimentale avec `List[T]`, le singleton `Nil` de
+    type `List[Nothing]`, `Cons[T]`, fabriques `List.empty` / `List.cons`,
+    operations compagnon `fold`, `map`, `filter` et conversion depuis `Array[T]`
   - `Option[T]`
   - operations `String`
   - I/O console et fichiers texte

@@ -1,0 +1,11 @@
+import collections.list
+
+def main(): Int = {
+    val empty: List[Int] = Nil
+    val xs = List.cons[Int](1, List.cons[Int](41, Nil))
+    if empty.isEmpty() && xs.tail().tail().isEmpty() && xs.mkString(",") == "1,41" {
+        42
+    } else {
+        1
+    }
+}

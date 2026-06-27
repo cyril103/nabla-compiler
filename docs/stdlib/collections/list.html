@@ -21,12 +21,12 @@
       <p class="eyebrow">Module</p>
       <h1>List</h1>
       <p class="import"><code>import collections.list</code></p>
-      <p>Liste chainee immutable experimentale. List[T] est inspiree de Scala, mais la V0 utilise encore Nil[T](defaultValue) au lieu d&#x27;un singleton Nil polymorphe. Utiliser List.empty[T](defaultValue) et List.cons[T](head, tail) pour construire les listes.</p>
+      <p>Liste chainee immutable experimentale. List[T] est inspiree de Scala. La liste vide est le singleton runtime `Nil`, declare comme `List[Nothing]` et assignable a `List[T]`. Utiliser `List.empty[T]()` et `List.cons[T](head, tail)` pour construire les listes.</p>
       <figure class="example">
         <figcaption>Construire et lire une liste</figcaption>
         <pre><code>import collections.list
 
-val xs = List.cons[Int](1, List.cons[Int](2, List.empty[Int](0)))
+val xs = List.cons[Int](1, List.cons[Int](2, Nil))
 xs.head() + xs.tail().head()</code></pre>
       </figure>
     </section>
@@ -37,19 +37,23 @@ xs.head() + xs.tail().head()</code></pre>
         <h3>Types</h3>
         <ul>
         <li><a href="#List" title="trait List[T]"><span>List</span><code>trait List[T]</code></a></li>
-        <li><a href="#Nil" title="class Nil[T](defaultValue: T) with List[T]"><span>Nil</span><code>class Nil[T](defaultValue: T) with List[T]</code></a></li>
+        <li><a href="#Nil" title="object Nil extends List[Nothing]"><span>Nil</span><code>object Nil extends List[Nothing]</code></a></li>
         <li><a href="#Cons" title="class Cons[T](val head: T, val tail: List[T]) with List[T]"><span>Cons</span><code>class Cons[T](val head: T, val tail: List[T]) with List[T]</code></a></li>
         </ul>
       </section>
       <section class="toc-group">
         <h3>Constructeurs et fabriques</h3>
         <ul>
-        <li><a href="#empty" title="def List.empty[T](defaultValue: T): List[T]"><span>empty</span><code>def List.empty[T](defaultValue: T): List[T]</code></a></li>
+        <li><a href="#empty" title="def List.empty[T](): List[T]"><span>empty</span><code>def List.empty[T](): List[T]</code></a></li>
+        <li><a href="#empty-2" title="def List.empty[T](defaultValue: T): List[T]"><span>empty</span><code>def List.empty[T](defaultValue: T): List[T]</code></a></li>
         <li><a href="#cons" title="def List.cons[T](head: T, tail: List[T]): List[T]"><span>cons</span><code>def List.cons[T](head: T, tail: List[T]): List[T]</code></a></li>
         <li><a href="#fold" title="def List.fold[T, U](values: List[T], initial: U, f: (U, T) =&gt; U): U"><span>fold</span><code>def List.fold[T, U](values: List[T], initial: U, f: (U, T) =&gt; U): U</code></a></li>
-        <li><a href="#map" title="def List.map[T, U](values: List[T], defaultValue: U, f: (T) =&gt; U): List[U]"><span>map</span><code>def List.map[T, U](values: List[T], defaultValue: U, f: (T) =&gt; U): List[U]</code></a></li>
-        <li><a href="#filter" title="def List.filter[T](values: List[T], defaultValue: T, predicate: (T) =&gt; Bool): List[T]"><span>filter</span><code>def List.filter[T](values: List[T], defaultValue: T, predicate: (T) =&gt; Bool): List[T]</code></a></li>
-        <li><a href="#fromArray" title="def List.fromArray[T](values: Array[T], defaultValue: T): List[T]"><span>fromArray</span><code>def List.fromArray[T](values: Array[T], defaultValue: T): List[T]</code></a></li>
+        <li><a href="#map" title="def List.map[T, U](values: List[T], f: (T) =&gt; U): List[U]"><span>map</span><code>def List.map[T, U](values: List[T], f: (T) =&gt; U): List[U]</code></a></li>
+        <li><a href="#map-2" title="def List.map[T, U](values: List[T], defaultValue: U, f: (T) =&gt; U): List[U]"><span>map</span><code>def List.map[T, U](values: List[T], defaultValue: U, f: (T) =&gt; U): List[U]</code></a></li>
+        <li><a href="#filter" title="def List.filter[T](values: List[T], predicate: (T) =&gt; Bool): List[T]"><span>filter</span><code>def List.filter[T](values: List[T], predicate: (T) =&gt; Bool): List[T]</code></a></li>
+        <li><a href="#filter-2" title="def List.filter[T](values: List[T], defaultValue: T, predicate: (T) =&gt; Bool): List[T]"><span>filter</span><code>def List.filter[T](values: List[T], defaultValue: T, predicate: (T) =&gt; Bool): List[T]</code></a></li>
+        <li><a href="#fromArray" title="def List.fromArray[T](values: Array[T]): List[T]"><span>fromArray</span><code>def List.fromArray[T](values: Array[T]): List[T]</code></a></li>
+        <li><a href="#fromArray-2" title="def List.fromArray[T](values: Array[T], defaultValue: T): List[T]"><span>fromArray</span><code>def List.fromArray[T](values: Array[T], defaultValue: T): List[T]</code></a></li>
         </ul>
       </section>
       <section class="toc-group">
@@ -107,7 +111,7 @@ xs.head() + xs.tail().head()</code></pre>
           </div>
           <h2>head</h2>
           <pre class="signature"><code>def head(): T</code></pre>
-          <p>Retourne la tete de liste, ou la valeur par defaut du Nil V0.</p>
+          <p>Retourne la tete de liste.</p>
 
         </article>
         <article class="entry" id="tail">
@@ -220,12 +224,12 @@ xs.head() + xs.tail().head()</code></pre>
         </article>
         <article class="entry" id="Nil">
           <div class="entry-meta">
-            <span class="kind">class</span> <span class="status compat">Compatibilite</span>
+            <span class="kind">object</span> <span class="status recommended">Recommandee</span>
           </div>
           <h2>Nil</h2>
-          <pre class="signature"><code>class Nil[T](defaultValue: T) with List[T]</code></pre>
-          <p>Liste vide V0.</p>
-<p>Nil[T](defaultValue) est une representation temporaire : la valeur par defaut sert seulement a donner un resultat a head() tant que le langage ne dispose pas de singleton Nil polymorphe.</p>
+          <pre class="signature"><code>object Nil extends List[Nothing]</code></pre>
+          <p>Liste vide singleton, Scala-like.</p>
+<p>`Nil` est un objet runtime qui implemente `List[Nothing]`. Comme `Nothing` est le type bottom, `Nil` peut etre utilise partout ou une `List[T]` est attendue.</p>
 
         </article>
         <article class="entry" id="Cons">
@@ -239,11 +243,20 @@ xs.head() + xs.tail().head()</code></pre>
         </article>
         <article class="entry" id="empty">
           <div class="entry-meta">
-            <span class="kind">def</span> <span class="status experimental">Experimentale</span>
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>empty</h2>
+          <pre class="signature"><code>def List.empty[T](): List[T]</code></pre>
+          <p>Construit une liste vide.</p>
+
+        </article>
+        <article class="entry" id="empty-2">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status compat">Compatibilite</span>
           </div>
           <h2>empty</h2>
           <pre class="signature"><code>def List.empty[T](defaultValue: T): List[T]</code></pre>
-          <p>Construit une liste vide V0.</p>
+          <p>Construit une liste vide. Compatibilite V0: defaultValue est ignore.</p>
 
         </article>
         <article class="entry" id="cons">
@@ -269,8 +282,17 @@ xs.head() + xs.tail().head()</code></pre>
             <span class="kind">def</span> <span class="status recommended">Recommandee</span>
           </div>
           <h2>map</h2>
-          <pre class="signature"><code>def List.map[T, U](values: List[T], defaultValue: U, f: (T) =&gt; U): List[U]</code></pre>
+          <pre class="signature"><code>def List.map[T, U](values: List[T], f: (T) =&gt; U): List[U]</code></pre>
           <p>Transforme chaque element.</p>
+
+        </article>
+        <article class="entry" id="map-2">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status compat">Compatibilite</span>
+          </div>
+          <h2>map</h2>
+          <pre class="signature"><code>def List.map[T, U](values: List[T], defaultValue: U, f: (T) =&gt; U): List[U]</code></pre>
+          <p>Transforme chaque element. Compatibilite V0: defaultValue est ignore.</p>
 
         </article>
         <article class="entry" id="filter">
@@ -278,17 +300,35 @@ xs.head() + xs.tail().head()</code></pre>
             <span class="kind">def</span> <span class="status recommended">Recommandee</span>
           </div>
           <h2>filter</h2>
-          <pre class="signature"><code>def List.filter[T](values: List[T], defaultValue: T, predicate: (T) =&gt; Bool): List[T]</code></pre>
+          <pre class="signature"><code>def List.filter[T](values: List[T], predicate: (T) =&gt; Bool): List[T]</code></pre>
           <p>Conserve les elements qui verifient predicate.</p>
+
+        </article>
+        <article class="entry" id="filter-2">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status compat">Compatibilite</span>
+          </div>
+          <h2>filter</h2>
+          <pre class="signature"><code>def List.filter[T](values: List[T], defaultValue: T, predicate: (T) =&gt; Bool): List[T]</code></pre>
+          <p>Conserve les elements qui verifient predicate. Compatibilite V0: defaultValue est ignore.</p>
 
         </article>
         <article class="entry" id="fromArray">
           <div class="entry-meta">
-            <span class="kind">def</span> <span class="status experimental">Experimentale</span>
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>fromArray</h2>
+          <pre class="signature"><code>def List.fromArray[T](values: Array[T]): List[T]</code></pre>
+          <p>Convertit un Array[T] public en List[T].</p>
+
+        </article>
+        <article class="entry" id="fromArray-2">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status compat">Compatibilite</span>
           </div>
           <h2>fromArray</h2>
           <pre class="signature"><code>def List.fromArray[T](values: Array[T], defaultValue: T): List[T]</code></pre>
-          <p>Convertit un Array[T] public en List[T].</p>
+          <p>Convertit un Array[T] public en List[T]. Compatibilite V0: defaultValue est ignore.</p>
 
         </article>
       </section>

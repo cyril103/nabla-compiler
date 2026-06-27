@@ -91,17 +91,19 @@ pas comme cible idiomatique pour le code applicatif.
   - `filterKeys(predicate)`
   - `mkString(separator)` et `toString()`
 - `List[T]` (**experimentale**)
-  - `List.empty[T](defaultValue)` et `List.cons[T](head, tail)`
+  - `Nil` est le singleton vide runtime, declare comme `List[Nothing]` et
+    assignable a `List[T]`.
+  - `List.empty[T]()` / compatibilite `List.empty[T](defaultValue)`, et
+    `List.cons[T](head, tail)`
   - `isEmpty()`, `nonEmpty()`, `size()`, `foreach(f)`, `head()`, `tail()`,
     `headOption()`, `prepend(value)`, `prepended(value)`, `appended(value)`,
     `concat(suffix)`, `reverse()`, `reverseConcat(suffix)`, `take(n)`,
     `drop(n)`, `slice(from, until)` et `mkString(separator)`
   - operations generiques via compagnon : `List.fold[T, U](values, initial, f)`,
-    `List.map[T, U](values, defaultValue, f)`,
-    `List.filter[T](values, defaultValue, predicate)` et
-    `List.fromArray[T](values, defaultValue)`
-  - `Nil[T](defaultValue)` est temporaire jusqu'au design de `object Nil`,
-    `Nothing` et variance ; `Array[T]` reste la collection indexee principale.
+    `List.map[T, U](values, f)` / compatibilite avec `defaultValue`,
+    `List.filter[T](values, predicate)` / compatibilite avec `defaultValue`, et
+    `List.fromArray[T](values)` / compatibilite avec `defaultValue`
+  - `Array[T]` reste la collection indexee principale.
 
 `ArrayObject[T]`, les facades de tableaux specialisees, `Set[T]`, `Map[K, V]` et
 `List[T]` implementent `Iterable[...]` pour permettre un `foreach` polymorphe.
