@@ -1,0 +1,7 @@
+def main(): Int = {
+    val offset = 2
+    val thunk: () => Int = () => {
+        40 + offset
+    }
+    thunk()
+}

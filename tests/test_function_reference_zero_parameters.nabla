@@ -1,0 +1,12 @@
+def answer(): Int = {
+    42
+}
+
+def call(thunk: () => Int): Int = {
+    thunk()
+}
+
+def main(): Int = {
+    val thunk: () => Int = answer
+    call(thunk)
+}

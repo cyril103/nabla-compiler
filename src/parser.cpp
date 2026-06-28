@@ -750,7 +750,11 @@ std::unique_ptr<ASTNode> Parser::parseForExpression() {
 bool Parser::startsLambdaExpression() const {
     if (peek().type != TokenType::LPAREN) return false;
     size_t cursor = index + 1;
-    if (cursor >= tokens.size() || tokens[cursor].type == TokenType::RPAREN) return false;
+    if (cursor >= tokens.size()) return false;
+    if (tokens[cursor].type == TokenType::RPAREN) {
+        ++cursor;
+        return cursor < tokens.size() && tokens[cursor].type == TokenType::FAT_ARROW;
+    }
 
     while (cursor < tokens.size()) {
         if (tokens[cursor].type != TokenType::IDENTIFIER) return false;
@@ -805,7 +809,11 @@ bool Parser::startsInferredLambdaExpressionAt(size_t cursor) const {
     }
     if (tokens[cursor].type != TokenType::LPAREN) return false;
     ++cursor;
-    if (cursor >= tokens.size() || tokens[cursor].type == TokenType::RPAREN) return false;
+    if (cursor >= tokens.size()) return false;
+    if (tokens[cursor].type == TokenType::RPAREN) {
+        ++cursor;
+        return cursor < tokens.size() && tokens[cursor].type == TokenType::FAT_ARROW;
+    }
 
     while (cursor < tokens.size()) {
         if (tokens[cursor].type != TokenType::IDENTIFIER) return false;
@@ -850,11 +858,6 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
         } else if (peek().type != TokenType::RPAREN) {
             throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ')' attendu après le paramètre");
         }
-    }
-    if (parameters.empty()) {
-        throw CompilerError(
-            ErrorKind::Parser, start.location,
-            "les lambdas doivent avoir au moins un paramètre");
     }
     consume(TokenType::RPAREN, "Parenthèse fermante attendue après le paramètre de lambda");
     consume(TokenType::FAT_ARROW, "'=>' attendu après le paramètre de lambda");
@@ -1066,10 +1069,11 @@ std::unique_ptr<ASTNode> Parser::parseFunctionReferenceWithExpectedType(const st
         return nullptr;
     }
     const auto overloadNames = functionOverloadNames(context, name);
-    if (overloadNames.size() <= 1) {
+    if (overloadNames.empty()) {
         return nullptr;
     }
 
+    const size_t referenceStartIndex = index;
     consume(TokenType::IDENTIFIER, "");
     std::vector<std::string> typeArguments;
     if (peek().type == TokenType::LBRACKET) {
@@ -1087,9 +1091,8 @@ std::unique_ptr<ASTNode> Parser::parseFunctionReferenceWithExpectedType(const st
         consume(TokenType::RBRACKET, "']' attendu après les arguments de type");
     }
     if (peek().type == TokenType::LPAREN) {
-        throw CompilerError(
-            ErrorKind::Parser, nameToken.location,
-            "référence de fonction attendue, appel trouvé: " + name);
+        index = referenceStartIndex;
+        return nullptr;
     }
 
     struct FunctionReferenceOverloadMatch {
@@ -1138,6 +1141,10 @@ std::unique_ptr<ASTNode> Parser::parseFunctionReferenceWithExpectedType(const st
         match = genericMatches[0];
     }
     if (!match) {
+        if (overloadNames.size() == 1) {
+            index = referenceStartIndex;
+            return nullptr;
+        }
         std::string candidates = formatFunctionOverloadCandidates(context, name);
         if (concreteMatches.size() > 1 ||
             (concreteMatches.empty() && genericMatches.size() > 1)) {

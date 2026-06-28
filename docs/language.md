@@ -649,7 +649,8 @@ identity(42)
 
 ## Fonctions Valeurs Et Lambdas
 
-Les types fonction s'ecrivent avec une syntaxe parenthesee.
+Les types fonction s'ecrivent avec une syntaxe parenthesee. La liste de
+parametres peut etre vide pour exprimer un thunk zero-argument `() => T`.
 
 ```nabla
 def apply(value: Int, f: (Int) => Int): Int = {
@@ -658,6 +659,19 @@ def apply(value: Int, f: (Int) => Int): Int = {
 
 def main(): Int = {
     apply(41, value => value + 1)
+}
+```
+
+```nabla
+def eval(thunk: () => Int): Int = {
+    thunk()
+}
+
+def main(): Int = {
+    val thunk: () => Int = () => {
+        42
+    }
+    eval(thunk)
 }
 ```
 

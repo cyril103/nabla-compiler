@@ -118,10 +118,11 @@ Le pipeline implemente actuellement :
   surcharge unique, y compris apres inference de type depuis les arguments deja
   lus d'une methode generique, et les cas ambigus produisent un diagnostic dedie;
 - types fonction-valeur canoniques `Fn(...)->...`, references de fonctions
-  nommees et appels indirects, avec lambdas sans capture `(x: Int) => { ... }` et
-  `(acc: Int, value: Int) => { ... }`, y compris l'appel direct d'une expression
-  retournant une fonction comme `makeAdder(10)(32)`, ainsi que les `def`
-  curryfies globaux a une liste supplementaire comme `def sum(f)(a, b): Int`;
+  nommees et appels indirects, avec lambdas sans capture `() => { ... }`,
+  `(x: Int) => { ... }` et `(acc: Int, value: Int) => { ... }`, y compris
+  l'appel direct d'une expression retournant une fonction comme
+  `makeAnswer()()` ou `makeAdder(10)(32)`, ainsi que les `def` curryfies
+  globaux a une liste supplementaire comme `def sum(f)(a, b): Int`;
 - closures avec capture par valeur pour les lambdas de types fonction
   canoniques;
 - representation interne canonique des types fonction sous forme `Fn(...)->...`;
@@ -164,8 +165,8 @@ Le pipeline implemente actuellement :
 - inference des arguments de type des fonctions generiques depuis les arguments
   d'appel, y compris pour typer une lambda suivante comme dans
   `applyOnce(41, value => value + 1)`;
-- lambdas et appels indirects avec plusieurs parametres, dans les limites de la
-  convention d'appel actuelle;
+- lambdas et appels indirects avec zero, un ou plusieurs parametres, dans les
+  limites de la convention d'appel actuelle;
 - closures testees avec parametres, captures et retours non limites a `Int`;
 - champs de type fonction appelables depuis les methodes de leur classe;
 - inference du type du parametre pour les lambdas mono-parametre en position
@@ -919,6 +920,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter les types fonction et lambdas zero-argument `() => T` / `() => { ... }` : representation canonique `Fn()->T`, inference en argument attendu, references de fonctions zero-parametre comme valeurs, appels indirects et closures avec capture par valeur. Ce jalon prepare l'etude d'un futur passage d'argument par nom sur base de thunks.
+  - Fichiers / tests associes: `src/compiler_context.hpp`, `src/parser.cpp`, `tests/test_lambda_zero_parameters*.nabla`, `tests/test_function_reference_zero_parameters.nabla`, `tests/test_function_returning_zero_parameter_lambda.nabla`, `tests/test_overloaded_function_returning_zero_parameter_lambda_argument.nabla`, `docs/language.md`, `docs/internals.md`, `docs/roadmap.md`, `make all-tests`.
 
 - `local` - Ajouter les champs constructeur `var` : parser, getters
   synthétiques, affectation interne typée vers les slots objet, diagnostics

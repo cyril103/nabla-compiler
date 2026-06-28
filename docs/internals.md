@@ -231,9 +231,11 @@ Les types fonction sont canoniques sous la forme interne :
 
 ```text
 Fn(T1,T2)->R
+Fn()->R
 ```
 
-La syntaxe source `(T1, T2) => R` est abaissée vers cette représentation.
+La syntaxe source `(T1, T2) => R` est abaissée vers cette représentation; la
+forme zero-argument `() => R` est representee par `Fn()->R`.
 Cette forme canonique est celle utilisee pour comparer les signatures, typer les
 annotations locales, resoudre les references de fonctions et representer les
 champs de type fonction.

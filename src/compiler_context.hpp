@@ -1055,7 +1055,6 @@ inline bool isFunctionTypeName(const std::string& type) {
 
 inline std::optional<std::string> functionNameForType(
     const CompilerContext::FunctionType& functionType) {
-    if (functionType.parameterTypes.empty()) return std::nullopt;
     return formatFunctionType(functionType);
 }
 

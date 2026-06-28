@@ -1,0 +1,19 @@
+def make(): () => Int = {
+    () => {
+        40
+    }
+}
+
+def make(value: Int): () => Int = {
+    () => {
+        value
+    }
+}
+
+def call(thunk: () => Int): Int = {
+    thunk()
+}
+
+def main(): Int = {
+    call(make(42))
+}
