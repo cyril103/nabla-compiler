@@ -1572,10 +1572,11 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
 FunctionCallNode::FunctionCallNode(
     std::string functionName, std::vector<std::unique_ptr<ASTNode>> args,
     std::vector<std::string> genericTypeArguments, std::string initialResolvedType,
-    std::string userFacingName)
+    std::string userFacingName, std::vector<bool> initialReturnFunctionByNameParameters)
     : name(std::move(functionName)), resolvedFunctionName(name), diagnosticName(std::move(userFacingName)),
       arguments(std::move(args)), typeArguments(std::move(genericTypeArguments)),
-      resolvedType(std::move(initialResolvedType)) {}
+      resolvedType(std::move(initialResolvedType)),
+      returnFunctionByNameParameters(std::move(initialReturnFunctionByNameParameters)) {}
 
 std::string FunctionCallNode::getType() {
     if (name == "print") return "Unit";
@@ -1801,6 +1802,7 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
         resolvedType = function->second.returnType;
         resolvedParameterTypes = parameterTypes(function->second.parameters);
         resolvedParameters = function->second.parameters;
+        returnFunctionByNameParameters = function->second.returnFunctionByNameParameters;
         resolvedTypeArguments.clear();
         return;
     }
@@ -1830,6 +1832,7 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
     resolvedType = substituteType(function->second.returnType, *substitution);
     resolvedParameterTypes = parameterTypes(parameters);
     resolvedParameters = parameters;
+    returnFunctionByNameParameters = function->second.returnFunctionByNameParameters;
     resolvedTypeArguments = orderedTypeArguments(function->second.typeParameters, *substitution);
 }
 
@@ -2034,9 +2037,11 @@ std::string FunctionValueCallNode::lowerToIR(IRBuilder& builder) const {
 
 FunctionExpressionCallNode::FunctionExpressionCallNode(
     std::string functionName, std::unique_ptr<ASTNode> functionExpression,
-    std::vector<std::unique_ptr<ASTNode>> args, std::string initialResolvedType)
+    std::vector<std::unique_ptr<ASTNode>> args, std::string initialResolvedType,
+    std::vector<bool> initialReturnFunctionByNameParameters)
     : name(std::move(functionName)), callee(std::move(functionExpression)), arguments(std::move(args)),
-      resolvedType(std::move(initialResolvedType)) {}
+      resolvedType(std::move(initialResolvedType)),
+      returnFunctionByNameParameters(std::move(initialReturnFunctionByNameParameters)) {}
 
 std::string FunctionExpressionCallNode::getType() {
     return resolvedType;

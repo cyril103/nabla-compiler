@@ -1,0 +1,15 @@
+class Counter(var value: Int) {
+    def next(): Int = {
+        value = value + 1
+        value
+    }
+}
+
+def fill3(seed: Int)(elem: => Int): Int = {
+    elem * 100 + elem * 10 + elem + seed
+}
+
+def main(): Int = {
+    val counter = new Counter(0)
+    fill3(0)(counter.next())
+}

@@ -688,6 +688,32 @@ def main(): Int = {
 Les champs de classe de type fonction peuvent aussi etre appeles depuis les
 methodes de la classe.
 
+Les paramètres de fonction peuvent être déclarés par nom avec une syntaxe
+Scala-like `name: => T`. Le compilateur les abaisse vers un thunk zéro-argument
+`name: () => T`: l'appelant fournit une expression normale, et chaque usage de
+`name` dans le corps réévalue cette expression.
+
+```nabla
+class Counter(var value: Int) {
+    def next(): Int = {
+        value = value + 1
+        value
+    }
+}
+
+def twice(x: => Int): Int = {
+    x + x
+}
+
+def main(): Int = {
+    val counter = new Counter(0)
+    twice(counter.next()) // 1 + 2 == 3
+}
+```
+
+La forme `=> T` est réservée aux positions paramètre; pour stocker explicitement
+un thunk dans une valeur ou un champ, utilisez `() => T`.
+
 ## Chaines
 
 Operations disponibles sur `String` :

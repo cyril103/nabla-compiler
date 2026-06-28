@@ -9,9 +9,9 @@ pour garder un cap clair après le tag `v0.1.0`.
   Le compilateur signale explicitement une commande externe introuvable comme
   `nasm` ou `ld`.
 - Typage statique avec fonctions, fonctions locales de bloc, methodes, classes,
-  generiques simples et lambdas; les paramètres constructeur `val` et `var`
-  génèrent des getters, et les champs `var` sont réassignables depuis les
-  méthodes de leur classe.
+  generiques simples, lambdas et paramètres par nom `=> T` abaissés en thunks
+  zero-argument; les paramètres constructeur `val` et `var` génèrent des getters,
+  et les champs `var` sont réassignables depuis les méthodes de leur classe.
 - Les `def` sans liste de parametres declarent des proprietes calculees
   zero-argument reutilisant les fonctions/methodes existantes: `def pi: Double`
   est utilisable comme `pi`, `Config.base` appelle `Config.base()`,

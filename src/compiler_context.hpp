@@ -22,6 +22,7 @@ struct CompilerContext {
         SourceLocation location;
         bool isRepeated = false;
         std::string repeatedElementType = "";
+        bool isByName = false;
     };
 
     struct FunctionSignature {
@@ -33,6 +34,7 @@ struct CompilerContext {
         bool isOverride = false;
         bool isAbstract = false;
         bool isSyntheticAccessor = false;
+        std::vector<bool> returnFunctionByNameParameters;
     };
 
     struct FieldInfo {
@@ -311,16 +313,31 @@ inline std::vector<std::string> splitTopLevelTypes(const std::string& types) {
 
 inline std::optional<CompilerContext::FunctionType> functionTypeFromName(const std::string& type) {
     const std::string prefix = "Fn(";
-    const std::string arrow = ")->";
     if (type.rfind(prefix, 0) != 0) return std::nullopt;
-    size_t arrowPosition = type.find(arrow, prefix.size());
+
+    int parenDepth = 0;
+    int bracketDepth = 0;
+    size_t arrowPosition = std::string::npos;
+    for (size_t i = prefix.size(); i + 2 < type.size(); ++i) {
+        const char c = type[i];
+        if (c == '(') ++parenDepth;
+        else if (c == ')') {
+            if (parenDepth == 0 && bracketDepth == 0 && type.compare(i, 3, ")->") == 0) {
+                arrowPosition = i;
+                break;
+            }
+            --parenDepth;
+        } else if (c == '[') ++bracketDepth;
+        else if (c == ']') --bracketDepth;
+        if (parenDepth < 0 || bracketDepth < 0) return std::nullopt;
+    }
     if (arrowPosition == std::string::npos) return std::nullopt;
 
     CompilerContext::FunctionType functionType;
     std::string parameters = type.substr(prefix.size(), arrowPosition - prefix.size());
     functionType.parameterTypes = splitTopLevelTypes(parameters);
     if (!parameters.empty() && functionType.parameterTypes.empty()) return std::nullopt;
-    functionType.returnType = type.substr(arrowPosition + arrow.size());
+    functionType.returnType = type.substr(arrowPosition + 3);
     if (functionType.returnType.empty()) return std::nullopt;
     return functionType;
 }

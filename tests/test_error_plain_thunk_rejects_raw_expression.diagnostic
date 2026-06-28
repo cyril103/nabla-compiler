@@ -1,0 +1,1 @@
+tests/test_error_plain_thunk_rejects_raw_expression.nabla:6:12: semantic error: call, paramètre 'thunk': type 'Fn()->Int' attendu, 'Int' reçu

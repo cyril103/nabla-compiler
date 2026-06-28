@@ -1,0 +1,7 @@
+def call(thunk: () => Int): Int = {
+    thunk()
+}
+
+def main(): Int = {
+    call(1 + 2)
+}

@@ -1,0 +1,4 @@
+def main(): Int = {
+    val thunk: => Int = 42
+    thunk
+}

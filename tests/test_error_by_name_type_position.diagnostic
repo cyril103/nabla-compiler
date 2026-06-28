@@ -1,0 +1,1 @@
+tests/test_error_by_name_type_position.nabla:2:16: parser error: type par nom autorisé uniquement en position paramètre

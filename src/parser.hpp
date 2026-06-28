@@ -7,6 +7,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 class Parser {
@@ -21,11 +22,24 @@ private:
     std::filesystem::path currentFile;
     std::string currentParsingClass;
     struct ParsedSymbol {
+        ParsedSymbol() = default;
+        ParsedSymbol(
+            std::string internalName, std::string type, bool isMutable,
+            bool isLocalFunction = false, bool isForbiddenCapture = false, bool isByName = false,
+            std::vector<bool> parameterByNameParameters = {},
+            std::vector<bool> returnFunctionByNameParameters = {})
+            : internalName(std::move(internalName)), type(std::move(type)), isMutable(isMutable),
+              isLocalFunction(isLocalFunction), isForbiddenCapture(isForbiddenCapture), isByName(isByName),
+              parameterByNameParameters(std::move(parameterByNameParameters)),
+              returnFunctionByNameParameters(std::move(returnFunctionByNameParameters)) {}
         std::string internalName;
         std::string type;
         bool isMutable;
         bool isLocalFunction = false;
         bool isForbiddenCapture = false;
+        bool isByName = false;
+        std::vector<bool> parameterByNameParameters;
+        std::vector<bool> returnFunctionByNameParameters;
     };
     struct CapturedSymbol {
         std::string name;
@@ -57,6 +71,10 @@ private:
     bool skipTypeAt(size_t& cursor) const;
     std::unique_ptr<ASTNode> parseLambdaExpression();
     std::unique_ptr<ASTNode> parseInferredLambdaExpression(const std::string& expectedType);
+    std::unique_ptr<ASTNode> parseByNameArgument(
+        const std::string& expectedFunctionType,
+        const CompilerContext::FunctionType& expectedFunction);
+    std::string zeroArgumentFunctionTypeFor(const std::string& returnType) const;
     std::string inferLambdaReturnType(
         ASTNode& body, const std::vector<FunctionDefNode::Parameter>& parameters,
         const std::vector<FunctionDefNode::Capture>& captures);
@@ -78,12 +96,13 @@ private:
     std::unique_ptr<ASTNode> parseFunctionDef(
         std::string clName, std::string objectName = "", bool allowAbstractMethod = false);
     std::vector<std::unique_ptr<ASTNode>> parseArguments(
-        const std::vector<std::string>& expectedTypes = {});
+        const std::vector<std::string>& expectedTypes = {},
+        const std::vector<bool>& byNameParameters = {});
     std::vector<std::unique_ptr<ASTNode>> parseFunctionCallArguments(
         const CompilerContext::FunctionSignature& signature,
         const std::vector<std::string>& typeArguments,
         std::map<std::string, std::string> initialSubstitution = {});
-    std::unique_ptr<ASTNode> parseArgument(const std::string& expectedType);
+    std::unique_ptr<ASTNode> parseArgument(const std::string& expectedType, bool allowByName = false);
     std::vector<std::string> expectedArgumentTypesForMethodCall(
         const std::string& receiverType, const std::string& methodName,
         const SourceLocation& location) const;
