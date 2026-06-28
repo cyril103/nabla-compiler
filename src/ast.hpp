@@ -174,13 +174,16 @@ class FunctionCallNode : public ASTNode {
     std::vector<std::string> resolvedParameterTypes;
     std::vector<CompilerContext::ParameterInfo> resolvedParameters;
     std::string resolvedType = "Int";
+    std::vector<bool> returnFunctionByNameParameters;
 public:
     FunctionCallNode(
         std::string functionName, std::vector<std::unique_ptr<ASTNode>> args,
         std::vector<std::string> genericTypeArguments = {},
         std::string initialResolvedType = "Int",
-        std::string userFacingName = "");
+        std::string userFacingName = "",
+        std::vector<bool> initialReturnFunctionByNameParameters = {});
     std::string getType() override;
+    const std::vector<bool>& getReturnFunctionByNameParameters() const { return returnFunctionByNameParameters; }
     void validateSemantics(CompilerContext& context) override;
     std::string lowerToIR(IRBuilder& builder) const override;
 };
@@ -233,11 +236,14 @@ class FunctionExpressionCallNode : public ASTNode {
     std::vector<std::unique_ptr<ASTNode>> arguments;
     std::string resolvedType = "Int";
     std::vector<std::string> resolvedParameterTypes;
+    std::vector<bool> returnFunctionByNameParameters;
 public:
     FunctionExpressionCallNode(
         std::string functionName, std::unique_ptr<ASTNode> functionExpression,
-        std::vector<std::unique_ptr<ASTNode>> args, std::string initialResolvedType = "Int");
+        std::vector<std::unique_ptr<ASTNode>> args, std::string initialResolvedType = "Int",
+        std::vector<bool> initialReturnFunctionByNameParameters = {});
     std::string getType() override;
+    const std::vector<bool>& getReturnFunctionByNameParameters() const { return returnFunctionByNameParameters; }
     void validateSemantics(CompilerContext& context) override;
     std::string lowerToIR(IRBuilder& builder) const override;
 };

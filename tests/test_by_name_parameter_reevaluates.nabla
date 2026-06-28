@@ -1,0 +1,15 @@
+class Counter(var value: Int) {
+    def next(): Int = {
+        value = value + 1
+        value
+    }
+}
+
+def twice(x: => Int): Int = {
+    x + x
+}
+
+def main(): Int = {
+    val counter = new Counter(0)
+    twice(counter.next())
+}

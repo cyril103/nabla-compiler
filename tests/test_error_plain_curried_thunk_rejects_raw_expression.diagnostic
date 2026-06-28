@@ -1,0 +1,1 @@
+tests/test_error_plain_curried_thunk_rejects_raw_expression.nabla:6:15: semantic error: Fn(Fn()->Int)->Int, paramètre: type 'Fn()->Int' attendu, 'Int' reçu

@@ -711,7 +711,11 @@ void SemanticAnalyzer::ensureAnyRootType() {
             "String",
             {},
             builtInLocation,
-            builtInLocation
+            builtInLocation,
+            false,
+            false,
+            false,
+            {}
         };
     }
     anyClass.methodOverloads["toString"] = {"toString"};
@@ -721,7 +725,11 @@ void SemanticAnalyzer::ensureAnyRootType() {
             "Int",
             {},
             builtInLocation,
-            builtInLocation
+            builtInLocation,
+            false,
+            false,
+            false,
+            {}
         };
     }
     anyClass.methodOverloads["hashCode"] = {"hashCode"};
@@ -731,7 +739,11 @@ void SemanticAnalyzer::ensureAnyRootType() {
             "Bool",
             {},
             builtInLocation,
-            builtInLocation
+            builtInLocation,
+            false,
+            false,
+            false,
+            {}
         };
     }
     anyClass.methodOverloads["equals"] = {"equals"};

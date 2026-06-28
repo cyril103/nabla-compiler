@@ -238,7 +238,10 @@ La syntaxe source `(T1, T2) => R` est abaissée vers cette représentation; la
 forme zero-argument `() => R` est representee par `Fn()->R`.
 Cette forme canonique est celle utilisee pour comparer les signatures, typer les
 annotations locales, resoudre les references de fonctions et representer les
-champs de type fonction.
+champs de type fonction. Les paramètres par nom `name: => T` sont stockés dans
+les signatures comme `Fn()->T` avec un marqueur `isByName`; le parser transforme
+chaque argument source en closure zéro-argument et chaque référence nue au
+paramètre dans le corps en appel indirect `name()`.
 
 Les lambdas sans capture et closures avec capture par valeur sont supportées.
 Les captures sont matérialisées côté IR/runtime comme valeurs stockées dans une

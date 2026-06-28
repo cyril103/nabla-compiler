@@ -224,7 +224,7 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool is
     auto registerConstructorValAccessor = [&](const Token& fieldToken, const std::string& fieldType) {
         auto& classInfo = context.classes[className];
         CompilerContext::FunctionSignature signature{
-            {}, fieldType, {}, fieldToken.location, fieldToken.location, false, false, true};
+            {}, fieldType, {}, fieldToken.location, fieldToken.location, false, false, true, {}};
         auto& overloads = classInfo.methodOverloads[fieldToken.value];
         for (const auto& overloadName : overloads) {
             const auto existingMethod = classInfo.methods.find(overloadName);
@@ -881,7 +881,7 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
     const std::string returnType = inferLambdaReturnType(*body, parameters, captures);
     std::string lambdaName = "lambda." + std::to_string(context.nextLambdaId++);
     context.functions[lambdaName] = {
-        signatureParameters, returnType, currentFunctionTypeParameters, start.location, start.location};
+        signatureParameters, returnType, currentFunctionTypeParameters, start.location, start.location, false, false, false, {}};
 
     auto function = located(std::make_unique<FunctionDefNode>(
         "", lambdaName, returnType, currentFunctionTypeParameters,
@@ -978,7 +978,7 @@ std::unique_ptr<ASTNode> Parser::parseInferredLambdaExpression(const std::string
     const std::string returnType = inferLambdaReturnType(*body, parameters, captures);
     std::string lambdaName = "lambda." + std::to_string(context.nextLambdaId++);
     context.functions[lambdaName] = {
-        signatureParameters, returnType, currentFunctionTypeParameters, start.location, start.location};
+        signatureParameters, returnType, currentFunctionTypeParameters, start.location, start.location, false, false, false, {}};
 
     auto function = located(std::make_unique<FunctionDefNode>(
         "", lambdaName, returnType, currentFunctionTypeParameters,
@@ -1004,6 +1004,68 @@ std::unique_ptr<ASTNode> Parser::parseInferredLambdaExpression(const std::string
     return located(
         std::make_unique<FunctionReferenceNode>(
             lambdaName, *functionType, currentFunctionTypeParameters, std::move(referenceCaptures)),
+        start.location);
+}
+
+std::string Parser::zeroArgumentFunctionTypeFor(const std::string& returnType) const {
+    CompilerContext::FunctionType functionType;
+    functionType.returnType = returnType;
+    auto functionTypeName = functionNameForType(functionType);
+    if (!functionTypeName) {
+        throw CompilerError(
+            ErrorKind::Parser, peek().location,
+            "type fonction zero-argument non supporté pour le paramètre par nom");
+    }
+    return *functionTypeName;
+}
+
+std::unique_ptr<ASTNode> Parser::parseByNameArgument(
+    const std::string& expectedFunctionType,
+    const CompilerContext::FunctionType& expectedFunction) {
+    const Token start = peek();
+    const size_t outerScopeCount = localScopes.size();
+    lambdaCaptureScopes.push_back({outerScopeCount, {}});
+    auto body = parseExpression();
+
+    std::vector<FunctionDefNode::Capture> captures;
+    for (const auto& [capturedSymbolName, capture] : lambdaCaptureScopes.back().capturesBySymbol) {
+        (void) capturedSymbolName;
+        captures.push_back({capture.name, capture.symbolName, capture.type});
+    }
+    lambdaCaptureScopes.pop_back();
+
+    if (isTypeAssignable(context, body->getType(), expectedFunctionType)) {
+        return body;
+    }
+    if (start.type == TokenType::IDENTIFIER) {
+        for (const auto& overloadName : functionOverloadNames(context, start.value)) {
+            const auto functionIt = context.functions.find(overloadName);
+            if (functionIt != context.functions.end() &&
+                isTypeAssignable(context, functionIt->second.returnType, expectedFunctionType)) {
+                return body;
+            }
+        }
+    }
+    if (!isTypeAssignable(context, body->getType(), expectedFunction.returnType)) {
+        return body;
+    }
+
+    std::string lambdaName = "lambda." + std::to_string(context.nextLambdaId++);
+    context.functions[lambdaName] = {
+        std::vector<CompilerContext::ParameterInfo>{}, body->getType(), currentFunctionTypeParameters,
+        start.location, start.location, false, false, false, {}};
+
+    generatedFunctions.push_back(located(std::make_unique<FunctionDefNode>(
+        "", lambdaName, body->getType(), currentFunctionTypeParameters,
+        std::vector<FunctionDefNode::Parameter>{}, std::move(body), captures), start.location));
+
+    std::vector<FunctionReferenceNode::Capture> referenceCaptures;
+    for (const auto& capture : captures) {
+        referenceCaptures.push_back({capture.name, capture.symbolName, capture.type});
+    }
+    return located(
+        std::make_unique<FunctionReferenceNode>(
+            lambdaName, expectedFunctionType, currentFunctionTypeParameters, std::move(referenceCaptures)),
         start.location);
 }
 
@@ -1141,7 +1203,10 @@ std::unique_ptr<ASTNode> Parser::parseFunctionReferenceWithExpectedType(const st
         match = genericMatches[0];
     }
     if (!match) {
-        if (overloadNames.size() == 1) {
+        const auto expectedFunctionType = functionTypeFromName(expectedType);
+        if (overloadNames.size() == 1 ||
+            (concreteMatches.empty() && genericMatches.empty() &&
+             expectedFunctionType && expectedFunctionType->parameterTypes.empty())) {
             index = referenceStartIndex;
             return nullptr;
         }
@@ -1319,6 +1384,7 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         }
         if (peek().type == TokenType::LPAREN) {
             std::vector<std::string> expectedArgumentTypes;
+            std::vector<bool> byNameParameters;
             auto [initialSymbol, initialScopeIndex] = findLocalWithScope(name);
             (void) initialScopeIndex;
             std::string fieldFunctionType;
@@ -1337,13 +1403,14 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                 auto functionType = functionTypeFromName(initialSymbol->type);
                 if (functionType) expectedArgumentTypes = functionType->parameterTypes;
                 consume(TokenType::LPAREN, "");
-                auto arguments = parseArguments(expectedArgumentTypes);
+                auto arguments = parseArguments(expectedArgumentTypes, initialSymbol->parameterByNameParameters);
                 consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
                 return located(
                     std::make_unique<FunctionCallNode>(
                         initialSymbol->internalName, std::move(arguments),
                         std::vector<std::string>{},
-                        functionType ? functionType->returnType : "Int", name),
+                        functionType ? functionType->returnType : "Int", name,
+                        initialSymbol->returnFunctionByNameParameters),
                     nameToken.location);
             }
             std::string functionLookupName = name;
@@ -1381,6 +1448,7 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     }
                     for (const auto& parameter : function->parameters) {
                         expectedArgumentTypes.push_back(substituteType(parameter.type, substitution));
+                        byNameParameters.push_back(parameter.isByName);
                     }
                 }
             }
@@ -1396,10 +1464,31 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             consume(TokenType::LPAREN, "");
             std::vector<std::unique_ptr<ASTNode>> arguments;
             const auto* namedFunction = uniqueFunctionSignatureForName(context, functionLookupName);
-            if (!initialSymbol && namedFunction) {
+            const CompilerContext::FunctionSignature* selectedOverloadedFunction = nullptr;
+            std::string selectedOverloadedFunctionName;
+            if (!initialSymbol && !namedFunction) {
+                std::vector<std::string> byNameOverloadNames;
+                for (const auto& overloadName : functionOverloadNames(context, functionLookupName)) {
+                    auto functionIt = context.functions.find(overloadName);
+                    if (functionIt == context.functions.end()) continue;
+                    const auto& candidate = functionIt->second;
+                    const bool hasByNameParameter = std::any_of(
+                        candidate.parameters.begin(), candidate.parameters.end(),
+                        [](const auto& parameter) { return parameter.isByName; });
+                    if (hasByNameParameter) byNameOverloadNames.push_back(overloadName);
+                }
+                if (byNameOverloadNames.size() == 1) {
+                    selectedOverloadedFunctionName = byNameOverloadNames.front();
+                    selectedOverloadedFunction = &context.functions[selectedOverloadedFunctionName];
+                    functionLookupName = selectedOverloadedFunctionName;
+                    arguments = parseFunctionCallArguments(*selectedOverloadedFunction, functionTypeArguments);
+                } else {
+                    arguments = parseArguments(expectedArgumentTypes, byNameParameters);
+                }
+            } else if (!initialSymbol && namedFunction) {
                 arguments = parseFunctionCallArguments(*namedFunction, functionTypeArguments);
             } else {
-                arguments = parseArguments(expectedArgumentTypes);
+                arguments = parseArguments(expectedArgumentTypes, byNameParameters);
             }
             consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
             auto [symbol, scopeIndex] = findLocalWithScope(name);
@@ -1425,7 +1514,9 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     nameToken.location);
             }
             std::string initialReturnType = "Int";
-            const auto* function = uniqueFunctionSignatureForName(context, functionLookupName);
+            const auto* function = selectedOverloadedFunction
+                ? selectedOverloadedFunction
+                : uniqueFunctionSignatureForName(context, functionLookupName);
             if (function) {
                 std::map<std::string, std::string> substitution;
                 if (auto genericSubstitution = genericFunctionSubstitutionFor(*function, functionTypeArguments)) {
@@ -1465,7 +1556,8 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             return located(
                 std::make_unique<FunctionCallNode>(
                     functionLookupName, std::move(arguments), std::move(functionTypeArguments),
-                    initialReturnType, diagnosticFunctionName),
+                    initialReturnType, diagnosticFunctionName,
+                    function ? function->returnFunctionByNameParameters : std::vector<bool>{}),
                 nameToken.location);
         }
         auto [symbol, scopeIndex] = findLocalWithScope(name);
@@ -1485,6 +1577,15 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     std::make_unique<FunctionReferenceNode>(
                         name, symbol->type, std::vector<std::string>{},
                         std::vector<FunctionReferenceNode::Capture>{}, symbol->internalName),
+                    nameToken.location);
+            }
+            if (symbol->isByName) {
+                captureIfNeeded(name, *symbol, scopeIndex);
+                auto functionType = functionTypeFromName(symbol->type);
+                return located(
+                    std::make_unique<FunctionValueCallNode>(
+                        name, symbol->internalName, std::vector<std::unique_ptr<ASTNode>>{},
+                        functionType ? functionType->returnType : "Int"),
                     nameToken.location);
             }
             captureIfNeeded(name, *symbol, scopeIndex);
@@ -1519,7 +1620,8 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     return located(
                         std::make_unique<FunctionCallNode>(
                             name, std::vector<std::unique_ptr<ASTNode>>{},
-                            std::vector<std::string>{}, signature.returnType),
+                            std::vector<std::string>{}, signature.returnType, std::string{},
+                            signature.returnFunctionByNameParameters),
                         nameToken.location);
                 }
             }
@@ -1583,12 +1685,18 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
         if (peek().type == TokenType::LPAREN) {
             Token callToken = consume(TokenType::LPAREN, "");
             std::vector<std::string> expectedArgumentTypes;
+            std::vector<bool> byNameParameters;
             std::string initialReturnType = "Int";
             if (auto functionType = functionTypeFromName(expr->getType())) {
                 expectedArgumentTypes = functionType->parameterTypes;
                 initialReturnType = functionType->returnType;
             }
-            auto arguments = parseArguments(expectedArgumentTypes);
+            if (auto* functionCall = dynamic_cast<FunctionCallNode*>(expr.get())) {
+                byNameParameters = functionCall->getReturnFunctionByNameParameters();
+            } else if (auto* expressionCall = dynamic_cast<FunctionExpressionCallNode*>(expr.get())) {
+                byNameParameters = expressionCall->getReturnFunctionByNameParameters();
+            }
+            auto arguments = parseArguments(expectedArgumentTypes, byNameParameters);
             consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
             expr = located(
                 std::make_unique<FunctionExpressionCallNode>(
@@ -1701,7 +1809,8 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
                     std::make_unique<FunctionCallNode>(
                         functionLookupName, std::move(arguments), std::move(functionTypeArguments),
                         initialReturnType,
-                        functionLookupName == qualifiedFunctionName ? std::string() : qualifiedFunctionName),
+                        functionLookupName == qualifiedFunctionName ? std::string() : qualifiedFunctionName,
+                        qualifiedFunction->second.returnFunctionByNameParameters),
                     methodToken.location);
                 continue;
             }
@@ -1957,7 +2066,20 @@ std::unique_ptr<ASTNode> Parser::parseLocalFunctionDef() {
         Token parameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre attendu");
         const std::string parameterName = parameterToken.value;
         consume(TokenType::COLON, "':' attendu après le nom du paramètre");
-        auto [parameterType, parameterTypeLocation] = parseType("Type de paramètre attendu");
+        bool isByName = false;
+        SourceLocation parameterTypeLocation = peek().location;
+        std::string parameterType;
+        if (peek().type == TokenType::FAT_ARROW) {
+            consume(TokenType::FAT_ARROW, "");
+            auto [byNameReturnType, byNameReturnLocation] = parseType("Type de retour du paramètre par nom attendu");
+            parameterType = zeroArgumentFunctionTypeFor(byNameReturnType);
+            parameterTypeLocation = byNameReturnLocation;
+            isByName = true;
+        } else {
+            auto parsedType = parseType("Type de paramètre attendu");
+            parameterType = parsedType.first;
+            parameterTypeLocation = parsedType.second;
+        }
         if (peek().type == TokenType::STAR) {
             throw CompilerError(
                 ErrorKind::Parser, peek().location,
@@ -1967,9 +2089,9 @@ std::unique_ptr<ASTNode> Parser::parseLocalFunctionDef() {
             throw CompilerError(ErrorKind::Parser, parameterToken.location, "paramètre déjà déclaré: " + parameterName);
         }
         const std::string symbolName = parameterName + "#" + std::to_string(nextSymbolId++);
-        functionScope[parameterName] = {symbolName, parameterType, false};
+        functionScope[parameterName] = {symbolName, parameterType, false, false, false, isByName};
         parameters.push_back({parameterName, symbolName, parameterType});
-        signatureParameters.push_back({parameterName, parameterType, parameterTypeLocation});
+        signatureParameters.push_back({parameterName, parameterType, parameterTypeLocation, false, "", isByName});
         if (peek().type == TokenType::COMMA) {
             consume(TokenType::COMMA, "");
         } else if (peek().type != TokenType::RPAREN) {
@@ -1994,11 +2116,19 @@ std::unique_ptr<ASTNode> Parser::parseLocalFunctionDef() {
         "local." + name + "." + std::to_string(context.nextLambdaId++);
     CompilerContext::FunctionSignature signature{
         signatureParameters, returnType, std::vector<std::string>{},
-        defToken.location, returnTypeLocation, false, false};
+        defToken.location, returnTypeLocation, false, false, false, {}};
     context.functions[mangledName] = signature;
-    localScopes.back()[name] = {mangledName, *functionType, false, true};
+    std::vector<bool> localFunctionByNameParameters;
+    for (const auto& parameter : signatureParameters) {
+        localFunctionByNameParameters.push_back(parameter.isByName);
+    }
+    localScopes.back()[name] = {
+        mangledName, *functionType, false, true, false, false,
+        localFunctionByNameParameters, signature.returnFunctionByNameParameters};
 
-    functionScope[name] = {mangledName, *functionType, false, true};
+    functionScope[name] = {
+        mangledName, *functionType, false, true, false, false,
+        localFunctionByNameParameters, signature.returnFunctionByNameParameters};
 
     consume(TokenType::EQUAL, "'=' attendu après la signature de fonction locale");
 
@@ -2013,7 +2143,8 @@ std::unique_ptr<ASTNode> Parser::parseLocalFunctionDef() {
                 visibleScope[sourceName] = symbol;
             } else {
                 visibleScope[sourceName] = {
-                    symbol.internalName, symbol.type, symbol.isMutable, false, true};
+                    symbol.internalName, symbol.type, symbol.isMutable, false, true, symbol.isByName,
+                    symbol.parameterByNameParameters, symbol.returnFunctionByNameParameters};
             }
         }
         if (!visibleScope.empty()) localScopes.push_back(std::move(visibleScope));
@@ -2107,7 +2238,20 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
             Token parameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre attendu");
             std::string parameterName = parameterToken.value;
             consume(TokenType::COLON, "':' attendu après le nom du paramètre");
-            auto [declaredParameterType, parameterTypeLocation] = parseType("Type de paramètre attendu");
+            bool isByName = false;
+            SourceLocation parameterTypeLocation = peek().location;
+            std::string declaredParameterType;
+            if (peek().type == TokenType::FAT_ARROW) {
+                consume(TokenType::FAT_ARROW, "");
+                auto [byNameReturnType, byNameReturnLocation] = parseType("Type de retour du paramètre par nom attendu");
+                declaredParameterType = zeroArgumentFunctionTypeFor(byNameReturnType);
+                parameterTypeLocation = byNameReturnLocation;
+                isByName = true;
+            } else {
+                auto parsedType = parseType("Type de paramètre attendu");
+                declaredParameterType = parsedType.first;
+                parameterTypeLocation = parsedType.second;
+            }
             bool isRepeated = false;
             std::string repeatedElementType;
             std::string parameterType = declaredParameterType;
@@ -2129,11 +2273,11 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
                 throw CompilerError(ErrorKind::Parser, parameterToken.location, "paramètre déjà déclaré: " + parameterName);
             }
             std::string symbolName = parameterName + "#" + std::to_string(nextSymbolId++);
-            if (targetScope) (*targetScope)[parameterName] = {symbolName, parameterType, false};
-            if (scopedParameters) scopedParameters->push_back({symbolName, parameterType, false});
+            if (targetScope) (*targetScope)[parameterName] = {symbolName, parameterType, false, false, false, isByName};
+            if (scopedParameters) scopedParameters->push_back({symbolName, parameterType, false, false, false, isByName});
             parsedParameters.push_back({parameterName, symbolName, parameterType});
             parsedSignatureParameters.push_back({
-                parameterName, parameterType, parameterTypeLocation, isRepeated, repeatedElementType});
+                parameterName, parameterType, parameterTypeLocation, isRepeated, repeatedElementType, isByName});
             if (peek().type == TokenType::COMMA) {
                 consume(TokenType::COMMA, "");
             } else if (peek().type != TokenType::RPAREN) {
@@ -2181,7 +2325,12 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
     }
     const bool isAbstract = allowAbstractMethod && peek().type != TokenType::EQUAL;
     CompilerContext::FunctionSignature signature{
-        signatureParameters, returnType, typeParameters, defToken.location, returnTypeLocation, isOverride, isAbstract};
+        signatureParameters, returnType, typeParameters, defToken.location, returnTypeLocation, isOverride, isAbstract, false, {}};
+    if (!curriedSignatureParameters.empty()) {
+        for (const auto& parameter : curriedSignatureParameters) {
+            signature.returnFunctionByNameParameters.push_back(parameter.isByName);
+        }
+    }
     std::string registeredFunctionName = functionName;
     if (!clName.empty()) {
         auto& overloads = context.classes[clName].methodOverloads[name];
@@ -2267,7 +2416,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
         std::string lambdaName = "lambda." + std::to_string(context.nextLambdaId++);
         context.functions[lambdaName] = {
             curriedSignatureParameters, declaredReturnType, currentFunctionTypeParameters,
-            nameToken.location, returnTypeLocation};
+            nameToken.location, returnTypeLocation, false, false, false, {}};
         generatedFunctions.push_back(located(std::make_unique<FunctionDefNode>(
             "", lambdaName, declaredReturnType, currentFunctionTypeParameters,
             std::move(curriedParameters), std::move(curriedBody), captures), nameToken.location));
@@ -2298,6 +2447,11 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
 }
 
 std::pair<std::string, SourceLocation> Parser::parseType(const std::string& expectedMessage) {
+    if (peek().type == TokenType::FAT_ARROW) {
+        throw CompilerError(
+            ErrorKind::Parser, peek().location,
+            "type par nom autorisé uniquement en position paramètre");
+    }
     if (peek().type == TokenType::IDENTIFIER) {
         Token typeToken = consume(TokenType::IDENTIFIER, expectedMessage);
         std::string typeName = typeToken.value;
@@ -2375,12 +2529,16 @@ std::pair<std::string, SourceLocation> Parser::parseType(const std::string& expe
     return {*functionName, start.location};
 }
 
-std::vector<std::unique_ptr<ASTNode>> Parser::parseArguments(const std::vector<std::string>& expectedTypes) {
+std::vector<std::unique_ptr<ASTNode>> Parser::parseArguments(
+    const std::vector<std::string>& expectedTypes,
+    const std::vector<bool>& byNameParameters) {
     std::vector<std::unique_ptr<ASTNode>> arguments;
     while (peek().type != TokenType::RPAREN) {
         std::string expectedType;
+        bool allowByName = false;
         if (arguments.size() < expectedTypes.size()) expectedType = expectedTypes[arguments.size()];
-        arguments.push_back(parseArgument(expectedType));
+        if (arguments.size() < byNameParameters.size()) allowByName = byNameParameters[arguments.size()];
+        arguments.push_back(parseArgument(expectedType, allowByName));
         if (peek().type == TokenType::COMMA) {
             consume(TokenType::COMMA, "");
         } else if (peek().type != TokenType::RPAREN) {
@@ -2413,7 +2571,7 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseFunctionCallArguments(
             }
             expectedType = expectedPattern;
         }
-        auto argument = parseArgument(expectedType);
+        auto argument = parseArgument(expectedType, parameterIndex < signature.parameters.size() && signature.parameters[parameterIndex].isByName);
         if (typeArguments.empty() && !expectedPattern.empty()) {
             inferTypeArgumentsFromTypes(
                 expectedPattern, argument->getType(),
@@ -2541,12 +2699,16 @@ std::optional<ClassMethodLookupResult> Parser::selectedOverloadedMethodCallForAr
     return std::nullopt;
 }
 
-std::unique_ptr<ASTNode> Parser::parseArgument(const std::string& expectedType) {
+std::unique_ptr<ASTNode> Parser::parseArgument(const std::string& expectedType, bool allowByName) {
     if (startsInferredLambdaExpression()) {
         return parseInferredLambdaExpression(expectedType);
     }
     if (auto functionReference = parseFunctionReferenceWithExpectedType(expectedType)) {
         return functionReference;
+    }
+    auto expectedFunction = functionTypeFromName(expectedType);
+    if (allowByName && expectedFunction && expectedFunction->parameterTypes.empty()) {
+        return parseByNameArgument(expectedType, *expectedFunction);
     }
     auto expression = parseExpression();
     if (peek().type == TokenType::COLON) {
