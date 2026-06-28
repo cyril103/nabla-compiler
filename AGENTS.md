@@ -921,8 +921,11 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Retirer les plans actifs termines `docs/plans/by-name-parameters.md` et `docs/plans/constructor-var-fields.md` après squash-merge des PRs associées; `docs/plans/README.md` revient à l'état sans plan actif.
+  - Fichiers / tests associes: `docs/plans/README.md`, suppression de `docs/plans/by-name-parameters.md` et `docs/plans/constructor-var-fields.md`, `git diff --check`.
+
 - `local` - Ajouter les paramètres par nom Scala-like `name: => T` : les signatures gardent un marqueur `isByName` et un type interne `Fn()->T`, les arguments sont abaissés en closures zéro-argument, les références nues dans le corps deviennent des appels indirects, et les types fonction imbriqués `Fn(Fn()->T)->R` sont parsés correctement pour les fonctions curryfiées.
-  - Fichiers / tests associes: `src/compiler_context.hpp`, `src/parser.hpp`, `src/parser.cpp`, `tests/test_by_name_parameter_*.nabla`, `tests/test_error_by_name_type_position.nabla`, `docs/plans/by-name-parameters.md`, `docs/language.md`, `docs/internals.md`, `docs/roadmap.md`, `make all-tests`.
+  - Fichiers / tests associes: `src/compiler_context.hpp`, `src/parser.hpp`, `src/parser.cpp`, `tests/test_by_name_parameter_*.nabla`, `tests/test_error_by_name_type_position.nabla`, `docs/language.md`, `docs/internals.md`, `docs/roadmap.md`, `make all-tests`.
 
 - `local` - Ajouter les types fonction et lambdas zero-argument `() => T` / `() => { ... }` : representation canonique `Fn()->T`, inference en argument attendu, references de fonctions zero-parametre comme valeurs, appels indirects et closures avec capture par valeur. Ce jalon prepare l'etude d'un futur passage d'argument par nom sur base de thunks.
   - Fichiers / tests associes: `src/compiler_context.hpp`, `src/parser.cpp`, `tests/test_lambda_zero_parameters*.nabla`, `tests/test_function_reference_zero_parameters.nabla`, `tests/test_function_returning_zero_parameter_lambda.nabla`, `tests/test_overloaded_function_returning_zero_parameter_lambda_argument.nabla`, `docs/language.md`, `docs/internals.md`, `docs/roadmap.md`, `make all-tests`.
