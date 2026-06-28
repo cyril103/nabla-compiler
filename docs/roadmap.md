@@ -213,6 +213,9 @@ reprise séparées :
   reste la stratégie mémoire complète (libération/GC éventuel).
 - Refactoriser les primitives runtime I/O pour eviter la duplication autour des
   chemins C.
+- Etudier un passage d'argument par nom en s'appuyant sur les thunks
+  zero-argument `() => T`, maintenant representables comme types fonction et
+  closures ordinaires.
 - Ajouter un support editeur supplementaire :
   - VS Code/TextMate grammar
   - Treesitter plus tard si le langage se stabilise.

@@ -1,0 +1,7 @@
+def eval(thunk: () => Int): Int = {
+    thunk()
+}
+
+def main(): Int = {
+    eval(() => 42)
+}
