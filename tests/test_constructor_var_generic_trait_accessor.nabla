@@ -1,0 +1,16 @@
+trait Cursor[T] {
+    def current: T
+}
+
+class Box[T](var current: T) with Cursor[T] {
+    def replace(next: T): T = {
+        current = next
+        current
+    }
+}
+
+def main(): Int = {
+    val box = new Box[Int](10)
+    val cursor: Cursor[Int] = box
+    box.replace(21) + cursor.current
+}

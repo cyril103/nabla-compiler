@@ -1,0 +1,10 @@
+class Point(val x: Int) {
+    def move(): Int = {
+        x = 2
+        x
+    }
+}
+
+def main(): Int = {
+    new Point(1).move()
+}

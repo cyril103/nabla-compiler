@@ -2118,6 +2118,37 @@ std::string FieldAccessNode::lowerToIR(IRBuilder& builder) const {
     return builder.emitFieldLoad(location, className, fieldName, type);
 }
 
+FieldAssignmentNode::FieldAssignmentNode(
+    std::string clName, std::string field, std::string fieldType,
+    bool isMutable, std::unique_ptr<ASTNode> v)
+    : className(std::move(clName)), fieldName(std::move(field)), type(std::move(fieldType)),
+      targetMutable(isMutable), value(std::move(v)) {}
+
+std::string FieldAssignmentNode::getType() {
+    return value ? value->getType() : "Unit";
+}
+
+void FieldAssignmentNode::validateSemantics(CompilerContext& context) {
+    value->validateSemantics(context);
+    if (!targetMutable) {
+        semanticError("impossible d'affecter au champ 'val' immuable: " + fieldName);
+    }
+    if (!isTypeAssignable(context, value->getType(), type)) {
+        semanticError(
+            "Affectation invalide pour le champ '" + fieldName + "': type '" + type +
+            "' attendu, '" + value->getType() + "' reçu");
+    }
+}
+
+std::string FieldAssignmentNode::lowerToIR(IRBuilder& builder) const {
+    const std::string actualType = builder.substituteActiveType(value->getType());
+    const std::string targetType = builder.substituteActiveType(type);
+    std::string loweredValue = value->lowerToIR(builder);
+    loweredValue = boxValueForParameter(builder, loweredValue, actualType, targetType);
+    builder.emitFieldStore(location, className, fieldName, loweredValue, type);
+    return loweredValue;
+}
+
 IfNode::IfNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode> thenBranch, std::unique_ptr<ASTNode> elseBranch)
     : condition(std::move(condition)), thenBranch(std::move(thenBranch)), elseBranch(std::move(elseBranch)) {}
 

@@ -397,6 +397,9 @@ private:
             case IROpcode::FieldLoad:
                 emitFieldLoad(instruction);
                 break;
+            case IROpcode::FieldStore:
+                emitFieldStore(instruction);
+                break;
             case IROpcode::Load:
                 loadValue(instruction.operands[0], "rax");
                 storeRegister(instruction.result, "rax");
@@ -1173,6 +1176,13 @@ private:
         loadValue(instruction.operands[0], "rax");
         out << "    mov rax, [rax + " << fieldOffsetFor(instruction.operation) << "]\n";
         storeRegister(instruction.result, "rax");
+    }
+
+    void emitFieldStore(const IRInstruction& instruction) {
+        if (instruction.operands.size() != 2) codegenError("écriture de champ IR invalide");
+        loadValue(instruction.operands[0], "rbx");
+        loadValue(instruction.operands[1], "rax");
+        out << "    mov [rbx + " << fieldOffsetFor(instruction.operation) << "], rax\n";
     }
 
     void emitBoxedValue(const IRInstruction& instruction, long long tag) {

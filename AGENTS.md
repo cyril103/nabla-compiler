@@ -60,7 +60,10 @@ Principes de direction :
   internes;
 - conserver un typage simple : sous-typage nominal pour les classes,
   generiques invariants par defaut, conversions explicites ou fonctions stdlib
-  plutot que magie implicite.
+  plutot que magie implicite;
+- utiliser les champs constructeur `var` pour les optimisations internes de
+  collections, sans exposer de setter public tant que les règles de visibilité
+  ne sont pas formalisées.
 
 Priorites structurantes :
 
@@ -87,7 +90,9 @@ Le pipeline implemente actuellement :
 - identifiants et chemins d'import avec lettres, chiffres et `_`;
 - resolution des imports relatifs, depuis la racine projet et depuis `stdlib/`,
   avec protection contre les cycles;
-- objets avec champs de constructeur et appels de methodes parametres;
+- objets avec champs de constructeur et appels de methodes parametres; les
+  paramètres constructeur `val` et `var` exposent des getters synthétiques, et
+  les champs `var` sont réassignables depuis les méthodes de la classe;
 - fonctions globales appelables avec parametres;
 - fonctions locales `def` dans les blocs, abaissees en fonctions cachees non
   surchargees et reutilisables comme valeurs fonction; elles supportent l'appel
@@ -914,6 +919,10 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter les champs constructeur `var` : parser, getters
+  synthétiques, affectation interne typée vers les slots objet, diagnostics
+  négatifs et tests `List[T]` préparant des builders inspirés de Scala.
 
 - `local` - Nettoyer `docs/plans/` apres livraison du retrait des fabriques
   publiques legacy `SetEmpty` / `SetFromArray`: le plan actif a ete retire de

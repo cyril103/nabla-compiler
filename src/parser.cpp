@@ -58,8 +58,9 @@ std::optional<ClassFieldLookupResult> resolveClassFieldInHierarchy(
     const std::string& fieldName, const SourceLocation& location) {
     std::map<std::string, std::set<std::string>> fieldOwners;
     std::map<std::string, std::string> fieldTypes;
+    std::map<std::string, bool> fieldMutability;
     std::set<std::string> visiting;
-    collectVisibleFieldsInHierarchy(context, className, visiting, fieldOwners, fieldTypes);
+    collectVisibleFieldsInHierarchy(context, className, visiting, fieldOwners, fieldTypes, &fieldMutability);
 
     auto it = fieldOwners.find(fieldName);
     if (it == fieldOwners.end()) return std::nullopt;
@@ -74,6 +75,7 @@ std::optional<ClassFieldLookupResult> resolveClassFieldInHierarchy(
     return ClassFieldLookupResult{
         *it->second.begin(),
         fieldType->second,
+        fieldMutability.count(fieldName) ? fieldMutability[fieldName] : false,
     };
 }
 
@@ -208,7 +210,8 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool is
         if (peek().type != TokenType::LPAREN) return false;
         if (index + 1 >= tokens.size()) return false;
         if (tokens[index + 1].type == TokenType::RPAREN) return true;
-        if (tokens[index + 1].type == TokenType::KW_VAL) {
+        if (tokens[index + 1].type == TokenType::KW_VAL ||
+            tokens[index + 1].type == TokenType::KW_VAR) {
             return index + 3 < tokens.size() &&
                    tokens[index + 2].type == TokenType::IDENTIFIER &&
                    tokens[index + 3].type == TokenType::COLON;
@@ -241,8 +244,10 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool is
         consume(TokenType::LPAREN, "");
         while (peek().type != TokenType::RPAREN) {
             bool hasAccessor = false;
-            if (peek().type == TokenType::KW_VAL) {
-                consume(TokenType::KW_VAL, "");
+            bool isMutableField = false;
+            if (peek().type == TokenType::KW_VAL || peek().type == TokenType::KW_VAR) {
+                isMutableField = peek().type == TokenType::KW_VAR;
+                index++;
                 hasAccessor = true;
             }
             Token fieldToken = consume(TokenType::IDENTIFIER, "Nom d'attribut attendu");
@@ -255,7 +260,7 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool is
                     "champ déjà déclaré dans '" + className + "': " + fieldName);
             }
             context.classLayouts[className][fieldName] = offset;
-            context.classes[className].fields.push_back({fieldName, fieldType, fieldTypeLocation, hasAccessor});
+            context.classes[className].fields.push_back({fieldName, fieldType, fieldTypeLocation, hasAccessor, isMutableField});
             if (hasAccessor) {
                 registerConstructorValAccessor(fieldToken, fieldType);
             }
@@ -708,9 +713,20 @@ std::unique_ptr<ASTNode> Parser::parseStatement() {
             consume(TokenType::EQUAL, "");
             auto rhs = parseExpression();
             const ParsedSymbol* symbol = findLocal(name);
+            if (symbol) {
+                return located(std::make_unique<AssignmentNode>(
+                    name, symbol->internalName, symbol->type, symbol->isMutable, std::move(rhs)),
+                    nameToken.location);
+            }
+            if (!currentParsingClass.empty() && lambdaCaptureScopes.empty()) {
+                if (auto field = resolveClassFieldInHierarchy(context, currentParsingClass, name, nameToken.location)) {
+                    return located(std::make_unique<FieldAssignmentNode>(
+                        field->ownerClassName, name, field->type, field->isMutable, std::move(rhs)),
+                        nameToken.location);
+                }
+            }
             return located(std::make_unique<AssignmentNode>(
-                name, symbol ? symbol->internalName : name, symbol ? symbol->type : "Int",
-                symbol ? symbol->isMutable : false, std::move(rhs)), nameToken.location);
+                name, name, "Int", false, std::move(rhs)), nameToken.location);
         }
     }
     return parseExpression();
@@ -1045,7 +1061,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionReferenceWithExpectedType(const st
     if (findLocal(name)) {
         return nullptr;
     }
-    if (!currentParsingClass.empty() &&
+    if (!currentParsingClass.empty() && lambdaCaptureScopes.empty() &&
         resolveClassFieldInHierarchy(context, currentParsingClass, name, nameToken.location)) {
         return nullptr;
     }
@@ -1361,7 +1377,7 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     }
                 }
             }
-            if (!initialSymbol && !currentParsingClass.empty()) {
+            if (!initialSymbol && !currentParsingClass.empty() && lambdaCaptureScopes.empty()) {
                 if (auto field = resolveClassFieldInHierarchy(context, currentParsingClass, name, nameToken.location)) {
                     if (auto functionType = functionTypeFromName(field->type)) {
                         fieldFunctionType = field->type;
@@ -1467,7 +1483,7 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             captureIfNeeded(name, *symbol, scopeIndex);
             return located(std::make_unique<IdentifierNode>(name, symbol->internalName, symbol->type), nameToken.location);
         }
-        if (!currentParsingClass.empty()) {
+        if (!currentParsingClass.empty() && lambdaCaptureScopes.empty()) {
             if (auto field = resolveClassFieldInHierarchy(context, currentParsingClass, name, nameToken.location)) {
                 return located(
                     std::make_unique<FieldAccessNode>(

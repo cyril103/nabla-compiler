@@ -42,6 +42,7 @@ enum class IROpcode {
     ObjectArrayGet,
     ObjectArraySet,
     FieldLoad,
+    FieldStore,
     Load,
     Store,
     Label,
@@ -151,6 +152,9 @@ public:
     std::string emitFieldLoad(
         const SourceLocation& location, const std::string& className, const std::string& fieldName,
         const std::string& type);
+    void emitFieldStore(
+        const SourceLocation& location, const std::string& className, const std::string& fieldName,
+        const std::string& value, const std::string& type);
     std::string emitLoad(const std::string& symbol, const std::string& type = "Int");
     void emitStore(const std::string& symbol, const std::string& value, const std::string& type = "Int");
     std::string emitPhi(const std::string& left, const std::string& right, const std::string& type = "Int");

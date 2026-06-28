@@ -1,0 +1,10 @@
+class Holder(var value: Any) {
+    def replace(next: Int): Int = {
+        value = next
+        if value.toString().length() == 2 { 42 } else { 1 }
+    }
+}
+
+def main(): Int = {
+    new Holder("start").replace(42)
+}

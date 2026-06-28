@@ -263,6 +263,21 @@ public:
     std::string lowerToIR(IRBuilder& builder) const override;
 };
 
+class FieldAssignmentNode : public ASTNode {
+    std::string className;
+    std::string fieldName;
+    std::string type;
+    bool targetMutable;
+    std::unique_ptr<ASTNode> value;
+public:
+    FieldAssignmentNode(
+        std::string clName, std::string field, std::string fieldType,
+        bool isMutable, std::unique_ptr<ASTNode> v);
+    std::string getType() override;
+    void validateSemantics(CompilerContext& context) override;
+    std::string lowerToIR(IRBuilder& builder) const override;
+};
+
 class IfNode : public ASTNode {
     std::unique_ptr<ASTNode> condition;
     std::unique_ptr<ASTNode> thenBranch;

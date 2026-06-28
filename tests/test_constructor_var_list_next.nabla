@@ -1,0 +1,19 @@
+import collections.list
+
+class Link[T](val head: T, var next: List[T]) {
+    def relink(value: List[T]): List[T] = {
+        next = value
+        next
+    }
+
+    def tail(): List[T] = {
+        next
+    }
+}
+
+def main(): Int = {
+    val link = new Link[Int](1, Nil)
+    val replacement = List.cons[Int](42, Nil)
+    link.relink(replacement)
+    link.tail().head()
+}

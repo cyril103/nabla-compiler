@@ -360,6 +360,8 @@ match value {
 Une classe declare ses champs dans le constructeur primaire. Par défaut, ces
 champs sont visibles dans les méthodes de la classe. Un paramètre constructeur
 préfixé par `val` expose aussi un accesseur public zéro-argument du même nom.
+Un paramètre préfixé par `var` expose le même getter et autorise la réaffectation
+du champ depuis les méthodes de la classe.
 
 ```nabla
 class Student(val name: String, val score: Int) {
@@ -372,8 +374,20 @@ def main(): Int = {
 ```
 
 `this` est disponible implicitement dans les methodes. L'accesseur généré par
-`val score: Int` se consomme comme une méthode, par exemple `ada.score()` ;
-l'accès propriété sans parenthèses (`ada.score`) n'est pas encore supporté.
+`val score: Int` ou `var score: Int` se consomme comme une méthode, par exemple
+`ada.score()` ; l'accès propriété sans parenthèses (`ada.score`) appelle aussi
+ce getter zéro-argument quand la résolution le permet. La V1 de `var` constructeur
+n'expose pas encore de setter public `ada.score = ...` : l'affectation supportée
+est interne à la classe.
+
+```nabla
+class Counter(var value: Int) {
+    def add(delta: Int): Int = {
+        value = value + delta
+        value
+    }
+}
+```
 
 ## Objets Statiques
 

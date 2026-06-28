@@ -1,0 +1,13 @@
+class Counter(var value: Int) {
+    def makeSetter(): (Int) => Int = {
+        (next: Int) => {
+            value = next
+            value
+        }
+    }
+}
+
+def main(): Int = {
+    val setter = new Counter(1).makeSetter()
+    setter(42)
+}

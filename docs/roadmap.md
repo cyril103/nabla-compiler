@@ -9,7 +9,9 @@ pour garder un cap clair après le tag `v0.1.0`.
   Le compilateur signale explicitement une commande externe introuvable comme
   `nasm` ou `ld`.
 - Typage statique avec fonctions, fonctions locales de bloc, methodes, classes,
-  generiques simples et lambdas.
+  generiques simples et lambdas; les paramètres constructeur `val` et `var`
+  génèrent des getters, et les champs `var` sont réassignables depuis les
+  méthodes de leur classe.
 - Les `def` sans liste de parametres declarent des proprietes calculees
   zero-argument reutilisant les fonctions/methodes existantes: `def pi: Double`
   est utilisable comme `pi`, `Config.base` appelle `Config.base()`,
@@ -148,14 +150,17 @@ Actions recommandees :
 11. Garder les diagnostics de compatibilite orientes vers les compagnons
    recommandes (`Array.fill`, `Array.range`, `Set.fromArray`,
    `Option.some`, `Option.none`, etc.).
-12. Poursuivre la surcharge par signature apres `v0.1.0` : la base couvre maintenant les
+12. Exploiter les champs constructeur `var` pour préparer des builders internes
+    de collections, notamment une construction de `List[T]` plus efficace avant
+    exposition publique.
+13. Poursuivre la surcharge par signature apres `v0.1.0` : la base couvre maintenant les
     fonctions globales, y compris les generiques inferables et les references
     typees, ainsi que les methodes de classe concretes ou generiques par
     signature exacte, y compris l'inference de lambdas apres arguments generiques
     deja resolus; commencer la migration publique de la stdlib vers les noms
     surcharges idiomatiques et garder les diagnostics d'ambiguite riches si la
     resolution devient moins stricte que l'exact match.
-13. Reporter `Result[T]`, variance avancee et GC tant que cette surface n'est
+14. Reporter `Result[T]`, variance avancee et GC tant que cette surface n'est
    pas propre.
 
 ## Jalons Récents Pris En Compte
