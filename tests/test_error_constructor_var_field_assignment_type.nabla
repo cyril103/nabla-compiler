@@ -1,0 +1,10 @@
+class Box(var value: Int) {
+    def bad(): Int = {
+        value = "oops"
+        value
+    }
+}
+
+def main(): Int = {
+    new Box(1).bad()
+}

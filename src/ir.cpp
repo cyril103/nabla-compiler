@@ -168,6 +168,9 @@ std::string IRProgram::format() const {
                 case IROpcode::FieldLoad:
                     out << "field " << instruction.operands[0] << ", " << instruction.operation;
                     break;
+                case IROpcode::FieldStore:
+                    out << "field_store " << instruction.operands[1] << ", " << instruction.operands[0] << ", " << instruction.operation;
+                    break;
                 case IROpcode::Load:
                     out << "load @" << instruction.operands[0];
                     break;
@@ -624,6 +627,17 @@ std::string IRBuilder::emitFieldLoad(
         IROpcode::FieldLoad, result, substituteActiveType(type),
         qualifiedMember(substituteActiveType(className), fieldName), {thisValue}});
     return result;
+}
+
+void IRBuilder::emitFieldStore(
+    const SourceLocation& location, const std::string& className, const std::string& fieldName,
+    const std::string& value, const std::string& type) {
+    if (thisValue.empty()) {
+        unsupported(location, "l'affectation au champ '" + qualifiedMember(className, fieldName) + "'");
+    }
+    emit({
+        IROpcode::FieldStore, "", substituteActiveType(type),
+        qualifiedMember(substituteActiveType(className), fieldName), {thisValue, value}});
 }
 
 std::string IRBuilder::emitLoad(const std::string& symbol, const std::string& type) {

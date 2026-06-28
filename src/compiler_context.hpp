@@ -40,6 +40,7 @@ struct CompilerContext {
         std::string type;
         SourceLocation location;
         bool hasAccessor = false;
+        bool isMutable = false;
     };
 
     struct ClassInfo {
@@ -471,6 +472,7 @@ struct ClassMethodLookupResult {
 struct ClassFieldLookupResult {
     std::string ownerClassName;
     std::string type;
+    bool isMutable = false;
 };
 
 inline std::optional<std::map<std::string, std::string>> genericSubstitutionFor(
@@ -485,7 +487,8 @@ inline void collectVisibleFieldsInHierarchy(
     const CompilerContext& context, const std::string& receiverType,
     std::set<std::string>& visiting,
     std::map<std::string, std::set<std::string>>& fieldOwners,
-    std::map<std::string, std::string>& fieldTypes) {
+    std::map<std::string, std::string>& fieldTypes,
+    std::map<std::string, bool>* fieldMutability = nullptr) {
     const std::string classLookupName = genericBaseName(receiverType);
     if (visiting.count(classLookupName)) return;
     visiting.insert(classLookupName);
@@ -507,11 +510,14 @@ inline void collectVisibleFieldsInHierarchy(
         if (!fieldTypes.count(field.name)) {
             fieldTypes[field.name] = substituteType(field.type, classSubstitution);
         }
+        if (fieldMutability && !fieldMutability->count(field.name)) {
+            (*fieldMutability)[field.name] = field.isMutable;
+        }
     }
 
     for (const auto& parentType : classIt->second.parentTypes) {
         const std::string concreteParentType = substituteType(parentType, classSubstitution);
-        collectVisibleFieldsInHierarchy(context, concreteParentType, visiting, fieldOwners, fieldTypes);
+        collectVisibleFieldsInHierarchy(context, concreteParentType, visiting, fieldOwners, fieldTypes, fieldMutability);
     }
 
     visiting.erase(classLookupName);

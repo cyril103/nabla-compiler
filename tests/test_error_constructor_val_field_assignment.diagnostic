@@ -1,0 +1,1 @@
+tests/test_error_constructor_val_field_assignment.nabla:3:9: semantic error: impossible d'affecter au champ 'val' immuable: x

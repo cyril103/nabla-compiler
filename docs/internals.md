@@ -125,6 +125,14 @@ slot 0      : pointeur vers la vtable backend pour les objets utilisateur
 slot 1..n   : champs de constructeur et champs hérités
 ```
 
+Les paramètres constructeur `val` et `var` partagent cette représentation de
+slot. Tous deux génèrent un getter synthétique zéro-argument abaissé comme une
+méthode normale. Le flag `var` est uniquement une règle source/sémantique : une
+affectation simple dans une méthode de la classe peut être résolue vers un champ
+constructeur mutable et l'IR émet alors un `FieldStore` sur le slot de `this`.
+Les champs `val` restent rejetés avant lowering. La V1 ne crée pas encore de
+setter public ni d'affectation externe `receiver.field = value`.
+
 Les vtables sont générées par le backend ASM pour les classes concrètes,
 spécialisations génériques nécessaires et singletons runtime. Les slots sont
 indexés par propriétaire statique + méthode résolue, afin de distinguer les

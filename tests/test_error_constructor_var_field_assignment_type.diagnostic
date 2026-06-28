@@ -1,0 +1,1 @@
+tests/test_error_constructor_var_field_assignment_type.nabla:3:9: semantic error: Affectation invalide pour le champ 'value': type 'Int' attendu, 'String' reçu

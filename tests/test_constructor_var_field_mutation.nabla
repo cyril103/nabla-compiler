@@ -1,0 +1,12 @@
+class Counter(var value: Int) {
+    def add(delta: Int): Int = {
+        value = value + delta
+        value
+    }
+}
+
+def main(): Int = {
+    val counter = new Counter(10)
+    counter.add(11)
+    counter.value() + counter.value
+}
