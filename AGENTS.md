@@ -1121,6 +1121,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   - Fichiers / tests associes: `docs/plans/README.md`, suppressions sous
     `docs/plans/`, `AGENTS.md`, `docs/roadmap.md`.
 
+- `local` - Retirer le plan actif termine `docs/plans/local-def-generic-methods.md`
+  apres livraison des fonctions locales dans les contextes generiques. Le
+  perimetre livre reste documente dans ce journal, `docs/roadmap.md`,
+  `docs/internals.md`, les tests et l'historique de PR.
+  - Fichiers / tests associes: suppression de
+    `docs/plans/local-def-generic-methods.md`, `AGENTS.md`, `git diff --check`.
+
 - `local` - Utiliser les fonctions locales pour cacher une premiere tranche de
   helpers stdlib non documentes: `util.randomStep` devient un detail local de
   `randomInt`, et la conversion `Bool` -> `String` de `collections.bool_array`
