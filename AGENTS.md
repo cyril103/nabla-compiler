@@ -101,10 +101,12 @@ Le pipeline implemente actuellement :
   les champs `var` sont réassignables depuis les méthodes de la classe;
 - fonctions globales appelables avec parametres;
 - fonctions locales `def` dans les blocs, abaissees en fonctions cachees non
-  surchargees et reutilisables comme valeurs fonction; elles supportent l'appel
-  direct, la recursion sur elles-memes et les appels vers des helpers locaux
-  declares plus haut dans le bloc, mais pas encore les captures ni les contextes
-  generiques;
+  surchargees; elles supportent l'appel direct, la recursion sur elles-memes,
+  les appels vers des helpers locaux declares plus haut et les contextes
+  generiques des fonctions/methodes/classes/traits englobants. Les references
+  comme valeurs fonction restent supportees pour les helpers declares hors
+  contexte generique; les captures implicites et fonctions locales generiques
+  restent reportees;
 - proprietes calculees `def` sans liste de parametres, abaissees comme des
   fonctions/methodes zero-argument: `def pi: Double = 3.14` s'utilise comme
   `pi`, `Config.base` appelle `Config.base()`, `value.head` appelle
@@ -583,6 +585,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   fonction, par exemple `makeAdder(10)(32)`.
 - [x] Ajouter une premiere syntaxe de `def` curryfiee a une liste de parametres
   supplementaire, abaissee vers un retour de type fonction.
+- [x] Autoriser les fonctions locales `def` non generiques dans les contextes
+  generiques de fonctions, methodes, classes et traits englobants, avec appels
+  directs et recursion specialises via l'IR generique existante.
 
 ### P1 - Diagnostics Sources
 
@@ -1086,6 +1091,17 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   avec une seconde liste d'arguments, sans passer par une variable intermediaire.
   - Fichiers / tests associes: `src/parser.cpp`,
     `tests/test_function_returning_function_direct_call.nabla`.
+
+- `local` - Autoriser les fonctions locales `def` non generiques dans les
+  contextes generiques des fonctions, methodes, classes et traits englobants:
+  les helpers conservent les limites V1 (pas de capture implicite, pas de
+  surcharge locale, pas de type parameter propre), mais leurs signatures/corps
+  peuvent mentionner les paramètres de type environnants et les appels directs
+  s'inferent/se specialisent normalement.
+  - Fichiers / tests associes: `src/parser.cpp`,
+    `tests/test_local_def_generic_*_context.nabla`, anciens probes
+    `test_error_local_def_generic_*_context` promus positifs,
+    `docs/internals.md`, `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Aligner `docs/internals.md` avec les conventions livrees pour
   proprietes `def` zero-argument et fonctions locales de bloc: les proprietes

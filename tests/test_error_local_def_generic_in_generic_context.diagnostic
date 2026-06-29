@@ -1,0 +1,1 @@
+tests/test_error_local_def_generic_in_generic_context.nabla:2:11: parser error: les fonctions locales génériques ne sont pas encore supportées

@@ -1,0 +1,10 @@
+def outer[T](value: T): T = {
+    def id[U](item: U): U = {
+        item
+    }
+    value
+}
+
+def main(): Int = {
+    outer[Int](42)
+}

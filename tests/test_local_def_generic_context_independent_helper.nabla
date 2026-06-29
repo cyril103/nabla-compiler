@@ -1,0 +1,10 @@
+def outer[T](value: T): Int = {
+    def inc(x: Int): Int = {
+        x + 1
+    }
+    inc(41)
+}
+
+def main(): Int = {
+    outer[String]("ignored")
+}

@@ -1,0 +1,27 @@
+import collections.list
+
+trait Counter[T] {
+    def countWhere(values: List[T], predicate: (T) => Bool): Int = {
+        def loop(rest: List[T], acc: Int, pred: (T) => Bool): Int = {
+            if rest.isEmpty() {
+                acc
+            } else {
+                if pred(rest.head()) {
+                    loop(rest.tail(), acc + 1, pred)
+                } else {
+                    loop(rest.tail(), acc, pred)
+                }
+            }
+        }
+        loop(values, 0, predicate)
+    }
+}
+
+class IntCounter() with Counter[Int] {
+}
+
+def main(): Int = {
+    val values = List.cons[Int](1, List.cons[Int](2, List.cons[Int](3, Nil)))
+    val counter = new IntCounter()
+    counter.countWhere(values, value => value > 1) + 40
+}

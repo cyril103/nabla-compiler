@@ -8,7 +8,8 @@ pour garder un cap clair après le tag `v0.1.0`.
 - Backend natif Linux x86_64 via assembleur, avec backend IR utilise par defaut.
   Le compilateur signale explicitement une commande externe introuvable comme
   `nasm` ou `ld`.
-- Typage statique avec fonctions, fonctions locales de bloc, methodes, classes,
+- Typage statique avec fonctions, fonctions locales de bloc utilisables dans les
+  contextes generiques de fonctions/methodes/classes/traits, methodes, classes,
   generiques simples, lambdas et paramètres par nom `=> T` abaissés en thunks
   zero-argument; les paramètres constructeur `val` et `var` génèrent des getters,
   et les champs `var` sont réassignables depuis les méthodes de leur classe.
@@ -197,9 +198,10 @@ reprise séparées :
   avec `Object.member()` / `value.member()`.
 - Les fonctions locales `def` avec parametres sont supportees dans les blocs via
   des fonctions cachees non exposees comme API publique; elles couvrent l'appel
-  direct, la recursion directe, les references comme valeurs fonction et les
-  appels vers des helpers locaux deja declares, avec captures et contextes
-  generiques explicitement reportes.
+  direct, la recursion directe, les references comme valeurs fonction pour les
+  helpers declares hors contexte generique, les appels vers des helpers locaux deja declares et les
+  contextes generiques de fonctions/methodes/classes/traits. Les captures
+  implicites et fonctions locales generiques restent explicitement reportees.
 - `docs/plans/` est reserve aux plans actifs: les plans historiques des jalons
   deja livres ont ete retires, et les prochains chantiers doivent creer un plan
   court centre sur le delta restant, puis suivre la checklist
@@ -218,9 +220,9 @@ reprise séparées :
 - Refactoriser les primitives runtime I/O pour eviter la duplication autour des
   chemins C.
 - Formaliser les prochaines limites de closures et d'evaluation paresseuse
-  (captures explicites, contextes generiques, cout d'allocation des thunks) sans
-  brouiller la distinction entre paramètres par nom `=> T` et types fonction
-  ordinaires `() => T`.
+  (captures explicites, cout d'allocation des thunks) sans brouiller la
+  distinction entre paramètres par nom `=> T` et types fonction ordinaires
+  `() => T`.
 - Ajouter un support editeur supplementaire :
   - VS Code/TextMate grammar
   - Treesitter plus tard si le langage se stabilise.
