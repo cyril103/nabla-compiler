@@ -59,7 +59,7 @@ nabla-compiler/
 │   └── runtime_asm.cpp/.hpp     # Runtime assembleur partagé
 ├── stdlib/             # Bibliothèque standard Nabla
 ├── examples/           # Exemples publics et scénarios applicatifs
-├── docs/               # Guide langage, API stdlib, internals et roadmap
+├── docs/               # Guide langage, API stdlib, internals, roadmap et workflow feature
 ├── tests/
 │   ├── *.nabla          # Tests positifs et négatifs
 │   ├── *.expected       # Codes de sortie attendus
@@ -78,6 +78,7 @@ Une première documentation utilisateur du langage est disponible ici :
 - [docs/stdlib-api.md](docs/stdlib-api.md)
 - [docs/roadmap.md](docs/roadmap.md)
 - [docs/internals.md](docs/internals.md)
+- [docs/feature-integration.md](docs/feature-integration.md)
 - [docs/releases/0.1.md](docs/releases/0.1.md)
 
 La reference HTML de la bibliotheque standard se genere depuis les commentaires
