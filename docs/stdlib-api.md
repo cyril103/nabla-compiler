@@ -60,6 +60,7 @@ pas comme cible idiomatique pour le code applicatif.
 - `existingArray: _*` pour passer un tableau a un parametre repete
 - `Array.empty[T]()`
 - `Array.fill[T](size, value)`
+- `Array.fill[T](n)(elem)` avec `elem` par nom, reevalue pour chaque case
 - `Array.tabulate[T](size, f)`
 - `Array.range(size)`
 - `Array.range(start, until)`

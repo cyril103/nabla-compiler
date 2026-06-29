@@ -809,6 +809,8 @@ Pour creer un tableau de n'importe quel type `T`, l'API recommandee est donc :
 - `Array(value1, value2, ...)` pour creer un tableau depuis des elements ;
 - `Array.empty[T]()` pour creer un tableau vide ;
 - `Array.fill[T](size, value)` pour creer un tableau deja rempli ;
+- `Array.fill[T](n)(elem)` pour creer un tableau en reevaluant `elem` par nom
+  pour chaque case ;
 - `Array.tabulate[T](size, f)` pour creer un tableau en calculant chaque
   element depuis son index ;
 - `Array.range(size)` pour obtenir `[0, 1, ..., size - 1]` en `Array[Int]` ;

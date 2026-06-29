@@ -53,6 +53,7 @@ indexes.mkString(&quot;, &quot;)</code></pre>
         <li><a href="#apply" title="def Array.apply[T](values: T*): Array[T]"><span>apply</span><code>def Array.apply[T](values: T*): Array[T]</code></a></li>
         <li><a href="#empty" title="def Array.empty[T](): Array[T]"><span>empty</span><code>def Array.empty[T](): Array[T]</code></a></li>
         <li><a href="#fill" title="def Array.fill[T](size: Int, value: T): Array[T]"><span>fill</span><code>def Array.fill[T](size: Int, value: T): Array[T]</code></a></li>
+        <li><a href="#fill-2" title="def Array.fill[T](n: Int)(elem: =&gt; T): Array[T]"><span>fill</span><code>def Array.fill[T](n: Int)(elem: =&gt; T): Array[T]</code></a></li>
         <li><a href="#tabulate" title="def Array.tabulate[T](size: Int, f: (Int) =&gt; T): Array[T]"><span>tabulate</span><code>def Array.tabulate[T](size: Int, f: (Int) =&gt; T): Array[T]</code></a></li>
         <li><a href="#range" title="def Array.range(size: Int): Array[Int]"><span>range</span><code>def Array.range(size: Int): Array[Int]</code></a></li>
         <li><a href="#range-2" title="def Array.range(start: Int, until: Int): Array[Int]"><span>range</span><code>def Array.range(start: Int, until: Int): Array[Int]</code></a></li>
@@ -125,6 +126,16 @@ indexes.mkString(&quot;, &quot;)</code></pre>
           <pre class="signature"><code>def Array.fill[T](size: Int, value: T): Array[T]</code></pre>
           <p>Cree un tableau rempli avec la meme valeur.</p>
 <p>Pour T = Int, Long, Float, Double ou Bool, le compilateur choisit une specialisation primitive. Les autres types utilisent la representation generique actuelle, sans que le code utilisateur doive la nommer.</p>
+
+        </article>
+        <article class="entry" id="fill-2">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>fill</h2>
+          <pre class="signature"><code>def Array.fill[T](n: Int)(elem: =&gt; T): Array[T]</code></pre>
+          <p>Cree un tableau en reevaluant l&#x27;expression fournie pour chaque element.</p>
+<p>La forme curryfiee accepte un parametre par nom: elem est evalue une fois par case, de gauche a droite, ce qui permet de produire des valeurs differentes a chaque iteration.</p>
 
         </article>
         <article class="entry" id="tabulate">

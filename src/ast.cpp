@@ -2555,11 +2555,20 @@ std::string FunctionDefNode::lowerSpecializedFunctionToIR(
     builder.pushTypeSubstitution(substitution);
 
     std::vector<IRParameter> irParameters;
+    if (!captures.empty()) {
+        irParameters.push_back({"closure", "Closure"});
+    }
     for (const auto& parameter : parameters) {
         irParameters.push_back({parameter.name, parameter.type});
     }
 
     builder.beginFunction(formatParameterizedType(name, concreteTypeArguments), irParameters, returnType);
+    if (!captures.empty()) {
+        builder.bindClosure();
+        for (size_t i = 0; i < captures.size(); ++i) {
+            builder.bindCapture(captures[i].symbolName, static_cast<int>(i), captures[i].type);
+        }
+    }
     for (const auto& parameter : parameters) {
         builder.bindParameter(parameter.symbolName, parameter.name);
     }

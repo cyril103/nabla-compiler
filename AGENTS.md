@@ -148,9 +148,9 @@ Le pipeline implemente actuellement :
   `get`, `set`, `map` et `foreach`;
 - constructeur ergonomique `new Array[T](size)` pour les types primitifs et
   objets utilisateur via les facades `Array[T]`, avec noms utilisateur
-  `Array.fill[T](size, value)` et les surcharges `Array.range(size)` /
-  `Array.range(start, until)` pour eviter d'exposer `IntArray` / `ArrayInt` /
-  `ObjectArray[T]` dans les cas simples;
+  `Array.fill[T](size, value)`, `Array.fill[T](n)(elem)` par nom et les
+  surcharges `Array.range(size)` / `Array.range(start, until)` pour eviter
+  d'exposer `IntArray` / `ArrayInt` / `ObjectArray[T]` dans les cas simples;
 - declarations de classes generiques simples comme `Box[T]`, instanciables avec
   `Box[Int]` ou `Box[String]`, avec substitution des champs, retours de methodes
   et types fonction comme `(T) => T`;
@@ -930,6 +930,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Ajouter la surcharge curryfiee `Array.fill[T](n)(elem)` avec
+  parametre par nom reevalue par element, et corriger la specialisation IR des
+  closures generiques qui capturent des valeurs.
 - `local` - Nettoyer l'etat de reprise du depot pour les prochaines features:
   suppression locale des anciennes branches de PR mergees, ajout de
   `docs/feature-integration.md`, liens depuis README/roadmap/plans et alignement
