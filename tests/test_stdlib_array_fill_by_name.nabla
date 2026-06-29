@@ -1,0 +1,14 @@
+import collections.array
+
+class Counter(var value: Int) {
+    def next(): Int = {
+        value = value + 1
+        value
+    }
+}
+
+def main(): Int = {
+    val counter = new Counter(0)
+    val values = Array.fill[Int](3)(counter.next())
+    values.get(0) * 100 + values.get(1) * 10 + values.get(2)
+}

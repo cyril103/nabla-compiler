@@ -83,6 +83,17 @@ object Array {
         objectArrayFill[T](size, value)
     }
 
+    /// Cree un tableau en reevaluant l'expression fournie pour chaque element.
+    /// @signature def Array.fill[T](n: Int)(elem: => T): Array[T]
+    /// @status Recommandee
+    ///
+    /// La forme curryfiee accepte un parametre par nom: elem est evalue une fois
+    /// par case, de gauche a droite, ce qui permet de produire des valeurs
+    /// differentes a chaque iteration.
+    def fill[T](n: Int)(elem: => T): ArrayObject[T] = {
+        Array.tabulate[T](n, index => elem)
+    }
+
     /// Cree un tableau en calculant chaque element depuis son index.
     /// @signature def Array.tabulate[T](size: Int, f: (Int) => T): Array[T]
     /// @status Recommandee

@@ -1730,15 +1730,62 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
             const std::string qualifiedFunctionName = identifier->getName() + "." + method;
             std::string functionLookupName = qualifiedFunctionName;
             std::vector<std::string> functionTypeArguments = typeArguments;
-            if (auto alias = resolveStdlibFunctionAlias(qualifiedFunctionName, typeArguments)) {
-                auto aliasFunction = context.functions.find(*alias);
-                if (aliasFunction != context.functions.end()) {
-                    functionLookupName = *alias;
-                    if (aliasFunction->second.typeParameters.empty()) {
-                        functionTypeArguments.clear();
+            auto countImmediateArguments = [&]() -> std::optional<size_t> {
+                if (peek().type != TokenType::LPAREN) return std::nullopt;
+                size_t cursor = index + 1;
+                if (cursor < tokens.size() && tokens[cursor].type == TokenType::RPAREN) return 0;
+                size_t count = 1;
+                int parenDepth = 0;
+                int bracketDepth = 0;
+                int braceDepth = 0;
+                while (cursor < tokens.size()) {
+                    const Token& token = tokens[cursor];
+                    if (token.type == TokenType::LPAREN) {
+                        ++parenDepth;
+                    } else if (token.type == TokenType::RPAREN) {
+                        if (parenDepth == 0 && bracketDepth == 0 && braceDepth == 0) return count;
+                        --parenDepth;
+                    } else if (token.type == TokenType::LBRACKET) {
+                        ++bracketDepth;
+                    } else if (token.type == TokenType::RBRACKET) {
+                        --bracketDepth;
+                    } else if (token.type == TokenType::LBRACE) {
+                        ++braceDepth;
+                    } else if (token.type == TokenType::RBRACE) {
+                        --braceDepth;
+                    } else if (token.type == TokenType::COMMA && parenDepth == 0 && bracketDepth == 0 && braceDepth == 0) {
+                        ++count;
+                    }
+                    ++cursor;
+                }
+                return std::nullopt;
+            };
+            bool selectedQualifiedOverload = false;
+            if (auto argumentCount = countImmediateArguments()) {
+                for (const auto& overloadName : functionOverloadNames(context, qualifiedFunctionName)) {
+                    auto overloadIt = context.functions.find(overloadName);
+                    if (overloadIt == context.functions.end()) continue;
+                    if (overloadIt->second.parameters.size() != *argumentCount) continue;
+                    if (overloadIt->second.returnFunctionByNameParameters.empty()) continue;
+                    if (!genericFunctionSubstitutionFor(overloadIt->second, typeArguments)) continue;
+                    functionLookupName = overloadName;
+                    selectedQualifiedOverload = true;
+                    break;
+                }
+            }
+            if (!selectedQualifiedOverload) {
+                if (auto alias = resolveStdlibFunctionAlias(qualifiedFunctionName, typeArguments)) {
+                    auto aliasFunction = context.functions.find(*alias);
+                    if (aliasFunction != context.functions.end()) {
+                        functionLookupName = *alias;
+                        if (aliasFunction->second.typeParameters.empty()) {
+                            functionTypeArguments.clear();
+                        }
                     }
                 }
-            } else if (isStdlibFunctionAliasName(qualifiedFunctionName) && !typeArguments.empty()) {
+            }
+            if (!selectedQualifiedOverload && isStdlibFunctionAliasName(qualifiedFunctionName) && !typeArguments.empty() &&
+                functionLookupName == qualifiedFunctionName) {
                 throw CompilerError(
                     ErrorKind::Parser, methodToken.location,
                     "la fonction standard générique '" + qualifiedFunctionName +
