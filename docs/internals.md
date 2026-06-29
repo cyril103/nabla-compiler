@@ -222,10 +222,14 @@ mémoïsation implicite: le corps est évalué à chaque appel.
 Les fonctions locales de bloc `def name(args...): R = { ... }` sont abaissées en
 symboles de fonction cachés non surchargés. Les appels directs restent des appels
 de fonction directs vers ce symbole caché; une référence en position valeur
-réutilise le chemin `FunctionReferenceNode` / `Fn`. La V0 autorise récursion
-directe et appels vers des helpers locaux déclarés précédemment, mais rejette
-captures implicites, fonctions locales génériques, contextes génériques et
-overloads locaux dans une même portée.
+réutilise le chemin `FunctionReferenceNode` / `Fn` pour les helpers déclarés hors
+contexte générique. La V1 autorise récursion directe, appels vers des helpers locaux
+déclarés précédemment, et réutilisation des paramètres de type des fonctions,
+méthodes, classes et traits englobants. Les signatures et corps de helpers
+locaux peuvent donc mentionner `T`, `U`, `List[T]` ou `(T) => U` quand ces types
+sont déjà en portée. Les captures implicites de valeurs/paramètres englobants,
+fonctions locales génériques et overloads locaux dans une même portée restent
+rejetés explicitement.
 
 Les types fonction sont canoniques sous la forme interne :
 

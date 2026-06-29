@@ -1,0 +1,10 @@
+def outer[T, U](value: T): Int = {
+    def constant(): Int = {
+        42
+    }
+    constant()
+}
+
+def main(): Int = {
+    outer[Int, String](1)
+}

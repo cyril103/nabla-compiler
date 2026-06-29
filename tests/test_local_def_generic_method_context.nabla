@@ -1,0 +1,13 @@
+class GenericRunner() {
+    def applyOnce[T](value: T, f: (T) => T): T = {
+        def call(item: T, fn: (T) => T): T = {
+            fn(item)
+        }
+        call(value, f)
+    }
+}
+
+def main(): Int = {
+    val runner = new GenericRunner()
+    runner.applyOnce[Int](41, value => value + 1)
+}

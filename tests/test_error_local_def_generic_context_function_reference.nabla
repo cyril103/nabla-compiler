@@ -1,0 +1,11 @@
+def outer[T](value: T): Int = {
+    def id(item: T): T = {
+        item
+    }
+    val fn: (T) => T = id
+    0
+}
+
+def main(): Int = {
+    outer[Int](42)
+}

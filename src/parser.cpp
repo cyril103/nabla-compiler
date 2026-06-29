@@ -1402,13 +1402,18 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             if (initialSymbol && initialSymbol->isLocalFunction) {
                 auto functionType = functionTypeFromName(initialSymbol->type);
                 if (functionType) expectedArgumentTypes = functionType->parameterTypes;
+                std::vector<std::string> localTypeArguments;
+                auto localFunction = context.functions.find(initialSymbol->internalName);
+                if (localFunction != context.functions.end()) {
+                    localTypeArguments = localFunction->second.typeParameters;
+                }
                 consume(TokenType::LPAREN, "");
                 auto arguments = parseArguments(expectedArgumentTypes, initialSymbol->parameterByNameParameters);
                 consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
                 return located(
                     std::make_unique<FunctionCallNode>(
                         initialSymbol->internalName, std::move(arguments),
-                        std::vector<std::string>{},
+                        std::move(localTypeArguments),
                         functionType ? functionType->returnType : "Int", name,
                         initialSymbol->returnFunctionByNameParameters),
                     nameToken.location);
@@ -2098,12 +2103,6 @@ std::unique_ptr<ASTNode> Parser::parseLocalFunctionDef() {
             ErrorKind::Parser, peek().location,
             "les fonctions locales génériques ne sont pas encore supportées");
     }
-    if (!currentFunctionTypeParameters.empty()) {
-        throw CompilerError(
-            ErrorKind::Parser, nameToken.location,
-            "les fonctions locales dans un contexte générique ne sont pas encore supportées");
-    }
-
     std::vector<FunctionDefNode::Parameter> parameters;
     std::vector<CompilerContext::ParameterInfo> signatureParameters;
     std::map<std::string, ParsedSymbol> functionScope;
@@ -2162,7 +2161,7 @@ std::unique_ptr<ASTNode> Parser::parseLocalFunctionDef() {
     const std::string mangledName =
         "local." + name + "." + std::to_string(context.nextLambdaId++);
     CompilerContext::FunctionSignature signature{
-        signatureParameters, returnType, std::vector<std::string>{},
+        signatureParameters, returnType, currentFunctionTypeParameters,
         defToken.location, returnTypeLocation, false, false, false, {}};
     context.functions[mangledName] = signature;
     std::vector<bool> localFunctionByNameParameters;
@@ -2197,7 +2196,6 @@ std::unique_ptr<ASTNode> Parser::parseLocalFunctionDef() {
         if (!visibleScope.empty()) localScopes.push_back(std::move(visibleScope));
     }
     localScopes.push_back(std::move(functionScope));
-    currentFunctionTypeParameters.clear();
     currentParsingClass.clear();
 
     std::unique_ptr<ASTNode> body;
@@ -2214,7 +2212,7 @@ std::unique_ptr<ASTNode> Parser::parseLocalFunctionDef() {
     currentParsingClass = std::move(savedParsingClass);
 
     generatedFunctions.push_back(located(std::make_unique<FunctionDefNode>(
-        "", mangledName, returnType, std::vector<std::string>{},
+        "", mangledName, returnType, currentFunctionTypeParameters,
         std::move(parameters), std::move(body), std::vector<FunctionDefNode::Capture>{}),
         defToken.location));
 

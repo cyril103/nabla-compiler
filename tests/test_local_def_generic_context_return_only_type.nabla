@@ -1,0 +1,10 @@
+def outer[T](): T = {
+    def abort(): T = {
+        panic("local return-only type")
+    }
+    abort()
+}
+
+def main(): Int = {
+    outer[Int]()
+}
