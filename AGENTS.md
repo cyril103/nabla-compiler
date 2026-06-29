@@ -13,6 +13,9 @@ contribuent au compilateur Nabla.
 - Regenerer la reference HTML avec `make stdlib-docs` quand une API publique de
   `stdlib/`, un commentaire `///`, une directive `@signature` ou une directive
   `@symbol` change, puis inclure le resultat `docs/stdlib/` dans le commit.
+- Pour une nouvelle feature, utiliser `docs/feature-integration.md` comme
+  checklist de reprise: branche propre, plan actif si necessaire, tests, docs,
+  validation locale et hygiene Markdown avant PR.
 
 ## Vision
 
@@ -75,7 +78,10 @@ Priorites structurantes :
    le runtime et les regles de typage.
 4. Maintenir le check CI qui verifie que `make stdlib-docs` ne laisse aucun diff.
 5. Produire des exemples idiomatiques n'utilisant pas les API internes.
-6. Reporter les grosses nouvelles structures (`Result[T]`, GC,
+6. Demarrer les nouvelles features depuis un etat de reprise clair, en suivant
+   `docs/feature-integration.md` et en gardant `docs/plans/` reserve aux plans
+   actifs.
+7. Reporter les grosses nouvelles structures (`Result[T]`, GC,
    variance avancee) tant que l'ergonomie des collections et options n'est pas
    stabilisee.
 
@@ -368,6 +374,9 @@ Le pipeline implemente actuellement :
   `git diff --check`;
 - `v0.1.0` est tagué; `docs/releases/0.1.md` conserve les notes de release
   et la matrice de validation 0.1.x;
+- `docs/feature-integration.md` formalise la reprise d'une nouvelle feature:
+  controle des PRs/branches locales, choix entre plan actif et delta-plan,
+  definition of done tests/docs, hygiene Markdown et validation avant PR;
 - reference HTML de la stdlib generee depuis `///`, avec directive `@status`
   pour distinguer visuellement API recommandee, compatibilite et helpers
   internes; les pages publiees utilisent une mise en page type reference Scala
@@ -920,6 +929,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Nettoyer l'etat de reprise du depot pour les prochaines features:
+  suppression locale des anciennes branches de PR mergees, ajout de
+  `docs/feature-integration.md`, liens depuis README/roadmap/plans et alignement
+  d'`AGENTS.md` afin de clarifier la checklist tests/docs/hygiene avant PR.
+  - Fichiers / tests associes: `README.md`, `docs/feature-integration.md`,
+    `docs/plans/README.md`, `docs/roadmap.md`, `AGENTS.md`, `git diff --check`.
 
 - `local` - Retirer les plans actifs termines `docs/plans/by-name-parameters.md` et `docs/plans/constructor-var-fields.md` après squash-merge des PRs associées; `docs/plans/README.md` revient à l'état sans plan actif.
   - Fichiers / tests associes: `docs/plans/README.md`, suppression de `docs/plans/by-name-parameters.md` et `docs/plans/constructor-var-fields.md`, `git diff --check`.
@@ -2082,4 +2098,7 @@ vite la surface publique :
 - améliorer les diagnostics et la documentation utilisateur avant de créer de
   nouvelles abstractions comme `Result[T]`, variance avancée ou GC;
 - conserver les helpers internes spécialisés de collections tant qu'ils
-  expriment des contraintes runtime/IR réelles.
+  expriment des contraintes runtime/IR réelles;
+- demarrer chaque nouvelle feature par la checklist `docs/feature-integration.md`
+  pour eviter les plans historiques ressuscites, les branches locales obsoletes
+  et les PRs redondantes.

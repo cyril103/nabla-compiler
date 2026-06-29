@@ -162,6 +162,9 @@ Actions recommandees :
     resolution devient moins stricte que l'exact match.
 14. Reporter `Result[T]`, variance avancee et GC tant que cette surface n'est
    pas propre.
+15. Pour chaque nouvelle feature, suivre `docs/feature-integration.md` afin de
+   verifier l'etat de depart, le plan actif, les tests, les docs et l'hygiene
+   avant PR.
 
 ## Jalons Récents Pris En Compte
 
@@ -199,7 +202,8 @@ reprise séparées :
   generiques explicitement reportes.
 - `docs/plans/` est reserve aux plans actifs: les plans historiques des jalons
   deja livres ont ete retires, et les prochains chantiers doivent creer un plan
-  court centre sur le delta restant.
+  court centre sur le delta restant, puis suivre la checklist
+  `docs/feature-integration.md` avant PR.
 - `docs/internals.md` documente les conventions internes courantes pour les
   proprietes `def` zero-argument et les fonctions locales de bloc, afin de ne
   pas les confondre avec des valeurs memoisees ou des lambdas source.
@@ -213,9 +217,10 @@ reprise séparées :
   reste la stratégie mémoire complète (libération/GC éventuel).
 - Refactoriser les primitives runtime I/O pour eviter la duplication autour des
   chemins C.
-- Etudier un passage d'argument par nom en s'appuyant sur les thunks
-  zero-argument `() => T`, maintenant representables comme types fonction et
-  closures ordinaires.
+- Formaliser les prochaines limites de closures et d'evaluation paresseuse
+  (captures explicites, contextes generiques, cout d'allocation des thunks) sans
+  brouiller la distinction entre paramètres par nom `=> T` et types fonction
+  ordinaires `() => T`.
 - Ajouter un support editeur supplementaire :
   - VS Code/TextMate grammar
   - Treesitter plus tard si le langage se stabilise.
@@ -226,7 +231,8 @@ reprise séparées :
 
 ## Regle De Reprise
 
-Avant de commencer une nouvelle feature :
+Avant de commencer une nouvelle feature, suivre la checklist complète de
+`docs/feature-integration.md`. Le minimum de reprise reste :
 
 ```bash
 git status --short
