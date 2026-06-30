@@ -92,7 +92,18 @@ Le point d'entree genere est `docs/stdlib/index.html`.
 
 ## Support éditeur
 
-Un support Vim minimal est disponible dans [editor/vim](editor/vim). Pour
+Un support VS Code local est disponible dans [editor/vscode](editor/vscode). Il
+fournit la detection des fichiers `*.nabla`, une coloration syntaxique TextMate,
+la configuration des commentaires/parentheses/indentation et quelques snippets :
+
+```bash
+code --extensionDevelopmentPath=editor/vscode
+```
+
+Pour l'installer durablement, generer un paquet VSIX depuis `editor/vscode` avec
+`vsce package`, puis installer le fichier produit avec `code --install-extension`.
+
+Un support Vim minimal est aussi disponible dans [editor/vim](editor/vim). Pour
 l'installer localement :
 
 ```bash

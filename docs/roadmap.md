@@ -87,7 +87,9 @@ pour garder un cap clair après le tag `v0.1.0`.
   verifies pour la surface stdlib publique (`Array[T]`, `Set[T]`, `Map[K, V]`,
   `List[T]`, `Option[T]`, `Sized` et operations texte), sans construction directe des
   representations de tableaux internes.
-- Support Vim minimal disponible dans `editor/vim`.
+- Support editeur minimal disponible dans `editor/vim` et `editor/vscode`; le
+  support VS Code couvre la detection `*.nabla`, la coloration TextMate, la
+  configuration langage et des snippets.
 - Suites `make all-tests`, `make examples` et `make tooling-tests` vertes au
   moment de cette mise a jour; la CI GitHub lance aussi les exemples publics.
 
@@ -224,7 +226,6 @@ reprise séparées :
   distinction entre paramètres par nom `=> T` et types fonction ordinaires
   `() => T`.
 - Ajouter un support editeur supplementaire :
-  - VS Code/TextMate grammar
   - Treesitter plus tard si le langage se stabilise.
 - Ajouter plus d'exemples applicatifs :
   - outil de notes avec fichiers

@@ -1,0 +1,115 @@
+{
+  "main function": {
+    "prefix": "main",
+    "body": [
+      "def main(): Int = {",
+      "    ${1:0}",
+      "}"
+    ],
+    "description": "Create a Nabla main function"
+  },
+  "function": {
+    "prefix": "def",
+    "body": [
+      "def ${1:name}(${2:param}: ${3:Int}): ${4:Int} = {",
+      "    ${5:0}",
+      "}"
+    ],
+    "description": "Create a Nabla function"
+  },
+  "class": {
+    "prefix": "class",
+    "body": [
+      "class ${1:Name}(${2:value}: ${3:Int}) {",
+      "    def ${4:method}(): ${5:Int} = {",
+      "        ${2:value}",
+      "    }",
+      "}"
+    ],
+    "description": "Create a Nabla class"
+  },
+  "trait": {
+    "prefix": "trait",
+    "body": [
+      "trait ${1:Name} {",
+      "    def ${2:method}(): ${3:Unit}",
+      "}"
+    ],
+    "description": "Create a Nabla trait"
+  },
+  "object": {
+    "prefix": "object",
+    "body": [
+      "object ${1:Name} {",
+      "    def ${2:method}(): ${3:Int} = {",
+      "        ${4:0}",
+      "    }",
+      "}"
+    ],
+    "description": "Create a Nabla object namespace"
+  },
+  "if expression": {
+    "prefix": "if",
+    "body": [
+      "if (${1:condition}) {",
+      "    ${2:value}",
+      "} else {",
+      "    ${3:other}",
+      "}"
+    ],
+    "description": "Create an if/else expression"
+  },
+  "match expression": {
+    "prefix": "match",
+    "body": [
+      "match ${1:value} {",
+      "    ${2:caseValue} => {",
+      "        ${3:result}",
+      "    }",
+      "    _ => {",
+      "        ${4:fallback}",
+      "    }",
+      "}"
+    ],
+    "description": "Create a match expression"
+  },
+  "while loop": {
+    "prefix": "while",
+    "body": [
+      "while (${1:condition}) {",
+      "    ${2:// body}",
+      "}"
+    ],
+    "description": "Create a while loop"
+  },
+  "lambda": {
+    "prefix": "lambda",
+    "body": [
+      "(${1:value}: ${2:Int}) => {",
+      "    ${3:value}",
+      "}"
+    ],
+    "description": "Create a typed lambda"
+  },
+  "Array fill": {
+    "prefix": "arrayfill",
+    "body": [
+      "Array.fill[${1:Int}](${2:size}, ${3:value})"
+    ],
+    "description": "Create an Array.fill expression"
+  },
+  "Option some": {
+    "prefix": "some",
+    "body": [
+      "Option.some[${1:Int}](${2:value})"
+    ],
+    "description": "Create an Option.some expression"
+  },
+  "Option none": {
+    "prefix": "none",
+    "body": [
+      "Option.none[${1:Int}]()"
+    ],
+    "description": "Create an Option.none expression"
+  }
+}

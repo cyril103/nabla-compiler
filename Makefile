@@ -1,5 +1,6 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra
+PYTHON ?= python
 SRC ?= tests/test_import.nabla
 BUILD_DIR := build
 BIN := $(BUILD_DIR)/$(notdir $(basename $(SRC)))
@@ -210,6 +211,7 @@ tooling-tests: nablac stdlib-docs
 	@tests/test_missing_external_tools.sh
 	@tests/test_configurable_heap_size.sh
 	@tests/test_stdlib_docs_html.py
+	@$(PYTHON) tools/test_editor_vscode.py
 
 stdlib-docs:
 	tools/generate_stdlib_docs.py

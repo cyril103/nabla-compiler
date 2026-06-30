@@ -1,0 +1,43 @@
+{
+  "name": "nabla-vscode",
+  "displayName": "Nabla Language Support",
+  "description": "Syntax highlighting, language configuration, and snippets for the Nabla language.",
+  "version": "0.1.0",
+  "publisher": "nabla",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "nabla",
+        "aliases": [
+          "Nabla",
+          "nabla"
+        ],
+        "extensions": [
+          ".nabla"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "nabla",
+        "scopeName": "source.nabla",
+        "path": "./syntaxes/nabla.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "nabla",
+        "path": "./snippets/nabla.json"
+      }
+    ]
+  }
+}

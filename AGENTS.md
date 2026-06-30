@@ -374,6 +374,9 @@ Le pipeline implemente actuellement :
 - CI GitHub avec `make all-tests`, `make examples`, `make tooling-tests`,
   vérification `make stdlib-docs` sans diff, compilation `-Werror` et
   `git diff --check`;
+- support editeur VS Code dans `editor/vscode` avec detection `*.nabla`,
+  grammaire TextMate, configuration langage, snippets et test d'outillage dedie
+  via `make tooling-tests`;
 - `v0.1.0` est tagué; `docs/releases/0.1.md` conserve les notes de release
   et la matrice de validation 0.1.x;
 - `docs/feature-integration.md` formalise la reprise d'une nouvelle feature:
@@ -891,6 +894,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   types, le runtime, l'IR et les conventions de stdlib.
 - [x] Ajouter une roadmap de reprise dans `docs/roadmap.md`.
 - [x] Ajouter un support Vim minimal pour `*.nabla`.
+- [x] Ajouter un support VS Code minimal pour `*.nabla` avec grammaire TextMate,
+  configuration langage, snippets et test d'outillage.
 - [x] Ajouter des tests Project Euler progressifs pour guider les extensions du
   langage.
 - [x] Vérifier `examples/student_scores.nabla` avec un code de sortie et une
@@ -934,6 +939,12 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter une extension VS Code locale pour Nabla: detection des
+  fichiers `*.nabla`, grammaire TextMate, configuration de langage, snippets,
+  documentation d'installation et test d'outillage rattache a `make tooling-tests`.
+  - Fichiers / tests associes: `editor/vscode/`, `tools/test_editor_vscode.py`,
+    `Makefile`, `README.md`, `AGENTS.md`, `python tools/test_editor_vscode.py`.
 
 - `local` - Retirer le plan actif termine de la troisieme tranche de cleanup
   stdlib `ArrayFloat` apres squash-merge: `docs/plans/` revient a l'etat sans

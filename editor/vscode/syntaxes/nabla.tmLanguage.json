@@ -1,0 +1,191 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Nabla",
+  "scopeName": "source.nabla",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#chars"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#functions"
+    },
+    {
+      "include": "#classes"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#types"
+    },
+    {
+      "include": "#constants"
+    },
+    {
+      "include": "#operators"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.nabla",
+          "match": "//.*$"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.nabla",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.nabla",
+              "match": "\\\\(?:[\\\\\"'nrt0]|x[0-9A-Fa-f]{2})"
+            }
+          ]
+        }
+      ]
+    },
+    "chars": {
+      "patterns": [
+        {
+          "name": "string.quoted.single.nabla",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.nabla",
+              "match": "\\\\(?:[\\\\\"'nrt0]|x[0-9A-Fa-f]{2})"
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.float.nabla",
+          "match": "\\b\\d+\\.\\d+f\\b"
+        },
+        {
+          "name": "constant.numeric.double.nabla",
+          "match": "\\b\\d+\\.\\d+\\b"
+        },
+        {
+          "name": "constant.numeric.integer.long.nabla",
+          "match": "\\b\\d+L\\b"
+        },
+        {
+          "name": "constant.numeric.integer.nabla",
+          "match": "\\b\\d+\\b"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.nabla",
+          "match": "\\b(?:if|else|match|while|for)\\b"
+        },
+        {
+          "name": "keyword.declaration.nabla",
+          "match": "\\b(?:def|class|trait|object|import|val|var|new|override|extends|with)\\b"
+        },
+        {
+          "name": "keyword.other.nabla",
+          "match": "\\b(?:this|super)\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "storage.type.primitive.nabla",
+          "match": "\\b(?:Any|AnyVal|AnyRef|Nothing|Int|Long|Float|Double|Bool|Char|String|Unit)\\b"
+        },
+        {
+          "name": "support.type.stdlib.nabla",
+          "match": "\\b(?:Array|ArrayInt|ArrayLong|ArrayFloat|ArrayDouble|ArrayBool|ArrayObject|ObjectArray|Option|Set|Map|List|Cons|Sized|Iterable|RangeInt)\\b"
+        }
+      ]
+    },
+    "constants": {
+      "patterns": [
+        {
+          "name": "constant.language.boolean.nabla",
+          "match": "\\b(?:true|false)\\b"
+        },
+        {
+          "name": "constant.language.nil.nabla",
+          "match": "\\bNil\\b"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "match": "(\\bdef\\s+)([A-Za-z_][A-Za-z0-9_]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.declaration.nabla"
+            },
+            "2": {
+              "name": "entity.name.function.nabla"
+            }
+          }
+        },
+        {
+          "name": "support.function.stdlib.nabla",
+          "match": "\\b(?:print|readLine|parseInt|panic|error|println|input|readFile|writeFile|appendFile|deleteFile|fileExists)\\b"
+        }
+      ]
+    },
+    "classes": {
+      "patterns": [
+        {
+          "match": "(\\b(?:class|trait|object)\\s+)([A-Za-z_][A-Za-z0-9_]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.declaration.nabla"
+            },
+            "2": {
+              "name": "entity.name.type.class.nabla"
+            }
+          }
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.arrow.nabla",
+          "match": "=>|->"
+        },
+        {
+          "name": "keyword.operator.comparison.nabla",
+          "match": "==|!=|<=|>="
+        },
+        {
+          "name": "keyword.operator.logical.nabla",
+          "match": "&&|\\|\\||!"
+        },
+        {
+          "name": "keyword.operator.arithmetic.nabla",
+          "match": "[+\\-*/%<>=]"
+        }
+      ]
+    }
+  }
+}
