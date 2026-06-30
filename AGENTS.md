@@ -935,6 +935,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Cacher une troisieme tranche de helpers stdlib non documentes via
+  fonctions locales: les wrappers `floatArrayLength`, `floatArrayGet` et
+  `floatArraySet` ne sont plus des symboles module-level de
+  `collections.float_array`; les methodes `ArrayFloat` declarent les petits
+  adaptateurs au plus pres des appels `arrayBase...`.
+  - Fichiers / tests associes: `stdlib/collections/float_array.nabla`,
+    `docs/plans/stdlib-local-helper-tranche-3.md`, `AGENTS.md`, tests cibles
+    `ArrayFloat`, `make stdlib-docs` sans diff attendu.
+
 - `local` - Retirer le plan actif termine de la deuxieme tranche de cleanup
   stdlib `ArrayDouble` apres squash-merge: `docs/plans/` revient a l'etat sans
   plan actif, le perimetre livre restant documente dans ce journal, les tests et

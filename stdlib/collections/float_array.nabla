@@ -159,40 +159,52 @@ def floatArrayFold(xs: FloatArray, initial: Float, combine: (Float, Float) => Fl
     accumulator
 }
 
-def floatArrayLength(values: FloatArray): Int = {
-    values.length()
-}
-
-def floatArrayGet(values: FloatArray, index: Int): Float = {
-    values.get(index)
-}
-
-def floatArraySet(values: FloatArray, index: Int, value: Float): Unit = {
-    values.set(index, value)
-}
-
 class ArrayFloat(values: FloatArray) with Iterable[Float] {
     def length(): Int = {
+        def floatArrayLength(items: FloatArray): Int = {
+            items.length()
+        }
+
         floatArrayLength(values)
     }
 
     override def size(): Int = {
+        def floatArrayLength(items: FloatArray): Int = {
+            items.length()
+        }
+
         arrayBaseSize[FloatArray](values, floatArrayLength)
     }
 
     override def isEmpty(): Bool = {
+        def floatArrayLength(items: FloatArray): Int = {
+            items.length()
+        }
+
         arrayBaseIsEmpty[FloatArray](values, floatArrayLength)
     }
 
     override def nonEmpty(): Bool = {
+        def floatArrayLength(items: FloatArray): Int = {
+            items.length()
+        }
+
         arrayBaseNonEmpty[FloatArray](values, floatArrayLength)
     }
 
     def get(index: Int): Float = {
+        def floatArrayGet(items: FloatArray, itemIndex: Int): Float = {
+            items.get(itemIndex)
+        }
+
         arrayBaseGet[Float, FloatArray](values, index, floatArrayGet)
     }
 
     def set(index: Int, value: Float): Unit = {
+        def floatArraySet(items: FloatArray, itemIndex: Int, itemValue: Float): Unit = {
+            items.set(itemIndex, itemValue)
+        }
+
         arrayBaseSet[Float, FloatArray](values, index, value, floatArraySet)
     }
 
@@ -233,10 +245,26 @@ class ArrayFloat(values: FloatArray) with Iterable[Float] {
     }
 
     def fold(initial: Float, combine: (Float, Float) => Float): Float = {
+        def floatArrayLength(items: FloatArray): Int = {
+            items.length()
+        }
+
+        def floatArrayGet(items: FloatArray, itemIndex: Int): Float = {
+            items.get(itemIndex)
+        }
+
         arrayBaseFold[Float, Float, FloatArray](values, floatArrayLength, floatArrayGet, initial, combine)
     }
 
     override def foreach(f: (Float) => Unit): Unit = {
+        def floatArrayLength(items: FloatArray): Int = {
+            items.length()
+        }
+
+        def floatArrayGet(items: FloatArray, itemIndex: Int): Float = {
+            items.get(itemIndex)
+        }
+
         arrayBaseForeach[Float, FloatArray](values, floatArrayLength, floatArrayGet, f)
     }
 
