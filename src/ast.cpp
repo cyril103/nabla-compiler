@@ -1494,16 +1494,31 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
                 concreteTypeArguments.push_back(parameterizedReturnType->second[0]);
             }
         }
-        const std::string loweredMethodName = concreteTypeArguments.empty()
-            ? methodName
-            : formatParameterizedType(methodName, concreteTypeArguments);
-        if (activeReceiverBase != activeReceiverType) {
-            std::vector<std::string> argumentTypes;
-            for (const auto& argument : arguments) {
-                argumentTypes.push_back(builder.substituteActiveType(argument->getType()));
+        std::vector<std::string> argumentTypes;
+        for (size_t i = 0; i < arguments.size(); ++i) {
+            if (i < resolvedParameters.size()) {
+                argumentTypes.push_back(builder.substituteActiveType(resolvedParameters[i].type));
+            } else {
+                argumentTypes.push_back(builder.substituteActiveType(arguments[i]->getType()));
             }
+        }
+        std::string loweredSourceMethodName = methodName;
+        if (auto classIt = builder.getContext().classes.find(activeReceiverBase);
+            classIt != builder.getContext().classes.end()) {
+            if (auto overloadIt = classIt->second.methodOverloads.find(methodName);
+                overloadIt != classIt->second.methodOverloads.end() && overloadIt->second.size() > 1) {
+                if (auto resolvedConcreteMethod = resolveExactClassMethodOverload(
+                        builder.getContext(), activeReceiverType, methodName, argumentTypes)) {
+                    loweredSourceMethodName = resolvedConcreteMethod->methodName;
+                }
+            }
+        }
+        const std::string loweredMethodName = concreteTypeArguments.empty()
+            ? loweredSourceMethodName
+            : formatParameterizedType(loweredSourceMethodName, concreteTypeArguments);
+        if (activeReceiverBase != activeReceiverType) {
             builder.registerMethodSpecialization(
-                activeReceiverType, activeReceiverBase, methodName, concreteTypeArguments,
+                activeReceiverType, activeReceiverBase, loweredSourceMethodName, concreteTypeArguments,
                 argumentTypes, concreteReturnType);
         }
         return builder.emitMethodCall(

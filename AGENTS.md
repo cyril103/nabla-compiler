@@ -147,7 +147,7 @@ Le pipeline implemente actuellement :
 - appels de methodes communs sur la facade generique `Array[T]` dans les corps
   generiques, specialises vers `ArrayInt`, `ArrayLong`, `ArrayFloat`,
   `ArrayDouble` ou `ArrayBool` pour `length`, `size`, `isEmpty`, `nonEmpty`,
-  `get`, `set`, `map` et `foreach`;
+  `get`, `set`, `map`, `foreach` et `sorted(lessThan)`;
 - constructeur ergonomique `new Array[T](size)` pour les types primitifs et
   objets utilisateur via les facades `Array[T]`, avec noms utilisateur
   `Array.fill[T](size, value)`, `Array.fill[T](n)(elem)` par nom et les
@@ -326,7 +326,8 @@ Le pipeline implemente actuellement :
   `Array.range`, `Array.rangeUntil` comme alias de compatibilite,
   `ArrayFill[T]`, `ArrayRange`, `arrayFill[T]`, `arrayMap[T]`,
   `arrayMap[T, U]`, `arrayFilter[T]`, `arrayFold[T]`, `arrayFold[T, U]`,
-  `arrayFlatMap[T]`, `arrayFlatMap[T, U]` et `arrayForeach[T]` resolus vers les
+  `arrayFlatMap[T]`, `arrayFlatMap[T, U]`, `arrayForeach[T]` et
+  `Array[T].sorted(lessThan)` resolus vers les
   specialisations `ArrayInt`, `ArrayLong`, `ArrayFloat`, `ArrayDouble` ou
   `ArrayBool` pour `T = Int`, `Long`, `Float`, `Double` ou `Bool`, et vers
   `ArrayObject[T]` pour les types concrets non specialises comme `String` et
@@ -939,6 +940,16 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter `Array.sorted`: les facades `ArrayInt`, `ArrayLong`,
+  `ArrayFloat`, `ArrayDouble`, `ArrayBool` et `ArrayObject[T]` retournent une
+  copie stable triee sans muter la source; les primitives ont `sorted()` par
+  ordre naturel et toutes exposent `sorted(lessThan)` pour l'ordre utilisateur,
+  utilisable aussi depuis une signature generique `Array[T]`.
+  - Fichiers / tests associes: `stdlib/collections/*_array.nabla`,
+    `src/compiler_context.hpp`, `docs/stdlib-api.md`,
+    `tests/test_stdlib_array_sorted_int.nabla`,
+    `tests/test_stdlib_array_sorted_generic.nabla`, `make test` cible.
 
 - `local` - Ajouter une extension VS Code locale pour Nabla: detection des
   fichiers `*.nabla`, grammaire TextMate, configuration de langage, snippets,

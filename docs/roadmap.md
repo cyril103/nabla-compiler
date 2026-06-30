@@ -49,7 +49,9 @@ pour garder un cap clair après le tag `v0.1.0`.
   `extends`, arguments de type et initialisation dédiée; ces singletons ne sont
   pas instanciables avec `new` et ne peuvent pas servir de parents de classe.
 - Standard library deja utile :
-  - collections typées et facade `Array[T]`
+  - collections typées et facade `Array[T]`, dont `sorted(lessThan)` retourne
+    une copie triee sans mutation et les facades primitives exposent aussi
+    `sorted()` par ordre naturel
   - `collections.set` avec `Set[T]`, `add`, `remove`, `union`, `intersect`,
     `difference`
   - `collections.map` avec `Map[K, V]`, recherche optionnelle, mises a jour

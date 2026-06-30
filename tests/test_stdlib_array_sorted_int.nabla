@@ -1,0 +1,19 @@
+import collections.array
+
+def main(): Int = {
+    val values = Array.fill[Int](5, 0)
+    values.set(0, 4)
+    values.set(1, 1)
+    values.set(2, 3)
+    values.set(3, 1)
+    values.set(4, 2)
+
+    val sorted = values.sorted()
+    val descending = values.sorted((left, right) => left > right)
+
+    if values.get(0) == 4 && sorted.mkString(",") == "1,1,2,3,4" && descending.mkString(",") == "4,3,2,1,1" {
+        42
+    } else {
+        1
+    }
+}

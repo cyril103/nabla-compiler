@@ -36,6 +36,14 @@
 ///
 /// Preferer Array.fill[T](size, value) dans le nouveau code.
 
+/// @symbol def Array[T].sorted(lessThan: (T, T) => Bool): Array[T]
+/// @status Recommandee
+/// Retourne une copie triee sans modifier le tableau source.
+///
+/// La V0 demande un predicat d'ordre strict utilisateur, par exemple
+/// `xs.sorted((left, right) => left.score() < right.score())`. Les tableaux
+/// primitifs numeriques exposent aussi `sorted()` avec leur ordre naturel.
+
 import collections.array_base
 import collections.int_array
 import collections.long_array

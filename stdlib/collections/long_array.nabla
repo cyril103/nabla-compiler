@@ -185,6 +185,32 @@ def longArraySet(values: LongArray, index: Int, value: Long): Unit = {
     values.set(index, value)
 }
 
+def longArraySortedWith(xs: LongArray, lessThan: (Long, Long) => Bool): LongArray = {
+    val sorted = new LongArray(xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        sorted.set(index, xs.get(index))
+        index = index + 1
+    }
+
+    index = 1
+    while (index < sorted.length()) {
+        val current = sorted.get(index)
+        var cursor = index
+        while (cursor > 0 && lessThan(current, sorted.get(cursor - 1))) {
+            sorted.set(cursor, sorted.get(cursor - 1))
+            cursor = cursor - 1
+        }
+        sorted.set(cursor, current)
+        index = index + 1
+    }
+    sorted
+}
+
+def longArraySorted(xs: LongArray): LongArray = {
+    longArraySortedWith(xs, (left: Long, right: Long) => { left < right })
+}
+
 class ArrayLong(values: LongArray) with Iterable[Long] {
     def length(): Int = {
         longArrayLength(values)
@@ -240,6 +266,14 @@ class ArrayLong(values: LongArray) with Iterable[Long] {
 
     def filter(predicate: (Long) => Bool): ArrayLong = {
         new ArrayLong(longArrayFilter(values, predicate))
+    }
+
+    def sorted(): ArrayLong = {
+        new ArrayLong(longArraySorted(values))
+    }
+
+    def sorted(lessThan: (Long, Long) => Bool): ArrayLong = {
+        new ArrayLong(longArraySortedWith(values, lessThan))
     }
 
     def shuffle(state: RandomState): ArrayLong = {
@@ -305,6 +339,14 @@ def arrayLongFlatMap(xs: ArrayLong, transform: (Long) => ArrayLong): ArrayLong =
 
 def arrayLongFilter(xs: ArrayLong, predicate: (Long) => Bool): ArrayLong = {
     xs.filter(predicate)
+}
+
+def arrayLongSorted(xs: ArrayLong): ArrayLong = {
+    xs.sorted()
+}
+
+def arrayLongSortedWith(xs: ArrayLong, lessThan: (Long, Long) => Bool): ArrayLong = {
+    xs.sorted(lessThan)
 }
 
 def arrayLongFold(xs: ArrayLong, initial: Long, combine: (Long, Long) => Long): Long = {

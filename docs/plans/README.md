@@ -8,7 +8,8 @@ actif; leur résultat est résumé dans [`AGENTS.md`](../../AGENTS.md),
 jalons inclus dans `v0.1.0`, [`docs/releases/0.1.md`](../releases/0.1.md)
 conserve aussi le périmètre livré et la matrice de validation 0.1.x.
 
-Aucun plan actif n'est actuellement ouvert dans ce répertoire.
+- [`array-sorted.md`](array-sorted.md) — ajouter une operation Scala-inspiree
+  `Array[T].sorted(lessThan)` et `sorted()` naturel pour facades primitives.
 
 Le cap post-0.1 courant est décrit dans [`docs/roadmap.md`](../roadmap.md) :
 durcissement héritage/runtime, nettoyage de la surface stdlib et maintien de
