@@ -8,11 +8,7 @@ actif; leur résultat est résumé dans [`AGENTS.md`](../../AGENTS.md),
 jalons inclus dans `v0.1.0`, [`docs/releases/0.1.md`](../releases/0.1.md)
 conserve aussi le périmètre livré et la matrice de validation 0.1.x.
 
-Plan actif actuel :
-
-- [`stdlib-local-helper-tranche-2.md`](stdlib-local-helper-tranche-2.md) — cacher
-  une petite tranche de wrappers `ArrayDouble` non documentés via des `def`
-  locaux, sans changement d'API publique.
+Aucun plan actif n'est actuellement ouvert dans ce répertoire.
 
 Le cap post-0.1 courant est décrit dans [`docs/roadmap.md`](../roadmap.md) :
 durcissement héritage/runtime, nettoyage de la surface stdlib et maintien de

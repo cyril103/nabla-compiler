@@ -935,14 +935,21 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Retirer le plan actif termine de la deuxieme tranche de cleanup
+  stdlib `ArrayDouble` apres squash-merge: `docs/plans/` revient a l'etat sans
+  plan actif, le perimetre livre restant documente dans ce journal, les tests et
+  l'historique de PR.
+  - Fichiers / tests associes: `docs/plans/README.md`, `AGENTS.md`, suppression
+    de `docs/plans/stdlib-local-helper-tranche-2.md`, `git diff --check`.
+
 - `local` - Cacher une deuxieme tranche de helpers stdlib non documentes via
   fonctions locales: les wrappers `doubleArrayLength`, `doubleArrayGet` et
   `doubleArraySet` ne sont plus des symboles module-level de
   `collections.double_array`; les methodes `ArrayDouble` declarent les petits
   adaptateurs au plus pres des appels `arrayBase...`.
   - Fichiers / tests associes: `stdlib/collections/double_array.nabla`,
-    `docs/plans/stdlib-local-helper-tranche-2.md`, `AGENTS.md`, tests cibles
-    `ArrayDouble`, `make stdlib-docs` sans diff attendu.
+    `AGENTS.md`, tests cibles `ArrayDouble`, `make stdlib-docs` sans diff
+    attendu.
 
 - `local` - Ajouter la surcharge curryfiee `Array.fill[T](n)(elem)` avec
   parametre par nom reevalue par element, et corriger la specialisation IR des
