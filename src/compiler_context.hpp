@@ -405,6 +405,12 @@ inline std::optional<CompilerContext::FunctionSignature> stdlibTypeAliasMethodSi
         signature.returnType = "Unit";
         return signature;
     }
+    if (methodName == "sorted") {
+        signature.parameters.push_back({
+            "lessThan", formatFunctionType({{elementType, elementType}, "Bool"}), {}});
+        signature.returnType = receiverType;
+        return signature;
+    }
     return std::nullopt;
 }
 

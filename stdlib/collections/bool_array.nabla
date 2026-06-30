@@ -225,6 +225,32 @@ def boolArraySet(values: BoolArray, index: Int, value: Bool): Unit = {
     values.set(index, value)
 }
 
+def boolArraySortedWith(xs: BoolArray, lessThan: (Bool, Bool) => Bool): BoolArray = {
+    val sorted = new BoolArray(xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        sorted.set(index, xs.get(index))
+        index = index + 1
+    }
+
+    index = 1
+    while (index < sorted.length()) {
+        val current = sorted.get(index)
+        var cursor = index
+        while (cursor > 0 && lessThan(current, sorted.get(cursor - 1))) {
+            sorted.set(cursor, sorted.get(cursor - 1))
+            cursor = cursor - 1
+        }
+        sorted.set(cursor, current)
+        index = index + 1
+    }
+    sorted
+}
+
+def boolArraySorted(xs: BoolArray): BoolArray = {
+    boolArraySortedWith(xs, (left: Bool, right: Bool) => { !left && right })
+}
+
 class ArrayBool extends ArrayPrimitiveBase[Bool, BoolArray] with Iterable[Bool](rawValues, lengthFn, getFn, setFn, toStringFn) {
 
     override def length(): Int = {
@@ -281,6 +307,14 @@ class ArrayBool extends ArrayPrimitiveBase[Bool, BoolArray] with Iterable[Bool](
 
     def filter(predicate: (Bool) => Bool): ArrayBool = {
         arrayBool(boolArrayFilter(rawValues, predicate))
+    }
+
+    def sorted(): ArrayBool = {
+        arrayBool(boolArraySorted(rawValues))
+    }
+
+    def sorted(lessThan: (Bool, Bool) => Bool): ArrayBool = {
+        arrayBool(boolArraySortedWith(rawValues, lessThan))
     }
 
     def shuffle(state: RandomState): ArrayBool = {
@@ -358,6 +392,14 @@ def arrayBoolFlatMap(xs: ArrayBool, transform: (Bool) => ArrayBool): ArrayBool =
 
 def arrayBoolFilter(xs: ArrayBool, predicate: (Bool) => Bool): ArrayBool = {
     xs.filter(predicate)
+}
+
+def arrayBoolSorted(xs: ArrayBool): ArrayBool = {
+    xs.sorted()
+}
+
+def arrayBoolSortedWith(xs: ArrayBool, lessThan: (Bool, Bool) => Bool): ArrayBool = {
+    xs.sorted(lessThan)
 }
 
 def arrayBoolShuffle(xs: ArrayBool, state: RandomState): ArrayBool = {

@@ -694,6 +694,32 @@ def intArrayPrepend(xs: IntArray, value: Int): IntArray = {
     prepended
 }
 
+def intArraySortedWith(xs: IntArray, lessThan: (Int, Int) => Bool): IntArray = {
+    val sorted = new IntArray(xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        sorted.set(index, xs.get(index))
+        index = index + 1
+    }
+
+    index = 1
+    while (index < sorted.length()) {
+        val current = sorted.get(index)
+        var cursor = index
+        while (cursor > 0 && lessThan(current, sorted.get(cursor - 1))) {
+            sorted.set(cursor, sorted.get(cursor - 1))
+            cursor = cursor - 1
+        }
+        sorted.set(cursor, current)
+        index = index + 1
+    }
+    sorted
+}
+
+def intArraySorted(xs: IntArray): IntArray = {
+    intArraySortedWith(xs, (left: Int, right: Int) => { left < right })
+}
+
 def intArrayReverse(xs: IntArray): IntArray = {
     val reversed = new IntArray(xs.length())
     var index = 0
@@ -967,6 +993,14 @@ class ArrayInt(values: IntArray) with Iterable[Int] {
         new ArrayInt(intArrayReverse(values))
     }
 
+    def sorted(): ArrayInt = {
+        new ArrayInt(intArraySorted(values))
+    }
+
+    def sorted(lessThan: (Int, Int) => Bool): ArrayInt = {
+        new ArrayInt(intArraySortedWith(values, lessThan))
+    }
+
     def shuffle(state: RandomState): ArrayInt = {
         new ArrayInt(intArrayShuffle(values, state))
     }
@@ -1202,6 +1236,14 @@ def arrayIntFlatMap(xs: ArrayInt, transform: (Int) => ArrayInt): ArrayInt = {
 
 def arrayIntFilter(xs: ArrayInt, predicate: (Int) => Bool): ArrayInt = {
     xs.filter(predicate)
+}
+
+def arrayIntSorted(xs: ArrayInt): ArrayInt = {
+    xs.sorted()
+}
+
+def arrayIntSortedWith(xs: ArrayInt, lessThan: (Int, Int) => Bool): ArrayInt = {
+    xs.sorted(lessThan)
 }
 
 def arrayIntFold(xs: ArrayInt, initial: Int, combine: (Int, Int) => Int): Int = {

@@ -64,6 +64,7 @@ indexes.mkString(&quot;, &quot;)</code></pre>
         <h3>Methodes</h3>
         <ul>
         <li><a href="#ArrayFill" title="def ArrayFill[T](size: Int, value: T): Array[T]"><span>ArrayFill</span><code>def ArrayFill[T](size: Int, value: T): Array[T]</code></a></li>
+        <li><a href="#Array-2" title="def Array[T].sorted(lessThan: (T, T) =&gt; Bool): Array[T]"><span>Array</span><code>def Array[T].sorted(lessThan: (T, T) =&gt; Bool): Array[T]</code></a></li>
         <li><a href="#ArrayRange" title="def ArrayRange(size: Int): Array[Int]"><span>ArrayRange</span><code>def ArrayRange(size: Int): Array[Int]</code></a></li>
         </ul>
       </section>
@@ -87,6 +88,16 @@ indexes.mkString(&quot;, &quot;)</code></pre>
           <pre class="signature"><code>def ArrayFill[T](size: Int, value: T): Array[T]</code></pre>
           <p>Cree un tableau rempli avec la meme valeur.</p>
 <p>Preferer Array.fill[T](size, value) dans le nouveau code.</p>
+
+        </article>
+        <article class="entry" id="Array-2">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>Array</h2>
+          <pre class="signature"><code>def Array[T].sorted(lessThan: (T, T) =&gt; Bool): Array[T]</code></pre>
+          <p>Retourne une copie triee sans modifier le tableau source.</p>
+<p>La V0 demande un predicat d&#x27;ordre strict utilisateur, par exemple `xs.sorted((left, right) =&gt; left.score() &lt; right.score())`. Les tableaux primitifs numeriques exposent aussi `sorted()` avec leur ordre naturel.</p>
 
         </article>
         <article class="entry" id="ArrayRange">

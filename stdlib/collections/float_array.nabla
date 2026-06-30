@@ -159,6 +159,32 @@ def floatArrayFold(xs: FloatArray, initial: Float, combine: (Float, Float) => Fl
     accumulator
 }
 
+def floatArraySortedWith(xs: FloatArray, lessThan: (Float, Float) => Bool): FloatArray = {
+    val sorted = new FloatArray(xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        sorted.set(index, xs.get(index))
+        index = index + 1
+    }
+
+    index = 1
+    while (index < sorted.length()) {
+        val current = sorted.get(index)
+        var cursor = index
+        while (cursor > 0 && lessThan(current, sorted.get(cursor - 1))) {
+            sorted.set(cursor, sorted.get(cursor - 1))
+            cursor = cursor - 1
+        }
+        sorted.set(cursor, current)
+        index = index + 1
+    }
+    sorted
+}
+
+def floatArraySorted(xs: FloatArray): FloatArray = {
+    floatArraySortedWith(xs, (left: Float, right: Float) => { left < right })
+}
+
 class ArrayFloat(values: FloatArray) with Iterable[Float] {
     def length(): Int = {
         def floatArrayLength(items: FloatArray): Int = {
@@ -236,6 +262,14 @@ class ArrayFloat(values: FloatArray) with Iterable[Float] {
         new ArrayFloat(floatArrayFilter(values, predicate))
     }
 
+    def sorted(): ArrayFloat = {
+        new ArrayFloat(floatArraySorted(values))
+    }
+
+    def sorted(lessThan: (Float, Float) => Bool): ArrayFloat = {
+        new ArrayFloat(floatArraySortedWith(values, lessThan))
+    }
+
     def shuffle(state: RandomState): ArrayFloat = {
         new ArrayFloat(floatArrayShuffle(values, state))
     }
@@ -311,6 +345,14 @@ def arrayFloatFlatMap(xs: ArrayFloat, transform: (Float) => ArrayFloat): ArrayFl
 
 def arrayFloatFilter(xs: ArrayFloat, predicate: (Float) => Bool): ArrayFloat = {
     xs.filter(predicate)
+}
+
+def arrayFloatSorted(xs: ArrayFloat): ArrayFloat = {
+    xs.sorted()
+}
+
+def arrayFloatSortedWith(xs: ArrayFloat, lessThan: (Float, Float) => Bool): ArrayFloat = {
+    xs.sorted(lessThan)
 }
 
 def arrayFloatFold(xs: ArrayFloat, initial: Float, combine: (Float, Float) => Float): Float = {

@@ -65,6 +65,8 @@ pas comme cible idiomatique pour le code applicatif.
 - `Array.range(size)`
 - `Array.range(start, until)`
 - `Array.rangeUntil(start, until)` — alias de compatibilite
+- `array.sorted(lessThan)` retourne une copie triee par predicat utilisateur;
+  les facades primitives `Int`, `Long`, `Float`, `Double` et `Bool` exposent aussi `sorted()` par ordre naturel (`false < true` pour `Bool`)
 - `Set[T]`
   - `contains(value)`
   - `add(value)`, `remove(value)`, `union(other)`, `intersect(other)`,

@@ -159,6 +159,32 @@ def doubleArrayFold(xs: DoubleArray, initial: Double, combine: (Double, Double) 
     accumulator
 }
 
+def doubleArraySortedWith(xs: DoubleArray, lessThan: (Double, Double) => Bool): DoubleArray = {
+    val sorted = new DoubleArray(xs.length())
+    var index = 0
+    while (index < xs.length()) {
+        sorted.set(index, xs.get(index))
+        index = index + 1
+    }
+
+    index = 1
+    while (index < sorted.length()) {
+        val current = sorted.get(index)
+        var cursor = index
+        while (cursor > 0 && lessThan(current, sorted.get(cursor - 1))) {
+            sorted.set(cursor, sorted.get(cursor - 1))
+            cursor = cursor - 1
+        }
+        sorted.set(cursor, current)
+        index = index + 1
+    }
+    sorted
+}
+
+def doubleArraySorted(xs: DoubleArray): DoubleArray = {
+    doubleArraySortedWith(xs, (left: Double, right: Double) => { left < right })
+}
+
 class ArrayDouble(values: DoubleArray) with Iterable[Double] {
     def length(): Int = {
         values.length()
@@ -230,6 +256,14 @@ class ArrayDouble(values: DoubleArray) with Iterable[Double] {
 
     def filter(predicate: (Double) => Bool): ArrayDouble = {
         new ArrayDouble(doubleArrayFilter(values, predicate))
+    }
+
+    def sorted(): ArrayDouble = {
+        new ArrayDouble(doubleArraySorted(values))
+    }
+
+    def sorted(lessThan: (Double, Double) => Bool): ArrayDouble = {
+        new ArrayDouble(doubleArraySortedWith(values, lessThan))
     }
 
     def shuffle(state: RandomState): ArrayDouble = {
@@ -307,6 +341,14 @@ def arrayDoubleFlatMap(xs: ArrayDouble, transform: (Double) => ArrayDouble): Arr
 
 def arrayDoubleFilter(xs: ArrayDouble, predicate: (Double) => Bool): ArrayDouble = {
     xs.filter(predicate)
+}
+
+def arrayDoubleSorted(xs: ArrayDouble): ArrayDouble = {
+    xs.sorted()
+}
+
+def arrayDoubleSortedWith(xs: ArrayDouble, lessThan: (Double, Double) => Bool): ArrayDouble = {
+    xs.sorted(lessThan)
 }
 
 def arrayDoubleFold(xs: ArrayDouble, initial: Double, combine: (Double, Double) => Double): Double = {

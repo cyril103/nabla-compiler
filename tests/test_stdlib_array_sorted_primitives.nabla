@@ -1,0 +1,37 @@
+import collections.array
+
+def main(): Int = {
+    val longs = Array.fill[Long](3, 0L)
+    longs.set(0, 3L)
+    longs.set(1, 1L)
+    longs.set(2, 2L)
+
+    val floats = Array.fill[Float](3, 0.0F)
+    floats.set(0, 3.0F)
+    floats.set(1, 1.0F)
+    floats.set(2, 2.0F)
+
+    val doubles = Array.fill[Double](3, 0.0)
+    doubles.set(0, 3.0)
+    doubles.set(1, 1.0)
+    doubles.set(2, 2.0)
+
+    val bools = Array.fill[Bool](3, true)
+    bools.set(0, true)
+    bools.set(1, false)
+    bools.set(2, true)
+
+    val empty = Array.fill[Int](0, 7)
+    val singleton = Array.fill[Int](1, 9)
+
+    if longs.sorted().mkString(",") == "1,2,3" &&
+       floats.sorted().mkString(",") == "1.000000,2.000000,3.000000" &&
+       doubles.sorted().mkString(",") == "1.000000,2.000000,3.000000" &&
+       bools.sorted().mkString(",") == "false,true,true" &&
+       empty.sorted().length() == 0 &&
+       singleton.sorted().get(0) == 9 {
+        42
+    } else {
+        1
+    }
+}

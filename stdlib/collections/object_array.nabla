@@ -64,6 +64,10 @@ def objectArrayFlatMap[T, U](xs: ArrayObject[T], transform: (T) => ArrayObject[U
     xs.flatMap[U](transform)
 }
 
+def objectArraySorted[T](xs: ArrayObject[T], lessThan: (T, T) => Bool): ArrayObject[T] = {
+    xs.sorted(lessThan)
+}
+
 def objectArrayMkString(xs: ArrayObject[String], separator: String): String = {
     var index = 0
     var result = ""
@@ -157,6 +161,28 @@ class ArrayObject[T](values: ObjectArray[T]) with Sized with Iterable[T] {
             index = index + 1
         }
         new ArrayObject[U](mapped)
+    }
+
+    def sorted(lessThan: (T, T) => Bool): ArrayObject[T] = {
+        val sorted = new ObjectArray[T](values.length())
+        var index = 0
+        while (index < values.length()) {
+            sorted.set(index, values.get(index))
+            index = index + 1
+        }
+
+        index = 1
+        while (index < sorted.length()) {
+            val current = sorted.get(index)
+            var cursor = index
+            while (cursor > 0 && lessThan(current, sorted.get(cursor - 1))) {
+                sorted.set(cursor, sorted.get(cursor - 1))
+                cursor = cursor - 1
+            }
+            sorted.set(cursor, current)
+            index = index + 1
+        }
+        new ArrayObject[T](sorted)
     }
 
     def filter(predicate: (T) => Bool): ArrayObject[T] = {
