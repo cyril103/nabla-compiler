@@ -935,6 +935,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Cacher une deuxieme tranche de helpers stdlib non documentes via
+  fonctions locales: les wrappers `doubleArrayLength`, `doubleArrayGet` et
+  `doubleArraySet` ne sont plus des symboles module-level de
+  `collections.double_array`; les methodes `ArrayDouble` declarent les petits
+  adaptateurs au plus pres des appels `arrayBase...`.
+  - Fichiers / tests associes: `stdlib/collections/double_array.nabla`,
+    `docs/plans/stdlib-local-helper-tranche-2.md`, `AGENTS.md`, tests cibles
+    `ArrayDouble`, `make stdlib-docs` sans diff attendu.
+
 - `local` - Ajouter la surcharge curryfiee `Array.fill[T](n)(elem)` avec
   parametre par nom reevalue par element, et corriger la specialisation IR des
   closures generiques qui capturent des valeurs.

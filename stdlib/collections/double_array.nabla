@@ -159,40 +159,48 @@ def doubleArrayFold(xs: DoubleArray, initial: Double, combine: (Double, Double) 
     accumulator
 }
 
-def doubleArrayLength(values: DoubleArray): Int = {
-    values.length()
-}
-
-def doubleArrayGet(values: DoubleArray, index: Int): Double = {
-    values.get(index)
-}
-
-def doubleArraySet(values: DoubleArray, index: Int, value: Double): Unit = {
-    values.set(index, value)
-}
-
 class ArrayDouble(values: DoubleArray) with Iterable[Double] {
     def length(): Int = {
-        doubleArrayLength(values)
+        values.length()
     }
 
     override def size(): Int = {
+        def doubleArrayLength(items: DoubleArray): Int = {
+            items.length()
+        }
+
         arrayBaseSize[DoubleArray](values, doubleArrayLength)
     }
 
     override def isEmpty(): Bool = {
+        def doubleArrayLength(items: DoubleArray): Int = {
+            items.length()
+        }
+
         arrayBaseIsEmpty[DoubleArray](values, doubleArrayLength)
     }
 
     override def nonEmpty(): Bool = {
+        def doubleArrayLength(items: DoubleArray): Int = {
+            items.length()
+        }
+
         arrayBaseNonEmpty[DoubleArray](values, doubleArrayLength)
     }
 
     def get(index: Int): Double = {
+        def doubleArrayGet(items: DoubleArray, itemIndex: Int): Double = {
+            items.get(itemIndex)
+        }
+
         arrayBaseGet[Double, DoubleArray](values, index, doubleArrayGet)
     }
 
     def set(index: Int, value: Double): Unit = {
+        def doubleArraySet(items: DoubleArray, itemIndex: Int, itemValue: Double): Unit = {
+            items.set(itemIndex, itemValue)
+        }
+
         arrayBaseSet[Double, DoubleArray](values, index, value, doubleArraySet)
     }
 
@@ -233,10 +241,26 @@ class ArrayDouble(values: DoubleArray) with Iterable[Double] {
     }
 
     def fold(initial: Double, combine: (Double, Double) => Double): Double = {
+        def doubleArrayLength(items: DoubleArray): Int = {
+            items.length()
+        }
+
+        def doubleArrayGet(items: DoubleArray, itemIndex: Int): Double = {
+            items.get(itemIndex)
+        }
+
         arrayBaseFold[Double, Double, DoubleArray](values, doubleArrayLength, doubleArrayGet, initial, combine)
     }
 
     override def foreach(f: (Double) => Unit): Unit = {
+        def doubleArrayLength(items: DoubleArray): Int = {
+            items.length()
+        }
+
+        def doubleArrayGet(items: DoubleArray, itemIndex: Int): Double = {
+            items.get(itemIndex)
+        }
+
         arrayBaseForeach[Double, DoubleArray](values, doubleArrayLength, doubleArrayGet, f)
     }
 
