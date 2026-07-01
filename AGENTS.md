@@ -941,6 +941,12 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Retirer le plan actif termine `Array.sorted` apres squash-merge:
+  `docs/plans/` revient a l'etat sans plan actif, le perimetre livre restant
+  documente dans ce journal, `docs/roadmap.md`, les tests et l'historique de PR.
+  - Fichiers / tests associes: `docs/plans/README.md`, `AGENTS.md`, suppression
+    de `docs/plans/array-sorted.md`, `git diff --check`.
+
 - `local` - Ajouter `Array.sorted`: les facades `ArrayInt`, `ArrayLong`,
   `ArrayFloat`, `ArrayDouble`, `ArrayBool` et `ArrayObject[T]` retournent une
   copie stable triee sans muter la source; les primitives ont `sorted()` par
