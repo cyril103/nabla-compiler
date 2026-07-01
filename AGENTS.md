@@ -949,8 +949,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `Array.fill[Int](n)(randInt())`; le chemin reproductible reste
   `randomSeed(...)` + `randomInt(state)`.
   - Fichiers / tests associes: `stdlib/util.nabla`, `docs/stdlib-api.md`,
-    `docs/plans/rand-int-convenience.md`,
-    `tests/test_stdlib_util_rand_int_fill.nabla`, `make test` cible.
+    `tests/test_stdlib_util_rand_int_fill.nabla`, `make test` cible. Le plan
+    actif `docs/plans/rand-int-convenience.md` a ete retire apres squash-merge.
 
 - `local` - Retirer le plan actif termine `Array.sorted` apres squash-merge:
   `docs/plans/` revient a l'etat sans plan actif, le perimetre livre restant
