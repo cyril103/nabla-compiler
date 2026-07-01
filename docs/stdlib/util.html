@@ -43,6 +43,7 @@
         <li><a href="#randomSeed" title="def randomSeed(seed: Int): RandomState"><span>randomSeed</span><code>def randomSeed(seed: Int): RandomState</code></a></li>
         <li><a href="#randomSeedNow" title="def randomSeedNow(): RandomState"><span>randomSeedNow</span><code>def randomSeedNow(): RandomState</code></a></li>
         <li><a href="#randomSeedTime" title="def randomSeedTime(): RandomState"><span>randomSeedTime</span><code>def randomSeedTime(): RandomState</code></a></li>
+        <li><a href="#randInt" title="def randInt(): Int"><span>randInt</span><code>def randInt(): Int</code></a></li>
         <li><a href="#randomInt" title="def randomInt(state: RandomState): RandomIntResult"><span>randomInt</span><code>def randomInt(state: RandomState): RandomIntResult</code></a></li>
         <li><a href="#randomIntInRange" title="def randomIntInRange(state: RandomState, minimum: Int, maximum: Int): RandomIntResult"><span>randomIntInRange</span><code>def randomIntInRange(state: RandomState, minimum: Int, maximum: Int): RandomIntResult</code></a></li>
         <li><a href="#randomIntRange" title="def randomIntRange(state: RandomState, minimum: Int, maximum: Int): RandomIntResult"><span>randomIntRange</span><code>def randomIntRange(state: RandomState, minimum: Int, maximum: Int): RandomIntResult</code></a></li>
@@ -124,13 +125,23 @@
           <p>Alias de compatibilite pour randomSeedNow().</p>
 
         </article>
+        <article class="entry" id="randInt">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>randInt</h2>
+          <pre class="signature"><code>def randInt(): Int</code></pre>
+          <p>Tire un entier pseudo-aleatoire non negatif.</p>
+<p>Utiliser cette commodite quand la reproductibilite exacte n&#x27;est pas necessaire, par exemple `Array.fill[Int](5)(randInt())`. Pour une sequence reproductible, preferer randomSeed(...) puis randomInt(state).</p>
+
+        </article>
         <article class="entry" id="randomInt">
           <div class="entry-meta">
             <span class="kind">def</span> <span class="status recommended">Recommandee</span>
           </div>
           <h2>randomInt</h2>
           <pre class="signature"><code>def randomInt(state: RandomState): RandomIntResult</code></pre>
-          <p>Tire un entier pseudo-aleatoire positif.</p>
+          <p>Tire un entier pseudo-aleatoire positif depuis un etat explicite.</p>
 
         </article>
         <article class="entry" id="randomIntInRange">

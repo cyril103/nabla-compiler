@@ -238,8 +238,9 @@ Le pipeline implemente actuellement :
   `RandomResult[T]`, `RandomIntResult`, `RandomBoolResult`,
   `RandomChoiceResult[T]`, `randomSeed`, `randomSeedNow`, `randomInt`,
   `randomIntRange` et `randomBool` pour une API pseudo-aléatoire deterministe
-  basée sur une seed; `randomSeedTime` et `randomIntInRange` restent des alias
-  de compatibilite;
+  basée sur une seed; `randInt()` fournit une commodite sans etat explicite
+  pour les petits programmes et expressions par nom comme `Array.fill[Int](n)(randInt())`;
+  `randomSeedTime` et `randomIntInRange` restent des alias de compatibilite;
 - module de bibliotheque standard `math` avec `abs(Int/Long/Float/Double)`,
   `absDiff(Int/Long/Float/Double)`, `max(Int/Long/Float/Double)`,
   `min(Int/Long/Float/Double)`, `clamp(Int/Long/Float/Double)`,
@@ -641,7 +642,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   sur `ArrayInt`, `LongArray`, `FloatArray`, `DoubleArray`, `BoolArray` et
   `ArrayObject[T]`.
 - [x] Ajouter `randomSeedNow()` au module standard `util`, basé sur une source de
-  timestamp en runtime pour initialiser un générateur avec une seed temporelle.
+  timestamp en runtime pour initialiser un générateur avec une seed temporelle,
+  puis exposer `randInt()` pour les appels sans etat explicite.
 - [x] Migrer les tests et exemples ordinaires de collections/options/set vers
   l'API publique recommandee (`Array.*`, `Option.*`, `Set.*`) en conservant les
   tests d'alias legacy.
@@ -940,6 +942,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter `randInt()` au module `util`: cette commodite retourne un
+  entier pseudo-aleatoire non negatif depuis une seed temporelle, sans exposer
+  `RandomState`, afin de nourrir des expressions par nom comme
+  `Array.fill[Int](n)(randInt())`; le chemin reproductible reste
+  `randomSeed(...)` + `randomInt(state)`.
+  - Fichiers / tests associes: `stdlib/util.nabla`, `docs/stdlib-api.md`,
+    `docs/plans/rand-int-convenience.md`,
+    `tests/test_stdlib_util_rand_int_fill.nabla`, `make test` cible.
 
 - `local` - Retirer le plan actif termine `Array.sorted` apres squash-merge:
   `docs/plans/` revient a l'etat sans plan actif, le perimetre livre restant

@@ -187,6 +187,7 @@ de retour seul.
 - `RandomChoiceResult[T]`
 - `randomSeed(...)`
 - `randomSeedNow()`
+- `randInt()`
 - `randomInt(...)`
 - `randomIntRange(...)`
 - `randomBool(...)`
