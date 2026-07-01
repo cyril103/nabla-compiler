@@ -1,0 +1,29 @@
+import util
+import collections.array
+
+class Counter(var value: Int) {
+    def next(): Int = {
+        value = value + 1
+        value
+    }
+}
+
+def main(): Int = {
+    val values = Array.fill[Int](4)(randInt())
+    val direct = randInt()
+    val counter = new Counter(0)
+    val reevaluated = Array.fill[Int](4)(counter.next())
+
+    if values.length() == 4 &&
+       values.get(0) >= 0 &&
+       values.get(1) >= 0 &&
+       values.get(2) >= 0 &&
+       values.get(3) >= 0 &&
+       direct >= 0 &&
+       reevaluated.mkString(",") == "1,2,3,4" &&
+       counter.value == 4 {
+        42
+    } else {
+        1
+    }
+}

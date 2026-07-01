@@ -60,7 +60,17 @@ def randomSeedTime(): RandomState = {
     randomSeedNow()
 }
 
-/// Tire un entier pseudo-aleatoire positif.
+/// Tire un entier pseudo-aleatoire non negatif.
+///
+/// Utiliser cette commodite quand la reproductibilite exacte n'est pas
+/// necessaire, par exemple `Array.fill[Int](5)(randInt())`. Pour une sequence
+/// reproductible, preferer randomSeed(...) puis randomInt(state).
+/// @status Recommandee
+def randInt(): Int = {
+    randomInt(randomSeedNow()).value()
+}
+
+/// Tire un entier pseudo-aleatoire positif depuis un etat explicite.
 /// @status Recommandee
 def randomInt(state: RandomState): RandomIntResult = {
     def randomStep(seed: Int): Int = {
