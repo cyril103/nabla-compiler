@@ -489,8 +489,9 @@ Limites importantes :
   surcharges, defaults de traits, `Iterable[T]`, `Sized`, parents génériques et
   méthodes génériques spécialisées. La méthode `toString()`, `hashCode()` et
   `equals(...)` redispatchent aussi depuis `Any` pour stabiliser l'égalité et
-  l'index hashé de `Set[Parent]`. La friction restante concerne les règles
-  avancées d'égalité dans les hiérarchies complexes.
+  l'index hashé de `Set[Parent]`; une regression couvre aussi les clefs
+  `Map[Parent, V]` construites avec des sous-classes. La friction restante
+  concerne les règles avancées d'égalité dans les hiérarchies complexes.
 - Le mot-clé `override` est supporté pour marquer explicitement les
   redéfinitions de méthodes héritées, et il est obligatoire quand une méthode
   redéfinit une méthode provenant d'un parent.
@@ -942,6 +943,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter une regression post-0.1 pour le dispatch dynamique de
+  `hashCode()` / `equals(...)` quand une map est typée `Map[Parent, V]` mais
+  reçoit des instances de sous-classes comme clefs. Le test vérifie la
+  déduplication, `contains`, `getOrElse`, `updated` et `removed` afin de couvrir
+  l'index hashé et l'égalité via le type parent.
+  - Fichiers / tests associes: `tests/test_inheritance_map_parent_dispatch.nabla`,
+    `tests/test_inheritance_map_parent_dispatch.expected`, `docs/roadmap.md`,
+    `AGENTS.md`, test cible.
 
 - `local` - Ajouter `randInt()` au module `util`: cette commodite retourne un
   entier pseudo-aleatoire non negatif depuis une seed temporelle, sans exposer

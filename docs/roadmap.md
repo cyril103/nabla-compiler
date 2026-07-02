@@ -195,7 +195,8 @@ reprise séparées :
 - Le dispatch dynamique repose désormais sur des vtables backend internes:
   objet slot 0 vers table de fonctions, slots par propriétaire statique +
   méthode résolue, couverture de `Any`, traits `Sized` / `Iterable[T]`, parents
-  génériques instanciés, méthodes génériques spécialisées et defaults de traits.
+  génériques instanciés, méthodes génériques spécialisées, defaults de traits,
+  `Set[Parent]` et clefs `Map[Parent, V]`.
 - Les proprietes `def` sans parametres sont supportees pour les fonctions
   globales, methodes de classes/objets, overrides et membres abstraits de trait,
   avec acces externe `Object.member` / `value.member` et compatibilite conservee
