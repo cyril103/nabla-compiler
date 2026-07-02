@@ -80,7 +80,14 @@ trait List[T] with Iterable[T] {
     /// @signature def concat(suffix: List[T]): List[T]
     /// @status Recommandee
     def concat(suffix: List[T]): List[T] = {
-        listConcat[T](this, suffix)
+        def concatWith(prefix: List[T], suffixValues: List[T]): List[T] = {
+            if prefix.isEmpty() {
+                suffixValues
+            } else {
+                listCons[T](prefix.head(), concatWith(prefix.tail(), suffixValues))
+            }
+        }
+        concatWith(this, suffix)
     }
 
     /// Inverse cette liste.
@@ -254,14 +261,6 @@ def listEmpty[T](): List[T] = {
 
 def listCons[T](head: T, tail: List[T]): List[T] = {
     new Cons[T](head, tail)
-}
-
-def listConcat[T](prefix: List[T], suffix: List[T]): List[T] = {
-    if prefix.isEmpty() {
-        suffix
-    } else {
-        listCons[T](prefix.head(), listConcat[T](prefix.tail(), suffix))
-    }
 }
 
 def listReverseInto[T](values: List[T], suffix: List[T]): List[T] = {

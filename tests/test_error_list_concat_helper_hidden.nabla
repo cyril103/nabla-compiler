@@ -1,0 +1,7 @@
+import collections.list
+
+def main(): Int = {
+    val left = List.cons[Int](1, List.empty[Int]())
+    val right = List.cons[Int](2, List.empty[Int]())
+    listConcat[Int](left, right).size()
+}
