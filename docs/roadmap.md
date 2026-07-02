@@ -51,7 +51,8 @@ pour garder un cap clair après le tag `v0.1.0`.
 - Standard library deja utile :
   - collections typées et facade `Array[T]`, dont `sorted(lessThan)` retourne
     une copie triee sans mutation et les facades primitives exposent aussi
-    `sorted()` par ordre naturel
+    `sorted()` par ordre naturel; les conversions primitives vers tableaux
+    generiques utilisent les noms idiomatiques `map[U]` et `flatMap[U]`
   - `collections.set` avec `Set[T]`, `add`, `remove`, `union`, `intersect`,
     `difference`
   - `collections.map` avec `Map[K, V]`, recherche optionnelle, mises a jour
@@ -189,8 +190,8 @@ reprise séparées :
 - Les exemples publics principaux privilégient désormais `Array[T]`,
   `Array.fill[T]`, `Set.fromArray[T]`, `Option.some` / `Option.none` et les
   méthodes publiques, plutôt que les représentations internes; les conversions
-  de facades primitives vers tableaux generiques utilisent `map[U]` plutot que
-  `mapObject[U]`.
+  de facades primitives vers tableaux generiques utilisent `map[U]` /
+  `flatMap[U]` plutot que `mapObject[U]` / `flatMapObject[U]`.
 - Les objets runtime V0 sont couverts par des tests de valeur singleton, dispatch
   via trait, assignabilité `Any` / `AnyRef`, diagnostic de namespace statique
   utilisé comme valeur et diagnostics d'héritage class-like.

@@ -258,6 +258,10 @@ class ArrayFloat(values: FloatArray) with Iterable[Float] {
         floatArrayFlatMapObject[U](values, transform)
     }
 
+    def flatMap[U](transform: (Float) => ArrayObject[U]): ArrayObject[U] = {
+        floatArrayFlatMapObject[U](values, transform)
+    }
+
     def flatMap(transform: (Float) => ArrayFloat): ArrayFloat = {
         new ArrayFloat(floatArrayFlatMap(values, transform))
     }

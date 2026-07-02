@@ -1,0 +1,112 @@
+import collections.array
+import core.option
+
+class LabelBox(name: String) {
+    def value(): String = {
+        name
+    }
+}
+
+def intWords(value: Int): ArrayObject[String] = {
+    val words = Array.fill[String](2, "i")
+    if value == 1 {
+        words.set(1, "one")
+    } else {
+        words.set(1, "zero")
+    }
+    words
+}
+
+def longWords(value: Long): ArrayObject[String] = {
+    val words = Array.fill[String](1, "long")
+    words
+}
+
+def floatWords(value: Float): ArrayObject[String] = {
+    val words = Array.fill[String](2, "f")
+    words.set(1, "float")
+    words
+}
+
+def doubleWords(value: Double): ArrayObject[String] = {
+    val words = Array.fill[String](1, "double")
+    words
+}
+
+def boolWords(value: Bool): ArrayObject[Option[String]] = {
+    val words = Array.fill[Option[String]](2, Option.some("yes"))
+    if value {
+        words.set(1, Option.some("true"))
+    } else {
+        words.set(1, Option.none[String]())
+    }
+    words
+}
+
+def boxedInt(value: Int): ArrayObject[LabelBox] = {
+    val boxes = Array.fill[LabelBox](1, new LabelBox(value.toString()))
+    boxes
+}
+
+def duplicateInt(value: Int): ArrayInt = {
+    Array.fill[Int](2, value)
+}
+
+def duplicateLong(value: Long): ArrayLong = {
+    Array.fill[Long](2, value)
+}
+
+def duplicateFloat(value: Float): ArrayFloat = {
+    Array.fill[Float](2, value)
+}
+
+def duplicateDouble(value: Double): ArrayDouble = {
+    Array.fill[Double](2, value)
+}
+
+def duplicateBool(value: Bool): ArrayBool = {
+    Array.fill[Bool](2, value)
+}
+
+def main(): Int = {
+    val ints = Array.range(2).flatMap[String](intWords)
+    val longs = Array.fill[Long](2, 4L).flatMap[String](longWords)
+    val floats = Array.fill[Float](1, 1.5F).flatMap[String](floatWords)
+    val doubles = Array.fill[Double](2, 2.5).flatMap[String](doubleWords)
+    val bools = Array.fill[Bool](1, true).flatMap[Option[String]](boolWords)
+    val boxes = Array.range(1, 3).flatMap[LabelBox](boxedInt)
+
+    val duplicatedInts: ArrayInt = Array.range(2).flatMap(duplicateInt)
+    val duplicatedLongs: ArrayLong = Array.fill[Long](1, 5L).flatMap(duplicateLong)
+    val duplicatedFloats: ArrayFloat = Array.fill[Float](1, 1.5F).flatMap(duplicateFloat)
+    val duplicatedDoubles: ArrayDouble = Array.fill[Double](1, 2.5).flatMap(duplicateDouble)
+    val duplicatedBools: ArrayBool = Array.fill[Bool](1, true).flatMap(duplicateBool)
+
+    if ints.size() == 4 &&
+       ints.get(1).length() == 4 &&
+       ints.get(3).length() == 3 &&
+       longs.size() == 2 &&
+       longs.get(0).length() == 4 &&
+       floats.size() == 2 &&
+       floats.get(1).length() == 5 &&
+       doubles.size() == 2 &&
+       doubles.get(1).length() == 6 &&
+       bools.size() == 2 &&
+       bools.get(1).getOrElse("x").length() == 4 &&
+       boxes.size() == 2 &&
+       boxes.get(1).value().length() == 1 &&
+       duplicatedInts.size() == 4 &&
+       duplicatedInts.sum() == 2 &&
+       duplicatedLongs.size() == 2 &&
+       duplicatedLongs.get(1) == 5L &&
+       duplicatedFloats.size() == 2 &&
+       duplicatedFloats.get(1) == 1.5F &&
+       duplicatedDoubles.size() == 2 &&
+       duplicatedDoubles.get(1) == 2.5 &&
+       duplicatedBools.size() == 2 &&
+       duplicatedBools.get(1) == true {
+        42
+    } else {
+        1
+    }
+}

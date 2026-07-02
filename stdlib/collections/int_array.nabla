@@ -1057,6 +1057,10 @@ class ArrayInt(values: IntArray) with Iterable[Int] {
         intArrayFlatMap(values, transform)
     }
 
+    def flatMap[U](transform: (Int) => ArrayObject[U]): ArrayObject[U] = {
+        intArrayFlatMapObject[U](values, transform)
+    }
+
     def flatMapObject[U](transform: (Int) => ArrayObject[U]): ArrayObject[U] = {
         intArrayFlatMapObject[U](values, transform)
     }
