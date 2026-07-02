@@ -188,7 +188,9 @@ reprise séparées :
   collections.
 - Les exemples publics principaux privilégient désormais `Array[T]`,
   `Array.fill[T]`, `Set.fromArray[T]`, `Option.some` / `Option.none` et les
-  méthodes publiques, plutôt que les représentations internes.
+  méthodes publiques, plutôt que les représentations internes; les conversions
+  de facades primitives vers tableaux generiques utilisent `map[U]` plutot que
+  `mapObject[U]`.
 - Les objets runtime V0 sont couverts par des tests de valeur singleton, dispatch
   via trait, assignabilité `Any` / `AnyRef`, diagnostic de namespace statique
   utilisé comme valeur et diagnostics d'héritage class-like.

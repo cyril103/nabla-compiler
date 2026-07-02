@@ -242,6 +242,10 @@ class ArrayDouble(values: DoubleArray) with Iterable[Double] {
         new ArrayDouble(doubleArrayMap(values, f))
     }
 
+    def map[U](f: (Double) => U): ArrayObject[U] = {
+        doubleArrayMapObject[U](values, f)
+    }
+
     def mapObject[U](f: (Double) => U): ArrayObject[U] = {
         doubleArrayMapObject[U](values, f)
     }
