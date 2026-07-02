@@ -1,0 +1,5 @@
+import collections.array
+
+def main(): Int = {
+    ArrayEmpty[Int]().size()
+}

@@ -206,6 +206,10 @@ reprise séparées :
 - Les diagnostics de types pour `if`, `while`, `for`, `!`, `&&` et `||`
   pointent l'expression fautive et couvrent les côtés gauche/droit des
   opérateurs booleens ainsi que le compteur de boucle.
+- Les diagnostics de compatibilité stdlib recommandent aussi les factories
+  publiques `Array.empty` / `Array.tabulate` quand l'utilisateur nomme les
+  anciens aliases `ArrayEmpty` / `ArrayTabulate` ou ajoute des type arguments aux
+  helpers spécialisés correspondants.
 - Une première cible `make unit-tests` compile un harness C++ front-end et
   vérifie directement lexer, parser, diagnostics sémantiques, surcharge,
   inférence générique et typage contextuel de lambdas sans assemblage.

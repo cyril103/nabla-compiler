@@ -257,6 +257,18 @@ inline std::optional<std::string> recommendedStdlibFunctionName(const std::strin
     }
     if (name == "ArrayRange" || name == "arrayIntRange") return "Array.range";
     if (name == "ArrayRangeUntil" || name == "arrayIntRangeUntil") return "Array.range";
+    if (name == "ArrayEmpty" || name == "arrayEmpty" ||
+        name == "arrayIntEmpty" || name == "arrayLongEmpty" ||
+        name == "arrayFloatEmpty" || name == "arrayDoubleEmpty" ||
+        name == "arrayBoolEmpty" || name == "objectArrayEmpty") {
+        return "Array.empty";
+    }
+    if (name == "ArrayTabulate" || name == "arrayTabulate" ||
+        name == "arrayIntTabulate" || name == "arrayLongTabulate" ||
+        name == "arrayFloatTabulate" || name == "arrayDoubleTabulate" ||
+        name == "arrayBoolTabulate" || name == "objectArrayTabulate") {
+        return "Array.tabulate";
+    }
     if (name == "SetEmpty" || name == "setEmpty") return "Set.empty";
     if (name == "SetFromArray" || name == "setFromArray" ||
         name == "setFromArrayInt" || name == "setFromArrayLong" ||
