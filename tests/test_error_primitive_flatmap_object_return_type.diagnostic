@@ -1,1 +1,0 @@
-tests/test_error_primitive_flatmap_object_return_type.nabla:4:42: semantic error: ArrayInt.flatMapObject, paramètre 'transform': type 'Fn(Int)->ArrayObject[String]' attendu, 'Fn(Int)->ArrayInt' reçu

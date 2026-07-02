@@ -953,6 +953,17 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Cadrer explicitement `mapObject[U]` et `flatMapObject[U]` comme
+  compatibilite stdlib: les regressions dediees portent desormais le marqueur
+  `compat` (`test_compat_...` ou `test_error_compat_...`), tandis que les tests
+  de surface recommandee restent centres sur `map[U]` et `flatMap[U]`. Aucun
+  symbole public n'est retire dans cette tranche.
+  - Fichiers / tests associes: `tests/test_compat_primitive_map_object_method.nabla`,
+    `tests/test_compat_primitive_flatmap_object_method.nabla`,
+    `tests/test_error_compat_primitive_map_object_return_type.nabla`,
+    `tests/test_error_compat_primitive_flatmap_object_return_type.nabla`,
+    `docs/stdlib-api.md`, `AGENTS.md`, tests cibles.
+
 - `local` - Ajouter les surcharges generiques `flatMap[U]` aux facades
   primitives `ArrayInt`, `ArrayLong`, `ArrayFloat`, `ArrayDouble` et
   `ArrayBool` pour que les conversions vers `Array[U]` utilisent le nom
