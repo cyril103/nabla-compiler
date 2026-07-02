@@ -1,0 +1,1 @@
+tests/test_error_legacy_array_empty_helper_type_args.nabla:4:5: semantic error: la fonction 'arrayIntEmpty' n'accepte pas d'arguments de type. Nom recommande: 'Array.empty'

@@ -1,0 +1,7 @@
+import collections.array
+
+def id(index: Int): Int = index
+
+def main(): Int = {
+    arrayIntTabulate[Int](3, id).size()
+}

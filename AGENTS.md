@@ -903,6 +903,9 @@ d'inference generique et de typage contextuel des lambdas.
 - [x] Ajouter une premiere cible `unit-tests` pour le lexer, parser et analyseur
   semantique, integree aux tests d'outillage, puis l'etendre aux surcharges et
   generiques front-end.
+- [x] Completer les diagnostics de compatibilite des factories Array legacy:
+  `ArrayEmpty` / `ArrayTabulate` et les helpers specialises mal parametres
+  recommandent `Array.empty` / `Array.tabulate`.
 - [x] Ajouter une racine `stdlib/` importable.
 - [x] Ajouter un premier module de collections dans `stdlib/`.
 - [x] Ajouter une premiere documentation utilisateur du langage.
@@ -963,6 +966,25 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Completer les diagnostics legacy des factories Array: les anciens
+  noms publics `ArrayEmpty` et `ArrayTabulate` affichent maintenant le suffixe
+  `Nom recommande` vers `Array.empty` / `Array.tabulate`, et les helpers
+  specialises comme `arrayIntEmpty[Int]()` ou `arrayIntTabulate[Int](...)`
+  gardent aussi cette recommandation quand ils sont mal appeles avec des type
+  arguments. Aucun programme accepté ni API stdlib ne change; le plan actif
+  temporaire n'est pas conserve dans la PR.
+  - Fichiers / tests associes: `src/compiler_context.hpp`,
+    `tests/test_error_legacy_array_empty_suggestion.nabla`,
+    `tests/test_error_legacy_array_empty_suggestion.diagnostic`,
+    `tests/test_error_legacy_array_tabulate_suggestion.nabla`,
+    `tests/test_error_legacy_array_tabulate_suggestion.diagnostic`,
+    `tests/test_error_legacy_array_empty_helper_type_args.nabla`,
+    `tests/test_error_legacy_array_empty_helper_type_args.diagnostic`,
+    `tests/test_error_legacy_array_tabulate_helper_type_args.nabla`,
+    `tests/test_error_legacy_array_tabulate_helper_type_args.diagnostic`,
+    `docs/roadmap.md`, `AGENTS.md`, suppression de
+    `docs/plans/array-factory-legacy-diagnostics.md`.
 
 - `local` - Factoriser les primitives runtime ASM d'ecriture fichier:
   `Runtime_writeFile` et `Runtime_appendFile` conservent leurs labels backend
