@@ -93,6 +93,9 @@ pour garder un cap clair après le tag `v0.1.0`.
 - Support editeur minimal disponible dans `editor/vim` et `editor/vscode`; le
   support VS Code couvre la detection `*.nabla`, la coloration TextMate, la
   configuration langage et des snippets.
+- Outillage de formatage minimal disponible: `make format` normalise les espaces
+  de fin de ligne et le retour final des sources/docs suivis, et `make
+  format-check` est integre a `make tooling-tests`.
 - Suites `make all-tests`, `make examples` et `make tooling-tests` vertes au
   moment de cette mise a jour; la CI GitHub lance aussi les exemples publics.
 
@@ -203,6 +206,9 @@ reprise séparées :
 - Une première cible `make unit-tests` compile un harness C++ front-end et
   vérifie directement lexer, parser, diagnostics sémantiques, surcharge,
   inférence générique et typage contextuel de lambdas sans assemblage.
+- Une première cible `make format` sans dépendance externe normalise les espaces
+  de fin de ligne et retours finaux des sources/docs; `make format-check` est couvert par
+  `tooling-tests`.
 - Le dispatch dynamique repose désormais sur des vtables backend internes:
   objet slot 0 vers table de fonctions, slots par propriétaire statique +
   méthode résolue, couverture de `Any`, traits `Sized` / `Iterable[T]`, parents

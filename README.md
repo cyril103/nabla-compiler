@@ -1,6 +1,6 @@
 # Nabla Compiler
 
-Un compilateur de recherche écrit en C++17 qui traduit un sous-ensemble orienté objet inspiré de **Scala** directement en assembleur **x86_64 natif (ELF Linux)**. 
+Un compilateur de recherche écrit en C++17 qui traduit un sous-ensemble orienté objet inspiré de **Scala** directement en assembleur **x86_64 natif (ELF Linux)**.
 
 Le pipeline sépare désormais l'analyse syntaxique, l'analyse sémantique et la
 génération de code. L'analyse sémantique valide notamment les classes,
