@@ -948,6 +948,13 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 
 ## Journal Des Jalons
 
+- `local` - Retirer le plan actif termine `primitive-array-generic-map` apres
+  squash-merge: `docs/plans/` revient a l'etat sans plan actif, le perimetre
+  livre restant documente dans ce journal, `docs/roadmap.md`, les tests et
+  l'historique de PR.
+  - Fichiers / tests associes: `docs/plans/README.md`, `AGENTS.md`, suppression
+    de `docs/plans/primitive-array-generic-map.md`, `git diff --check`.
+
 - `local` - Ajouter les surcharges generiques `map[U]` aux facades primitives
   `ArrayInt`, `ArrayLong`, `ArrayFloat`, `ArrayDouble` et `ArrayBool` pour que
   les conversions vers `Array[U]` utilisent le nom idiomatique `map` sans
