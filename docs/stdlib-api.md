@@ -216,6 +216,11 @@ nouveaux exemples devraient preferer la surface publique ci-dessus :
 - `flatMapObject[U](...)` sur les facades primitives quand `flatMap[U](...)`
   exprime la meme conversion sans exposer le detail `ArrayObject[U]` dans le
   code source.
+
+Les tests qui couvrent explicitement ces deux noms portent le marqueur
+`compat` (`test_compat_...` ou `test_error_compat_...`) afin de les distinguer
+des regressions de surface publique `map[U]` / `flatMap[U]`.
+
 - Fonctions bas niveau `setEmpty`, `setFromArray` et variantes specialisees
   quand la fabrique de `Set` exprime mieux l'intention.
 - Compatibilite `randomSeedTime()` quand `randomSeedNow()` exprime mieux

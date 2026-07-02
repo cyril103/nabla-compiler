@@ -1,1 +1,0 @@
-tests/test_error_primitive_map_object_return_type.nabla:4:38: semantic error: ArrayInt.mapObject, paramètre 'f': type 'Fn(Int)->String' attendu, 'Fn(Int)->Int' reçu
