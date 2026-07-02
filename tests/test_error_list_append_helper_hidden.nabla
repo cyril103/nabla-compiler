@@ -1,0 +1,5 @@
+import collections.list
+
+def main(): Int = {
+    listAppend[Int](List.empty[Int](), 1).size()
+}

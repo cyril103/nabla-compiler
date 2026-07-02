@@ -216,6 +216,8 @@ reprise séparées :
 - `List.fromArray[T]` cache maintenant son parcours récursif dans un `def` local;
   l'ancien helper global `listFromArrayFrom` n'est plus import-visible et son
   diagnostic recommande `List.fromArray`.
+- `List[T].appended(value)` cache aussi son parcours récursif dans un `def` local;
+  l'ancien helper global `listAppend` n'est plus import-visible.
 - Une première cible `make unit-tests` compile un harness C++ front-end et
   vérifie directement lexer, parser, diagnostics sémantiques, surcharge,
   inférence générique et typage contextuel de lambdas sans assemblage.
