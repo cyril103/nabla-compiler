@@ -214,11 +214,18 @@ examples: nablac
 
 examples-full: examples
 
-tooling-tests: nablac unit-tests stdlib-docs
+format:
+	$(PYTHON) tools/format_sources.py
+
+format-check:
+	$(PYTHON) tools/format_sources.py --check
+
+tooling-tests: nablac unit-tests stdlib-docs format-check
 	@tests/test_missing_external_tools.sh
 	@tests/test_configurable_heap_size.sh
 	@tests/test_stdlib_docs_html.py
 	@$(PYTHON) tools/test_editor_vscode.py
+	@$(PYTHON) tests/test_format_sources.py
 
 stdlib-docs:
 	tools/generate_stdlib_docs.py
@@ -231,4 +238,4 @@ debug: nablac
 clean:
 	rm -rf $(BUILD_DIR) nablac
 
-.PHONY: all clean test debug all-tests examples examples-quick examples-full unit-tests tooling-tests stdlib-docs
+.PHONY: all clean test debug all-tests examples examples-quick examples-full unit-tests tooling-tests format format-check stdlib-docs

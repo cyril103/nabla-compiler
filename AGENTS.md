@@ -379,6 +379,9 @@ Le pipeline implemente actuellement :
 - support editeur VS Code dans `editor/vscode` avec detection `*.nabla`,
   grammaire TextMate, configuration langage, snippets et test d'outillage dedie
   via `make tooling-tests`;
+- cible de formatage sans dependance externe: `make format` normalise les
+  espaces de fin de ligne et le retour final des sources/docs suivis, tandis
+  que `make format-check` verifie l'arbre et rejoint `make tooling-tests`;
 - `v0.1.0` est tagué; `docs/releases/0.1.md` conserve les notes de release
   et la matrice de validation 0.1.x;
 - `docs/feature-integration.md` formalise la reprise d'une nouvelle feature:
@@ -893,7 +896,7 @@ d'inference generique et de typage contextuel des lambdas.
 ### P3 - Outillage
 
 - [x] Retirer les binaires suivis sous `build/`.
-- [ ] Ajouter une cible de formatage.
+- [x] Ajouter une cible de formatage.
 - [x] Ajouter une integration continue.
 - [x] Ajouter une premiere cible `unit-tests` pour le lexer, parser et analyseur
   semantique, integree aux tests d'outillage, puis l'etendre aux surcharges et
@@ -958,6 +961,16 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter une premiere cible de formatage sans dependance externe:
+  `tools/format_sources.py` supprime les espaces de fin de ligne et garantit le
+  retour final des sources/docs suivis, `make format` applique la
+  normalisation, `make format-check` verifie l'arbre et rejoint
+  `tooling-tests`. Le test d'outillage couvre le mode correction et le mode
+  `--check`; le plan actif temporaire n'est pas conserve dans la PR.
+  - Fichiers / tests associes: `tools/format_sources.py`,
+    `tests/test_format_sources.py`, `Makefile`, `docs/roadmap.md`, `AGENTS.md`,
+    `make format-check`, `make tooling-tests`.
 
 - `local` - Etendre le harness de tests unitaires front-end aux chemins de
   surcharge et generiques: resolution de surcharge globale/methode par type
