@@ -82,7 +82,7 @@ def report(students: Array[Student]): Int = {
     val passingNames = passing.map[String](student => student.name())
     val bands = roster.map[String](scoreBand)
     val badges = roster.flatMap[Option[String]](studentBadges)
-    val indexLabels = Array.range(roster.size()).mapObject[String](indexLabel)
+    val indexLabels = Array.range(roster.size()).map[String](indexLabel)
     val total = roster.fold[Int](0, (accumulator, student) => accumulator + student.score())
     val firstStudent = firstOf(roster)
     val firstBadge = badges.get(1)

@@ -333,8 +333,8 @@ Le pipeline implemente actuellement :
   `ArrayBool` pour `T = Int`, `Long`, `Float`, `Double` ou `Bool`, et vers
   `ArrayObject[T]` pour les types concrets non specialises comme `String` et
   `Array[Int]`;
-  `arrayMap[Primitive, U]`, `arrayFlatMap[Primitive, U]`, `mapObject[U]` et
-  `flatMapObject[U]` produisent
+  `arrayMap[Primitive, U]`, `arrayFlatMap[Primitive, U]`, `map[U]`,
+  `mapObject[U]` et `flatMapObject[U]` produisent
   `ArrayObject[U]` quand la sortie ne reste pas dans la meme primitive
   specialisee;
 - documentation utilisateur recentree sur `Array[T]`, `Option[T]`, `Set[T]`,
@@ -445,14 +445,15 @@ Limites importantes :
   `arrayFlatMap[T, U]` et `arrayForeach[T]` sont des fonctions standard
   generiques specialisees pour `Int`, `Long`, `Float`, `Double` et `Bool`, mais
   pas encore une implementation unique de tableau generique;
-  `arrayMap[Primitive, U]`, `arrayFlatMap[Primitive, U]`,
+  `arrayMap[Primitive, U]`, `arrayFlatMap[Primitive, U]`, `map[U]`,
   `mapObject[U]` et `flatMapObject[U]` peuvent mapper une facade primitive
-  vers `ArrayObject[U]`;
+  vers `ArrayObject[U]`, avec `map[U]` comme nom source recommande;
   `Array[T]` est valide dans les
   signatures generiques utilisateur et se specialise correctement quand `T`
   devient concret, avec une premiere surface de methodes communes; `map[U]`
-  existe sur `ArrayObject[T]`; `filter` existe sur les facades primitives et
-  `ArrayObject[T]`, tandis que les operations non communes comme `sum` ou
+  existe sur `ArrayObject[T]` et sur les facades primitives pour les sorties
+  generiques; `filter` existe sur les facades primitives et `ArrayObject[T]`,
+  tandis que les operations non communes comme `sum` ou
   `countTrue` restent specialisees; `fold` existe sur les facades primitives
   avec accumulateur du meme type, et `fold[U]` / `flatMap[U]` existent sur
   `ArrayObject[T]`;
@@ -830,6 +831,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter `arrayFlatMap[T]` et `arrayFlatMap[T, U]`.
 - [x] Completer `arrayFlatMap[T]` pour `Long`, `Float`, `Double` et `Bool`.
 - [x] Ajouter `mapObject[U]` sur les facades primitives.
+- [x] Ajouter `map[U]` sur les facades primitives comme nom recommande pour les
+  conversions vers `ArrayObject[U]`, en gardant les surcharges same-type
+  specialisees.
 - [x] Ajouter `flatMapObject[U]` sur les facades primitives.
 - [x] Ajouter `filter` et `fold` sur `ArrayLong`, `ArrayFloat`,
   `ArrayDouble` et `ArrayBool`.
@@ -943,6 +947,16 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter les surcharges generiques `map[U]` aux facades primitives
+  `ArrayInt`, `ArrayLong`, `ArrayFloat`, `ArrayDouble` et `ArrayBool` pour que
+  les conversions vers `Array[U]` utilisent le nom idiomatique `map` sans
+  exposer `mapObject`; les surcharges same-type specialisees restent verifiees
+  par regression sur chaque facade primitive.
+  - Fichiers / tests associes: `stdlib/collections/*_array.nabla`,
+    `tests/test_generic_array_primitive_map_method.nabla`,
+    `examples/student_scores.nabla`, `docs/stdlib-api.md`, `docs/roadmap.md`,
+    `AGENTS.md`, tests cibles.
 
 - `local` - Ajouter une regression post-0.1 pour le dispatch dynamique de
   `hashCode()` / `equals(...)` quand une map est typée `Map[Parent, V]` mais

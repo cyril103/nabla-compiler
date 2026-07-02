@@ -973,6 +973,10 @@ class ArrayInt(values: IntArray) with Iterable[Int] {
         new ArrayInt(intArrayMap(values, f))
     }
 
+    def map[U](f: (Int) => U): ArrayObject[U] = {
+        intArrayMapObject[U](values, f)
+    }
+
     def mapObject[U](f: (Int) => U): ArrayObject[U] = {
         intArrayMapObject[U](values, f)
     }

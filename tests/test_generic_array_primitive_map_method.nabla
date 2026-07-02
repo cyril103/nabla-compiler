@@ -1,0 +1,82 @@
+import collections.array
+import core.option
+
+class LabelBox(name: String) {
+    def value(): String = {
+        name
+    }
+}
+
+def intLabel(value: Int): String = {
+    if value == 0 {
+        "zero"
+    } else {
+        "int"
+    }
+}
+
+def longLabel(value: Long): String = {
+    "long"
+}
+
+def floatLabel(value: Float): String = {
+    "float"
+}
+
+def doubleLabel(value: Double): String = {
+    "double"
+}
+
+def boolLabel(value: Bool): String = {
+    if value {
+        "true"
+    } else {
+        "false"
+    }
+}
+
+def maybeFlag(value: Bool): Option[String] = {
+    if value {
+        Option.some("yes")
+    } else {
+        Option.none[String]()
+    }
+}
+
+def boxedInt(value: Int): LabelBox = {
+    new LabelBox(value.toString())
+}
+
+def main(): Int = {
+    val ints = Array.range(2).map[String](intLabel)
+    val longs = Array.fill[Long](1, 5L).map[String](longLabel)
+    val floats = Array.fill[Float](1, 1.5F).map[String](floatLabel)
+    val doubles = Array.fill[Double](1, 2.5).map[String](doubleLabel)
+    val bools = Array.fill[Bool](2, true).map[String](boolLabel)
+    val maybeBools = Array.fill[Bool](1, true).map[Option[String]](maybeFlag)
+    val boxes = Array.range(1, 3).map[LabelBox](boxedInt)
+
+    val doubledInts: ArrayInt = Array.range(3).map(value => value + value)
+    val doubledLongs: ArrayLong = Array.fill[Long](1, 5L).map(value => value + value)
+    val doubledFloats: ArrayFloat = Array.fill[Float](1, 1.5F).map(value => value + value)
+    val doubledDoubles: ArrayDouble = Array.fill[Double](1, 2.5).map(value => value + value)
+    val invertedBools: ArrayBool = Array.fill[Bool](1, true).map(value => !value)
+
+    if ints.size() == 2 &&
+       ints.get(0).length() == 4 &&
+       longs.get(0).length() == 4 &&
+       floats.get(0).length() == 5 &&
+       doubles.get(0).length() == 6 &&
+       bools.get(1).length() == 4 &&
+       maybeBools.get(0).getOrElse("x").length() == 3 &&
+       boxes.get(1).value().length() == 1 &&
+       doubledInts.sum() == 6 &&
+       doubledLongs.get(0) == 10L &&
+       doubledFloats.get(0) == 3.0F &&
+       doubledDoubles.get(0) == 5.0 &&
+       invertedBools.get(0) == false {
+        42
+    } else {
+        1
+    }
+}

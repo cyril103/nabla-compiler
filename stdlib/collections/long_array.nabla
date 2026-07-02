@@ -252,6 +252,10 @@ class ArrayLong(values: LongArray) with Iterable[Long] {
         new ArrayLong(longArrayMap(values, f))
     }
 
+    def map[U](f: (Long) => U): ArrayObject[U] = {
+        longArrayMapObject[U](values, f)
+    }
+
     def mapObject[U](f: (Long) => U): ArrayObject[U] = {
         longArrayMapObject[U](values, f)
     }

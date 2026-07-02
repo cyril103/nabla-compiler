@@ -65,6 +65,9 @@ pas comme cible idiomatique pour le code applicatif.
 - `Array.range(size)`
 - `Array.range(start, until)`
 - `Array.rangeUntil(start, until)` — alias de compatibilite
+- `array.map(f)` pour conserver le meme type specialise quand il existe, et
+  `array.map[U](f)` pour produire un tableau generique `Array[U]` depuis une
+  facade primitive sans passer par le nom de compatibilite `mapObject`.
 - `array.sorted(lessThan)` retourne une copie triee par predicat utilisateur;
   les facades primitives `Int`, `Long`, `Float`, `Double` et `Bool` exposent aussi `sorted()` par ordre naturel (`false < true` pour `Bool`)
 - `Set[T]`
@@ -205,6 +208,8 @@ nouveaux exemples devraient preferer la surface publique ci-dessus :
   fabrique `Array` exprime mieux l'intention.
 - Helpers `arrayIntMap`, `arrayObjectMap`, etc. quand une methode de facade
   existe (`xs.map(...)`, `xs.filter(...)`, `xs.fold(...)`, etc.).
+- `mapObject[U](...)` sur les facades primitives quand `map[U](...)` exprime la
+  meme conversion sans exposer le detail `ArrayObject[U]` dans le code source.
 - Fonctions bas niveau `setEmpty`, `setFromArray` et variantes specialisees
   quand la fabrique de `Set` exprime mieux l'intention.
 - Compatibilite `randomSeedTime()` quand `randomSeedNow()` exprime mieux
