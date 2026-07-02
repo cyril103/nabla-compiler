@@ -195,6 +195,9 @@ reprise séparées :
 - Les objets runtime V0 sont couverts par des tests de valeur singleton, dispatch
   via trait, assignabilité `Any` / `AnyRef`, diagnostic de namespace statique
   utilisé comme valeur et diagnostics d'héritage class-like.
+- Les diagnostics de types pour `if`, `while`, `for`, `!`, `&&` et `||`
+  pointent l'expression fautive et couvrent les côtés gauche/droit des
+  opérateurs booleens ainsi que le compteur de boucle.
 - Le dispatch dynamique repose désormais sur des vtables backend internes:
   objet slot 0 vers table de fonctions, slots par propriétaire statique +
   méthode résolue, couverture de `Any`, traits `Sized` / `Iterable[T]`, parents
