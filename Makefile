@@ -11,6 +11,13 @@ nablac: src/main.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp src/ir
 	@mkdir -p $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) src/main.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp src/ir.cpp src/ir_codegen.cpp src/runtime_asm.cpp -o $(BUILD_DIR)/nablac
 
+$(BUILD_DIR)/frontend_unit_tests: tests/frontend_unit_tests.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp src/ir.cpp src/lexer.hpp src/ast.hpp src/parser.hpp src/semantic_analyzer.hpp src/ir.hpp src/compiler_context.hpp src/compiler_error.hpp
+	@mkdir -p $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) tests/frontend_unit_tests.cpp src/parser.cpp src/ast.cpp src/semantic_analyzer.cpp src/ir.cpp -o $(BUILD_DIR)/frontend_unit_tests
+
+unit-tests: $(BUILD_DIR)/frontend_unit_tests
+	@$(BUILD_DIR)/frontend_unit_tests
+
 test: nablac
 	@mkdir -p $(BUILD_DIR)
 	NABLA_BUILD_DIR=$(BUILD_DIR) $(BUILD_DIR)/nablac $(SRC)
@@ -207,7 +214,7 @@ examples: nablac
 
 examples-full: examples
 
-tooling-tests: nablac stdlib-docs
+tooling-tests: nablac unit-tests stdlib-docs
 	@tests/test_missing_external_tools.sh
 	@tests/test_configurable_heap_size.sh
 	@tests/test_stdlib_docs_html.py
@@ -224,4 +231,4 @@ debug: nablac
 clean:
 	rm -rf $(BUILD_DIR) nablac
 
-.PHONY: all clean test debug all-tests examples examples-quick examples-full tooling-tests stdlib-docs
+.PHONY: all clean test debug all-tests examples examples-quick examples-full unit-tests tooling-tests stdlib-docs
