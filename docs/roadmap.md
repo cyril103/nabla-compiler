@@ -162,8 +162,8 @@ Actions recommandees :
    Les cookbooks doivent rester concis et ne pas laisser entendre que tous les
    retours de tableaux masquent deja completement `ArrayObject[T]`.
 12. Garder les diagnostics de compatibilite orientes vers les compagnons
-   recommandes (`Array.fill`, `Array.range`, `Set.fromArray`,
-   `Option.some`, `Option.none`, etc.).
+   recommandes (`Array.fill`, `Array.range`, `Set.fromArray`, `Map.empty`,
+   `Map.fromArray`, `List.empty`, `Option.some`, `Option.none`, etc.).
 13. Exploiter les champs constructeur `var` pour préparer des builders internes
     de collections, notamment une construction de `List[T]` plus efficace avant
     exposition publique.
@@ -210,6 +210,9 @@ reprise séparées :
   publiques `Array.empty` / `Array.tabulate` quand l'utilisateur nomme les
   anciens aliases `ArrayEmpty` / `ArrayTabulate` ou ajoute des type arguments aux
   helpers spécialisés correspondants.
+- Les diagnostics de compatibilité stdlib couvrent aussi les noms legacy ou
+  helpers internes courants de `Map` et `List`, en réorientant l'utilisateur vers
+  `Map.empty`, `Map.fromArray` et `List.empty` sans changer les helpers acceptés.
 - Une première cible `make unit-tests` compile un harness C++ front-end et
   vérifie directement lexer, parser, diagnostics sémantiques, surcharge,
   inférence générique et typage contextuel de lambdas sans assemblage.

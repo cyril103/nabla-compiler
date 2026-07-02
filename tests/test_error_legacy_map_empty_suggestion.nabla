@@ -1,0 +1,5 @@
+import collections.map
+
+def main(): Int = {
+    MapEmpty[String, Int]().size()
+}
