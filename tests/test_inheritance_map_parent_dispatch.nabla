@@ -1,0 +1,62 @@
+import collections.map
+
+class Account(idValue: Int, nameValue: String) {
+    def id(): Int = {
+        idValue
+    }
+
+    override def toString(): String = {
+        "account"
+    }
+
+    override def hashCode(): Int = {
+        nameValue.length()
+    }
+
+    override def equals(other: Any): Bool = {
+        false
+    }
+}
+
+class PremiumAccount extends Account(idValue: Int, nameValue: String) {
+    override def toString(): String = {
+        nameValue
+    }
+
+    override def hashCode(): Int = {
+        idValue
+    }
+
+    override def equals(other: Any): Bool = {
+        idValue == other.hashCode()
+    }
+}
+
+def main(): Int = {
+    val adaOne: Account = new PremiumAccount(7, "ada-one-long")
+    val adaTwo: Account = new PremiumAccount(7, "ada")
+    val adaProbe: Account = new PremiumAccount(7, "probe-name")
+    val bob: Account = new PremiumAccount(11, "bob")
+    val missing: Account = new PremiumAccount(13, "missing")
+
+    val aliases = Map[Account, String](adaOne -> "old", bob -> "bob", adaTwo -> "ada")
+    val updated = aliases.updated(adaTwo, "ada-updated")
+    val removed = updated.removed(adaOne)
+
+    if aliases.size() == 2 &&
+       aliases.contains(adaTwo) &&
+       aliases.getOrElse(adaTwo, "missing") == "ada" &&
+       aliases.contains(adaProbe) &&
+       aliases.getOrElse(adaProbe, "missing") == "ada" &&
+       aliases.getOrElse(bob, "missing") == "bob" &&
+       aliases.getOrElse(missing, "fallback") == "fallback" &&
+       updated.size() == 2 &&
+       updated.getOrElse(adaOne, "missing") == "ada-updated" &&
+       removed.size() == 1 &&
+       !removed.contains(adaTwo) &&
+       removed.contains(bob) {
+        42
+    } else {
+        1
+    }
+}
