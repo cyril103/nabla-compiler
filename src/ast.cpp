@@ -410,7 +410,9 @@ std::string NotNode::getType() {
 void NotNode::validateSemantics(CompilerContext& context) {
     expression->validateSemantics(context);
     if (expression->getType() != "Bool") {
-        semanticError("l'opérateur '!' attend une expression de type Bool");
+        throw CompilerError(
+            ErrorKind::Semantic, expression->getLocation(),
+            "l'opérateur '!' attend une expression de type Bool");
     }
 }
 
@@ -453,7 +455,9 @@ void LogicalNode::validateSemantics(CompilerContext& context) {
     left->validateSemantics(context);
     right->validateSemantics(context);
     if (left->getType() != "Bool") {
-        semanticError("l'opérateur '" + operation + "' attend une expression gauche de type Bool");
+        throw CompilerError(
+            ErrorKind::Semantic, left->getLocation(),
+            "l'opérateur '" + operation + "' attend une expression gauche de type Bool");
     }
     if (right->getType() != "Bool") {
         throw CompilerError(
@@ -2181,7 +2185,9 @@ void IfNode::validateSemantics(CompilerContext& context) {
     thenBranch->validateSemantics(context);
     elseBranch->validateSemantics(context);
     if (condition->getType() != "Bool") {
-        semanticError("la condition d'un 'if' doit être de type Bool");
+        throw CompilerError(
+            ErrorKind::Semantic, condition->getLocation(),
+            "la condition d'un 'if' doit être de type Bool");
     }
     if (thenBranch->getType() == elseBranch->getType()) {
         resolvedType = thenBranch->getType();
@@ -2357,7 +2363,9 @@ void WhileNode::validateSemantics(CompilerContext& context) {
     condition->validateSemantics(context);
     body->validateSemantics(context);
     if (condition->getType() != "Bool") {
-        semanticError("la condition d'un 'while' doit être de type Bool");
+        throw CompilerError(
+            ErrorKind::Semantic, condition->getLocation(),
+            "la condition d'un 'while' doit être de type Bool");
     }
 }
 
@@ -2388,7 +2396,9 @@ void ForNode::validateSemantics(CompilerContext& context) {
     count->validateSemantics(context);
     body->validateSemantics(context);
     if (count->getType() != "Int") {
-        semanticError("le compteur d'un 'for' doit être de type Int");
+        throw CompilerError(
+            ErrorKind::Semantic, count->getLocation(),
+            "le compteur d'un 'for' doit être de type Int");
     }
 }
 

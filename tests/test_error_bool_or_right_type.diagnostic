@@ -1,0 +1,1 @@
+tests/test_error_bool_or_right_type.nabla:2:17: semantic error: l'opérateur '||' attend une expression droite de type Bool

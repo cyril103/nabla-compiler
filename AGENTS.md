@@ -724,7 +724,7 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Ajouter le reste de division `%` pour `Int` et `Long`.
 - [x] Ajouter la conversion `Int.toLong`.
 - [x] Ajouter les champs et methodes herites si l'heritage est retenu.
-- [ ] Valider les types des branches, boucles et operateurs de facon uniforme.
+- [x] Valider les types des branches, boucles et operateurs de facon uniforme.
 - [x] Ajouter une premiere syntaxe de types parametres pour `Option[Int]` et
   `Array[Int]` via aliases standard.
 - [x] Centraliser les aliases de types standard comme `Array[Int] -> ArrayInt`.
@@ -952,6 +952,20 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Durcir la validation des types de controle de flux: les diagnostics
+  de `if`, `while`, `for`, `!` et du cote gauche de `&&` / `||` pointent
+  maintenant l'expression fautive, avec regressions dediees pour le compteur
+  `for` non-`Int`, le cote gauche de `&&` et le cote droit de `||`. Le plan
+  temporaire est retire dans la meme PR que le durcissement.
+  - Fichiers / tests associes: `src/ast.cpp`,
+    `tests/test_error_for_count_type.nabla`,
+    `tests/test_error_bool_and_left_type.nabla`,
+    `tests/test_error_bool_or_right_type.nabla`,
+    `tests/test_error_int_condition.diagnostic`,
+    `tests/test_error_loop_as_int.diagnostic`, `docs/language.md`,
+    `docs/roadmap.md`, `AGENTS.md`, suppression de
+    `docs/plans/control-flow-type-validation.md`, tests cibles.
 
 - `local` - Cadrer explicitement `mapObject[U]` et `flatMapObject[U]` comme
   compatibilite stdlib: les regressions dediees portent desormais le marqueur

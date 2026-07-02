@@ -1,1 +1,1 @@
-tests/test_error_bool_not_type.nabla:2:8: semantic error: l'opérateur '!' attend une expression de type Bool
+tests/test_error_bool_not_type.nabla:2:9: semantic error: l'opérateur '!' attend une expression de type Bool

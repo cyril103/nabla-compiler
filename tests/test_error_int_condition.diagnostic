@@ -1,1 +1,1 @@
-tests/test_error_int_condition.nabla:2:5: semantic error: la condition d'un 'if' doit être de type Bool
+tests/test_error_int_condition.nabla:2:8: semantic error: la condition d'un 'if' doit être de type Bool

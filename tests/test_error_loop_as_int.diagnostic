@@ -1,1 +1,1 @@
-tests/test_error_loop_as_int.nabla:2:5: semantic error: la condition d'un 'while' doit être de type Bool
+tests/test_error_loop_as_int.nabla:2:11: semantic error: la condition d'un 'while' doit être de type Bool

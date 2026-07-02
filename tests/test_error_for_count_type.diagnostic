@@ -1,0 +1,1 @@
+tests/test_error_for_count_type.nabla:2:9: semantic error: le compteur d'un 'for' doit être de type Int

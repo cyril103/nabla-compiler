@@ -286,6 +286,10 @@ le `if` est type `Unit`, ce qui permet de l'utiliser naturellement pour des
 effets de bord. Les chaines `else if` sont acceptees, mais une branche finale
 `else` reste obligatoire.
 
+Les conditions de `if` et `while` doivent être de type `Bool`; le compteur de
+`for` doit être de type `Int`. Les opérandes de `&&`, `||` et `!` sont aussi
+validés comme `Bool`, avec diagnostics sur l'expression fautive.
+
 ```nabla
 def max(left: Int, right: Int): Int = {
     if left > right {

@@ -1,0 +1,6 @@
+def main(): Int = {
+    for true {
+        1
+    }
+    0
+}
