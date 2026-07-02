@@ -582,7 +582,8 @@ optionnel `<nom>.stdout` valide la sortie console. Les fichiers dont le nom
 contient `error` ou `fail` doivent echouer pendant la compilation. La cible
 `unit-tests` compile `tests/frontend_unit_tests.cpp` et exerce directement le
 lexer, le parser et l'analyse semantique sans assembler ni executer de programme
-Nabla.
+Nabla. Le harness couvre aussi des chemins front-end fragiles de surcharge,
+d'inference generique et de typage contextuel des lambdas.
 
 ## Feuille De Route
 
@@ -895,7 +896,8 @@ Nabla.
 - [ ] Ajouter une cible de formatage.
 - [x] Ajouter une integration continue.
 - [x] Ajouter une premiere cible `unit-tests` pour le lexer, parser et analyseur
-  semantique, integree aux tests d'outillage.
+  semantique, integree aux tests d'outillage, puis l'etendre aux surcharges et
+  generiques front-end.
 - [x] Ajouter une racine `stdlib/` importable.
 - [x] Ajouter un premier module de collections dans `stdlib/`.
 - [x] Ajouter une premiere documentation utilisateur du langage.
@@ -956,6 +958,14 @@ Nabla.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Etendre le harness de tests unitaires front-end aux chemins de
+  surcharge et generiques: resolution de surcharge globale/methode par type
+  d'argument, diagnostic d'ambiguite de surcharge, inference de fonction
+  generique depuis les arguments et typage attendu d'une lambda passee a une
+  fonction generique. Le plan actif temporaire n'est pas conserve dans la PR.
+  - Fichiers / tests associes: `tests/frontend_unit_tests.cpp`,
+    `docs/roadmap.md`, `AGENTS.md`, `make unit-tests`.
 
 - `local` - Ajouter une premiere cible de tests unitaires front-end: le harness
   C++ `tests/frontend_unit_tests.cpp` couvre directement les tokens/positions du
