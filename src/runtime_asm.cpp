@@ -216,39 +216,22 @@ void emitText(std::ostream& out) {
         << "    syscall\n"
         << "    jmp Runtime_emptyString\n\n";
     out << "Runtime_writeFile:\n"
-        << "    mov r12, rsi\n"
-        << "    call Runtime_copyPathToCString\n"
-        << "    mov rdi, rax\n"
-        << "    mov rsi, 577\n"
-        << "    mov rdx, 420\n"
-        << "    mov rax, 2\n"
-        << "    syscall\n"
-        << "    cmp rax, 0\n"
-        << "    jl .L_write_file_return_tagged\n"
-        << "    mov r13, rax\n"
-        << "    mov rdi, r13\n"
-        << "    mov rsi, [r12 + 16]\n"
-        << "    mov rdx, [r12 + 8]\n"
-        << "    mov rax, 1\n"
-        << "    syscall\n"
-        << "    mov r14, rax\n"
-        << "    mov rdi, r13\n"
-        << RuntimeValues::asmMoveTaggedTrue("rax")
-        << "    syscall\n"
-        << "    mov rax, r14\n"
-        << ".L_write_file_return_tagged:\n"
-        << RuntimeValues::asmEncodeTaggedInteger("rax")
-        << "    ret\n\n";
+        << "    mov rdx, 577\n"
+        << "    jmp Runtime_writeStringToFileWithFlags\n\n";
     out << "Runtime_appendFile:\n"
+        << "    mov rdx, 1089\n"
+        << "    jmp Runtime_writeStringToFileWithFlags\n\n";
+    out << "Runtime_writeStringToFileWithFlags:\n"
         << "    mov r12, rsi\n"
+        << "    mov r15, rdx\n"
         << "    call Runtime_copyPathToCString\n"
         << "    mov rdi, rax\n"
-        << "    mov rsi, 1089\n"
+        << "    mov rsi, r15\n"
         << "    mov rdx, 420\n"
         << "    mov rax, 2\n"
         << "    syscall\n"
         << "    cmp rax, 0\n"
-        << "    jl .L_append_file_return_tagged\n"
+        << "    jl .L_write_string_to_file_return_tagged\n"
         << "    mov r13, rax\n"
         << "    mov rdi, r13\n"
         << "    mov rsi, [r12 + 16]\n"
@@ -260,7 +243,7 @@ void emitText(std::ostream& out) {
         << RuntimeValues::asmMoveTaggedTrue("rax")
         << "    syscall\n"
         << "    mov rax, r14\n"
-        << ".L_append_file_return_tagged:\n"
+        << ".L_write_string_to_file_return_tagged:\n"
         << RuntimeValues::asmEncodeTaggedInteger("rax")
         << "    ret\n\n";
     out << "Runtime_fileExists:\n"
