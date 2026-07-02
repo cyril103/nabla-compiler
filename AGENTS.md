@@ -334,7 +334,7 @@ Le pipeline implemente actuellement :
   `ArrayObject[T]` pour les types concrets non specialises comme `String` et
   `Array[Int]`;
   `arrayMap[Primitive, U]`, `arrayFlatMap[Primitive, U]`, `map[U]`,
-  `mapObject[U]` et `flatMapObject[U]` produisent
+  `flatMap[U]`, `mapObject[U]` et `flatMapObject[U]` produisent
   `ArrayObject[U]` quand la sortie ne reste pas dans la meme primitive
   specialisee;
 - documentation utilisateur recentree sur `Array[T]`, `Option[T]`, `Set[T]`,
@@ -446,13 +446,15 @@ Limites importantes :
   generiques specialisees pour `Int`, `Long`, `Float`, `Double` et `Bool`, mais
   pas encore une implementation unique de tableau generique;
   `arrayMap[Primitive, U]`, `arrayFlatMap[Primitive, U]`, `map[U]`,
-  `mapObject[U]` et `flatMapObject[U]` peuvent mapper une facade primitive
-  vers `ArrayObject[U]`, avec `map[U]` comme nom source recommande;
+  `flatMap[U]`, `mapObject[U]` et `flatMapObject[U]` peuvent mapper une
+  facade primitive vers `ArrayObject[U]`, avec `map[U]` / `flatMap[U]` comme
+  noms source recommandes;
   `Array[T]` est valide dans les
   signatures generiques utilisateur et se specialise correctement quand `T`
   devient concret, avec une premiere surface de methodes communes; `map[U]`
   existe sur `ArrayObject[T]` et sur les facades primitives pour les sorties
-  generiques; `filter` existe sur les facades primitives et `ArrayObject[T]`,
+  generiques; `flatMap[U]` existe aussi sur les facades primitives pour les
+  sorties generiques; `filter` existe sur les facades primitives et `ArrayObject[T]`,
   tandis que les operations non communes comme `sum` ou
   `countTrue` restent specialisees; `fold` existe sur les facades primitives
   avec accumulateur du meme type, et `fold[U]` / `flatMap[U]` existent sur
@@ -835,6 +837,9 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   conversions vers `ArrayObject[U]`, en gardant les surcharges same-type
   specialisees.
 - [x] Ajouter `flatMapObject[U]` sur les facades primitives.
+- [x] Ajouter `flatMap[U]` sur les facades primitives comme nom recommande pour
+  les conversions vers `ArrayObject[U]`, en gardant les surcharges same-type
+  specialisees.
 - [x] Ajouter `filter` et `fold` sur `ArrayLong`, `ArrayFloat`,
   `ArrayDouble` et `ArrayBool`.
 - [x] Etendre les aliases standard pour choisir automatiquement :
@@ -947,6 +952,17 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter les surcharges generiques `flatMap[U]` aux facades
+  primitives `ArrayInt`, `ArrayLong`, `ArrayFloat`, `ArrayDouble` et
+  `ArrayBool` pour que les conversions vers `Array[U]` utilisent le nom
+  idiomatique `flatMap` sans exposer `flatMapObject`; les surcharges same-type
+  specialisees restent verifiees par regression sur chaque facade primitive. Le
+  plan de travail temporaire a ete retire dans la meme PR que la feature.
+  - Fichiers / tests associes: `stdlib/collections/*_array.nabla`,
+    `tests/test_generic_array_primitive_flatmap_method.nabla`,
+    `docs/stdlib-api.md`, `docs/roadmap.md`, `AGENTS.md`, suppression de
+    `docs/plans/primitive-array-generic-flatmap.md`, tests cibles.
 
 - `local` - Retirer le plan actif termine `primitive-array-generic-map` apres
   squash-merge: `docs/plans/` revient a l'etat sans plan actif, le perimetre
