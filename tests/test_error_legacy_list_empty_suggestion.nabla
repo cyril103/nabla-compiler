@@ -1,0 +1,5 @@
+import collections.list
+
+def main(): Int = {
+    ListEmpty[Int]().size()
+}

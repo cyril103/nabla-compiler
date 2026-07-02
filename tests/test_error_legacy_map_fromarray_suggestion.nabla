@@ -1,0 +1,6 @@
+import collections.map
+import collections.array
+
+def main(): Int = {
+    MapFromArray[String, Int](Array("a" -> 1)).size()
+}

@@ -1,0 +1,1 @@
+tests/test_error_legacy_map_fromarray_suggestion.nabla:5:5: semantic error: fonction inconnue: MapFromArray. Nom recommande: 'Map.fromArray'

@@ -276,6 +276,11 @@ inline std::optional<std::string> recommendedStdlibFunctionName(const std::strin
         name == "setFromArrayBool") {
         return "Set.fromArray";
     }
+    if (name == "MapEmpty" || name == "mapEmpty") return "Map.empty";
+    if (name == "MapFromArray" || name == "mapFromArray") return "Map.fromArray";
+    if (name == "ListEmpty" || name == "listEmpty") return "List.empty";
+    if (name == "ListCons" || name == "listCons") return "List.cons";
+    if (name == "ListFromArray" || name == "listFromArrayFrom") return "List.fromArray";
     if (name == "OptionSome" || name == "optionSome") return "Option.some";
     if (name == "OptionNone" || name == "optionNone") return "Option.none";
     return std::nullopt;

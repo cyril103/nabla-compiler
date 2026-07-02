@@ -413,9 +413,9 @@ Le pipeline implemente actuellement :
   `ArrayInt`.
 - les tests et exemples ordinaires privilegient maintenant les surcharges
   `Array.range`, `Array.fill[T]`, `Option.some` / `Option.none`,
-  `Set.fromArray` et `Set.empty`; les anciens noms encore toleres ou desormais
-  rejetes restent couverts dans les tests explicitement dedies aux alias ou
-  diagnostics legacy.
+  `Set.fromArray`, `Set.empty`, `Map.empty`, `Map.fromArray` et `List.empty`;
+  les anciens noms encore toleres ou desormais rejetes restent couverts dans les
+  tests explicitement dedies aux alias ou diagnostics legacy.
 
 Limites importantes :
 
@@ -966,6 +966,23 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Completer les diagnostics legacy des helpers collections: les noms
+  anciens ou devines `MapEmpty`, `MapFromArray` et `ListEmpty` affichent
+  maintenant un suffixe `Nom recommande` vers `Map.empty`, `Map.fromArray` et
+  `List.empty`, et la table de recommandations couvre aussi les helpers internes
+  `mapEmpty`, `mapFromArray`, `listEmpty`, `listCons` et `listFromArrayFrom`.
+  Aucun programme accepte ni API stdlib ne change; le plan actif temporaire
+  n'est pas conserve dans la PR.
+  - Fichiers / tests associes: `src/compiler_context.hpp`,
+    `tests/test_error_legacy_map_empty_suggestion.nabla`,
+    `tests/test_error_legacy_map_empty_suggestion.diagnostic`,
+    `tests/test_error_legacy_map_fromarray_suggestion.nabla`,
+    `tests/test_error_legacy_map_fromarray_suggestion.diagnostic`,
+    `tests/test_error_legacy_list_empty_suggestion.nabla`,
+    `tests/test_error_legacy_list_empty_suggestion.diagnostic`,
+    `docs/roadmap.md`, `AGENTS.md`, suppression de
+    `docs/plans/collection-helper-diagnostics.md`.
 
 - `local` - Completer les diagnostics legacy des factories Array: les anciens
   noms publics `ArrayEmpty` et `ArrayTabulate` affichent maintenant le suffixe
