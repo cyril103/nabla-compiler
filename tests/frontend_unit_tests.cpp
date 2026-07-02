@@ -190,6 +190,78 @@ void testSemanticBoolAndLeftDiagnosticLocation(const std::string& testName) {
         "message de l'opérande gauche incorrect");
 }
 
+void testSemanticGlobalOverloadResolvesByArgumentType(const std::string& testName) {
+    (void)testName;
+    const std::string source =
+        "def pick(value: Int): Int = {\n"
+        "    value + 1\n"
+        "}\n"
+        "\n"
+        "def pick(value: String): Int = {\n"
+        "    value.length()\n"
+        "}\n"
+        "\n"
+        "def main(): Int = {\n"
+        "    pick(41) + pick(\"abc\")\n"
+        "}\n";
+    analyzeSource(source, "unit_global_overload.nabla");
+}
+
+void testSemanticFunctionOverloadAmbiguityDiagnostic(const std::string& testName) {
+    const std::string source =
+        "def choose[T](value: T): Int = {\n"
+        "    1\n"
+        "}\n"
+        "\n"
+        "def choose[U](value: U): Int = {\n"
+        "    2\n"
+        "}\n"
+        "\n"
+        "def main(): Int = {\n"
+        "    choose(42)\n"
+        "}\n";
+    auto error = expectCompilerError(source, "unit_global_overload_ambiguous.nabla", ErrorKind::Semantic);
+    expectTrue(testName, error.location.line == 10, "ligne de l'appel ambigu incorrecte");
+    expectTrue(testName, error.location.column == 5, "colonne de l'appel ambigu incorrecte");
+    expectTrue(
+        testName,
+        std::string(error.what()).find("appel de fonction surchargée ambigu pour 'choose(Int)'") != std::string::npos,
+        "message d'ambiguïté de surcharge globale incorrect");
+}
+
+void testSemanticGenericFunctionInferenceWithLambda(const std::string& testName) {
+    (void)testName;
+    const std::string source =
+        "def applyOnce[T](value: T, f: (T) => T): T = {\n"
+        "    f(value)\n"
+        "}\n"
+        "\n"
+        "def main(): Int = {\n"
+        "    applyOnce(41, value => value + 1)\n"
+        "}\n";
+    analyzeSource(source, "unit_generic_lambda_inference.nabla");
+}
+
+void testSemanticMethodOverloadResolvesByArgumentType(const std::string& testName) {
+    (void)testName;
+    const std::string source =
+        "class Box() {\n"
+        "    def pick(value: Int): Int = {\n"
+        "        value + 1\n"
+        "    }\n"
+        "\n"
+        "    def pick(value: String): Int = {\n"
+        "        value.length()\n"
+        "    }\n"
+        "}\n"
+        "\n"
+        "def main(): Int = {\n"
+        "    val box = new Box()\n"
+        "    box.pick(41) + box.pick(\"abc\")\n"
+        "}\n";
+    analyzeSource(source, "unit_method_overload.nabla");
+}
+
 } // namespace
 
 int main() {
@@ -199,6 +271,10 @@ int main() {
     run("semantic_if_condition_diagnostic_location", testSemanticIfConditionDiagnosticLocation);
     run("semantic_for_count_diagnostic_location", testSemanticForCountDiagnosticLocation);
     run("semantic_bool_and_left_diagnostic_location", testSemanticBoolAndLeftDiagnosticLocation);
+    run("semantic_global_overload_resolves_by_argument_type", testSemanticGlobalOverloadResolvesByArgumentType);
+    run("semantic_function_overload_ambiguity_diagnostic", testSemanticFunctionOverloadAmbiguityDiagnostic);
+    run("semantic_generic_function_inference_with_lambda", testSemanticGenericFunctionInferenceWithLambda);
+    run("semantic_method_overload_resolves_by_argument_type", testSemanticMethodOverloadResolvesByArgumentType);
 
     if (failures != 0) {
         std::cerr << failures << " échec(s) de tests unitaires front-end\n";

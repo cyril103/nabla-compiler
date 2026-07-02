@@ -201,7 +201,8 @@ reprise séparées :
   pointent l'expression fautive et couvrent les côtés gauche/droit des
   opérateurs booleens ainsi que le compteur de boucle.
 - Une première cible `make unit-tests` compile un harness C++ front-end et
-  vérifie directement lexer, parser et diagnostics sémantiques sans assemblage.
+  vérifie directement lexer, parser, diagnostics sémantiques, surcharge,
+  inférence générique et typage contextuel de lambdas sans assemblage.
 - Le dispatch dynamique repose désormais sur des vtables backend internes:
   objet slot 0 vers table de fonctions, slots par propriétaire statique +
   méthode résolue, couverture de `Any`, traits `Sized` / `Iterable[T]`, parents
