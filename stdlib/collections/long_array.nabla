@@ -264,6 +264,10 @@ class ArrayLong(values: LongArray) with Iterable[Long] {
         longArrayFlatMapObject[U](values, transform)
     }
 
+    def flatMap[U](transform: (Long) => ArrayObject[U]): ArrayObject[U] = {
+        longArrayFlatMapObject[U](values, transform)
+    }
+
     def flatMap(transform: (Long) => ArrayLong): ArrayLong = {
         new ArrayLong(longArrayFlatMap(values, transform))
     }

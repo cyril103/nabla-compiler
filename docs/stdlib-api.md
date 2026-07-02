@@ -68,6 +68,9 @@ pas comme cible idiomatique pour le code applicatif.
 - `array.map(f)` pour conserver le meme type specialise quand il existe, et
   `array.map[U](f)` pour produire un tableau generique `Array[U]` depuis une
   facade primitive sans passer par le nom de compatibilite `mapObject`.
+- `array.flatMap(f)` pour conserver le meme type specialise quand il existe, et
+  `array.flatMap[U](f)` pour produire un tableau generique `Array[U]` depuis une
+  facade primitive sans passer par le nom de compatibilite `flatMapObject`.
 - `array.sorted(lessThan)` retourne une copie triee par predicat utilisateur;
   les facades primitives `Int`, `Long`, `Float`, `Double` et `Bool` exposent aussi `sorted()` par ordre naturel (`false < true` pour `Bool`)
 - `Set[T]`
@@ -210,6 +213,9 @@ nouveaux exemples devraient preferer la surface publique ci-dessus :
   existe (`xs.map(...)`, `xs.filter(...)`, `xs.fold(...)`, etc.).
 - `mapObject[U](...)` sur les facades primitives quand `map[U](...)` exprime la
   meme conversion sans exposer le detail `ArrayObject[U]` dans le code source.
+- `flatMapObject[U](...)` sur les facades primitives quand `flatMap[U](...)`
+  exprime la meme conversion sans exposer le detail `ArrayObject[U]` dans le
+  code source.
 - Fonctions bas niveau `setEmpty`, `setFromArray` et variantes specialisees
   quand la fabrique de `Set` exprime mieux l'intention.
 - Compatibilite `randomSeedTime()` quand `randomSeedNow()` exprime mieux

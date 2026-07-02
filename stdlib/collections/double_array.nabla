@@ -254,6 +254,10 @@ class ArrayDouble(values: DoubleArray) with Iterable[Double] {
         doubleArrayFlatMapObject[U](values, transform)
     }
 
+    def flatMap[U](transform: (Double) => ArrayObject[U]): ArrayObject[U] = {
+        doubleArrayFlatMapObject[U](values, transform)
+    }
+
     def flatMap(transform: (Double) => ArrayDouble): ArrayDouble = {
         new ArrayDouble(doubleArrayFlatMap(values, transform))
     }

@@ -305,6 +305,10 @@ class ArrayBool extends ArrayPrimitiveBase[Bool, BoolArray] with Iterable[Bool](
         boolArrayFlatMapObject[U](rawValues, transform)
     }
 
+    def flatMap[U](transform: (Bool) => ArrayObject[U]): ArrayObject[U] = {
+        boolArrayFlatMapObject[U](rawValues, transform)
+    }
+
     def flatMap(transform: (Bool) => ArrayBool): ArrayBool = {
         arrayBool(boolArrayFlatMap(rawValues, transform))
     }
