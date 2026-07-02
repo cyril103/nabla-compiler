@@ -1,0 +1,6 @@
+import collections.list
+import collections.array
+
+def main(): Int = {
+    listFromArrayFrom[Int](Array(1), 0).size()
+}

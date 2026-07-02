@@ -228,7 +228,14 @@ object List {
     /// @signature def List.fromArray[T](values: Array[T]): List[T]
     /// @status Recommandee
     def fromArray[T](values: Array[T]): List[T] = {
-        listFromArrayFrom[T](values, 0)
+        def fromIndex(source: Array[T], index: Int): List[T] = {
+            if index >= source.size() {
+                listEmpty[T]()
+            } else {
+                listCons[T](source.get(index), fromIndex(source, index + 1))
+            }
+        }
+        fromIndex(values, 0)
     }
 
 }
@@ -316,13 +323,5 @@ def listFilter[T](values: List[T], predicate: (T) => Bool): List[T] = {
         } else {
             listFilter[T](values.tail(), predicate)
         }
-    }
-}
-
-def listFromArrayFrom[T](values: Array[T], index: Int): List[T] = {
-    if index >= values.size() {
-        listEmpty[T]()
-    } else {
-        listCons[T](values.get(index), listFromArrayFrom[T](values, index + 1))
     }
 }
