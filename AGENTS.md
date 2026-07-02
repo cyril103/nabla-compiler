@@ -579,7 +579,10 @@ portee reelle d'un changement, preferer la validation complete.
 
 Les tests normaux utilisent un fichier voisin `<nom>.expected`. Un fichier
 optionnel `<nom>.stdout` valide la sortie console. Les fichiers dont le nom
-contient `error` ou `fail` doivent echouer pendant la compilation.
+contient `error` ou `fail` doivent echouer pendant la compilation. La cible
+`unit-tests` compile `tests/frontend_unit_tests.cpp` et exerce directement le
+lexer, le parser et l'analyse semantique sans assembler ni executer de programme
+Nabla.
 
 ## Feuille De Route
 
@@ -891,7 +894,8 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
 - [x] Retirer les binaires suivis sous `build/`.
 - [ ] Ajouter une cible de formatage.
 - [x] Ajouter une integration continue.
-- [ ] Ajouter des tests unitaires du lexer, parser et analyseur semantique.
+- [x] Ajouter une premiere cible `unit-tests` pour le lexer, parser et analyseur
+  semantique, integree aux tests d'outillage.
 - [x] Ajouter une racine `stdlib/` importable.
 - [x] Ajouter un premier module de collections dans `stdlib/`.
 - [x] Ajouter une premiere documentation utilisateur du langage.
@@ -952,6 +956,15 @@ contient `error` ou `fail` doivent echouer pendant la compilation.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter une premiere cible de tests unitaires front-end: le harness
+  C++ `tests/frontend_unit_tests.cpp` couvre directement les tokens/positions du
+  lexer, l'acceptation et le rejet parser, puis des diagnostics semantiques de
+  controle de flux sans passer par NASM/ld. La cible `unit-tests` est integree a
+  `tooling-tests`, et le plan actif temporaire est retire avant PR.
+  - Fichiers / tests associes: `Makefile`, `tests/frontend_unit_tests.cpp`,
+    `docs/roadmap.md`, `AGENTS.md`, suppression de
+    `docs/plans/frontend-unit-tests.md`, `make unit-tests`.
 
 - `local` - Durcir la validation des types de controle de flux: les diagnostics
   de `if`, `while`, `for`, `!` et du cote gauche de `&&` / `||` pointent

@@ -141,34 +141,36 @@ Actions recommandees :
 4. Maintenir le check CI pour `make stdlib-docs` et la référence HTML générée.
 5. Maintenir le check CI `make examples` pour garantir que les exemples publics
    restent compilables et que leurs sorties attendues ne dérivent pas.
-6. Maintenir et enrichir `docs/internals.md`, la specification vivante pour
+6. Maintenir `make unit-tests` comme filet rapide du front-end en couvrant
+   directement lexer, parser et analyse sémantique sans passer par NASM/ld.
+7. Maintenir et enrichir `docs/internals.md`, la specification vivante pour
    types, runtime, IR et conventions de stdlib.
-7. Utiliser `docs/stdlib-api.md` pour distinguer API publique, compatibilite
+8. Utiliser `docs/stdlib-api.md` pour distinguer API publique, compatibilite
    temporaire et helpers internes avant d'ajouter de nouveaux symboles.
-8. Revoir la doc stdlib pour masquer ou signaler les helpers internes.
-9. Stabiliser `Array[T]`, `Option[T]` et `Set[T]` comme surfaces utilisateur
+9. Revoir la doc stdlib pour masquer ou signaler les helpers internes.
+10. Stabiliser `Array[T]`, `Option[T]` et `Set[T]` comme surfaces utilisateur
    principales.
-10. Continuer a garder les exemples publics sur les facades idiomatiques
+11. Continuer a garder les exemples publics sur les facades idiomatiques
    (`Array[T]`, `Array.fill[T]`, `Set.fromArray[T]`,
    `Option.some[T]` / `Option.none[T]`) quand elles existent.
    Les cookbooks doivent rester concis et ne pas laisser entendre que tous les
    retours de tableaux masquent deja completement `ArrayObject[T]`.
-11. Garder les diagnostics de compatibilite orientes vers les compagnons
+12. Garder les diagnostics de compatibilite orientes vers les compagnons
    recommandes (`Array.fill`, `Array.range`, `Set.fromArray`,
    `Option.some`, `Option.none`, etc.).
-12. Exploiter les champs constructeur `var` pour préparer des builders internes
+13. Exploiter les champs constructeur `var` pour préparer des builders internes
     de collections, notamment une construction de `List[T]` plus efficace avant
     exposition publique.
-13. Poursuivre la surcharge par signature apres `v0.1.0` : la base couvre maintenant les
+14. Poursuivre la surcharge par signature apres `v0.1.0` : la base couvre maintenant les
     fonctions globales, y compris les generiques inferables et les references
     typees, ainsi que les methodes de classe concretes ou generiques par
     signature exacte, y compris l'inference de lambdas apres arguments generiques
     deja resolus; commencer la migration publique de la stdlib vers les noms
     surcharges idiomatiques et garder les diagnostics d'ambiguite riches si la
     resolution devient moins stricte que l'exact match.
-14. Reporter `Result[T]`, variance avancee et GC tant que cette surface n'est
+15. Reporter `Result[T]`, variance avancee et GC tant que cette surface n'est
    pas propre.
-15. Pour chaque nouvelle feature, suivre `docs/feature-integration.md` afin de
+16. Pour chaque nouvelle feature, suivre `docs/feature-integration.md` afin de
    verifier l'etat de depart, le plan actif, les tests, les docs et l'hygiene
    avant PR.
 
@@ -198,6 +200,8 @@ reprise séparées :
 - Les diagnostics de types pour `if`, `while`, `for`, `!`, `&&` et `||`
   pointent l'expression fautive et couvrent les côtés gauche/droit des
   opérateurs booleens ainsi que le compteur de boucle.
+- Une première cible `make unit-tests` compile un harness C++ front-end et
+  vérifie directement lexer, parser et diagnostics sémantiques sans assemblage.
 - Le dispatch dynamique repose désormais sur des vtables backend internes:
   objet slot 0 vers table de fonctions, slots par propriétaire statique +
   méthode résolue, couverture de `Any`, traits `Sized` / `Iterable[T]`, parents
