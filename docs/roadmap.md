@@ -164,9 +164,9 @@ Actions recommandees :
 12. Garder les diagnostics de compatibilite orientes vers les compagnons
    recommandes (`Array.fill`, `Array.range`, `Set.fromArray`, `Map.empty`,
    `Map.fromArray`, `List.empty`, `Option.some`, `Option.none`, etc.).
-13. Exploiter les champs constructeur `var` pour préparer des builders internes
-    de collections, notamment une construction de `List[T]` plus efficace avant
-    exposition publique.
+13. Exploiter les fonctions locales et les champs constructeur `var` pour réduire
+    la surface des helpers internes de collections, notamment la construction de
+    `List[T]` avant exposition publique.
 14. Poursuivre la surcharge par signature apres `v0.1.0` : la base couvre maintenant les
     fonctions globales, y compris les generiques inferables et les references
     typees, ainsi que les methodes de classe concretes ou generiques par
@@ -213,6 +213,9 @@ reprise séparées :
 - Les diagnostics de compatibilité stdlib couvrent aussi les noms legacy ou
   helpers internes courants de `Map` et `List`, en réorientant l'utilisateur vers
   `Map.empty`, `Map.fromArray` et `List.empty` sans changer les helpers acceptés.
+- `List.fromArray[T]` cache maintenant son parcours récursif dans un `def` local;
+  l'ancien helper global `listFromArrayFrom` n'est plus import-visible et son
+  diagnostic recommande `List.fromArray`.
 - Une première cible `make unit-tests` compile un harness C++ front-end et
   vérifie directement lexer, parser, diagnostics sémantiques, surcharge,
   inférence générique et typage contextuel de lambdas sans assemblage.
