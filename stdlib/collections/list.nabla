@@ -66,7 +66,14 @@ trait List[T] with Iterable[T] {
     /// @signature def appended(value: T): List[T]
     /// @status Experimentale
     def appended(value: T): List[T] = {
-        listAppend[T](this, value)
+        def appendTo(values: List[T], suffixValue: T): List[T] = {
+            if values.isEmpty() {
+                listCons[T](suffixValue, listEmpty[T]())
+            } else {
+                listCons[T](values.head(), appendTo(values.tail(), suffixValue))
+            }
+        }
+        appendTo(this, value)
     }
 
     /// Concatene cette liste avec suffix, comme le `:::` de Scala avec un nom Nabla.
@@ -247,14 +254,6 @@ def listEmpty[T](): List[T] = {
 
 def listCons[T](head: T, tail: List[T]): List[T] = {
     new Cons[T](head, tail)
-}
-
-def listAppend[T](values: List[T], value: T): List[T] = {
-    if values.isEmpty() {
-        listCons[T](value, listEmpty[T]())
-    } else {
-        listCons[T](values.head(), listAppend[T](values.tail(), value))
-    }
 }
 
 def listConcat[T](prefix: List[T], suffix: List[T]): List[T] = {

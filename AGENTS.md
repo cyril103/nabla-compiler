@@ -419,6 +419,8 @@ Le pipeline implemente actuellement :
 - `List.fromArray[T]` garde son parcours récursif dans un helper local interne;
   l'ancien helper global `listFromArrayFrom` n'est plus import-visible et son
   diagnostic recommande `List.fromArray`.
+- `List[T].appended(value)` garde aussi son parcours récursif dans un helper
+  local interne; l'ancien helper global `listAppend` n'est plus import-visible.
 
 Limites importantes :
 
@@ -969,6 +971,17 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Masquer le helper interne `listAppend`: `List[T].appended(value)`
+  utilise maintenant un `def appendTo(...)` local pour son parcours recursif,
+  sans changement de comportement public. Un test négatif exact vérifie que
+  l'ancien helper global n'est plus import-visible. Le plan actif temporaire
+  n'est pas conserve dans la PR.
+  - Fichiers / tests associes: `stdlib/collections/list.nabla`,
+    `tests/test_error_list_append_helper_hidden.nabla`,
+    `tests/test_error_list_append_helper_hidden.diagnostic`,
+    `docs/roadmap.md`, `AGENTS.md`, suppression de
+    `docs/plans/hide-list-append-helper.md`.
 
 - `local` - Masquer le helper interne `listFromArrayFrom`: `List.fromArray[T]`
   utilise maintenant un `def fromIndex(...)` local pour son parcours recursif,
