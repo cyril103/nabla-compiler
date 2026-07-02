@@ -96,6 +96,9 @@ pour garder un cap clair après le tag `v0.1.0`.
 - Outillage de formatage minimal disponible: `make format` normalise les espaces
   de fin de ligne et le retour final des sources/docs suivis, et `make
   format-check` est integre a `make tooling-tests`.
+- Le runtime ASM garde les labels I/O publics attendus par le backend, mais les
+  chemins `writeFile` / `appendFile` partagent maintenant un helper interne
+  paramétré par les flags `open(2)`.
 - Suites `make all-tests`, `make examples` et `make tooling-tests` vertes au
   moment de cette mise a jour; la CI GitHub lance aussi les exemples publics.
 
@@ -239,8 +242,8 @@ reprise séparées :
 - Agrandir le heap runtime au-delà de la valeur par défaut de 8 MiB est possible
   à la compilation avec `nablac --heap-size <octets>`; le chantier long terme
   reste la stratégie mémoire complète (libération/GC éventuel).
-- Refactoriser les primitives runtime I/O pour eviter la duplication autour des
-  chemins C.
+- Continuer a consolider les helpers runtime internes quand deux primitives
+  partagent la meme convention observable.
 - Formaliser les prochaines limites de closures et d'evaluation paresseuse
   (captures explicites, cout d'allocation des thunks) sans brouiller la
   distinction entre paramètres par nom `=> T` et types fonction ordinaires

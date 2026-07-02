@@ -882,6 +882,8 @@ d'inference generique et de typage contextuel des lambdas.
 - [x] Lire les fichiers texte complets au lieu d'un bloc fixe.
 - [x] Ajouter suppression de fichiers texte.
 - [x] Documenter les conventions d'erreur actuelles de l'IO fichier.
+- [x] Factoriser le chemin runtime ASM commun de `writeFile` et `appendFile`
+  derriere un helper interne parametre par les flags `open(2)`.
 - [x] Ajouter une premiere collection native `IntArray`.
 - [x] Ajouter une collection native `LongArray`.
 - [x] Ajouter une collection native `FloatArray`.
@@ -961,6 +963,18 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Factoriser les primitives runtime ASM d'ecriture fichier:
+  `Runtime_writeFile` et `Runtime_appendFile` conservent leurs labels backend
+  publics mais sautent vers `Runtime_writeStringToFileWithFlags`, qui partage la
+  copie du chemin, l'ouverture, l'ecriture, la fermeture et le retour entier
+  tagge. Aucun symbole stdlib ni comportement utilisateur n'est modifie; les
+  regressions I/O existantes couvrent `write`, `append`, lecture, suppression,
+  renommage, creation de dossier et EOF. Le plan actif temporaire n'est pas
+  conserve dans la PR.
+  - Fichiers / tests associes: `src/runtime_asm.cpp`, `docs/internals.md`,
+    `docs/roadmap.md`, `AGENTS.md`, suppression de
+    `docs/plans/runtime-io-asm-helpers.md`, tests I/O cibles.
 
 - `local` - Ajouter une premiere cible de formatage sans dependance externe:
   `tools/format_sources.py` supprime les espaces de fin de ligne et garantit le

@@ -210,6 +210,22 @@ longueur et un pointeur vers un buffer de bytes runtime. Les operations `+`,
 byte-based; `toCharArray()` produit un `ArrayObject[Char]` afin de ne pas
 exposer de tableau natif specialise pour les caracteres.
 
+## Runtime I/O Fichier
+
+Les primitives fichier restent des entrees runtime internes appelees par le
+backend IR (`Runtime_readFile`, `Runtime_writeFile`, `Runtime_appendFile`,
+`Runtime_fileExists`, `Runtime_deleteFile`, `Runtime_renameFile` et
+`Runtime_createDir`). Les labels d'entree sont stables pour le backend, mais les
+sequences assembleur partagees peuvent etre factorisees en helpers runtime
+prives.
+
+`Runtime_writeFile` et `Runtime_appendFile` divergent uniquement par les flags
+`open(2)` (`O_TRUNC` contre `O_APPEND`) et sautent vers
+`Runtime_writeStringToFileWithFlags`. Ce helper copie le chemin Nabla vers une
+chaine C temporaire, ouvre le fichier avec les flags fournis, ecrit le payload
+`String`, ferme le descripteur puis retourne le resultat de `write(2)` encode
+comme entier tagge, comme les anciennes entrees dediees.
+
 ## Fonctions, `def`, Lambdas Et Closures
 
 Les `def` source restent le concept utilisateur pour les fonctions, méthodes et
