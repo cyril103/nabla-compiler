@@ -902,9 +902,13 @@ d'inference generique et de typage contextuel des lambdas.
 - [x] Inventorier les familles heap du futur GC dans `docs/internals.md`:
   chaînes, tableaux de valeurs/références, instances, closures, boîtes,
   singletons statiques et valeurs immédiates.
+- [x] Inventorier les racines backend du futur GC dans `docs/internals.md`:
+  slots de frame, paramètres, temporaires IR, `Store`/`var`, registres
+  transitoires autour de `Runtime_alloc`, racines statiques et état runtime des
+  helpers assembleur.
 - [ ] Poursuivre la fondation GC en suivant `docs/plans/runtime-memory-management.md`:
-  inventorier les racines backend et les métadonnées de parcours; ne pas exposer
-  de `delete` public tant que l'aliasing et l'échappement ne sont pas spécifiés.
+  produire les métadonnées/descripteurs de parcours; ne pas exposer de `delete`
+  public tant que l'aliasing et l'échappement ne sont pas spécifiés.
 - [x] Ajouter une primitive d'affichage console pour `String`.
 - [x] Ajouter une primitive d'entree console `readLine(): String`.
 - [x] Ajouter une premiere lecture/ecriture de fichiers texte.
@@ -996,6 +1000,16 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Inventorier les racines backend du futur GC: `docs/internals.md`
+  documente les racines à exposer avant collecte (slots de frame `StackFrame`,
+  paramètres, temporaires IR, `Store`/`var`, registres transitoires autour de
+  `Runtime_alloc`, racines statiques et état runtime des helpers assembleur) et
+  reporte l'activation de collecte jusqu'à la génération de métadonnées de
+  parcours testables.
+  - Fichiers / tests associes: `docs/internals.md`,
+    `docs/plans/runtime-memory-management.md`, `docs/plans/README.md`,
+    `docs/roadmap.md`, `tests/test_gc_inventory_docs.py`, `AGENTS.md`.
 
 - `local` - Inventorier les familles heap du futur GC: `docs/internals.md`
   documente les layouts et le traitement GC attendu pour `String`, stockages de
