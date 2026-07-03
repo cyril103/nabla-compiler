@@ -385,7 +385,11 @@ dépasse `heap_end`, ou si une taille d'allocation déborde pendant l'alignement
 ou le calcul de taille des tableaux natifs, le runtime écrit
 `Nabla runtime error: heap exhausted` sur stderr puis termine avec le code 255.
 Les objets créés par `new`, les tableaux, chaînes, closures et valeurs boxées
-allouées sur le heap sont reclamés uniquement par la fin du processus. Un
+allouées sur le heap sont reclamés uniquement par la fin du processus. Les
+mitigations sûres restent donc externes à la sémantique d'allocation : augmenter
+`--heap-size` pour les charges connues, éviter les concaténations ou `repeat`
+non bornés dans les boucles, et réutiliser des tableaux mutables lorsque le
+traitement peut être exprimé en place. Un
 `delete` utilisateur serait donc une nouvelle stratégie mémoire, pas un simple
 wrapper autour du runtime actuel;
 il devra traiter aliasing, échappement depuis tableaux/closures/collections,

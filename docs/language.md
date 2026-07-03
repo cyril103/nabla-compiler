@@ -773,12 +773,27 @@ def main(): Int = {
 "a,,b,".split(",").mkString("|") // "a||b|"
 ```
 
+### Pression Heap Des Chaines
+
+Les operations `+`, `repeat`, `substring`, `trim`, `split` et `toCharArray`
+allouent de nouvelles valeurs sur le heap runtime. Comme le heap courant est
+monotone, ces allocations ne sont pas libérées avant la fin du processus. Pour
+les traitements volumineux, préférer une accumulation bornée, factoriser les
+transformations dans quelques tableaux réutilisés quand c'est possible, et
+augmenter explicitement la capacité avec `nablac --heap-size <octets>` si le
+volume attendu est connu. Un dépassement termine le programme avec le diagnostic
+`Nabla runtime error: heap exhausted` sur stderr et le code de sortie 255.
+
 ## Tableaux Et Collections
 
 Le module `collections.array` donne acces a la facade generique `Array[T]` et
 aux fonctions communes. C'est l'API recommandee pour le code utilisateur :
 les types plus bas niveau comme `IntArray`, `ArrayInt`, `ObjectArray[T]` et
 `ArrayObject[T]` sont surtout des details d'implementation de la bibliotheque.
+Les fabriques comme `Array.fill`, `Array.tabulate`, `Array.range` et les
+operations qui retournent un nouveau tableau allouent sur le même heap monotone :
+préférer réutiliser un tableau mutable via `set` quand le volume est grand et
+que l'algorithme le permet.
 
 ```nabla
 import collections.array
@@ -1153,7 +1168,9 @@ projet, puis dans `stdlib/`.
   plutôt qu'un `null` public. `nablac --heap-size <octets>` permet de compiler
   un exécutable avec une autre capacité de heap (minimum 4096 octets). En cas de
   dépassement du heap, le runtime écrit `Nabla runtime error: heap exhausted`
-  sur stderr et termine avec le code 255.
+  sur stderr et termine avec le code 255. Les sections `Chaines` et
+  `Tableaux Et Collections` listent les mitigations usuelles pour réduire la
+  pression heap sans changer le modèle mémoire.
 - Les objets utilisateur stockent un pointeur de vtable backend dans leur
   header et les appels de méthodes utilisateur sont virtuels par défaut quand
   la valeur est manipulée via un type parent, y compris pour un parent générique

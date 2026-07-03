@@ -890,9 +890,12 @@ d'inference generique et de typage contextuel des lambdas.
 - [x] Stabiliser le diagnostic observable de dépassement heap: le runtime écrit
   `Nabla runtime error: heap exhausted` sur stderr et sort avec le code 255,
   avec régression automatisée sous `--heap-size 4096`.
+- [x] Documenter les mitigations de pression heap côté utilisateur: dimensionner
+  `--heap-size`, éviter les concaténations ou `repeat` non bornés et réutiliser
+  les tableaux mutables quand l'algorithme le permet.
 - [ ] Choisir une strategie memoire a long terme en suivant
-  `docs/plans/runtime-memory-management.md`: formaliser le heap monotone,
-  améliorer l'observabilité des dépassements, puis choisir explicitement entre
+  `docs/plans/runtime-memory-management.md`: le heap monotone, les diagnostics
+  et les mitigations sont désormais documentés; choisir explicitement entre
   arènes, GC simple ou module `unsafe`; ne pas exposer de `delete` public tant
   que l'aliasing et l'échappement ne sont pas spécifiés.
 - [x] Ajouter une primitive d'affichage console pour `String`.
@@ -986,6 +989,18 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Compléter la phase d'observabilité heap avec les mitigations
+  utilisateur: la documentation explique désormais que les opérations `String`
+  (`+`, `repeat`, `substring`, `trim`, `split`, `toCharArray`) et les fabriques
+  ou transformations `Array` allouent sur le heap monotone. Elle recommande de
+  dimensionner `--heap-size`, d'éviter les constructions non bornées en boucle et
+  de réutiliser des tableaux mutables lorsque l'algorithme le permet. Le plan
+  actif marque la phase 2 comme couverte et déplace le delta vers le choix d'un
+  modèle de récupération sûr.
+  - Fichiers / tests associes: `docs/language.md`, `docs/internals.md`,
+    `docs/plans/runtime-memory-management.md`, `docs/plans/README.md`,
+    `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Stabiliser l'observabilité des dépassements heap: `Runtime_heap_overflow`
   écrit maintenant `Nabla runtime error: heap exhausted` sur stderr avant de

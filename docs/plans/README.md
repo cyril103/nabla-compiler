@@ -11,7 +11,9 @@ conserve aussi le périmètre livré et la matrice de validation 0.1.x.
 Le cap post-0.1 courant est décrit dans [`docs/roadmap.md`](../roadmap.md) :
 durcissement héritage/runtime, nettoyage de la surface stdlib et maintien de
 [`docs/internals.md`](../internals.md). Le chantier actif de stratégie mémoire
-runtime est suivi dans [`runtime-memory-management.md`](runtime-memory-management.md).
+runtime est suivi dans [`runtime-memory-management.md`](runtime-memory-management.md);
+après formalisation du heap monotone et des mitigations de pression heap, son
+delta courant est le choix d'un modèle de récupération sûr.
 La checklist opérationnelle pour intégrer une nouvelle feature est dans
 [`docs/feature-integration.md`](../feature-integration.md).
 
