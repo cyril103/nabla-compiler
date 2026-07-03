@@ -1170,7 +1170,9 @@ projet, puis dans `stdlib/`.
   dépassement du heap, le runtime écrit `Nabla runtime error: heap exhausted`
   sur stderr et termine avec le code 255. Les sections `Chaines` et
   `Tableaux Et Collections` listent les mitigations usuelles pour réduire la
-  pression heap sans changer le modèle mémoire.
+  pression heap sans changer le modèle mémoire. La direction de récupération
+  choisie pour la suite est un GC traçant simple non compactant, mais aucune
+  collecte n'est active aujourd'hui.
 - Les objets utilisateur stockent un pointeur de vtable backend dans leur
   header et les appels de méthodes utilisateur sont virtuels par défaut quand
   la valeur est manipulée via un type parent, y compris pour un parent générique

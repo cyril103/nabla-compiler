@@ -893,11 +893,13 @@ d'inference generique et de typage contextuel des lambdas.
 - [x] Documenter les mitigations de pression heap côté utilisateur: dimensionner
   `--heap-size`, éviter les concaténations ou `repeat` non bornés et réutiliser
   les tableaux mutables quand l'algorithme le permet.
-- [ ] Choisir une strategie memoire a long terme en suivant
-  `docs/plans/runtime-memory-management.md`: le heap monotone, les diagnostics
-  et les mitigations sont désormais documentés; choisir explicitement entre
-  arènes, GC simple ou module `unsafe`; ne pas exposer de `delete` public tant
-  que l'aliasing et l'échappement ne sont pas spécifiés.
+- [x] Choisir la direction de récupération mémoire sûre: fonder un GC traçant
+  simple non compactant, sans collecte active tant que les racines et
+  métadonnées de parcours ne sont pas spécifiées.
+- [ ] Fonder le futur GC en suivant `docs/plans/runtime-memory-management.md`:
+  inventorier les familles d'objets heap, les racines backend et les
+  métadonnées de parcours; ne pas exposer de `delete` public tant que l'aliasing
+  et l'échappement ne sont pas spécifiés.
 - [x] Ajouter une primitive d'affichage console pour `String`.
 - [x] Ajouter une primitive d'entree console `readLine(): String`.
 - [x] Ajouter une premiere lecture/ecriture de fichiers texte.
@@ -989,6 +991,17 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Choisir la direction de récupération mémoire: le chantier runtime
+  part désormais sur un GC traçant simple non compactant comme modèle sûr par
+  défaut. Les arènes restent reportées à une API spécialisée ou `unsafe`, et la
+  mémoire manuelle reste hors surface normale. La prochaine étape est une
+  fondation sans collecte active: inventorier les familles d'objets heap, les
+  racines backend et les métadonnées de parcours nécessaires avant de modifier
+  la sémantique d'allocation.
+  - Fichiers / tests associes: `docs/plans/runtime-memory-management.md`,
+    `docs/plans/README.md`, `docs/roadmap.md`, `docs/internals.md`,
+    `docs/language.md`, `AGENTS.md`.
 
 - `local` - Compléter la phase d'observabilité heap avec les mitigations
   utilisateur: la documentation explique désormais que les opérations `String`

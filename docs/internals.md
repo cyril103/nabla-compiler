@@ -393,12 +393,14 @@ traitement peut être exprimé en place. Un
 `delete` utilisateur serait donc une nouvelle stratégie mémoire, pas un simple
 wrapper autour du runtime actuel;
 il devra traiter aliasing, échappement depuis tableaux/closures/collections,
-cycle de vie des chaînes et interaction avec un futur GC ou des arènes.
+cycle de vie des chaînes et interaction avec le GC prévu ou d'éventuelles arènes
+spécialisées.
 
 La direction active est suivie dans `docs/plans/runtime-memory-management.md` :
-garder la surface normale sûre (`AnyRef`, `Option[T]`, collections) et choisir
-plus tard entre arènes, GC simple ou module `unsafe` explicite au lieu d'exposer
-un `delete` C++-like prématuré.
+garder la surface normale sûre (`AnyRef`, `Option[T]`, collections) et fonder un
+GC traçant simple non compactant. Les arènes et `unsafe.memory` restent reportés
+à des besoins spécialisés; aucune collecte ne doit être activée tant que les
+racines et métadonnées de parcours ne sont pas spécifiées.
 
 Ces codes doivent rester documentés au fur et à mesure qu'ils deviennent une
 surface observable par l'utilisateur.

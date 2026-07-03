@@ -127,8 +127,8 @@ features.
   `nablac --heap-size <octets>`. La stratégie mémoire active est décrite dans
   `docs/plans/runtime-memory-management.md`: pas de `delete` public prématuré,
   diagnostic de dépassement heap stabilisé (stderr + code 255), mitigations
-  documentées, puis choix entre arènes, GC simple ou module `unsafe` selon les
-  prochains besoins concrets.
+  documentées, puis fondation d'un GC traçant simple non compactant comme modèle
+  de récupération sûr par défaut.
 - Typage a garder simple : sous-typage nominal pour les classes, generiques
   invariants par defaut, conversions explicites ou helpers stdlib.
 - Documentation : la reference HTML doit rester une doc utilisateur claire,
@@ -184,9 +184,9 @@ Actions recommandees :
 15. Garder `Result[T]` et variance avancee reportes; pour la mémoire runtime,
    suivre `docs/plans/runtime-memory-management.md`: le heap monotone, le
    diagnostic de dépassement et les mitigations utilisateur sont documentés;
-   choisir maintenant explicitement entre arènes, GC simple ou module `unsafe`,
-   sans exposer de `delete` public tant que l'aliasing et l'échappement ne sont
-   pas spécifiés.
+   fonder maintenant un GC traçant simple non compactant avant toute collecte
+   active, sans exposer de `delete` public tant que les racines, l'aliasing et
+   l'échappement ne sont pas spécifiés.
 16. Pour chaque nouvelle feature, suivre `docs/feature-integration.md` afin de
    verifier l'etat de depart, le plan actif, les tests, les docs et l'hygiene
    avant PR.
