@@ -81,9 +81,10 @@ Priorites structurantes :
 6. Demarrer les nouvelles features depuis un etat de reprise clair, en suivant
    `docs/feature-integration.md` et en gardant `docs/plans/` reserve aux plans
    actifs.
-7. Reporter les grosses nouvelles structures (`Result[T]`, GC,
+7. Reporter les grosses nouvelles structures (`Result[T]`, collecte GC active,
    variance avancee) tant que l'ergonomie des collections et options n'est pas
-   stabilisee.
+   stabilisee; les fondations GC additives sans collecte restent autorisees par
+   le plan memoire runtime.
 
 ## Etat Actuel
 
@@ -909,9 +910,13 @@ d'inference generique et de typage contextuel des lambdas.
 - [x] Émettre les premières métadonnées de racines de frame GC:
   `nabla_gc_frame_roots_<fonction>` liste dans `.data` les slots
   référence-capables et leurs offsets `rbp` positifs, sans activer de collecte.
+- [x] Émettre les premiers descripteurs de layout heap GC pour classes/closures:
+  `nabla_gc_object_layout_<classe>` liste les champs référence-capables et
+  `nabla_gc_closure_layout_<fonction>_<result>` liste les captures
+  référence-capables, sans consommation runtime.
 - [ ] Poursuivre la fondation GC en suivant `docs/plans/runtime-memory-management.md`:
-  produire les descripteurs champs/captures et les cartes de points d'appel
-  `Runtime_alloc`; ne pas exposer de `delete` public tant que l'aliasing et
+  produire les cartes de points d'appel `Runtime_alloc` et relier ces cartes aux
+  descripteurs heap; ne pas exposer de `delete` public tant que l'aliasing et
   l'échappement ne sont pas spécifiés.
 - [x] Ajouter une primitive d'affichage console pour `String`.
 - [x] Ajouter une primitive d'entree console `readLine(): String`.
@@ -1004,6 +1009,16 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Émettre les premiers descripteurs de layout heap GC: le backend
+  ajoute `nabla_gc_object_layout_<classe>` pour les champs référence-capables des
+  instances/façades et `nabla_gc_closure_layout_<fonction>_<result>` pour les
+  captures référence-capables d'une allocation de closure. Ces descripteurs
+  restent non consommés par le runtime; aucune collecte n'est activée.
+  - Fichiers / tests associes: `src/ir_codegen.cpp`,
+    `tests/test_gc_heap_layout_metadata.sh`, `tests/test_gc_inventory_docs.py`,
+    `docs/internals.md`, `docs/plans/runtime-memory-management.md`,
+    `docs/plans/README.md`, `docs/roadmap.md`, `Makefile`, `AGENTS.md`.
 
 - `local` - Émettre les premières métadonnées de racines de frame GC: le backend
   ajoute `nabla_gc_frame_roots_<fonction>` dans `.data` avec le nombre de slots
