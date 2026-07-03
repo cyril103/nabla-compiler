@@ -63,6 +63,11 @@ required_inventory_terms = [
     "nabla_gc_closure_layout_<fonction>_<result>",
     "gc field [Classe + offset] champ: Type",
     "captures commencent à l'offset `+16`",
+    "Métadonnées De Points D'Allocation GC",
+    "nabla_gc_alloc_calls_<fonction>",
+    "nabla_gc_alloc_call_<fonction>_<index>",
+    "gc alloc call",
+    "gc alloc root [rbp -",
 ]
 
 for term in required_inventory_terms:
@@ -79,6 +84,9 @@ for term in [
     "Descripteurs de champs/captures heap couverts",
     "nabla_gc_object_layout_<classe>",
     "nabla_gc_closure_layout_<fonction>_<result>",
+    "Cartes de points d'appel `Runtime_alloc` couvertes",
+    "nabla_gc_alloc_calls_<fonction>",
+    "nabla_gc_alloc_call_<fonction>_<index>",
 ]:
     require(term in PLAN, f"runtime memory plan should track the inventory state: {term}")
 
@@ -93,6 +101,10 @@ require(
 require(
     "descripteurs champs/captures pour\n  classes/closures" in ROADMAP,
     "roadmap should mention the GC heap layout descriptors",
+)
+require(
+    "cartes de points d'appel `Runtime_alloc` du code\n  utilisateur" in ROADMAP,
+    "roadmap should mention the GC allocation call maps",
 )
 
 # Keep the docs anchored to the implementation families that currently allocate
@@ -110,11 +122,15 @@ for term in [
     "emitGcFrameMap",
     "emitGcClosureMaps",
     "emitGcObjectLayoutMaps",
+    "emitGcAllocationCallMaps",
+    "allocationCallKind",
     "collectConcreteClassesToEmit",
     "isGcReferenceCapableType",
     "nabla_gc_frame_roots_",
     "nabla_gc_object_layout_",
     "nabla_gc_closure_layout_",
+    "nabla_gc_alloc_calls_",
+    "nabla_gc_alloc_call_",
 ]:
     require(term in CODEGEN, f"expected implementation hook missing: {term}")
 

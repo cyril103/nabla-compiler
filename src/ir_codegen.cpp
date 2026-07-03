@@ -243,18 +243,7 @@ public:
     }
 
     void emitGcFrameMap() const {
-        struct RootSlot {
-            std::string name;
-            std::string type;
-            int offset;
-        };
-        std::vector<RootSlot> roots;
-        for (const auto& slotName : frame.slotsInFrameOrder()) {
-            auto typeIt = valueTypes.find(slotName);
-            if (typeIt == valueTypes.end()) continue;
-            if (!isGcReferenceCapableType(context, typeIt->second)) continue;
-            roots.push_back({slotName, typeIt->second, frame.offsetFor(slotName)});
-        }
+        const std::vector<RootSlot> roots = gcReferenceRootSlots();
 
         out << "    align 8\n";
         out << "nabla_gc_frame_roots_" << asmFunctionName(function.name) << ": dq " << roots.size();
@@ -300,6 +289,48 @@ public:
         }
     }
 
+    void emitGcAllocationCallMaps() const {
+        std::set<std::string> availableSlots;
+        for (const auto& parameter : function.parameters) {
+            availableSlots.insert("%" + parameter.name);
+        }
+
+        size_t callIndex = 0;
+        for (const auto& instruction : function.instructions) {
+            const auto kind = allocationCallKind(instruction);
+            if (!kind) {
+                markGcAvailableAfterInstruction(instruction, availableSlots);
+                continue;
+            }
+
+            const std::vector<RootSlot> roots = gcReferenceRootSlotsFor(availableSlots);
+            out << "    align 8\n";
+            out << "nabla_gc_alloc_call_" << asmFunctionName(function.name) << "_"
+                << callIndex << ": dq " << roots.size();
+            for (const auto& root : roots) {
+                out << ", " << root.offset;
+            }
+            out << "\n";
+            out << "    ; gc alloc call " << callIndex << " " << *kind
+                << " result " << instruction.result;
+            if (!instruction.operation.empty()) out << " op " << instruction.operation;
+            out << "\n";
+            for (const auto& root : roots) {
+                out << "    ; gc alloc root [rbp - " << root.offset << "] " << root.name
+                    << ": " << root.type << "\n";
+            }
+            ++callIndex;
+            markGcAvailableAfterInstruction(instruction, availableSlots);
+        }
+
+        out << "    align 8\n";
+        out << "nabla_gc_alloc_calls_" << asmFunctionName(function.name) << ": dq " << callIndex;
+        for (size_t i = 0; i < callIndex; ++i) {
+            out << ", nabla_gc_alloc_call_" << asmFunctionName(function.name) << "_" << i;
+        }
+        out << "\n";
+    }
+
 private:
     const IRFunction& function;
     const CompilerContext& context;
@@ -311,6 +342,78 @@ private:
     std::map<std::string, std::string> valueTypes;
     std::map<std::string, int> emittedIncomingJumps;
     int nextIndirectCallId = 0;
+
+    struct RootSlot {
+        std::string name;
+        std::string type;
+        int offset;
+    };
+
+    std::optional<RootSlot> gcReferenceRootSlot(const std::string& slotName) const {
+        auto typeIt = valueTypes.find(slotName);
+        if (typeIt == valueTypes.end()) return std::nullopt;
+        if (!isGcReferenceCapableType(context, typeIt->second)) return std::nullopt;
+        return RootSlot{slotName, typeIt->second, frame.offsetFor(slotName)};
+    }
+
+    std::vector<RootSlot> gcReferenceRootSlots() const {
+        std::vector<RootSlot> roots;
+        for (const auto& slotName : frame.slotsInFrameOrder()) {
+            auto root = gcReferenceRootSlot(slotName);
+            if (!root) continue;
+            roots.push_back(*root);
+        }
+        return roots;
+    }
+
+    std::vector<RootSlot> gcReferenceRootSlotsFor(const std::set<std::string>& availableSlots) const {
+        std::vector<RootSlot> roots;
+        for (const auto& slotName : frame.slotsInFrameOrder()) {
+            if (!availableSlots.count(slotName)) continue;
+            auto root = gcReferenceRootSlot(slotName);
+            if (!root) continue;
+            roots.push_back(*root);
+        }
+        return roots;
+    }
+
+    void markGcAvailableAfterInstruction(
+        const IRInstruction& instruction, std::set<std::string>& availableSlots) const {
+        if (!instruction.result.empty() && gcReferenceRootSlot(instruction.result)) {
+            availableSlots.insert(instruction.result);
+        }
+        if (instruction.opcode == IROpcode::Store && gcReferenceRootSlot(instruction.operands[0])) {
+            availableSlots.insert(instruction.operands[0]);
+        }
+    }
+
+    static std::optional<std::string> allocationCallKind(const IRInstruction& instruction) {
+        switch (instruction.opcode) {
+            case IROpcode::FunctionReference:
+                return std::string("closure");
+            case IROpcode::NewObject:
+                return std::string("object");
+            case IROpcode::NewIntArray:
+                return std::string("IntArray");
+            case IROpcode::NewLongArray:
+                return std::string("LongArray");
+            case IROpcode::NewFloatArray:
+                return std::string("FloatArray");
+            case IROpcode::NewDoubleArray:
+                return std::string("DoubleArray");
+            case IROpcode::NewBoolArray:
+                return std::string("BoolArray");
+            case IROpcode::NewObjectArray:
+                return std::string("ObjectArray");
+            case IROpcode::MethodCall: {
+                auto [className, methodName] = splitQualifiedMember(instruction.operation);
+                if (methodName == "box") return std::string("boxed-" + className);
+                return std::nullopt;
+            }
+            default:
+                return std::nullopt;
+        }
+    }
 
     std::string tailEntryLabel() const {
         return "L_tail_entry_" + asmSymbolPart(function.name);
@@ -1678,6 +1781,7 @@ void IRCodeGenerator::generateASM(
         FunctionEmitter emitter(function, context, out, methodOffsets);
         emitter.emitGcFrameMap();
         emitter.emitGcClosureMaps();
+        emitter.emitGcAllocationCallMaps();
     }
 
     // Emit all code in section .text (runtime helper functions first, then user functions)
