@@ -13,7 +13,7 @@
 - Phase 1 est couverte par la PR qui introduit ce plan : les docs décrivent le heap monotone actuel, l'absence de `delete` mémoire public, `Option[T]` comme modèle d'absence et les options futures.
 - Phase 2 est couverte : le dépassement heap a désormais une régression sous `--heap-size 4096`, un diagnostic stderr stable, le code de sortie 255, des garde-fous contre les wraps arithmétiques de taille d'allocation déjà observés sur les tableaux natifs, et des mitigations utilisateur documentées.
 - Phase 3 choisit le GC traçant simple comme direction par défaut : c'est le modèle qui préserve le mieux la surface Scala-like actuelle (`AnyRef`, `Option[T]`, `Array[T]`, closures) sans introduire de `delete` public ni d'obligations de portée pour le code utilisateur.
-- Le delta actif passe à la fondation GC : `heapUsed()` / `heapCapacity()` exposent maintenant des points d'observation runtime sans collecte; la suite consiste à inventorier les racines et métadonnées nécessaires avant tout parcours GC.
+- Le delta actif passe à la fondation GC : `heapUsed()` / `heapCapacity()` exposent maintenant des points d'observation runtime sans collecte; l'inventaire des familles heap est documenté, et la suite consiste à inventorier les racines backend puis les métadonnées nécessaires avant tout parcours GC.
 
 ## Non-objectifs Pour La Surface Normale
 
@@ -72,7 +72,9 @@ Raisons :
 **Delta actif : fondation GC sans collecte active.**
 1. Points d'observation couverts : `heapUsed()` et `heapCapacity()` lisent l'état
    du bump allocator sans changer la sémantique utilisateur.
-2. Inventorier les familles d'objets heap et leurs champs références : `String`, tableaux natifs, `ArrayObject[T]`, instances utilisateur, closures, valeurs boxées et singletons runtime.
+2. Inventaire heap couvert dans `docs/internals.md` : `String`, tableaux natifs,
+   `ArrayObject[T]`, instances utilisateur, closures, valeurs boxées,
+   singletons runtime et valeurs immédiates.
 3. Identifier les racines que le backend devra exposer : variables locales vivantes, temporaires d'expression, arguments, globals/singletons et valeurs conservées dans le runtime.
 4. Ajouter ensuite des métadonnées ou tables de descriptors assez petites pour tester le parcours sans modifier la sémantique utilisateur.
 5. Introduire la collecte seulement dans une PR ultérieure, derrière des régressions runtime dédiées.

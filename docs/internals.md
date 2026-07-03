@@ -407,6 +407,54 @@ GC traçant simple non compactant. Les arènes et `unsafe.memory` restent report
 à des besoins spécialisés; aucune collecte ne doit être activée tant que les
 racines et métadonnées de parcours ne sont pas spécifiées.
 
+### Inventaire Des Familles Heap Pour Le Futur GC
+
+Cet inventaire décrit les objets que le futur marqueur devra reconnaître. Il
+reste une convention interne : aucun tag, offset ou pointeur de vtable listé ici
+n'est une ABI source publique.
+
+- **Chaînes heap `String`** : le mot `+0` vaut `kStringTag`, `+8` contient la
+  longueur non taggée en octets, et `+16` contient un pointeur vers les octets.
+  Les littéraux placent ces octets en `.data`; les chaînes construites au
+  runtime placent généralement les octets à partir de `+24` dans la même
+  allocation. Le futur GC doit donc traiter `+16` comme pointeur interne ou
+  pointeur statique, pas comme référence Nabla à marquer.
+- **Stockage de tableaux natifs et `ObjectArray[T]` brut** : le mot `+0` est
+  aujourd'hui un slot nul, `+8` contient la longueur taggée, puis les éléments
+  commencent à `+16`. Pour `IntArray`, `LongArray`, `FloatArray`, `DoubleArray`
+  et `BoolArray`, les éléments sont des valeurs; pour `ObjectArray[T]`, les
+  éléments sont des slots potentiellement références et devront être scannés.
+- **Façades `ArrayObject[T]`** : ce sont des instances utilisateur/génériques
+  avec vtable à `+0` et champ `values` à `+8`; ce champ référence le stockage
+  brut `ObjectArray[T]` dont les éléments commencent à `+16`. Le futur GC devra
+  donc marquer d'abord le champ `values`, puis scanner le stockage brut selon
+  son type d'élément.
+- **Instances utilisateur et façades objet** : le mot `+0` contient un pointeur
+  de vtable backend. Les champs de layout commencent aux offsets calculés dans
+  `context.classLayouts`; seuls les champs dont le type peut porter une
+  référence (`Any`, `AnyRef`, `String`, tableaux, classes, closures ou
+  paramètres de type conservés comme objets) devront être marqués.
+- **Closures** : une référence de fonction alloue `16 + 8 * captures` octets;
+  `+0` contient le pointeur code, `+8` un indicateur de capture, puis les
+  captures commencent à `+16`. Chaque capture est un slot Nabla et devra être
+  scannée selon son type statique conservé par le backend.
+- **Valeurs boxées `Any` / `AnyVal`** : les tags `kBoxedIntTag`,
+  `kBoxedLongTag`, `kBoxedFloatTag`, `kBoxedDoubleTag`, `kBoxedBoolTag`,
+  `kBoxedCharTag` et `kBoxedUnitTag` occupent le mot `+0`; la valeur est à `+8`.
+  Ces boîtes ne contiennent pas de référence aujourd'hui.
+- **Singletons runtime** : les objets listés dans `context.runtimeObjects` vivent
+  en `.data` et contiennent un pointeur de vtable. Ils doivent être considérés
+  comme racines statiques plutôt que comme allocations bump-heap.
+- **Valeurs immédiates** : les `Int`/`Bool`/`Char` taggés et les slots nuls
+  (`kNullSlot`) ne sont pas des pointeurs heap et doivent être ignorés par le
+  marqueur.
+
+Le premier descripteur GC devra donc pouvoir distinguer au minimum :
+`String`, tableau de valeurs, tableau de références, instance utilisateur,
+closure, boîte primitive et singleton statique. Avant toute collecte, le backend
+doit aussi produire les offsets de champs/captures références et les racines de
+pile ou temporaires à scanner.
+
 Ces codes doivent rester documentés au fur et à mesure qu'ils deviennent une
 surface observable par l'utilisateur.
 

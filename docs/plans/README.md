@@ -15,7 +15,8 @@ runtime est suivi dans [`runtime-memory-management.md`](runtime-memory-managemen
 après formalisation du heap monotone et des mitigations de pression heap, son
 delta courant est la fondation d'un GC traçant simple non compactant; les
 compteurs `heapUsed()` / `heapCapacity()` sont disponibles comme observation
-sans collecte, et les racines/métadonnées restent à stabiliser avant tout
+sans collecte, l'inventaire des familles heap est documenté dans
+`../internals.md`, et les racines/métadonnées restent à stabiliser avant tout
 parcours GC.
 La checklist opérationnelle pour intégrer une nouvelle feature est dans
 [`docs/feature-integration.md`](../feature-integration.md).
