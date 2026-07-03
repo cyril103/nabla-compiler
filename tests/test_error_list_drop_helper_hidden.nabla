@@ -1,0 +1,7 @@
+import collections.list
+
+def main(): Int = {
+    val xs = List.cons[Int](1, Nil)
+    val ys = listDrop[Int](xs, 1)
+    ys.size()
+}

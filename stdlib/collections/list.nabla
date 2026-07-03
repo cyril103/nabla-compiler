@@ -122,21 +122,53 @@ trait List[T] with Iterable[T] {
     /// @signature def take(n: Int): List[T]
     /// @status Recommandee
     def take(n: Int): List[T] = {
-        listTake[T](this, n)
+        def takeFrom(values: List[T], count: Int): List[T] = {
+            if count <= 0 || values.isEmpty() {
+                listEmpty[T]()
+            } else {
+                listCons[T](values.head(), takeFrom(values.tail(), count - 1))
+            }
+        }
+        takeFrom(this, n)
     }
 
     /// Ignore les n premiers elements.
     /// @signature def drop(n: Int): List[T]
     /// @status Recommandee
     def drop(n: Int): List[T] = {
-        listDrop[T](this, n)
+        def dropFrom(values: List[T], count: Int): List[T] = {
+            if count <= 0 || values.isEmpty() {
+                values
+            } else {
+                dropFrom(values.tail(), count - 1)
+            }
+        }
+        dropFrom(this, n)
     }
 
     /// Retourne les elements dans l'intervalle [from, until).
     /// @signature def slice(from: Int, until: Int): List[T]
     /// @status Recommandee
     def slice(from: Int, until: Int): List[T] = {
-        listSlice[T](this, from, until)
+        def takeFrom(values: List[T], count: Int): List[T] = {
+            if count <= 0 || values.isEmpty() {
+                listEmpty[T]()
+            } else {
+                listCons[T](values.head(), takeFrom(values.tail(), count - 1))
+            }
+        }
+        def dropFrom(values: List[T], count: Int): List[T] = {
+            if count <= 0 || values.isEmpty() {
+                values
+            } else {
+                dropFrom(values.tail(), count - 1)
+            }
+        }
+        if from <= 0 {
+            takeFrom(this, until)
+        } else {
+            takeFrom(dropFrom(this, from), until - from)
+        }
     }
 
     /// Concatene les elements separes par separator.
@@ -275,30 +307,6 @@ def listEmpty[T](): List[T] = {
 
 def listCons[T](head: T, tail: List[T]): List[T] = {
     new Cons[T](head, tail)
-}
-
-def listTake[T](values: List[T], n: Int): List[T] = {
-    if n <= 0 || values.isEmpty() {
-        listEmpty[T]()
-    } else {
-        listCons[T](values.head(), listTake[T](values.tail(), n - 1))
-    }
-}
-
-def listDrop[T](values: List[T], n: Int): List[T] = {
-    if n <= 0 || values.isEmpty() {
-        values
-    } else {
-        listDrop[T](values.tail(), n - 1)
-    }
-}
-
-def listSlice[T](values: List[T], from: Int, until: Int): List[T] = {
-    if from <= 0 {
-        listTake[T](values, until)
-    } else {
-        listTake[T](listDrop[T](values, from), until - from)
-    }
 }
 
 def listFold[T, U](values: List[T], initial: U, f: (U, T) => U): U = {
