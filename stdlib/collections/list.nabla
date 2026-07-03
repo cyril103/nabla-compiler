@@ -94,14 +94,28 @@ trait List[T] with Iterable[T] {
     /// @signature def reverse(): List[T]
     /// @status Recommandee
     def reverse(): List[T] = {
-        listReverseInto[T](this, listEmpty[T]())
+        def reverseInto(values: List[T], suffix: List[T]): List[T] = {
+            if values.isEmpty() {
+                suffix
+            } else {
+                reverseInto(values.tail(), listCons[T](values.head(), suffix))
+            }
+        }
+        reverseInto(this, listEmpty[T]())
     }
 
     /// Inverse cette liste puis la place devant suffix, equivalent pratique de `reverse_:::`.
     /// @signature def reverseConcat(suffix: List[T]): List[T]
     /// @status Experimentale
     def reverseConcat(suffix: List[T]): List[T] = {
-        listReverseInto[T](this, suffix)
+        def reverseInto(values: List[T], suffixValues: List[T]): List[T] = {
+            if values.isEmpty() {
+                suffixValues
+            } else {
+                reverseInto(values.tail(), listCons[T](values.head(), suffixValues))
+            }
+        }
+        reverseInto(this, suffix)
     }
 
     /// Garde au plus les n premiers elements.
@@ -261,14 +275,6 @@ def listEmpty[T](): List[T] = {
 
 def listCons[T](head: T, tail: List[T]): List[T] = {
     new Cons[T](head, tail)
-}
-
-def listReverseInto[T](values: List[T], suffix: List[T]): List[T] = {
-    if values.isEmpty() {
-        suffix
-    } else {
-        listReverseInto[T](values.tail(), listCons[T](values.head(), suffix))
-    }
 }
 
 def listTake[T](values: List[T], n: Int): List[T] = {

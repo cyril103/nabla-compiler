@@ -423,6 +423,9 @@ Le pipeline implemente actuellement :
   local interne; l'ancien helper global `listAppend` n'est plus import-visible.
 - `List[T].concat(suffix)` garde aussi son parcours récursif dans un helper
   local interne; l'ancien helper global `listConcat` n'est plus import-visible.
+- `List[T].reverse()` et `List[T].reverseConcat(suffix)` gardent aussi leur
+  parcours récursif dans des helpers locaux internes; l'ancien helper global
+  `listReverseInto` n'est plus import-visible.
 
 Limites importantes :
 
@@ -973,6 +976,17 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Masquer le helper interne `listReverseInto`: `List[T].reverse()`
+  et `List[T].reverseConcat(suffix)` utilisent maintenant des `def reverseInto(...)`
+  locaux pour leur parcours recursif, sans changement de comportement public.
+  Un test négatif exact vérifie que l'ancien helper global n'est plus
+  import-visible. Le plan actif temporaire n'est pas conserve dans la PR.
+  - Fichiers / tests associes: `stdlib/collections/list.nabla`,
+    `tests/test_error_list_reverse_helper_hidden.nabla`,
+    `tests/test_error_list_reverse_helper_hidden.diagnostic`,
+    `docs/roadmap.md`, `AGENTS.md`, suppression de
+    `docs/plans/hide-list-reverse-helper.md`.
 
 - `local` - Masquer le helper interne `listConcat`: `List[T].concat(suffix)`
   utilise maintenant un `def concatWith(...)` local pour son parcours recursif,
