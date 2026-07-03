@@ -568,6 +568,45 @@ protègent pas encore les registres transitoires chargés juste avant
 `Runtime_alloc`, et ne couvrent pas les allocations réalisées à l'intérieur des
 helpers assembleur runtime.
 
+### Inventaire Des Allocations Internes Aux Helpers Runtime
+
+Les allocations réalisées directement dans `src/runtime_asm.cpp` restent hors des
+cartes `nabla_gc_alloc_call_*`, parce qu'elles ne passent pas par une instruction
+IR utilisateur. Elles sont maintenant inventoriées par test pour éviter qu'une
+nouvelle allocation helper soit ajoutée sans décision GC explicite. Les nombres
+ci-dessous comptent les sites statiques `call Runtime_alloc`; deux sites peuvent
+être alternatifs sur des branches différentes :
+
+- `Runtime_cStringToString` (1) : construit un `String` depuis un C string.
+- `Runtime_buildArgsArray` (2) : construit le tableau brut d'arguments puis la
+  façade `ArrayObject[String]`.
+- `Runtime_readLine` (1) : alloue le buffer `String` de lecture.
+- `Runtime_copyPathToCString` (1) : alloue un buffer C transitoire.
+- `Runtime_emptyString` (1) : alloue la chaîne vide runtime.
+- `Runtime_readFile` (1) : alloue le `String` contenant le fichier lu.
+- `Runtime_stringConcat` (1), `Runtime_stringSubstring` (1),
+  `Runtime_stringRepeat` (1), `Runtime_stringTrim` (1) : allouent un `String`
+  résultat.
+- `Runtime_stringToCharArray` (2) : alloue le tableau brut de caractères puis la
+  façade `ArrayObject[Char]`.
+- `Runtime_stringSplit` (3) : alloue le tableau brut de segments dans les chemins
+  séparateur normal/vide puis la façade finale.
+- `Runtime_stringSplitMakeSegment` (1) : alloue chaque segment `String` et le
+  stocke dans le tableau courant.
+- `Int_method_toString` (1), `Bool_method_toString` (2),
+  `Char_method_toString` (1), `FloatDouble_method_toString` (2) et
+  `Any_toString` (1) : allouent des `String` de conversion.
+
+Ces sites sont non encore couverts par des cartes racines consommables. Les
+helpers multi-allocation effectifs (`Runtime_buildArgsArray`,
+`Runtime_stringSplit`, `Runtime_stringToCharArray`, `FloatDouble_method_toString`)
+sont prioritaires pour la tranche suivante : ils gardent des références heap dans
+des registres ou sur la pile native entre deux appels à `Runtime_alloc`, donc une
+collecte active ne pourra pas être autorisée tant que ces racines internes ne
+sont pas spillées ou décrites. Les helpers avec plusieurs sites alternatifs sur
+branches exclusives, comme `Bool_method_toString`, restent à documenter mais ne
+créent pas le même besoin de conservation entre deux allocations successives.
+
 Ces codes doivent rester documentés au fur et à mesure qu'ils deviennent une
 surface observable par l'utilisateur.
 

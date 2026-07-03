@@ -920,10 +920,14 @@ d'inference generique et de typage contextuel des lambdas.
   utilisateur, avec les slots de frame référence-capables déjà produits dans le
   parcours IR linéaire avant le point d'allocation. Ces cartes restent non
   consommées par le runtime et non encore dominance-aware.
+- [x] Inventorier et outiller les allocations internes aux helpers runtime:
+  `tests/test_gc_runtime_helper_alloc_inventory.py` ancre les appels
+  `Runtime_alloc` directs de `src/runtime_asm.cpp` dans `docs/internals.md`, afin
+  qu'une nouvelle allocation helper force une décision GC explicite.
 - [ ] Poursuivre la fondation GC en suivant `docs/plans/runtime-memory-management.md`:
   protéger/spiller les registres transitoires autour de `Runtime_alloc` et
-  décrire les racines internes aux helpers runtime; ne pas exposer de `delete`
-  public tant que l'aliasing et l'échappement ne sont pas spécifiés.
+  produire les cartes racines internes aux helpers runtime; ne pas exposer de
+  `delete` public tant que l'aliasing et l'échappement ne sont pas spécifiés.
 - [x] Ajouter une primitive d'affichage console pour `String`.
 - [x] Ajouter une primitive d'entree console `readLine(): String`.
 - [x] Ajouter une premiere lecture/ecriture de fichiers texte.
@@ -1015,6 +1019,16 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Inventorier et outiller les allocations internes aux helpers runtime
+  pour le futur GC: `tests/test_gc_runtime_helper_alloc_inventory.py` ancre les
+  appels `Runtime_alloc` directs de `src/runtime_asm.cpp` dans
+  `docs/internals.md`. Les helpers multi-allocation sont maintenant visibles
+  comme prochaine cible de cartes racines runtime; aucune collecte n'est activée.
+  - Fichiers / tests associes: `src/runtime_asm.cpp`,
+    `tests/test_gc_runtime_helper_alloc_inventory.py`, `tests/test_gc_inventory_docs.py`,
+    `docs/internals.md`, `docs/plans/runtime-memory-management.md`,
+    `docs/plans/README.md`, `docs/roadmap.md`, `Makefile`, `AGENTS.md`.
 
 - `local` - Émettre les premières cartes de points d'appel `Runtime_alloc` GC:
   le backend ajoute `nabla_gc_alloc_calls_<fonction>` et
