@@ -129,7 +129,9 @@ features.
   diagnostic de dépassement heap stabilisé (stderr + code 255), mitigations
   documentées, puis fondation d'un GC traçant simple non compactant comme modèle
   de récupération sûr par défaut. Les primitives d'observation `heapUsed()` et
-  `heapCapacity()` exposent l'état du bump allocator sans activer de collecte.
+  `heapCapacity()` exposent l'état du bump allocator sans activer de collecte;
+  l'inventaire interne des familles heap fixe la prochaine cible sur les racines
+  backend et les descripteurs de parcours.
 - Typage a garder simple : sous-typage nominal pour les classes, generiques
   invariants par defaut, conversions explicites ou helpers stdlib.
 - Documentation : la reference HTML doit rester une doc utilisateur claire,
