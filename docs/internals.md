@@ -449,11 +449,13 @@ n'est une ABI source publique.
   (`kNullSlot`) ne sont pas des pointeurs heap et doivent être ignorés par le
   marqueur.
 
-Le premier descripteur GC devra donc pouvoir distinguer au minimum :
+Le premier descripteur GC doit donc pouvoir distinguer au minimum :
 `String`, tableau de valeurs, tableau de références, instance utilisateur,
-closure, boîte primitive et singleton statique. Avant toute collecte, le backend
-doit aussi produire les offsets de champs/captures références et les racines de
-pile ou temporaires à scanner.
+closure, boîte primitive et singleton statique. Le backend produit déjà des
+métadonnées additives pour les slots de frame, les champs d'objets et les
+captures de closures référence-capables; avant toute collecte, il reste à
+compléter les cartes de points d'appel à `Runtime_alloc` et le modèle de
+parcours des familles runtime non décrites par des champs de classe.
 
 ### Inventaire Des Racines Backend Pour Le Futur GC
 
@@ -503,10 +505,10 @@ Non-racines explicites : valeurs taggées immédiates, slots `kNullSlot`, raw
 `Float`/`Double`, pointeurs de vtable et pointeurs de bytes internes aux
 `String`.
 
-Prochaine étape technique : compléter ces métadonnées par des descripteurs de
-champs/captures et une liste des points d'appel à `Runtime_alloc` dont les
-registres temporaires doivent être protégés ou spillés. Tant que ces cartes ne
-sont pas complètes et testées, le bump allocator reste monotone.
+Prochaine étape technique : compléter ces métadonnées par des cartes de points
+d'appel à `Runtime_alloc` dont les registres temporaires doivent être protégés ou
+spillés, puis relier ces cartes aux descripteurs de heap existants. Tant que ces
+cartes ne sont pas complètes et testées, le bump allocator reste monotone.
 
 ### Métadonnées De Racines De Frame GC
 
@@ -522,9 +524,27 @@ La sélection est conservatrice mais typée : `Any`, `AnyVal`, `AnyRef`, `String
 tableaux natifs, `ObjectArray[T]`, `ArrayObject[T]`, fonctions/closures et
 classes connues sont racines; les valeurs primitives (`Int`, `Long`, `Float`,
 `Double`, `Bool`, `Char`, `Unit`) ne le sont pas. Cette métadonnée ne protège pas
-encore les registres transitoires autour de `Runtime_alloc` et ne décrit pas les
-champs internes des objets heap; elle prépare seulement la première carte de
-slots de pile candidats, testable sans collecte.
+encore les registres transitoires autour de `Runtime_alloc`; elle prépare
+seulement la première carte de slots de pile candidats, testable sans collecte.
+
+### Métadonnées De Layout Heap GC
+
+Le backend émet aussi des descripteurs additifs non consommés pour les layouts
+heap dont les offsets référence-capables sont connus au moment de la génération :
+
+- `nabla_gc_object_layout_<classe>` : `dq count, offset1, offset2, ...` pour les
+  champs d'instances utilisateur/façades dont le type statique peut porter une
+  référence. Les commentaires adjacents suivent la forme
+  `; gc field [Classe + offset] champ: Type`.
+- `nabla_gc_closure_layout_<fonction>_<result>` : `dq count, offset1, offset2,
+  ...` pour les captures référence-capables d'une allocation de closure capturante
+  précise. Les captures commencent à l'offset `+16`, après le pointeur code et
+  l'indicateur de capture.
+
+Ces descripteurs couvrent la partie classes/closures du parcours heap mais ne
+suffisent pas encore à activer un GC : `String`, `ObjectArray[T]` brut, valeurs
+boxées et singletons runtime gardent des conventions spécialisées, et les appels
+à `Runtime_alloc` doivent encore exposer les registres temporaires vivants.
 
 Ces codes doivent rester documentés au fur et à mesure qu'ils deviennent une
 surface observable par l'utilisateur.

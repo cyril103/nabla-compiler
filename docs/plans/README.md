@@ -17,9 +17,9 @@ delta courant est la fondation d'un GC traçant simple non compactant; les
 compteurs `heapUsed()` / `heapCapacity()` sont disponibles comme observation
 sans collecte, l'inventaire des familles heap et des racines backend est
 documenté dans `../internals.md`, les premières métadonnées de racines de frame
-sont émises dans l'assembleur, et les descripteurs champs/captures plus les
-cartes de points d'appel `Runtime_alloc` restent à stabiliser avant tout parcours
-GC.
+sont émises dans l'assembleur, les descripteurs champs/captures pour
+classes/closures sont testables, et les cartes de points d'appel `Runtime_alloc`
+restent à stabiliser avant tout parcours GC.
 La checklist opérationnelle pour intégrer une nouvelle feature est dans
 [`docs/feature-integration.md`](../feature-integration.md).
 

@@ -268,6 +268,38 @@ public:
         }
     }
 
+    void emitGcClosureMaps() const {
+        for (const auto& instruction : function.instructions) {
+            if (instruction.opcode != IROpcode::FunctionReference || instruction.operands.empty()) continue;
+
+            struct CaptureSlot {
+                std::string name;
+                std::string type;
+                int offset;
+            };
+            std::vector<CaptureSlot> captures;
+            for (size_t i = 0; i < instruction.operands.size(); ++i) {
+                const std::string& operand = instruction.operands[i];
+                auto typeIt = valueTypes.find(operand);
+                if (typeIt == valueTypes.end()) continue;
+                if (!isGcReferenceCapableType(context, typeIt->second)) continue;
+                captures.push_back({operand, typeIt->second, static_cast<int>(16 + i * 8)});
+            }
+
+            out << "    align 8\n";
+            out << "nabla_gc_closure_layout_" << asmFunctionName(function.name) << "_"
+                << asmSymbolPart(instruction.result) << ": dq " << captures.size();
+            for (const auto& capture : captures) {
+                out << ", " << capture.offset;
+            }
+            out << "\n";
+            for (const auto& capture : captures) {
+                out << "    ; gc capture [closure + " << capture.offset << "] " << capture.name
+                    << ": " << capture.type << "\n";
+            }
+        }
+    }
+
 private:
     const IRFunction& function;
     const CompilerContext& context;
@@ -1397,6 +1429,73 @@ private:
         storeRegister(instruction.result, "rax");
     }
 };
+
+std::set<std::string> collectConcreteClassesToEmit(
+    const IRProgram& program, const CompilerContext& context, bool mainUsesCommandLineArguments) {
+    std::set<std::string> concreteClassesToEmit;
+    if (mainUsesCommandLineArguments) {
+        concreteClassesToEmit.insert(formatParameterizedType("ArrayObject", {"String"}));
+    }
+
+    for (const auto& [className, classInfo] : context.classes) {
+        if (classInfo.isTrait || className == "Any" || className == "AnyVal" || className == "AnyRef") {
+            continue;
+        }
+        if (classInfo.typeParameters.empty()) {
+            concreteClassesToEmit.insert(className);
+        }
+    }
+
+    for (const auto& function : program.functions) {
+        for (const auto& instruction : function.instructions) {
+            if (instruction.opcode == IROpcode::NewObject) {
+                concreteClassesToEmit.insert(instruction.operation);
+            } else if (instruction.opcode == IROpcode::MethodCall ||
+                       instruction.opcode == IROpcode::StaticMethodCall) {
+                auto [methodClassName, _] = splitQualifiedMember(instruction.operation);
+                const auto classIt = context.classes.find(genericBaseName(methodClassName));
+                if (classIt != context.classes.end() && !classIt->second.isTrait) {
+                    concreteClassesToEmit.insert(methodClassName);
+                }
+            }
+        }
+    }
+
+    return concreteClassesToEmit;
+}
+
+void emitGcObjectLayoutMaps(
+    const std::set<std::string>& concreteClassesToEmit, const CompilerContext& context, std::ostream& out) {
+    for (const std::string& className : concreteClassesToEmit) {
+        const std::string layoutClassName = genericBaseName(className);
+        auto layoutIt = context.classLayouts.find(layoutClassName);
+        if (layoutIt == context.classLayouts.end()) continue;
+
+        struct FieldSlot {
+            std::string name;
+            std::string type;
+            int offset;
+        };
+        std::vector<FieldSlot> fields;
+        for (const auto& field : collectClassFieldsInHierarchyForLayout(context, className)) {
+            if (!isGcReferenceCapableType(context, field.second)) continue;
+            auto offsetIt = layoutIt->second.find(field.first);
+            if (offsetIt == layoutIt->second.end()) continue;
+            fields.push_back({field.first, field.second, offsetIt->second});
+        }
+
+        out << "    align 8\n";
+        out << "nabla_gc_object_layout_" << asmSymbolName(className) << ": dq " << fields.size();
+        for (const auto& field : fields) {
+            out << ", " << field.offset;
+        }
+        out << "\n";
+        for (const auto& field : fields) {
+            out << "    ; gc field [" << className << " + " << field.offset << "] "
+                << field.name << ": " << field.type << "\n";
+        }
+    }
+}
 }
 
 IRCodeGenerator::IRCodeGenerator(std::uint64_t heapCapacityBytes)
@@ -1440,36 +1539,8 @@ void IRCodeGenerator::generateASM(
     const bool mainUsesCommandLineArguments = mainAcceptsCommandLineArguments(context);
 
     // Generate Vtables and all constants in section .data
-    std::set<std::string> concreteClassesToEmit;
-    if (mainUsesCommandLineArguments) {
-        concreteClassesToEmit.insert(formatParameterizedType("ArrayObject", {"String"}));
-    }
-
-    // 1. Non-generic classes from context
-    for (const auto& [className, classInfo] : context.classes) {
-        if (classInfo.isTrait || className == "Any" || className == "AnyVal" || className == "AnyRef") {
-            continue;
-        }
-        if (classInfo.typeParameters.empty()) {
-            concreteClassesToEmit.insert(className);
-        }
-    }
-
-    // 2. Concrete classes instantiated in the program (including generic specializations)
-    for (const auto& function : program.functions) {
-        for (const auto& instruction : function.instructions) {
-            if (instruction.opcode == IROpcode::NewObject) {
-                concreteClassesToEmit.insert(instruction.operation);
-            } else if (instruction.opcode == IROpcode::MethodCall ||
-                       instruction.opcode == IROpcode::StaticMethodCall) {
-                auto [methodClassName, _] = splitQualifiedMember(instruction.operation);
-                const auto classIt = context.classes.find(genericBaseName(methodClassName));
-                if (classIt != context.classes.end() && !classIt->second.isTrait) {
-                    concreteClassesToEmit.insert(methodClassName);
-                }
-            }
-        }
-    }
+    std::set<std::string> concreteClassesToEmit =
+        collectConcreteClassesToEmit(program, context, mainUsesCommandLineArguments);
 
     for (const std::string& className : concreteClassesToEmit) {
         out << "vtable_" << asmSymbolName(className) << ":\n";
@@ -1599,11 +1670,14 @@ void IRCodeGenerator::generateASM(
         }
     }
 
-    // Emit additive GC frame-root metadata in .data. The runtime does not consume
-    // these descriptors yet; they make the first precise roots testable before
-    // collection is enabled.
+    // Emit additive GC layout metadata in .data. The runtime does not consume
+    // these descriptors yet; they make candidate frame slots, object fields,
+    // and closure captures testable before collection is enabled.
+    emitGcObjectLayoutMaps(concreteClassesToEmit, context, out);
     for (const auto& function : program.functions) {
-        FunctionEmitter(function, context, out, methodOffsets).emitGcFrameMap();
+        FunctionEmitter emitter(function, context, out, methodOffsets);
+        emitter.emitGcFrameMap();
+        emitter.emitGcClosureMaps();
     }
 
     // Emit all code in section .text (runtime helper functions first, then user functions)

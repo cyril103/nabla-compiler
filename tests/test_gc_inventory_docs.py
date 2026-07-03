@@ -58,6 +58,11 @@ required_inventory_terms = [
     "nabla_gc_frame_roots_<fonction>",
     "dq count, offset1, offset2",
     "distance positive utilisée par le frame `rbp`",
+    "Métadonnées De Layout Heap GC",
+    "nabla_gc_object_layout_<classe>",
+    "nabla_gc_closure_layout_<fonction>_<result>",
+    "gc field [Classe + offset] champ: Type",
+    "captures commencent à l'offset `+16`",
 ]
 
 for term in required_inventory_terms:
@@ -71,7 +76,9 @@ for term in [
     "descripteurs testables",
     "Métadonnées de racines de frame couvertes",
     "nabla_gc_frame_roots_<fonction>",
-    "descripteurs champs/captures",
+    "Descripteurs de champs/captures heap couverts",
+    "nabla_gc_object_layout_<classe>",
+    "nabla_gc_closure_layout_<fonction>_<result>",
 ]:
     require(term in PLAN, f"runtime memory plan should track the inventory state: {term}")
 
@@ -80,8 +87,12 @@ require(
     "roadmap should mention the GC heap/root inventories",
 )
 require(
-    "premières métadonnées de racines de frame" in ROADMAP,
+    "métadonnées de racines de frame" in ROADMAP,
     "roadmap should mention the GC frame-root metadata",
+)
+require(
+    "descripteurs champs/captures pour\n  classes/closures" in ROADMAP,
+    "roadmap should mention the GC heap layout descriptors",
 )
 
 # Keep the docs anchored to the implementation families that currently allocate
@@ -97,8 +108,13 @@ for term in [
     "loadValue",
     "storeRegister",
     "emitGcFrameMap",
+    "emitGcClosureMaps",
+    "emitGcObjectLayoutMaps",
+    "collectConcreteClassesToEmit",
     "isGcReferenceCapableType",
     "nabla_gc_frame_roots_",
+    "nabla_gc_object_layout_",
+    "nabla_gc_closure_layout_",
 ]:
     require(term in CODEGEN, f"expected implementation hook missing: {term}")
 

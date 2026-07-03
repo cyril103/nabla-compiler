@@ -131,8 +131,9 @@ features.
   de récupération sûr par défaut. Les primitives d'observation `heapUsed()` et
   `heapCapacity()` exposent l'état du bump allocator sans activer de collecte;
   l'inventaire interne des familles heap et des racines backend, plus les
-  premières métadonnées de racines de frame, fixent la prochaine cible sur les
-  descripteurs champs/captures et les cartes de points d'appel `Runtime_alloc`.
+  métadonnées de racines de frame et les descripteurs champs/captures pour
+  classes/closures, fixent la prochaine cible sur les cartes de points d'appel
+  `Runtime_alloc`.
 - Typage a garder simple : sous-typage nominal pour les classes, generiques
   invariants par defaut, conversions explicites ou helpers stdlib.
 - Documentation : la reference HTML doit rester une doc utilisateur claire,
