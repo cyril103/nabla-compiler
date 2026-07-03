@@ -223,6 +223,9 @@ reprise séparées :
   l'ancien helper global `listAppend` n'est plus import-visible.
 - `List[T].concat(suffix)` cache aussi son parcours récursif dans un `def` local;
   l'ancien helper global `listConcat` n'est plus import-visible.
+- `List[T].reverse()` et `List[T].reverseConcat(suffix)` cachent aussi leur
+  parcours récursif dans des `def` locaux; l'ancien helper global
+  `listReverseInto` n'est plus import-visible.
 - Une première cible `make unit-tests` compile un harness C++ front-end et
   vérifie directement lexer, parser, diagnostics sémantiques, surcharge,
   inférence générique et typage contextuel de lambdas sans assemblage.
