@@ -11,8 +11,8 @@
 ## État Du Plan
 
 - Phase 1 est couverte par la PR qui introduit ce plan : les docs décrivent le heap monotone actuel, l'absence de `delete` mémoire public, `Option[T]` comme modèle d'absence et les options futures.
-- Phase 2 est partiellement couverte : le dépassement heap a désormais une régression sous `--heap-size 4096`, un diagnostic stderr stable, le code de sortie 255 et des garde-fous contre les wraps arithmétiques de taille d'allocation déjà observés sur les tableaux natifs.
-- Le delta actif restant consiste à enrichir les mitigations et à choisir ensuite un modèle de récupération sûr.
+- Phase 2 est couverte : le dépassement heap a désormais une régression sous `--heap-size 4096`, un diagnostic stderr stable, le code de sortie 255, des garde-fous contre les wraps arithmétiques de taille d'allocation déjà observés sur les tableaux natifs, et des mitigations utilisateur documentées.
+- Le delta actif passe en phase 3 : choisir un modèle de récupération sûr avant toute surface `delete`/`free`.
 
 ## Non-objectifs Pour La Surface Normale
 
@@ -45,15 +45,10 @@
 1. Régression runtime de dépassement heap avec `--heap-size 4096`.
 2. Diagnostic observable stable : stderr `Nabla runtime error: heap exhausted` et code de sortie 255.
 3. Test d'outillage existant prouvant que l'assembleur généré reçoit bien la capacité demandée.
+4. Mitigations usuelles documentées : augmenter `--heap-size`, éviter les concaténations ou répétitions de chaînes non bornées, réutiliser des tableaux mutables quand c'est possible.
 
-**Delta restant :**
-1. Documenter les mitigations usuelles : augmenter `--heap-size`, éviter la concaténation de chaînes/listes non bornée, réutiliser des tableaux quand c'est possible.
-2. Ajouter plus tard, si utile, des métriques de pression heap plus riches que le simple dépassement.
-
-**Fichiers probables pour le delta restant :**
-- `docs/language.md`
-- `docs/internals.md`
-- éventuels tests/runtime si une métrique devient observable
+**Reste hors phase 2 :**
+- Ajouter plus tard, si utile, des métriques de pression heap plus riches que le simple dépassement.
 
 ## Phase 3: Choisir Le Premier Modèle De Récupération Sûr
 
