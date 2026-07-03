@@ -1032,7 +1032,13 @@ private:
         out << "    jl Runtime_bounds_error\n";
         out << "    mov r8, rax\n";
         out << "    sar rax, 1\n";
-        out << "    lea rdi, [rax * 8 + 16]\n";
+        out << "    mov rcx, 2305843009213693949\n";
+        out << "    cmp rax, rcx\n";
+        out << "    ja Runtime_heap_overflow\n";
+        out << "    mov rdi, rax\n";
+        out << "    shl rdi, 3\n";
+        out << "    add rdi, 16\n";
+        out << "    jc Runtime_heap_overflow\n";
         out << "    call Runtime_alloc\n";
         out << "    mov rbx, rax\n";
         out << "    mov qword [rbx], 0\n";

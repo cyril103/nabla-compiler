@@ -1151,7 +1151,9 @@ projet, puis dans `stdlib/`.
   donc jusqu'à la fin du processus; Nabla n'expose pas de `delete` mémoire ni de
   `free` source. Pour représenter l'absence de valeur, utiliser `Option[T]`
   plutôt qu'un `null` public. `nablac --heap-size <octets>` permet de compiler
-  un exécutable avec une autre capacité de heap (minimum 4096 octets).
+  un exécutable avec une autre capacité de heap (minimum 4096 octets). En cas de
+  dépassement du heap, le runtime écrit `Nabla runtime error: heap exhausted`
+  sur stderr et termine avec le code 255.
 - Les objets utilisateur stockent un pointeur de vtable backend dans leur
   header et les appels de méthodes utilisateur sont virtuels par défaut quand
   la valeur est manipulée via un type parent, y compris pour un parent générique

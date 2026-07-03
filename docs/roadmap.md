@@ -126,8 +126,9 @@ features.
   et la capacité du heap peut être ajustée par exécutable avec
   `nablac --heap-size <octets>`. La stratégie mémoire active est décrite dans
   `docs/plans/runtime-memory-management.md`: pas de `delete` public prématuré,
-  mais une progression vers observabilité heap, arènes, GC simple ou module
-  `unsafe` selon les prochains besoins concrets.
+  diagnostic de dépassement heap stabilisé (stderr + code 255), puis progression
+  vers mitigations, arènes, GC simple ou module `unsafe` selon les prochains
+  besoins concrets.
 - Typage a garder simple : sous-typage nominal pour les classes, generiques
   invariants par defaut, conversions explicites ou helpers stdlib.
 - Documentation : la reference HTML doit rester une doc utilisateur claire,

@@ -483,7 +483,8 @@ Limites importantes :
   generiques reste a durcir;
 - le runtime initialise par défaut un tas de 8 MiB par `mmap`, configurable à la
   compilation avec `nablac --heap-size <octets>`, avec allocations bump
-  alignees sur 8 octets et verification de depassement, mais pas de
+  alignees sur 8 octets, verification de depassement, diagnostic stderr
+  `Nabla runtime error: heap exhausted` et sortie 255, mais pas de
   ramasse-miettes;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
 - `Nothing` est un type bottom builtin assignable a tout type attendu sans
@@ -886,6 +887,9 @@ d'inference generique et de typage contextuel des lambdas.
 - [x] Extraire le runtime ASM commun du backend IR.
 - [x] Stabiliser la representation de `String`.
 - [x] Ajouter `String.charAt(index): Char` sur la representation byte-based.
+- [x] Stabiliser le diagnostic observable de dépassement heap: le runtime écrit
+  `Nabla runtime error: heap exhausted` sur stderr et sort avec le code 255,
+  avec régression automatisée sous `--heap-size 4096`.
 - [ ] Choisir une strategie memoire a long terme en suivant
   `docs/plans/runtime-memory-management.md`: formaliser le heap monotone,
   améliorer l'observabilité des dépassements, puis choisir explicitement entre
@@ -982,6 +986,22 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Stabiliser l'observabilité des dépassements heap: `Runtime_heap_overflow`
+  écrit maintenant `Nabla runtime error: heap exhausted` sur stderr avant de
+  sortir avec le code 255. `Runtime_alloc` détecte aussi les wraps arithmétiques
+  lors de l'alignement et de l'addition à `heap_pointer`, et le calcul de taille
+  des tableaux natifs refuse les longueurs dont `length * 8 + 16` déborderait.
+  Les régressions couvrent un dépassement sous `--heap-size 4096` et une taille
+  de tableau native énorme qui se terminait auparavant en segfault.
+  - Fichiers / tests associes: `src/runtime_asm.cpp`, `src/ir_codegen.cpp`,
+    `tests/test_heap_overflow_diagnostic.nabla`,
+    `tests/test_heap_overflow_diagnostic.expected`,
+    `tests/test_heap_array_size_overflow.nabla`,
+    `tests/test_heap_array_size_overflow.expected`,
+    `tests/test_heap_overflow_diagnostic.sh`, `Makefile`,
+    `docs/plans/runtime-memory-management.md`, `docs/language.md`,
+    `docs/internals.md`, `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Ouvrir le chantier de stratégie mémoire runtime: le plan actif
   `docs/plans/runtime-memory-management.md` formalise le heap monotone actuel,
