@@ -1146,8 +1146,12 @@ projet, puis dans `stdlib/`.
 
 - Les chaines sont byte-based/ASCII, pas encore Unicode.
 - La memoire utilise par défaut un heap `mmap` de 8 MiB avec bump allocator,
-  sans liberation ni GC. `nablac --heap-size <octets>` permet de compiler un
-  exécutable avec une autre capacité de heap (minimum 4096 octets).
+  sans liberation ni GC. Les allocations produites par `new`, les tableaux,
+  les chaînes, les closures et les valeurs boxées allouées sur le heap vivent
+  donc jusqu'à la fin du processus; Nabla n'expose pas de `delete` mémoire ni de
+  `free` source. Pour représenter l'absence de valeur, utiliser `Option[T]`
+  plutôt qu'un `null` public. `nablac --heap-size <octets>` permet de compiler
+  un exécutable avec une autre capacité de heap (minimum 4096 octets).
 - Les objets utilisateur stockent un pointeur de vtable backend dans leur
   header et les appels de méthodes utilisateur sont virtuels par défaut quand
   la valeur est manipulée via un type parent, y compris pour un parent générique

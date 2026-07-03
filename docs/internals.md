@@ -378,6 +378,20 @@ reste `8388608` octets (8 MiB), mais le compilateur accepte
 symbole assembleur `heap_capacity`. Les valeurs non entières ou inférieures à
 4096 octets sont rejetées par `nablac` avant la génération.
 
+Le bump allocator est monotone : `Runtime_alloc` avance `heap_pointer` et aucune
+primitive runtime ne rend actuellement une allocation individuelle réutilisable.
+Les objets créés par `new`, les tableaux, chaînes, closures et valeurs boxées
+allouées sur le heap sont reclamés uniquement par la fin du processus. Un
+`delete` utilisateur serait donc une nouvelle stratégie mémoire, pas un simple
+wrapper autour du runtime actuel;
+il devra traiter aliasing, échappement depuis tableaux/closures/collections,
+cycle de vie des chaînes et interaction avec un futur GC ou des arènes.
+
+La direction active est suivie dans `docs/plans/runtime-memory-management.md` :
+garder la surface normale sûre (`AnyRef`, `Option[T]`, collections) et choisir
+plus tard entre arènes, GC simple ou module `unsafe` explicite au lieu d'exposer
+un `delete` C++-like prématuré.
+
 Ces codes doivent rester documentés au fur et à mesure qu'ils deviennent une
 surface observable par l'utilisateur.
 

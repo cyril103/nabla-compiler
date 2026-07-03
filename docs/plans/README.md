@@ -10,8 +10,9 @@ conserve aussi le périmètre livré et la matrice de validation 0.1.x.
 
 Le cap post-0.1 courant est décrit dans [`docs/roadmap.md`](../roadmap.md) :
 durcissement héritage/runtime, nettoyage de la surface stdlib et maintien de
-[`docs/internals.md`](../internals.md). La checklist opérationnelle pour
-intégrer une nouvelle feature est dans
+[`docs/internals.md`](../internals.md). Le chantier actif de stratégie mémoire
+runtime est suivi dans [`runtime-memory-management.md`](runtime-memory-management.md).
+La checklist opérationnelle pour intégrer une nouvelle feature est dans
 [`docs/feature-integration.md`](../feature-integration.md).
 
 Quand un nouveau chantier reprend un sujet ancien (`List[T]`, `object`, `def`
