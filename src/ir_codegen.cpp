@@ -54,6 +54,17 @@ std::string singletonObjectLabel(const std::string& className) {
     return asmSymbolName("singleton." + className);
 }
 
+bool isGcReferenceCapableType(const CompilerContext& context, const std::string& type) {
+    if (type == "Any" || type == "AnyVal" || type == "AnyRef") return true;
+    if (isBuiltinReferenceType(type)) return true;
+    if (isBuiltinValueType(type)) return false;
+    if (auto parameterized = parameterizedTypeFromName(type)) {
+        if (parameterized->first == "ArrayObject" || parameterized->first == "ObjectArray") return true;
+        return context.classes.count(parameterized->first) > 0;
+    }
+    return context.classes.count(genericBaseName(type)) > 0;
+}
+
 long long classIdForContext(const CompilerContext& context, const std::string& className) {
     const std::string classBaseName = genericBaseName(className);
     long long nextClassId = 1000;
@@ -187,6 +198,10 @@ public:
         return slot->second;
     }
 
+    const std::vector<std::string>& slotsInFrameOrder() const {
+        return slotOrder;
+    }
+
 private:
     std::map<std::string, int> slotOffsets;
     std::vector<std::string> slotOrder;
@@ -225,6 +240,32 @@ public:
             ++i;
         }
         out << "\n";
+    }
+
+    void emitGcFrameMap() const {
+        struct RootSlot {
+            std::string name;
+            std::string type;
+            int offset;
+        };
+        std::vector<RootSlot> roots;
+        for (const auto& slotName : frame.slotsInFrameOrder()) {
+            auto typeIt = valueTypes.find(slotName);
+            if (typeIt == valueTypes.end()) continue;
+            if (!isGcReferenceCapableType(context, typeIt->second)) continue;
+            roots.push_back({slotName, typeIt->second, frame.offsetFor(slotName)});
+        }
+
+        out << "    align 8\n";
+        out << "nabla_gc_frame_roots_" << asmFunctionName(function.name) << ": dq " << roots.size();
+        for (const auto& root : roots) {
+            out << ", " << root.offset;
+        }
+        out << "\n";
+        for (const auto& root : roots) {
+            out << "    ; gc root [rbp - " << root.offset << "] " << root.name
+                << ": " << root.type << "\n";
+        }
     }
 
 private:
@@ -1556,6 +1597,13 @@ void IRCodeGenerator::generateASM(
                     << ", " << label << "_chars\n";
             }
         }
+    }
+
+    // Emit additive GC frame-root metadata in .data. The runtime does not consume
+    // these descriptors yet; they make the first precise roots testable before
+    // collection is enabled.
+    for (const auto& function : program.functions) {
+        FunctionEmitter(function, context, out, methodOffsets).emitGcFrameMap();
     }
 
     // Emit all code in section .text (runtime helper functions first, then user functions)

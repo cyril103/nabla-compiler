@@ -228,6 +228,7 @@ tooling-tests: nablac unit-tests stdlib-docs format-check
 	@tests/test_configurable_heap_size.sh
 	@tests/test_heap_overflow_diagnostic.sh
 	@tests/test_heap_stats_builtins.sh
+	@tests/test_gc_frame_root_metadata.sh
 	@$(PYTHON) tests/test_gc_inventory_docs.py
 	@tests/test_stdlib_docs_html.py
 	@$(PYTHON) tools/test_editor_vscode.py
