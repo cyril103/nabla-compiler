@@ -2400,6 +2400,11 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
         overloads.push_back(registeredFunctionName);
         context.classes[clName].methods[registeredFunctionName] = signature;
     } else {
+        if (functionName == "heapUsed" || functionName == "heapCapacity") {
+            throw CompilerError(
+                ErrorKind::Parser, nameToken.location,
+                "nom de fonction réservé pour une primitive runtime: " + functionName);
+        }
         auto& overloads = context.functionOverloads[functionName];
         for (const auto& overloadName : overloads) {
             const auto existingFunction = context.functions.find(overloadName);

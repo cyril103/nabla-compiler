@@ -896,7 +896,10 @@ d'inference generique et de typage contextuel des lambdas.
 - [x] Choisir la direction de récupération mémoire sûre: fonder un GC traçant
   simple non compactant, sans collecte active tant que les racines et
   métadonnées de parcours ne sont pas spécifiées.
-- [ ] Fonder le futur GC en suivant `docs/plans/runtime-memory-management.md`:
+- [x] Fonder le futur GC avec des compteurs d'observation sans collecte:
+  `heapUsed()` et `heapCapacity()` exposent l'état du bump allocator sans changer
+  la sémantique d'allocation.
+- [ ] Poursuivre la fondation GC en suivant `docs/plans/runtime-memory-management.md`:
   inventorier les familles d'objets heap, les racines backend et les
   métadonnées de parcours; ne pas exposer de `delete` public tant que l'aliasing
   et l'échappement ne sont pas spécifiés.
@@ -991,6 +994,26 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter des compteurs d'observation heap sans collecte active:
+  `heapUsed()` et `heapCapacity()` exposent respectivement les octets réservés
+  par le bump allocator et la capacité compilée. Ces primitives servent de
+  fondation mesurable pour le futur GC traçant sans introduire de `delete`, de
+  `free`, de pointeurs bruts publics ni de changement de sémantique d'allocation.
+  - Fichiers / tests associes: `src/runtime_asm.cpp`, `src/ast.cpp`,
+    `src/ir_codegen.cpp`, `src/parser.cpp`, `src/main.cpp`,
+    `tests/test_heap_stats_builtins.nabla`, `tests/test_heap_stats_builtins.sh`,
+    `tests/test_configurable_heap_size.sh`,
+    `tests/test_error_heap_used_argument.nabla`,
+    `tests/test_error_heap_used_argument.diagnostic`,
+    `tests/test_error_heap_capacity_argument.nabla`,
+    `tests/test_error_heap_capacity_argument.diagnostic`,
+    `tests/test_error_heap_capacity_type_argument.nabla`,
+    `tests/test_error_heap_capacity_type_argument.diagnostic`,
+    `tests/test_error_heap_used_reserved_name.nabla`,
+    `tests/test_error_heap_used_reserved_name.diagnostic`, `docs/language.md`,
+    `docs/internals.md`, `docs/plans/runtime-memory-management.md`,
+    `docs/plans/README.md`, `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Choisir la direction de récupération mémoire: le chantier runtime
   part désormais sur un GC traçant simple non compactant comme modèle sûr par

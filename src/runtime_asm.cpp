@@ -65,6 +65,7 @@ void emitText(std::ostream& out, bool mainAcceptsArguments) {
         << "    mov [heap_pointer], rax\n"
         << "    mov rcx, rax\n"
         << "    add rcx, [heap_capacity]\n"
+        << "    jc Runtime_heap_overflow\n"
         << "    mov [heap_end], rcx\n"
         << "    ret\n\n";
     out << "Runtime_cStringToString:\n"
@@ -139,6 +140,15 @@ void emitText(std::ostream& out, bool mainAcceptsArguments) {
         << "    cmp rcx, [heap_end]\n"
         << "    ja Runtime_heap_overflow\n"
         << "    mov [heap_pointer], rcx\n"
+        << "    ret\n\n"
+        << "Runtime_heapUsed:\n"
+        << "    mov rax, [heap_pointer]\n"
+        << "    sub rax, [heap_start]\n"
+        << RuntimeValues::asmEncodeTaggedInteger("rax")
+        << "    ret\n\n"
+        << "Runtime_heapCapacity:\n"
+        << "    mov rax, [heap_capacity]\n"
+        << RuntimeValues::asmEncodeTaggedInteger("rax")
         << "    ret\n\n"
         << "Runtime_heap_overflow:\n"
         << "    mov rax, 1\n"

@@ -5,6 +5,7 @@
 #include "semantic_analyzer.hpp"
 #include "ir.hpp"
 #include "ir_codegen.hpp"
+#include "runtime_values.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -56,7 +57,8 @@ static bool parseHeapSize(const std::string& value, std::uint64_t& heapCapacityB
         return false;
     }
 
-    if (parsedLength != value.size() || parsed < kMinimumHeapCapacityBytes) {
+    if (parsedLength != value.size() || parsed < kMinimumHeapCapacityBytes ||
+        parsed > static_cast<unsigned long long>(RuntimeValues::kMaxTaggedIntPayload)) {
         return false;
     }
     heapCapacityBytes = static_cast<std::uint64_t>(parsed);
@@ -114,7 +116,8 @@ int main(int argc, char* argv[]) {
         } else if (arg == "--heap-size") {
             if (i + 1 >= argc || !parseHeapSize(argv[i + 1], heapCapacityBytes)) {
                 std::cerr << "Argument invalide pour --heap-size : entier en octets attendu (minimum "
-                          << kMinimumHeapCapacityBytes << ")\n";
+                          << kMinimumHeapCapacityBytes << ", maximum "
+                          << RuntimeValues::kMaxTaggedIntPayload << ")\n";
                 return 1;
             }
             ++i;

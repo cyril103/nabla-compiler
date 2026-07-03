@@ -1,0 +1,7 @@
+def heapUsed(): Int = {
+    123
+}
+
+def main(): Int = {
+    heapUsed()
+}

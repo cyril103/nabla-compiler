@@ -1610,6 +1610,8 @@ std::string FunctionCallNode::getType() {
     if (name == "createDir") return "Bool";
     if (name == "parseInt") return "Int";
     if (name == "timeSeed") return "Int";
+    if (name == "heapUsed") return "Int";
+    if (name == "heapCapacity") return "Int";
     return resolvedType;
 }
 
@@ -1769,6 +1771,16 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
     if (name == "timeSeed") {
         if (!arguments.empty()) {
             semanticError("timeSeed: 0 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
+        }
+        resolvedType = "Int";
+        return;
+    }
+    if (name == "heapUsed" || name == "heapCapacity") {
+        if (!typeArguments.empty()) {
+            semanticError("la primitive '" + name + "' n'accepte pas d'arguments de type");
+        }
+        if (!arguments.empty()) {
+            semanticError(name + ": 0 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
         }
         resolvedType = "Int";
         return;

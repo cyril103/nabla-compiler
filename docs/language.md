@@ -1166,7 +1166,11 @@ projet, puis dans `stdlib/`.
   donc jusqu'à la fin du processus; Nabla n'expose pas de `delete` mémoire ni de
   `free` source. Pour représenter l'absence de valeur, utiliser `Option[T]`
   plutôt qu'un `null` public. `nablac --heap-size <octets>` permet de compiler
-  un exécutable avec une autre capacité de heap (minimum 4096 octets). En cas de
+  un exécutable avec une autre capacité de heap (minimum 4096 octets, maximum
+  représentable par `Int`). Les
+  primitives d'observation `heapUsed(): Int` et `heapCapacity(): Int` retournent
+  respectivement le nombre d'octets déjà réservés par le bump allocator et la
+  capacité compilée de l'exécutable; elles n'activent aucune collecte. En cas de
   dépassement du heap, le runtime écrit `Nabla runtime error: heap exhausted`
   sur stderr et termine avec le code 255. Les sections `Chaines` et
   `Tableaux Et Collections` listent les mitigations usuelles pour réduire la
