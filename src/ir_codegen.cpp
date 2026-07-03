@@ -43,8 +43,15 @@ std::string asmFunctionName(const std::string& name) {
     return asmSymbolName(name);
 }
 
-std::string singletonObjectLabel(const std::string& name) {
-    return asmSymbolName("singleton." + name);
+bool mainAcceptsCommandLineArguments(const CompilerContext& context) {
+    auto it = context.functions.find("main");
+    if (it == context.functions.end()) return false;
+    return it->second.parameters.size() == 1 &&
+           it->second.parameters[0].type == formatParameterizedType("ArrayObject", {"String"});
+}
+
+std::string singletonObjectLabel(const std::string& className) {
+    return asmSymbolName("singleton." + className);
 }
 
 long long classIdForContext(const CompilerContext& context, const std::string& className) {
@@ -1379,8 +1386,13 @@ void IRCodeGenerator::generateASM(
         offset += 8;
     }
 
+    const bool mainUsesCommandLineArguments = mainAcceptsCommandLineArguments(context);
+
     // Generate Vtables and all constants in section .data
     std::set<std::string> concreteClassesToEmit;
+    if (mainUsesCommandLineArguments) {
+        concreteClassesToEmit.insert(formatParameterizedType("ArrayObject", {"String"}));
+    }
 
     // 1. Non-generic classes from context
     for (const auto& [className, classInfo] : context.classes) {
@@ -1537,7 +1549,7 @@ void IRCodeGenerator::generateASM(
     }
 
     // Emit all code in section .text (runtime helper functions first, then user functions)
-    RuntimeASM::emitText(out);
+    RuntimeASM::emitText(out, mainUsesCommandLineArguments);
 
     for (const auto& function : program.functions) {
         FunctionEmitter(function, context, out, methodOffsets).emit();

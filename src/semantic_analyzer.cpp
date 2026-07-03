@@ -482,15 +482,26 @@ void SemanticAnalyzer::validateDeclaredTypes() {
                 ErrorKind::Semantic, signature.location,
                 "la fonction '" + functionName + "' dépasse la limite de 6 paramètres");
         }
-        if (functionName == "main" && !signature.parameters.empty()) {
-            throw CompilerError(
-                ErrorKind::Semantic, signature.location,
-                "la fonction 'main' ne peut pas accepter de paramètres");
-        }
         if (functionName == "main" && !signature.typeParameters.empty()) {
             throw CompilerError(
                 ErrorKind::Semantic, signature.location,
                 "la fonction 'main' ne peut pas être générique");
+        }
+        if (functionName == "main") {
+            const bool acceptsNoArguments = signature.parameters.empty();
+            const bool acceptsCommandLineArguments =
+                signature.parameters.size() == 1 &&
+                signature.parameters[0].type == formatParameterizedType("ArrayObject", {"String"});
+            if (!acceptsNoArguments && !acceptsCommandLineArguments) {
+                throw CompilerError(
+                    ErrorKind::Semantic, signature.location,
+                    "signature main invalide: utiliser 'def main(): Int' ou 'def main(args: Array[String]): Int'");
+            }
+            if (signature.returnType != "Int") {
+                throw CompilerError(
+                    ErrorKind::Semantic, signature.returnTypeLocation,
+                    "signature main invalide: utiliser 'def main(): Int' ou 'def main(args: Array[String]): Int'");
+            }
         }
         for (const auto& parameter : signature.parameters) {
             if (!isKnownTypeInScope(parameter.type, signature.typeParameters)) {
@@ -509,13 +520,13 @@ void SemanticAnalyzer::validateDeclaredTypes() {
     }
     if (auto mainOverloads = context.functionOverloads.find("main");
         mainOverloads != context.functionOverloads.end()) {
-        for (const auto& overloadName : mainOverloads->second) {
-            const auto function = context.functions.find(overloadName);
-            if (function != context.functions.end() && !function->second.parameters.empty()) {
-                throw CompilerError(
-                    ErrorKind::Semantic, function->second.location,
-                    "la fonction 'main' ne peut pas accepter de paramètres");
-            }
+        if (mainOverloads->second.size() > 1) {
+            const auto function = context.functions.find(mainOverloads->second[1]);
+            SourceLocation location{};
+            if (function != context.functions.end()) location = function->second.location;
+            throw CompilerError(
+                ErrorKind::Semantic, location,
+                "la fonction 'main' ne peut pas être surchargée; utiliser 'def main(): Int' ou 'def main(args: Array[String]): Int'");
         }
     }
 

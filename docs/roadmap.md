@@ -13,6 +13,9 @@ pour garder un cap clair après le tag `v0.1.0`.
   generiques simples, lambdas et paramètres par nom `=> T` abaissés en thunks
   zero-argument; les paramètres constructeur `val` et `var` génèrent des getters,
   et les champs `var` sont réassignables depuis les méthodes de leur classe.
+  Le point d'entree accepte `def main(): Int` ou `def main(args: Array[String]): Int`,
+  cette seconde forme recevant les arguments CLI utilisateur dans un tableau Nabla
+  de `String` sans le nom de l'executable.
 - Les `def` sans liste de parametres declarent des proprietes calculees
   zero-argument reutilisant les fonctions/methodes existantes: `def pi: Double`
   est utilisable comme `pi`, `Config.base` appelle `Config.base()`,

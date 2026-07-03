@@ -1,0 +1,1 @@
+tests/test_error_main_overload.nabla:7:1: semantic error: la fonction 'main' ne peut pas être surchargée; utiliser 'def main(): Int' ou 'def main(args: Array[String]): Int'

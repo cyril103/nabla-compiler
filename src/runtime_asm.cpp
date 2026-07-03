@@ -15,17 +15,28 @@ void emitData(std::ostream& out, std::uint64_t heapCapacityBytes) {
         << "    floatToStringScale: dq 1000000.0\n\n";
 }
 
-void emit(std::ostream& out, std::uint64_t heapCapacityBytes) {
+void emit(std::ostream& out, std::uint64_t heapCapacityBytes, bool mainAcceptsArguments) {
     emitData(out, heapCapacityBytes);
-    emitText(out);
+    emitText(out, mainAcceptsArguments);
 }
 
-void emitText(std::ostream& out) {
+void emitText(std::ostream& out, bool mainAcceptsArguments) {
     out << "section .text\nglobal _start\n\n";
-    out << "_start:\n"
-        << "    call Runtime_initHeap\n"
-        << "    call main\n"
-        << "    mov rdi, rax\n"
+    out << "_start:\n";
+    if (mainAcceptsArguments) {
+        out << "    mov r12, [rsp]\n"
+            << "    lea r13, [rsp + 8]\n"
+            << "    call Runtime_initHeap\n"
+            << "    mov rdi, r12\n"
+            << "    mov rsi, r13\n"
+            << "    call Runtime_buildArgsArray\n"
+            << "    mov rdi, rax\n"
+            << "    call main\n";
+    } else {
+        out << "    call Runtime_initHeap\n"
+            << "    call main\n";
+    }
+    out << "    mov rdi, rax\n"
         << "    shr rdi, 1\n"
         << "    mov rax, 60\n"
         << "    syscall\n\n";
@@ -54,6 +65,67 @@ void emitText(std::ostream& out) {
         << "    add rcx, [heap_capacity]\n"
         << "    mov [heap_end], rcx\n"
         << "    ret\n\n";
+    out << "Runtime_cStringToString:\n"
+        << "    mov r10, rdi\n"
+        << "    xor r11, r11\n"
+        << ".L_cstring_len_loop:\n"
+        << "    cmp byte [r10 + r11], 0\n"
+        << "    je .L_cstring_len_done\n"
+        << "    inc r11\n"
+        << "    jmp .L_cstring_len_loop\n"
+        << ".L_cstring_len_done:\n"
+        << "    mov rdi, r11\n"
+        << "    add rdi, 24\n"
+        << "    call Runtime_alloc\n"
+        << "    mov qword [rax], " << RuntimeValues::kStringTag << "\n"
+        << "    mov [rax + 8], r11\n"
+        << "    lea r8, [rax + 24]\n"
+        << "    mov [rax + 16], r8\n"
+        << "    xor rcx, rcx\n"
+        << ".L_cstring_copy_loop:\n"
+        << "    cmp rcx, r11\n"
+        << "    jge .L_cstring_copy_done\n"
+        << "    mov dl, [r10 + rcx]\n"
+        << "    mov [r8 + rcx], dl\n"
+        << "    inc rcx\n"
+        << "    jmp .L_cstring_copy_loop\n"
+        << ".L_cstring_copy_done:\n"
+        << "    ret\n\n";
+    if (mainAcceptsArguments) {
+        out << "Runtime_buildArgsArray:\n"
+            << "    mov r12, rdi\n"
+            << "    mov r13, rsi\n"
+            << "    mov r14, r12\n"
+            << "    dec r14\n"
+            << "    cmp r14, 0\n"
+            << "    jge .L_args_count_ready\n"
+            << "    xor r14, r14\n"
+            << ".L_args_count_ready:\n"
+            << "    lea rdi, [r14 * 8 + 16]\n"
+            << "    call Runtime_alloc\n"
+            << "    mov r15, rax\n"
+            << "    mov qword [r15], 0\n"
+            << "    mov rax, r14\n"
+            << "    shl rax, 1\n"
+            << "    or rax, 1\n"
+            << "    mov [r15 + 8], rax\n"
+            << "    xor rbx, rbx\n"
+            << ".L_args_loop:\n"
+            << "    cmp rbx, r14\n"
+            << "    jge .L_args_done\n"
+            << "    mov rdi, [r13 + 8 + rbx * 8]\n"
+            << "    call Runtime_cStringToString\n"
+            << "    mov [r15 + 16 + rbx * 8], rax\n"
+            << "    inc rbx\n"
+            << "    jmp .L_args_loop\n"
+            << ".L_args_done:\n"
+            << "    mov rdi, 16\n"
+            << "    call Runtime_alloc\n"
+            << "    lea r10, [vtable_nabla_sym_ArrayObject_5bString_5d]\n"
+            << "    mov [rax], r10\n"
+            << "    mov [rax + 8], r15\n"
+            << "    ret\n\n";
+    }
     out << "Runtime_alloc:\n"
         << "    add rdi, 7\n"
         << "    and rdi, -8\n"

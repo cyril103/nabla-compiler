@@ -1,0 +1,5 @@
+import collections.array
+
+def main(args: Array[String]): Bool = {
+    true
+}

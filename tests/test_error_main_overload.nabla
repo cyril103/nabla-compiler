@@ -1,0 +1,9 @@
+import collections.array
+
+def main(): Int = {
+    0
+}
+
+def main(args: Array[String]): Int = {
+    0
+}

@@ -73,10 +73,13 @@ all-tests: nablac
 					executable=$(BUILD_DIR)/$$(basename "$$testfile" .nabla); \
 					stdout_file=$${testfile%.nabla}.stdout; \
 					actual_stdout=$(BUILD_DIR)/$$(basename "$$testfile" .nabla).stdout; \
+					args_file=$${testfile%.nabla}.args; \
+					test_args=""; \
+					if [ -f "$$args_file" ]; then test_args=$$(cat "$$args_file"); fi; \
 					if [ -f "$$stdout_file" ]; then \
-						"$$executable" >"$$actual_stdout" 2>/dev/null; \
+						"$$executable" $$test_args >"$$actual_stdout" 2>/dev/null; \
 					else \
-						"$$executable" >/dev/null 2>&1; \
+						"$$executable" $$test_args >/dev/null 2>&1; \
 					fi; \
 					run_status=$$?; \
 					expected=$$(tr -d '[:space:]' < "$$expected_file"); \
@@ -116,9 +119,9 @@ all-tests: nablac
 						ir_backend_status=$$?; \
 						if [ $$ir_backend_status -eq 0 ]; then \
 							if [ -f "$$stdout_file" ]; then \
-								"$$executable" >"$$actual_stdout" 2>/dev/null; \
+								"$$executable" $$test_args >"$$actual_stdout" 2>/dev/null; \
 							else \
-								"$$executable" >/dev/null 2>&1; \
+								"$$executable" $$test_args >/dev/null 2>&1; \
 							fi; \
 							ir_backend_run_status=$$?; \
 							expected_ir_backend_status=$$(tr -d '[:space:]' < "$$expected_ir_backend"); \

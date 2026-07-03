@@ -1,0 +1,1 @@
+tests/test_error_main_invalid_return.nabla:3:32: semantic error: signature main invalide: utiliser 'def main(): Int' ou 'def main(args: Array[String]): Int'

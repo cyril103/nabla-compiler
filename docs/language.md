@@ -8,7 +8,7 @@ Ce document decrit l'etat actuel du langage, pas une specification definitive.
 
 ## Programme Minimal
 
-Un programme executable expose une fonction globale `main(): Int`.
+Un programme executable expose une fonction globale `main(): Int` ou, s'il veut lire les arguments de ligne de commande, `main(args: Array[String]): Int`.
 
 ```nabla
 def main(): Int = {
@@ -16,7 +16,15 @@ def main(): Int = {
 }
 ```
 
-La valeur retournee par `main` devient le code de sortie du programme.
+```nabla
+import collections.array
+
+def main(args: Array[String]): Int = {
+    if args.size() > 0 && args.get(0) == "ok" { 0 } else { 1 }
+}
+```
+
+La valeur retournee par `main` devient le code de sortie du programme. Dans la variante `main(args: Array[String])`, `args` contient les arguments utilisateur sans le nom de l'executable, donc `./prog alpha beta` fournit un tableau de taille 2 contenant `"alpha"` puis `"beta"`.
 
 ## Compilation
 
