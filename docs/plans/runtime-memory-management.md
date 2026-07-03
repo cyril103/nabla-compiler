@@ -11,7 +11,8 @@
 ## État Du Plan
 
 - Phase 1 est couverte par la PR qui introduit ce plan : les docs décrivent le heap monotone actuel, l'absence de `delete` mémoire public, `Option[T]` comme modèle d'absence et les options futures.
-- Le delta actif commence donc en phase 2 : rendre la pression heap et les dépassements plus observables avant de choisir un mécanisme de libération.
+- Phase 2 est partiellement couverte : le dépassement heap a désormais une régression sous `--heap-size 4096`, un diagnostic stderr stable, le code de sortie 255 et des garde-fous contre les wraps arithmétiques de taille d'allocation déjà observés sur les tableaux natifs.
+- Le delta actif restant consiste à enrichir les mitigations et à choisir ensuite un modèle de récupération sûr.
 
 ## Non-objectifs Pour La Surface Normale
 
@@ -40,17 +41,19 @@
 
 **Objectif :** rendre les dépassements mémoire plus faciles à comprendre avant de changer la sémantique d'allocation.
 
-**Tâches potentielles :**
-1. Ajouter ou durcir une régression runtime de dépassement heap avec un `--heap-size` volontairement petit.
-2. Stabiliser et documenter le code de sortie et le message observable lors d'un dépassement heap.
-3. Garder un test d'outillage prouvant que l'assembleur généré reçoit bien la capacité demandée.
-4. Documenter les mitigations usuelles : augmenter `--heap-size`, éviter la concaténation de chaînes/listes non bornée, réutiliser des tableaux quand c'est possible.
+**Tâches couvertes :**
+1. Régression runtime de dépassement heap avec `--heap-size 4096`.
+2. Diagnostic observable stable : stderr `Nabla runtime error: heap exhausted` et code de sortie 255.
+3. Test d'outillage existant prouvant que l'assembleur généré reçoit bien la capacité demandée.
 
-**Fichiers probables :**
-- `tests/` runtime ou tooling tests
-- `src/runtime_asm.cpp`
+**Delta restant :**
+1. Documenter les mitigations usuelles : augmenter `--heap-size`, éviter la concaténation de chaînes/listes non bornée, réutiliser des tableaux quand c'est possible.
+2. Ajouter plus tard, si utile, des métriques de pression heap plus riches que le simple dépassement.
+
+**Fichiers probables pour le delta restant :**
 - `docs/language.md`
 - `docs/internals.md`
+- éventuels tests/runtime si une métrique devient observable
 
 ## Phase 3: Choisir Le Premier Modèle De Récupération Sûr
 

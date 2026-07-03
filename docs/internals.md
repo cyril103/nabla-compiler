@@ -380,6 +380,10 @@ symbole assembleur `heap_capacity`. Les valeurs non entières ou inférieures à
 
 Le bump allocator est monotone : `Runtime_alloc` avance `heap_pointer` et aucune
 primitive runtime ne rend actuellement une allocation individuelle réutilisable.
+Si `Runtime_initHeap` ne peut pas obtenir le heap demandé, si `Runtime_alloc`
+dépasse `heap_end`, ou si une taille d'allocation déborde pendant l'alignement
+ou le calcul de taille des tableaux natifs, le runtime écrit
+`Nabla runtime error: heap exhausted` sur stderr puis termine avec le code 255.
 Les objets créés par `new`, les tableaux, chaînes, closures et valeurs boxées
 allouées sur le heap sont reclamés uniquement par la fin du processus. Un
 `delete` utilisateur serait donc une nouvelle stratégie mémoire, pas un simple

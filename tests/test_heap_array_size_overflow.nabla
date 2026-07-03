@@ -1,0 +1,4 @@
+def main(): Int = {
+    val xs = new IntArray(4611686018427387903)
+    0
+}
