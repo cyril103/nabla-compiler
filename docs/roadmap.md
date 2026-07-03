@@ -229,6 +229,9 @@ reprise séparées :
 - `List[T].take(n)`, `List[T].drop(n)` et `List[T].slice(from, until)` cachent
   aussi leurs parcours récursifs dans des `def` locaux; les anciens helpers
   globaux `listTake`, `listDrop` et `listSlice` ne sont plus import-visibles.
+- `List.fold`, `List.map` et `List.filter` cachent maintenant leurs parcours
+  récursifs dans des `def` locaux; les anciens helpers globaux `listFold`,
+  `listMap` et `listFilter` ne sont plus import-visibles.
 - Une première cible `make unit-tests` compile un harness C++ front-end et
   vérifie directement lexer, parser, diagnostics sémantiques, surcharge,
   inférence générique et typage contextuel de lambdas sans assemblage.

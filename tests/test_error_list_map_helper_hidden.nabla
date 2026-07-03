@@ -1,0 +1,10 @@
+import collections.list
+
+def inc(value: Int): Int = {
+    value + 1
+}
+
+def main(): Int = {
+    val xs = List.cons[Int](1, List.empty[Int]())
+    listMap[Int, Int](xs, inc).size()
+}
