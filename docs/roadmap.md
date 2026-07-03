@@ -124,7 +124,10 @@ features.
   tableaux natifs, slots nuls, conventions d'erreur et limites memoire. Les
   constantes d'encodage `Int`/`Long`/`Bool` sont deja centralisees dans le code,
   et la capacité du heap peut être ajustée par exécutable avec
-  `nablac --heap-size <octets>`.
+  `nablac --heap-size <octets>`. La stratégie mémoire active est décrite dans
+  `docs/plans/runtime-memory-management.md`: pas de `delete` public prématuré,
+  mais une progression vers observabilité heap, arènes, GC simple ou module
+  `unsafe` selon les prochains besoins concrets.
 - Typage a garder simple : sous-typage nominal pour les classes, generiques
   invariants par defaut, conversions explicites ou helpers stdlib.
 - Documentation : la reference HTML doit rester une doc utilisateur claire,
@@ -177,8 +180,11 @@ Actions recommandees :
     deja resolus; commencer la migration publique de la stdlib vers les noms
     surcharges idiomatiques et garder les diagnostics d'ambiguite riches si la
     resolution devient moins stricte que l'exact match.
-15. Reporter `Result[T]`, variance avancee et GC tant que cette surface n'est
-   pas propre.
+15. Garder `Result[T]` et variance avancee reportes; pour la mémoire runtime,
+   suivre `docs/plans/runtime-memory-management.md`: d'abord formaliser le heap
+   monotone et améliorer l'observabilité, puis choisir explicitement entre
+   arènes, GC simple ou module `unsafe`, sans exposer de `delete` public tant
+   que l'aliasing et l'échappement ne sont pas spécifiés.
 16. Pour chaque nouvelle feature, suivre `docs/feature-integration.md` afin de
    verifier l'etat de depart, le plan actif, les tests, les docs et l'hygiene
    avant PR.

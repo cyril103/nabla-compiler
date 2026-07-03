@@ -886,8 +886,11 @@ d'inference generique et de typage contextuel des lambdas.
 - [x] Extraire le runtime ASM commun du backend IR.
 - [x] Stabiliser la representation de `String`.
 - [x] Ajouter `String.charAt(index): Char` sur la representation byte-based.
-- [ ] Choisir une strategie memoire a long terme: heap structure, header
-  d'objet, liberation des objets non references et eventuel GC mark-and-sweep.
+- [ ] Choisir une strategie memoire a long terme en suivant
+  `docs/plans/runtime-memory-management.md`: formaliser le heap monotone,
+  améliorer l'observabilité des dépassements, puis choisir explicitement entre
+  arènes, GC simple ou module `unsafe`; ne pas exposer de `delete` public tant
+  que l'aliasing et l'échappement ne sont pas spécifiés.
 - [x] Ajouter une primitive d'affichage console pour `String`.
 - [x] Ajouter une primitive d'entree console `readLine(): String`.
 - [x] Ajouter une premiere lecture/ecriture de fichiers texte.
@@ -979,6 +982,15 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ouvrir le chantier de stratégie mémoire runtime: le plan actif
+  `docs/plans/runtime-memory-management.md` formalise le heap monotone actuel,
+  confirme qu'il n'existe pas de `delete` mémoire public, recommande `Option[T]`
+  plutôt qu'un `null` source et trace les options futures (observabilité heap,
+  arènes, GC simple ou module `unsafe`) sans figer prématurément l'ABI objet.
+  - Fichiers / tests associes: `docs/plans/runtime-memory-management.md`,
+    `docs/plans/README.md`, `docs/language.md`, `docs/internals.md`,
+    `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Ajouter `main(args: Array[String])`: les programmes peuvent garder
   `def main(): Int` ou recevoir les arguments CLI utilisateur via
