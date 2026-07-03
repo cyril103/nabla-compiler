@@ -265,14 +265,28 @@ object List {
     /// @signature def List.fold[T, U](values: List[T], initial: U, f: (U, T) => U): U
     /// @status Recommandee
     def fold[T, U](values: List[T], initial: U, f: (U, T) => U): U = {
-        listFold[T, U](values, initial, f)
+        def foldFrom(current: List[T], state: U, combine: (U, T) => U): U = {
+            if current.isEmpty() {
+                state
+            } else {
+                foldFrom(current.tail(), combine(state, current.head()), combine)
+            }
+        }
+        foldFrom(values, initial, f)
     }
 
     /// Transforme chaque element.
     /// @signature def List.map[T, U](values: List[T], f: (T) => U): List[U]
     /// @status Recommandee
     def map[T, U](values: List[T], f: (T) => U): List[U] = {
-        listMap[T, U](values, f)
+        def mapFrom(current: List[T], transform: (T) => U): List[U] = {
+            if current.isEmpty() {
+                listEmpty[U]()
+            } else {
+                listCons[U](transform(current.head()), mapFrom(current.tail(), transform))
+            }
+        }
+        mapFrom(values, f)
     }
 
 
@@ -280,7 +294,18 @@ object List {
     /// @signature def List.filter[T](values: List[T], predicate: (T) => Bool): List[T]
     /// @status Recommandee
     def filter[T](values: List[T], predicate: (T) => Bool): List[T] = {
-        listFilter[T](values, predicate)
+        def filterFrom(current: List[T], keep: (T) => Bool): List[T] = {
+            if current.isEmpty() {
+                listEmpty[T]()
+            } else {
+                if keep(current.head()) {
+                    listCons[T](current.head(), filterFrom(current.tail(), keep))
+                } else {
+                    filterFrom(current.tail(), keep)
+                }
+            }
+        }
+        filterFrom(values, predicate)
     }
 
 
@@ -307,33 +332,4 @@ def listEmpty[T](): List[T] = {
 
 def listCons[T](head: T, tail: List[T]): List[T] = {
     new Cons[T](head, tail)
-}
-
-def listFold[T, U](values: List[T], initial: U, f: (U, T) => U): U = {
-    if values.isEmpty() {
-        initial
-    } else {
-        listFold[T, U](values.tail(), f(initial, values.head()), f)
-    }
-}
-
-def listMap[T, U](values: List[T], f: (T) => U): List[U] = {
-    if values.isEmpty() {
-        listEmpty[U]()
-    } else {
-        listCons[U](f(values.head()), listMap[T, U](values.tail(), f))
-    }
-}
-
-
-def listFilter[T](values: List[T], predicate: (T) => Bool): List[T] = {
-    if values.isEmpty() {
-        listEmpty[T]()
-    } else {
-        if predicate(values.head()) {
-            listCons[T](values.head(), listFilter[T](values.tail(), predicate))
-        } else {
-            listFilter[T](values.tail(), predicate)
-        }
-    }
 }

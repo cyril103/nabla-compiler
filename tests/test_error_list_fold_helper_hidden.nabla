@@ -1,0 +1,10 @@
+import collections.list
+
+def add(acc: Int, value: Int): Int = {
+    acc + value
+}
+
+def main(): Int = {
+    val xs = List.cons[Int](1, List.empty[Int]())
+    listFold[Int, Int](xs, 0, add)
+}

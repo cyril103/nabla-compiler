@@ -1,0 +1,10 @@
+import collections.list
+
+def positive(value: Int): Bool = {
+    value > 0
+}
+
+def main(): Int = {
+    val xs = List.cons[Int](1, List.empty[Int]())
+    listFilter[Int](xs, positive).size()
+}
