@@ -13,7 +13,7 @@
 - Phase 1 est couverte par la PR qui introduit ce plan : les docs décrivent le heap monotone actuel, l'absence de `delete` mémoire public, `Option[T]` comme modèle d'absence et les options futures.
 - Phase 2 est couverte : le dépassement heap a désormais une régression sous `--heap-size 4096`, un diagnostic stderr stable, le code de sortie 255, des garde-fous contre les wraps arithmétiques de taille d'allocation déjà observés sur les tableaux natifs, et des mitigations utilisateur documentées.
 - Phase 3 choisit le GC traçant simple comme direction par défaut : c'est le modèle qui préserve le mieux la surface Scala-like actuelle (`AnyRef`, `Option[T]`, `Array[T]`, closures) sans introduire de `delete` public ni d'obligations de portée pour le code utilisateur.
-- Le delta actif passe à la fondation GC : `heapUsed()` / `heapCapacity()` exposent maintenant des points d'observation runtime sans collecte; l'inventaire des familles heap et des racines backend est documenté, les premières métadonnées de racines de frame sont émises sous forme de descripteurs testables, les descripteurs de champs/captures heap sont présents pour les classes/closures, et les cartes de points d'appel `Runtime_alloc` générés par le code utilisateur sont disponibles. La suite consiste à protéger les registres transitoires et les allocations internes aux helpers runtime avant tout parcours GC.
+- Le delta actif passe à la fondation GC : `heapUsed()` / `heapCapacity()` exposent maintenant des points d'observation runtime sans collecte; l'inventaire des familles heap et des racines backend est documenté, les premières métadonnées de racines de frame sont émises sous forme de descripteurs testables, les descripteurs de champs/captures heap sont présents pour les classes/closures, les cartes de points d'appel `Runtime_alloc` générés par le code utilisateur sont disponibles, et l'inventaire des allocations internes aux helpers runtime est outillé. La suite consiste à protéger les registres transitoires et à produire les cartes racines internes aux helpers runtime assembleur avant tout parcours GC.
 
 ## Non-objectifs Pour La Surface Normale
 
@@ -94,9 +94,14 @@ Raisons :
    référence-capables déjà produits dans le parcours IR linéaire avant le point
    d'allocation. Ces cartes restent additives, non consommées et non encore
    dominance-aware.
-7. Ajouter ensuite la protection/spill des registres transitoires autour de
+7. Inventaire des allocations internes aux helpers runtime couvert :
+   `tests/test_gc_runtime_helper_alloc_inventory.py` ancre les appels
+   `Runtime_alloc` directs de `src/runtime_asm.cpp` dans `docs/internals.md` et
+   force une mise à jour explicite quand un helper runtime gagne ou perd une
+   allocation.
+8. Ajouter ensuite la protection/spill des registres transitoires autour de
    `Runtime_alloc` et les cartes racines internes aux helpers runtime assembleur.
-8. Introduire la collecte seulement dans une PR ultérieure, derrière des régressions runtime dédiées.
+9. Introduire la collecte seulement dans une PR ultérieure, derrière des régressions runtime dédiées.
 
 ## Phase 4: Esquisses D'API Futures, Pas Des Engagements
 

@@ -68,6 +68,10 @@ required_inventory_terms = [
     "nabla_gc_alloc_call_<fonction>_<index>",
     "gc alloc call",
     "gc alloc root [rbp -",
+    "Inventaire Des Allocations Internes Aux Helpers Runtime",
+    "Runtime_stringSplitMakeSegment",
+    "FloatDouble_method_toString",
+    "cartes racines consommables",
 ]
 
 for term in required_inventory_terms:
@@ -87,6 +91,8 @@ for term in [
     "Cartes de points d'appel `Runtime_alloc` couvertes",
     "nabla_gc_alloc_calls_<fonction>",
     "nabla_gc_alloc_call_<fonction>_<index>",
+    "Inventaire des allocations internes aux helpers runtime couvert",
+    "tests/test_gc_runtime_helper_alloc_inventory.py",
 ]:
     require(term in PLAN, f"runtime memory plan should track the inventory state: {term}")
 
@@ -103,8 +109,8 @@ require(
     "roadmap should mention the GC heap layout descriptors",
 )
 require(
-    "cartes de points d'appel `Runtime_alloc` du code\n  utilisateur" in ROADMAP,
-    "roadmap should mention the GC allocation call maps",
+    "cartes de points d'appel `Runtime_alloc` du code\n  utilisateur et l'inventaire outillé des allocations internes aux helpers\n  runtime" in ROADMAP,
+    "roadmap should mention the GC runtime helper allocation inventory",
 )
 
 # Keep the docs anchored to the implementation families that currently allocate

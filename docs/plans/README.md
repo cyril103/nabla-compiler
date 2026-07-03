@@ -19,7 +19,8 @@ sans collecte, l'inventaire des familles heap et des racines backend est
 documenté dans `../internals.md`, les premières métadonnées de racines de frame
 sont émises dans l'assembleur, les descripteurs champs/captures pour
 classes/closures sont testables, les cartes de points d'appel `Runtime_alloc` du
-code utilisateur sont disponibles, et les registres transitoires/helpers runtime
+code utilisateur sont disponibles, l'inventaire des allocations internes aux
+helpers runtime est outillé, et les registres transitoires/cartes racines runtime
 restent à stabiliser avant tout parcours GC.
 La checklist opérationnelle pour intégrer une nouvelle feature est dans
 [`docs/feature-integration.md`](../feature-integration.md).
