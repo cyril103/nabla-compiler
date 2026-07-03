@@ -455,6 +455,60 @@ closure, boîte primitive et singleton statique. Avant toute collecte, le backen
 doit aussi produire les offsets de champs/captures références et les racines de
 pile ou temporaires à scanner.
 
+### Inventaire Des Racines Backend Pour Le Futur GC
+
+Le backend actuel abaisse chaque fonction en un frame `rbp` simple. Toutes les
+valeurs IR nommées sont matérialisées dans des slots `StackFrame` à offset fixe
+via `collectSlots()`, puis lues/écrites par `loadValue()` et `storeRegister()`.
+Ce modèle est pratique pour un premier GC stop-the-world : les racines sûres
+peuvent être décrites comme des slots `rbp - offset` plutôt que comme une pile
+machine conservatrice.
+
+Racines à exposer avant toute collecte :
+
+- **Paramètres de fonction et de méthode** : au prologue, les registres d'appel
+  sont copiés dans les slots `%param`. Les paramètres dont le type peut porter
+  une référence (`Any`, `AnyRef`, `String`, tableaux/façades, classes,
+  closures, type parameters objectifiés) doivent être listés comme racines.
+- **Temporaires IR nommés** : chaque résultat d'instruction avec `result` reçoit
+  un slot. Les temporaires produits par `StringLiteral`, `Call`,
+  `FunctionReference`, `SingletonObjectRef`, `NewObject`, `New*Array`,
+  `ObjectArrayGet`, `FieldLoad`, `Load`, `Phi`, appels de méthode et appels
+  indirects sont des candidats racines si leur type est référence-capable.
+- **Variables locales mutables** : les `Store` ajoutent aussi le symbole stocké
+  au frame. Comme les slots de `var` peuvent survivre à plusieurs branches ou
+  boucles, ils doivent rester scannables tant que la fonction est active.
+- **Arguments et temporaires en registres pendant un appel runtime** : le codegen
+  charge souvent des valeurs heap dans `rdi`, `rsi`, `rdx`, `rcx`, `r8`, `r9`,
+  `r10`, `r11`, `r12` ou `r13` juste avant `Runtime_alloc` et les helpers de
+  chaînes.
+  Tant qu'une collecte peut arriver dans `Runtime_alloc`, ces registres doivent
+  être soit spillés dans des slots racines avant l'appel, soit décrits par une
+  carte d'appel minimale. Sans cette étape, le GC ne doit pas être activé.
+- **Racines statiques** : les singletons `context.runtimeObjects`, vtables et
+  littéraux de chaînes en `.data` ne sont pas des slots du bump heap. Les
+  singletons doivent être traités comme racines statiques; les vtables et bytes
+  de chaînes comme données non scannées.
+- **État runtime transitoire** : les helpers assembleur qui allouent pendant
+  qu'une référence heap précédente reste nécessaire, ou qui enchaînent plusieurs
+  allocations (`Runtime_stringSplit`, `Runtime_buildArgsArray`, conversions
+  `toString`, wrappers `ArrayObject[T]`), conservent parfois une allocation
+  précédente dans un registre ou sur la pile native avant l'allocation suivante.
+  Ces valeurs devront être spillées ou déclarées comme racines runtime avant
+  d'autoriser une collecte dans ces helpers. Les helpers à allocation unique,
+  comme `Runtime_stringConcat`, restent concernés par la protection de leurs
+  arguments vivants si une collecte peut arriver dans `Runtime_alloc`.
+
+Non-racines explicites : valeurs taggées immédiates, slots `kNullSlot`, raw
+`Float`/`Double`, pointeurs de vtable et pointeurs de bytes internes aux
+`String`.
+
+Prochaine étape technique : générer une métadonnée par fonction contenant les
+slots de frame référence-capables (`nom`, `type`, `offset`) et, séparément, une
+liste des points d'appel à `Runtime_alloc` dont les registres temporaires doivent
+être protégés ou spillés. Tant que ces cartes ne sont pas testées, le bump
+allocator reste monotone.
+
 Ces codes doivent rester documentés au fur et à mesure qu'ils deviennent une
 surface observable par l'utilisateur.
 
