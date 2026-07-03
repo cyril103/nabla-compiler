@@ -60,6 +60,7 @@ expect_invalid_heap_size 4095 below_minimum
 expect_invalid_heap_size -1 negative
 expect_invalid_heap_size +4096 plus_sign
 expect_invalid_heap_size abc non_integer
+expect_invalid_heap_size 4611686018427387904 above_tagged_int_payload
 
 if NABLA_BUILD_DIR="$CUSTOM_BUILD_DIR" "$BUILD_DIR/nablac" --heap-size tests/test_configurable_heap_size.nabla >"$TMP_DIR/missing.out" 2>"$TMP_DIR/missing.err"; then
     echo "FAIL: --heap-size sans valeur numérique aurait dû échouer" >&2

@@ -681,6 +681,10 @@ private:
             out << "    call Runtime_stringToInt\n";
         } else if (instruction.operation == "timeSeed") {
             out << "    call Runtime_timeSeed\n";
+        } else if (instruction.operation == "heapUsed") {
+            out << "    call Runtime_heapUsed\n";
+        } else if (instruction.operation == "heapCapacity") {
+            out << "    call Runtime_heapCapacity\n";
         } else if (instruction.operation == "panic") {
             out << "    call Runtime_panic\n";
         } else {

@@ -375,11 +375,16 @@ Certaines opérations runtime utilisent des codes de sortie dédiés, par exempl
 Le heap runtime est un bump allocator alloué par `mmap`. Sa capacité par défaut
 reste `8388608` octets (8 MiB), mais le compilateur accepte
 `--heap-size <octets>` pour générer un exécutable avec une autre valeur dans le
-symbole assembleur `heap_capacity`. Les valeurs non entières ou inférieures à
-4096 octets sont rejetées par `nablac` avant la génération.
+symbole assembleur `heap_capacity`. Les valeurs non entières, inférieures à
+4096 octets ou supérieures au payload `Int` taggé représentable sont rejetées
+par `nablac` avant la génération.
 
 Le bump allocator est monotone : `Runtime_alloc` avance `heap_pointer` et aucune
 primitive runtime ne rend actuellement une allocation individuelle réutilisable.
+`Runtime_heapUsed` retourne `heap_pointer - heap_start` comme `Int` Nabla, et
+`Runtime_heapCapacity` retourne `heap_capacity`; les primitives source
+`heapUsed()` / `heapCapacity()` exposent ces compteurs comme points
+d'observation sans modifier la sémantique d'allocation ni activer de collecte.
 Si `Runtime_initHeap` ne peut pas obtenir le heap demandé, si `Runtime_alloc`
 dépasse `heap_end`, ou si une taille d'allocation déborde pendant l'alignement
 ou le calcul de taille des tableaux natifs, le runtime écrit

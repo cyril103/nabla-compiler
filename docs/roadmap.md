@@ -128,7 +128,8 @@ features.
   `docs/plans/runtime-memory-management.md`: pas de `delete` public prématuré,
   diagnostic de dépassement heap stabilisé (stderr + code 255), mitigations
   documentées, puis fondation d'un GC traçant simple non compactant comme modèle
-  de récupération sûr par défaut.
+  de récupération sûr par défaut. Les primitives d'observation `heapUsed()` et
+  `heapCapacity()` exposent l'état du bump allocator sans activer de collecte.
 - Typage a garder simple : sous-typage nominal pour les classes, generiques
   invariants par defaut, conversions explicites ou helpers stdlib.
 - Documentation : la reference HTML doit rester une doc utilisateur claire,
