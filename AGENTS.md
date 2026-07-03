@@ -906,9 +906,13 @@ d'inference generique et de typage contextuel des lambdas.
   slots de frame, paramètres, temporaires IR, `Store`/`var`, registres
   transitoires autour de `Runtime_alloc`, racines statiques et état runtime des
   helpers assembleur.
+- [x] Émettre les premières métadonnées de racines de frame GC:
+  `nabla_gc_frame_roots_<fonction>` liste dans `.data` les slots
+  référence-capables et leurs offsets `rbp` positifs, sans activer de collecte.
 - [ ] Poursuivre la fondation GC en suivant `docs/plans/runtime-memory-management.md`:
-  produire les métadonnées/descripteurs de parcours; ne pas exposer de `delete`
-  public tant que l'aliasing et l'échappement ne sont pas spécifiés.
+  produire les descripteurs champs/captures et les cartes de points d'appel
+  `Runtime_alloc`; ne pas exposer de `delete` public tant que l'aliasing et
+  l'échappement ne sont pas spécifiés.
 - [x] Ajouter une primitive d'affichage console pour `String`.
 - [x] Ajouter une primitive d'entree console `readLine(): String`.
 - [x] Ajouter une premiere lecture/ecriture de fichiers texte.
@@ -1000,6 +1004,15 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Émettre les premières métadonnées de racines de frame GC: le backend
+  ajoute `nabla_gc_frame_roots_<fonction>` dans `.data` avec le nombre de slots
+  référence-capables et leurs offsets `rbp` positifs; le runtime ne consomme pas
+  encore ces descripteurs et aucune collecte n'est activée.
+  - Fichiers / tests associes: `src/ir_codegen.cpp`,
+    `tests/test_gc_frame_root_metadata.sh`, `tests/test_gc_inventory_docs.py`,
+    `docs/internals.md`, `docs/plans/runtime-memory-management.md`,
+    `docs/plans/README.md`, `docs/roadmap.md`, `Makefile`, `AGENTS.md`.
 
 - `local` - Inventorier les racines backend du futur GC: `docs/internals.md`
   documente les racines à exposer avant collecte (slots de frame `StackFrame`,

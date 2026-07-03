@@ -460,8 +460,8 @@ pile ou temporaires à scanner.
 Le backend actuel abaisse chaque fonction en un frame `rbp` simple. Toutes les
 valeurs IR nommées sont matérialisées dans des slots `StackFrame` à offset fixe
 via `collectSlots()`, puis lues/écrites par `loadValue()` et `storeRegister()`.
-Ce modèle est pratique pour un premier GC stop-the-world : les racines sûres
-peuvent être décrites comme des slots `rbp - offset` plutôt que comme une pile
+Ce modèle est pratique pour un premier GC stop-the-world : les slots candidats
+peuvent être décrits comme des offsets `rbp - offset` plutôt que comme une pile
 machine conservatrice.
 
 Racines à exposer avant toute collecte :
@@ -503,11 +503,28 @@ Non-racines explicites : valeurs taggées immédiates, slots `kNullSlot`, raw
 `Float`/`Double`, pointeurs de vtable et pointeurs de bytes internes aux
 `String`.
 
-Prochaine étape technique : générer une métadonnée par fonction contenant les
-slots de frame référence-capables (`nom`, `type`, `offset`) et, séparément, une
-liste des points d'appel à `Runtime_alloc` dont les registres temporaires doivent
-être protégés ou spillés. Tant que ces cartes ne sont pas testées, le bump
-allocator reste monotone.
+Prochaine étape technique : compléter ces métadonnées par des descripteurs de
+champs/captures et une liste des points d'appel à `Runtime_alloc` dont les
+registres temporaires doivent être protégés ou spillés. Tant que ces cartes ne
+sont pas complètes et testées, le bump allocator reste monotone.
+
+### Métadonnées De Racines De Frame GC
+
+Le backend émet désormais, dans `.data`, un descripteur additif par fonction :
+`nabla_gc_frame_roots_<fonction>`. Le format initial est volontairement minimal
+et non consommé par le runtime : `dq count, offset1, offset2, ...`, où chaque
+offset est la distance positive utilisée par le frame `rbp` (`[rbp - offset]`).
+Des commentaires assembleur adjacents conservent le nom IR et le type statique de
+chaque racine, par exemple `; gc root [rbp - 8] %name: String`, pour rendre la
+carte vérifiable dans les tests sans figer une ABI utilisateur.
+
+La sélection est conservatrice mais typée : `Any`, `AnyVal`, `AnyRef`, `String`,
+tableaux natifs, `ObjectArray[T]`, `ArrayObject[T]`, fonctions/closures et
+classes connues sont racines; les valeurs primitives (`Int`, `Long`, `Float`,
+`Double`, `Bool`, `Char`, `Unit`) ne le sont pas. Cette métadonnée ne protège pas
+encore les registres transitoires autour de `Runtime_alloc` et ne décrit pas les
+champs internes des objets heap; elle prépare seulement la première carte de
+slots de pile candidats, testable sans collecte.
 
 Ces codes doivent rester documentés au fur et à mesure qu'ils deviennent une
 surface observable par l'utilisateur.

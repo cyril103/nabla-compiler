@@ -13,7 +13,7 @@
 - Phase 1 est couverte par la PR qui introduit ce plan : les docs décrivent le heap monotone actuel, l'absence de `delete` mémoire public, `Option[T]` comme modèle d'absence et les options futures.
 - Phase 2 est couverte : le dépassement heap a désormais une régression sous `--heap-size 4096`, un diagnostic stderr stable, le code de sortie 255, des garde-fous contre les wraps arithmétiques de taille d'allocation déjà observés sur les tableaux natifs, et des mitigations utilisateur documentées.
 - Phase 3 choisit le GC traçant simple comme direction par défaut : c'est le modèle qui préserve le mieux la surface Scala-like actuelle (`AnyRef`, `Option[T]`, `Array[T]`, closures) sans introduire de `delete` public ni d'obligations de portée pour le code utilisateur.
-- Le delta actif passe à la fondation GC : `heapUsed()` / `heapCapacity()` exposent maintenant des points d'observation runtime sans collecte; l'inventaire des familles heap et des racines backend est documenté, et la suite consiste à produire des métadonnées/descripteurs testables avant tout parcours GC.
+- Le delta actif passe à la fondation GC : `heapUsed()` / `heapCapacity()` exposent maintenant des points d'observation runtime sans collecte; l'inventaire des familles heap et des racines backend est documenté, et les premières métadonnées de racines de frame sont émises sous forme de descripteurs testables. La suite consiste à produire les descripteurs champs/captures et les cartes des points d'appel `Runtime_alloc` avant tout parcours GC.
 
 ## Non-objectifs Pour La Surface Normale
 
@@ -79,8 +79,13 @@ Raisons :
    frame `StackFrame`, paramètres, temporaires IR, `Store`/`var`, registres
    transitoires autour de `Runtime_alloc`, racines statiques et état runtime des
    helpers assembleur.
-4. Ajouter ensuite des métadonnées ou tables de descripteurs assez petites pour tester le parcours sans modifier la sémantique utilisateur.
-5. Introduire la collecte seulement dans une PR ultérieure, derrière des régressions runtime dédiées.
+4. Métadonnées de racines de frame couvertes : le backend émet
+   `nabla_gc_frame_roots_<fonction>` dans `.data` avec le nombre de slots
+   référence-capables et leurs offsets `rbp` positifs. Ces descripteurs sont
+   testables mais non consommés par le runtime.
+5. Ajouter ensuite les descripteurs de champs/captures heap et les cartes de
+   points d'appel `Runtime_alloc` pour les registres temporaires.
+6. Introduire la collecte seulement dans une PR ultérieure, derrière des régressions runtime dédiées.
 
 ## Phase 4: Esquisses D'API Futures, Pas Des Engagements
 

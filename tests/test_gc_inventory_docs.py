@@ -53,7 +53,11 @@ required_inventory_terms = [
     "État runtime transitoire",
     "Runtime_alloc",
     "carte d'appel minimale",
-    "métadonnée par fonction",
+    "descripteur additif par fonction",
+    "Métadonnées De Racines De Frame GC",
+    "nabla_gc_frame_roots_<fonction>",
+    "dq count, offset1, offset2",
+    "distance positive utilisée par le frame `rbp`",
 ]
 
 for term in required_inventory_terms:
@@ -62,15 +66,22 @@ for term in required_inventory_terms:
 for term in [
     "Inventaire heap couvert",
     "racines backend",
-    "métadonnées/descripteurs",
+    "métadonnées de racines de frame",
     "Inventaire des racines backend couvert",
-    "tables de descripteurs",
+    "descripteurs testables",
+    "Métadonnées de racines de frame couvertes",
+    "nabla_gc_frame_roots_<fonction>",
+    "descripteurs champs/captures",
 ]:
     require(term in PLAN, f"runtime memory plan should track the inventory state: {term}")
 
 require(
     "l'inventaire interne des familles heap et des racines backend" in ROADMAP,
     "roadmap should mention the GC heap/root inventories",
+)
+require(
+    "premières métadonnées de racines de frame" in ROADMAP,
+    "roadmap should mention the GC frame-root metadata",
 )
 
 # Keep the docs anchored to the implementation families that currently allocate
@@ -85,6 +96,9 @@ for term in [
     "collectSlots",
     "loadValue",
     "storeRegister",
+    "emitGcFrameMap",
+    "isGcReferenceCapableType",
+    "nabla_gc_frame_roots_",
 ]:
     require(term in CODEGEN, f"expected implementation hook missing: {term}")
 
