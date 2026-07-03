@@ -1,0 +1,7 @@
+import collections.list
+
+
+def main(): Int = {
+    val xs = List.cons[Int](1, List.empty[Int]())
+    listReverseInto[Int](xs, List.empty[Int]()).size()
+}
