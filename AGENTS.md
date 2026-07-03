@@ -1001,6 +1001,23 @@ d'inference generique et de typage contextuel des lambdas.
     `tests/test_error_main_overload.diagnostic`, `docs/language.md`,
     `docs/roadmap.md`, `AGENTS.md`.
 
+- `local` - Masquer les helpers internes `listTake`, `listDrop` et
+  `listSlice`: `List[T].take(n)`, `List[T].drop(n)` et
+  `List[T].slice(from, until)` utilisent maintenant des `def takeFrom(...)` /
+  `def dropFrom(...)` locaux pour leurs parcours recursifs, sans changement de
+  comportement public. Des tests négatifs exacts vérifient que les anciens
+  helpers globaux ne sont plus import-visibles. Le plan actif temporaire n'est
+  pas conserve dans la PR.
+  - Fichiers / tests associes: `stdlib/collections/list.nabla`,
+    `tests/test_error_list_take_helper_hidden.nabla`,
+    `tests/test_error_list_take_helper_hidden.diagnostic`,
+    `tests/test_error_list_drop_helper_hidden.nabla`,
+    `tests/test_error_list_drop_helper_hidden.diagnostic`,
+    `tests/test_error_list_slice_helper_hidden.nabla`,
+    `tests/test_error_list_slice_helper_hidden.diagnostic`,
+    `docs/roadmap.md`, `AGENTS.md`, suppression de
+    `docs/plans/hide-list-slice-helpers.md`.
+
 - `local` - Masquer le helper interne `listReverseInto`: `List[T].reverse()`
   et `List[T].reverseConcat(suffix)` utilisent maintenant des `def reverseInto(...)`
   locaux pour leur parcours recursif, sans changement de comportement public.

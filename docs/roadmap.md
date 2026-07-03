@@ -226,6 +226,9 @@ reprise séparées :
 - `List[T].reverse()` et `List[T].reverseConcat(suffix)` cachent aussi leur
   parcours récursif dans des `def` locaux; l'ancien helper global
   `listReverseInto` n'est plus import-visible.
+- `List[T].take(n)`, `List[T].drop(n)` et `List[T].slice(from, until)` cachent
+  aussi leurs parcours récursifs dans des `def` locaux; les anciens helpers
+  globaux `listTake`, `listDrop` et `listSlice` ne sont plus import-visibles.
 - Une première cible `make unit-tests` compile un harness C++ front-end et
   vérifie directement lexer, parser, diagnostics sémantiques, surcharge,
   inférence générique et typage contextuel de lambdas sans assemblage.
