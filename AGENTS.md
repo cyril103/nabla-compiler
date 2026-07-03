@@ -223,6 +223,9 @@ Le pipeline implemente actuellement :
   `ArrayBool.mkString(separator)` et `arrayMkString[Int/Long/Bool/String]`;
 - affichage console de `String` via la primitive globale `print`;
 - lecture console de `String` via la primitive globale `readLine`;
+- point d'entree executable `def main(): Int` ou `def main(args: Array[String]): Int`;
+  la variante avec arguments construit au demarrage un `Array[String]` a partir
+  de `argv` sans inclure le nom de l'executable;
 - lecture/ecriture de fichiers texte via `readFile`, `writeFile`,
   `appendFile`, `deleteFile`, `fileExists` et les wrappers `io.readTextFile` /
   `io.writeTextFile` / `io.appendTextFile` / `io.deleteTextFile` /
@@ -976,6 +979,27 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter `main(args: Array[String])`: les programmes peuvent garder
+  `def main(): Int` ou recevoir les arguments CLI utilisateur via
+  `def main(args: Array[String]): Int`. `_start` construit seulement dans cette
+  forme un `Array[String]` Nabla depuis `argc/argv` sans inclure le nom de
+  l'executable; les autres signatures `main` restent refusees avec diagnostic
+  exact. Le runner `make all-tests` sait alimenter des fichiers `.args`.
+  - Fichiers / tests associes: `src/semantic_analyzer.cpp`,
+    `src/runtime_asm.cpp`, `src/runtime_asm.hpp`, `src/ir_codegen.cpp`,
+    `Makefile`, `tests/test_main_args.nabla`, `tests/test_main_args.args`,
+    `tests/test_main_args.expected`, `tests/test_main_args_empty.nabla`,
+    `tests/test_main_args_empty.expected`,
+    `tests/test_main_zero_args_compat.nabla`,
+    `tests/test_main_zero_args_compat.expected`,
+    `tests/test_error_main_invalid_args.nabla`,
+    `tests/test_error_main_invalid_args.diagnostic`,
+    `tests/test_error_main_invalid_return.nabla`,
+    `tests/test_error_main_invalid_return.diagnostic`,
+    `tests/test_error_main_overload.nabla`,
+    `tests/test_error_main_overload.diagnostic`, `docs/language.md`,
+    `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Masquer le helper interne `listReverseInto`: `List[T].reverse()`
   et `List[T].reverseConcat(suffix)` utilisent maintenant des `def reverseInto(...)`
