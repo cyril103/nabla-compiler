@@ -914,10 +914,16 @@ d'inference generique et de typage contextuel des lambdas.
   `nabla_gc_object_layout_<classe>` liste les champs référence-capables et
   `nabla_gc_closure_layout_<fonction>_<result>` liste les captures
   référence-capables, sans consommation runtime.
+- [x] Émettre les premières cartes de points d'appel `Runtime_alloc` GC:
+  `nabla_gc_alloc_calls_<fonction>` indexe les cartes
+  `nabla_gc_alloc_call_<fonction>_<index>` pour les allocations IR du code
+  utilisateur, avec les slots de frame référence-capables déjà produits dans le
+  parcours IR linéaire avant le point d'allocation. Ces cartes restent non
+  consommées par le runtime et non encore dominance-aware.
 - [ ] Poursuivre la fondation GC en suivant `docs/plans/runtime-memory-management.md`:
-  produire les cartes de points d'appel `Runtime_alloc` et relier ces cartes aux
-  descripteurs heap; ne pas exposer de `delete` public tant que l'aliasing et
-  l'échappement ne sont pas spécifiés.
+  protéger/spiller les registres transitoires autour de `Runtime_alloc` et
+  décrire les racines internes aux helpers runtime; ne pas exposer de `delete`
+  public tant que l'aliasing et l'échappement ne sont pas spécifiés.
 - [x] Ajouter une primitive d'affichage console pour `String`.
 - [x] Ajouter une primitive d'entree console `readLine(): String`.
 - [x] Ajouter une premiere lecture/ecriture de fichiers texte.
@@ -1009,6 +1015,18 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Émettre les premières cartes de points d'appel `Runtime_alloc` GC:
+  le backend ajoute `nabla_gc_alloc_calls_<fonction>` et
+  `nabla_gc_alloc_call_<fonction>_<index>` pour les allocations IR du code
+  utilisateur (`new`, tableaux natifs/objets, closures capturantes, boxing), avec
+  les slots de frame référence-capables déjà produits dans le parcours IR linéaire
+  avant le point d'allocation. Ces cartes restent non consommées par le runtime,
+  non encore dominance-aware; aucune collecte n'est activée.
+  - Fichiers / tests associes: `src/ir_codegen.cpp`,
+    `tests/test_gc_alloc_call_metadata.sh`, `tests/test_gc_inventory_docs.py`,
+    `docs/internals.md`, `docs/plans/runtime-memory-management.md`,
+    `docs/plans/README.md`, `docs/roadmap.md`, `Makefile`, `AGENTS.md`.
 
 - `local` - Émettre les premiers descripteurs de layout heap GC: le backend
   ajoute `nabla_gc_object_layout_<classe>` pour les champs référence-capables des

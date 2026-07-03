@@ -505,10 +505,12 @@ Non-racines explicites : valeurs taggées immédiates, slots `kNullSlot`, raw
 `Float`/`Double`, pointeurs de vtable et pointeurs de bytes internes aux
 `String`.
 
-Prochaine étape technique : compléter ces métadonnées par des cartes de points
-d'appel à `Runtime_alloc` dont les registres temporaires doivent être protégés ou
-spillés, puis relier ces cartes aux descripteurs de heap existants. Tant que ces
-cartes ne sont pas complètes et testées, le bump allocator reste monotone.
+Le backend émet maintenant une première carte additive par point d'appel
+`Runtime_alloc` généré par le code utilisateur. Elle réutilise les slots de frame
+référence-capables comme ensemble conservateur de racines scannables au moment de
+l'allocation. Les registres temporaires et les helpers runtime assembleur restent
+à traiter avant toute collecte active; tant que ces cartes ne couvrent pas ces
+cas, le bump allocator reste monotone.
 
 ### Métadonnées De Racines De Frame GC
 
@@ -543,8 +545,28 @@ heap dont les offsets référence-capables sont connus au moment de la générat
 
 Ces descripteurs couvrent la partie classes/closures du parcours heap mais ne
 suffisent pas encore à activer un GC : `String`, `ObjectArray[T]` brut, valeurs
-boxées et singletons runtime gardent des conventions spécialisées, et les appels
-à `Runtime_alloc` doivent encore exposer les registres temporaires vivants.
+boxées et singletons runtime gardent des conventions spécialisées.
+
+### Métadonnées De Points D'Allocation GC
+
+Le backend émet aussi, pour chaque fonction, un index additif
+`nabla_gc_alloc_calls_<fonction>`. Son premier mot est le nombre de points
+d'allocation IR qui appellent directement `Runtime_alloc` dans le code utilisateur
+(`NewObject`, `New*Array`, `FunctionReference` et boxing), suivi des adresses des
+cartes `nabla_gc_alloc_call_<fonction>_<index>`.
+
+Chaque carte garde le format minimal `dq count, offset1, offset2, ...`, où les
+offsets réutilisent les mêmes slots `rbp` positifs que
+`nabla_gc_frame_roots_<fonction>`. Des commentaires assembleur adjacents indiquent
+le type d'allocation (`object`, `IntArray`, `ObjectArray`, `closure`,
+`boxed-Int`, etc.), le résultat IR (`; gc alloc call ...`) et les racines de
+frame candidates (`; gc alloc root [rbp - ...]`). Ces cartes sont volontairement
+conservatrices, provisoires et non consommées : elles décrivent les slots de
+frame référence-capables déjà produits dans le parcours IR linéaire avant le point
+d'allocation. Elles ne sont pas encore dominance-aware pour les branches, ne
+protègent pas encore les registres transitoires chargés juste avant
+`Runtime_alloc`, et ne couvrent pas les allocations réalisées à l'intérieur des
+helpers assembleur runtime.
 
 Ces codes doivent rester documentés au fur et à mesure qu'ils deviennent une
 surface observable par l'utilisateur.
