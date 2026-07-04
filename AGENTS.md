@@ -81,10 +81,10 @@ Priorites structurantes :
 6. Demarrer les nouvelles features depuis un etat de reprise clair, en suivant
    `docs/feature-integration.md` et en gardant `docs/plans/` reserve aux plans
    actifs.
-7. Reporter les grosses nouvelles structures (`Result[T]`, collecte GC active,
+7. Reporter les grosses nouvelles structures (`Result[T]`, GC exact avance,
    variance avancee) tant que l'ergonomie des collections et options n'est pas
-   stabilisee; les fondations GC additives sans collecte restent autorisees par
-   le plan memoire runtime.
+   stabilisee; la collecte conservative runtime reste limitée au plan mémoire
+   sans nouvelle surface source.
 
 ## Etat Actuel
 
@@ -483,31 +483,27 @@ Limites importantes :
   operations avancees restent a faire; la monomorphisation complete des classes
   generiques reste a durcir;
 - le runtime initialise par défaut un tas de 8 MiB par `mmap`, configurable à la
-  compilation avec `nablac --heap-size <octets>`, avec allocations bump
-  alignees sur 8 octets, verification de depassement, diagnostic stderr
-  `Nabla runtime error: heap exhausted` et sortie 255, mais pas de
-  ramasse-miettes;
-- la fondation GC reste additive et sans collecte active: le backend émet des
-  métadonnées de racines de frame, layouts de classes/closures, cartes de points
-  d'appel `Runtime_alloc` du code utilisateur, et le runtime ASM émet des cartes
+  compilation avec `nablac --heap-size <octets>`, avec allocations alignées sur
+  8 octets, header caché de 16 octets par bloc, free-list de blocs sweepés,
+  collecte GC conservative non compactante avant dépassement, diagnostic stderr
+  `Nabla runtime error: heap exhausted` et sortie 255 si l'allocation échoue
+  encore après collecte;
+- la fondation GC exacte reste additive: le backend émet des métadonnées de
+  racines de frame, layouts de classes/closures, cartes de points d'appel
+  `Runtime_alloc` du code utilisateur, et le runtime ASM émet des cartes
   candidates inertes pour les racines internes de helpers multi-allocation
   (`Runtime_buildArgsArray`, `Runtime_stringToCharArray`, `Runtime_stringSplit`,
   `Runtime_stringSplitMakeSegment`, `FloatDouble_method_toString`). Ces cartes
-  ne sont pas consommées; `Runtime_buildArgsArray` contient la première
-  protection native concrète en spillant `r15` autour de l'appel au helper
-  allocant `Runtime_cStringToString` et du `Runtime_alloc` final, et
-  `Runtime_stringToCharArray` contient la seconde tranche en spillant le owner
-  `String` source autour de l'allocation du tableau brut de caractères puis
-  `rbx` autour de l'allocation de façade `ArrayObject[Char]`, et
-  `Runtime_stringSplit` / `Runtime_stringSplitMakeSegment` contiennent la tranche
-  suivante en spillant les owners `String` source/séparateur, `rbx` destination
-  et `r10` owner source de segment autour de leurs allocations directes, et
-  `FloatDouble_method_toString` contient la tranche suivante en spillant `r10`
-  owner `String` de la partie entière autour des deux allocations directes des
-  chemins fractionnel et sans fraction non nulle. Les cartes candidates
-  `native_stack+8` / `native_stack+16` restent inertes; `r14`/`r15` restent des
-  pointeurs intérieurs/recalculables non consommables; la protection automatique
-  générale des registres/slots natifs reste à faire;
+  ne sont pas encore consommées par `Runtime_alloc` / `Runtime_gc`; la première
+  collecte active scanne conservativement la pile native jusqu'à `gc_stack_top`,
+  puis les payloads heap marqués jusqu'à fixpoint, et sweep les blocs non marqués
+  vers `heap_free_list`. `Runtime_buildArgsArray`, `Runtime_stringToCharArray`,
+  `Runtime_stringSplit` / `Runtime_stringSplitMakeSegment` et
+  `FloatDouble_method_toString` gardent leurs spills natifs documentés, tandis
+  que `r14`/`r15` restent des pointeurs intérieurs/recalculables non
+  consommables; la prochaine étape est de remplacer progressivement le scan
+  conservateur par des cartes exactes consommables et de réduire les faux
+  positifs;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
 - `Nothing` est un type bottom builtin assignable a tout type attendu sans
   valeur instanciable; les primitives globales `panic(message: String)` et
@@ -916,11 +912,11 @@ d'inference generique et de typage contextuel des lambdas.
   `--heap-size`, éviter les concaténations ou `repeat` non bornés et réutiliser
   les tableaux mutables quand l'algorithme le permet.
 - [x] Choisir la direction de récupération mémoire sûre: fonder un GC traçant
-  simple non compactant, sans collecte active tant que les racines et
-  métadonnées de parcours ne sont pas spécifiées.
-- [x] Fonder le futur GC avec des compteurs d'observation sans collecte:
-  `heapUsed()` et `heapCapacity()` exposent l'état du bump allocator sans changer
-  la sémantique d'allocation.
+  simple non compactant, d'abord avec une phase de métadonnées inertes puis avec
+  une première collecte conservative active.
+- [x] Fonder le futur GC avec des compteurs d'observation:
+  `heapUsed()` et `heapCapacity()` exposent l'état bump/high-water sans changer
+  la surface source.
 - [x] Inventorier les familles heap du futur GC dans `docs/internals.md`:
   chaînes, tableaux de valeurs/références, instances, closures, boîtes,
   singletons statiques et valeurs immédiates.
@@ -930,7 +926,8 @@ d'inference generique et de typage contextuel des lambdas.
   helpers assembleur.
 - [x] Émettre les premières métadonnées de racines de frame GC:
   `nabla_gc_frame_roots_<fonction>` liste dans `.data` les slots
-  référence-capables et leurs offsets `rbp` positifs, sans activer de collecte.
+  référence-capables et leurs offsets `rbp` positifs, sans consommation runtime
+  exacte.
 - [x] Émettre les premiers descripteurs de layout heap GC pour classes/closures:
   `nabla_gc_object_layout_<classe>` liste les champs référence-capables et
   `nabla_gc_closure_layout_<fonction>_<result>` liste les captures
@@ -948,19 +945,19 @@ d'inference generique et de typage contextuel des lambdas.
 - [x] Émettre les premières cartes candidates de racines internes aux helpers
   runtime ASM: `nabla_gc_runtime_helper_allocs_<helper>` indexe
   `nabla_gc_runtime_helper_alloc_<helper>_<index>` pour les helpers
-  multi-allocation effectifs, sans consommation runtime ni activation de
-  collecte.
+  multi-allocation effectifs; elles restent non consommées par le collecteur
+  conservative actuel.
 - [x] Protéger une première racine native concrète dans un helper runtime:
   `Runtime_buildArgsArray` spille manuellement `r15`, qui tient le tableau brut
   d'arguments, autour de `Runtime_cStringToString` et du `Runtime_alloc` final.
-  La carte candidate correspondante décrit `native_stack+8`, reste non consommée
-  par `Runtime_alloc` et n'active aucune collecte.
+  La carte candidate correspondante décrit `native_stack+8` et reste non
+  consommée par `Runtime_alloc`.
 - [x] Protéger une seconde tranche de racines natives concrètes dans un helper
   runtime: `Runtime_stringToCharArray` spille le owner `String` source autour du
   `Runtime_alloc` du tableau brut de caractères, puis `rbx` autour du
   `Runtime_alloc` final de façade `ArrayObject[Char]`. Les deux cartes
   candidates décrivent `native_stack+8`, restent non consommées par
-  `Runtime_alloc` et n'activent aucune collecte.
+  `Runtime_alloc`.
 - [x] Protéger les racines natives concrètes de `Runtime_stringSplit` et
   `Runtime_stringSplitMakeSegment`: `Runtime_stringSplit` spille les owners
   `String` source/séparateur autour des allocations de tableaux bruts et `rbx`
@@ -968,20 +965,26 @@ d'inference generique et de typage contextuel des lambdas.
   `Runtime_stringSplitMakeSegment` conserve ses pushes d'état et ajoute les
   spills racines `rbx` puis `r10` autour de l'allocation de segment. Les cartes
   candidates décrivent `native_stack+8` / `native_stack+16`, restent non
-  consommées par `Runtime_alloc` et n'activent aucune collecte; `r14`/`r15`
-  restent des pointeurs intérieurs/recalculables non consommables.
+  consommées par `Runtime_alloc`; `r14`/`r15` restent des pointeurs
+  intérieurs/recalculables non consommables.
 - [x] Protéger les racines natives concrètes de `FloatDouble_method_toString`:
   le helper spille `r10`, owner `String` de la partie entière produite par
   `Int_method_toString`, autour des deux `Runtime_alloc` directs des chemins
   fractionnel et sans fraction non nulle. Les cartes candidates décrivent
   désormais `native_stack+8`; `[rsp + 16]` reste un slot local du helper, mais la
   racine concrètement protégée au safepoint est le `push r10`. Les cartes
-  restent non consommées par `Runtime_alloc` et n'activent aucune collecte.
+  restent non consommées par `Runtime_alloc`.
+- [x] Introduire une première collecte GC active conservative et non compactante:
+  `Runtime_alloc` ajoute un header caché de 16 octets, réutilise
+  `heap_free_list`, appelle `Runtime_gc` avant `Runtime_heap_overflow`, puis
+  retente l'allocation. `Runtime_gc` scanne la pile native jusqu'à
+  `gc_stack_top`, propage dans les payloads heap marqués jusqu'à fixpoint et
+  sweep les blocs non marqués vers la free-list.
 - [ ] Poursuivre la fondation GC en suivant `docs/plans/runtime-memory-management.md`:
-  généraliser la protection/spill des registres transitoires et slots natifs
-  autour de `Runtime_alloc`, puis stabiliser des cartes racines internes
-  consommables pour les helpers runtime; ne pas exposer de `delete` public tant
-  que l'aliasing et l'échappement ne sont pas spécifiés.
+  remplacer progressivement le scan conservateur par les cartes exactes déjà
+  émises, généraliser les racines consommables pour les helpers runtime,
+  raffiner `heapUsed()` si besoin et ne pas exposer de `delete` public tant que
+  l'aliasing et l'échappement ne sont pas spécifiés.
 - [x] Ajouter une primitive d'affichage console pour `String`.
 - [x] Ajouter une primitive d'entree console `readLine(): String`.
 - [x] Ajouter une premiere lecture/ecriture de fichiers texte.
@@ -1074,13 +1077,26 @@ d'inference generique et de typage contextuel des lambdas.
 
 ## Journal Des Jalons
 
+- `local` - Introduire une première collecte GC active conservative: le runtime
+  ASM ajoute un header caché de 16 octets avant chaque payload, les états
+  `heap_free_list`, `gc_stack_top` et `gc_mark_changed`, sauvegarde le sommet de
+  pile initial dans `_start`, fait appeler `Runtime_gc` par `Runtime_alloc` avant
+  `Runtime_heap_overflow`, puis réutilise les blocs sweepés. `Runtime_gc` scanne
+  conservativement la pile native et les payloads marqués jusqu'à fixpoint, ne
+  compacte jamais, et laisse les cartes exactes existantes inertes pour la suite.
+  - Fichiers / tests associes: `src/runtime_asm.cpp`,
+    `tests/test_gc_active_collection.sh`, `Makefile`, `docs/internals.md`,
+    `docs/plans/runtime-memory-management.md`, `docs/plans/README.md`,
+    `docs/roadmap.md`, `AGENTS.md`.
+
 - `local` - Protéger les racines natives de `FloatDouble_method_toString`: le
   helper spille `r10`, owner `String` de la partie entière, autour des deux
   `Runtime_alloc` directs des chemins fractionnel et sans fraction non nulle.
   Les deux cartes candidates décrivent maintenant `native_stack+8`; `[rsp + 16]`
   reste un slot local du helper, mais la racine concrètement protégée au
   safepoint est le `push r10`. Les cartes restent inertes et non consommées par
-  `Runtime_alloc`; aucune collecte n'est activée.
+  `Runtime_alloc`; le collecteur conservative courant ne les consomme toujours
+  pas.
   - Fichiers / tests associes: `src/runtime_asm.cpp`,
     `tests/test_gc_runtime_helper_root_spills.py`,
     `tests/test_gc_runtime_helper_root_maps.py`, `docs/internals.md`,
@@ -1093,8 +1109,8 @@ d'inference generique et de typage contextuel des lambdas.
   de la façade `ArrayObject[String]`; le helper de segment conserve les pushes
   d'état `r8`/`r9`/`rdx` et ajoute les spills racines `rbx` puis `r10`. Les
   cartes candidates décrivent `native_stack+8` et `native_stack+16` selon l'ordre
-  exact des pushes, restent inertes et non consommées par `Runtime_alloc`; aucune
-  collecte n'est activée, et `r14`/`r15` restent documentés comme pointeurs
+  exact des pushes, restent inertes et non consommées par `Runtime_alloc`, et
+  `r14`/`r15` restent documentés comme pointeurs
   intérieurs/recalculables non consommables.
   - Fichiers / tests associes: `src/runtime_asm.cpp`,
     `tests/test_gc_runtime_helper_root_spills.py`,
@@ -1109,7 +1125,7 @@ d'inference generique et de typage contextuel des lambdas.
   `nabla_gc_runtime_helper_alloc_Runtime_stringToCharArray_0` et
   `nabla_gc_runtime_helper_alloc_Runtime_stringToCharArray_1` décrivent
   désormais `native_stack+8`; `r10` reste documenté comme pointeur intérieur
-  non consommable/recalculable, aucune collecte n'est activée.
+  non consommable/recalculable par les cartes exactes.
   - Fichiers / tests associes: `src/runtime_asm.cpp`,
     `tests/test_gc_runtime_helper_root_spills.py`,
     `tests/test_gc_runtime_helper_root_maps.py`, `docs/internals.md`,
@@ -1121,7 +1137,7 @@ d'inference generique et de typage contextuel des lambdas.
   helper allocant `Runtime_cStringToString` et du `Runtime_alloc` final. La carte
   candidate `nabla_gc_runtime_helper_alloc_Runtime_buildArgsArray_1` décrit
   désormais `native_stack+8` pour le `r15` spillé, tout en restant inerte et non
-  consommée par `Runtime_alloc`; aucune collecte n'est activée.
+  consommée par `Runtime_alloc`.
   - Fichiers / tests associes: `src/runtime_asm.cpp`,
     `tests/test_gc_runtime_helper_root_spills.py`,
     `tests/test_gc_runtime_helper_root_maps.py`,
@@ -1135,8 +1151,8 @@ d'inference generique et de typage contextuel des lambdas.
   `Runtime_buildArgsArray`, `Runtime_stringToCharArray`, `Runtime_stringSplit`,
   `Runtime_stringSplitMakeSegment` et `FloatDouble_method_toString`. Ces cartes
   restent conservatrices, non consommées par `Runtime_alloc` et sans spill
-  automatique; la collecte active reste interdite tant que les registres/slots
-  natifs ne sont pas protégés.
+  automatique; le collecteur conservative actuel les contourne par scan
+  pile/payload.
   - Fichiers / tests associes: `src/runtime_asm.cpp`,
     `tests/test_gc_runtime_helper_root_maps.py`,
     `tests/test_gc_runtime_helper_alloc_inventory.py`,
@@ -1148,7 +1164,7 @@ d'inference generique et de typage contextuel des lambdas.
   pour le futur GC: `tests/test_gc_runtime_helper_alloc_inventory.py` ancre les
   appels `Runtime_alloc` directs de `src/runtime_asm.cpp` dans
   `docs/internals.md`. Les helpers multi-allocation sont maintenant visibles
-  comme prochaine cible de cartes racines runtime; aucune collecte n'est activée.
+  comme prochaine cible de cartes racines runtime consommables.
   - Fichiers / tests associes: `src/runtime_asm.cpp`,
     `tests/test_gc_runtime_helper_alloc_inventory.py`, `tests/test_gc_inventory_docs.py`,
     `docs/internals.md`, `docs/plans/runtime-memory-management.md`,
@@ -1160,7 +1176,7 @@ d'inference generique et de typage contextuel des lambdas.
   utilisateur (`new`, tableaux natifs/objets, closures capturantes, boxing), avec
   les slots de frame référence-capables déjà produits dans le parcours IR linéaire
   avant le point d'allocation. Ces cartes restent non consommées par le runtime,
-  non encore dominance-aware; aucune collecte n'est activée.
+  non encore dominance-aware.
   - Fichiers / tests associes: `src/ir_codegen.cpp`,
     `tests/test_gc_alloc_call_metadata.sh`, `tests/test_gc_inventory_docs.py`,
     `docs/internals.md`, `docs/plans/runtime-memory-management.md`,
@@ -1170,7 +1186,7 @@ d'inference generique et de typage contextuel des lambdas.
   ajoute `nabla_gc_object_layout_<classe>` pour les champs référence-capables des
   instances/façades et `nabla_gc_closure_layout_<fonction>_<result>` pour les
   captures référence-capables d'une allocation de closure. Ces descripteurs
-  restent non consommés par le runtime; aucune collecte n'est activée.
+  restent non consommés par le runtime conservative actuel.
   - Fichiers / tests associes: `src/ir_codegen.cpp`,
     `tests/test_gc_heap_layout_metadata.sh`, `tests/test_gc_inventory_docs.py`,
     `docs/internals.md`, `docs/plans/runtime-memory-management.md`,
@@ -1179,7 +1195,7 @@ d'inference generique et de typage contextuel des lambdas.
 - `local` - Émettre les premières métadonnées de racines de frame GC: le backend
   ajoute `nabla_gc_frame_roots_<fonction>` dans `.data` avec le nombre de slots
   référence-capables et leurs offsets `rbp` positifs; le runtime ne consomme pas
-  encore ces descripteurs et aucune collecte n'est activée.
+  encore ces descripteurs exacts.
   - Fichiers / tests associes: `src/ir_codegen.cpp`,
     `tests/test_gc_frame_root_metadata.sh`, `tests/test_gc_inventory_docs.py`,
     `docs/internals.md`, `docs/plans/runtime-memory-management.md`,
@@ -1200,14 +1216,14 @@ d'inference generique et de typage contextuel des lambdas.
   tableaux natifs/`ObjectArray[T]`, façades `ArrayObject[T]`, instances
   utilisateur, closures, valeurs boxées, singletons runtime et valeurs
   immédiates. Le plan mémoire passe maintenant à
-  l'inventaire des racines backend et des descripteurs de parcours, toujours
-  sans collecte active ni `delete` public.
+  l'inventaire des racines backend et des descripteurs de parcours, sans
+  `delete` public.
   - Fichiers / tests associes: `docs/internals.md`,
     `docs/plans/runtime-memory-management.md`, `docs/plans/README.md`,
     `docs/roadmap.md`, `tests/test_gc_inventory_docs.py`, `Makefile`,
     `AGENTS.md`.
 
-- `local` - Ajouter des compteurs d'observation heap sans collecte active:
+- `local` - Ajouter des compteurs d'observation heap:
   `heapUsed()` et `heapCapacity()` exposent respectivement les octets réservés
   par le bump allocator et la capacité compilée. Ces primitives servent de
   fondation mesurable pour le futur GC traçant sans introduire de `delete`, de
@@ -1231,9 +1247,9 @@ d'inference generique et de typage contextuel des lambdas.
   part désormais sur un GC traçant simple non compactant comme modèle sûr par
   défaut. Les arènes restent reportées à une API spécialisée ou `unsafe`, et la
   mémoire manuelle reste hors surface normale. La prochaine étape est une
-  fondation sans collecte active: inventorier les familles d'objets heap, les
-  racines backend et les métadonnées de parcours nécessaires avant de modifier
-  la sémantique d'allocation.
+  fondation de métadonnées: inventorier les familles d'objets heap, les racines
+  backend et les métadonnées de parcours nécessaires avant de modifier la
+  sémantique d'allocation.
   - Fichiers / tests associes: `docs/plans/runtime-memory-management.md`,
     `docs/plans/README.md`, `docs/roadmap.md`, `docs/internals.md`,
     `docs/language.md`, `AGENTS.md`.
@@ -1241,7 +1257,7 @@ d'inference generique et de typage contextuel des lambdas.
 - `local` - Compléter la phase d'observabilité heap avec les mitigations
   utilisateur: la documentation explique désormais que les opérations `String`
   (`+`, `repeat`, `substring`, `trim`, `split`, `toCharArray`) et les fabriques
-  ou transformations `Array` allouent sur le heap monotone. Elle recommande de
+  ou transformations `Array` allouent sur le heap runtime. Elle recommande de
   dimensionner `--heap-size`, d'éviter les constructions non bornées en boucle et
   de réutiliser des tableaux mutables lorsque l'algorithme le permet. Le plan
   actif marque la phase 2 comme couverte et déplace le delta vers le choix d'un
@@ -1267,7 +1283,7 @@ d'inference generique et de typage contextuel des lambdas.
     `docs/internals.md`, `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Ouvrir le chantier de stratégie mémoire runtime: le plan actif
-  `docs/plans/runtime-memory-management.md` formalise le heap monotone actuel,
+  `docs/plans/runtime-memory-management.md` formalise le heap runtime initial,
   confirme qu'il n'existe pas de `delete` mémoire public, recommande `Option[T]`
   plutôt qu'un `null` source et trace les options futures (observabilité heap,
   arènes, GC simple ou module `unsafe`) sans figer prématurément l'ABI objet.

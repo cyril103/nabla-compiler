@@ -127,29 +127,25 @@ features.
   `nablac --heap-size <octets>`. La stratégie mémoire active est décrite dans
   `docs/plans/runtime-memory-management.md`: pas de `delete` public prématuré,
   diagnostic de dépassement heap stabilisé (stderr + code 255), mitigations
-  documentées, puis fondation d'un GC traçant simple non compactant comme modèle
-  de récupération sûr par défaut. Les primitives d'observation `heapUsed()` et
-  `heapCapacity()` exposent l'état du bump allocator sans activer de collecte;
-  l'inventaire interne des familles heap et des racines backend, plus les
-  métadonnées de racines de frame, les descripteurs champs/captures pour
-  classes/closures, les cartes de points d'appel `Runtime_alloc` du code
-  utilisateur, l'inventaire outillé des allocations internes aux helpers
-  runtime et les cartes candidates de racines internes aux helpers runtime sont
-  complétés par des protections natives concrètes dans `Runtime_buildArgsArray`,
-  où `r15` est spillé autour de l'appel au helper allocant
-  `Runtime_cStringToString` et du `Runtime_alloc` final, puis dans
-  `Runtime_stringToCharArray`, où le owner `String` source et `rbx` sont
-  spillés autour des deux allocations directes, puis dans `Runtime_stringSplit`
-  et `Runtime_stringSplitMakeSegment`, où les owners `String` source/séparateur,
-  `rbx` destination et `r10` owner source de segment sont spillés autour des
-  allocations directes, puis dans `FloatDouble_method_toString`, où `r10` owner
-  `String` de la partie entière est spillé autour des deux allocations directes
-  des chemins fractionnel et sans fraction non nulle. Les cartes restent inertes
-  et non consommées par `Runtime_alloc`; `r14`/`r15` restent des pointeurs
-  intérieurs recalculables non consommables, et la prochaine cible reste la
-  protection générale des
-  registres/slots natifs transitoires et la production de cartes racines runtime
-  consommables.
+  documentées, puis première collecte GC conservative active comme modèle de
+  récupération sûr par défaut. `Runtime_alloc` ajoute un header caché de 16
+  octets, réutilise `heap_free_list`, appelle `Runtime_gc` avant overflow et
+  retente l'allocation; `Runtime_gc` scanne conservativement la pile native
+  jusqu'à `gc_stack_top`, propage dans les payloads heap marqués, puis sweep les
+  blocs non marqués vers la free-list sans compacter. Les primitives
+  d'observation `heapUsed()` et `heapCapacity()` restent high-water/capacité.
+  l'inventaire interne des familles heap et des racines backend, les métadonnées
+  de racines de frame, les descripteurs champs/captures pour classes/closures,
+  les cartes de points d'appel `Runtime_alloc` du code utilisateur, l'inventaire
+  outillé des allocations internes aux helpers runtime et les cartes candidates
+  de racines internes aux helpers runtime restent inertes et non consommées par
+  `Runtime_alloc` / `Runtime_gc`. La prochaine cible est de remplacer
+  progressivement le scan conservateur par ces cartes exactes consommables, de
+  réduire les faux positifs et de raffiner `heapUsed()` si nécessaire. Les
+  métadonnées de racines de frame restent documentées comme base exacte future;
+  les descripteurs champs/captures pour
+  classes/closures aussi. l'inventaire outillé des allocations internes aux helpers
+  runtime reste l'ancre des sites assembleur directs; les cartes candidates de racines internes aux helpers runtime restent l'ancre des racines natives.
 - Typage a garder simple : sous-typage nominal pour les classes, generiques
   invariants par defaut, conversions explicites ou helpers stdlib.
 - Documentation : la reference HTML doit rester une doc utilisateur claire,
@@ -203,10 +199,10 @@ Actions recommandees :
     surcharges idiomatiques et garder les diagnostics d'ambiguite riches si la
     resolution devient moins stricte que l'exact match.
 15. Garder `Result[T]` et variance avancee reportes; pour la mémoire runtime,
-   suivre `docs/plans/runtime-memory-management.md`: le heap monotone, le
-   diagnostic de dépassement et les mitigations utilisateur sont documentés;
-   fonder maintenant un GC traçant simple non compactant avant toute collecte
-   active, sans exposer de `delete` public tant que les racines, l'aliasing et
+   suivre `docs/plans/runtime-memory-management.md`: le diagnostic de
+   dépassement, les mitigations utilisateur et la première collecte GC
+   conservative non compactante sont documentés; continuer vers des cartes
+   exactes consommables sans exposer de `delete` public tant que l'aliasing et
    l'échappement ne sont pas spécifiés.
 16. Pour chaque nouvelle feature, suivre `docs/feature-integration.md` afin de
    verifier l'etat de depart, le plan actif, les tests, les docs et l'hygiene

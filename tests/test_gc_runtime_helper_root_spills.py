@@ -57,8 +57,7 @@ with tempfile.TemporaryDirectory(
     asm = asm_path.read_text(encoding="utf-8")
 
 required_wording = [
-    "not consumed by Runtime_alloc",
-    "do not enable collection",
+    "not consumed by the current conservative Runtime_gc",
 ]
 for wording in required_wording:
     require(wording in asm, f"generated asm should keep inert GC wording: {wording}")

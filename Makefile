@@ -228,6 +228,7 @@ tooling-tests: nablac unit-tests stdlib-docs format-check
 	@tests/test_configurable_heap_size.sh
 	@tests/test_heap_overflow_diagnostic.sh
 	@tests/test_heap_stats_builtins.sh
+	@tests/test_gc_active_collection.sh
 	@tests/test_gc_frame_root_metadata.sh
 	@tests/test_gc_heap_layout_metadata.sh
 	@tests/test_gc_alloc_call_metadata.sh

@@ -372,40 +372,70 @@ Certaines opérations runtime utilisent des codes de sortie dédiés, par exempl
 - accès hors bornes sur chaînes/tableaux ;
 - dépassement du heap.
 
-Le heap runtime est un bump allocator alloué par `mmap`. Sa capacité par défaut
-reste `8388608` octets (8 MiB), mais le compilateur accepte
+Le heap runtime est alloué par `mmap`. Sa capacité par défaut reste `8388608`
+octets (8 MiB), mais le compilateur accepte
 `--heap-size <octets>` pour générer un exécutable avec une autre valeur dans le
 symbole assembleur `heap_capacity`. Les valeurs non entières, inférieures à
 4096 octets ou supérieures au payload `Int` taggé représentable sont rejetées
 par `nablac` avant la génération.
 
-Le bump allocator est monotone : `Runtime_alloc` avance `heap_pointer` et aucune
-primitive runtime ne rend actuellement une allocation individuelle réutilisable.
-`Runtime_heapUsed` retourne `heap_pointer - heap_start` comme `Int` Nabla, et
-`Runtime_heapCapacity` retourne `heap_capacity`; les primitives source
-`heapUsed()` / `heapCapacity()` exposent ces compteurs comme points
-d'observation sans modifier la sémantique d'allocation ni activer de collecte.
-Si `Runtime_initHeap` ne peut pas obtenir le heap demandé, si `Runtime_alloc`
-dépasse `heap_end`, ou si une taille d'allocation déborde pendant l'alignement
-ou le calcul de taille des tableaux natifs, le runtime écrit
-`Nabla runtime error: heap exhausted` sur stderr puis termine avec le code 255.
-Les objets créés par `new`, les tableaux, chaînes, closures et valeurs boxées
-allouées sur le heap sont reclamés uniquement par la fin du processus. Les
-mitigations sûres restent donc externes à la sémantique d'allocation : augmenter
-`--heap-size` pour les charges connues, éviter les concaténations ou `repeat`
-non bornés dans les boucles, et réutiliser des tableaux mutables lorsque le
-traitement peut être exprimé en place. Un
-`delete` utilisateur serait donc une nouvelle stratégie mémoire, pas un simple
-wrapper autour du runtime actuel;
+`Runtime_alloc` aligne la taille demandée sur 8 octets et retourne un pointeur
+payload stable. Chaque allocation possède désormais un header caché de 16 octets
+juste avant ce payload : `header[0]` contient la taille payload alignée avec les
+bits hauts `mark` et `free`, et `header[1]` contient le lien `next` quand le bloc
+est dans `heap_free_list` (sinon 0). Le layout observé par le code Nabla reste
+inchangé : objets, chaînes, tableaux, closures et boîtes commencent toujours à
+l'adresse payload retournée.
+
+L'allocation essaie d'abord de réutiliser un bloc libre assez grand depuis
+`heap_free_list`, puis tente d'avancer `heap_pointer` en réservant
+`payload_size + 16`. Si le bump échoue, `Runtime_alloc` appelle `Runtime_gc`,
+retente la free-list puis le bump, et n'émet `Runtime_heap_overflow` qu'après cet
+échec. Le sweep fusionne les suites adjacentes de blocs morts/libres en un seul
+bloc réutilisable. Les blocs libres ne sont pas encore découpés à la
+réallocation : un bloc réutilisé garde sa taille payload complète, mais son
+payload est remis à zéro avant d'être rendu au programme afin d'éviter que des
+références obsolètes dans la queue ne retiennent artificiellement d'autres blocs.
+
+`Runtime_gc` est une première collecte active réelle, conservative, traçante et
+non compactante, entièrement côté runtime assembleur. `_start` enregistre
+`gc_stack_top` avant l'initialisation du heap. Lors d'une collecte, le runtime
+scanne les mots pairs entre la pile native courante et ce sommet, y compris les
+registres généraux spillés par `Runtime_alloc`, puis traite tout mot qui tombe
+dans le payload d'un bloc heap alloué comme une racine candidate. Les payloads
+des blocs marqués sont ensuite rescannés conservativement jusqu'à fixpoint
+(`gc_mark_changed`). Le sweep parcourt linéairement les headers de `heap_start`
+à `heap_pointer` : un bloc marqué est conservé et son bit mark effacé; un bloc
+non marqué est ajouté à `heap_free_list` avec le bit free. Aucun payload pointer
+n'est déplacé.
+
+Cette stratégie accepte les faux positifs : un entier raw, un fragment de bytes
+ou une ancienne valeur de pile peut ressembler à un pointeur heap et retenir un
+bloc trop longtemps. Elle ne consomme pas encore les métadonnées exactes de
+racines, layouts et points d'appel décrites plus bas; ces cartes restent
+additives pour la prochaine étape. `Runtime_heapUsed` retourne donc encore
+`heap_pointer - heap_start` comme high-water mark bump, pas la mémoire vivante
+après sweep, tandis que `Runtime_heapCapacity` retourne `heap_capacity`; les
+primitives source `heapUsed()` / `heapCapacity()` exposent ces compteurs.
+
+Si `Runtime_initHeap` ne peut pas obtenir le heap demandé, si une allocation ne
+peut toujours pas être satisfaite après `Runtime_gc`, ou si une taille
+d'allocation déborde pendant l'alignement ou le calcul de taille des tableaux
+natifs, le runtime écrit `Nabla runtime error: heap exhausted` sur stderr puis
+termine avec le code 255. Les mitigations sûres restent : augmenter
+`--heap-size` pour les charges connues, éviter les concaténations ou `repeat` non
+bornés dans les boucles, et réutiliser des tableaux mutables lorsque le
+traitement peut être exprimé en place. Un `delete` utilisateur serait donc une
+nouvelle stratégie mémoire, pas un simple wrapper autour du runtime actuel;
 il devra traiter aliasing, échappement depuis tableaux/closures/collections,
-cycle de vie des chaînes et interaction avec le GC prévu ou d'éventuelles arènes
-spécialisées.
+cycle de vie des chaînes et interaction avec le GC conservateur courant ou
+d'éventuelles arènes spécialisées.
 
 La direction active est suivie dans `docs/plans/runtime-memory-management.md` :
-garder la surface normale sûre (`AnyRef`, `Option[T]`, collections) et fonder un
+garder la surface normale sûre (`AnyRef`, `Option[T]`, collections) et durcir le
 GC traçant simple non compactant. Les arènes et `unsafe.memory` restent reportés
-à des besoins spécialisés; aucune collecte ne doit être activée tant que les
-racines et métadonnées de parcours ne sont pas spécifiées.
+à des besoins spécialisés; les prochaines étapes consistent à remplacer
+progressivement le scan conservateur par les cartes exactes déjà émises.
 
 ### Inventaire Des Familles Heap Pour Le Futur GC
 
@@ -449,13 +479,12 @@ n'est une ABI source publique.
   (`kNullSlot`) ne sont pas des pointeurs heap et doivent être ignorés par le
   marqueur.
 
-Le premier descripteur GC doit donc pouvoir distinguer au minimum :
+Les métadonnées exactes devront donc pouvoir distinguer au minimum :
 `String`, tableau de valeurs, tableau de références, instance utilisateur,
 closure, boîte primitive et singleton statique. Le backend produit déjà des
 métadonnées additives pour les slots de frame, les champs d'objets et les
-captures de closures référence-capables; avant toute collecte, il reste à
-compléter les cartes de points d'appel à `Runtime_alloc` et le modèle de
-parcours des familles runtime non décrites par des champs de classe.
+captures de closures référence-capables; le GC actif actuel ne les consomme pas
+encore et se limite au scan conservateur pile + payload.
 
 ### Inventaire Des Racines Backend Pour Le Futur GC
 
@@ -481,12 +510,15 @@ Racines à exposer avant toute collecte :
   au frame. Comme les slots de `var` peuvent survivre à plusieurs branches ou
   boucles, ils doivent rester scannables tant que la fonction est active.
 - **Arguments et temporaires en registres pendant un appel runtime** : le codegen
-  charge souvent des valeurs heap dans `rdi`, `rsi`, `rdx`, `rcx`, `r8`, `r9`,
-  `r10`, `r11`, `r12` ou `r13` juste avant `Runtime_alloc` et les helpers de
-  chaînes.
-  Tant qu'une collecte peut arriver dans `Runtime_alloc`, ces registres doivent
-  être soit spillés dans des slots racines avant l'appel, soit décrits par une
-  carte d'appel minimale. Sans cette étape, le GC ne doit pas être activé.
+  peut charger des valeurs heap dans `rsi`, `rdx`, `rcx`, `r8`, `r9`, `r10`,
+  `r11`, `r12` ou `r13` juste avant `Runtime_alloc` et les helpers de chaînes;
+  `rdi` porte la taille demandée au safepoint `Runtime_alloc` et ne constitue
+  pas une racine implicite pour cet appel. La collecte conservatrice courante
+  rend ces valeurs visibles en spillant les registres généraux (`rbx`, `rcx`,
+  `rdx`, `rsi`, `r8`-`r15`) dans la pile native avant `Runtime_gc`. Les helpers
+  qui écrasent un owner heap pour préparer une allocation doivent continuer à le
+  spiller explicitement avant de charger la nouvelle taille. Les cartes exactes
+  futures devront remplacer ce contrat conservateur par des racines consommables.
 - **Racines statiques** : les singletons `context.runtimeObjects`, vtables et
   littéraux de chaînes en `.data` ne sont pas des slots du bump heap. Les
   singletons doivent être traités comme racines statiques; les vtables et bytes
@@ -496,10 +528,12 @@ Racines à exposer avant toute collecte :
   allocations (`Runtime_stringSplit`, `Runtime_buildArgsArray`, conversions
   `toString`, wrappers `ArrayObject[T]`), conservent parfois une allocation
   précédente dans un registre ou sur la pile native avant l'allocation suivante.
-  Ces valeurs devront être spillées ou déclarées comme racines runtime avant
-  d'autoriser une collecte dans ces helpers. Les helpers à allocation unique,
-  comme `Runtime_stringConcat`, restent concernés par la protection de leurs
-  arguments vivants si une collecte peut arriver dans `Runtime_alloc`.
+  Ces valeurs sont aujourd'hui protégées soit par le spill général de
+  `Runtime_alloc`, soit par des spills manuels documentés quand le helper doit
+  écraser un registre owner avant l'appel. Les helpers à allocation unique, comme
+  `Runtime_stringConcat`, restent concernés par la protection de leurs arguments
+  vivants si une future étape remplace le scan conservateur par des cartes
+  exactes consommées.
 
 Non-racines explicites : valeurs taggées immédiates, slots `kNullSlot`, raw
 `Float`/`Double`, pointeurs de vtable et pointeurs de bytes internes aux
@@ -508,9 +542,10 @@ Non-racines explicites : valeurs taggées immédiates, slots `kNullSlot`, raw
 Le backend émet maintenant une première carte additive par point d'appel
 `Runtime_alloc` généré par le code utilisateur. Elle réutilise les slots de frame
 référence-capables comme ensemble conservateur de racines scannables au moment de
-l'allocation. Les registres temporaires et les helpers runtime assembleur restent
-à traiter avant toute collecte active; tant que ces cartes ne couvrent pas ces
-cas, le bump allocator reste monotone.
+l'allocation. Le collecteur actif de cette PR ne consomme pas encore ces cartes :
+il s'appuie plutôt sur le scan conservateur de la pile native et des payloads
+heap, ce qui garde les registres spillés visibles sans figer immédiatement le
+format exact.
 
 ### Métadonnées De Racines De Frame GC
 
@@ -600,10 +635,11 @@ ci-dessous comptent les sites statiques `call Runtime_alloc`; deux sites peuvent
 Ces sites sont non encore couverts par des cartes racines consommables. Les
 helpers multi-allocation effectifs (`Runtime_buildArgsArray`,
 `Runtime_stringSplit`, `Runtime_stringToCharArray`, `FloatDouble_method_toString`)
-restent prioritaires : ils gardent des références heap dans des registres ou sur
-la pile native entre deux appels à `Runtime_alloc`, donc une collecte active ne
-pourra pas être autorisée tant que ces racines internes ne sont pas spillées ou
-décrites de façon consommable. Les premières protections concrètes couvrent
+restent prioritaires pour le passage futur aux cartes exactes : ils gardent des
+références heap dans des registres ou sur la pile native entre deux appels à
+`Runtime_alloc`. Le GC actif courant contourne cette limite par le scan
+conservateur des registres spillés et de la pile, pas par consommation de ces
+cartes. Les premières protections concrètes couvrent
 seulement `Runtime_buildArgsArray`, qui spille `r15` sur la pile native autour de
 l'appel allocant `Runtime_cStringToString` de la boucle et autour de l'allocation
 finale de façade, puis `Runtime_stringToCharArray`, qui spille le owner `String`
@@ -655,14 +691,14 @@ avec le même statut. Les cartes signalent aussi les dépendances `interior:*` q
 restent dangereuses pour un GC mobile ou actif.
 
 Ces métadonnées sont runtime-inertes, non consommées par `Runtime_alloc` et non
-précises : la protection manuelle de `Runtime_buildArgsArray` ne change pas la
-convention de `Runtime_alloc` et ne rend pas une collecte sûre. Une entrée
+précises : la collecte active actuelle ne s'appuie pas sur elles, mais sur le
+scan conservateur pile/payload. Une entrée
 `interior:*` n'est pas une racine consommable : elle documente au contraire un
 pointeur intérieur qui devra être rattaché à son objet propriétaire, recalculé
-après collection ou interdit comme safepoint. La prochaine étape avant toute
-collecte active reste de protéger automatiquement les registres/slots natifs
-listés ou de remplacer ces cartes candidates par des cartes consommables dont le
-format et les points sûrs sont spécifiés.
+après collection ou interdit comme safepoint. La prochaine étape consiste à
+protéger automatiquement les registres/slots natifs listés ou à remplacer ces
+cartes candidates par des cartes consommables dont le format et les points sûrs
+sont spécifiés, afin de réduire la dépendance aux faux positifs conservateurs.
 
 Ces codes doivent rester documentés au fur et à mesure qu'ils deviennent une
 surface observable par l'utilisateur.

@@ -43,8 +43,7 @@ with tempfile.TemporaryDirectory(prefix="nabla_gc_runtime_helper_root_maps_") as
 
 required_wording = [
     "GC runtime-helper allocation maps are additive, conservative candidates",
-    "not consumed by Runtime_alloc",
-    "do not enable collection",
+    "not consumed by the current conservative Runtime_gc",
 ]
 for wording in required_wording:
     require(wording in asm, f"generated asm should document inert runtime helper maps: {wording}")
