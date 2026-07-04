@@ -600,12 +600,15 @@ ci-dessous comptent les sites statiques `call Runtime_alloc`; deux sites peuvent
 Ces sites sont non encore couverts par des cartes racines consommables. Les
 helpers multi-allocation effectifs (`Runtime_buildArgsArray`,
 `Runtime_stringSplit`, `Runtime_stringToCharArray`, `FloatDouble_method_toString`)
-sont prioritaires pour la tranche suivante : ils gardent des références heap dans
-des registres ou sur la pile native entre deux appels à `Runtime_alloc`, donc une
-collecte active ne pourra pas être autorisée tant que ces racines internes ne
-sont pas spillées ou décrites. Les helpers avec plusieurs sites alternatifs sur
-branches exclusives, comme `Bool_method_toString`, restent à documenter mais ne
-créent pas le même besoin de conservation entre deux allocations successives.
+restent prioritaires : ils gardent des références heap dans des registres ou sur
+la pile native entre deux appels à `Runtime_alloc`, donc une collecte active ne
+pourra pas être autorisée tant que ces racines internes ne sont pas spillées ou
+décrites de façon consommable. La première protection concrète couvre seulement
+`Runtime_buildArgsArray`, qui spille `r15` sur la pile native autour de l'appel
+allocant `Runtime_cStringToString` de la boucle et autour de l'allocation finale
+de façade. Les helpers avec plusieurs sites alternatifs sur branches exclusives,
+comme `Bool_method_toString`, restent à documenter mais ne créent pas le même
+besoin de conservation entre deux allocations successives.
 
 ### Métadonnées De Racines Internes Des Helpers Runtime
 
@@ -624,22 +627,24 @@ multi-allocation :
 Ces cartes couvrent aujourd'hui `Runtime_buildArgsArray`,
 `Runtime_stringToCharArray`, `Runtime_stringSplit`,
 `Runtime_stringSplitMakeSegment` et `FloatDouble_method_toString`. Elles listent
-des racines conservatrices comme `r15` pour le tableau brut d'arguments, `rbx`
-pour les stockages `ObjectArray[...]` temporaires, `r10`/`r11` pour les chaînes
-source de `String.split`, et `native_stack+16` pour la chaîne de partie entière
-dans `FloatDouble_method_toString`. Elles signalent aussi les dépendances
+des racines conservatrices comme `native_stack+8` pour le `r15` spillé qui tient
+le tableau brut d'arguments pendant l'allocation finale de
+`Runtime_buildArgsArray`, `rbx` pour les stockages `ObjectArray[...]`
+temporaires, `r10`/`r11` pour les chaînes source de `String.split`, et
+`native_stack+16` pour la chaîne de partie entière dans
+`FloatDouble_method_toString`. Elles signalent aussi les dépendances
 `interior:*` qui restent dangereuses pour un GC mobile ou actif, par exemple les
 pointeurs de bytes `r10`, `r14` ou `r15` dérivés d'un `String` source.
 
 Ces métadonnées sont runtime-inertes, non consommées par `Runtime_alloc` et non
-précises : elles ne spillent aucun registre, ne modifient pas la convention
-d'appel des helpers et ne rendent pas une collecte sûre. Une entrée `interior:*`
-n'est pas une racine consommable : elle documente au contraire un pointeur
-intérieur qui devra être rattaché à son objet propriétaire, recalculé après
-collection ou interdit comme safepoint. La prochaine étape avant toute collecte
-active reste de protéger automatiquement les registres/slots natifs listés ou de
-remplacer ces cartes candidates par des cartes consommables dont le format et les
-points sûrs sont spécifiés.
+précises : la protection manuelle de `Runtime_buildArgsArray` ne change pas la
+convention de `Runtime_alloc` et ne rend pas une collecte sûre. Une entrée
+`interior:*` n'est pas une racine consommable : elle documente au contraire un
+pointeur intérieur qui devra être rattaché à son objet propriétaire, recalculé
+après collection ou interdit comme safepoint. La prochaine étape avant toute
+collecte active reste de protéger automatiquement les registres/slots natifs
+listés ou de remplacer ces cartes candidates par des cartes consommables dont le
+format et les points sûrs sont spécifiés.
 
 Ces codes doivent rester documentés au fur et à mesure qu'ils deviennent une
 surface observable par l'utilisateur.

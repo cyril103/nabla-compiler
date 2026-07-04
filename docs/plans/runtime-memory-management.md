@@ -111,10 +111,17 @@ Raisons :
    vérifiées par `tests/test_gc_runtime_helper_root_maps.py`. Elles constituent
    la première tranche inerte de cartes racines internes aux helpers runtime
    assembleur, pas encore une protection consommable.
-9. Ajouter ensuite la protection/spill automatique des registres transitoires et
+9. Première protection native concrète couverte : `Runtime_buildArgsArray`
+   spille manuellement `r15`, qui tient le tableau brut d'arguments, autour de
+   l'appel allocant `Runtime_cStringToString` dans la boucle et autour du
+   `Runtime_alloc` final qui construit la façade `ArrayObject[String]`. La carte
+   candidate de ce second site décrit `native_stack+8`, reste inerte et n'est
+   pas consommée par `Runtime_alloc`; `tests/test_gc_runtime_helper_root_spills.py`
+   ancre les commentaires et l'ordre `push` / `call` / `pop`.
+10. Ajouter ensuite la protection/spill automatique des registres transitoires et
    slots natifs autour de `Runtime_alloc`, puis remplacer ou stabiliser ces
    cartes candidates en cartes consommables avant tout parcours GC.
-10. Introduire la collecte seulement dans une PR ultérieure, derrière des régressions runtime dédiées.
+11. Introduire la collecte seulement dans une PR ultérieure, derrière des régressions runtime dédiées.
 
 ## Phase 4: Esquisses D'API Futures, Pas Des Engagements
 

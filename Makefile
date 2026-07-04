@@ -233,6 +233,7 @@ tooling-tests: nablac unit-tests stdlib-docs format-check
 	@tests/test_gc_alloc_call_metadata.sh
 	@$(PYTHON) tests/test_gc_runtime_helper_alloc_inventory.py
 	@$(PYTHON) tests/test_gc_runtime_helper_root_maps.py
+	@$(PYTHON) tests/test_gc_runtime_helper_root_spills.py
 	@$(PYTHON) tests/test_gc_inventory_docs.py
 	@tests/test_stdlib_docs_html.py
 	@$(PYTHON) tools/test_editor_vscode.py

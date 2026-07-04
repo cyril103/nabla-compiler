@@ -50,7 +50,7 @@ for wording in required_wording:
     require(wording in asm, f"generated asm should document inert runtime helper maps: {wording}")
 
 expected_roots = {
-    "Runtime_buildArgsArray": [[], ["r15"]],
+    "Runtime_buildArgsArray": [[], ["native_stack+8"]],
     "Runtime_stringToCharArray": [["interior:r10"], ["rbx"]],
     "Runtime_stringSplit": [
         ["r10", "r11", "interior:r14", "interior:r15"],
