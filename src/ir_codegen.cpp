@@ -875,8 +875,12 @@ private:
             out << "    call Runtime_gcLastStackWords\n";
         } else if (instruction.operation == "gcLastHeapWords") {
             out << "    call Runtime_gcLastHeapWords\n";
+        } else if (instruction.operation == "heapAllocatedBytes") {
+            out << "    call Runtime_heapAllocatedBytes\n";
         } else if (instruction.operation == "heapFreeBytes") {
             out << "    call Runtime_heapFreeBytes\n";
+        } else if (instruction.operation == "heapFreeBlockCount") {
+            out << "    call Runtime_heapFreeBlockCount\n";
         } else if (instruction.operation == "heapLargestFreeBlock") {
             out << "    call Runtime_heapLargestFreeBlock\n";
         } else if (instruction.operation == "panic") {

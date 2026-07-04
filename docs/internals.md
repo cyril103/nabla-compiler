@@ -430,10 +430,14 @@ de pile native inspectés et `gc_last_heap_words` compte les mots payload heap
 inspectés pendant la propagation conservatrice. Les primitives
 `gcCollections()`, `gcLastFreedBytes()`, `gcLastLargestFreeBlock()`,
 `gcLastMarkedBlocks()`, `gcLastFreedBlocks()`, `gcLastStackWords()` et
-`gcLastHeapWords()` exposent ces valeurs de dernière collecte. `Runtime_heapFreeBytes` et
-`Runtime_heapLargestFreeBlock` parcourent `heap_free_list` à la demande pour
-exposer `heapFreeBytes()` et `heapLargestFreeBlock()`, utiles pour diagnostiquer
-la fragmentation sans changer la sémantique high-water de `heapUsed()`.
+`gcLastHeapWords()` exposent ces valeurs de dernière collecte. À la demande,
+`Runtime_heapAllocatedBytes` parcourt les headers entre `heap_start` et
+`heap_pointer` pour additionner les payloads des blocs non libres, tandis que
+`Runtime_heapFreeBytes`, `Runtime_heapFreeBlockCount` et
+`Runtime_heapLargestFreeBlock` parcourent `heap_free_list`. Les primitives
+`heapAllocatedBytes()`, `heapFreeBytes()`, `heapFreeBlockCount()` et
+`heapLargestFreeBlock()` aident à distinguer high-water bump, payload encore
+alloué et fragmentation sans changer la sémantique de `heapUsed()`.
 
 Si `Runtime_initHeap` ne peut pas obtenir le heap demandé, si une allocation ne
 peut toujours pas être satisfaite après `Runtime_gc`, ou si une taille
