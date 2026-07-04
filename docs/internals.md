@@ -392,10 +392,13 @@ L'allocation essaie d'abord de réutiliser un bloc libre assez grand depuis
 `payload_size + 16`. Si le bump échoue, `Runtime_alloc` appelle `Runtime_gc`,
 retente la free-list puis le bump, et n'émet `Runtime_heap_overflow` qu'après cet
 échec. Le sweep fusionne les suites adjacentes de blocs morts/libres en un seul
-bloc réutilisable. Les blocs libres ne sont pas encore découpés à la
-réallocation : un bloc réutilisé garde sa taille payload complète, mais son
-payload est remis à zéro avant d'être rendu au programme afin d'éviter que des
-références obsolètes dans la queue ne retiennent artificiellement d'autres blocs.
+bloc réutilisable. Quand un bloc libre est nettement plus grand que la demande,
+`Runtime_alloc` le découpe : le préfixe devient le bloc alloué, et la queue reste
+un bloc libre avec son propre header de 16 octets dans `heap_free_list`. Si la
+queue ne peut pas contenir un header plus au moins un mot payload aligné, le bloc
+entier est consommé. Le payload rendu au programme est remis à zéro; les queues
+libres ne sont pas scannées par le marqueur conservateur tant qu'elles restent
+marquées `free`.
 
 `Runtime_gc` est une première collecte active réelle, conservative, traçante et
 non compactante, entièrement côté runtime assembleur. `_start` enregistre

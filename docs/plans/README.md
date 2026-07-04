@@ -15,7 +15,8 @@ runtime est suivi dans [`runtime-memory-management.md`](runtime-memory-managemen
 après formalisation du heap et des mitigations de pression heap, son delta
 courant introduit une première collecte GC conservative active, traçante et non
 compactante. `Runtime_alloc` utilise un header caché de 16 octets, réutilise
-`heap_free_list`, appelle `Runtime_gc` avant overflow et retente l'allocation;
+`heap_free_list`, découpe les blocs libres surdimensionnés, appelle `Runtime_gc`
+avant overflow et retente l'allocation;
 `Runtime_gc` scanne conservativement la pile native jusqu'à `gc_stack_top`, puis
 les payloads heap marqués jusqu'à fixpoint, avant de sweep les blocs non marqués
 vers la free-list. Les compteurs `heapUsed()` / `heapCapacity()` restent des
