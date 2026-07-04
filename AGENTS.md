@@ -493,8 +493,11 @@ Limites importantes :
   candidates inertes pour les racines internes de helpers multi-allocation
   (`Runtime_buildArgsArray`, `Runtime_stringToCharArray`, `Runtime_stringSplit`,
   `Runtime_stringSplitMakeSegment`, `FloatDouble_method_toString`). Ces cartes
-  ne sont pas consommées et ne protègent pas encore automatiquement les
-  registres/slots natifs;
+  ne sont pas consommées; `Runtime_buildArgsArray` contient la première
+  protection native concrète en spillant `r15` autour de l'appel au helper
+  allocant `Runtime_cStringToString` et du `Runtime_alloc` final,
+  mais la protection automatique générale des registres/slots natifs reste à
+  faire;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
 - `Nothing` est un type bottom builtin assignable a tout type attendu sans
   valeur instanciable; les primitives globales `panic(message: String)` et
@@ -937,11 +940,16 @@ d'inference generique et de typage contextuel des lambdas.
   `nabla_gc_runtime_helper_alloc_<helper>_<index>` pour les helpers
   multi-allocation effectifs, sans consommation runtime ni activation de
   collecte.
+- [x] Protéger une première racine native concrète dans un helper runtime:
+  `Runtime_buildArgsArray` spille manuellement `r15`, qui tient le tableau brut
+  d'arguments, autour de `Runtime_cStringToString` et du `Runtime_alloc` final.
+  La carte candidate correspondante décrit `native_stack+8`, reste non consommée
+  par `Runtime_alloc` et n'active aucune collecte.
 - [ ] Poursuivre la fondation GC en suivant `docs/plans/runtime-memory-management.md`:
-  protéger/spiller les registres transitoires et slots natifs autour de
-  `Runtime_alloc`, puis stabiliser des cartes racines internes consommables pour
-  les helpers runtime; ne pas exposer de `delete` public tant que l'aliasing et
-  l'échappement ne sont pas spécifiés.
+  généraliser la protection/spill des registres transitoires et slots natifs
+  autour de `Runtime_alloc`, puis stabiliser des cartes racines internes
+  consommables pour les helpers runtime; ne pas exposer de `delete` public tant
+  que l'aliasing et l'échappement ne sont pas spécifiés.
 - [x] Ajouter une primitive d'affichage console pour `String`.
 - [x] Ajouter une primitive d'entree console `readLine(): String`.
 - [x] Ajouter une premiere lecture/ecriture de fichiers texte.
@@ -1033,6 +1041,18 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Protéger la racine native `r15` dans `Runtime_buildArgsArray`:
+  le helper runtime spille le tableau brut d'arguments autour de l'appel au
+  helper allocant `Runtime_cStringToString` et du `Runtime_alloc` final. La carte
+  candidate `nabla_gc_runtime_helper_alloc_Runtime_buildArgsArray_1` décrit
+  désormais `native_stack+8` pour le `r15` spillé, tout en restant inerte et non
+  consommée par `Runtime_alloc`; aucune collecte n'est activée.
+  - Fichiers / tests associes: `src/runtime_asm.cpp`,
+    `tests/test_gc_runtime_helper_root_spills.py`,
+    `tests/test_gc_runtime_helper_root_maps.py`,
+    `docs/internals.md`, `docs/plans/runtime-memory-management.md`,
+    `docs/plans/README.md`, `docs/roadmap.md`, `Makefile`, `AGENTS.md`.
 
 - `local` - Émettre des cartes candidates de racines internes pour les helpers
   runtime ASM multi-allocation: `src/runtime_asm.cpp` ajoute dans `.data` les

@@ -22,8 +22,11 @@ classes/closures sont testables, les cartes de points d'appel `Runtime_alloc` du
 code utilisateur sont disponibles, l'inventaire des allocations internes aux
 helpers runtime est outillé, les premières cartes candidates de racines internes
 aux helpers runtime assembleur sont émises sous forme de métadonnées inertes, et
-les registres transitoires/slots natifs restent à protéger ou spiller avant tout
-parcours GC.
+`Runtime_buildArgsArray` contient la première protection native concrète en
+spillant `r15` autour de son appel au helper allocant `Runtime_cStringToString`
+et autour de son `Runtime_alloc` final. Le reste des registres
+transitoires/slots natifs reste à protéger ou spiller avant tout parcours GC, et
+les cartes restent non consommées par `Runtime_alloc`.
 La checklist opérationnelle pour intégrer une nouvelle feature est dans
 [`docs/feature-integration.md`](../feature-integration.md).
 
