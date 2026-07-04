@@ -24,7 +24,10 @@ observations high-water/capacité, pas une mesure de mémoire vivante; les
 compteurs GC `gcCollections()`, `gcLastFreedBytes()`,
 `gcLastLargestFreeBlock()`, `heapFreeBytes()` et `heapLargestFreeBlock()`
 exposent le nombre de collectes, le dernier sweep et l'état courant de la
-free-list pour les tests et diagnostics.
+free-list pour les tests et diagnostics. La suite de stress GC couvre désormais
+les temporaires imbriqués, helpers de chaînes, `Array[T]`, tableaux d'objets,
+`Map[K, V]` et `Set[T]` sous heaps serrés afin de garder ces chemins exercés dans
+`make tooling-tests`.
 
 L'inventaire des familles heap et des racines backend reste documenté dans
 `../internals.md`; les métadonnées de racines de frame, les descripteurs

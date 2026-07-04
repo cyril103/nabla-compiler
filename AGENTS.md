@@ -987,6 +987,10 @@ d'inference generique et de typage contextuel des lambdas.
   collectes, `gcLastFreedBytes()` / `gcLastLargestFreeBlock()` décrivent le
   dernier sweep, et `heapFreeBytes()` / `heapLargestFreeBlock()` inspectent la
   free-list courante sans changer `heapUsed()`.
+- [x] Ajouter une suite de stress GC runtime: `tests/test_gc_memory_stress.sh`
+  compile sous heaps serrés des programmes couvrant temporaires imbriqués,
+  helpers de chaînes, `Array[T]`, tableaux d'objets, `Map[K, V]` et `Set[T]`, et
+  vérifie des métriques GC/free-list pour prouver des collectes réelles.
 - [ ] Poursuivre la fondation GC en suivant `docs/plans/runtime-memory-management.md`:
   remplacer progressivement le scan conservateur par les cartes exactes déjà
   émises, généraliser les racines consommables pour les helpers runtime,
@@ -1083,6 +1087,17 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter une suite de stress GC sous heaps serrés: la régression
+  `tests/test_gc_memory_stress.sh` génère et exécute des programmes couvrant les
+  temporaires imbriqués, concaténations/répétitions de chaînes, facades
+  `Array[T]`, tableaux d'objets, `Map[K, V]` et `Set[T]`, avec assertions sur les
+  métriques `gcCollections()`, `gcLastFreedBytes()`, `heapFreeBytes()` ou
+  `heapLargestFreeBlock()` pour prouver une collecte réelle. Elle est intégrée à
+  `make tooling-tests`.
+  - Fichiers / tests associes: `tests/test_gc_memory_stress.sh`, `Makefile`,
+    `docs/plans/runtime-memory-management.md`, `docs/plans/README.md`,
+    `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Découper les blocs libres surdimensionnés pendant `Runtime_alloc`:
   quand un bloc de `heap_free_list` dépasse suffisamment la demande, le runtime
