@@ -133,8 +133,9 @@ features.
   l'inventaire interne des familles heap et des racines backend, plus les
   métadonnées de racines de frame, les descripteurs champs/captures pour
   classes/closures, les cartes de points d'appel `Runtime_alloc` du code
-  utilisateur et l'inventaire outillé des allocations internes aux helpers
-  runtime, fixent la prochaine cible sur la protection des registres
+  utilisateur, l'inventaire outillé des allocations internes aux helpers
+  runtime et les cartes candidates de racines internes aux helpers runtime,
+  fixent la prochaine cible sur la protection des registres/slots natifs
   transitoires et la production de cartes racines runtime consommables.
 - Typage a garder simple : sous-typage nominal pour les classes, generiques
   invariants par defaut, conversions explicites ou helpers stdlib.

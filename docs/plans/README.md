@@ -20,8 +20,10 @@ documenté dans `../internals.md`, les premières métadonnées de racines de fr
 sont émises dans l'assembleur, les descripteurs champs/captures pour
 classes/closures sont testables, les cartes de points d'appel `Runtime_alloc` du
 code utilisateur sont disponibles, l'inventaire des allocations internes aux
-helpers runtime est outillé, et les registres transitoires/cartes racines runtime
-restent à stabiliser avant tout parcours GC.
+helpers runtime est outillé, les premières cartes candidates de racines internes
+aux helpers runtime assembleur sont émises sous forme de métadonnées inertes, et
+les registres transitoires/slots natifs restent à protéger ou spiller avant tout
+parcours GC.
 La checklist opérationnelle pour intégrer une nouvelle feature est dans
 [`docs/feature-integration.md`](../feature-integration.md).
 

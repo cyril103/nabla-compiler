@@ -487,6 +487,14 @@ Limites importantes :
   alignees sur 8 octets, verification de depassement, diagnostic stderr
   `Nabla runtime error: heap exhausted` et sortie 255, mais pas de
   ramasse-miettes;
+- la fondation GC reste additive et sans collecte active: le backend émet des
+  métadonnées de racines de frame, layouts de classes/closures, cartes de points
+  d'appel `Runtime_alloc` du code utilisateur, et le runtime ASM émet des cartes
+  candidates inertes pour les racines internes de helpers multi-allocation
+  (`Runtime_buildArgsArray`, `Runtime_stringToCharArray`, `Runtime_stringSplit`,
+  `Runtime_stringSplitMakeSegment`, `FloatDouble_method_toString`). Ces cartes
+  ne sont pas consommées et ne protègent pas encore automatiquement les
+  registres/slots natifs;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
 - `Nothing` est un type bottom builtin assignable a tout type attendu sans
   valeur instanciable; les primitives globales `panic(message: String)` et
@@ -924,10 +932,16 @@ d'inference generique et de typage contextuel des lambdas.
   `tests/test_gc_runtime_helper_alloc_inventory.py` ancre les appels
   `Runtime_alloc` directs de `src/runtime_asm.cpp` dans `docs/internals.md`, afin
   qu'une nouvelle allocation helper force une décision GC explicite.
+- [x] Émettre les premières cartes candidates de racines internes aux helpers
+  runtime ASM: `nabla_gc_runtime_helper_allocs_<helper>` indexe
+  `nabla_gc_runtime_helper_alloc_<helper>_<index>` pour les helpers
+  multi-allocation effectifs, sans consommation runtime ni activation de
+  collecte.
 - [ ] Poursuivre la fondation GC en suivant `docs/plans/runtime-memory-management.md`:
-  protéger/spiller les registres transitoires autour de `Runtime_alloc` et
-  produire les cartes racines internes aux helpers runtime; ne pas exposer de
-  `delete` public tant que l'aliasing et l'échappement ne sont pas spécifiés.
+  protéger/spiller les registres transitoires et slots natifs autour de
+  `Runtime_alloc`, puis stabiliser des cartes racines internes consommables pour
+  les helpers runtime; ne pas exposer de `delete` public tant que l'aliasing et
+  l'échappement ne sont pas spécifiés.
 - [x] Ajouter une primitive d'affichage console pour `String`.
 - [x] Ajouter une primitive d'entree console `readLine(): String`.
 - [x] Ajouter une premiere lecture/ecriture de fichiers texte.
@@ -1019,6 +1033,22 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Émettre des cartes candidates de racines internes pour les helpers
+  runtime ASM multi-allocation: `src/runtime_asm.cpp` ajoute dans `.data` les
+  labels `nabla_gc_runtime_helper_allocs_<helper>` et
+  `nabla_gc_runtime_helper_alloc_<helper>_<index>` pour
+  `Runtime_buildArgsArray`, `Runtime_stringToCharArray`, `Runtime_stringSplit`,
+  `Runtime_stringSplitMakeSegment` et `FloatDouble_method_toString`. Ces cartes
+  restent conservatrices, non consommées par `Runtime_alloc` et sans spill
+  automatique; la collecte active reste interdite tant que les registres/slots
+  natifs ne sont pas protégés.
+  - Fichiers / tests associes: `src/runtime_asm.cpp`,
+    `tests/test_gc_runtime_helper_root_maps.py`,
+    `tests/test_gc_runtime_helper_alloc_inventory.py`,
+    `tests/test_gc_inventory_docs.py`, `docs/internals.md`,
+    `docs/plans/runtime-memory-management.md`, `docs/plans/README.md`,
+    `docs/roadmap.md`.
 
 - `local` - Inventorier et outiller les allocations internes aux helpers runtime
   pour le futur GC: `tests/test_gc_runtime_helper_alloc_inventory.py` ancre les

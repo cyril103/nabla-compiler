@@ -64,7 +64,7 @@ for needle in [
 
 for needle in [
     "inventaire des allocations internes aux helpers runtime",
-    "cartes racines internes aux helpers runtime assembleur",
+    "cartes racines internes aux helpers runtime",
 ]:
     if needle not in PLAN:
         raise SystemExit(f"runtime memory plan missing helper allocation wording: {needle}")
