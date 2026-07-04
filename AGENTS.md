@@ -495,9 +495,12 @@ Limites importantes :
   `Runtime_stringSplitMakeSegment`, `FloatDouble_method_toString`). Ces cartes
   ne sont pas consommées; `Runtime_buildArgsArray` contient la première
   protection native concrète en spillant `r15` autour de l'appel au helper
-  allocant `Runtime_cStringToString` et du `Runtime_alloc` final,
-  mais la protection automatique générale des registres/slots natifs reste à
-  faire;
+  allocant `Runtime_cStringToString` et du `Runtime_alloc` final, et
+  `Runtime_stringToCharArray` contient la seconde tranche en spillant le owner
+  `String` source autour de l'allocation du tableau brut de caractères puis
+  `rbx` autour de l'allocation de façade `ArrayObject[Char]`, avec cartes
+  candidates `native_stack+8` toujours inertes; la protection automatique
+  générale des registres/slots natifs reste à faire;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
 - `Nothing` est un type bottom builtin assignable a tout type attendu sans
   valeur instanciable; les primitives globales `panic(message: String)` et
@@ -945,6 +948,12 @@ d'inference generique et de typage contextuel des lambdas.
   d'arguments, autour de `Runtime_cStringToString` et du `Runtime_alloc` final.
   La carte candidate correspondante décrit `native_stack+8`, reste non consommée
   par `Runtime_alloc` et n'active aucune collecte.
+- [x] Protéger une seconde tranche de racines natives concrètes dans un helper
+  runtime: `Runtime_stringToCharArray` spille le owner `String` source autour du
+  `Runtime_alloc` du tableau brut de caractères, puis `rbx` autour du
+  `Runtime_alloc` final de façade `ArrayObject[Char]`. Les deux cartes
+  candidates décrivent `native_stack+8`, restent non consommées par
+  `Runtime_alloc` et n'activent aucune collecte.
 - [ ] Poursuivre la fondation GC en suivant `docs/plans/runtime-memory-management.md`:
   généraliser la protection/spill des registres transitoires et slots natifs
   autour de `Runtime_alloc`, puis stabiliser des cartes racines internes
@@ -1041,6 +1050,20 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Protéger les racines natives de `Runtime_stringToCharArray`: le
+  helper runtime spille le owner `String` source autour du `Runtime_alloc` du
+  tableau brut de caractères et `rbx` autour du `Runtime_alloc` final de façade
+  `ArrayObject[Char]`. Les cartes candidates
+  `nabla_gc_runtime_helper_alloc_Runtime_stringToCharArray_0` et
+  `nabla_gc_runtime_helper_alloc_Runtime_stringToCharArray_1` décrivent
+  désormais `native_stack+8`; `r10` reste documenté comme pointeur intérieur
+  non consommable/recalculable, aucune collecte n'est activée.
+  - Fichiers / tests associes: `src/runtime_asm.cpp`,
+    `tests/test_gc_runtime_helper_root_spills.py`,
+    `tests/test_gc_runtime_helper_root_maps.py`, `docs/internals.md`,
+    `docs/plans/runtime-memory-management.md`, `docs/plans/README.md`,
+    `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Protéger la racine native `r15` dans `Runtime_buildArgsArray`:
   le helper runtime spille le tableau brut d'arguments autour de l'appel au

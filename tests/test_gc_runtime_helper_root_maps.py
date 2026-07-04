@@ -51,7 +51,7 @@ for wording in required_wording:
 
 expected_roots = {
     "Runtime_buildArgsArray": [[], ["native_stack+8"]],
-    "Runtime_stringToCharArray": [["interior:r10"], ["rbx"]],
+    "Runtime_stringToCharArray": [["native_stack+8"], ["native_stack+8"]],
     "Runtime_stringSplit": [
         ["r10", "r11", "interior:r14", "interior:r15"],
         ["r10", "r11", "interior:r14"],
