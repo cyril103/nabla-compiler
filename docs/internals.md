@@ -607,6 +607,40 @@ sont pas spillées ou décrites. Les helpers avec plusieurs sites alternatifs su
 branches exclusives, comme `Bool_method_toString`, restent à documenter mais ne
 créent pas le même besoin de conservation entre deux allocations successives.
 
+### Métadonnées De Racines Internes Des Helpers Runtime
+
+Le runtime ASM émet maintenant dans `.data` des cartes candidates pour les
+helpers runtime qui allouent plusieurs fois ou qui participent à un helper
+multi-allocation :
+
+- `nabla_gc_runtime_helper_allocs_<helper>` : index additif dont le premier mot
+  est le nombre de sites `Runtime_alloc` directs couverts pour le helper, suivi
+  des labels `nabla_gc_runtime_helper_alloc_<helper>_<index>`.
+- `nabla_gc_runtime_helper_alloc_<helper>_<index>` : carte candidate minimale
+  pour un site d'allocation interne au helper. Le premier mot est un nombre de
+  racines candidates; les noms de registres ou slots natifs sont conservés sous
+  forme de descripteurs/commentaires ASM pour les tests structuraux.
+
+Ces cartes couvrent aujourd'hui `Runtime_buildArgsArray`,
+`Runtime_stringToCharArray`, `Runtime_stringSplit`,
+`Runtime_stringSplitMakeSegment` et `FloatDouble_method_toString`. Elles listent
+des racines conservatrices comme `r15` pour le tableau brut d'arguments, `rbx`
+pour les stockages `ObjectArray[...]` temporaires, `r10`/`r11` pour les chaînes
+source de `String.split`, et `native_stack+16` pour la chaîne de partie entière
+dans `FloatDouble_method_toString`. Elles signalent aussi les dépendances
+`interior:*` qui restent dangereuses pour un GC mobile ou actif, par exemple les
+pointeurs de bytes `r10`, `r14` ou `r15` dérivés d'un `String` source.
+
+Ces métadonnées sont runtime-inertes, non consommées par `Runtime_alloc` et non
+précises : elles ne spillent aucun registre, ne modifient pas la convention
+d'appel des helpers et ne rendent pas une collecte sûre. Une entrée `interior:*`
+n'est pas une racine consommable : elle documente au contraire un pointeur
+intérieur qui devra être rattaché à son objet propriétaire, recalculé après
+collection ou interdit comme safepoint. La prochaine étape avant toute collecte
+active reste de protéger automatiquement les registres/slots natifs listés ou de
+remplacer ces cartes candidates par des cartes consommables dont le format et les
+points sûrs sont spécifiés.
+
 Ces codes doivent rester documentés au fur et à mesure qu'ils deviennent une
 surface observable par l'utilisateur.
 

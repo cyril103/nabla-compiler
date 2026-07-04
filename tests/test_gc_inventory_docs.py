@@ -71,6 +71,12 @@ required_inventory_terms = [
     "Inventaire Des Allocations Internes Aux Helpers Runtime",
     "Runtime_stringSplitMakeSegment",
     "FloatDouble_method_toString",
+    "Métadonnées De Racines Internes Des Helpers Runtime",
+    "nabla_gc_runtime_helper_allocs_<helper>",
+    "nabla_gc_runtime_helper_alloc_<helper>_<index>",
+    "cartes candidates",
+    "interior:*",
+    "non consommées",
     "cartes racines consommables",
 ]
 
@@ -93,6 +99,10 @@ for term in [
     "nabla_gc_alloc_call_<fonction>_<index>",
     "Inventaire des allocations internes aux helpers runtime couvert",
     "tests/test_gc_runtime_helper_alloc_inventory.py",
+    "Cartes candidates de racines internes aux helpers runtime couvertes",
+    "nabla_gc_runtime_helper_allocs_<helper>",
+    "nabla_gc_runtime_helper_alloc_<helper>_<index>",
+    "tests/test_gc_runtime_helper_root_maps.py",
 ]:
     require(term in PLAN, f"runtime memory plan should track the inventory state: {term}")
 
@@ -108,9 +118,15 @@ require(
     "descripteurs champs/captures pour\n  classes/closures" in ROADMAP,
     "roadmap should mention the GC heap layout descriptors",
 )
+for term in [
+    "cartes de points d'appel `Runtime_alloc` du code",
+    "l'inventaire outillé des allocations internes aux helpers",
+    "runtime et les cartes candidates",
+]:
+    require(term in ROADMAP, f"roadmap should mention the GC runtime helper allocation inventory: {term}")
 require(
-    "cartes de points d'appel `Runtime_alloc` du code\n  utilisateur et l'inventaire outillé des allocations internes aux helpers\n  runtime" in ROADMAP,
-    "roadmap should mention the GC runtime helper allocation inventory",
+    "cartes candidates de racines internes aux helpers runtime" in ROADMAP,
+    "roadmap should mention the GC runtime helper root maps",
 )
 
 # Keep the docs anchored to the implementation families that currently allocate
@@ -158,6 +174,9 @@ for term in [
     "Runtime_stringConcat",
     "Runtime_stringSplit",
     "Runtime_buildArgsArray",
+    "emitRuntimeHelperAllocMetadata",
+    "nabla_gc_runtime_helper_allocs_",
+    "nabla_gc_runtime_helper_alloc_",
 ]:
     require(term in RUNTIME_ASM, f"expected runtime helper missing: {term}")
 
