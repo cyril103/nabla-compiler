@@ -19,7 +19,11 @@ compactante. `Runtime_alloc` utilise un header caché de 16 octets, réutilise
 `Runtime_gc` scanne conservativement la pile native jusqu'à `gc_stack_top`, puis
 les payloads heap marqués jusqu'à fixpoint, avant de sweep les blocs non marqués
 vers la free-list. Les compteurs `heapUsed()` / `heapCapacity()` restent des
-observations high-water/capacité, pas une mesure de mémoire vivante.
+observations high-water/capacité, pas une mesure de mémoire vivante; les
+compteurs GC `gcCollections()`, `gcLastFreedBytes()`,
+`gcLastLargestFreeBlock()`, `heapFreeBytes()` et `heapLargestFreeBlock()`
+exposent le nombre de collectes, le dernier sweep et l'état courant de la
+free-list pour les tests et diagnostics.
 
 L'inventaire des familles heap et des racines backend reste documenté dans
 `../internals.md`; les métadonnées de racines de frame, les descripteurs

@@ -861,6 +861,16 @@ private:
             out << "    call Runtime_heapUsed\n";
         } else if (instruction.operation == "heapCapacity") {
             out << "    call Runtime_heapCapacity\n";
+        } else if (instruction.operation == "gcCollections") {
+            out << "    call Runtime_gcCollections\n";
+        } else if (instruction.operation == "gcLastFreedBytes") {
+            out << "    call Runtime_gcLastFreedBytes\n";
+        } else if (instruction.operation == "gcLastLargestFreeBlock") {
+            out << "    call Runtime_gcLastLargestFreeBlock\n";
+        } else if (instruction.operation == "heapFreeBytes") {
+            out << "    call Runtime_heapFreeBytes\n";
+        } else if (instruction.operation == "heapLargestFreeBlock") {
+            out << "    call Runtime_heapLargestFreeBlock\n";
         } else if (instruction.operation == "panic") {
             out << "    call Runtime_panic\n";
         } else {

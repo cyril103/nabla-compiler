@@ -133,7 +133,10 @@ features.
   retente l'allocation; `Runtime_gc` scanne conservativement la pile native
   jusqu'à `gc_stack_top`, propage dans les payloads heap marqués, puis sweep les
   blocs non marqués vers la free-list sans compacter. Les primitives
-  d'observation `heapUsed()` et `heapCapacity()` restent high-water/capacité.
+  d'observation `heapUsed()` et `heapCapacity()` restent high-water/capacité,
+  complétées par `gcCollections()`, `gcLastFreedBytes()`,
+  `gcLastLargestFreeBlock()`, `heapFreeBytes()` et `heapLargestFreeBlock()` pour
+  diagnostiquer les collectes et la free-list.
   l'inventaire interne des familles heap et des racines backend, les métadonnées
   de racines de frame, les descripteurs champs/captures pour classes/closures,
   les cartes de points d'appel `Runtime_alloc` du code utilisateur, l'inventaire
