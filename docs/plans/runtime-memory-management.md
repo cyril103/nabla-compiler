@@ -2,7 +2,13 @@
 
 **Objectif :** transformer le heap bump-allocated actuel de Nabla en chantier de gestion mémoire explicite et sûr, sans exposer de `delete` dangereux dans la surface normale du langage.
 
-**Architecture :** garder pour l'instant `new` sur le bump allocator `mmap` existant, documenter que les allocations vivent jusqu'à la fin du processus, puis ajouter des capacités runtime incrémentales derrière des sémantiques claires. La surface utilisateur doit rester orientée références sûres (`AnyRef`, `Option[T]`, tableaux/collections); le contrôle manuel doit rester réservé à une future API d'arène ou à un module `unsafe` si un besoin bas niveau concret l'impose.
+**Architecture :** garder `new` sur le heap `mmap` existant, ajouter une
+première collecte runtime conservative et non compactante derrière la même
+surface source, puis remplacer progressivement le scan conservateur par des
+cartes exactes. La surface utilisateur doit rester orientée références sûres
+(`AnyRef`, `Option[T]`, tableaux/collections); le contrôle manuel doit rester
+réservé à une future API d'arène ou à un module `unsafe` si un besoin bas niveau
+concret l'impose.
 
 **Pile technique :** compilateur Nabla C++17 frontend/backend, runtime assembleur x86-64, stdlib/docs/tests Nabla.
 
@@ -10,10 +16,17 @@
 
 ## État Du Plan
 
-- Phase 1 est couverte par la PR qui introduit ce plan : les docs décrivent le heap monotone actuel, l'absence de `delete` mémoire public, `Option[T]` comme modèle d'absence et les options futures.
+- Phase 1 est couverte par la PR qui introduit ce plan : les docs décrivent le
+  contrat heap, l'absence de `delete` mémoire public, `Option[T]` comme modèle
+  d'absence et les options futures.
 - Phase 2 est couverte : le dépassement heap a désormais une régression sous `--heap-size 4096`, un diagnostic stderr stable, le code de sortie 255, des garde-fous contre les wraps arithmétiques de taille d'allocation déjà observés sur les tableaux natifs, et des mitigations utilisateur documentées.
 - Phase 3 choisit le GC traçant simple comme direction par défaut : c'est le modèle qui préserve le mieux la surface Scala-like actuelle (`AnyRef`, `Option[T]`, `Array[T]`, closures) sans introduire de `delete` public ni d'obligations de portée pour le code utilisateur.
-- Le delta actif passe à la fondation GC : `heapUsed()` / `heapCapacity()` exposent maintenant des points d'observation runtime sans collecte; l'inventaire des familles heap et des racines backend est documenté, les premières métadonnées de racines de frame sont émises sous forme de descripteurs testables, les descripteurs de champs/captures heap sont présents pour les classes/closures, les cartes de points d'appel `Runtime_alloc` générés par le code utilisateur sont disponibles, l'inventaire des allocations internes aux helpers runtime est outillé, et les helpers runtime multi-allocation émettent des cartes candidates inertes. La suite consiste à protéger/spiller les registres et slots natifs transitoires avant tout parcours GC.
+- Le delta actif introduit une première collecte réelle : `Runtime_alloc`
+  réutilise une free-list, lance `Runtime_gc` avant overflow, et `Runtime_gc`
+  trace conservativement la pile native puis les payloads heap sans déplacer les
+  objets. `heapUsed()` reste un high-water mark basé sur `heap_pointer`; les
+  métadonnées exactes de racines/layouts/points d'appel restent disponibles mais
+  non consommées.
 
 ## Non-objectifs Pour La Surface Normale
 
@@ -35,7 +48,9 @@
 1. `new`, chaînes, tableaux, closures, valeurs boxées allouées sur le heap et singletons runtime produisent des références heap ou des références runtime stables, mais aucun `delete` source n'existe.
 2. L'absence de valeur doit passer par `Option[T]`, pas par un `null` public.
 3. `deleteTextFile` / `deleteFile` restent explicitement limités à la suppression de fichiers.
-4. L'allocateur courant est monotone : les allocations sont récupérées seulement à la fin du processus.
+4. L'ancien allocateur monotone est documenté comme état historique; le runtime
+   courant peut récupérer des blocs via une free-list après collecte
+   conservative.
 5. La libération manuelle reste reportée; la phase 3 retient un GC traçant simple comme direction sûre par défaut, avec arènes ou couche `unsafe` seulement pour de futurs besoins spécialisés.
 
 ## Phase 2: Améliorer L'Observabilité De La Pression Heap
@@ -67,11 +82,13 @@ Raisons :
 - Ne pas activer une collecte tant que les racines ne sont pas énumérées de façon fiable.
 - Ne pas changer la surface source : pas de `delete`, pas de pointeurs bruts, pas de `null` public.
 - Préférer des métadonnées runtime additives au-dessus des headers actuels plutôt qu'une ABI publique figée.
-- Garder le bump allocator actuel comme fallback et comme point d'observation pendant la transition.
+- Garder le bump allocator comme chemin rapide et high-water mark pendant la
+  transition, avec free-list pour les blocs libérés par sweep.
 
-**Delta actif : fondation GC sans collecte active.**
-1. Points d'observation couverts : `heapUsed()` et `heapCapacity()` lisent l'état
-   du bump allocator sans changer la sémantique utilisateur.
+**Delta actif : première collecte conservative active.**
+1. Points d'observation couverts : `heapUsed()` et `heapCapacity()` lisent encore
+   l'état bump/high-water sans changer la sémantique utilisateur; `heapUsed()`
+   n'est pas une mesure de mémoire vivante après sweep.
 2. Inventaire heap couvert dans `docs/internals.md` : `String`, tableaux natifs,
    `ArrayObject[T]`, instances utilisateur, closures, valeurs boxées,
    singletons runtime et valeurs immédiates.
@@ -83,6 +100,8 @@ Raisons :
    `nabla_gc_frame_roots_<fonction>` dans `.data` avec le nombre de slots
    référence-capables et leurs offsets `rbp` positifs. Ces descripteurs sont
    testables mais non consommés par le runtime.
+   Les métadonnées de racines de frame restent donc des descripteurs testables
+   exacts, distincts du scan conservateur actif.
 5. Descripteurs de champs/captures heap couverts pour les classes et closures :
    `nabla_gc_object_layout_<classe>` liste les champs référence-capables et
    `nabla_gc_closure_layout_<fonction>_<result>` liste les captures
@@ -99,6 +118,9 @@ Raisons :
    `Runtime_alloc` directs de `src/runtime_asm.cpp` dans `docs/internals.md` et
    force une mise à jour explicite quand un helper runtime gagne ou perd une
    allocation.
+   Cet inventaire des allocations internes aux helpers runtime reste nécessaire
+   pendant que les cartes racines internes aux helpers runtime ne sont pas
+   consommées.
 8. Cartes candidates de racines internes aux helpers runtime couvertes :
    `nabla_gc_runtime_helper_allocs_<helper>` indexe les cartes
    `nabla_gc_runtime_helper_alloc_<helper>_<index>` pour
@@ -142,10 +164,17 @@ Raisons :
    candidates décrivent désormais `native_stack+8`; `[rsp + 16]` reste un slot
    local du helper, mais la racine concrètement protégée au safepoint est le
    `push r10`. Les cartes restent inertes et non consommées par `Runtime_alloc`.
-14. Ajouter ensuite la protection/spill automatique des registres transitoires et
-   slots natifs autour de `Runtime_alloc`, puis remplacer ou stabiliser ces
-   cartes candidates en cartes consommables avant tout parcours GC.
-15. Introduire la collecte seulement dans une PR ultérieure, derrière des régressions runtime dédiées.
+14. Collecte active conservative couverte : `Runtime_alloc` ajoute un header
+   caché de 16 octets par bloc, cherche `heap_free_list`, tente le bump, appelle
+   `Runtime_gc` avant overflow, puis retente. `Runtime_gc` scanne la pile native
+   jusqu'à `gc_stack_top`, propage en scannant les payloads des blocs marqués
+   jusqu'à fixpoint, puis sweep les blocs non marqués vers la free-list. Aucun
+   pointeur payload n'est déplacé.
+15. Ajouter ensuite la protection/spill automatique des registres transitoires et
+   slots natifs autour de `Runtime_alloc`, remplacer ou stabiliser les cartes
+   candidates en cartes consommables, raffiner `heapUsed()` si besoin, et réduire
+   les faux positifs du scan conservateur en consommant progressivement les
+   métadonnées exactes.
 
 ## Phase 4: Esquisses D'API Futures, Pas Des Engagements
 

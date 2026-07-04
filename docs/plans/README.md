@@ -12,31 +12,23 @@ Le cap post-0.1 courant est décrit dans [`docs/roadmap.md`](../roadmap.md) :
 durcissement héritage/runtime, nettoyage de la surface stdlib et maintien de
 [`docs/internals.md`](../internals.md). Le chantier actif de stratégie mémoire
 runtime est suivi dans [`runtime-memory-management.md`](runtime-memory-management.md);
-après formalisation du heap monotone et des mitigations de pression heap, son
-delta courant est la fondation d'un GC traçant simple non compactant; les
-compteurs `heapUsed()` / `heapCapacity()` sont disponibles comme observation
-sans collecte, l'inventaire des familles heap et des racines backend est
-documenté dans `../internals.md`, les premières métadonnées de racines de frame
-sont émises dans l'assembleur, les descripteurs champs/captures pour
-classes/closures sont testables, les cartes de points d'appel `Runtime_alloc` du
-code utilisateur sont disponibles, l'inventaire des allocations internes aux
-helpers runtime est outillé, les premières cartes candidates de racines internes
-aux helpers runtime assembleur sont émises sous forme de métadonnées inertes,
-`Runtime_buildArgsArray` contient la première protection native concrète en
-spillant `r15` autour de son appel au helper allocant `Runtime_cStringToString`
-et autour de son `Runtime_alloc` final, et `Runtime_stringToCharArray` contient
-la seconde tranche en spillant le owner `String` source puis `rbx` autour de ses
-deux allocations directes. `Runtime_stringSplit` et
-`Runtime_stringSplitMakeSegment` couvrent maintenant une tranche additive
-supplémentaire en spillant les owners `String` source/séparateur, `rbx` pour le
-tableau brut `ObjectArray[String]` et `r10` pour le owner source de segment
-autour de leurs `Runtime_alloc`; `r14`/`r15` restent des pointeurs intérieurs
-recalculables non consommables. `FloatDouble_method_toString` couvre maintenant
-la tranche suivante en spillant `r10`, owner `String` de la partie entière,
-autour de ses deux allocations directes; les cartes candidates correspondantes
-décrivent `native_stack+8` et restent non consommées par `Runtime_alloc`. Le
-reste des registres transitoires/slots natifs reste à protéger ou spiller avant
-tout parcours GC, et les cartes restent non consommées par `Runtime_alloc`.
+après formalisation du heap et des mitigations de pression heap, son delta
+courant introduit une première collecte GC conservative active, traçante et non
+compactante. `Runtime_alloc` utilise un header caché de 16 octets, réutilise
+`heap_free_list`, appelle `Runtime_gc` avant overflow et retente l'allocation;
+`Runtime_gc` scanne conservativement la pile native jusqu'à `gc_stack_top`, puis
+les payloads heap marqués jusqu'à fixpoint, avant de sweep les blocs non marqués
+vers la free-list. Les compteurs `heapUsed()` / `heapCapacity()` restent des
+observations high-water/capacité, pas une mesure de mémoire vivante.
+
+L'inventaire des familles heap et des racines backend reste documenté dans
+`../internals.md`; les métadonnées de racines de frame, les descripteurs
+champs/captures, les cartes de points d'appel `Runtime_alloc`, l'inventaire des
+allocations internes aux helpers runtime et les cartes candidates de racines
+internes aux helpers runtime sont toujours émis comme métadonnées inertes. Elles
+ne sont pas encore consommées par `Runtime_alloc` ou `Runtime_gc`; la suite du
+plan consiste à réduire les faux positifs conservateurs en consommant
+progressivement ces cartes exactes et en raffinant `heapUsed()` si nécessaire.
 La checklist opérationnelle pour intégrer une nouvelle feature est dans
 [`docs/feature-integration.md`](../feature-integration.md).
 

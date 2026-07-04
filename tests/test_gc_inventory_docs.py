@@ -52,7 +52,7 @@ required_inventory_terms = [
     "Racines statiques",
     "État runtime transitoire",
     "Runtime_alloc",
-    "carte d'appel minimale",
+    "spillant les registres généraux",
     "descripteur additif par fonction",
     "Métadonnées De Racines De Frame GC",
     "nabla_gc_frame_roots_<fonction>",

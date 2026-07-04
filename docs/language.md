@@ -776,13 +776,15 @@ def main(): Int = {
 ### Pression Heap Des Chaines
 
 Les operations `+`, `repeat`, `substring`, `trim`, `split` et `toCharArray`
-allouent de nouvelles valeurs sur le heap runtime. Comme le heap courant est
-monotone, ces allocations ne sont pas libérées avant la fin du processus. Pour
-les traitements volumineux, préférer une accumulation bornée, factoriser les
-transformations dans quelques tableaux réutilisés quand c'est possible, et
-augmenter explicitement la capacité avec `nablac --heap-size <octets>` si le
-volume attendu est connu. Un dépassement termine le programme avec le diagnostic
-`Nabla runtime error: heap exhausted` sur stderr et le code de sortie 255.
+allouent de nouvelles valeurs sur le heap runtime. Le collecteur conservateur
+non compactant peut récupérer des chaînes devenues inaccessibles, mais les faux
+positifs et la fragmentation restent possibles; pour les traitements
+volumineux, préférer une accumulation bornée, factoriser les transformations
+dans quelques tableaux réutilisés quand c'est possible, et augmenter
+explicitement la capacité avec `nablac --heap-size <octets>` si le volume attendu
+est connu. Un dépassement persistant après collecte termine le programme avec le
+diagnostic `Nabla runtime error: heap exhausted` sur stderr et le code de sortie
+255.
 
 ## Tableaux Et Collections
 
@@ -791,7 +793,7 @@ aux fonctions communes. C'est l'API recommandee pour le code utilisateur :
 les types plus bas niveau comme `IntArray`, `ArrayInt`, `ObjectArray[T]` et
 `ArrayObject[T]` sont surtout des details d'implementation de la bibliotheque.
 Les fabriques comme `Array.fill`, `Array.tabulate`, `Array.range` et les
-operations qui retournent un nouveau tableau allouent sur le même heap monotone :
+operations qui retournent un nouveau tableau allouent sur le même heap runtime :
 préférer réutiliser un tableau mutable via `set` quand le volume est grand et
 que l'algorithme le permet.
 
@@ -1160,23 +1162,23 @@ projet, puis dans `stdlib/`.
 ## Limites Actuelles
 
 - Les chaines sont byte-based/ASCII, pas encore Unicode.
-- La memoire utilise par défaut un heap `mmap` de 8 MiB avec bump allocator,
-  sans liberation ni GC. Les allocations produites par `new`, les tableaux,
-  les chaînes, les closures et les valeurs boxées allouées sur le heap vivent
-  donc jusqu'à la fin du processus; Nabla n'expose pas de `delete` mémoire ni de
-  `free` source. Pour représenter l'absence de valeur, utiliser `Option[T]`
-  plutôt qu'un `null` public. `nablac --heap-size <octets>` permet de compiler
-  un exécutable avec une autre capacité de heap (minimum 4096 octets, maximum
-  représentable par `Int`). Les
-  primitives d'observation `heapUsed(): Int` et `heapCapacity(): Int` retournent
-  respectivement le nombre d'octets déjà réservés par le bump allocator et la
-  capacité compilée de l'exécutable; elles n'activent aucune collecte. En cas de
-  dépassement du heap, le runtime écrit `Nabla runtime error: heap exhausted`
-  sur stderr et termine avec le code 255. Les sections `Chaines` et
-  `Tableaux Et Collections` listent les mitigations usuelles pour réduire la
-  pression heap sans changer le modèle mémoire. La direction de récupération
-  choisie pour la suite est un GC traçant simple non compactant, mais aucune
-  collecte n'est active aujourd'hui.
+- La memoire utilise par défaut un heap `mmap` de 8 MiB. Chaque allocation a un
+  header runtime caché, puis un payload stable retourné au programme; Nabla
+  n'expose pas de `delete` mémoire ni de `free` source. Pour représenter
+  l'absence de valeur, utiliser `Option[T]` plutôt qu'un `null` public.
+  `nablac --heap-size <octets>` permet de compiler un exécutable avec une autre
+  capacité de heap (minimum 4096 octets, maximum représentable par `Int`). Le
+  runtime active une première collecte traçante conservative non compactante en
+  cas de pression heap: il scanne la pile native et les payloads heap marqués,
+  puis réutilise les blocs sweepés via une free-list. Les faux positifs restent
+  possibles et aucune compaction n'est effectuée. Les primitives d'observation
+  `heapUsed(): Int` et `heapCapacity(): Int` retournent respectivement le
+  high-water mark du pointeur bump et la capacité compilée de l'exécutable; elles
+  ne représentent pas encore la mémoire vivante après sweep. En cas de
+  dépassement persistant après collecte, le runtime écrit `Nabla runtime error:
+  heap exhausted` sur stderr et termine avec le code 255. Les sections `Chaines`
+  et `Tableaux Et Collections` listent les mitigations usuelles pour réduire la
+  pression heap sans changer le modèle mémoire.
 - Les objets utilisateur stockent un pointeur de vtable backend dans leur
   header et les appels de méthodes utilisateur sont virtuels par défaut quand
   la valeur est manipulée via un type parent, y compris pour un parent générique
