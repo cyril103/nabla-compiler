@@ -421,11 +421,16 @@ additives pour la prochaine étape. `Runtime_heapUsed` retourne donc encore
 après sweep, tandis que `Runtime_heapCapacity` retourne `heap_capacity`; les
 primitives source `heapUsed()` / `heapCapacity()` exposent ces compteurs. Pour
 l'observabilité GC, `Runtime_gc` incrémente `gc_collections` au début de chaque
-collecte et remet à zéro puis remplit `gc_last_freed_bytes` avec les payloads
-nouvellement récupérés et `gc_last_largest_free_block` avec le plus gros bloc
-libre produit par le sweep. Les primitives
-`gcCollections()`, `gcLastFreedBytes()` et `gcLastLargestFreeBlock()` exposent
-ces valeurs de dernière collecte. `Runtime_heapFreeBytes` et
+collecte et remet à zéro puis remplit les métriques de dernière collecte :
+`gc_last_freed_bytes` additionne les payloads nouvellement récupérés,
+`gc_last_largest_free_block` retient le plus gros bloc libre produit par le
+sweep, `gc_last_marked_blocks` compte les blocs marqués, `gc_last_freed_blocks`
+compte les blocs alloués devenus libres, `gc_last_stack_words` compte les mots
+de pile native inspectés et `gc_last_heap_words` compte les mots payload heap
+inspectés pendant la propagation conservatrice. Les primitives
+`gcCollections()`, `gcLastFreedBytes()`, `gcLastLargestFreeBlock()`,
+`gcLastMarkedBlocks()`, `gcLastFreedBlocks()`, `gcLastStackWords()` et
+`gcLastHeapWords()` exposent ces valeurs de dernière collecte. `Runtime_heapFreeBytes` et
 `Runtime_heapLargestFreeBlock` parcourent `heap_free_list` à la demande pour
 exposer `heapFreeBytes()` et `heapLargestFreeBlock()`, utiles pour diagnostiquer
 la fragmentation sans changer la sémantique high-water de `heapUsed()`.

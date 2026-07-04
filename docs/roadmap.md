@@ -134,10 +134,12 @@ features.
   retente l'allocation; `Runtime_gc` scanne conservativement la pile native
   jusqu'à `gc_stack_top`, propage dans les payloads heap marqués, puis sweep les
   blocs non marqués vers la free-list sans compacter. Les primitives
-  d'observation `heapUsed()` et `heapCapacity()` restent high-water/capacité,
-  complétées par `gcCollections()`, `gcLastFreedBytes()`,
-  `gcLastLargestFreeBlock()`, `heapFreeBytes()` et `heapLargestFreeBlock()` pour
-  diagnostiquer les collectes et la free-list. Le filet de stress
+  d'observation `heapUsed()` et `heapCapacity()` restent high-water/capacité;
+  les métriques `gcCollections()`, `gcLastFreedBytes()`,
+  `gcLastLargestFreeBlock()`, `gcLastMarkedBlocks()`, `gcLastFreedBlocks()`,
+  `gcLastStackWords()`, `gcLastHeapWords()`, `heapFreeBytes()` et
+  `heapLargestFreeBlock()` aident à diagnostiquer les collectes, le marquage,
+  le volume de scan conservateur et la free-list. Le filet de stress
   `tests/test_gc_memory_stress.sh` exerce également sous heaps serrés les
   temporaires imbriqués, helpers de chaînes, `Array[T]`, tableaux d'objets,
   `Map[K, V]` et `Set[T]`. Par ailleurs,
@@ -148,11 +150,11 @@ features.
   de racines internes aux helpers runtime restent inertes et non consommées par
   `Runtime_alloc` / `Runtime_gc`. La prochaine cible est de remplacer
   progressivement le scan conservateur par ces cartes exactes consommables, de
-  réduire les faux positifs et de raffiner `heapUsed()` si nécessaire. Les
-  métadonnées de racines de frame restent documentées comme base exacte future;
-  les descripteurs champs/captures pour
-  classes/closures aussi. l'inventaire outillé des allocations internes aux helpers
-  runtime reste l'ancre des sites assembleur directs; les cartes candidates de racines internes aux helpers runtime restent l'ancre des racines natives.
+  réduire les faux positifs et de raffiner `heapUsed()` si nécessaire; les
+  métadonnées de racines de frame, les descripteurs champs/captures pour
+  classes/closures, l'inventaire outillé des allocations internes aux helpers
+  runtime et les cartes candidates de racines internes aux helpers runtime
+  restent les ancres documentées de cette transition.
 - Typage a garder simple : sous-typage nominal pour les classes, generiques
   invariants par defaut, conversions explicites ou helpers stdlib.
 - Documentation : la reference HTML doit rester une doc utilisateur claire,

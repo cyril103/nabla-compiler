@@ -1615,6 +1615,10 @@ std::string FunctionCallNode::getType() {
     if (name == "gcCollections") return "Int";
     if (name == "gcLastFreedBytes") return "Int";
     if (name == "gcLastLargestFreeBlock") return "Int";
+    if (name == "gcLastMarkedBlocks") return "Int";
+    if (name == "gcLastFreedBlocks") return "Int";
+    if (name == "gcLastStackWords") return "Int";
+    if (name == "gcLastHeapWords") return "Int";
     if (name == "heapFreeBytes") return "Int";
     if (name == "heapLargestFreeBlock") return "Int";
     return resolvedType;
@@ -1782,6 +1786,8 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
     }
     if (name == "heapUsed" || name == "heapCapacity" || name == "gcCollections" ||
         name == "gcLastFreedBytes" || name == "gcLastLargestFreeBlock" ||
+        name == "gcLastMarkedBlocks" || name == "gcLastFreedBlocks" ||
+        name == "gcLastStackWords" || name == "gcLastHeapWords" ||
         name == "heapFreeBytes" || name == "heapLargestFreeBlock") {
         if (!typeArguments.empty()) {
             semanticError("la primitive '" + name + "' n'accepte pas d'arguments de type");

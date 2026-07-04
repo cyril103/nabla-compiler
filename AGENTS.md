@@ -488,7 +488,9 @@ Limites importantes :
   découpage des blocs libres surdimensionnés lors de la réallocation,
   collecte GC conservative non compactante avant dépassement, compteurs
   d'observabilité (`gcCollections()`, `gcLastFreedBytes()`,
-  `gcLastLargestFreeBlock()`, `heapFreeBytes()`, `heapLargestFreeBlock()`),
+  `gcLastLargestFreeBlock()`, `gcLastMarkedBlocks()`, `gcLastFreedBlocks()`,
+  `gcLastStackWords()`, `gcLastHeapWords()`, `heapFreeBytes()`,
+  `heapLargestFreeBlock()`),
   diagnostic stderr `Nabla runtime error: heap exhausted` et sortie 255 si
   l'allocation échoue encore après collecte;
 - la fondation GC exacte reste additive: le backend émet des métadonnées de
@@ -987,6 +989,10 @@ d'inference generique et de typage contextuel des lambdas.
   collectes, `gcLastFreedBytes()` / `gcLastLargestFreeBlock()` décrivent le
   dernier sweep, et `heapFreeBytes()` / `heapLargestFreeBlock()` inspectent la
   free-list courante sans changer `heapUsed()`.
+- [x] Ajouter des métriques GC détaillées de dernière collecte:
+  `gcLastMarkedBlocks()`, `gcLastFreedBlocks()`, `gcLastStackWords()` et
+  `gcLastHeapWords()` mesurent les blocs marqués/libérés et le volume de scan
+  conservateur pile/heap pour instrumenter le coût du collecteur.
 - [x] Ajouter une suite de stress GC runtime: `tests/test_gc_memory_stress.sh`
   compile sous heaps serrés des programmes couvrant temporaires imbriqués,
   helpers de chaînes, `Array[T]`, tableaux d'objets, `Map[K, V]` et `Set[T]`, et
@@ -1087,6 +1093,18 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter des métriques GC détaillées de dernière collecte: le runtime
+  remet à zéro au début de `Runtime_gc` puis expose `gcLastMarkedBlocks()`,
+  `gcLastFreedBlocks()`, `gcLastStackWords()` et `gcLastHeapWords()` pour mesurer
+  respectivement les blocs marqués, les blocs alloués libérés, les mots de pile
+  native scannés et les mots payload heap inspectés pendant la propagation
+  conservatrice. La régression `tests/test_gc_detailed_metrics.sh` vérifie les
+  primitives, les marqueurs assembleur et les noms réservés.
+  - Fichiers / tests associes: `src/runtime_asm.cpp`, `src/ast.cpp`,
+    `src/parser.cpp`, `src/ir_codegen.cpp`, `tests/test_gc_detailed_metrics.sh`,
+    `Makefile`, `docs/internals.md`, `docs/plans/runtime-memory-management.md`,
+    `docs/plans/README.md`, `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Ajouter une suite de stress GC sous heaps serrés: la régression
   `tests/test_gc_memory_stress.sh` génère et exécute des programmes couvrant les

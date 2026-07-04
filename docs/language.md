@@ -1178,10 +1178,13 @@ projet, puis dans `stdlib/`.
   high-water mark du pointeur bump et la capacité compilée de l'exécutable; elles
   ne représentent pas encore la mémoire vivante après sweep. Les compteurs
   runtime `gcCollections(): Int`, `gcLastFreedBytes(): Int`,
-  `gcLastLargestFreeBlock(): Int`, `heapFreeBytes(): Int` et
-  `heapLargestFreeBlock(): Int` exposent une observabilité GC minimale pour les
-  tests et diagnostics: nombre de collectes, octets/libre le plus grand bloc de
-  la dernière collecte, puis état courant de la free-list. En cas de
+  `gcLastLargestFreeBlock(): Int`, `gcLastMarkedBlocks(): Int`,
+  `gcLastFreedBlocks(): Int`, `gcLastStackWords(): Int`,
+  `gcLastHeapWords(): Int`, `heapFreeBytes(): Int` et
+  `heapLargestFreeBlock(): Int` exposent l'observabilité GC pour les tests et
+  diagnostics: nombre de collectes, octets/libre le plus grand bloc de la
+  dernière collecte, blocs marqués/libérés, volume de scan conservateur pile/heap,
+  puis état courant de la free-list. En cas de
   dépassement persistant après collecte, le runtime écrit `Nabla runtime error:
   heap exhausted` sur stderr et termine avec le code 255. Les sections `Chaines`
   et `Tableaux Et Collections` listent les mitigations usuelles pour réduire la

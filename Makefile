@@ -230,6 +230,7 @@ tooling-tests: nablac unit-tests stdlib-docs format-check
 	@tests/test_heap_stats_builtins.sh
 	@tests/test_gc_active_collection.sh
 	@tests/test_gc_runtime_metrics.sh
+	@tests/test_gc_detailed_metrics.sh
 	@tests/test_gc_free_list_splitting.sh
 	@tests/test_gc_memory_stress.sh
 	@tests/test_gc_frame_root_metadata.sh
