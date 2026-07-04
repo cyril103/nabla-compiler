@@ -501,10 +501,13 @@ Limites importantes :
   `rbx` autour de l'allocation de façade `ArrayObject[Char]`, et
   `Runtime_stringSplit` / `Runtime_stringSplitMakeSegment` contiennent la tranche
   suivante en spillant les owners `String` source/séparateur, `rbx` destination
-  et `r10` owner source de segment autour de leurs allocations directes. Les
-  cartes candidates `native_stack+8` / `native_stack+16` restent inertes;
-  `r14`/`r15` restent des pointeurs intérieurs/recalculables non consommables;
-  la protection automatique générale des registres/slots natifs reste à faire;
+  et `r10` owner source de segment autour de leurs allocations directes, et
+  `FloatDouble_method_toString` contient la tranche suivante en spillant `r10`
+  owner `String` de la partie entière autour des deux allocations directes des
+  chemins fractionnel et sans fraction non nulle. Les cartes candidates
+  `native_stack+8` / `native_stack+16` restent inertes; `r14`/`r15` restent des
+  pointeurs intérieurs/recalculables non consommables; la protection automatique
+  générale des registres/slots natifs reste à faire;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
 - `Nothing` est un type bottom builtin assignable a tout type attendu sans
   valeur instanciable; les primitives globales `panic(message: String)` et
@@ -967,6 +970,13 @@ d'inference generique et de typage contextuel des lambdas.
   candidates décrivent `native_stack+8` / `native_stack+16`, restent non
   consommées par `Runtime_alloc` et n'activent aucune collecte; `r14`/`r15`
   restent des pointeurs intérieurs/recalculables non consommables.
+- [x] Protéger les racines natives concrètes de `FloatDouble_method_toString`:
+  le helper spille `r10`, owner `String` de la partie entière produite par
+  `Int_method_toString`, autour des deux `Runtime_alloc` directs des chemins
+  fractionnel et sans fraction non nulle. Les cartes candidates décrivent
+  désormais `native_stack+8`; `[rsp + 16]` reste un slot local du helper, mais la
+  racine concrètement protégée au safepoint est le `push r10`. Les cartes
+  restent non consommées par `Runtime_alloc` et n'activent aucune collecte.
 - [ ] Poursuivre la fondation GC en suivant `docs/plans/runtime-memory-management.md`:
   généraliser la protection/spill des registres transitoires et slots natifs
   autour de `Runtime_alloc`, puis stabiliser des cartes racines internes
@@ -1063,6 +1073,19 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Protéger les racines natives de `FloatDouble_method_toString`: le
+  helper spille `r10`, owner `String` de la partie entière, autour des deux
+  `Runtime_alloc` directs des chemins fractionnel et sans fraction non nulle.
+  Les deux cartes candidates décrivent maintenant `native_stack+8`; `[rsp + 16]`
+  reste un slot local du helper, mais la racine concrètement protégée au
+  safepoint est le `push r10`. Les cartes restent inertes et non consommées par
+  `Runtime_alloc`; aucune collecte n'est activée.
+  - Fichiers / tests associes: `src/runtime_asm.cpp`,
+    `tests/test_gc_runtime_helper_root_spills.py`,
+    `tests/test_gc_runtime_helper_root_maps.py`, `docs/internals.md`,
+    `docs/plans/runtime-memory-management.md`, `docs/plans/README.md`,
+    `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Protéger les racines natives de `Runtime_stringSplit` et
   `Runtime_stringSplitMakeSegment`: le helper split spille les owners `String`

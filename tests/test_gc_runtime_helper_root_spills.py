@@ -278,4 +278,62 @@ for descriptor in ['"native_stack+8", 0', '"native_stack+16", 0', '"interior:r14
         f"Runtime_stringSplitMakeSegment alloc 0 should describe {descriptor}",
     )
 
+block_match = re.search(
+    r"^FloatDouble_method_toString:\n(.*?)(?=^Any_hashCode:)",
+    asm,
+    re.MULTILINE | re.DOTALL,
+)
+require(block_match is not None, "missing FloatDouble_method_toString block in generated ASM")
+float_double_to_string = block_match.group(1)
+
+require_ordered(
+    float_double_to_string,
+    [
+        ".L_float_double_prefix_done:",
+        "mov r15, r12",
+        "add r15, 7",
+        "mov rdi, r15",
+        "add rdi, 24",
+        "; gc runtime helper root spill begin: preserve r10 integer-part String across fractional Runtime_alloc",
+        "push r10",
+        "call Runtime_alloc",
+        "pop r10",
+        "; gc runtime helper root spill end: restore r10 integer-part String after fractional Runtime_alloc",
+    ],
+    "FloatDouble_method_toString fractional result allocation spill",
+)
+
+require_ordered(
+    float_double_to_string,
+    [
+        ".L_float_double_no_fraction_copy_prefix:",
+        "mov r15, r12",
+        "add r15, 7",
+        "mov rdi, r15",
+        "add rdi, 24",
+        "; gc runtime helper root spill begin: preserve r10 integer-part String across no-fraction Runtime_alloc",
+        "push r10",
+        "call Runtime_alloc",
+        "pop r10",
+        "; gc runtime helper root spill end: restore r10 integer-part String after no-fraction Runtime_alloc",
+    ],
+    "FloatDouble_method_toString no-fraction result allocation spill",
+)
+
+for index in (0, 1):
+    map_match = re.search(
+        rf"^\s*nabla_gc_runtime_helper_alloc_FloatDouble_method_toString_{index}: dq 1"
+        r"(.*?)(?=^\s*nabla_gc_runtime_helper_alloc_|^\s*nabla_gc_runtime_helper_allocs_|^section )",
+        asm,
+        re.MULTILINE | re.DOTALL,
+    )
+    require(
+        map_match is not None,
+        f"missing FloatDouble_method_toString alloc {index} helper root map",
+    )
+    require(
+        '"native_stack+8", 0' in map_match.group(1),
+        f"FloatDouble_method_toString alloc {index} should describe spilled r10 as native_stack+8",
+    )
+
 print("PASS: runtime helper root spills preserve native owners around allocing helper calls")

@@ -135,10 +135,17 @@ Raisons :
    segment. A l'entrée de `Runtime_alloc`, `native_stack+8` décrit `r10` et
    `native_stack+16` décrit `rbx`; `r14` reste intérieur/recalculable et les
    cartes restent inertes.
-13. Ajouter ensuite la protection/spill automatique des registres transitoires et
+13. Cinquième protection native concrète couverte :
+   `FloatDouble_method_toString` spille `r10`, owner `String` de la partie
+   entière produite par `Int_method_toString`, autour des deux `Runtime_alloc`
+   directs des chemins fractionnel et sans fraction non nulle. Les deux cartes
+   candidates décrivent désormais `native_stack+8`; `[rsp + 16]` reste un slot
+   local du helper, mais la racine concrètement protégée au safepoint est le
+   `push r10`. Les cartes restent inertes et non consommées par `Runtime_alloc`.
+14. Ajouter ensuite la protection/spill automatique des registres transitoires et
    slots natifs autour de `Runtime_alloc`, puis remplacer ou stabiliser ces
    cartes candidates en cartes consommables avant tout parcours GC.
-14. Introduire la collecte seulement dans une PR ultérieure, derrière des régressions runtime dédiées.
+15. Introduire la collecte seulement dans une PR ultérieure, derrière des régressions runtime dédiées.
 
 ## Phase 4: Esquisses D'API Futures, Pas Des Engagements
 
