@@ -21,12 +21,14 @@ sont émises dans l'assembleur, les descripteurs champs/captures pour
 classes/closures sont testables, les cartes de points d'appel `Runtime_alloc` du
 code utilisateur sont disponibles, l'inventaire des allocations internes aux
 helpers runtime est outillé, les premières cartes candidates de racines internes
-aux helpers runtime assembleur sont émises sous forme de métadonnées inertes, et
+aux helpers runtime assembleur sont émises sous forme de métadonnées inertes,
 `Runtime_buildArgsArray` contient la première protection native concrète en
 spillant `r15` autour de son appel au helper allocant `Runtime_cStringToString`
-et autour de son `Runtime_alloc` final. Le reste des registres
-transitoires/slots natifs reste à protéger ou spiller avant tout parcours GC, et
-les cartes restent non consommées par `Runtime_alloc`.
+et autour de son `Runtime_alloc` final, et `Runtime_stringToCharArray` contient
+la seconde tranche en spillant le owner `String` source puis `rbx` autour de ses
+deux allocations directes. Le reste des registres transitoires/slots natifs
+reste à protéger ou spiller avant tout parcours GC, et les cartes restent non
+consommées par `Runtime_alloc`.
 La checklist opérationnelle pour intégrer une nouvelle feature est dans
 [`docs/feature-integration.md`](../feature-integration.md).
 

@@ -110,4 +110,57 @@ require(
     "Runtime_buildArgsArray alloc 1 should describe spilled r15 as native_stack+8",
 )
 
-print("PASS: Runtime_buildArgsArray spills r15 around allocing helper calls")
+block_match = re.search(
+    r"^Runtime_stringToCharArray:\n(.*?)(?=^Runtime_stringSubstring:)",
+    asm,
+    re.MULTILINE | re.DOTALL,
+)
+require(block_match is not None, "missing Runtime_stringToCharArray block in generated ASM")
+string_to_char_array = block_match.group(1)
+
+require_ordered(
+    string_to_char_array,
+    [
+        "mov r11, [rdi + 8]",
+        "mov r10, [rdi + 16]",
+        "; gc runtime helper root spill begin: preserve source String owner across raw char array Runtime_alloc",
+        "push rdi",
+        "lea rdi, [r11 * 8 + 16]",
+        "call Runtime_alloc",
+        "pop rdi",
+        "; gc runtime helper root spill end: restore source String owner after raw char array Runtime_alloc",
+    ],
+    "Runtime_stringToCharArray raw char array allocation spill",
+)
+
+require_ordered(
+    string_to_char_array,
+    [
+        ".L_string_to_char_array_wrap:",
+        "mov rdi, 16",
+        "; gc runtime helper root spill begin: preserve rbx raw ObjectArray[Char] across facade Runtime_alloc",
+        "push rbx",
+        "call Runtime_alloc",
+        "pop rbx",
+        "; gc runtime helper root spill end: restore rbx raw ObjectArray[Char] after facade Runtime_alloc",
+    ],
+    "Runtime_stringToCharArray facade allocation spill",
+)
+
+for index in (0, 1):
+    map_match = re.search(
+        rf"^\s*nabla_gc_runtime_helper_alloc_Runtime_stringToCharArray_{index}: dq 1"
+        r"(.*?)(?=^\s*nabla_gc_runtime_helper_alloc_|^\s*nabla_gc_runtime_helper_allocs_|^section )",
+        asm,
+        re.MULTILINE | re.DOTALL,
+    )
+    require(
+        map_match is not None,
+        f"missing Runtime_stringToCharArray alloc {index} helper root map",
+    )
+    require(
+        '"native_stack+8", 0' in map_match.group(1),
+        f"Runtime_stringToCharArray alloc {index} should describe native_stack+8",
+    )
+
+print("PASS: runtime helper root spills preserve native owners around allocing helper calls")

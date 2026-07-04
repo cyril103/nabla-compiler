@@ -118,10 +118,15 @@ Raisons :
    candidate de ce second site décrit `native_stack+8`, reste inerte et n'est
    pas consommée par `Runtime_alloc`; `tests/test_gc_runtime_helper_root_spills.py`
    ancre les commentaires et l'ordre `push` / `call` / `pop`.
-10. Ajouter ensuite la protection/spill automatique des registres transitoires et
+10. Seconde protection native concrète couverte : `Runtime_stringToCharArray`
+   spille le owner `String` source autour du `Runtime_alloc` du tableau brut de
+   caractères, puis `rbx` autour du `Runtime_alloc` final de façade
+   `ArrayObject[Char]`. Les deux cartes candidates décrivent `native_stack+8`;
+   `r10` reste un pointeur intérieur/recalculable et les cartes restent inertes.
+11. Ajouter ensuite la protection/spill automatique des registres transitoires et
    slots natifs autour de `Runtime_alloc`, puis remplacer ou stabiliser ces
    cartes candidates en cartes consommables avant tout parcours GC.
-11. Introduire la collecte seulement dans une PR ultérieure, derrière des régressions runtime dédiées.
+12. Introduire la collecte seulement dans une PR ultérieure, derrière des régressions runtime dédiées.
 
 ## Phase 4: Esquisses D'API Futures, Pas Des Engagements
 
