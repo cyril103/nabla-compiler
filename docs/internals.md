@@ -611,10 +611,12 @@ source autour de l'allocation du tableau brut de caractères et `rbx` autour de
 l'allocation de la façade `ArrayObject[Char]`, puis `Runtime_stringSplit` et
 `Runtime_stringSplitMakeSegment`, qui spillent les owners `String` source et
 séparateur, le tableau brut `ObjectArray[String]` destination et le owner source
-de segment autour de leurs `Runtime_alloc` directs. Les helpers avec plusieurs
-sites alternatifs sur branches exclusives, comme `Bool_method_toString`, restent
-à documenter mais ne créent pas le même besoin de conservation entre deux
-allocations successives.
+de segment autour de leurs `Runtime_alloc` directs, puis
+`FloatDouble_method_toString`, qui spille `r10` comme owner `String` de la
+partie entière autour des deux allocations directes des chemins fractionnel et
+sans fraction non nulle. Les helpers avec plusieurs sites alternatifs sur
+branches exclusives, comme `Bool_method_toString`, restent à documenter mais ne
+créent pas le même besoin de conservation entre deux allocations successives.
 
 ### Métadonnées De Racines Internes Des Helpers Runtime
 
@@ -639,8 +641,11 @@ le tableau brut d'arguments pendant l'allocation finale de
 `rbx` spillé de `Runtime_stringToCharArray`, `native_stack+8` /
 `native_stack+16` pour les owners `String` source/séparateur spillés de
 `Runtime_stringSplit` et pour `r10`/`rbx` spillés de
-`Runtime_stringSplitMakeSegment`, et `native_stack+16` pour la chaîne de partie
-entière dans `FloatDouble_method_toString`. Dans `Runtime_stringToCharArray`,
+`Runtime_stringSplitMakeSegment`, et `native_stack+8` pour le `r10` spillé qui
+tient la chaîne de partie entière dans `FloatDouble_method_toString`. Le slot
+local `[rsp + 16]` de `FloatDouble_method_toString` conserve aussi cette chaîne
+dans le helper, mais la racine concrète autour des safepoints est le `push r10`.
+Dans `Runtime_stringToCharArray`,
 `r10` reste un pointeur intérieur vers les bytes du `String` source et doit être
 considéré comme un sujet à rattacher ou recalculer; le candidat racine testable
 est désormais le owner spillé. Dans `Runtime_stringSplit`,

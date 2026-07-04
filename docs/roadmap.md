@@ -142,9 +142,12 @@ features.
   spillés autour des deux allocations directes, puis dans `Runtime_stringSplit`
   et `Runtime_stringSplitMakeSegment`, où les owners `String` source/séparateur,
   `rbx` destination et `r10` owner source de segment sont spillés autour des
-  allocations directes. Les cartes restent inertes et non consommées par
-  `Runtime_alloc`; `r14`/`r15` restent des pointeurs intérieurs recalculables non
-  consommables, et la prochaine cible reste la protection générale des
+  allocations directes, puis dans `FloatDouble_method_toString`, où `r10` owner
+  `String` de la partie entière est spillé autour des deux allocations directes
+  des chemins fractionnel et sans fraction non nulle. Les cartes restent inertes
+  et non consommées par `Runtime_alloc`; `r14`/`r15` restent des pointeurs
+  intérieurs recalculables non consommables, et la prochaine cible reste la
+  protection générale des
   registres/slots natifs transitoires et la production de cartes racines runtime
   consommables.
 - Typage a garder simple : sous-typage nominal pour les classes, generiques

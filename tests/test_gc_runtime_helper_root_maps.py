@@ -58,7 +58,7 @@ expected_roots = {
         ["native_stack+8"],
     ],
     "Runtime_stringSplitMakeSegment": [["native_stack+8", "native_stack+16", "interior:r14"]],
-    "FloatDouble_method_toString": [["native_stack+16"], ["native_stack+16"]],
+    "FloatDouble_method_toString": [["native_stack+8"], ["native_stack+8"]],
 }
 
 for helper, alloc_roots in expected_roots.items():

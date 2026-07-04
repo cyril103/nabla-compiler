@@ -31,9 +31,12 @@ deux allocations directes. `Runtime_stringSplit` et
 supplémentaire en spillant les owners `String` source/séparateur, `rbx` pour le
 tableau brut `ObjectArray[String]` et `r10` pour le owner source de segment
 autour de leurs `Runtime_alloc`; `r14`/`r15` restent des pointeurs intérieurs
-recalculables non consommables. Le reste des registres transitoires/slots natifs
-reste à protéger ou spiller avant tout parcours GC, et les cartes restent non
-consommées par `Runtime_alloc`.
+recalculables non consommables. `FloatDouble_method_toString` couvre maintenant
+la tranche suivante en spillant `r10`, owner `String` de la partie entière,
+autour de ses deux allocations directes; les cartes candidates correspondantes
+décrivent `native_stack+8` et restent non consommées par `Runtime_alloc`. Le
+reste des registres transitoires/slots natifs reste à protéger ou spiller avant
+tout parcours GC, et les cartes restent non consommées par `Runtime_alloc`.
 La checklist opérationnelle pour intégrer une nouvelle feature est dans
 [`docs/feature-integration.md`](../feature-integration.md).
 
