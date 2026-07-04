@@ -35,6 +35,9 @@ concret l'impose.
   la réallocation: le préfixe sert la demande, la queue reste dans
   `heap_free_list` si elle peut contenir un header et un mot payload aligné, et
   le chemin de consommation entière reste utilisé pour les restes trop petits.
+- Le delta de robustesse ajoute une suite de stress exécutable sous heaps serrés
+  qui couvre les temporaires imbriqués, helpers de chaînes, `Array[T]`, tableaux
+  d'objets, `Map[K, V]` et `Set[T]` avec assertions de métriques GC/free-list.
 
 ## Non-objectifs Pour La Surface Normale
 
@@ -179,7 +182,13 @@ Raisons :
    native jusqu'à `gc_stack_top`, propage en scannant les payloads des blocs
    marqués jusqu'à fixpoint, puis sweep les blocs non marqués vers la free-list.
    Aucun pointeur payload n'est déplacé.
-15. Ajouter ensuite la protection/spill automatique des registres transitoires et
+15. Stress runtime GC couvert : `tests/test_gc_memory_stress.sh` compile et
+   exécute des programmes Nabla sous heaps serrés pour exercer temporaires
+   imbriqués, concaténation/répétition de chaînes, `Array.range`/`map`/`filter`,
+   `Array.tabulate` d'objets, `Map[K, V]` et `Set[T]`, tout en vérifiant que les métriques
+   `gcCollections()`, `gcLastFreedBytes()`, `heapFreeBytes()` ou
+   `heapLargestFreeBlock()` confirment une collecte réelle.
+16. Ajouter ensuite la protection/spill automatique des registres transitoires et
    slots natifs autour de `Runtime_alloc`, remplacer ou stabiliser les cartes
    candidates en cartes consommables, raffiner `heapUsed()` si besoin, et réduire
    les faux positifs du scan conservateur en consommant progressivement les

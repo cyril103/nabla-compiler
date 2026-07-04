@@ -137,7 +137,10 @@ features.
   d'observation `heapUsed()` et `heapCapacity()` restent high-water/capacité,
   complétées par `gcCollections()`, `gcLastFreedBytes()`,
   `gcLastLargestFreeBlock()`, `heapFreeBytes()` et `heapLargestFreeBlock()` pour
-  diagnostiquer les collectes et la free-list.
+  diagnostiquer les collectes et la free-list. Le filet de stress
+  `tests/test_gc_memory_stress.sh` exerce également sous heaps serrés les
+  temporaires imbriqués, helpers de chaînes, `Array[T]`, tableaux d'objets,
+  `Map[K, V]` et `Set[T]`. Par ailleurs,
   l'inventaire interne des familles heap et des racines backend, les métadonnées
   de racines de frame, les descripteurs champs/captures pour classes/closures,
   les cartes de points d'appel `Runtime_alloc` du code utilisateur, l'inventaire
