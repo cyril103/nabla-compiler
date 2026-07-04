@@ -498,9 +498,13 @@ Limites importantes :
   allocant `Runtime_cStringToString` et du `Runtime_alloc` final, et
   `Runtime_stringToCharArray` contient la seconde tranche en spillant le owner
   `String` source autour de l'allocation du tableau brut de caractères puis
-  `rbx` autour de l'allocation de façade `ArrayObject[Char]`, avec cartes
-  candidates `native_stack+8` toujours inertes; la protection automatique
-  générale des registres/slots natifs reste à faire;
+  `rbx` autour de l'allocation de façade `ArrayObject[Char]`, et
+  `Runtime_stringSplit` / `Runtime_stringSplitMakeSegment` contiennent la tranche
+  suivante en spillant les owners `String` source/séparateur, `rbx` destination
+  et `r10` owner source de segment autour de leurs allocations directes. Les
+  cartes candidates `native_stack+8` / `native_stack+16` restent inertes;
+  `r14`/`r15` restent des pointeurs intérieurs/recalculables non consommables;
+  la protection automatique générale des registres/slots natifs reste à faire;
 - les acces hors bornes de `IntArray` terminent le programme avec le code 254;
 - `Nothing` est un type bottom builtin assignable a tout type attendu sans
   valeur instanciable; les primitives globales `panic(message: String)` et
@@ -954,6 +958,15 @@ d'inference generique et de typage contextuel des lambdas.
   `Runtime_alloc` final de façade `ArrayObject[Char]`. Les deux cartes
   candidates décrivent `native_stack+8`, restent non consommées par
   `Runtime_alloc` et n'activent aucune collecte.
+- [x] Protéger les racines natives concrètes de `Runtime_stringSplit` et
+  `Runtime_stringSplitMakeSegment`: `Runtime_stringSplit` spille les owners
+  `String` source/séparateur autour des allocations de tableaux bruts et `rbx`
+  autour de l'allocation finale de façade `ArrayObject[String]`;
+  `Runtime_stringSplitMakeSegment` conserve ses pushes d'état et ajoute les
+  spills racines `rbx` puis `r10` autour de l'allocation de segment. Les cartes
+  candidates décrivent `native_stack+8` / `native_stack+16`, restent non
+  consommées par `Runtime_alloc` et n'activent aucune collecte; `r14`/`r15`
+  restent des pointeurs intérieurs/recalculables non consommables.
 - [ ] Poursuivre la fondation GC en suivant `docs/plans/runtime-memory-management.md`:
   généraliser la protection/spill des registres transitoires et slots natifs
   autour de `Runtime_alloc`, puis stabiliser des cartes racines internes
@@ -1050,6 +1063,21 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Protéger les racines natives de `Runtime_stringSplit` et
+  `Runtime_stringSplitMakeSegment`: le helper split spille les owners `String`
+  source/séparateur autour des allocations de tableaux bruts puis `rbx` autour
+  de la façade `ArrayObject[String]`; le helper de segment conserve les pushes
+  d'état `r8`/`r9`/`rdx` et ajoute les spills racines `rbx` puis `r10`. Les
+  cartes candidates décrivent `native_stack+8` et `native_stack+16` selon l'ordre
+  exact des pushes, restent inertes et non consommées par `Runtime_alloc`; aucune
+  collecte n'est activée, et `r14`/`r15` restent documentés comme pointeurs
+  intérieurs/recalculables non consommables.
+  - Fichiers / tests associes: `src/runtime_asm.cpp`,
+    `tests/test_gc_runtime_helper_root_spills.py`,
+    `tests/test_gc_runtime_helper_root_maps.py`, `docs/internals.md`,
+    `docs/plans/runtime-memory-management.md`, `docs/plans/README.md`,
+    `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Protéger les racines natives de `Runtime_stringToCharArray`: le
   helper runtime spille le owner `String` source autour du `Runtime_alloc` du

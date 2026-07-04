@@ -26,7 +26,12 @@ aux helpers runtime assembleur sont émises sous forme de métadonnées inertes,
 spillant `r15` autour de son appel au helper allocant `Runtime_cStringToString`
 et autour de son `Runtime_alloc` final, et `Runtime_stringToCharArray` contient
 la seconde tranche en spillant le owner `String` source puis `rbx` autour de ses
-deux allocations directes. Le reste des registres transitoires/slots natifs
+deux allocations directes. `Runtime_stringSplit` et
+`Runtime_stringSplitMakeSegment` couvrent maintenant une tranche additive
+supplémentaire en spillant les owners `String` source/séparateur, `rbx` pour le
+tableau brut `ObjectArray[String]` et `r10` pour le owner source de segment
+autour de leurs `Runtime_alloc`; `r14`/`r15` restent des pointeurs intérieurs
+recalculables non consommables. Le reste des registres transitoires/slots natifs
 reste à protéger ou spiller avant tout parcours GC, et les cartes restent non
 consommées par `Runtime_alloc`.
 La checklist opérationnelle pour intégrer une nouvelle feature est dans

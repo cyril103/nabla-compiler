@@ -135,14 +135,18 @@ features.
   classes/closures, les cartes de points d'appel `Runtime_alloc` du code
   utilisateur, l'inventaire outillé des allocations internes aux helpers
   runtime et les cartes candidates de racines internes aux helpers runtime sont
-  complétés par deux protections natives concrètes dans `Runtime_buildArgsArray`,
+  complétés par des protections natives concrètes dans `Runtime_buildArgsArray`,
   où `r15` est spillé autour de l'appel au helper allocant
   `Runtime_cStringToString` et du `Runtime_alloc` final, puis dans
   `Runtime_stringToCharArray`, où le owner `String` source et `rbx` sont
-  spillés autour des deux allocations directes. Les cartes restent inertes et
-  non consommées par `Runtime_alloc`; la prochaine cible reste la protection
-  générale des registres/slots natifs transitoires et la production de cartes
-  racines runtime consommables.
+  spillés autour des deux allocations directes, puis dans `Runtime_stringSplit`
+  et `Runtime_stringSplitMakeSegment`, où les owners `String` source/séparateur,
+  `rbx` destination et `r10` owner source de segment sont spillés autour des
+  allocations directes. Les cartes restent inertes et non consommées par
+  `Runtime_alloc`; `r14`/`r15` restent des pointeurs intérieurs recalculables non
+  consommables, et la prochaine cible reste la protection générale des
+  registres/slots natifs transitoires et la production de cartes racines runtime
+  consommables.
 - Typage a garder simple : sous-typage nominal pour les classes, generiques
   invariants par defaut, conversions explicites ou helpers stdlib.
 - Documentation : la reference HTML doit rester une doc utilisateur claire,

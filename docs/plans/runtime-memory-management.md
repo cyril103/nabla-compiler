@@ -123,10 +123,22 @@ Raisons :
    caractères, puis `rbx` autour du `Runtime_alloc` final de façade
    `ArrayObject[Char]`. Les deux cartes candidates décrivent `native_stack+8`;
    `r10` reste un pointeur intérieur/recalculable et les cartes restent inertes.
-11. Ajouter ensuite la protection/spill automatique des registres transitoires et
+11. Troisième protection native concrète couverte : `Runtime_stringSplit`
+   spille les owners `String` source/séparateur autour des allocations de
+   tableaux bruts, puis `rbx` autour de l'allocation finale de façade
+   `ArrayObject[String]`. Les cartes candidates décrivent `native_stack+8` et
+   `native_stack+16` selon l'ordre des `push`; `r14`/`r15` restent des pointeurs
+   intérieurs/recalculables non consommables.
+12. Quatrième protection native concrète couverte :
+   `Runtime_stringSplitMakeSegment` conserve les pushes d'état `r8`/`r9`/`rdx`
+   et ajoute les spills racines `rbx` puis `r10` autour du `Runtime_alloc` de
+   segment. A l'entrée de `Runtime_alloc`, `native_stack+8` décrit `r10` et
+   `native_stack+16` décrit `rbx`; `r14` reste intérieur/recalculable et les
+   cartes restent inertes.
+13. Ajouter ensuite la protection/spill automatique des registres transitoires et
    slots natifs autour de `Runtime_alloc`, puis remplacer ou stabiliser ces
    cartes candidates en cartes consommables avant tout parcours GC.
-12. Introduire la collecte seulement dans une PR ultérieure, derrière des régressions runtime dédiées.
+14. Introduire la collecte seulement dans une PR ultérieure, derrière des régressions runtime dédiées.
 
 ## Phase 4: Esquisses D'API Futures, Pas Des Engagements
 

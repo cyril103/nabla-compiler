@@ -53,11 +53,11 @@ expected_roots = {
     "Runtime_buildArgsArray": [[], ["native_stack+8"]],
     "Runtime_stringToCharArray": [["native_stack+8"], ["native_stack+8"]],
     "Runtime_stringSplit": [
-        ["r10", "r11", "interior:r14", "interior:r15"],
-        ["r10", "r11", "interior:r14"],
-        ["rbx"],
+        ["native_stack+8", "native_stack+16", "interior:r14", "interior:r15"],
+        ["native_stack+8", "native_stack+16", "interior:r14"],
+        ["native_stack+8"],
     ],
-    "Runtime_stringSplitMakeSegment": [["rbx", "r10", "interior:r14"]],
+    "Runtime_stringSplitMakeSegment": [["native_stack+8", "native_stack+16", "interior:r14"]],
     "FloatDouble_method_toString": [["native_stack+16"], ["native_stack+16"]],
 }
 

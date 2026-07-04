@@ -608,9 +608,12 @@ seulement `Runtime_buildArgsArray`, qui spille `r15` sur la pile native autour d
 l'appel allocant `Runtime_cStringToString` de la boucle et autour de l'allocation
 finale de façade, puis `Runtime_stringToCharArray`, qui spille le owner `String`
 source autour de l'allocation du tableau brut de caractères et `rbx` autour de
-l'allocation de la façade `ArrayObject[Char]`. Les helpers avec plusieurs sites
-alternatifs sur branches exclusives, comme `Bool_method_toString`, restent à
-documenter mais ne créent pas le même besoin de conservation entre deux
+l'allocation de la façade `ArrayObject[Char]`, puis `Runtime_stringSplit` et
+`Runtime_stringSplitMakeSegment`, qui spillent les owners `String` source et
+séparateur, le tableau brut `ObjectArray[String]` destination et le owner source
+de segment autour de leurs `Runtime_alloc` directs. Les helpers avec plusieurs
+sites alternatifs sur branches exclusives, comme `Bool_method_toString`, restent
+à documenter mais ne créent pas le même besoin de conservation entre deux
 allocations successives.
 
 ### Métadonnées De Racines Internes Des Helpers Runtime
@@ -633,15 +636,18 @@ Ces cartes couvrent aujourd'hui `Runtime_buildArgsArray`,
 des racines conservatrices comme `native_stack+8` pour le `r15` spillé qui tient
 le tableau brut d'arguments pendant l'allocation finale de
 `Runtime_buildArgsArray`, `native_stack+8` pour le owner `String` source ou le
-`rbx` spillé de `Runtime_stringToCharArray`, `rbx` pour les autres stockages
-`ObjectArray[...]` temporaires, `r10`/`r11` pour les chaînes source de
-`String.split`, et `native_stack+16` pour la chaîne de partie entière dans
-`FloatDouble_method_toString`. Dans `Runtime_stringToCharArray`, `r10` reste un
-pointeur intérieur vers les bytes du `String` source et doit être considéré comme
-un sujet à rattacher ou recalculer; le candidat racine testable est désormais le
-owner spillé. Les cartes signalent aussi les dépendances `interior:*` qui
-restent dangereuses pour un GC mobile ou actif, par exemple les pointeurs de
-bytes `r14` ou `r15` dérivés d'un `String` source.
+`rbx` spillé de `Runtime_stringToCharArray`, `native_stack+8` /
+`native_stack+16` pour les owners `String` source/séparateur spillés de
+`Runtime_stringSplit` et pour `r10`/`rbx` spillés de
+`Runtime_stringSplitMakeSegment`, et `native_stack+16` pour la chaîne de partie
+entière dans `FloatDouble_method_toString`. Dans `Runtime_stringToCharArray`,
+`r10` reste un pointeur intérieur vers les bytes du `String` source et doit être
+considéré comme un sujet à rattacher ou recalculer; le candidat racine testable
+est désormais le owner spillé. Dans `Runtime_stringSplit`,
+`r14`/`r15` restent des pointeurs intérieurs/recalculables non consommables vers
+les bytes source/séparateur, et `Runtime_stringSplitMakeSegment` conserve `r14`
+avec le même statut. Les cartes signalent aussi les dépendances `interior:*` qui
+restent dangereuses pour un GC mobile ou actif.
 
 Ces métadonnées sont runtime-inertes, non consommées par `Runtime_alloc` et non
 précises : la protection manuelle de `Runtime_buildArgsArray` ne change pas la

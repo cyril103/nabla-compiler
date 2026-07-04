@@ -163,4 +163,119 @@ for index in (0, 1):
         f"Runtime_stringToCharArray alloc {index} should describe native_stack+8",
     )
 
+block_match = re.search(
+    r"^Runtime_stringSplit:\n(.*?)(?=^Runtime_stringSplitMakeSegment:)",
+    asm,
+    re.MULTILINE | re.DOTALL,
+)
+require(block_match is not None, "missing Runtime_stringSplit block in generated ASM")
+string_split = block_match.group(1)
+
+require_ordered(
+    string_split,
+    [
+        ".L_string_split_allocate:",
+        "lea rdi, [r8 * 8 + 16]",
+        "; gc runtime helper root spill begin: preserve source/separator String owners across raw split array Runtime_alloc",
+        "push r10",
+        "push r11",
+        "call Runtime_alloc",
+        "pop r11",
+        "pop r10",
+        "; gc runtime helper root spill end: restore source/separator String owners after raw split array Runtime_alloc",
+    ],
+    "Runtime_stringSplit non-empty separator raw array allocation spill",
+)
+
+require_ordered(
+    string_split,
+    [
+        ".L_string_split_empty_separator:",
+        "mov r8, r12",
+        "lea rdi, [r8 * 8 + 16]",
+        "; gc runtime helper root spill begin: preserve source/separator String owners across empty split array Runtime_alloc",
+        "push r10",
+        "push r11",
+        "call Runtime_alloc",
+        "pop r11",
+        "pop r10",
+        "; gc runtime helper root spill end: restore source/separator String owners after empty split array Runtime_alloc",
+    ],
+    "Runtime_stringSplit empty separator raw array allocation spill",
+)
+
+require_ordered(
+    string_split,
+    [
+        ".L_string_split_wrap:",
+        "mov rdi, 16",
+        "; gc runtime helper root spill begin: preserve rbx raw ObjectArray[String] across split facade Runtime_alloc",
+        "push rbx",
+        "call Runtime_alloc",
+        "pop rbx",
+        "; gc runtime helper root spill end: restore rbx raw ObjectArray[String] after split facade Runtime_alloc",
+    ],
+    "Runtime_stringSplit facade allocation spill",
+)
+
+split_expected = {
+    0: ['"native_stack+8", 0', '"native_stack+16", 0', '"interior:r14", 0', '"interior:r15", 0'],
+    1: ['"native_stack+8", 0', '"native_stack+16", 0', '"interior:r14", 0'],
+    2: ['"native_stack+8", 0'],
+}
+for index, descriptors in split_expected.items():
+    map_match = re.search(
+        rf"^\s*nabla_gc_runtime_helper_alloc_Runtime_stringSplit_{index}: dq {len(descriptors)}"
+        r"(.*?)(?=^\s*nabla_gc_runtime_helper_alloc_|^\s*nabla_gc_runtime_helper_allocs_|^section )",
+        asm,
+        re.MULTILINE | re.DOTALL,
+    )
+    require(map_match is not None, f"missing Runtime_stringSplit alloc {index} helper root map")
+    for descriptor in descriptors:
+        require(
+            descriptor in map_match.group(1),
+            f"Runtime_stringSplit alloc {index} should describe {descriptor}",
+        )
+
+block_match = re.search(
+    r"^Runtime_stringSplitMakeSegment:\n(.*?)(?=^Int_method_toString:)",
+    asm,
+    re.MULTILINE | re.DOTALL,
+)
+require(block_match is not None, "missing Runtime_stringSplitMakeSegment block in generated ASM")
+string_split_make_segment = block_match.group(1)
+
+require_ordered(
+    string_split_make_segment,
+    [
+        "push r8",
+        "push r9",
+        "push rdx",
+        "; gc runtime helper root spill begin: preserve split destination/source owners across segment Runtime_alloc",
+        "push rbx",
+        "push r10",
+        "call Runtime_alloc",
+        "pop r10",
+        "pop rbx",
+        "; gc runtime helper root spill end: restore split destination/source owners after segment Runtime_alloc",
+        "pop rdx",
+        "pop r9",
+        "pop r8",
+    ],
+    "Runtime_stringSplitMakeSegment segment allocation spill",
+)
+
+map_match = re.search(
+    r"^\s*nabla_gc_runtime_helper_alloc_Runtime_stringSplitMakeSegment_0: dq 3"
+    r"(.*?)(?=^\s*nabla_gc_runtime_helper_alloc_|^\s*nabla_gc_runtime_helper_allocs_|^section )",
+    asm,
+    re.MULTILINE | re.DOTALL,
+)
+require(map_match is not None, "missing Runtime_stringSplitMakeSegment alloc 0 helper root map")
+for descriptor in ['"native_stack+8", 0', '"native_stack+16", 0', '"interior:r14", 0']:
+    require(
+        descriptor in map_match.group(1),
+        f"Runtime_stringSplitMakeSegment alloc 0 should describe {descriptor}",
+    )
+
 print("PASS: runtime helper root spills preserve native owners around allocing helper calls")
