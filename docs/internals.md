@@ -416,7 +416,16 @@ racines, layouts et points d'appel décrites plus bas; ces cartes restent
 additives pour la prochaine étape. `Runtime_heapUsed` retourne donc encore
 `heap_pointer - heap_start` comme high-water mark bump, pas la mémoire vivante
 après sweep, tandis que `Runtime_heapCapacity` retourne `heap_capacity`; les
-primitives source `heapUsed()` / `heapCapacity()` exposent ces compteurs.
+primitives source `heapUsed()` / `heapCapacity()` exposent ces compteurs. Pour
+l'observabilité GC, `Runtime_gc` incrémente `gc_collections` au début de chaque
+collecte et remet à zéro puis remplit `gc_last_freed_bytes` avec les payloads
+nouvellement récupérés et `gc_last_largest_free_block` avec le plus gros bloc
+libre produit par le sweep. Les primitives
+`gcCollections()`, `gcLastFreedBytes()` et `gcLastLargestFreeBlock()` exposent
+ces valeurs de dernière collecte. `Runtime_heapFreeBytes` et
+`Runtime_heapLargestFreeBlock` parcourent `heap_free_list` à la demande pour
+exposer `heapFreeBytes()` et `heapLargestFreeBlock()`, utiles pour diagnostiquer
+la fragmentation sans changer la sémantique high-water de `heapUsed()`.
 
 Si `Runtime_initHeap` ne peut pas obtenir le heap demandé, si une allocation ne
 peut toujours pas être satisfaite après `Runtime_gc`, ou si une taille

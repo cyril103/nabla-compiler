@@ -27,6 +27,10 @@ concret l'impose.
   objets. `heapUsed()` reste un high-water mark basé sur `heap_pointer`; les
   métadonnées exactes de racines/layouts/points d'appel restent disponibles mais
   non consommées.
+- Le delta d'observabilité ajoute les compteurs source `gcCollections()`,
+  `gcLastFreedBytes()`, `gcLastLargestFreeBlock()`, `heapFreeBytes()` et
+  `heapLargestFreeBlock()` afin de mesurer le nombre de collectes, le sweep le
+  plus récent et l'état courant de la free-list sans changer `heapUsed()`.
 
 ## Non-objectifs Pour La Surface Normale
 

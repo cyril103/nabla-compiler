@@ -2400,7 +2400,11 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
         overloads.push_back(registeredFunctionName);
         context.classes[clName].methods[registeredFunctionName] = signature;
     } else {
-        if (functionName == "heapUsed" || functionName == "heapCapacity") {
+        if (functionName == "heapUsed" || functionName == "heapCapacity" ||
+            functionName == "gcCollections" || functionName == "heapFreeBytes" ||
+            functionName == "gcLastFreedBytes" ||
+            functionName == "gcLastLargestFreeBlock" ||
+            functionName == "heapLargestFreeBlock") {
             throw CompilerError(
                 ErrorKind::Parser, nameToken.location,
                 "nom de fonction réservé pour une primitive runtime: " + functionName);

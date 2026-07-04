@@ -485,9 +485,11 @@ Limites importantes :
 - le runtime initialise par défaut un tas de 8 MiB par `mmap`, configurable à la
   compilation avec `nablac --heap-size <octets>`, avec allocations alignées sur
   8 octets, header caché de 16 octets par bloc, free-list de blocs sweepés,
-  collecte GC conservative non compactante avant dépassement, diagnostic stderr
-  `Nabla runtime error: heap exhausted` et sortie 255 si l'allocation échoue
-  encore après collecte;
+  collecte GC conservative non compactante avant dépassement, compteurs
+  d'observabilité (`gcCollections()`, `gcLastFreedBytes()`,
+  `gcLastLargestFreeBlock()`, `heapFreeBytes()`, `heapLargestFreeBlock()`),
+  diagnostic stderr `Nabla runtime error: heap exhausted` et sortie 255 si
+  l'allocation échoue encore après collecte;
 - la fondation GC exacte reste additive: le backend émet des métadonnées de
   racines de frame, layouts de classes/closures, cartes de points d'appel
   `Runtime_alloc` du code utilisateur, et le runtime ASM émet des cartes
@@ -980,6 +982,10 @@ d'inference generique et de typage contextuel des lambdas.
   retente l'allocation. `Runtime_gc` scanne la pile native jusqu'à
   `gc_stack_top`, propage dans les payloads heap marqués jusqu'à fixpoint et
   sweep les blocs non marqués vers la free-list.
+- [x] Ajouter une observabilité GC minimale: `gcCollections()` compte les
+  collectes, `gcLastFreedBytes()` / `gcLastLargestFreeBlock()` décrivent le
+  dernier sweep, et `heapFreeBytes()` / `heapLargestFreeBlock()` inspectent la
+  free-list courante sans changer `heapUsed()`.
 - [ ] Poursuivre la fondation GC en suivant `docs/plans/runtime-memory-management.md`:
   remplacer progressivement le scan conservateur par les cartes exactes déjà
   émises, généraliser les racines consommables pour les helpers runtime,
@@ -1076,6 +1082,18 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter une observabilité GC minimale: `Runtime_gc` incrémente
+  `gc_collections`, remet à zéro puis remplit `gc_last_freed_bytes` et
+  `gc_last_largest_free_block` pendant le sweep (`gc_last_freed_bytes` compte les
+  payloads nouvellement récupérés, pas les blocs déjà libres), et le runtime expose
+  `gcCollections()`, `gcLastFreedBytes()`, `gcLastLargestFreeBlock()`,
+  `heapFreeBytes()` et `heapLargestFreeBlock()` pour les tests et diagnostics.
+  La sémantique de `heapUsed()` reste un high-water mark bump.
+  - Fichiers / tests associes: `src/runtime_asm.cpp`, `src/ast.cpp`,
+    `src/parser.cpp`, `src/ir_codegen.cpp`, `tests/test_gc_runtime_metrics.sh`,
+    `Makefile`, `docs/internals.md`, `docs/language.md`,
+    `docs/plans/runtime-memory-management.md`, `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Introduire une première collecte GC active conservative: le runtime
   ASM ajoute un header caché de 16 octets avant chaque payload, les états
