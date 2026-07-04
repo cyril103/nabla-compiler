@@ -31,6 +31,10 @@ concret l'impose.
   `gcLastFreedBytes()`, `gcLastLargestFreeBlock()`, `heapFreeBytes()` et
   `heapLargestFreeBlock()` afin de mesurer le nombre de collectes, le sweep le
   plus récent et l'état courant de la free-list sans changer `heapUsed()`.
+- Le delta de fragmentation immédiate découpe les blocs libres surdimensionnés à
+  la réallocation: le préfixe sert la demande, la queue reste dans
+  `heap_free_list` si elle peut contenir un header et un mot payload aligné, et
+  le chemin de consommation entière reste utilisé pour les restes trop petits.
 
 ## Non-objectifs Pour La Surface Normale
 
@@ -169,11 +173,12 @@ Raisons :
    local du helper, mais la racine concrètement protégée au safepoint est le
    `push r10`. Les cartes restent inertes et non consommées par `Runtime_alloc`.
 14. Collecte active conservative couverte : `Runtime_alloc` ajoute un header
-   caché de 16 octets par bloc, cherche `heap_free_list`, tente le bump, appelle
-   `Runtime_gc` avant overflow, puis retente. `Runtime_gc` scanne la pile native
-   jusqu'à `gc_stack_top`, propage en scannant les payloads des blocs marqués
-   jusqu'à fixpoint, puis sweep les blocs non marqués vers la free-list. Aucun
-   pointeur payload n'est déplacé.
+   caché de 16 octets par bloc, cherche `heap_free_list`, découpe les blocs
+   libres surdimensionnés quand la queue peut rester réutilisable, tente le bump,
+   appelle `Runtime_gc` avant overflow, puis retente. `Runtime_gc` scanne la pile
+   native jusqu'à `gc_stack_top`, propage en scannant les payloads des blocs
+   marqués jusqu'à fixpoint, puis sweep les blocs non marqués vers la free-list.
+   Aucun pointeur payload n'est déplacé.
 15. Ajouter ensuite la protection/spill automatique des registres transitoires et
    slots natifs autour de `Runtime_alloc`, remplacer ou stabiliser les cartes
    candidates en cartes consommables, raffiner `heapUsed()` si besoin, et réduire

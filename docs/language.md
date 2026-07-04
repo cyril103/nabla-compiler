@@ -1170,8 +1170,10 @@ projet, puis dans `stdlib/`.
   capacité de heap (minimum 4096 octets, maximum représentable par `Int`). Le
   runtime active une première collecte traçante conservative non compactante en
   cas de pression heap: il scanne la pile native et les payloads heap marqués,
-  puis réutilise les blocs sweepés via une free-list. Les faux positifs restent
-  possibles et aucune compaction n'est effectuée. Les primitives d'observation
+  puis réutilise les blocs sweepés via une free-list. Les grands blocs libres
+  sont découpés quand la queue restante peut former un bloc réutilisable, ce qui
+  réduit la fragmentation immédiate; les faux positifs restent possibles et
+  aucune compaction n'est effectuée. Les primitives d'observation
   `heapUsed(): Int` et `heapCapacity(): Int` retournent respectivement le
   high-water mark du pointeur bump et la capacité compilée de l'exécutable; elles
   ne représentent pas encore la mémoire vivante après sweep. Les compteurs

@@ -129,7 +129,8 @@ features.
   diagnostic de dépassement heap stabilisé (stderr + code 255), mitigations
   documentées, puis première collecte GC conservative active comme modèle de
   récupération sûr par défaut. `Runtime_alloc` ajoute un header caché de 16
-  octets, réutilise `heap_free_list`, appelle `Runtime_gc` avant overflow et
+  octets, réutilise `heap_free_list`, découpe les blocs libres surdimensionnés,
+  appelle `Runtime_gc` avant overflow et
   retente l'allocation; `Runtime_gc` scanne conservativement la pile native
   jusqu'à `gc_stack_top`, propage dans les payloads heap marqués, puis sweep les
   blocs non marqués vers la free-list sans compacter. Les primitives

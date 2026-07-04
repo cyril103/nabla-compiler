@@ -485,6 +485,7 @@ Limites importantes :
 - le runtime initialise par défaut un tas de 8 MiB par `mmap`, configurable à la
   compilation avec `nablac --heap-size <octets>`, avec allocations alignées sur
   8 octets, header caché de 16 octets par bloc, free-list de blocs sweepés,
+  découpage des blocs libres surdimensionnés lors de la réallocation,
   collecte GC conservative non compactante avant dépassement, compteurs
   d'observabilité (`gcCollections()`, `gcLastFreedBytes()`,
   `gcLastLargestFreeBlock()`, `heapFreeBytes()`, `heapLargestFreeBlock()`),
@@ -1082,6 +1083,18 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Découper les blocs libres surdimensionnés pendant `Runtime_alloc`:
+  quand un bloc de `heap_free_list` dépasse suffisamment la demande, le runtime
+  alloue le préfixe demandé et laisse une queue libre avec son propre header;
+  sinon il consomme le bloc entier. La régression `test_gc_free_list_splitting.sh`
+  couvre un heap serré où l'ancien comportement gaspillait un gros bloc libre et
+  menait à `Runtime_heap_overflow`, tandis que le nouveau chemin conserve la
+  queue réutilisable.
+  - Fichiers / tests associes: `src/runtime_asm.cpp`,
+    `tests/test_gc_free_list_splitting.sh`, `Makefile`, `docs/internals.md`,
+    `docs/language.md`, `docs/plans/runtime-memory-management.md`,
+    `docs/plans/README.md`, `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Ajouter une observabilité GC minimale: `Runtime_gc` incrémente
   `gc_collections`, remet à zéro puis remplit `gc_last_freed_bytes` et
