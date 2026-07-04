@@ -22,9 +22,11 @@ les payloads heap marqués jusqu'à fixpoint, avant de sweep les blocs non marqu
 vers la free-list. Les compteurs `heapUsed()` / `heapCapacity()` restent des
 observations high-water/capacité, pas une mesure de mémoire vivante; les
 compteurs GC `gcCollections()`, `gcLastFreedBytes()`,
-`gcLastLargestFreeBlock()`, `heapFreeBytes()` et `heapLargestFreeBlock()`
-exposent le nombre de collectes, le dernier sweep et l'état courant de la
-free-list pour les tests et diagnostics. La suite de stress GC couvre désormais
+`gcLastLargestFreeBlock()`, `gcLastMarkedBlocks()`, `gcLastFreedBlocks()`,
+`gcLastStackWords()`, `gcLastHeapWords()`, `heapFreeBytes()` et
+`heapLargestFreeBlock()` exposent le nombre de collectes, le dernier sweep, le
+marquage, le volume de scan conservateur et l'état courant de la free-list pour
+les tests et diagnostics. La suite de stress GC couvre désormais
 les temporaires imbriqués, helpers de chaînes, `Array[T]`, tableaux d'objets,
 `Map[K, V]` et `Set[T]` sous heaps serrés afin de garder ces chemins exercés dans
 `make tooling-tests`.

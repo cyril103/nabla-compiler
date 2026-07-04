@@ -28,9 +28,11 @@ concret l'impose.
   métadonnées exactes de racines/layouts/points d'appel restent disponibles mais
   non consommées.
 - Le delta d'observabilité ajoute les compteurs source `gcCollections()`,
-  `gcLastFreedBytes()`, `gcLastLargestFreeBlock()`, `heapFreeBytes()` et
-  `heapLargestFreeBlock()` afin de mesurer le nombre de collectes, le sweep le
-  plus récent et l'état courant de la free-list sans changer `heapUsed()`.
+  `gcLastFreedBytes()`, `gcLastLargestFreeBlock()`, `gcLastMarkedBlocks()`,
+  `gcLastFreedBlocks()`, `gcLastStackWords()`, `gcLastHeapWords()`,
+  `heapFreeBytes()` et `heapLargestFreeBlock()` afin de mesurer le nombre de
+  collectes, le sweep le plus récent, le marquage, le volume de scan
+  conservateur et l'état courant de la free-list sans changer `heapUsed()`.
 - Le delta de fragmentation immédiate découpe les blocs libres surdimensionnés à
   la réallocation: le préfixe sert la demande, la queue reste dans
   `heap_free_list` si elle peut contenir un header et un mot payload aligné, et
@@ -188,7 +190,13 @@ Raisons :
    `Array.tabulate` d'objets, `Map[K, V]` et `Set[T]`, tout en vérifiant que les métriques
    `gcCollections()`, `gcLastFreedBytes()`, `heapFreeBytes()` ou
    `heapLargestFreeBlock()` confirment une collecte réelle.
-16. Ajouter ensuite la protection/spill automatique des registres transitoires et
+16. Détail de dernière collecte couvert : `tests/test_gc_detailed_metrics.sh`
+   vérifie les primitives `gcLastMarkedBlocks()`, `gcLastFreedBlocks()`,
+   `gcLastStackWords()` et `gcLastHeapWords()`. Elles instrumentent les blocs
+   marqués/libérés et les mots inspectés par les scans conservateurs de pile et
+   de payloads heap afin de suivre le coût du collecteur avant de consommer les
+   cartes exactes.
+17. Ajouter ensuite la protection/spill automatique des registres transitoires et
    slots natifs autour de `Runtime_alloc`, remplacer ou stabiliser les cartes
    candidates en cartes consommables, raffiner `heapUsed()` si besoin, et réduire
    les faux positifs du scan conservateur en consommant progressivement les

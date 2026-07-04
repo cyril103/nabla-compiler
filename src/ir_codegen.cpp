@@ -867,6 +867,14 @@ private:
             out << "    call Runtime_gcLastFreedBytes\n";
         } else if (instruction.operation == "gcLastLargestFreeBlock") {
             out << "    call Runtime_gcLastLargestFreeBlock\n";
+        } else if (instruction.operation == "gcLastMarkedBlocks") {
+            out << "    call Runtime_gcLastMarkedBlocks\n";
+        } else if (instruction.operation == "gcLastFreedBlocks") {
+            out << "    call Runtime_gcLastFreedBlocks\n";
+        } else if (instruction.operation == "gcLastStackWords") {
+            out << "    call Runtime_gcLastStackWords\n";
+        } else if (instruction.operation == "gcLastHeapWords") {
+            out << "    call Runtime_gcLastHeapWords\n";
         } else if (instruction.operation == "heapFreeBytes") {
             out << "    call Runtime_heapFreeBytes\n";
         } else if (instruction.operation == "heapLargestFreeBlock") {
