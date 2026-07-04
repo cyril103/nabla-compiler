@@ -2401,7 +2401,8 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
         context.classes[clName].methods[registeredFunctionName] = signature;
     } else {
         if (functionName == "heapUsed" || functionName == "heapCapacity" ||
-            functionName == "gcCollections" || functionName == "heapFreeBytes" ||
+            functionName == "gcCollections" || functionName == "heapAllocatedBytes" ||
+            functionName == "heapFreeBytes" || functionName == "heapFreeBlockCount" ||
             functionName == "gcLastFreedBytes" ||
             functionName == "gcLastLargestFreeBlock" ||
             functionName == "gcLastMarkedBlocks" ||

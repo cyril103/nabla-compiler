@@ -489,8 +489,8 @@ Limites importantes :
   collecte GC conservative non compactante avant dépassement, compteurs
   d'observabilité (`gcCollections()`, `gcLastFreedBytes()`,
   `gcLastLargestFreeBlock()`, `gcLastMarkedBlocks()`, `gcLastFreedBlocks()`,
-  `gcLastStackWords()`, `gcLastHeapWords()`, `heapFreeBytes()`,
-  `heapLargestFreeBlock()`),
+  `gcLastStackWords()`, `gcLastHeapWords()`, `heapAllocatedBytes()`,
+  `heapFreeBytes()`, `heapFreeBlockCount()`, `heapLargestFreeBlock()`),
   diagnostic stderr `Nabla runtime error: heap exhausted` et sortie 255 si
   l'allocation échoue encore après collecte;
 - la fondation GC exacte reste additive: le backend émet des métadonnées de
@@ -1093,6 +1093,20 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter des métriques GC d'accounting heap courant: le runtime expose
+  `heapAllocatedBytes()` pour additionner à la demande les payloads des blocs non
+  libres entre `heap_start` et `heap_pointer`, et `heapFreeBlockCount()` pour
+  compter les nœuds de `heap_free_list`. Ces métriques complètent `heapUsed()`
+  (high-water bump), `heapFreeBytes()` et `heapLargestFreeBlock()` afin de
+  distinguer payload encore alloué et fragmentation courante. La régression
+  `tests/test_gc_heap_accounting_metrics.sh` vérifie l'exécution sous heap serré,
+  les marqueurs assembleur et les noms réservés.
+  - Fichiers / tests associes: `src/runtime_asm.cpp`, `src/ast.cpp`,
+    `src/parser.cpp`, `src/ir_codegen.cpp`,
+    `tests/test_gc_heap_accounting_metrics.sh`, `Makefile`, `docs/internals.md`,
+    `docs/language.md`, `docs/plans/runtime-memory-management.md`,
+    `docs/plans/README.md`, `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Ajouter des métriques GC détaillées de dernière collecte: le runtime
   remet à zéro au début de `Runtime_gc` puis expose `gcLastMarkedBlocks()`,
