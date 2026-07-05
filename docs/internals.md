@@ -443,19 +443,25 @@ restent strictement observationnels et ne modifient pas la décision de marquage
 `nabla_gc_alloc_safepoints_<fonction>`, et stocke en interne le pointeur de
 carte trouvé dans `gc_last_alloc_safepoint_map` sans lire cette carte pour le
 marquage. Les indicateurs `gc_last_alloc_safepoint_map_found` et
-`gc_last_alloc_safepoint_map_missed` sont remis à zéro à chaque collecte et
-indiquent respectivement si la dernière collecte a résolu ou non le return PC
-courant vers une carte d'allocation utilisateur. Un miss est attendu pour une
-collecte déclenchée depuis un appel `Runtime_alloc` interne aux helpers runtime,
-tant que ces safepoints ne sont pas dans l'index utilisateur. Ces indicateurs
-sont eux aussi strictement observationnels.
+`gc_last_alloc_safepoint_map_missed`, ainsi que
+`gc_last_alloc_safepoint_root_slots` et
+`gc_last_alloc_safepoint_root_bytes`, sont remis à zéro à chaque collecte. Sur
+lookup réussi, `Runtime_gc` lit seulement le premier `dq` de la carte, c'est-à-
+dire son nombre de slots racines déclarés, puis expose aussi le nombre d'octets
+correspondant (`slots * 8`). Il ne lit pas les offsets de racines suivants et ne
+les transmet pas au marqueur. Un miss est attendu pour une collecte déclenchée
+depuis un appel `Runtime_alloc` interne aux helpers runtime, tant que ces
+safepoints ne sont pas dans l'index utilisateur. Ces indicateurs sont eux aussi
+strictement observationnels.
 Les primitives
 `gcCollections()`, `gcLastFreedBytes()`, `gcLastLargestFreeBlock()`,
 `gcLastMarkedBlocks()`, `gcLastFreedBlocks()`, `gcLastStackWords()` et
 `gcLastHeapWords()`, `gcLastStackCandidateWords()` et
 `gcLastHeapCandidateWords()`, `gcLastStackInteriorCandidateWords()` et
 `gcLastHeapInteriorCandidateWords()`, `gcLastAllocSafepointMapFound()` et
-`gcLastAllocSafepointMapMissed()` exposent ces valeurs de dernière collecte. À la demande,
+`gcLastAllocSafepointMapMissed()`,
+`gcLastAllocSafepointRootSlots()` et
+`gcLastAllocSafepointRootBytes()` exposent ces valeurs de dernière collecte. À la demande,
 `Runtime_heapAllocatedBytes` parcourt les headers entre `heap_start` et
 `heap_pointer` pour additionner les payloads des blocs non libres, tandis que
 `Runtime_heapFreeBytes`, `Runtime_heapFreeBlockCount` et
@@ -666,8 +672,11 @@ fonctions compilées à l'avance. Le lookup courant ne fait que comparer le
 return PC utilisateur sauvegardé par `Runtime_alloc` à `[rsp + 112]`, enregistrer
 le pointeur de carte trouvé dans un slot runtime interne, et mettre à jour les
 compteurs `gcLastAllocSafepointMapFound()` /
-`gcLastAllocSafepointMapMissed()`; il ne consomme pas encore les offsets de la
-carte pour marquer les racines.
+`gcLastAllocSafepointMapMissed()`. Sur un match, il lit aussi uniquement le
+header `count` de la carte pour exposer
+`gcLastAllocSafepointRootSlots()` et
+`gcLastAllocSafepointRootBytes()` comme métriques de forme de carte; il ne
+consomme pas encore les offsets de la carte pour marquer les racines.
 
 Chaque carte garde le format minimal `dq count, offset1, offset2, ...`, où les
 offsets réutilisent les mêmes slots `rbp` positifs que

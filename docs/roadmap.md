@@ -141,11 +141,14 @@ features.
   `gcLastHeapCandidateWords()`, `gcLastStackInteriorCandidateWords()`,
   `gcLastHeapInteriorCandidateWords()`,
   `gcLastAllocSafepointMapFound()`,
-  `gcLastAllocSafepointMapMissed()`, `heapAllocatedBytes()`,
+  `gcLastAllocSafepointMapMissed()`,
+  `gcLastAllocSafepointRootSlots()`,
+  `gcLastAllocSafepointRootBytes()`, `heapAllocatedBytes()`,
   `heapFreeBytes()`, `heapFreeBlockCount()` et `heapLargestFreeBlock()` aident à
   diagnostiquer les collectes, le marquage, le volume de scan conservateur, le
   bruit candidat pile/heap, les candidats intérieurs au payload, le lookup
-  observationnel du return PC d'allocation vers une carte exacte non consommée,
+  observationnel du return PC d'allocation vers une carte exacte non consommée
+  et le nombre de slots déclarés dans cette carte sans lire leurs offsets,
   le payload encore alloué et la free-list. Le filet de stress
   `tests/test_gc_memory_stress.sh` exerce également sous heaps serrés les
   temporaires imbriqués, helpers de chaînes, `Array[T]`, tableaux d'objets,
@@ -162,7 +165,8 @@ features.
   `nabla_gc_alloc_safepoints_<fonction>`, eux-mêmes listés dans l'index global
   `nabla_gc_alloc_safepoint_tables`, qui lient chaque return PC de safepoint à
   sa carte. `Runtime_gc` parcourt désormais cet index pour exposer found/missed,
-  sans consommer les racines exactes. La prochaine
+  puis lit seulement le header count de la carte trouvée pour exposer
+  slots/octets racines déclarés, sans consommer les racines exactes. La prochaine
   cible est de remplacer progressivement le scan conservateur par ces cartes
   exactes consommables, de réduire les faux positifs et de raffiner `heapUsed()`
   si nécessaire; les métadonnées de racines de frame, les descripteurs
