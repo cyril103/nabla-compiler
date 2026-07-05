@@ -126,13 +126,18 @@ Raisons :
    `nabla_gc_closure_layout_<fonction>_<result>` liste les captures
    référence-capables d'une allocation de closure. Ces descripteurs restent
    additifs et non consommés.
-6. Cartes de points d'appel `Runtime_alloc` couvertes pour les allocations IR du
+6. Métadonnées de racines statiques couvertes : `nabla_gc_static_roots` indexe
+   les labels des singletons runtime `context.runtimeObjects` et des objets de
+   littéraux `String` statiques `nabla_string_..._obj`, avec des commentaires
+   ASM qui gardent la catégorie et la source. Cet index reste additif et non
+   consommé par `Runtime_alloc` / `Runtime_gc`.
+7. Cartes de points d'appel `Runtime_alloc` couvertes pour les allocations IR du
    code utilisateur : `nabla_gc_alloc_calls_<fonction>` indexe les cartes
    `nabla_gc_alloc_call_<fonction>_<index>`, qui listent les slots de frame
    référence-capables déjà produits dans le parcours IR linéaire avant le point
    d'allocation. Ces cartes restent additives, non consommées et non encore
    dominance-aware.
-7. Inventaire des allocations internes aux helpers runtime couvert :
+8. Inventaire des allocations internes aux helpers runtime couvert :
    `tests/test_gc_runtime_helper_alloc_inventory.py` ancre les appels
    `Runtime_alloc` directs de `src/runtime_asm.cpp` dans `docs/internals.md` et
    force une mise à jour explicite quand un helper runtime gagne ou perd une
@@ -140,7 +145,7 @@ Raisons :
    Cet inventaire des allocations internes aux helpers runtime reste nécessaire
    pendant que les cartes racines internes aux helpers runtime ne sont pas
    consommées.
-8. Cartes candidates de racines internes aux helpers runtime couvertes :
+9. Cartes candidates de racines internes aux helpers runtime couvertes :
    `nabla_gc_runtime_helper_allocs_<helper>` indexe les cartes
    `nabla_gc_runtime_helper_alloc_<helper>_<index>` pour
    `Runtime_buildArgsArray`, `Runtime_stringToCharArray`,
@@ -152,57 +157,57 @@ Raisons :
    vérifiées par `tests/test_gc_runtime_helper_root_maps.py`. Elles constituent
    la première tranche inerte de cartes racines internes aux helpers runtime
    assembleur, pas encore une protection consommable.
-9. Première protection native concrète couverte : `Runtime_buildArgsArray`
+10. Première protection native concrète couverte : `Runtime_buildArgsArray`
    spille manuellement `r15`, qui tient le tableau brut d'arguments, autour de
    l'appel allocant `Runtime_cStringToString` dans la boucle et autour du
    `Runtime_alloc` final qui construit la façade `ArrayObject[String]`. La carte
    candidate de ce second site décrit `native_stack+8`, reste inerte et n'est
    pas consommée par `Runtime_alloc`; `tests/test_gc_runtime_helper_root_spills.py`
    ancre les commentaires et l'ordre `push` / `call` / `pop`.
-10. Seconde protection native concrète couverte : `Runtime_stringToCharArray`
+11. Seconde protection native concrète couverte : `Runtime_stringToCharArray`
    spille le owner `String` source autour du `Runtime_alloc` du tableau brut de
    caractères, puis `rbx` autour du `Runtime_alloc` final de façade
    `ArrayObject[Char]`. Les deux cartes candidates décrivent `native_stack+8`;
    `r10` reste un pointeur intérieur/recalculable et les cartes restent inertes.
-11. Troisième protection native concrète couverte : `Runtime_stringSplit`
+12. Troisième protection native concrète couverte : `Runtime_stringSplit`
    spille les owners `String` source/séparateur autour des allocations de
    tableaux bruts, puis `rbx` autour de l'allocation finale de façade
    `ArrayObject[String]`. Les cartes candidates décrivent `native_stack+8` et
    `native_stack+16` selon l'ordre des `push`; `r14`/`r15` restent des pointeurs
    intérieurs/recalculables non consommables.
-12. Quatrième protection native concrète couverte :
+13. Quatrième protection native concrète couverte :
    `Runtime_stringSplitMakeSegment` conserve les pushes d'état `r8`/`r9`/`rdx`
    et ajoute les spills racines `rbx` puis `r10` autour du `Runtime_alloc` de
    segment. A l'entrée de `Runtime_alloc`, `native_stack+8` décrit `r10` et
    `native_stack+16` décrit `rbx`; `r14` reste intérieur/recalculable et les
    cartes restent inertes.
-13. Cinquième protection native concrète couverte :
+14. Cinquième protection native concrète couverte :
    `FloatDouble_method_toString` spille `r10`, owner `String` de la partie
    entière produite par `Int_method_toString`, autour des deux `Runtime_alloc`
    directs des chemins fractionnel et sans fraction non nulle. Les deux cartes
    candidates décrivent désormais `native_stack+8`; `[rsp + 16]` reste un slot
    local du helper, mais la racine concrètement protégée au safepoint est le
    `push r10`. Les cartes restent inertes et non consommées par `Runtime_alloc`.
-14. Collecte active conservative couverte : `Runtime_alloc` ajoute un header
+15. Collecte active conservative couverte : `Runtime_alloc` ajoute un header
    caché de 16 octets par bloc, cherche `heap_free_list`, découpe les blocs
    libres surdimensionnés quand la queue peut rester réutilisable, tente le bump,
    appelle `Runtime_gc` avant overflow, puis retente. `Runtime_gc` scanne la pile
    native jusqu'à `gc_stack_top`, propage en scannant les payloads des blocs
    marqués jusqu'à fixpoint, puis sweep les blocs non marqués vers la free-list.
    Aucun pointeur payload n'est déplacé.
-15. Stress runtime GC couvert : `tests/test_gc_memory_stress.sh` compile et
+16. Stress runtime GC couvert : `tests/test_gc_memory_stress.sh` compile et
    exécute des programmes Nabla sous heaps serrés pour exercer temporaires
    imbriqués, concaténation/répétition de chaînes, `Array.range`/`map`/`filter`,
    `Array.tabulate` d'objets, `Map[K, V]` et `Set[T]`, tout en vérifiant que les métriques
    `gcCollections()`, `gcLastFreedBytes()`, `heapFreeBytes()` ou
    `heapLargestFreeBlock()` confirment une collecte réelle.
-16. Détail de dernière collecte couvert : `tests/test_gc_detailed_metrics.sh`
+17. Détail de dernière collecte couvert : `tests/test_gc_detailed_metrics.sh`
    vérifie les primitives `gcLastMarkedBlocks()`, `gcLastFreedBlocks()`,
    `gcLastStackWords()` et `gcLastHeapWords()`. Elles instrumentent les blocs
    marqués/libérés et les mots inspectés par les scans conservateurs de pile et
    de payloads heap afin de suivre le coût du collecteur avant de consommer les
    cartes exactes.
-17. Ajouter ensuite la protection/spill automatique des registres transitoires et
+18. Ajouter ensuite la protection/spill automatique des registres transitoires et
    slots natifs autour de `Runtime_alloc`, remplacer ou stabiliser les cartes
    candidates en cartes consommables, raffiner `heapUsed()` si besoin, et réduire
    les faux positifs du scan conservateur en consommant progressivement les

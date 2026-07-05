@@ -149,16 +149,18 @@ features.
   `Map[K, V]` et `Set[T]`. Par ailleurs,
   l'inventaire interne des familles heap et des racines backend, les métadonnées
   de racines de frame, les descripteurs champs/captures pour classes/closures,
-  les cartes de points d'appel `Runtime_alloc` du code utilisateur, l'inventaire
-  outillé des allocations internes aux helpers runtime et les cartes candidates
-  de racines internes aux helpers runtime restent inertes et non consommées par
-  `Runtime_alloc` / `Runtime_gc`. La prochaine cible est de remplacer
-  progressivement le scan conservateur par ces cartes exactes consommables, de
-  réduire les faux positifs et de raffiner `heapUsed()` si nécessaire; les
-  métadonnées de racines de frame, les descripteurs champs/captures pour
-  classes/closures, l'inventaire outillé des allocations internes aux helpers
-  runtime et les cartes candidates de racines internes aux helpers runtime
-  restent les ancres documentées de cette transition.
+  l'index `nabla_gc_static_roots` des singletons runtime et littéraux `String`
+  statiques, les cartes de points d'appel `Runtime_alloc` du code utilisateur,
+  l'inventaire outillé des allocations internes aux helpers runtime et les
+  cartes candidates de racines internes aux helpers runtime restent inertes et
+  non consommées par `Runtime_alloc` / `Runtime_gc`. La prochaine cible est de
+  remplacer progressivement le scan conservateur par ces cartes exactes
+  consommables, de réduire les faux positifs et de raffiner `heapUsed()` si
+  nécessaire; les métadonnées de racines de frame, les descripteurs
+  champs/captures pour classes/closures, l'index des racines statiques,
+  l'inventaire outillé des allocations internes aux helpers runtime et les
+  cartes candidates de racines internes aux helpers runtime restent les ancres
+  documentées de cette transition.
 - Typage a garder simple : sous-typage nominal pour les classes, generiques
   invariants par defaut, conversions explicites ou helpers stdlib.
 - Documentation : la reference HTML doit rester une doc utilisateur claire,

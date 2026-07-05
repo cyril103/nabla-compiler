@@ -63,6 +63,10 @@ required_inventory_terms = [
     "nabla_gc_closure_layout_<fonction>_<result>",
     "gc field [Classe + offset] champ: Type",
     "captures commencent à l'offset `+16`",
+    "Métadonnées De Racines Statiques GC",
+    "nabla_gc_static_roots",
+    "runtime singleton object",
+    "static string literal object",
     "Métadonnées De Points D'Allocation GC",
     "nabla_gc_alloc_calls_<fonction>",
     "nabla_gc_alloc_call_<fonction>_<index>",
@@ -94,6 +98,8 @@ for term in [
     "Descripteurs de champs/captures heap couverts",
     "nabla_gc_object_layout_<classe>",
     "nabla_gc_closure_layout_<fonction>_<result>",
+    "Métadonnées de racines statiques couvertes",
+    "nabla_gc_static_roots",
     "Cartes de points d'appel `Runtime_alloc` couvertes",
     "nabla_gc_alloc_calls_<fonction>",
     "nabla_gc_alloc_call_<fonction>_<index>",
@@ -115,13 +121,18 @@ require(
     "roadmap should mention the GC frame-root metadata",
 )
 require(
-    "descripteurs champs/captures pour\n  classes/closures" in ROADMAP,
+    "descripteurs champs/captures pour classes/closures" in ROADMAP.replace("\n  ", " "),
     "roadmap should mention the GC heap layout descriptors",
+)
+require(
+    "nabla_gc_static_roots" in ROADMAP,
+    "roadmap should mention the GC static root metadata",
 )
 for term in [
     "cartes de points d'appel `Runtime_alloc` du code",
     "l'inventaire outillé des allocations internes aux helpers",
-    "runtime et les cartes candidates",
+    "runtime",
+    "cartes candidates",
 ]:
     require(term in ROADMAP, f"roadmap should mention the GC runtime helper allocation inventory: {term}")
 require(
@@ -144,6 +155,8 @@ for term in [
     "emitGcFrameMap",
     "emitGcClosureMaps",
     "emitGcObjectLayoutMaps",
+    "collectGcStaticRoots",
+    "emitGcStaticRootMap",
     "emitGcAllocationCallMaps",
     "allocationCallKind",
     "collectConcreteClassesToEmit",
@@ -151,6 +164,7 @@ for term in [
     "nabla_gc_frame_roots_",
     "nabla_gc_object_layout_",
     "nabla_gc_closure_layout_",
+    "nabla_gc_static_roots",
     "nabla_gc_alloc_calls_",
     "nabla_gc_alloc_call_",
 ]:

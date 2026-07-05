@@ -497,8 +497,9 @@ Limites importantes :
   l'allocation échoue encore après collecte;
 - la fondation GC exacte reste additive: le backend émet des métadonnées de
   racines de frame, layouts de classes/closures, cartes de points d'appel
-  `Runtime_alloc` du code utilisateur, et le runtime ASM émet des cartes
-  candidates inertes pour les racines internes de helpers multi-allocation
+  `Runtime_alloc` du code utilisateur, un index `nabla_gc_static_roots` des
+  singletons runtime et littéraux `String` statiques, et le runtime ASM émet des
+  cartes candidates inertes pour les racines internes de helpers multi-allocation
   (`Runtime_buildArgsArray`, `Runtime_stringToCharArray`, `Runtime_stringSplit`,
   `Runtime_stringSplitMakeSegment`, `FloatDouble_method_toString`). Ces cartes
   ne sont pas encore consommées par `Runtime_alloc` / `Runtime_gc`; la première
@@ -939,6 +940,10 @@ d'inference generique et de typage contextuel des lambdas.
   `nabla_gc_object_layout_<classe>` liste les champs référence-capables et
   `nabla_gc_closure_layout_<fonction>_<result>` liste les captures
   référence-capables, sans consommation runtime.
+- [x] Émettre un premier index de racines statiques GC:
+  `nabla_gc_static_roots` liste les labels des singletons runtime et des objets
+  de littéraux `String` statiques, avec commentaires ASM de catégorie/source,
+  sans consommation par `Runtime_alloc` ou `Runtime_gc`.
 - [x] Émettre les premières cartes de points d'appel `Runtime_alloc` GC:
   `nabla_gc_alloc_calls_<fonction>` indexe les cartes
   `nabla_gc_alloc_call_<fonction>_<index>` pour les allocations IR du code
@@ -1101,6 +1106,22 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Émettre des métadonnées inertes de racines statiques GC: le backend
+  ajoute l'index `.data` `nabla_gc_static_roots`, qui compte et référence les
+  labels des singletons runtime `context.runtimeObjects` et des objets de
+  littéraux `String` statiques `nabla_string_..._obj`. Les commentaires ASM
+  gardent la catégorie (`runtime singleton object` ou
+  `static string literal object`) et la source; ni `Runtime_alloc` ni
+  `Runtime_gc` ne consomment encore cet index. La régression
+  `tests/test_gc_static_root_metadata.sh` compile en `--keep-asm` un programme
+  avec singleton runtime et littéraux de chaînes, vérifie le descripteur, le
+  compte, les commentaires et le comportement exécutable.
+  - Fichiers / tests associes: `src/ir_codegen.cpp`,
+    `tests/test_gc_static_root_metadata.sh`, `tests/test_gc_inventory_docs.py`,
+    `Makefile`, `docs/internals.md`,
+    `docs/plans/runtime-memory-management.md`, `docs/plans/README.md`,
+    `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Ajouter des métriques GC de candidats intérieurs conservateurs:
   `Runtime_gc` expose maintenant `gcLastStackInteriorCandidateWords()` et
