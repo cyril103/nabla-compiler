@@ -493,7 +493,9 @@ Limites importantes :
   `gcLastHeapCandidateWords()`, `gcLastStackInteriorCandidateWords()`,
   `gcLastHeapInteriorCandidateWords()`,
   `gcLastAllocSafepointMapFound()`,
-  `gcLastAllocSafepointMapMissed()`, `heapAllocatedBytes()`,
+  `gcLastAllocSafepointMapMissed()`,
+  `gcLastAllocSafepointRootSlots()`,
+  `gcLastAllocSafepointRootBytes()`, `heapAllocatedBytes()`,
   `heapFreeBytes()`, `heapFreeBlockCount()`, `heapLargestFreeBlock()`),
   diagnostic stderr `Nabla runtime error: heap exhausted` et sortie 255 si
   l'allocation échoue encore après collecte;
@@ -513,9 +515,12 @@ Limites importantes :
   Ces cartes ne sont pas encore consommées par le marqueur; `Runtime_gc` parcourt
   toutefois `nabla_gc_alloc_safepoint_tables` pour résoudre le return PC
   utilisateur sauvegardé à `[rsp + 112]` vers une carte et expose le résultat via
-  `gcLastAllocSafepointMapFound()` / `gcLastAllocSafepointMapMissed()` sans lire
-  les racines de cette carte; un miss reste normal pour un `Runtime_alloc` interne
-  à un helper runtime non indexé. La première collecte active scanne
+  `gcLastAllocSafepointMapFound()` / `gcLastAllocSafepointMapMissed()`, puis lit
+  seulement le header count de la carte trouvée pour exposer
+  `gcLastAllocSafepointRootSlots()` /
+  `gcLastAllocSafepointRootBytes()` sans lire les offsets de racines de cette
+  carte; un miss reste normal pour un `Runtime_alloc` interne à un helper runtime
+  non indexé. La première collecte active scanne
   conservativement la pile native jusqu'à
   `gc_stack_top`,
   puis les payloads heap marqués jusqu'à fixpoint, et sweep les blocs non marqués
@@ -1034,7 +1039,10 @@ d'inference generique et de typage contextuel des lambdas.
 - [x] Ajouter le lookup observationnel des safepoints d'allocation:
   `gcLastAllocSafepointMapFound()` /
   `gcLastAllocSafepointMapMissed()` indiquent si le return PC utilisateur courant
-  de `Runtime_alloc` a été résolu dans `nabla_gc_alloc_safepoint_tables`; le
+  de `Runtime_alloc` a été résolu dans `nabla_gc_alloc_safepoint_tables`;
+  `gcLastAllocSafepointRootSlots()` /
+  `gcLastAllocSafepointRootBytes()` exposent seulement le header count de la
+  carte trouvée comme métrique de forme slots/octets, sans scan des offsets; le
   pointeur de carte trouvé reste interne, un miss peut être légitime pour un
   helper runtime non indexé, et les racines exactes ne sont pas consommées par le
   marqueur.
@@ -1145,11 +1153,13 @@ d'inference generique et de typage contextuel des lambdas.
   `nabla_gc_alloc_safepoints_<fonction>`, stocke le pointeur de carte trouvé
   dans un slot runtime interne, puis expose
   `gcLastAllocSafepointMapFound()` /
-  `gcLastAllocSafepointMapMissed()`. Le marquage reste conservateur et ne lit
-  pas les racines exactes. La régression
+  `gcLastAllocSafepointMapMissed()`. Sur un match, il lit seulement le header
+  count de la carte pour exposer `gcLastAllocSafepointRootSlots()` /
+  `gcLastAllocSafepointRootBytes()`; le marquage reste conservateur et ne lit
+  pas les offsets de racines exactes. La régression
   `tests/test_gc_alloc_safepoint_lookup_metrics.sh` force une collecte sous heap
-  serré, vérifie found/missed, inspecte l'ASM conservé et couvre les noms
-  réservés.
+  serré, vérifie found/missed et slots/octets, inspecte l'ASM conservé et couvre
+  les noms réservés.
   - Fichiers / tests associes: `src/runtime_asm.cpp`, `src/ast.cpp`,
     `src/parser.cpp`, `src/ir_codegen.cpp`,
     `tests/test_gc_alloc_safepoint_lookup_metrics.sh`,

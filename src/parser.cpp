@@ -2415,6 +2415,8 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
             functionName == "gcLastHeapInteriorCandidateWords" ||
             functionName == "gcLastAllocSafepointMapFound" ||
             functionName == "gcLastAllocSafepointMapMissed" ||
+            functionName == "gcLastAllocSafepointRootSlots" ||
+            functionName == "gcLastAllocSafepointRootBytes" ||
             functionName == "heapLargestFreeBlock") {
             throw CompilerError(
                 ErrorKind::Parser, nameToken.location,

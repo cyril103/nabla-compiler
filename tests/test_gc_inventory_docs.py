@@ -90,9 +90,13 @@ required_inventory_terms = [
     "cartes racines consommables",
     "gc_last_alloc_safepoint_map_found",
     "gc_last_alloc_safepoint_map_missed",
+    "gc_last_alloc_safepoint_root_slots",
+    "gc_last_alloc_safepoint_root_bytes",
     "gc_last_alloc_safepoint_map",
     "`gcLastAllocSafepointMapFound()`",
     "`gcLastAllocSafepointMapMissed()`",
+    "`gcLastAllocSafepointRootSlots()`",
+    "`gcLastAllocSafepointRootBytes()`",
 ]
 
 for term in required_inventory_terms:
@@ -128,6 +132,8 @@ for term in [
     "tests/test_gc_alloc_safepoint_lookup_metrics.sh",
     "gcLastAllocSafepointMapFound() > 0",
     "gcLastAllocSafepointMapMissed() == 0",
+    "gcLastAllocSafepointRootSlots() > 0",
+    "gcLastAllocSafepointRootBytes() == slots * 8",
 ]:
     require(term in PLAN, f"runtime memory plan should track the inventory state: {term}")
 
@@ -139,6 +145,8 @@ for term in [
     "sans consommation",
     "gcLastAllocSafepointMapFound()",
     "gcLastAllocSafepointMapMissed()",
+    "gcLastAllocSafepointRootSlots()",
+    "gcLastAllocSafepointRootBytes()",
 ]:
     require(term in PLAN_README, f"plans README should track inert allocation return-PC metadata: {term}")
 
@@ -169,6 +177,8 @@ for term in [
     "cartes candidates",
     "gcLastAllocSafepointMapFound()",
     "gcLastAllocSafepointMapMissed()",
+    "gcLastAllocSafepointRootSlots()",
+    "gcLastAllocSafepointRootBytes()",
 ]:
     require(term in ROADMAP, f"roadmap should mention the GC runtime helper allocation inventory: {term}")
 require(
@@ -235,8 +245,13 @@ for term in [
     "nabla_gc_runtime_helper_alloc_",
     "gc_last_alloc_safepoint_map_found",
     "gc_last_alloc_safepoint_map_missed",
+    "gc_last_alloc_safepoint_root_slots",
+    "gc_last_alloc_safepoint_root_bytes",
     "Runtime_gcLastAllocSafepointMapFound",
     "Runtime_gcLastAllocSafepointMapMissed",
+    "Runtime_gcLastAllocSafepointRootSlots",
+    "Runtime_gcLastAllocSafepointRootBytes",
+    "Observational only: read the map header count, not root offsets.",
 ]:
     require(term in RUNTIME_ASM, f"expected runtime helper missing: {term}")
 

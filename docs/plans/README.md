@@ -26,7 +26,8 @@ compteurs GC `gcCollections()`, `gcLastFreedBytes()`,
 `gcLastStackWords()`, `gcLastHeapWords()`, `gcLastStackCandidateWords()`,
 `gcLastHeapCandidateWords()`, `gcLastStackInteriorCandidateWords()`,
 `gcLastHeapInteriorCandidateWords()`, `gcLastAllocSafepointMapFound()`,
-`gcLastAllocSafepointMapMissed()`, `heapAllocatedBytes()`, `heapFreeBytes()`,
+`gcLastAllocSafepointMapMissed()`, `gcLastAllocSafepointRootSlots()`,
+`gcLastAllocSafepointRootBytes()`, `heapAllocatedBytes()`, `heapFreeBytes()`,
 `heapFreeBlockCount()` et `heapLargestFreeBlock()` exposent
 le nombre de collectes, le dernier sweep, le marquage, le volume de scan
 conservateur, le bruit candidat pile/heap, les candidats intérieurs au payload,
@@ -49,8 +50,9 @@ cartes correspondantes, un label
 `nabla_gc_alloc_return_<fonction>_<index>` immédiatement après l'appel, et un
 index `nabla_gc_alloc_safepoints_<fonction>` qui associe chaque return PC à sa
 carte, plus l'index global `nabla_gc_alloc_safepoint_tables`; `Runtime_gc`
-parcourt désormais ces index pour exposer found/missed, sans consommer les
-racines des cartes. Cette étape reste donc sans consommation des racines exactes:
+parcourt désormais ces index pour exposer found/missed et lit seulement le
+header count de la carte trouvée pour exposer slots/octets déclarés, sans
+consommer les racines des cartes. Cette étape reste donc sans consommation des racines exactes:
 elles ne sont pas encore consommées par le marqueur
 conservateur; la suite du plan consiste à réduire les faux
 positifs conservateurs en consommant progressivement ces cartes exactes et en

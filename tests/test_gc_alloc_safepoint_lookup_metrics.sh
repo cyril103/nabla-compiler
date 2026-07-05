@@ -16,7 +16,7 @@ class Cell(value: Int) {
     def get(): Int = { value }
 }
 
-def churn(count: Int): Int = {
+def churn(anchor: Cell, count: Int): Int = {
     var i = 0
     var total = 0
     while i < count {
@@ -24,12 +24,12 @@ def churn(count: Int): Int = {
         total = total + dead.get()
         i = i + 1
     }
-    total
+    total + anchor.get()
 }
 
 def main(): Int = {
     val kept = new Cell(7)
-    val total = churn(220)
+    val total = churn(kept, 220)
     if kept.get() != 7 {
         10
     } else if total <= 0 {
@@ -40,6 +40,10 @@ def main(): Int = {
         13
     } else if gcLastAllocSafepointMapMissed() != 0 {
         14
+    } else if gcLastAllocSafepointRootSlots() <= 0 {
+        15
+    } else if gcLastAllocSafepointRootBytes() != gcLastAllocSafepointRootSlots() * 8 {
+        16
     } else {
         0
     }
@@ -49,6 +53,35 @@ NABLA
 NABLA_BUILD_DIR="$CUSTOM_BUILD_DIR" "$BUILD_DIR/nablac" --heap-size 4096 --keep-asm "$TMP_DIR/gc_alloc_safepoint_lookup_metrics.nabla" >/dev/null
 "$CUSTOM_BUILD_DIR/gc_alloc_safepoint_lookup_metrics"
 
+cat >"$TMP_DIR/gc_alloc_safepoint_lookup_miss_reset.nabla" <<'NABLA'
+def main(): Int = {
+    var i = 0
+    var s = "seed"
+    while i < 180 {
+        s = s + "x"
+        i = i + 1
+    }
+    if s.length() <= 0 {
+        20
+    } else if gcCollections() <= 0 {
+        21
+    } else if gcLastAllocSafepointMapFound() != 0 {
+        22
+    } else if gcLastAllocSafepointMapMissed() <= 0 {
+        23
+    } else if gcLastAllocSafepointRootSlots() != 0 {
+        24
+    } else if gcLastAllocSafepointRootBytes() != 0 {
+        25
+    } else {
+        0
+    }
+}
+NABLA
+
+NABLA_BUILD_DIR="$CUSTOM_BUILD_DIR/miss" "$BUILD_DIR/nablac" --heap-size 4096 "$TMP_DIR/gc_alloc_safepoint_lookup_miss_reset.nabla" >/dev/null
+"$CUSTOM_BUILD_DIR/miss/gc_alloc_safepoint_lookup_miss_reset"
+
 ASM="$CUSTOM_BUILD_DIR/gc_alloc_safepoint_lookup_metrics_tmp.asm"
 python3 - "$ASM" <<'PY'
 import sys
@@ -56,6 +89,8 @@ asm = open(sys.argv[1], encoding='utf-8').read()
 required = [
     "gc_last_alloc_safepoint_map_found: dq 0",
     "gc_last_alloc_safepoint_map_missed: dq 0",
+    "gc_last_alloc_safepoint_root_slots: dq 0",
+    "gc_last_alloc_safepoint_root_bytes: dq 0",
     "gc_last_alloc_safepoint_map: dq 0",
     "mov rax, [rsp + 112]",
     "8-byte Runtime_gc return + 8-byte requested-size spill + 12 saved regs",
@@ -68,19 +103,40 @@ required = [
     "add r11, 16",
     "mov r13, [r11 + 8]",
     "mov [gc_last_alloc_safepoint_map], r13",
+    "Observational only: read the map header count, not root offsets.",
+    "mov r14, [r13]",
+    "mov [gc_last_alloc_safepoint_root_slots], r14",
+    "shl r14, 3",
+    "mov [gc_last_alloc_safepoint_root_bytes], r14",
     "Runtime_gcLastAllocSafepointMapFound:",
     "Runtime_gcLastAllocSafepointMapMissed:",
+    "Runtime_gcLastAllocSafepointRootSlots:",
+    "Runtime_gcLastAllocSafepointRootBytes:",
     "call Runtime_gcLastAllocSafepointMapFound",
     "call Runtime_gcLastAllocSafepointMapMissed",
+    "call Runtime_gcLastAllocSafepointRootSlots",
+    "call Runtime_gcLastAllocSafepointRootBytes",
     "nabla_gc_alloc_safepoint_tables:",
     "nabla_gc_alloc_safepoints_main:",
 ]
 missing = [item for item in required if item not in asm]
 if missing:
     raise SystemExit("missing expected allocation safepoint lookup ASM markers: " + ", ".join(missing))
+found_start = asm.index(".L_gc_alloc_safepoint_lookup_found:")
+found_end = asm.index(".L_gc_alloc_safepoint_lookup_done:", found_start)
+found_block = asm[found_start:found_end]
+compact_found_block = found_block.replace(" ", "")
+for forbidden in ["[r13+8]", "Runtime_gc_mark_candidate", ".L_gc_exact_root"]:
+    haystack = compact_found_block if forbidden.startswith("[") else found_block
+    if forbidden in haystack:
+        raise SystemExit(f"allocation safepoint lookup should not consume root offsets yet: {forbidden}")
 PY
 
-for primitive in gcLastAllocSafepointMapFound gcLastAllocSafepointMapMissed; do
+for primitive in \
+    gcLastAllocSafepointMapFound \
+    gcLastAllocSafepointMapMissed \
+    gcLastAllocSafepointRootSlots \
+    gcLastAllocSafepointRootBytes; do
     cat >"$TMP_DIR/${primitive}_reserved.nabla" <<NABLA
 def ${primitive}(): Int = { 0 }
 def main(): Int = { ${primitive}() }

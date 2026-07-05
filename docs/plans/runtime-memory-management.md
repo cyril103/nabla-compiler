@@ -34,7 +34,9 @@ concret l'impose.
   `gcLastStackInteriorCandidateWords()`,
   `gcLastHeapInteriorCandidateWords()`,
   `gcLastAllocSafepointMapFound()`,
-  `gcLastAllocSafepointMapMissed()`, `heapAllocatedBytes()`,
+  `gcLastAllocSafepointMapMissed()`,
+  `gcLastAllocSafepointRootSlots()`,
+  `gcLastAllocSafepointRootBytes()`, `heapAllocatedBytes()`,
   `heapFreeBytes()`, `heapFreeBlockCount()` et
   `heapLargestFreeBlock()` afin de mesurer le nombre de collectes, le sweep le
   plus récent, le marquage, le volume de scan conservateur, le bruit candidat
@@ -225,10 +227,13 @@ Raisons :
 18. Lookup runtime des cartes d'allocation couvert :
    `tests/test_gc_alloc_safepoint_lookup_metrics.sh` force une collecte à un
    safepoint `Runtime_alloc` utilisateur sous heap serré, vérifie
-   `gcLastAllocSafepointMapFound() > 0` et
-   `gcLastAllocSafepointMapMissed() == 0`, puis inspecte l'ASM conservé pour le
+   `gcLastAllocSafepointMapFound() > 0`,
+   `gcLastAllocSafepointMapMissed() == 0`,
+   `gcLastAllocSafepointRootSlots() > 0` et
+   `gcLastAllocSafepointRootBytes() == slots * 8`, puis inspecte l'ASM conservé pour le
    parcours de `nabla_gc_alloc_safepoint_tables` et les labels runtime publics.
-   Le pointeur de carte trouvé reste interne et non consommé par le marquage.
+   Le pointeur de carte trouvé reste interne; seul le header count de la carte
+   est lu, sans scan des offsets ni consommation par le marquage.
 19. Ajouter ensuite la protection/spill automatique des registres transitoires et
    slots natifs autour de `Runtime_alloc`, remplacer ou stabiliser les cartes
    candidates en cartes consommables, raffiner `heapUsed()` si besoin, et réduire

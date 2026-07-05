@@ -1625,6 +1625,8 @@ std::string FunctionCallNode::getType() {
     if (name == "gcLastHeapInteriorCandidateWords") return "Int";
     if (name == "gcLastAllocSafepointMapFound") return "Int";
     if (name == "gcLastAllocSafepointMapMissed") return "Int";
+    if (name == "gcLastAllocSafepointRootSlots") return "Int";
+    if (name == "gcLastAllocSafepointRootBytes") return "Int";
     if (name == "heapAllocatedBytes") return "Int";
     if (name == "heapFreeBytes") return "Int";
     if (name == "heapFreeBlockCount") return "Int";
@@ -1799,6 +1801,7 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
         name == "gcLastStackCandidateWords" || name == "gcLastHeapCandidateWords" ||
         name == "gcLastStackInteriorCandidateWords" || name == "gcLastHeapInteriorCandidateWords" ||
         name == "gcLastAllocSafepointMapFound" || name == "gcLastAllocSafepointMapMissed" ||
+        name == "gcLastAllocSafepointRootSlots" || name == "gcLastAllocSafepointRootBytes" ||
         name == "heapAllocatedBytes" || name == "heapFreeBytes" ||
         name == "heapFreeBlockCount" || name == "heapLargestFreeBlock") {
         if (!typeArguments.empty()) {
