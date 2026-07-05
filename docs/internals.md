@@ -426,11 +426,17 @@ collecte et remet à zéro puis remplit les métriques de dernière collecte :
 `gc_last_largest_free_block` retient le plus gros bloc libre produit par le
 sweep, `gc_last_marked_blocks` compte les blocs marqués, `gc_last_freed_blocks`
 compte les blocs alloués devenus libres, `gc_last_stack_words` compte les mots
-de pile native inspectés et `gc_last_heap_words` compte les mots payload heap
-inspectés pendant la propagation conservatrice. Les primitives
+de pile native inspectés, `gc_last_heap_words` compte les mots payload heap
+inspectés pendant la propagation conservatrice, et
+`gc_last_stack_candidate_words` / `gc_last_heap_candidate_words` comptent les
+mots scannés qui ressemblent effectivement à des pointeurs vers un bloc heap
+alloué. Ces compteurs de candidats ne sont pas des racines exactes uniques : ils
+mesurent le bruit conservateur par source de scan et peuvent compter plusieurs
+fois le même pointeur pendant les passes de propagation. Les primitives
 `gcCollections()`, `gcLastFreedBytes()`, `gcLastLargestFreeBlock()`,
 `gcLastMarkedBlocks()`, `gcLastFreedBlocks()`, `gcLastStackWords()` et
-`gcLastHeapWords()` exposent ces valeurs de dernière collecte. À la demande,
+`gcLastHeapWords()`, `gcLastStackCandidateWords()` et
+`gcLastHeapCandidateWords()` exposent ces valeurs de dernière collecte. À la demande,
 `Runtime_heapAllocatedBytes` parcourt les headers entre `heap_start` et
 `heap_pointer` pour additionner les payloads des blocs non libres, tandis que
 `Runtime_heapFreeBytes`, `Runtime_heapFreeBlockCount` et

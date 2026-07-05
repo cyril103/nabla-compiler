@@ -2409,6 +2409,8 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
             functionName == "gcLastFreedBlocks" ||
             functionName == "gcLastStackWords" ||
             functionName == "gcLastHeapWords" ||
+            functionName == "gcLastStackCandidateWords" ||
+            functionName == "gcLastHeapCandidateWords" ||
             functionName == "heapLargestFreeBlock") {
             throw CompilerError(
                 ErrorKind::Parser, nameToken.location,

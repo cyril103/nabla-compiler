@@ -489,8 +489,9 @@ Limites importantes :
   collecte GC conservative non compactante avant dépassement, compteurs
   d'observabilité (`gcCollections()`, `gcLastFreedBytes()`,
   `gcLastLargestFreeBlock()`, `gcLastMarkedBlocks()`, `gcLastFreedBlocks()`,
-  `gcLastStackWords()`, `gcLastHeapWords()`, `heapAllocatedBytes()`,
-  `heapFreeBytes()`, `heapFreeBlockCount()`, `heapLargestFreeBlock()`),
+  `gcLastStackWords()`, `gcLastHeapWords()`, `gcLastStackCandidateWords()`,
+  `gcLastHeapCandidateWords()`, `heapAllocatedBytes()`, `heapFreeBytes()`,
+  `heapFreeBlockCount()`, `heapLargestFreeBlock()`),
   diagnostic stderr `Nabla runtime error: heap exhausted` et sortie 255 si
   l'allocation échoue encore après collecte;
 - la fondation GC exacte reste additive: le backend émet des métadonnées de
@@ -1093,6 +1094,21 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter des métriques GC de candidats conservateurs: `Runtime_gc`
+  distingue maintenant les mots scannés qui ressemblent à des pointeurs heap
+  selon leur source (`gcLastStackCandidateWords()` pour la pile native et
+  `gcLastHeapCandidateWords()` pour la propagation payload heap). Ces compteurs
+  complètent `gcLastStackWords()` / `gcLastHeapWords()` afin de mesurer le bruit
+  conservateur avant de consommer des cartes exactes; ils ne sont pas des racines
+  exactes uniques et peuvent compter plusieurs observations du même pointeur. La
+  régression `tests/test_gc_candidate_scan_metrics.sh` vérifie l'exécution sous
+  heap serré, les marqueurs assembleur et les noms réservés.
+  - Fichiers / tests associes: `src/runtime_asm.cpp`, `src/ast.cpp`,
+    `src/parser.cpp`, `src/ir_codegen.cpp`,
+    `tests/test_gc_candidate_scan_metrics.sh`, `Makefile`, `docs/internals.md`,
+    `docs/language.md`, `docs/plans/runtime-memory-management.md`,
+    `docs/plans/README.md`, `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Ajouter des métriques GC d'accounting heap courant: le runtime expose
   `heapAllocatedBytes()` pour additionner à la demande les payloads des blocs non

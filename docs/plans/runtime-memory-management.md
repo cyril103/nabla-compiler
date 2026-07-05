@@ -30,10 +30,12 @@ concret l'impose.
 - Le delta d'observabilité ajoute les compteurs source `gcCollections()`,
   `gcLastFreedBytes()`, `gcLastLargestFreeBlock()`, `gcLastMarkedBlocks()`,
   `gcLastFreedBlocks()`, `gcLastStackWords()`, `gcLastHeapWords()`,
+  `gcLastStackCandidateWords()`, `gcLastHeapCandidateWords()`,
   `heapAllocatedBytes()`, `heapFreeBytes()`, `heapFreeBlockCount()` et
   `heapLargestFreeBlock()` afin de mesurer le nombre de collectes, le sweep le
-  plus récent, le marquage, le volume de scan conservateur, le payload encore
-  alloué et l'état courant de la free-list sans changer `heapUsed()`.
+  plus récent, le marquage, le volume de scan conservateur, le bruit candidat
+  pile/heap, le payload encore alloué et l'état courant de la free-list sans
+  changer `heapUsed()`.
 - Le delta de fragmentation immédiate découpe les blocs libres surdimensionnés à
   la réallocation: le préfixe sert la demande, la queue reste dans
   `heap_free_list` si elle peut contenir un header et un mot payload aligné, et
