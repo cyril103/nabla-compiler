@@ -506,7 +506,8 @@ Limites importantes :
   `gc alloc safepoint map ... non-consumed` qui identifient la carte
   `nabla_gc_alloc_call_<fonction>_<index>` correspondante, puis un label
   `nabla_gc_alloc_return_<fonction>_<index>` immédiatement après l'appel; l'index
-  `nabla_gc_alloc_safepoints_<fonction>` associe chaque return PC à sa carte.
+  `nabla_gc_alloc_safepoints_<fonction>` associe chaque return PC à sa carte, et
+  l'index global `nabla_gc_alloc_safepoint_tables` liste ces tables par fonction.
   Ces cartes ne sont pas encore consommées par `Runtime_alloc` / `Runtime_gc`; la
   première collecte active scanne conservativement la pile native jusqu'à
   `gc_stack_top`,
@@ -962,8 +963,9 @@ d'inference generique et de typage contextuel des lambdas.
 - [x] Émettre un index return-PC inerte pour les safepoints `Runtime_alloc`
   utilisateur: chaque appel allocant du code généré reçoit un label
   `nabla_gc_alloc_return_<fonction>_<index>` immédiatement après
-  `call Runtime_alloc`, et `nabla_gc_alloc_safepoints_<fonction>` lie chaque
-  return PC à la carte `nabla_gc_alloc_call_<fonction>_<index>` existante, sans
+  `call Runtime_alloc`, `nabla_gc_alloc_safepoints_<fonction>` lie chaque
+  return PC à la carte `nabla_gc_alloc_call_<fonction>_<index>` existante, et
+  `nabla_gc_alloc_safepoint_tables` liste les tables par fonction, sans
   consommation par `Runtime_alloc` ou `Runtime_gc`.
 - [x] Inventorier et outiller les allocations internes aux helpers runtime:
   `tests/test_gc_runtime_helper_alloc_inventory.py` ancre les appels
@@ -1346,6 +1348,17 @@ d'inference generique et de typage contextuel des lambdas.
   `nabla_gc_alloc_safepoints_<fonction>` dans `.data` avec les paires
   return-label / `nabla_gc_alloc_call_<fonction>_<index>`. Cette table reste
   additive, inerte et non consommée par le collecteur conservative actuel.
+  - Fichiers / tests associes: `src/ir_codegen.cpp`,
+    `tests/test_gc_alloc_call_metadata.sh`, `tests/test_gc_inventory_docs.py`,
+    `docs/internals.md`, `docs/plans/runtime-memory-management.md`,
+    `docs/plans/README.md`, `docs/roadmap.md`, `AGENTS.md`.
+
+- `local` - Émettre l'index global des tables de safepoints `Runtime_alloc`:
+  `nabla_gc_alloc_safepoint_tables` liste les
+  `nabla_gc_alloc_safepoints_<fonction>` de toutes les fonctions compilées afin
+  qu'un futur lookup runtime puisse parcourir tous les return PC sans connaître
+  les fonctions à l'avance. L'index reste additif, inerte et non consommé par le
+  collecteur conservative actuel.
   - Fichiers / tests associes: `src/ir_codegen.cpp`,
     `tests/test_gc_alloc_call_metadata.sh`, `tests/test_gc_inventory_docs.py`,
     `docs/internals.md`, `docs/plans/runtime-memory-management.md`,

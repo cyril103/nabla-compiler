@@ -1737,6 +1737,21 @@ void emitGcStaticRootMap(const std::vector<StaticRootDescriptor>& roots, std::os
             << " source " << asmCommentText(root.source) << "\n";
     }
 }
+
+void emitGcAllocationSafepointTableIndex(
+    const std::vector<IRFunction>& functions, std::ostream& out) {
+    out << "    align 8\n";
+    out << "nabla_gc_alloc_safepoint_tables: dq " << functions.size();
+    for (const auto& function : functions) {
+        out << ", nabla_gc_alloc_safepoints_" << asmFunctionName(function.name);
+    }
+    out << "\n";
+    for (const auto& function : functions) {
+        out << "    ; gc alloc safepoint table " << asmFunctionName(function.name)
+            << " -> nabla_gc_alloc_safepoints_" << asmFunctionName(function.name)
+            << " non-consumed\n";
+    }
+}
 }
 
 IRCodeGenerator::IRCodeGenerator(std::uint64_t heapCapacityBytes)
@@ -1922,6 +1937,7 @@ void IRCodeGenerator::generateASM(
         emitter.emitGcClosureMaps();
         emitter.emitGcAllocationCallMaps();
     }
+    emitGcAllocationSafepointTableIndex(program.functions, out);
 
     // Emit all code in section .text (runtime helper functions first, then user functions)
     RuntimeASM::emitText(out, mainUsesCommandLineArguments);

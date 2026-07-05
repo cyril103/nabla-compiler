@@ -138,13 +138,15 @@ Raisons :
    d'allocation. `nabla_gc_alloc_safepoints_<fonction>` indexe aussi les paires
    `nabla_gc_alloc_return_<fonction>_<index>` /
    `nabla_gc_alloc_call_<fonction>_<index>` pour relier l'adresse de retour du
-   `call Runtime_alloc` à la carte. Chaque `call Runtime_alloc` utilisateur
-   correspondant garde aussi un commentaire ASM inerte
+   `call Runtime_alloc` à la carte, et `nabla_gc_alloc_safepoint_tables` liste
+   les tables par fonction pour un futur lookup runtime global. Chaque
+   `call Runtime_alloc` utilisateur correspondant garde aussi un commentaire ASM
+   inerte
    `; gc alloc safepoint map nabla_gc_alloc_call_<fonction>_<index> ...
    non-consumed` immédiatement avant le safepoint, puis le label
    `nabla_gc_alloc_return_<fonction>_<index>:` immédiatement après l'appel. Ces
-   cartes et tables restent additives, non consommées et non encore
-   dominance-aware.
+   cartes, tables par fonction et index global restent additifs, non consommés
+   et non encore dominance-aware.
 8. Inventaire des allocations internes aux helpers runtime couvert :
    `tests/test_gc_runtime_helper_alloc_inventory.py` ancre les appels
    `Runtime_alloc` directs de `src/runtime_asm.cpp` dans `docs/internals.md` et

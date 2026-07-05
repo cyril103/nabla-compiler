@@ -71,6 +71,7 @@ required_inventory_terms = [
     "Métadonnées De Points D'Allocation GC",
     "nabla_gc_alloc_calls_<fonction>",
     "nabla_gc_alloc_safepoints_<fonction>",
+    "nabla_gc_alloc_safepoint_tables",
     "nabla_gc_alloc_call_<fonction>_<index>",
     "nabla_gc_alloc_return_<fonction>_<index>",
     "return_pc, map",
@@ -108,6 +109,7 @@ for term in [
     "Cartes de points d'appel `Runtime_alloc` couvertes",
     "nabla_gc_alloc_calls_<fonction>",
     "nabla_gc_alloc_safepoints_<fonction>",
+    "nabla_gc_alloc_safepoint_tables",
     "nabla_gc_alloc_call_<fonction>_<index>",
     "nabla_gc_alloc_return_<fonction>_<index>",
     "gc alloc safepoint map",
@@ -123,8 +125,9 @@ for term in [
 for term in [
     "nabla_gc_alloc_return_<fonction>_<index>",
     "nabla_gc_alloc_safepoints_<fonction>",
+    "nabla_gc_alloc_safepoint_tables",
     "return PC",
-    "sans consommation runtime",
+    "sans consommation",
 ]:
     require(term in PLAN_README, f"plans README should track inert allocation return-PC metadata: {term}")
 
@@ -149,6 +152,7 @@ for term in [
     "gc alloc safepoint map",
     "nabla_gc_alloc_return_<fonction>_<index>",
     "nabla_gc_alloc_safepoints_<fonction>",
+    "nabla_gc_alloc_safepoint_tables",
     "l'inventaire outillé des allocations internes aux helpers",
     "runtime",
     "cartes candidates",
@@ -179,6 +183,7 @@ for term in [
     "emitGcAllocationCallMaps",
     "emitGcAllocationSafepointComment",
     "emitGcAllocationReturnLabel",
+    "emitGcAllocationSafepointTableIndex",
     "allocationCallKind",
     "collectConcreteClassesToEmit",
     "isGcReferenceCapableType",
@@ -189,6 +194,7 @@ for term in [
     "nabla_gc_alloc_calls_",
     "nabla_gc_alloc_call_",
     "nabla_gc_alloc_safepoints_",
+    "nabla_gc_alloc_safepoint_tables",
     "nabla_gc_alloc_return_",
 ]:
     require(term in CODEGEN, f"expected implementation hook missing: {term}")
