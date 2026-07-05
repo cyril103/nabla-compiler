@@ -371,6 +371,7 @@ private:
     std::map<std::string, std::string> valueTypes;
     std::map<std::string, int> emittedIncomingJumps;
     int nextIndirectCallId = 0;
+    size_t nextGcAllocationCallIndex = 0;
 
     struct RootSlot {
         std::string name;
@@ -442,6 +443,18 @@ private:
             default:
                 return std::nullopt;
         }
+    }
+
+    void emitGcAllocationSafepointComment(const IRInstruction& instruction) {
+        const auto kind = allocationCallKind(instruction);
+        if (!kind) codegenError("commentaire safepoint GC demande pour une instruction non allocante");
+
+        out << "    ; gc alloc safepoint map nabla_gc_alloc_call_"
+            << asmFunctionName(function.name) << "_" << nextGcAllocationCallIndex
+            << " kind " << *kind << " result " << instruction.result;
+        if (!instruction.operation.empty()) out << " op " << instruction.operation;
+        out << " non-consumed\n";
+        ++nextGcAllocationCallIndex;
     }
 
     std::string tailEntryLabel() const {
@@ -936,6 +949,7 @@ private:
     void emitFunctionReference(const IRInstruction& instruction) {
         const size_t objectSize = 16 + instruction.operands.size() * 8;
         out << "    mov rdi, " << objectSize << "\n";
+        emitGcAllocationSafepointComment(instruction);
         out << "    call Runtime_alloc\n";
         out << "    mov rbx, rax\n";
         out << "    mov qword [rbx], " << asmFunctionName(instruction.operation) << "\n";
@@ -1239,6 +1253,7 @@ private:
         }
 
         out << "    mov rdi, " << objectSizeFor(instruction.operation) << "\n";
+        emitGcAllocationSafepointComment(instruction);
         out << "    call Runtime_alloc\n";
         out << "    mov rbx, rax\n";
         out << "    lea rax, [vtable_" << asmSymbolName(instruction.operation) << "]\n";
@@ -1278,6 +1293,7 @@ private:
         out << "    shl rdi, 3\n";
         out << "    add rdi, 16\n";
         out << "    jc Runtime_heap_overflow\n";
+        emitGcAllocationSafepointComment(instruction);
         out << "    call Runtime_alloc\n";
         out << "    mov rbx, rax\n";
         out << "    mov qword [rbx], 0\n";
@@ -1441,6 +1457,7 @@ private:
         if (instruction.operands.size() != 1) codegenError("boxing IR invalide");
         loadValue(instruction.operands[0], "r10");
         out << "    mov rdi, 16\n";
+        emitGcAllocationSafepointComment(instruction);
         out << "    call Runtime_alloc\n";
         out << "    mov qword [rax], " << tag << "\n";
         out << "    mov [rax + 8], r10\n";

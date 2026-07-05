@@ -651,6 +651,14 @@ protègent pas encore les registres transitoires chargés juste avant
 `Runtime_alloc`, et ne couvrent pas les allocations réalisées à l'intérieur des
 helpers assembleur runtime.
 
+Pour faciliter le raccord futur entre code et données, chaque `call Runtime_alloc`
+émis depuis une instruction IR allocante utilisateur est maintenant précédé dans
+`.text` d'un commentaire inerte de la forme
+`; gc alloc safepoint map nabla_gc_alloc_call_<fonction>_<index> kind ... result ... [op ...] non-consumed`.
+Ce commentaire identifie la carte correspondante, le type d'allocation, le
+résultat IR et l'opération source si elle existe. Il ne change pas la convention
+d'appel et n'est lu ni par `Runtime_alloc` ni par `Runtime_gc`.
+
 ### Inventaire Des Allocations Internes Aux Helpers Runtime
 
 Les allocations réalisées directement dans `src/runtime_asm.cpp` restent hors des

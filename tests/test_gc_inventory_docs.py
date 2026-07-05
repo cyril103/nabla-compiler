@@ -71,6 +71,7 @@ required_inventory_terms = [
     "nabla_gc_alloc_calls_<fonction>",
     "nabla_gc_alloc_call_<fonction>_<index>",
     "gc alloc call",
+    "gc alloc safepoint map",
     "gc alloc root [rbp -",
     "Inventaire Des Allocations Internes Aux Helpers Runtime",
     "Runtime_stringSplitMakeSegment",
@@ -103,6 +104,7 @@ for term in [
     "Cartes de points d'appel `Runtime_alloc` couvertes",
     "nabla_gc_alloc_calls_<fonction>",
     "nabla_gc_alloc_call_<fonction>_<index>",
+    "gc alloc safepoint map",
     "Inventaire des allocations internes aux helpers runtime couvert",
     "tests/test_gc_runtime_helper_alloc_inventory.py",
     "Cartes candidates de racines internes aux helpers runtime couvertes",
@@ -130,6 +132,7 @@ require(
 )
 for term in [
     "cartes de points d'appel `Runtime_alloc` du code",
+    "gc alloc safepoint map",
     "l'inventaire outillé des allocations internes aux helpers",
     "runtime",
     "cartes candidates",
@@ -158,6 +161,7 @@ for term in [
     "collectGcStaticRoots",
     "emitGcStaticRootMap",
     "emitGcAllocationCallMaps",
+    "emitGcAllocationSafepointComment",
     "allocationCallKind",
     "collectConcreteClassesToEmit",
     "isGcReferenceCapableType",
