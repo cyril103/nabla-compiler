@@ -1183,14 +1183,17 @@ projet, puis dans `stdlib/`.
   `gcLastHeapWords(): Int`, `gcLastStackCandidateWords(): Int`,
   `gcLastHeapCandidateWords(): Int`,
   `gcLastStackInteriorCandidateWords(): Int`,
-  `gcLastHeapInteriorCandidateWords(): Int`, `heapAllocatedBytes(): Int`,
+  `gcLastHeapInteriorCandidateWords(): Int`,
+  `gcLastAllocSafepointMapFound(): Int`,
+  `gcLastAllocSafepointMapMissed(): Int`, `heapAllocatedBytes(): Int`,
   `heapFreeBytes(): Int`, `heapFreeBlockCount(): Int` et
   `heapLargestFreeBlock(): Int` exposent l'observabilité GC pour les tests et
   diagnostics: nombre de collectes, octets/libre le plus grand bloc de la
   dernière collecte, blocs marqués/libérés, volume de scan conservateur pile/heap,
   mots candidats qui ressemblent à des pointeurs heap, sous-ensemble de
-  candidats intérieurs au payload, puis état courant de la free-list et payload
-  encore alloué. En cas de
+  candidats intérieurs au payload, résolution observationnelle du return PC
+  d'allocation utilisateur vers une carte exacte non consommée, puis état
+  courant de la free-list et payload encore alloué. En cas de
   dépassement persistant après collecte, le runtime écrit `Nabla runtime error:
   heap exhausted` sur stderr et termine avec le code 255. Les sections `Chaines`
   et `Tableaux Et Collections` listent les mitigations usuelles pour réduire la

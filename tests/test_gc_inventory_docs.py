@@ -88,6 +88,11 @@ required_inventory_terms = [
     "interior:*",
     "non consommées",
     "cartes racines consommables",
+    "gc_last_alloc_safepoint_map_found",
+    "gc_last_alloc_safepoint_map_missed",
+    "gc_last_alloc_safepoint_map",
+    "`gcLastAllocSafepointMapFound()`",
+    "`gcLastAllocSafepointMapMissed()`",
 ]
 
 for term in required_inventory_terms:
@@ -119,6 +124,10 @@ for term in [
     "nabla_gc_runtime_helper_allocs_<helper>",
     "nabla_gc_runtime_helper_alloc_<helper>_<index>",
     "tests/test_gc_runtime_helper_root_maps.py",
+    "Lookup runtime des cartes d'allocation couvert",
+    "tests/test_gc_alloc_safepoint_lookup_metrics.sh",
+    "gcLastAllocSafepointMapFound() > 0",
+    "gcLastAllocSafepointMapMissed() == 0",
 ]:
     require(term in PLAN, f"runtime memory plan should track the inventory state: {term}")
 
@@ -128,6 +137,8 @@ for term in [
     "nabla_gc_alloc_safepoint_tables",
     "return PC",
     "sans consommation",
+    "gcLastAllocSafepointMapFound()",
+    "gcLastAllocSafepointMapMissed()",
 ]:
     require(term in PLAN_README, f"plans README should track inert allocation return-PC metadata: {term}")
 
@@ -156,6 +167,8 @@ for term in [
     "l'inventaire outillé des allocations internes aux helpers",
     "runtime",
     "cartes candidates",
+    "gcLastAllocSafepointMapFound()",
+    "gcLastAllocSafepointMapMissed()",
 ]:
     require(term in ROADMAP, f"roadmap should mention the GC runtime helper allocation inventory: {term}")
 require(
@@ -220,6 +233,10 @@ for term in [
     "emitRuntimeHelperAllocMetadata",
     "nabla_gc_runtime_helper_allocs_",
     "nabla_gc_runtime_helper_alloc_",
+    "gc_last_alloc_safepoint_map_found",
+    "gc_last_alloc_safepoint_map_missed",
+    "Runtime_gcLastAllocSafepointMapFound",
+    "Runtime_gcLastAllocSafepointMapMissed",
 ]:
     require(term in RUNTIME_ASM, f"expected runtime helper missing: {term}")
 

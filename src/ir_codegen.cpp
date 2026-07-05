@@ -946,6 +946,10 @@ private:
             out << "    call Runtime_gcLastStackInteriorCandidateWords\n";
         } else if (instruction.operation == "gcLastHeapInteriorCandidateWords") {
             out << "    call Runtime_gcLastHeapInteriorCandidateWords\n";
+        } else if (instruction.operation == "gcLastAllocSafepointMapFound") {
+            out << "    call Runtime_gcLastAllocSafepointMapFound\n";
+        } else if (instruction.operation == "gcLastAllocSafepointMapMissed") {
+            out << "    call Runtime_gcLastAllocSafepointMapMissed\n";
         } else if (instruction.operation == "heapAllocatedBytes") {
             out << "    call Runtime_heapAllocatedBytes\n";
         } else if (instruction.operation == "heapFreeBytes") {
