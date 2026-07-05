@@ -552,10 +552,10 @@ Racines à exposer avant toute collecte :
   qui écrasent un owner heap pour préparer une allocation doivent continuer à le
   spiller explicitement avant de charger la nouvelle taille. Les cartes exactes
   futures devront remplacer ce contrat conservateur par des racines consommables.
-- **Racines statiques** : les singletons `context.runtimeObjects`, vtables et
-  littéraux de chaînes en `.data` ne sont pas des slots du bump heap. Les
-  singletons doivent être traités comme racines statiques; les vtables et bytes
-  de chaînes comme données non scannées.
+- **Racines statiques** : les singletons `context.runtimeObjects` et les objets
+  statiques de littéraux `String` en `.data` ne sont pas des slots du bump heap
+  mais peuvent pointer vers des objets heap ou des buffers statiques. Les vtables
+  et bytes de chaînes restent des données non scannées.
 - **État runtime transitoire** : les helpers assembleur qui allouent pendant
   qu'une référence heap précédente reste nécessaire, ou qui enchaînent plusieurs
   allocations (`Runtime_stringSplit`, `Runtime_buildArgsArray`, conversions
@@ -614,6 +614,21 @@ heap dont les offsets référence-capables sont connus au moment de la générat
 Ces descripteurs couvrent la partie classes/closures du parcours heap mais ne
 suffisent pas encore à activer un GC : `String`, `ObjectArray[T]` brut, valeurs
 boxées et singletons runtime gardent des conventions spécialisées.
+
+### Métadonnées De Racines Statiques GC
+
+Le backend émet aussi un index additif unique `nabla_gc_static_roots` dans
+`.data`. Son premier mot est le nombre de racines statiques non-bump, suivi des
+labels des objets singleton runtime (`nabla_sym_singleton_...`) et des objets de
+littéraux `String` statiques (`nabla_string_..._obj`). Les commentaires
+adjacents gardent la catégorie et la source, par exemple
+`; gc static root runtime singleton object ... source Current` ou
+`; gc static root static string literal object ... source hello`.
+
+Cet index reste runtime-inerte : ni `Runtime_alloc` ni `Runtime_gc` ne le lisent
+encore. Il prépare seulement l'énumération exacte future des objets globaux qui
+ne passent pas par le bump allocator, tout en laissant les vtables et les buffers
+de bytes de chaînes hors scan.
 
 ### Métadonnées De Points D'Allocation GC
 

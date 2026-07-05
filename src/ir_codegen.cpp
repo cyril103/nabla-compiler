@@ -150,6 +150,35 @@ std::string asmDataBytes(const std::string& value) {
     return out.str();
 }
 
+std::string asmCommentText(const std::string& value) {
+    std::ostringstream out;
+    static constexpr char hex[] = "0123456789abcdef";
+    for (unsigned char c : value) {
+        switch (c) {
+            case '\\':
+                out << "\\\\";
+                break;
+            case '\n':
+                out << "\\n";
+                break;
+            case '\r':
+                out << "\\r";
+                break;
+            case '\t':
+                out << "\\t";
+                break;
+            default:
+                if (std::isprint(c)) {
+                    out << static_cast<char>(c);
+                } else {
+                    out << "\\x" << hex[(c >> 4) & 0xf] << hex[c & 0xf];
+                }
+                break;
+        }
+    }
+    return out.str();
+}
+
 std::string normalizeFloatConstant(const std::string& value) {
     if (value.find('.') != std::string::npos) return value;
     if (value.find('e') != std::string::npos || value.find('E') != std::string::npos) return value;
@@ -1629,6 +1658,43 @@ void emitGcObjectLayoutMaps(
         }
     }
 }
+
+struct StaticRootDescriptor {
+    std::string label;
+    std::string kind;
+    std::string source;
+};
+
+std::vector<StaticRootDescriptor> collectGcStaticRoots(
+    const IRProgram& program, const CompilerContext& context) {
+    std::vector<StaticRootDescriptor> roots;
+    for (const auto& objectName : context.runtimeObjects) {
+        roots.push_back({singletonObjectLabel(objectName), "runtime singleton object", objectName});
+    }
+
+    for (const auto& function : program.functions) {
+        for (const auto& instruction : function.instructions) {
+            if (instruction.opcode != IROpcode::StringLiteral) continue;
+            const std::string label = "nabla_string_" + asmSymbolPart(function.name) + "_" +
+                                      asmSymbolPart(instruction.result) + "_obj";
+            roots.push_back({label, "static string literal object", instruction.operands[0]});
+        }
+    }
+    return roots;
+}
+
+void emitGcStaticRootMap(const std::vector<StaticRootDescriptor>& roots, std::ostream& out) {
+    out << "    align 8\n";
+    out << "nabla_gc_static_roots: dq " << roots.size();
+    for (const auto& root : roots) {
+        out << ", " << root.label;
+    }
+    out << "\n";
+    for (const auto& root : roots) {
+        out << "    ; gc static root " << root.kind << " " << root.label
+            << " source " << asmCommentText(root.source) << "\n";
+    }
+}
 }
 
 IRCodeGenerator::IRCodeGenerator(std::uint64_t heapCapacityBytes)
@@ -1807,6 +1873,7 @@ void IRCodeGenerator::generateASM(
     // these descriptors yet; they make candidate frame slots, object fields,
     // and closure captures testable before collection is enabled.
     emitGcObjectLayoutMaps(concreteClassesToEmit, context, out);
+    emitGcStaticRootMap(collectGcStaticRoots(program, context), out);
     for (const auto& function : program.functions) {
         FunctionEmitter emitter(function, context, out, methodOffsets);
         emitter.emitGcFrameMap();

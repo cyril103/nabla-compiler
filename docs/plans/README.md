@@ -37,12 +37,14 @@ les temporaires imbriqués, helpers de chaînes, `Array[T]`, tableaux d'objets,
 
 L'inventaire des familles heap et des racines backend reste documenté dans
 `../internals.md`; les métadonnées de racines de frame, les descripteurs
-champs/captures, les cartes de points d'appel `Runtime_alloc`, l'inventaire des
-allocations internes aux helpers runtime et les cartes candidates de racines
-internes aux helpers runtime sont toujours émis comme métadonnées inertes. Elles
-ne sont pas encore consommées par `Runtime_alloc` ou `Runtime_gc`; la suite du
-plan consiste à réduire les faux positifs conservateurs en consommant
-progressivement ces cartes exactes et en raffinant `heapUsed()` si nécessaire.
+champs/captures, l'index `nabla_gc_static_roots` des singletons runtime et
+littéraux `String` statiques, les cartes de points d'appel `Runtime_alloc`,
+l'inventaire des allocations internes aux helpers runtime et les cartes
+candidates de racines internes aux helpers runtime sont toujours émis comme
+métadonnées inertes. Elles ne sont pas encore consommées par `Runtime_alloc` ou
+`Runtime_gc`; la suite du plan consiste à réduire les faux positifs
+conservateurs en consommant progressivement ces cartes exactes et en raffinant
+`heapUsed()` si nécessaire.
 La checklist opérationnelle pour intégrer une nouvelle feature est dans
 [`docs/feature-integration.md`](../feature-integration.md).
 
