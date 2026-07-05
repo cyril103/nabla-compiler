@@ -5,6 +5,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 INTERNALS = (ROOT / "docs" / "internals.md").read_text(encoding="utf-8")
 PLAN = (ROOT / "docs" / "plans" / "runtime-memory-management.md").read_text(encoding="utf-8")
+PLAN_README = (ROOT / "docs" / "plans" / "README.md").read_text(encoding="utf-8")
 ROADMAP = (ROOT / "docs" / "roadmap.md").read_text(encoding="utf-8")
 CODEGEN = (ROOT / "src" / "ir_codegen.cpp").read_text(encoding="utf-8")
 RUNTIME_VALUES = (ROOT / "src" / "runtime_values.hpp").read_text(encoding="utf-8")
@@ -69,7 +70,10 @@ required_inventory_terms = [
     "static string literal object",
     "Métadonnées De Points D'Allocation GC",
     "nabla_gc_alloc_calls_<fonction>",
+    "nabla_gc_alloc_safepoints_<fonction>",
     "nabla_gc_alloc_call_<fonction>_<index>",
+    "nabla_gc_alloc_return_<fonction>_<index>",
+    "return_pc, map",
     "gc alloc call",
     "gc alloc safepoint map",
     "gc alloc root [rbp -",
@@ -103,7 +107,9 @@ for term in [
     "nabla_gc_static_roots",
     "Cartes de points d'appel `Runtime_alloc` couvertes",
     "nabla_gc_alloc_calls_<fonction>",
+    "nabla_gc_alloc_safepoints_<fonction>",
     "nabla_gc_alloc_call_<fonction>_<index>",
+    "nabla_gc_alloc_return_<fonction>_<index>",
     "gc alloc safepoint map",
     "Inventaire des allocations internes aux helpers runtime couvert",
     "tests/test_gc_runtime_helper_alloc_inventory.py",
@@ -113,6 +119,14 @@ for term in [
     "tests/test_gc_runtime_helper_root_maps.py",
 ]:
     require(term in PLAN, f"runtime memory plan should track the inventory state: {term}")
+
+for term in [
+    "nabla_gc_alloc_return_<fonction>_<index>",
+    "nabla_gc_alloc_safepoints_<fonction>",
+    "return PC",
+    "sans consommation runtime",
+]:
+    require(term in PLAN_README, f"plans README should track inert allocation return-PC metadata: {term}")
 
 require(
     "l'inventaire interne des familles heap et des racines backend" in ROADMAP,
@@ -133,6 +147,8 @@ require(
 for term in [
     "cartes de points d'appel `Runtime_alloc` du code",
     "gc alloc safepoint map",
+    "nabla_gc_alloc_return_<fonction>_<index>",
+    "nabla_gc_alloc_safepoints_<fonction>",
     "l'inventaire outillé des allocations internes aux helpers",
     "runtime",
     "cartes candidates",
@@ -162,6 +178,7 @@ for term in [
     "emitGcStaticRootMap",
     "emitGcAllocationCallMaps",
     "emitGcAllocationSafepointComment",
+    "emitGcAllocationReturnLabel",
     "allocationCallKind",
     "collectConcreteClassesToEmit",
     "isGcReferenceCapableType",
@@ -171,6 +188,8 @@ for term in [
     "nabla_gc_static_roots",
     "nabla_gc_alloc_calls_",
     "nabla_gc_alloc_call_",
+    "nabla_gc_alloc_safepoints_",
+    "nabla_gc_alloc_return_",
 ]:
     require(term in CODEGEN, f"expected implementation hook missing: {term}")
 

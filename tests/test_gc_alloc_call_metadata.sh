@@ -47,12 +47,16 @@ require_asm() {
 
 require_asm "nabla_gc_alloc_calls_nabla_sym_allocate: dq 5"
 require_asm "nabla_gc_alloc_calls_main: dq 0"
+require_asm "nabla_gc_alloc_safepoints_nabla_sym_allocate: dq 5"
+require_asm "nabla_gc_alloc_safepoints_main: dq 0"
 require_asm "nabla_gc_alloc_call_nabla_sym_allocate_0: dq"
+require_asm "nabla_gc_alloc_return_nabla_sym_allocate_0:"
 require_asm "; gc alloc call 0 object result"
 require_asm "; gc alloc call 1 IntArray result"
 require_asm "; gc alloc call 2 ObjectArray result"
 require_asm "; gc alloc call 3 closure result"
 require_asm "; gc alloc call 4 boxed-Int result"
+require_asm "; gc alloc safepoint 0 return nabla_gc_alloc_return_nabla_sym_allocate_0 map nabla_gc_alloc_call_nabla_sym_allocate_0 non-consumed"
 require_asm "; gc alloc safepoint map nabla_gc_alloc_call_nabla_sym_allocate_0 kind object result"
 require_asm "; gc alloc safepoint map nabla_gc_alloc_call_nabla_sym_allocate_1 kind IntArray result"
 require_asm "; gc alloc safepoint map nabla_gc_alloc_call_nabla_sym_allocate_2 kind ObjectArray result"
@@ -75,6 +79,10 @@ labels = re.findall(r"^nabla_gc_alloc_call_nabla_sym_allocate_(\d+): dq ([^\n]+)
 if [int(index) for index, _ in labels] != [0, 1, 2, 3, 4]:
     raise SystemExit(f"unexpected allocation call labels: {labels}")
 
+return_labels = re.findall(r"^nabla_gc_alloc_return_nabla_sym_allocate_(\d+):$", asm, re.MULTILINE)
+if [int(index) for index in return_labels] != [0, 1, 2, 3, 4]:
+    raise SystemExit(f"unexpected allocation return labels: {return_labels}")
+
 index_match = re.search(r"^nabla_gc_alloc_calls_nabla_sym_allocate: dq ([^\n]+)", asm, re.MULTILINE)
 if not index_match:
     raise SystemExit("missing allocation call descriptor index")
@@ -83,6 +91,39 @@ if int(index_parts[0]) != len(labels):
     raise SystemExit(
         f"descriptor count {index_parts[0]} does not match allocation labels {len(labels)}"
     )
+if index_parts[1:] != [f"nabla_gc_alloc_call_nabla_sym_allocate_{i}" for i in range(len(labels))]:
+    raise SystemExit(f"unexpected allocation call index entries: {index_parts[1:]}")
+
+safepoint_index_match = re.search(
+    r"^nabla_gc_alloc_safepoints_nabla_sym_allocate: dq ([^\n]+)",
+    asm,
+    re.MULTILINE,
+)
+if not safepoint_index_match:
+    raise SystemExit("missing allocation safepoint descriptor index")
+safepoint_parts = [part.strip() for part in safepoint_index_match.group(1).split(",")]
+if int(safepoint_parts[0]) != len(labels):
+    raise SystemExit(
+        f"safepoint count {safepoint_parts[0]} does not match allocation labels {len(labels)}"
+    )
+expected_safepoint_parts = []
+for i in range(len(labels)):
+    expected_safepoint_parts.extend(
+        [
+            f"nabla_gc_alloc_return_nabla_sym_allocate_{i}",
+            f"nabla_gc_alloc_call_nabla_sym_allocate_{i}",
+        ]
+    )
+if safepoint_parts[1:] != expected_safepoint_parts:
+    raise SystemExit(f"unexpected allocation safepoint entries: {safepoint_parts[1:]}")
+
+for i in range(len(labels)):
+    expected_comment = (
+        f"; gc alloc safepoint {i} return nabla_gc_alloc_return_nabla_sym_allocate_{i} "
+        f"map nabla_gc_alloc_call_nabla_sym_allocate_{i} non-consumed"
+    )
+    if expected_comment not in asm:
+        raise SystemExit(f"missing safepoint table comment: {expected_comment}")
 
 blocks = {}
 for index, _ in labels:
@@ -137,7 +178,8 @@ runtime_alloc_calls = []
 for index, line in enumerate(lines):
     if line.strip() == "call Runtime_alloc":
         previous_line = lines[index - 1].strip() if index > 0 else ""
-        runtime_alloc_calls.append((index + 1, previous_line))
+        next_line = lines[index + 1].strip() if index + 1 < len(lines) else ""
+        runtime_alloc_calls.append((index + 1, previous_line, next_line))
 metadata_comments = {}
 metadata_re = re.compile(
     r"; gc alloc call (?P<index>\d+) (?P<kind>\S+) result (?P<result>\S+)(?: op (?P<op>\S+))?"
@@ -157,7 +199,7 @@ safepoint_re = re.compile(
     r"; gc alloc safepoint map nabla_gc_alloc_call_nabla_sym_allocate_(?P<index>\d+) "
     r"kind (?P<kind>\S+) result (?P<result>\S+)(?: op (?P<op>\S+))? non-consumed$"
 )
-for line_number, previous_line in runtime_alloc_calls:
+for line_number, previous_line, next_line in runtime_alloc_calls:
     match = safepoint_re.search(previous_line)
     if not match:
         raise SystemExit(
@@ -174,6 +216,12 @@ for line_number, previous_line in runtime_alloc_calls:
                 f"safepoint comment field mismatch for {index} field {field}: "
                 f"{match.group(field)!r} != {expected.get(field)!r}"
             )
+    expected_return_label = f"nabla_gc_alloc_return_nabla_sym_allocate_{index}:"
+    if next_line != expected_return_label:
+        raise SystemExit(
+            f"Runtime_alloc at allocate line {line_number} missing immediate return label; "
+            f"next line was {next_line!r}, expected {expected_return_label!r}"
+        )
 PY
 
 if grep -Fq "; gc alloc root" "$ASM" && ! grep -Fq "nabla_gc_frame_roots_nabla_sym_allocate" "$ASM"; then

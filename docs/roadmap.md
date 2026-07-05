@@ -155,7 +155,9 @@ features.
   cartes candidates de racines internes aux helpers runtime restent inertes et
   non consommées par `Runtime_alloc` / `Runtime_gc`. Les appels `Runtime_alloc`
   utilisateur portent aussi des commentaires ASM `gc alloc safepoint map ...
-  non-consumed` qui lient chaque safepoint à sa carte inertielle. La prochaine
+  non-consumed` et des labels `nabla_gc_alloc_return_<fonction>_<index>` indexés
+  par `nabla_gc_alloc_safepoints_<fonction>` qui lient chaque return PC de
+  safepoint à sa carte inertielle. La prochaine
   cible est de remplacer progressivement le scan conservateur par ces cartes
   exactes consommables, de réduire les faux positifs et de raffiner `heapUsed()`
   si nécessaire; les métadonnées de racines de frame, les descripteurs

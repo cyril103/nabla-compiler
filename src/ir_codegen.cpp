@@ -358,6 +358,20 @@ public:
             out << ", nabla_gc_alloc_call_" << asmFunctionName(function.name) << "_" << i;
         }
         out << "\n";
+
+        out << "    align 8\n";
+        out << "nabla_gc_alloc_safepoints_" << asmFunctionName(function.name) << ": dq "
+            << callIndex;
+        for (size_t i = 0; i < callIndex; ++i) {
+            out << ", nabla_gc_alloc_return_" << asmFunctionName(function.name) << "_" << i
+                << ", nabla_gc_alloc_call_" << asmFunctionName(function.name) << "_" << i;
+        }
+        out << "\n";
+        for (size_t i = 0; i < callIndex; ++i) {
+            out << "    ; gc alloc safepoint " << i << " return nabla_gc_alloc_return_"
+                << asmFunctionName(function.name) << "_" << i << " map nabla_gc_alloc_call_"
+                << asmFunctionName(function.name) << "_" << i << " non-consumed\n";
+        }
     }
 
 private:
@@ -445,16 +459,23 @@ private:
         }
     }
 
-    void emitGcAllocationSafepointComment(const IRInstruction& instruction) {
+    size_t emitGcAllocationSafepointComment(const IRInstruction& instruction) {
         const auto kind = allocationCallKind(instruction);
         if (!kind) codegenError("commentaire safepoint GC demande pour une instruction non allocante");
 
+        const size_t callIndex = nextGcAllocationCallIndex;
         out << "    ; gc alloc safepoint map nabla_gc_alloc_call_"
-            << asmFunctionName(function.name) << "_" << nextGcAllocationCallIndex
+            << asmFunctionName(function.name) << "_" << callIndex
             << " kind " << *kind << " result " << instruction.result;
         if (!instruction.operation.empty()) out << " op " << instruction.operation;
         out << " non-consumed\n";
         ++nextGcAllocationCallIndex;
+        return callIndex;
+    }
+
+    void emitGcAllocationReturnLabel(size_t callIndex) {
+        out << "nabla_gc_alloc_return_" << asmFunctionName(function.name) << "_"
+            << callIndex << ":\n";
     }
 
     std::string tailEntryLabel() const {
@@ -949,8 +970,9 @@ private:
     void emitFunctionReference(const IRInstruction& instruction) {
         const size_t objectSize = 16 + instruction.operands.size() * 8;
         out << "    mov rdi, " << objectSize << "\n";
-        emitGcAllocationSafepointComment(instruction);
+        const size_t gcCallIndex = emitGcAllocationSafepointComment(instruction);
         out << "    call Runtime_alloc\n";
+        emitGcAllocationReturnLabel(gcCallIndex);
         out << "    mov rbx, rax\n";
         out << "    mov qword [rbx], " << asmFunctionName(instruction.operation) << "\n";
         out << "    mov qword [rbx + 8], " << (instruction.operands.empty() ? 0 : 1) << "\n";
@@ -1253,8 +1275,9 @@ private:
         }
 
         out << "    mov rdi, " << objectSizeFor(instruction.operation) << "\n";
-        emitGcAllocationSafepointComment(instruction);
+        const size_t gcCallIndex = emitGcAllocationSafepointComment(instruction);
         out << "    call Runtime_alloc\n";
+        emitGcAllocationReturnLabel(gcCallIndex);
         out << "    mov rbx, rax\n";
         out << "    lea rax, [vtable_" << asmSymbolName(instruction.operation) << "]\n";
         out << "    mov [rbx], rax\n";
@@ -1293,8 +1316,9 @@ private:
         out << "    shl rdi, 3\n";
         out << "    add rdi, 16\n";
         out << "    jc Runtime_heap_overflow\n";
-        emitGcAllocationSafepointComment(instruction);
+        const size_t gcCallIndex = emitGcAllocationSafepointComment(instruction);
         out << "    call Runtime_alloc\n";
+        emitGcAllocationReturnLabel(gcCallIndex);
         out << "    mov rbx, rax\n";
         out << "    mov qword [rbx], 0\n";
         out << "    mov [rbx + 8], r8\n";
@@ -1457,8 +1481,9 @@ private:
         if (instruction.operands.size() != 1) codegenError("boxing IR invalide");
         loadValue(instruction.operands[0], "r10");
         out << "    mov rdi, 16\n";
-        emitGcAllocationSafepointComment(instruction);
+        const size_t gcCallIndex = emitGcAllocationSafepointComment(instruction);
         out << "    call Runtime_alloc\n";
+        emitGcAllocationReturnLabel(gcCallIndex);
         out << "    mov qword [rax], " << tag << "\n";
         out << "    mov [rax + 8], r10\n";
         storeRegister(instruction.result, "rax");

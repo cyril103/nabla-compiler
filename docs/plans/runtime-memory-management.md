@@ -135,11 +135,16 @@ Raisons :
    code utilisateur : `nabla_gc_alloc_calls_<fonction>` indexe les cartes
    `nabla_gc_alloc_call_<fonction>_<index>`, qui listent les slots de frame
    référence-capables déjà produits dans le parcours IR linéaire avant le point
-   d'allocation. Chaque `call Runtime_alloc` utilisateur correspondant garde
-   aussi un commentaire ASM inerte `; gc alloc safepoint map
-   nabla_gc_alloc_call_<fonction>_<index> ... non-consumed` immédiatement avant le
-   safepoint pour lier le code à la carte. Ces cartes restent additives, non
-   consommées et non encore dominance-aware.
+   d'allocation. `nabla_gc_alloc_safepoints_<fonction>` indexe aussi les paires
+   `nabla_gc_alloc_return_<fonction>_<index>` /
+   `nabla_gc_alloc_call_<fonction>_<index>` pour relier l'adresse de retour du
+   `call Runtime_alloc` à la carte. Chaque `call Runtime_alloc` utilisateur
+   correspondant garde aussi un commentaire ASM inerte
+   `; gc alloc safepoint map nabla_gc_alloc_call_<fonction>_<index> ...
+   non-consumed` immédiatement avant le safepoint, puis le label
+   `nabla_gc_alloc_return_<fonction>_<index>:` immédiatement après l'appel. Ces
+   cartes et tables restent additives, non consommées et non encore
+   dominance-aware.
 8. Inventaire des allocations internes aux helpers runtime couvert :
    `tests/test_gc_runtime_helper_alloc_inventory.py` ancre les appels
    `Runtime_alloc` directs de `src/runtime_asm.cpp` dans `docs/internals.md` et
