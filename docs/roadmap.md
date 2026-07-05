@@ -153,10 +153,12 @@ features.
   statiques, les cartes de points d'appel `Runtime_alloc` du code utilisateur,
   l'inventaire outillé des allocations internes aux helpers runtime et les
   cartes candidates de racines internes aux helpers runtime restent inertes et
-  non consommées par `Runtime_alloc` / `Runtime_gc`. La prochaine cible est de
-  remplacer progressivement le scan conservateur par ces cartes exactes
-  consommables, de réduire les faux positifs et de raffiner `heapUsed()` si
-  nécessaire; les métadonnées de racines de frame, les descripteurs
+  non consommées par `Runtime_alloc` / `Runtime_gc`. Les appels `Runtime_alloc`
+  utilisateur portent aussi des commentaires ASM `gc alloc safepoint map ...
+  non-consumed` qui lient chaque safepoint à sa carte inertielle. La prochaine
+  cible est de remplacer progressivement le scan conservateur par ces cartes
+  exactes consommables, de réduire les faux positifs et de raffiner `heapUsed()`
+  si nécessaire; les métadonnées de racines de frame, les descripteurs
   champs/captures pour classes/closures, l'index des racines statiques,
   l'inventaire outillé des allocations internes aux helpers runtime et les
   cartes candidates de racines internes aux helpers runtime restent les ancres

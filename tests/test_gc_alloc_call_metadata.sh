@@ -53,6 +53,12 @@ require_asm "; gc alloc call 1 IntArray result"
 require_asm "; gc alloc call 2 ObjectArray result"
 require_asm "; gc alloc call 3 closure result"
 require_asm "; gc alloc call 4 boxed-Int result"
+require_asm "; gc alloc safepoint map nabla_gc_alloc_call_nabla_sym_allocate_0 kind object result"
+require_asm "; gc alloc safepoint map nabla_gc_alloc_call_nabla_sym_allocate_1 kind IntArray result"
+require_asm "; gc alloc safepoint map nabla_gc_alloc_call_nabla_sym_allocate_2 kind ObjectArray result"
+require_asm "; gc alloc safepoint map nabla_gc_alloc_call_nabla_sym_allocate_3 kind closure result"
+require_asm "; gc alloc safepoint map nabla_gc_alloc_call_nabla_sym_allocate_4 kind boxed-Int result"
+require_asm " non-consumed"
 require_asm "; gc alloc root [rbp -"
 require_asm ": String"
 require_asm ": Box"
@@ -68,6 +74,15 @@ asm = Path(sys.argv[1]).read_text(encoding="utf-8")
 labels = re.findall(r"^nabla_gc_alloc_call_nabla_sym_allocate_(\d+): dq ([^\n]+)", asm, re.MULTILINE)
 if [int(index) for index, _ in labels] != [0, 1, 2, 3, 4]:
     raise SystemExit(f"unexpected allocation call labels: {labels}")
+
+index_match = re.search(r"^nabla_gc_alloc_calls_nabla_sym_allocate: dq ([^\n]+)", asm, re.MULTILINE)
+if not index_match:
+    raise SystemExit("missing allocation call descriptor index")
+index_parts = [part.strip() for part in index_match.group(1).split(",")]
+if int(index_parts[0]) != len(labels):
+    raise SystemExit(
+        f"descriptor count {index_parts[0]} does not match allocation labels {len(labels)}"
+    )
 
 blocks = {}
 for index, _ in labels:
@@ -108,6 +123,57 @@ for index, values in labels:
         raise SystemExit(f"allocation call {index} declares {declared_count} roots but has {len(offsets)} offsets")
     if len(offsets) != len(set(offsets)):
         raise SystemExit(f"allocation call {index} contains duplicate offsets: {offsets}")
+
+function_match = re.search(
+    r"^nabla_sym_allocate:\n(.*?)(?=^main:)",
+    asm,
+    re.MULTILINE | re.DOTALL,
+)
+if not function_match:
+    raise SystemExit("missing generated allocate function body")
+function_body = function_match.group(1)
+lines = function_body.splitlines()
+runtime_alloc_calls = []
+for index, line in enumerate(lines):
+    if line.strip() == "call Runtime_alloc":
+        previous_line = lines[index - 1].strip() if index > 0 else ""
+        runtime_alloc_calls.append((index + 1, previous_line))
+metadata_comments = {}
+metadata_re = re.compile(
+    r"; gc alloc call (?P<index>\d+) (?P<kind>\S+) result (?P<result>\S+)(?: op (?P<op>\S+))?"
+)
+for index, block in blocks.items():
+    match = metadata_re.search(block)
+    if not match:
+        raise SystemExit(f"allocation call {index} missing metadata comment")
+    metadata_comments[index] = match.groupdict()
+
+if len(runtime_alloc_calls) != len(metadata_comments):
+    raise SystemExit(
+        f"expected {len(metadata_comments)} direct user Runtime_alloc calls, got {len(runtime_alloc_calls)}"
+    )
+
+safepoint_re = re.compile(
+    r"; gc alloc safepoint map nabla_gc_alloc_call_nabla_sym_allocate_(?P<index>\d+) "
+    r"kind (?P<kind>\S+) result (?P<result>\S+)(?: op (?P<op>\S+))? non-consumed$"
+)
+for line_number, previous_line in runtime_alloc_calls:
+    match = safepoint_re.search(previous_line)
+    if not match:
+        raise SystemExit(
+            f"Runtime_alloc at allocate line {line_number} missing immediate safepoint comment; "
+            f"previous line was {previous_line!r}"
+        )
+    index = int(match.group("index"))
+    expected = metadata_comments.get(index)
+    if expected is None:
+        raise SystemExit(f"safepoint comment references unknown metadata index {index}")
+    for field in ["kind", "result", "op"]:
+        if (match.group(field) or None) != (expected.get(field) or None):
+            raise SystemExit(
+                f"safepoint comment field mismatch for {index} field {field}: "
+                f"{match.group(field)!r} != {expected.get(field)!r}"
+            )
 PY
 
 if grep -Fq "; gc alloc root" "$ASM" && ! grep -Fq "nabla_gc_frame_roots_nabla_sym_allocate" "$ASM"; then

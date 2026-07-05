@@ -501,9 +501,12 @@ Limites importantes :
   singletons runtime et littéraux `String` statiques, et le runtime ASM émet des
   cartes candidates inertes pour les racines internes de helpers multi-allocation
   (`Runtime_buildArgsArray`, `Runtime_stringToCharArray`, `Runtime_stringSplit`,
-  `Runtime_stringSplitMakeSegment`, `FloatDouble_method_toString`). Ces cartes
-  ne sont pas encore consommées par `Runtime_alloc` / `Runtime_gc`; la première
-  collecte active scanne conservativement la pile native jusqu'à `gc_stack_top`,
+  `Runtime_stringSplitMakeSegment`, `FloatDouble_method_toString`). Les appels
+  `Runtime_alloc` utilisateur portent des commentaires ASM inertes
+  `gc alloc safepoint map ... non-consumed` qui identifient la carte
+  `nabla_gc_alloc_call_<fonction>_<index>` correspondante. Ces cartes ne sont
+  pas encore consommées par `Runtime_alloc` / `Runtime_gc`; la première collecte
+  active scanne conservativement la pile native jusqu'à `gc_stack_top`,
   puis les payloads heap marqués jusqu'à fixpoint, et sweep les blocs non marqués
   vers `heap_free_list`. `Runtime_buildArgsArray`, `Runtime_stringToCharArray`,
   `Runtime_stringSplit` / `Runtime_stringSplitMakeSegment` et
@@ -948,8 +951,11 @@ d'inference generique et de typage contextuel des lambdas.
   `nabla_gc_alloc_calls_<fonction>` indexe les cartes
   `nabla_gc_alloc_call_<fonction>_<index>` pour les allocations IR du code
   utilisateur, avec les slots de frame référence-capables déjà produits dans le
-  parcours IR linéaire avant le point d'allocation. Ces cartes restent non
-  consommées par le runtime et non encore dominance-aware.
+  parcours IR linéaire avant le point d'allocation. Les appels `Runtime_alloc`
+  utilisateur correspondants portent un commentaire ASM inerte
+  `gc alloc safepoint map ... non-consumed` immédiatement avant le safepoint.
+  Ces cartes restent non consommées par le runtime et non encore
+  dominance-aware.
 - [x] Inventorier et outiller les allocations internes aux helpers runtime:
   `tests/test_gc_runtime_helper_alloc_inventory.py` ancre les appels
   `Runtime_alloc` directs de `src/runtime_asm.cpp` dans `docs/internals.md`, afin
@@ -1314,8 +1320,11 @@ d'inference generique et de typage contextuel des lambdas.
   `nabla_gc_alloc_call_<fonction>_<index>` pour les allocations IR du code
   utilisateur (`new`, tableaux natifs/objets, closures capturantes, boxing), avec
   les slots de frame référence-capables déjà produits dans le parcours IR linéaire
-  avant le point d'allocation. Ces cartes restent non consommées par le runtime,
-  non encore dominance-aware.
+  avant le point d'allocation. Les appels `Runtime_alloc` utilisateur gardent
+  maintenant un commentaire ASM inerte `gc alloc safepoint map ... non-consumed`
+  qui identifie la carte, le type d'allocation, le résultat IR et l'opération
+  quand l'instruction IR en porte une.
+  Ces cartes restent non consommées par le runtime, non encore dominance-aware.
   - Fichiers / tests associes: `src/ir_codegen.cpp`,
     `tests/test_gc_alloc_call_metadata.sh`, `tests/test_gc_inventory_docs.py`,
     `docs/internals.md`, `docs/plans/runtime-memory-management.md`,
