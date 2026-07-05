@@ -24,11 +24,12 @@ observations high-water/capacité, pas une mesure de mémoire vivante; les
 compteurs GC `gcCollections()`, `gcLastFreedBytes()`,
 `gcLastLargestFreeBlock()`, `gcLastMarkedBlocks()`, `gcLastFreedBlocks()`,
 `gcLastStackWords()`, `gcLastHeapWords()`, `gcLastStackCandidateWords()`,
-`gcLastHeapCandidateWords()`, `heapAllocatedBytes()`, `heapFreeBytes()`,
-`heapFreeBlockCount()` et `heapLargestFreeBlock()` exposent
+`gcLastHeapCandidateWords()`, `gcLastStackInteriorCandidateWords()`,
+`gcLastHeapInteriorCandidateWords()`, `heapAllocatedBytes()`,
+`heapFreeBytes()`, `heapFreeBlockCount()` et `heapLargestFreeBlock()` exposent
 le nombre de collectes, le dernier sweep, le marquage, le volume de scan
-conservateur, le bruit candidat pile/heap, le payload encore alloué et l'état
-courant de la free-list pour
+conservateur, le bruit candidat pile/heap, les candidats intérieurs au payload,
+le payload encore alloué et l'état courant de la free-list pour
 les tests et diagnostics. La suite de stress GC couvre désormais
 les temporaires imbriqués, helpers de chaînes, `Array[T]`, tableaux d'objets,
 `Map[K, V]` et `Set[T]` sous heaps serrés afin de garder ces chemins exercés dans

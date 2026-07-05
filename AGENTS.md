@@ -490,8 +490,9 @@ Limites importantes :
   d'observabilité (`gcCollections()`, `gcLastFreedBytes()`,
   `gcLastLargestFreeBlock()`, `gcLastMarkedBlocks()`, `gcLastFreedBlocks()`,
   `gcLastStackWords()`, `gcLastHeapWords()`, `gcLastStackCandidateWords()`,
-  `gcLastHeapCandidateWords()`, `heapAllocatedBytes()`, `heapFreeBytes()`,
-  `heapFreeBlockCount()`, `heapLargestFreeBlock()`),
+  `gcLastHeapCandidateWords()`, `gcLastStackInteriorCandidateWords()`,
+  `gcLastHeapInteriorCandidateWords()`, `heapAllocatedBytes()`,
+  `heapFreeBytes()`, `heapFreeBlockCount()`, `heapLargestFreeBlock()`),
   diagnostic stderr `Nabla runtime error: heap exhausted` et sortie 255 si
   l'allocation échoue encore après collecte;
 - la fondation GC exacte reste additive: le backend émet des métadonnées de
@@ -994,6 +995,12 @@ d'inference generique et de typage contextuel des lambdas.
   `gcLastMarkedBlocks()`, `gcLastFreedBlocks()`, `gcLastStackWords()` et
   `gcLastHeapWords()` mesurent les blocs marqués/libérés et le volume de scan
   conservateur pile/heap pour instrumenter le coût du collecteur.
+- [x] Ajouter des métriques GC de bruit candidat conservateur:
+  `gcLastStackCandidateWords()` / `gcLastHeapCandidateWords()` comptent les mots
+  ressemblant à des pointeurs heap, et
+  `gcLastStackInteriorCandidateWords()` /
+  `gcLastHeapInteriorCandidateWords()` isolent le sous-ensemble intérieur au
+  payload sans changer le marquage conservateur ni consommer les cartes exactes.
 - [x] Ajouter une suite de stress GC runtime: `tests/test_gc_memory_stress.sh`
   compile sous heaps serrés des programmes couvrant temporaires imbriqués,
   helpers de chaînes, `Array[T]`, tableaux d'objets, `Map[K, V]` et `Set[T]`, et
@@ -1094,6 +1101,23 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter des métriques GC de candidats intérieurs conservateurs:
+  `Runtime_gc` expose maintenant `gcLastStackInteriorCandidateWords()` et
+  `gcLastHeapInteriorCandidateWords()` pour compter, par source de scan, les
+  candidats qui tombent à l'intérieur du payload d'un bloc heap alloué sans être
+  égaux au début du payload. Ces compteurs restent strictement observationnels:
+  ils complètent les compteurs de candidats existants sans consommer les cartes
+  exactes ni changer la portée conservative du marquage. La régression
+  `tests/test_gc_interior_candidate_scan_metrics.sh` vérifie une exécution sous
+  heap serré produisant des candidats intérieurs pile et heap, les marqueurs
+  assembleur et les noms réservés.
+  - Fichiers / tests associes: `src/runtime_asm.cpp`, `src/ast.cpp`,
+    `src/parser.cpp`, `src/ir_codegen.cpp`,
+    `tests/test_gc_interior_candidate_scan_metrics.sh`, `Makefile`,
+    `docs/internals.md`, `docs/language.md`,
+    `docs/plans/runtime-memory-management.md`, `docs/plans/README.md`,
+    `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Ajouter des métriques GC de candidats conservateurs: `Runtime_gc`
   distingue maintenant les mots scannés qui ressemblent à des pointeurs heap

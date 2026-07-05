@@ -138,10 +138,12 @@ features.
   les métriques `gcCollections()`, `gcLastFreedBytes()`,
   `gcLastLargestFreeBlock()`, `gcLastMarkedBlocks()`, `gcLastFreedBlocks()`,
   `gcLastStackWords()`, `gcLastHeapWords()`, `gcLastStackCandidateWords()`,
-  `gcLastHeapCandidateWords()`, `heapAllocatedBytes()`, `heapFreeBytes()`,
-  `heapFreeBlockCount()` et `heapLargestFreeBlock()` aident à
+  `gcLastHeapCandidateWords()`, `gcLastStackInteriorCandidateWords()`,
+  `gcLastHeapInteriorCandidateWords()`, `heapAllocatedBytes()`,
+  `heapFreeBytes()`, `heapFreeBlockCount()` et `heapLargestFreeBlock()` aident à
   diagnostiquer les collectes, le marquage, le volume de scan conservateur, le
-  bruit candidat pile/heap, le payload encore alloué et la free-list. Le filet de stress
+  bruit candidat pile/heap, les candidats intérieurs au payload, le payload
+  encore alloué et la free-list. Le filet de stress
   `tests/test_gc_memory_stress.sh` exerce également sous heaps serrés les
   temporaires imbriqués, helpers de chaînes, `Array[T]`, tableaux d'objets,
   `Map[K, V]` et `Set[T]`. Par ailleurs,
