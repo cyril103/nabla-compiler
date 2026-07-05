@@ -49,6 +49,7 @@ require_asm "nabla_gc_alloc_calls_nabla_sym_allocate: dq 5"
 require_asm "nabla_gc_alloc_calls_main: dq 0"
 require_asm "nabla_gc_alloc_safepoints_nabla_sym_allocate: dq 5"
 require_asm "nabla_gc_alloc_safepoints_main: dq 0"
+require_asm "nabla_gc_alloc_safepoint_tables: dq"
 require_asm "nabla_gc_alloc_call_nabla_sym_allocate_0: dq"
 require_asm "nabla_gc_alloc_return_nabla_sym_allocate_0:"
 require_asm "; gc alloc call 0 object result"
@@ -57,6 +58,7 @@ require_asm "; gc alloc call 2 ObjectArray result"
 require_asm "; gc alloc call 3 closure result"
 require_asm "; gc alloc call 4 boxed-Int result"
 require_asm "; gc alloc safepoint 0 return nabla_gc_alloc_return_nabla_sym_allocate_0 map nabla_gc_alloc_call_nabla_sym_allocate_0 non-consumed"
+require_asm "; gc alloc safepoint table nabla_sym_allocate -> nabla_gc_alloc_safepoints_nabla_sym_allocate non-consumed"
 require_asm "; gc alloc safepoint map nabla_gc_alloc_call_nabla_sym_allocate_0 kind object result"
 require_asm "; gc alloc safepoint map nabla_gc_alloc_call_nabla_sym_allocate_1 kind IntArray result"
 require_asm "; gc alloc safepoint map nabla_gc_alloc_call_nabla_sym_allocate_2 kind ObjectArray result"
@@ -116,6 +118,36 @@ for i in range(len(labels)):
     )
 if safepoint_parts[1:] != expected_safepoint_parts:
     raise SystemExit(f"unexpected allocation safepoint entries: {safepoint_parts[1:]}")
+
+global_index_match = re.search(
+    r"^nabla_gc_alloc_safepoint_tables: dq ([^\n]+)",
+    asm,
+    re.MULTILINE,
+)
+if not global_index_match:
+    raise SystemExit("missing global allocation safepoint table index")
+global_index_parts = [part.strip() for part in global_index_match.group(1).split(",")]
+all_safepoint_tables = re.findall(
+    r"^(nabla_gc_alloc_safepoints_[^:]+): dq ",
+    asm,
+    re.MULTILINE,
+)
+if int(global_index_parts[0]) != len(all_safepoint_tables):
+    raise SystemExit(
+        f"global safepoint table count {global_index_parts[0]} "
+        f"does not match emitted tables {all_safepoint_tables}"
+    )
+if global_index_parts[1:] != all_safepoint_tables:
+    raise SystemExit(
+        f"global safepoint table index {global_index_parts[1:]} "
+        f"does not match emitted tables {all_safepoint_tables}"
+    )
+for required_table in [
+    "nabla_gc_alloc_safepoints_nabla_sym_allocate",
+    "nabla_gc_alloc_safepoints_main",
+]:
+    if required_table not in global_index_parts[1:]:
+        raise SystemExit(f"global safepoint table index missing {required_table}")
 
 for i in range(len(labels)):
     expected_comment = (

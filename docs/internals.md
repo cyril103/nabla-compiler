@@ -634,15 +634,22 @@ de bytes de chaînes hors scan.
 
 Le backend émet aussi, pour chaque fonction, deux index additifs :
 `nabla_gc_alloc_calls_<fonction>` et
-`nabla_gc_alloc_safepoints_<fonction>`. Le premier mot de chaque index est le
-nombre de points d'allocation IR qui appellent directement `Runtime_alloc` dans
-le code utilisateur (`NewObject`, `New*Array`, `FunctionReference` et boxing).
+`nabla_gc_alloc_safepoints_<fonction>`, plus un index global
+`nabla_gc_alloc_safepoint_tables`. Le premier mot de chaque index par fonction
+est le nombre de points d'allocation IR qui appellent directement
+`Runtime_alloc` dans le code utilisateur (`NewObject`, `New*Array`,
+`FunctionReference` et boxing).
 `nabla_gc_alloc_calls_<fonction>` est suivi des adresses des cartes
 `nabla_gc_alloc_call_<fonction>_<index>`. `nabla_gc_alloc_safepoints_<fonction>`
 est suivi de paires `return_pc, map`, sous la forme
 `nabla_gc_alloc_return_<fonction>_<index>` /
 `nabla_gc_alloc_call_<fonction>_<index>`, pour lier l'adresse de retour vue par
 un futur `Runtime_alloc` exact à la carte déjà émise.
+`nabla_gc_alloc_safepoint_tables` utilise le format
+`dq function_count, table1, table2, ...` : son premier mot est le nombre de
+tables listées, suivi des adresses `nabla_gc_alloc_safepoints_<fonction>`. Il
+permettra à un futur lookup runtime de parcourir tous les return PC sans
+connaître les fonctions compilées à l'avance.
 
 Chaque carte garde le format minimal `dq count, offset1, offset2, ...`, où les
 offsets réutilisent les mêmes slots `rbp` positifs que
@@ -666,8 +673,9 @@ résultat IR et l'opération source si elle existe. Le `call Runtime_alloc` est
 immédiatement suivi d'un label global
 `nabla_gc_alloc_return_<fonction>_<index>:` qui matérialise l'adresse de retour
 que `Runtime_alloc` verra sur `[rsp]` dans une étape future. Le label et l'index
-`nabla_gc_alloc_safepoints_<fonction>` ne changent pas la convention d'appel et
-ne sont lus ni par `Runtime_alloc` ni par `Runtime_gc`.
+`nabla_gc_alloc_safepoints_<fonction>`, ainsi que l'index global
+`nabla_gc_alloc_safepoint_tables`, ne changent pas la convention d'appel et ne
+sont lus ni par `Runtime_alloc` ni par `Runtime_gc`.
 
 ### Inventaire Des Allocations Internes Aux Helpers Runtime
 

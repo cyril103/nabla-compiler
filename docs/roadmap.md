@@ -156,7 +156,8 @@ features.
   non consommées par `Runtime_alloc` / `Runtime_gc`. Les appels `Runtime_alloc`
   utilisateur portent aussi des commentaires ASM `gc alloc safepoint map ...
   non-consumed` et des labels `nabla_gc_alloc_return_<fonction>_<index>` indexés
-  par `nabla_gc_alloc_safepoints_<fonction>` qui lient chaque return PC de
+  par `nabla_gc_alloc_safepoints_<fonction>`, eux-mêmes listés dans l'index
+  global `nabla_gc_alloc_safepoint_tables`, qui lient chaque return PC de
   safepoint à sa carte inertielle. La prochaine
   cible est de remplacer progressivement le scan conservateur par ces cartes
   exactes consommables, de réduire les faux positifs et de raffiner `heapUsed()`
