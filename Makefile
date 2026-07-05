@@ -234,6 +234,7 @@ tooling-tests: nablac unit-tests stdlib-docs format-check
 	@tests/test_gc_heap_accounting_metrics.sh
 	@tests/test_gc_candidate_scan_metrics.sh
 	@tests/test_gc_interior_candidate_scan_metrics.sh
+	@tests/test_gc_alloc_safepoint_lookup_metrics.sh
 	@tests/test_gc_free_list_splitting.sh
 	@tests/test_gc_memory_stress.sh
 	@tests/test_gc_frame_root_metadata.sh

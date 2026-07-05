@@ -25,11 +25,13 @@ compteurs GC `gcCollections()`, `gcLastFreedBytes()`,
 `gcLastLargestFreeBlock()`, `gcLastMarkedBlocks()`, `gcLastFreedBlocks()`,
 `gcLastStackWords()`, `gcLastHeapWords()`, `gcLastStackCandidateWords()`,
 `gcLastHeapCandidateWords()`, `gcLastStackInteriorCandidateWords()`,
-`gcLastHeapInteriorCandidateWords()`, `heapAllocatedBytes()`,
-`heapFreeBytes()`, `heapFreeBlockCount()` et `heapLargestFreeBlock()` exposent
+`gcLastHeapInteriorCandidateWords()`, `gcLastAllocSafepointMapFound()`,
+`gcLastAllocSafepointMapMissed()`, `heapAllocatedBytes()`, `heapFreeBytes()`,
+`heapFreeBlockCount()` et `heapLargestFreeBlock()` exposent
 le nombre de collectes, le dernier sweep, le marquage, le volume de scan
 conservateur, le bruit candidat pile/heap, les candidats intérieurs au payload,
-le payload encore alloué et l'état courant de la free-list pour
+le lookup observationnel du return PC d'allocation vers une carte exacte non
+consommée, le payload encore alloué et l'état courant de la free-list pour
 les tests et diagnostics. La suite de stress GC couvre désormais
 les temporaires imbriqués, helpers de chaînes, `Array[T]`, tableaux d'objets,
 `Map[K, V]` et `Set[T]` sous heaps serrés afin de garder ces chemins exercés dans
@@ -46,9 +48,11 @@ commentaires ASM `gc alloc safepoint map ... non-consumed` qui les relient aux
 cartes correspondantes, un label
 `nabla_gc_alloc_return_<fonction>_<index>` immédiatement après l'appel, et un
 index `nabla_gc_alloc_safepoints_<fonction>` qui associe chaque return PC à sa
-carte, plus l'index global `nabla_gc_alloc_safepoint_tables`, sans consommation
-runtime. Elles ne sont pas encore consommées par
-`Runtime_alloc` ou `Runtime_gc`; la suite du plan consiste à réduire les faux
+carte, plus l'index global `nabla_gc_alloc_safepoint_tables`; `Runtime_gc`
+parcourt désormais ces index pour exposer found/missed, sans consommer les
+racines des cartes. Cette étape reste donc sans consommation des racines exactes:
+elles ne sont pas encore consommées par le marqueur
+conservateur; la suite du plan consiste à réduire les faux
 positifs conservateurs en consommant progressivement ces cartes exactes et en
 raffinant `heapUsed()` si nécessaire.
 La checklist opérationnelle pour intégrer une nouvelle feature est dans

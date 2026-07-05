@@ -32,13 +32,16 @@ concret l'impose.
   `gcLastFreedBlocks()`, `gcLastStackWords()`, `gcLastHeapWords()`,
   `gcLastStackCandidateWords()`, `gcLastHeapCandidateWords()`,
   `gcLastStackInteriorCandidateWords()`,
-  `gcLastHeapInteriorCandidateWords()`, `heapAllocatedBytes()`,
+  `gcLastHeapInteriorCandidateWords()`,
+  `gcLastAllocSafepointMapFound()`,
+  `gcLastAllocSafepointMapMissed()`, `heapAllocatedBytes()`,
   `heapFreeBytes()`, `heapFreeBlockCount()` et
   `heapLargestFreeBlock()` afin de mesurer le nombre de collectes, le sweep le
   plus récent, le marquage, le volume de scan conservateur, le bruit candidat
-  pile/heap, le sous-ensemble de candidats intérieurs au payload, le payload
-  encore alloué et l'état courant de la free-list sans changer `heapUsed()` ni
-  la portée conservative du marqueur.
+  pile/heap, le sous-ensemble de candidats intérieurs au payload, le lookup
+  observationnel du return PC d'allocation vers une carte exacte non consommée,
+  le payload encore alloué et l'état courant de la free-list sans changer
+  `heapUsed()` ni la portée conservative du marqueur.
 - Le delta de fragmentation immédiate découpe les blocs libres surdimensionnés à
   la réallocation: le préfixe sert la demande, la queue reste dans
   `heap_free_list` si elle peut contenir un header et un mot payload aligné, et
@@ -145,8 +148,10 @@ Raisons :
    `; gc alloc safepoint map nabla_gc_alloc_call_<fonction>_<index> ...
    non-consumed` immédiatement avant le safepoint, puis le label
    `nabla_gc_alloc_return_<fonction>_<index>:` immédiatement après l'appel. Ces
-   cartes, tables par fonction et index global restent additifs, non consommés
-   et non encore dominance-aware.
+   cartes restent additives, non consommées et non encore dominance-aware; le
+   runtime parcourt maintenant les tables par fonction et l'index global pour
+   exposer si le return PC courant a une carte correspondante, sans lire les
+   racines de cette carte.
 8. Inventaire des allocations internes aux helpers runtime couvert :
    `tests/test_gc_runtime_helper_alloc_inventory.py` ancre les appels
    `Runtime_alloc` directs de `src/runtime_asm.cpp` dans `docs/internals.md` et
@@ -217,7 +222,14 @@ Raisons :
    marqués/libérés et les mots inspectés par les scans conservateurs de pile et
    de payloads heap afin de suivre le coût du collecteur avant de consommer les
    cartes exactes.
-18. Ajouter ensuite la protection/spill automatique des registres transitoires et
+18. Lookup runtime des cartes d'allocation couvert :
+   `tests/test_gc_alloc_safepoint_lookup_metrics.sh` force une collecte à un
+   safepoint `Runtime_alloc` utilisateur sous heap serré, vérifie
+   `gcLastAllocSafepointMapFound() > 0` et
+   `gcLastAllocSafepointMapMissed() == 0`, puis inspecte l'ASM conservé pour le
+   parcours de `nabla_gc_alloc_safepoint_tables` et les labels runtime publics.
+   Le pointeur de carte trouvé reste interne et non consommé par le marquage.
+19. Ajouter ensuite la protection/spill automatique des registres transitoires et
    slots natifs autour de `Runtime_alloc`, remplacer ou stabiliser les cartes
    candidates en cartes consommables, raffiner `heapUsed()` si besoin, et réduire
    les faux positifs du scan conservateur en consommant progressivement les

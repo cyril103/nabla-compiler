@@ -2413,6 +2413,8 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
             functionName == "gcLastHeapCandidateWords" ||
             functionName == "gcLastStackInteriorCandidateWords" ||
             functionName == "gcLastHeapInteriorCandidateWords" ||
+            functionName == "gcLastAllocSafepointMapFound" ||
+            functionName == "gcLastAllocSafepointMapMissed" ||
             functionName == "heapLargestFreeBlock") {
             throw CompilerError(
                 ErrorKind::Parser, nameToken.location,

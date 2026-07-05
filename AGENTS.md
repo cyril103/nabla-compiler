@@ -491,7 +491,9 @@ Limites importantes :
   `gcLastLargestFreeBlock()`, `gcLastMarkedBlocks()`, `gcLastFreedBlocks()`,
   `gcLastStackWords()`, `gcLastHeapWords()`, `gcLastStackCandidateWords()`,
   `gcLastHeapCandidateWords()`, `gcLastStackInteriorCandidateWords()`,
-  `gcLastHeapInteriorCandidateWords()`, `heapAllocatedBytes()`,
+  `gcLastHeapInteriorCandidateWords()`,
+  `gcLastAllocSafepointMapFound()`,
+  `gcLastAllocSafepointMapMissed()`, `heapAllocatedBytes()`,
   `heapFreeBytes()`, `heapFreeBlockCount()`, `heapLargestFreeBlock()`),
   diagnostic stderr `Nabla runtime error: heap exhausted` et sortie 255 si
   l'allocation échoue encore après collecte;
@@ -508,8 +510,13 @@ Limites importantes :
   `nabla_gc_alloc_return_<fonction>_<index>` immédiatement après l'appel; l'index
   `nabla_gc_alloc_safepoints_<fonction>` associe chaque return PC à sa carte, et
   l'index global `nabla_gc_alloc_safepoint_tables` liste ces tables par fonction.
-  Ces cartes ne sont pas encore consommées par `Runtime_alloc` / `Runtime_gc`; la
-  première collecte active scanne conservativement la pile native jusqu'à
+  Ces cartes ne sont pas encore consommées par le marqueur; `Runtime_gc` parcourt
+  toutefois `nabla_gc_alloc_safepoint_tables` pour résoudre le return PC
+  utilisateur sauvegardé à `[rsp + 112]` vers une carte et expose le résultat via
+  `gcLastAllocSafepointMapFound()` / `gcLastAllocSafepointMapMissed()` sans lire
+  les racines de cette carte; un miss reste normal pour un `Runtime_alloc` interne
+  à un helper runtime non indexé. La première collecte active scanne
+  conservativement la pile native jusqu'à
   `gc_stack_top`,
   puis les payloads heap marqués jusqu'à fixpoint, et sweep les blocs non marqués
   vers `heap_free_list`. `Runtime_buildArgsArray`, `Runtime_stringToCharArray`,
@@ -965,8 +972,9 @@ d'inference generique et de typage contextuel des lambdas.
   `nabla_gc_alloc_return_<fonction>_<index>` immédiatement après
   `call Runtime_alloc`, `nabla_gc_alloc_safepoints_<fonction>` lie chaque
   return PC à la carte `nabla_gc_alloc_call_<fonction>_<index>` existante, et
-  `nabla_gc_alloc_safepoint_tables` liste les tables par fonction, sans
-  consommation par `Runtime_alloc` ou `Runtime_gc`.
+  `nabla_gc_alloc_safepoint_tables` liste les tables par fonction. `Runtime_gc`
+  peut désormais utiliser cet index pour un lookup observationnel, mais les
+  racines exactes des cartes restent non consommées.
 - [x] Inventorier et outiller les allocations internes aux helpers runtime:
   `tests/test_gc_runtime_helper_alloc_inventory.py` ancre les appels
   `Runtime_alloc` directs de `src/runtime_asm.cpp` dans `docs/internals.md`, afin
@@ -1023,6 +1031,13 @@ d'inference generique et de typage contextuel des lambdas.
   `gcLastStackInteriorCandidateWords()` /
   `gcLastHeapInteriorCandidateWords()` isolent le sous-ensemble intérieur au
   payload sans changer le marquage conservateur ni consommer les cartes exactes.
+- [x] Ajouter le lookup observationnel des safepoints d'allocation:
+  `gcLastAllocSafepointMapFound()` /
+  `gcLastAllocSafepointMapMissed()` indiquent si le return PC utilisateur courant
+  de `Runtime_alloc` a été résolu dans `nabla_gc_alloc_safepoint_tables`; le
+  pointeur de carte trouvé reste interne, un miss peut être légitime pour un
+  helper runtime non indexé, et les racines exactes ne sont pas consommées par le
+  marqueur.
 - [x] Ajouter une suite de stress GC runtime: `tests/test_gc_memory_stress.sh`
   compile sous heaps serrés des programmes couvrant temporaires imbriqués,
   helpers de chaînes, `Array[T]`, tableaux d'objets, `Map[K, V]` et `Set[T]`, et
@@ -1123,6 +1138,24 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Ajouter le lookup observationnel des safepoints d'allocation GC:
+  `Runtime_gc` lit le return PC utilisateur sauvegardé par `Runtime_alloc` à
+  `[rsp + 112]`, parcourt `nabla_gc_alloc_safepoint_tables` et les tables
+  `nabla_gc_alloc_safepoints_<fonction>`, stocke le pointeur de carte trouvé
+  dans un slot runtime interne, puis expose
+  `gcLastAllocSafepointMapFound()` /
+  `gcLastAllocSafepointMapMissed()`. Le marquage reste conservateur et ne lit
+  pas les racines exactes. La régression
+  `tests/test_gc_alloc_safepoint_lookup_metrics.sh` force une collecte sous heap
+  serré, vérifie found/missed, inspecte l'ASM conservé et couvre les noms
+  réservés.
+  - Fichiers / tests associes: `src/runtime_asm.cpp`, `src/ast.cpp`,
+    `src/parser.cpp`, `src/ir_codegen.cpp`,
+    `tests/test_gc_alloc_safepoint_lookup_metrics.sh`,
+    `tests/test_gc_inventory_docs.py`, `Makefile`, `docs/internals.md`,
+    `docs/language.md`, `docs/plans/runtime-memory-management.md`,
+    `docs/plans/README.md`, `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Émettre des métadonnées inertes de racines statiques GC: le backend
   ajoute l'index `.data` `nabla_gc_static_roots`, qui compte et référence les
