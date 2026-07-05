@@ -879,6 +879,10 @@ private:
             out << "    call Runtime_gcLastStackCandidateWords\n";
         } else if (instruction.operation == "gcLastHeapCandidateWords") {
             out << "    call Runtime_gcLastHeapCandidateWords\n";
+        } else if (instruction.operation == "gcLastStackInteriorCandidateWords") {
+            out << "    call Runtime_gcLastStackInteriorCandidateWords\n";
+        } else if (instruction.operation == "gcLastHeapInteriorCandidateWords") {
+            out << "    call Runtime_gcLastHeapInteriorCandidateWords\n";
         } else if (instruction.operation == "heapAllocatedBytes") {
             out << "    call Runtime_heapAllocatedBytes\n";
         } else if (instruction.operation == "heapFreeBytes") {

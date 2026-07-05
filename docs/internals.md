@@ -430,13 +430,19 @@ de pile native inspectés, `gc_last_heap_words` compte les mots payload heap
 inspectés pendant la propagation conservatrice, et
 `gc_last_stack_candidate_words` / `gc_last_heap_candidate_words` comptent les
 mots scannés qui ressemblent effectivement à des pointeurs vers un bloc heap
-alloué. Ces compteurs de candidats ne sont pas des racines exactes uniques : ils
-mesurent le bruit conservateur par source de scan et peuvent compter plusieurs
-fois le même pointeur pendant les passes de propagation. Les primitives
+alloué. `gc_last_stack_interior_candidate_words` /
+`gc_last_heap_interior_candidate_words` comptent le sous-ensemble de ces
+candidats qui tombe à l'intérieur du payload d'un bloc alloué sans être égal au
+début de ce payload. Ces compteurs de candidats ne sont pas des racines exactes
+uniques : ils mesurent le bruit conservateur par source de scan et peuvent
+compter plusieurs fois le même pointeur pendant les passes de propagation. Ils
+restent strictement observationnels et ne modifient pas la décision de marquage.
+Les primitives
 `gcCollections()`, `gcLastFreedBytes()`, `gcLastLargestFreeBlock()`,
 `gcLastMarkedBlocks()`, `gcLastFreedBlocks()`, `gcLastStackWords()` et
 `gcLastHeapWords()`, `gcLastStackCandidateWords()` et
-`gcLastHeapCandidateWords()` exposent ces valeurs de dernière collecte. À la demande,
+`gcLastHeapCandidateWords()`, `gcLastStackInteriorCandidateWords()` et
+`gcLastHeapInteriorCandidateWords()` exposent ces valeurs de dernière collecte. À la demande,
 `Runtime_heapAllocatedBytes` parcourt les headers entre `heap_start` et
 `heap_pointer` pour additionner les payloads des blocs non libres, tandis que
 `Runtime_heapFreeBytes`, `Runtime_heapFreeBlockCount` et
