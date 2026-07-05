@@ -504,9 +504,12 @@ Limites importantes :
   `Runtime_stringSplitMakeSegment`, `FloatDouble_method_toString`). Les appels
   `Runtime_alloc` utilisateur portent des commentaires ASM inertes
   `gc alloc safepoint map ... non-consumed` qui identifient la carte
-  `nabla_gc_alloc_call_<fonction>_<index>` correspondante. Ces cartes ne sont
-  pas encore consommées par `Runtime_alloc` / `Runtime_gc`; la première collecte
-  active scanne conservativement la pile native jusqu'à `gc_stack_top`,
+  `nabla_gc_alloc_call_<fonction>_<index>` correspondante, puis un label
+  `nabla_gc_alloc_return_<fonction>_<index>` immédiatement après l'appel; l'index
+  `nabla_gc_alloc_safepoints_<fonction>` associe chaque return PC à sa carte.
+  Ces cartes ne sont pas encore consommées par `Runtime_alloc` / `Runtime_gc`; la
+  première collecte active scanne conservativement la pile native jusqu'à
+  `gc_stack_top`,
   puis les payloads heap marqués jusqu'à fixpoint, et sweep les blocs non marqués
   vers `heap_free_list`. `Runtime_buildArgsArray`, `Runtime_stringToCharArray`,
   `Runtime_stringSplit` / `Runtime_stringSplitMakeSegment` et
@@ -956,6 +959,12 @@ d'inference generique et de typage contextuel des lambdas.
   `gc alloc safepoint map ... non-consumed` immédiatement avant le safepoint.
   Ces cartes restent non consommées par le runtime et non encore
   dominance-aware.
+- [x] Émettre un index return-PC inerte pour les safepoints `Runtime_alloc`
+  utilisateur: chaque appel allocant du code généré reçoit un label
+  `nabla_gc_alloc_return_<fonction>_<index>` immédiatement après
+  `call Runtime_alloc`, et `nabla_gc_alloc_safepoints_<fonction>` lie chaque
+  return PC à la carte `nabla_gc_alloc_call_<fonction>_<index>` existante, sans
+  consommation par `Runtime_alloc` ou `Runtime_gc`.
 - [x] Inventorier et outiller les allocations internes aux helpers runtime:
   `tests/test_gc_runtime_helper_alloc_inventory.py` ancre les appels
   `Runtime_alloc` directs de `src/runtime_asm.cpp` dans `docs/internals.md`, afin
@@ -1329,6 +1338,18 @@ d'inference generique et de typage contextuel des lambdas.
     `tests/test_gc_alloc_call_metadata.sh`, `tests/test_gc_inventory_docs.py`,
     `docs/internals.md`, `docs/plans/runtime-memory-management.md`,
     `docs/plans/README.md`, `docs/roadmap.md`, `Makefile`, `AGENTS.md`.
+
+- `local` - Émettre les labels return-PC des safepoints `Runtime_alloc`
+  utilisateur: après chaque `call Runtime_alloc` généré depuis une instruction IR
+  allocante, le backend émet
+  `nabla_gc_alloc_return_<fonction>_<index>:` et ajoute
+  `nabla_gc_alloc_safepoints_<fonction>` dans `.data` avec les paires
+  return-label / `nabla_gc_alloc_call_<fonction>_<index>`. Cette table reste
+  additive, inerte et non consommée par le collecteur conservative actuel.
+  - Fichiers / tests associes: `src/ir_codegen.cpp`,
+    `tests/test_gc_alloc_call_metadata.sh`, `tests/test_gc_inventory_docs.py`,
+    `docs/internals.md`, `docs/plans/runtime-memory-management.md`,
+    `docs/plans/README.md`, `docs/roadmap.md`, `AGENTS.md`.
 
 - `local` - Émettre les premiers descripteurs de layout heap GC: le backend
   ajoute `nabla_gc_object_layout_<classe>` pour les champs référence-capables des

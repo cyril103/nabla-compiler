@@ -43,10 +43,13 @@ l'inventaire des allocations internes aux helpers runtime et les cartes
 candidates de racines internes aux helpers runtime sont toujours émis comme
 métadonnées inertes. Les appels `Runtime_alloc` utilisateur portent aussi des
 commentaires ASM `gc alloc safepoint map ... non-consumed` qui les relient aux
-cartes correspondantes sans consommation runtime. Elles ne sont pas encore
-consommées par `Runtime_alloc` ou `Runtime_gc`; la suite du plan consiste à
-réduire les faux positifs conservateurs en consommant progressivement ces cartes
-exactes et en raffinant `heapUsed()` si nécessaire.
+cartes correspondantes, un label
+`nabla_gc_alloc_return_<fonction>_<index>` immédiatement après l'appel, et un
+index `nabla_gc_alloc_safepoints_<fonction>` qui associe chaque return PC à sa
+carte sans consommation runtime. Elles ne sont pas encore consommées par
+`Runtime_alloc` ou `Runtime_gc`; la suite du plan consiste à réduire les faux
+positifs conservateurs en consommant progressivement ces cartes exactes et en
+raffinant `heapUsed()` si nécessaire.
 La checklist opérationnelle pour intégrer une nouvelle feature est dans
 [`docs/feature-integration.md`](../feature-integration.md).
 
