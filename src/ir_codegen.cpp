@@ -533,6 +533,36 @@ private:
         return type->second;
     }
 
+    void loadNumericOperandToXmm(const std::string& operand, const std::string& sourceType,
+                                 const std::string& targetType, const std::string& xmm) {
+        loadValue(operand, "rax");
+        if (targetType == "Double") {
+            if (sourceType == "Double") {
+                out << "    movq " << xmm << ", rax\n";
+            } else if (sourceType == "Float") {
+                out << "    movd " << xmm << ", eax\n";
+                out << "    cvtss2sd " << xmm << ", " << xmm << "\n";
+            } else {
+                out << "    sar rax, 1\n";
+                out << "    cvtsi2sd " << xmm << ", rax\n";
+            }
+            return;
+        }
+        if (targetType == "Float") {
+            if (sourceType == "Float") {
+                out << "    movd " << xmm << ", eax\n";
+            } else if (sourceType == "Double") {
+                out << "    movq " << xmm << ", rax\n";
+                out << "    cvtsd2ss " << xmm << ", " << xmm << "\n";
+            } else {
+                out << "    sar rax, 1\n";
+                out << "    cvtsi2ss " << xmm << ", rax\n";
+            }
+            return;
+        }
+        codegenError("conversion numérique IR non supportée vers " + targetType);
+    }
+
     void emitInstruction(const IRInstruction& instruction) {
         switch (instruction.opcode) {
             case IROpcode::Constant:
@@ -747,12 +777,14 @@ private:
     }
 
     void emitBinary(const IRInstruction& instruction) {
-        if (instruction.type == "Float" || typeOf(instruction.operands[0]) == "Float") {
-            emitFloatBinary(instruction);
+        const std::string leftType = typeOf(instruction.operands[0]);
+        const std::string rightType = typeOf(instruction.operands[1]);
+        if (instruction.type == "Double" || leftType == "Double" || rightType == "Double") {
+            emitDoubleBinary(instruction);
             return;
         }
-        if (instruction.type == "Double" || typeOf(instruction.operands[0]) == "Double") {
-            emitDoubleBinary(instruction);
+        if (instruction.type == "Float" || leftType == "Float" || rightType == "Float") {
+            emitFloatBinary(instruction);
             return;
         }
         loadValue(instruction.operands[0], "rax");
@@ -818,10 +850,8 @@ private:
     }
 
     void emitFloatBinary(const IRInstruction& instruction) {
-        loadValue(instruction.operands[0], "rax");
-        loadValue(instruction.operands[1], "rbx");
-        out << "    movd xmm0, eax\n";
-        out << "    movd xmm1, ebx\n";
+        loadNumericOperandToXmm(instruction.operands[0], typeOf(instruction.operands[0]), "Float", "xmm0");
+        loadNumericOperandToXmm(instruction.operands[1], typeOf(instruction.operands[1]), "Float", "xmm1");
         const std::string& op = instruction.operation;
         if (op == "+") {
             out << "    addss xmm0, xmm1\n";
@@ -855,10 +885,8 @@ private:
     }
 
     void emitDoubleBinary(const IRInstruction& instruction) {
-        loadValue(instruction.operands[0], "rax");
-        loadValue(instruction.operands[1], "rbx");
-        out << "    movq xmm0, rax\n";
-        out << "    movq xmm1, rbx\n";
+        loadNumericOperandToXmm(instruction.operands[0], typeOf(instruction.operands[0]), "Double", "xmm0");
+        loadNumericOperandToXmm(instruction.operands[1], typeOf(instruction.operands[1]), "Double", "xmm1");
         const std::string& op = instruction.operation;
         if (op == "+") {
             out << "    addsd xmm0, xmm1\n";
@@ -1586,15 +1614,19 @@ private:
             }
         } else if (className == "Int" && methodName == "toLong") {
             out << "    mov rax, rdi\n";
-        } else if (className == "Int" && methodName == "toFloat") {
+        } else if ((className == "Int" || className == "Long") && methodName == "toFloat") {
             out << "    mov rax, rdi\n";
             out << "    sar rax, 1\n";
             out << "    cvtsi2ss xmm0, rax\n";
             out << "    movd eax, xmm0\n";
-        } else if (className == "Int" && methodName == "toDouble") {
+        } else if ((className == "Int" || className == "Long") && methodName == "toDouble") {
             out << "    mov rax, rdi\n";
             out << "    sar rax, 1\n";
             out << "    cvtsi2sd xmm0, rax\n";
+            out << "    movq rax, xmm0\n";
+        } else if (className == "Float" && methodName == "toDouble") {
+            out << "    movd xmm0, edi\n";
+            out << "    cvtss2sd xmm0, xmm0\n";
             out << "    movq rax, xmm0\n";
         } else if (className == "String" && methodName == "length") {
             out << "    mov rax, [rdi + 8]\n";

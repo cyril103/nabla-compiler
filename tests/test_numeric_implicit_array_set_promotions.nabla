@@ -1,0 +1,14 @@
+def main(): Int = {
+    val doubles = new DoubleArray(2)
+    doubles.set(0, 5)
+    doubles.set(1, 6.5F)
+    val floats = new FloatArray(1)
+    floats.set(0, 7)
+    val longs = new LongArray(1)
+    longs.set(0, 8)
+    if doubles.get(0) == 5.0 && doubles.get(1) == 6.5 && floats.get(0) == 7.0F && longs.get(0) == 8L {
+        0
+    } else {
+        1
+    }
+}

@@ -1,0 +1,2 @@
+tests/test_error_numeric_implicit_override_return_widening.nabla:8:14: semantic error: override invalide pour 'NumericChild.value' : signature incompatible avec la méthode héritée
+signatures héritées candidates: NumericParent.value(): Double

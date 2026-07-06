@@ -1,0 +1,4 @@
+tests/test_error_numeric_implicit_overload_not_selected.nabla:10:25: semantic error: aucune surcharge compatible pour 'choose(Int)'
+candidats:
+- choose(Double): Double
+- choose(String): String

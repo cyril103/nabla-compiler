@@ -809,6 +809,28 @@ inline bool isTypeAssignable(
     return isTypeAssignable(context, actualType, expectedType, visiting);
 }
 
+inline int numericWideningRank(const std::string& type) {
+    if (type == "Int") return 0;
+    if (type == "Long") return 1;
+    if (type == "Float") return 2;
+    if (type == "Double") return 3;
+    return -1;
+}
+
+inline bool isNumericWideningAssignable(const std::string& actualType, const std::string& expectedType) {
+    const int actualRank = numericWideningRank(actualType);
+    const int expectedRank = numericWideningRank(expectedType);
+    return actualRank >= 0 && expectedRank >= 0 && actualRank < expectedRank;
+}
+
+inline bool isValueAssignable(
+    const CompilerContext& context,
+    const std::string& actualType,
+    const std::string& expectedType) {
+    return isTypeAssignable(context, actualType, expectedType) ||
+           isNumericWideningAssignable(actualType, expectedType);
+}
+
 inline bool exactOrBottomListAssignable(
     const CompilerContext& context,
     const std::string& actualType,

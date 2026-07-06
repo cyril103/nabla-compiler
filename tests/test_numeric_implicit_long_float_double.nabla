@@ -1,0 +1,24 @@
+def returnsDouble(): Double = {
+    9L
+}
+
+def returnsFloat(): Float = {
+    4L
+}
+
+def main(): Int = {
+    val longProduct: Long = 3 * 4L
+    val doubleSum: Double = 1L + 2.5
+    val doubleFromFloat: Double = 1.5F + 2.0
+    val doubleCompare: Bool = 3.0 >= 2L
+    val directLongToFloat: Float = 6L.toFloat()
+    val directLongToDouble: Double = 7L.toDouble()
+    val directFloatToDouble: Double = 8.5F.toDouble()
+    if longProduct == 12L && doubleSum == 3.5 && doubleFromFloat == 3.5 && doubleCompare &&
+       directLongToFloat == 6.0F && directLongToDouble == 7.0 && directFloatToDouble == 8.5 &&
+       returnsDouble() == 9.0 && returnsFloat() == 4.0F {
+        0
+    } else {
+        1
+    }
+}
