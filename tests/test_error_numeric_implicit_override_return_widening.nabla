@@ -1,0 +1,15 @@
+class NumericParent() {
+    def value(): Double = {
+        1.0
+    }
+}
+
+class NumericChild extends NumericParent() {
+    override def value(): Int = {
+        1
+    }
+}
+
+def main(): Int = {
+    0
+}

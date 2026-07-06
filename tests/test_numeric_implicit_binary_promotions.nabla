@@ -1,0 +1,11 @@
+def main(): Int = {
+    val product: Double = 3 * 2.5
+    val reverseProduct: Double = 2.5 * 3
+    val floatSum: Float = 2 + 1.5F
+    val mixedComparison: Bool = 2 < 2.5
+    if product == 7.5 && reverseProduct == 7.5 && floatSum == 3.5F && mixedComparison {
+        0
+    } else {
+        1
+    }
+}

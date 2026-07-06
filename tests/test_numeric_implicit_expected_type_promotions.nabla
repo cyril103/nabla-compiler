@@ -1,0 +1,21 @@
+def acceptsDouble(value: Double): Double = {
+    value * 2.0
+}
+
+def acceptsFloat(value: Float): Float = {
+    value + 0.5F
+}
+
+def main(): Int = {
+    val asDouble: Double = 4
+    val asFloat: Float = 3
+    var mutableDouble: Double = 0.0
+    mutableDouble = 5
+    val callDouble: Double = acceptsDouble(6)
+    val callFloat: Float = acceptsFloat(2)
+    if asDouble == 4.0 && asFloat == 3.0F && mutableDouble == 5.0 && callDouble == 12.0 && callFloat == 2.5F {
+        0
+    } else {
+        1
+    }
+}

@@ -1,0 +1,14 @@
+class NumericBox(value: Double) {
+    def get(): Double = {
+        value
+    }
+}
+
+def main(): Int = {
+    val box = new NumericBox(3)
+    if box.get() == 3.0 {
+        0
+    } else {
+        1
+    }
+}

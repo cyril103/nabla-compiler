@@ -1,0 +1,12 @@
+def choose(value: Double): Double = {
+    value
+}
+
+def choose(value: String): String = {
+    value
+}
+
+def main(): Int = {
+    val value: Double = choose(1)
+    0
+}

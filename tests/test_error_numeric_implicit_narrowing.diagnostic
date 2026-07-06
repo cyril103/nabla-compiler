@@ -1,0 +1,1 @@
+tests/test_error_numeric_implicit_narrowing.nabla:2:5: semantic error: Déclaration invalide pour 'narrowed': type 'Int' attendu, 'Double' reçu

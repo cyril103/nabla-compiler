@@ -108,9 +108,19 @@ applicatif devrait privilegier `Array[T]` et les compagnons publics.
 Les chaines et caracteres sont actuellement byte-based/ASCII pour les operations
 de longueur, indexation et decoupe.
 
-Les types numeriques supportent `+`, `-`, `*`, `/` et les comparaisons. Le
-reste de division `%` est disponible pour `Int` et `Long`. `Int` expose aussi
-`toLong(): Long`, `toFloat(): Float` et `toDouble(): Double`.
+Les types numeriques supportent `+`, `-`, `*`, `/` et les comparaisons. Quand
+une operation ou un type attendu combine plusieurs types numeriques, Nabla
+applique uniquement des promotions implicites elargissantes dans l'ordre
+`Int -> Long -> Float -> Double`: par exemple `Int * Double` produit un
+`Double`, `Long + Float` produit un `Float`, et un argument `Int` peut etre
+passe a un parametre ordinaire `Double` quand l'appel n'a pas besoin de choisir
+entre plusieurs surcharges. Les conversions retrecissantes restent explicites
+ou refusees. Ces promotions sont des conversions de valeurs, pas du sous-typage:
+elles ne rendent pas un `override def f(): Int` compatible avec un parent qui
+retourne `Double`. Le reste de division `%` est disponible seulement quand le type
+promu reste entier (`Int` ou `Long`). Les primitives exposent aussi les
+conversions elargissantes directes disponibles, comme `Int.toLong()`,
+`Int.toFloat()`, `Long.toDouble()` ou `Float.toDouble()`.
 
 ## Tuples
 
@@ -274,8 +284,9 @@ recevoir son type attendu si l'arite et les positions de lambdas identifient une
 seule surcharge; pour une methode generique, les arguments deja lus peuvent
 inferer les parametres de type avant de typer la lambda suivante. Si plusieurs
 surcharges fonctionnelles restent possibles, un diagnostic d'ambiguite liste les
-signatures candidates. Les conversions implicites restent volontairement limitees
-a la resolution exacte actuelle.
+signatures candidates. Hors de ce cas, les conversions implicites sont limitees
+aux promotions numeriques elargissantes (`Int -> Long -> Float -> Double`) et ne
+servent pas a choisir une surcharge non exacte.
 
 `Unit` sert aux fonctions a effet.
 

@@ -22,6 +22,30 @@ bool isNumericType(const std::string& type) {
     return isIntegerType(type) || type == "Float" || type == "Double";
 }
 
+int numericRank(const std::string& type) {
+    if (type == "Int") return 0;
+    if (type == "Long") return 1;
+    if (type == "Float") return 2;
+    if (type == "Double") return 3;
+    return -1;
+}
+
+std::string promotedNumericType(const std::string& leftType, const std::string& rightType) {
+    if (!isNumericType(leftType) || !isNumericType(rightType)) return leftType;
+    return numericRank(leftType) >= numericRank(rightType) ? leftType : rightType;
+}
+
+bool isNumericWidening(const std::string& actualType, const std::string& expectedType) {
+    return isNumericType(actualType) && isNumericType(expectedType) &&
+           numericRank(actualType) >= 0 && numericRank(actualType) < numericRank(expectedType);
+}
+
+std::string conversionMethodName(const std::string& expectedType) {
+    if (expectedType == "Long") return "toLong";
+    if (expectedType == "Float") return "toFloat";
+    return "toDouble";
+}
+
 bool isBoolBinaryMethod(const std::string& methodName) {
     return methodName == "==" || methodName == "!=";
 }
@@ -276,7 +300,7 @@ void validateArguments(
                     ErrorKind::Semantic, arguments[i]->getLocation(),
                     callableName + ": ': _*' est uniquement autorisé comme dernier argument d'un paramètre répété");
             }
-            if (!isTypeAssignable(context, splat->getType(), parameter.type)) {
+            if (!isValueAssignable(context, splat->getType(), parameter.type)) {
                 throw CompilerError(ErrorKind::Semantic, arguments[i]->getLocation(),
                     callableName + ", paramètre '" + parameter.name + "': type '" +
                     parameter.type + "' attendu, '" + splat->getType() + "' reçu" +
@@ -287,7 +311,7 @@ void validateArguments(
         const std::string expectedType = hasRepeated && i >= parameters.size() - 1
             ? parameter.repeatedElementType
             : parameter.type;
-        if (!isTypeAssignable(context, arguments[i]->getType(), expectedType)) {
+        if (!isValueAssignable(context, arguments[i]->getType(), expectedType)) {
             throw CompilerError(ErrorKind::Semantic, arguments[i]->getLocation(),
                 callableName + ", paramètre '" + parameter.name + "': type '" +
                 expectedType + "' attendu, '" + arguments[i]->getType() + "' reçu" +
@@ -311,6 +335,28 @@ std::string boxValueForParameter(
     const std::string& actualType, const std::string& expectedType) {
     if (!shouldBoxArgumentForParameter(actualType, expectedType)) return loweredValue;
     return builder.emitMethodCall(actualType, "box", loweredValue, {}, expectedType);
+}
+
+std::string convertNumericValue(
+    IRBuilder& builder, const std::string& loweredValue,
+    const std::string& actualType, const std::string& expectedType) {
+    const std::string activeActualType = builder.substituteActiveType(actualType);
+    const std::string activeExpectedType = builder.substituteActiveType(expectedType);
+    if (!isNumericWidening(activeActualType, activeExpectedType)) return loweredValue;
+    return builder.emitMethodCall(
+        activeActualType, conversionMethodName(activeExpectedType), loweredValue, {}, activeExpectedType);
+}
+
+std::string coerceValueForExpectedType(
+    IRBuilder& builder, const std::string& loweredValue,
+    const std::string& actualType, const std::string& expectedType) {
+    const std::string activeActualType = builder.substituteActiveType(actualType);
+    const std::string activeExpectedType = builder.substituteActiveType(expectedType);
+    std::string converted = convertNumericValue(builder, loweredValue, activeActualType, activeExpectedType);
+    const std::string convertedType = isNumericWidening(activeActualType, activeExpectedType)
+        ? activeExpectedType
+        : activeActualType;
+    return boxValueForParameter(builder, converted, convertedType, activeExpectedType);
 }
 
 std::string emitPackedArrayArgument(
@@ -342,7 +388,7 @@ std::string emitPackedArrayArgument(
         const auto& argument = arguments[startIndex + i];
         const std::string index = builder.emitConstant(std::to_string(i), "Int");
         std::string value = argument->lowerToIR(builder);
-        value = boxValueForParameter(
+        value = coerceValueForExpectedType(
             builder, value, argument->getType(), parameter.repeatedElementType);
 
         if (arrayType == "ArrayLong") {
@@ -373,7 +419,7 @@ std::vector<std::string> lowerCallArgumentsForParameters(
 
     for (size_t i = 0; i < arguments.size() && i < fixedCount; ++i) {
         std::string loweredArgument = arguments[i]->lowerToIR(builder);
-        loweredArgument = boxValueForParameter(
+        loweredArgument = coerceValueForExpectedType(
             builder, loweredArgument, arguments[i]->getType(), parameters[i].type);
         loweredArguments.push_back(loweredArgument);
     }
@@ -745,7 +791,7 @@ void NewNode::validateSemantics(CompilerContext& context) {
                     "Constructeur de '" + className + "': champ '" + fields[i].first +
                     "' non initialisé");
             }
-            if (!isTypeAssignable(context, args[i]->getType(), expectedType)) {
+            if (!isValueAssignable(context, args[i]->getType(), expectedType)) {
                 throw CompilerError(ErrorKind::Semantic, args[i]->getLocation(),
                     "Constructeur de '" + className + "', champ '" + fields[i].first +
                     "': type '" + expectedType + "' attendu, '" + args[i]->getType() + "' reçu");
@@ -761,7 +807,7 @@ void NewNode::validateSemantics(CompilerContext& context) {
     }
     for (size_t i = 0; i < args.size(); ++i) {
         const std::string expectedType = substituteType(fields[i].second, substitution);
-        if (!isTypeAssignable(context, args[i]->getType(), expectedType)) {
+        if (!isValueAssignable(context, args[i]->getType(), expectedType)) {
             throw CompilerError(ErrorKind::Semantic, args[i]->getLocation(),
                 "Constructeur de '" + className + "', champ '" + fields[i].first +
                 "': type '" + expectedType + "' attendu, '" + args[i]->getType() + "' reçu");
@@ -793,7 +839,22 @@ std::string NewNode::lowerToIR(IRBuilder& builder) const {
     if (className == "DoubleArray") return builder.emitNewDoubleArray(loweredArguments[0]);
     if (className == "BoolArray") return builder.emitNewBoolArray(loweredArguments[0]);
     if (isObjectArrayType(className)) return builder.emitNewObjectArray(loweredArguments[0], nativeArrayElementType(className));
-    return builder.emitNewObject(className, loweredArguments);
+    std::vector<std::string> coercedArguments;
+    const std::string classLookupName = genericBaseName(className);
+    auto classIt = builder.getContext().classes.find(classLookupName);
+    if (classIt != builder.getContext().classes.end() && args.size() == classIt->second.fields.size()) {
+        std::map<std::string, std::string> substitution;
+        if (auto genericSubstitution = genericSubstitutionFor(builder.getContext(), className)) {
+            substitution = *genericSubstitution;
+        }
+        for (size_t i = 0; i < args.size(); ++i) {
+            const std::string expectedType = builder.substituteActiveType(
+                substituteType(classIt->second.fields[i].type, substitution));
+            coercedArguments.push_back(coerceValueForExpectedType(
+                builder, loweredArguments[i], args[i]->getType(), expectedType));
+        }
+    }
+    return builder.emitNewObject(className, coercedArguments.empty() ? loweredArguments : coercedArguments);
 }
 
 SuperNode::SuperNode(std::string type) : parentType(std::move(type)) {}
@@ -831,6 +892,14 @@ std::string MethodCallNode::getType() {
         if (receiverType == "Int" && methodName == "toFloat") return "Float";
         if (receiverType == "Int" && methodName == "toDouble") return "Double";
         if (isComparisonMethod(methodName)) return "Bool";
+        if ((methodName == "toLong" || methodName == "toFloat" || methodName == "toDouble") && arguments.empty()) {
+            if (isNumericWidening(receiverType, methodName == "toLong" ? "Long" : (methodName == "toFloat" ? "Float" : "Double"))) {
+                return methodName == "toLong" ? "Long" : (methodName == "toFloat" ? "Float" : "Double");
+            }
+        }
+        if (arguments.size() == 1 && isArithmeticMethod(methodName) && isNumericType(arguments[0]->getType())) {
+            return promotedNumericType(receiverType, arguments[0]->getType());
+        }
         return receiverType;
     }
     if (receiverType == "Bool" && methodName == "toString") return "String";
@@ -913,13 +982,18 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             if (arguments.size() != 1) {
                 semanticError("la méthode " + receiverType + "." + methodName + " attend un argument");
             }
-            if (arguments[0]->getType() != receiverType) {
+            const std::string argumentType = arguments[0]->getType();
+            if (!isNumericType(argumentType)) {
                 throw CompilerError(
                     ErrorKind::Semantic, arguments[0]->getLocation(),
                     "la méthode " + receiverType + "." + methodName +
-                    " attend un argument de type " + receiverType);
+                    " attend un argument numérique");
             }
-            resolvedType = isComparisonMethod(methodName) ? "Bool" : receiverType;
+            const std::string operationType = promotedNumericType(receiverType, argumentType);
+            if (methodName == "%" && !isIntegerType(operationType)) {
+                semanticError("méthode inconnue: " + receiverType + "." + methodName);
+            }
+            resolvedType = isComparisonMethod(methodName) ? "Bool" : operationType;
             return;
         }
         if (methodName == "toString") {
@@ -936,9 +1010,10 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             resolvedType = "Long";
             return;
         }
-        if (receiverType == "Int" && (methodName == "toFloat" || methodName == "toDouble")) {
+        if ((methodName == "toFloat" || methodName == "toDouble") &&
+            isNumericWidening(receiverType, methodName == "toFloat" ? "Float" : "Double")) {
             if (!arguments.empty()) {
-                semanticError("la méthode Int." + methodName + " n'accepte aucun argument");
+                semanticError("la méthode " + receiverType + "." + methodName + " n'accepte aucun argument");
             }
             resolvedType = methodName == "toFloat" ? "Float" : "Double";
             return;
@@ -1157,7 +1232,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
                     "la méthode " + receiverType + ".set attend un index de type Int");
             }
             const std::string elementType = nativeArrayElementType(receiverType);
-            if (arguments[1]->getType() != elementType) {
+            if (!isValueAssignable(context, arguments[1]->getType(), elementType)) {
                 throw CompilerError(
                     ErrorKind::Semantic, arguments[1]->getLocation(),
                     "la méthode " + receiverType + ".set attend une valeur de type " + elementType);
@@ -1381,13 +1456,14 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
             std::string loweredReceiver = receiver->lowerToIR(builder);
             return builder.emitMethodCall("Int", "toLong", loweredReceiver, {}, "Long");
         }
-        if (receiverType == "Int" && (methodName == "toFloat" || methodName == "toDouble")) {
+        if ((methodName == "toFloat" || methodName == "toDouble") &&
+            isNumericWidening(receiverType, methodName == "toFloat" ? "Float" : "Double")) {
             if (!arguments.empty()) {
-                builder.unsupported(location, "l'appel de méthode Int." + methodName);
+                builder.unsupported(location, "l'appel de méthode " + receiverType + "." + methodName);
             }
             std::string loweredReceiver = receiver->lowerToIR(builder);
             return builder.emitMethodCall(
-                "Int", methodName, loweredReceiver, {}, methodName == "toFloat" ? "Float" : "Double");
+                receiverType, methodName, loweredReceiver, {}, methodName == "toFloat" ? "Float" : "Double");
         }
         const std::vector<std::string> supported = {
             "+", "-", "*", "/", "%", "==", "!=", "<", ">", "<=", ">="
@@ -1400,7 +1476,11 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         }
         std::string left = receiver->lowerToIR(builder);
         std::string right = arguments[0]->lowerToIR(builder);
-        return builder.emitBinary(methodName, left, right, isComparisonMethod(methodName) ? "Bool" : receiverType);
+        const std::string argumentType = arguments[0]->getType();
+        const std::string operationType = promotedNumericType(receiverType, argumentType);
+        left = convertNumericValue(builder, left, receiverType, operationType);
+        right = convertNumericValue(builder, right, argumentType, operationType);
+        return builder.emitBinary(methodName, left, right, isComparisonMethod(methodName) ? "Bool" : operationType);
     }
     if (receiverType == "Bool" && methodName == "toString") {
         if (!arguments.empty()) {
@@ -1584,16 +1664,22 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
                     loweredReceiver, arguments[0]->lowerToIR(builder), arguments[1]->lowerToIR(builder));
             }
             if (receiverType == "DoubleArray") {
+                std::string loweredValue = coerceValueForExpectedType(
+                    builder, arguments[1]->lowerToIR(builder), arguments[1]->getType(), "Double");
                 return builder.emitDoubleArraySet(
-                    loweredReceiver, arguments[0]->lowerToIR(builder), arguments[1]->lowerToIR(builder));
+                    loweredReceiver, arguments[0]->lowerToIR(builder), loweredValue);
             }
             if (receiverType == "FloatArray") {
+                std::string loweredValue = coerceValueForExpectedType(
+                    builder, arguments[1]->lowerToIR(builder), arguments[1]->getType(), "Float");
                 return builder.emitFloatArraySet(
-                    loweredReceiver, arguments[0]->lowerToIR(builder), arguments[1]->lowerToIR(builder));
+                    loweredReceiver, arguments[0]->lowerToIR(builder), loweredValue);
             }
             if (receiverType == "LongArray") {
+                std::string loweredValue = coerceValueForExpectedType(
+                    builder, arguments[1]->lowerToIR(builder), arguments[1]->getType(), "Long");
                 return builder.emitLongArraySet(
-                    loweredReceiver, arguments[0]->lowerToIR(builder), arguments[1]->lowerToIR(builder));
+                    loweredReceiver, arguments[0]->lowerToIR(builder), loweredValue);
             }
             return builder.emitIntArraySet(
                 loweredReceiver, arguments[0]->lowerToIR(builder), arguments[1]->lowerToIR(builder));
@@ -1616,7 +1702,7 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
             for (size_t i = 0; i < arguments.size(); ++i) {
                 std::string loweredArgument = arguments[i]->lowerToIR(builder);
                 if (i < resolvedParameterTypes.size()) {
-                    loweredArgument = boxValueForParameter(
+                    loweredArgument = coerceValueForExpectedType(
                         builder, loweredArgument, arguments[i]->getType(), resolvedParameterTypes[i]);
                 }
                 loweredArguments.push_back(loweredArgument);
@@ -1675,7 +1761,7 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         for (size_t i = 0; i < arguments.size(); ++i) {
             std::string loweredArgument = arguments[i]->lowerToIR(builder);
             if (i < resolvedParameterTypes.size()) {
-                loweredArgument = boxValueForParameter(
+                loweredArgument = coerceValueForExpectedType(
                     builder, loweredArgument, arguments[i]->getType(), resolvedParameterTypes[i]);
             }
             loweredArguments.push_back(loweredArgument);
@@ -2061,7 +2147,7 @@ std::string FunctionCallNode::lowerToIR(IRBuilder& builder) const {
         for (size_t i = 0; i < arguments.size(); ++i) {
             std::string loweredArgument = arguments[i]->lowerToIR(builder);
             if (i < resolvedParameterTypes.size()) {
-                loweredArgument = boxValueForParameter(
+                loweredArgument = coerceValueForExpectedType(
                     builder, loweredArgument, arguments[i]->getType(), resolvedParameterTypes[i]);
             }
             loweredArguments.push_back(loweredArgument);
@@ -2210,7 +2296,7 @@ void FunctionValueCallNode::validateSemantics(CompilerContext& context) {
     resolvedType = functionType->returnType;
     resolvedParameterTypes = functionType->parameterTypes;
     for (size_t i = 0; i < arguments.size(); ++i) {
-        if (!isTypeAssignable(context, arguments[i]->getType(), functionType->parameterTypes[i])) {
+        if (!isValueAssignable(context, arguments[i]->getType(), functionType->parameterTypes[i])) {
             throw CompilerError(
                 ErrorKind::Semantic, arguments[i]->getLocation(),
                 calleeType + ", paramètre: type '" + functionType->parameterTypes[i] +
@@ -2225,7 +2311,7 @@ std::string FunctionValueCallNode::lowerToIR(IRBuilder& builder) const {
     for (size_t i = 0; i < arguments.size(); ++i) {
         std::string loweredArgument = arguments[i]->lowerToIR(builder);
         if (i < resolvedParameterTypes.size()) {
-            loweredArgument = boxValueForParameter(
+            loweredArgument = coerceValueForExpectedType(
                 builder, loweredArgument, arguments[i]->getType(), resolvedParameterTypes[i]);
         }
         loweredArguments.push_back(loweredArgument);
@@ -2268,7 +2354,7 @@ void FunctionExpressionCallNode::validateSemantics(CompilerContext& context) {
     resolvedType = functionType->returnType;
     resolvedParameterTypes = functionType->parameterTypes;
     for (size_t i = 0; i < arguments.size(); ++i) {
-        if (!isTypeAssignable(context, arguments[i]->getType(), functionType->parameterTypes[i])) {
+        if (!isValueAssignable(context, arguments[i]->getType(), functionType->parameterTypes[i])) {
             throw CompilerError(
                 ErrorKind::Semantic, arguments[i]->getLocation(),
                 callee->getType() + ", paramètre: type '" + functionType->parameterTypes[i] +
@@ -2283,7 +2369,7 @@ std::string FunctionExpressionCallNode::lowerToIR(IRBuilder& builder) const {
     for (size_t i = 0; i < arguments.size(); ++i) {
         std::string loweredArgument = arguments[i]->lowerToIR(builder);
         if (i < resolvedParameterTypes.size()) {
-            loweredArgument = boxValueForParameter(
+            loweredArgument = coerceValueForExpectedType(
                 builder, loweredArgument, arguments[i]->getType(), resolvedParameterTypes[i]);
         }
         loweredArguments.push_back(loweredArgument);
@@ -2336,7 +2422,7 @@ void FieldAssignmentNode::validateSemantics(CompilerContext& context) {
     if (!targetMutable) {
         semanticError("impossible d'affecter au champ 'val' immuable: " + fieldName);
     }
-    if (!isTypeAssignable(context, value->getType(), type)) {
+    if (!isValueAssignable(context, value->getType(), type)) {
         semanticError(
             "Affectation invalide pour le champ '" + fieldName + "': type '" + type +
             "' attendu, '" + value->getType() + "' reçu");
@@ -2347,7 +2433,7 @@ std::string FieldAssignmentNode::lowerToIR(IRBuilder& builder) const {
     const std::string actualType = builder.substituteActiveType(value->getType());
     const std::string targetType = builder.substituteActiveType(type);
     std::string loweredValue = value->lowerToIR(builder);
-    loweredValue = boxValueForParameter(builder, loweredValue, actualType, targetType);
+    loweredValue = coerceValueForExpectedType(builder, loweredValue, actualType, targetType);
     builder.emitFieldStore(location, className, fieldName, loweredValue, type);
     return loweredValue;
 }
@@ -2700,7 +2786,7 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
     if (!knownType) {
         semanticError("type de retour inconnu '" + returnType + "' pour la fonction '" + name + "'");
     }
-    if (body && !isTypeAssignable(context, body->getType(), returnType)) {
+    if (body && !isValueAssignable(context, body->getType(), returnType)) {
         semanticError(
             "Type de retour invalide pour '" + name + "': '" + returnType +
             "' attendu, '" + body->getType() + "' reçu");
@@ -2735,6 +2821,7 @@ std::string FunctionDefNode::lowerToIR(IRBuilder& builder) const {
         builder.bindParameter(parameter.symbolName, parameter.name);
     }
     std::string result = body->lowerToIR(builder);
+    result = coerceValueForExpectedType(builder, result, body->getType(), returnType);
     builder.endFunction(result);
     return "";
 }
@@ -2786,6 +2873,7 @@ std::string FunctionDefNode::lowerSpecializedMethodToIR(
         builder.bindParameter(parameter.symbolName, parameter.name);
     }
     std::string result = body->lowerToIR(builder);
+    result = coerceValueForExpectedType(builder, result, body->getType(), returnType);
     builder.endFunction(result);
 
     builder.popTypeSubstitution();
@@ -2824,6 +2912,7 @@ std::string FunctionDefNode::lowerSpecializedFunctionToIR(
         builder.bindParameter(parameter.symbolName, parameter.name);
     }
     std::string result = body->lowerToIR(builder);
+    result = coerceValueForExpectedType(builder, result, body->getType(), returnType);
     builder.endFunction(result);
 
     builder.popTypeSubstitution();
@@ -2907,7 +2996,7 @@ void VarDeclNode::validateSemantics(CompilerContext& context) {
         if (!isKnownTypeInContext(declaredType, context)) {
             semanticError("type inconnu '" + declaredType + "' pour la variable '" + name + "'");
         }
-        if (!isTypeAssignable(context, initializer->getType(), declaredType)) {
+        if (!isValueAssignable(context, initializer->getType(), declaredType)) {
             semanticError(
                 "Déclaration invalide pour '" + name + "': type '" + declaredType +
                 "' attendu, '" + initializer->getType() + "' reçu");
@@ -2918,8 +3007,9 @@ void VarDeclNode::validateSemantics(CompilerContext& context) {
 
 std::string VarDeclNode::lowerToIR(IRBuilder& builder) const {
     std::string value = initializer->lowerToIR(builder);
-    const std::string storageType =
-        declaredType.empty() ? const_cast<ASTNode*>(initializer.get())->getType() : declaredType;
+    const std::string initializerType = const_cast<ASTNode*>(initializer.get())->getType();
+    const std::string storageType = declaredType.empty() ? initializerType : declaredType;
+    value = coerceValueForExpectedType(builder, value, initializerType, storageType);
     builder.emitStore(symbolName, value, storageType);
     return value;
 }
@@ -2946,7 +3036,7 @@ void AssignmentNode::validateSemantics(CompilerContext& context) {
         semanticError("affectation sur variable hors de sa portée: " + name);
     }
     targetType = symbol->second;
-    if (!isTypeAssignable(context, value->getType(), targetType)) {
+    if (!isValueAssignable(context, value->getType(), targetType)) {
         semanticError(
             "Affectation invalide pour '" + name + "': type '" + targetType +
             "' attendu, '" + value->getType() + "' reçu");
@@ -2955,6 +3045,7 @@ void AssignmentNode::validateSemantics(CompilerContext& context) {
 
 std::string AssignmentNode::lowerToIR(IRBuilder& builder) const {
     std::string loweredValue = value->lowerToIR(builder);
+    loweredValue = coerceValueForExpectedType(builder, loweredValue, value->getType(), targetType);
     builder.emitStore(symbolName, loweredValue, targetType);
     return loweredValue;
 }
