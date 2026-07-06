@@ -109,7 +109,8 @@ Les chaines et caracteres sont actuellement byte-based/ASCII pour les operations
 de longueur, indexation et decoupe.
 
 Les types numeriques supportent `+`, `-`, `*`, `/` et les comparaisons. Le
-reste de division `%` est disponible pour `Int` et `Long`.
+reste de division `%` est disponible pour `Int` et `Long`. `Int` expose aussi
+`toLong(): Long`, `toFloat(): Float` et `toDouble(): Double`.
 
 ## Tuples
 
@@ -754,6 +755,8 @@ Operations disponibles sur `String` :
 - `charAt(index: Int): Char`
 - `toCharArray(): ArrayObject[Char]`
 - `toInt(): Int`
+- `toFloat(): Float`
+- `toDouble(): Double`
 - `substring(from: Int, until: Int): String`
 - `repeat(count: Int): String`
 - `trim(): String`
@@ -771,6 +774,13 @@ la representation actuelle des tableaux de types non primitifs ; le code
 utilisateur devrait surtout utiliser les operations communes (`size`, `get`,
 `mkString`, `foreach`, etc.) et garder `Array[T]` pour construire ses propres
 tableaux.
+
+`toInt()`, `toFloat()` et `toDouble()` échouent avec le code runtime `253` si la
+chaine ne contient pas un nombre valide. Les formes globales `parseInt(value)`,
+`parseFloat(value)` et `parseDouble(value)` sont des alias équivalents. Les
+conversions `Float`/`Double` acceptent un signe optionnel, des chiffres avant
+ou après un unique point décimal (`"12"`, `"12.5"`, `".5"`, `"5."`), sans
+espaces ni exposant (`"1e2"` est rejeté).
 
 ```nabla
 import collections.array

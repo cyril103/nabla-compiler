@@ -100,8 +100,9 @@ la roadmap. À la date de ce fichier, le compilateur couvre notamment:
   capture par valeur, fonctions retournant des fonctions et formes curryfiées;
 - paramètres by-name `param: => T` avec thunking distinct des `Fn()->T` ordinaires;
 - types primitifs `Int`, `Long`, `Bool`, `Float`, `Double`, `Char`, `String`,
-  `Unit`, `Nothing`, racines `Any` / `AnyVal` / `AnyRef`, boxing et dispatch des
-  méthodes racines (`toString`, `hashCode`, `equals`);
+  `Unit`, `Nothing`, racines `Any` / `AnyVal` / `AnyRef`, conversions numériques
+  de base, boxing et dispatch des méthodes racines (`toString`, `hashCode`,
+  `equals`);
 - tableaux natifs spécialisés et facades `Array[T]` / `ArrayObject[T]`, avec API
   Scala-like documentée progressivement;
 - stdlib structurée autour de `core`, `collections`, `math`, `strings`, `io` et

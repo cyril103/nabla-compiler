@@ -828,6 +828,8 @@ std::string MethodCallNode::getType() {
     if (isNumericType(receiverType)) {
         if (methodName == "toString") return "String";
         if (receiverType == "Int" && methodName == "toLong") return "Long";
+        if (receiverType == "Int" && methodName == "toFloat") return "Float";
+        if (receiverType == "Int" && methodName == "toDouble") return "Double";
         if (isComparisonMethod(methodName)) return "Bool";
         return receiverType;
     }
@@ -839,6 +841,8 @@ std::string MethodCallNode::getType() {
         if (methodName == "isEmpty" || methodName == "nonEmpty" || methodName == "startsWith" ||
             methodName == "endsWith" || methodName == "contains") return "Bool";
         if (methodName == "toInt") return "Int";
+        if (methodName == "toFloat") return "Float";
+        if (methodName == "toDouble") return "Double";
         if (methodName == "toCharArray") return "ArrayObject[Char]";
         if (methodName == "split") return "ArrayObject[String]";
         if (methodName == "substring" || methodName == "repeat" || methodName == "trim") return "String";
@@ -932,6 +936,13 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             resolvedType = "Long";
             return;
         }
+        if (receiverType == "Int" && (methodName == "toFloat" || methodName == "toDouble")) {
+            if (!arguments.empty()) {
+                semanticError("la méthode Int." + methodName + " n'accepte aucun argument");
+            }
+            resolvedType = methodName == "toFloat" ? "Float" : "Double";
+            return;
+        }
         semanticError("méthode inconnue: " + receiverType + "." + methodName);
     }
     if (receiverType == "Bool") {
@@ -1019,11 +1030,11 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             resolvedType = methodName == "contains" ? "Bool" : "Int";
             return;
         }
-        if (methodName == "toInt") {
+        if (methodName == "toInt" || methodName == "toFloat" || methodName == "toDouble") {
             if (!arguments.empty()) {
-                semanticError("la méthode String.toInt n'accepte aucun argument");
+                semanticError("la méthode String." + methodName + " n'accepte aucun argument");
             }
-            resolvedType = "Int";
+            resolvedType = methodName == "toInt" ? "Int" : methodName == "toFloat" ? "Float" : "Double";
             return;
         }
         if (methodName == "toCharArray") {
@@ -1370,6 +1381,14 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
             std::string loweredReceiver = receiver->lowerToIR(builder);
             return builder.emitMethodCall("Int", "toLong", loweredReceiver, {}, "Long");
         }
+        if (receiverType == "Int" && (methodName == "toFloat" || methodName == "toDouble")) {
+            if (!arguments.empty()) {
+                builder.unsupported(location, "l'appel de méthode Int." + methodName);
+            }
+            std::string loweredReceiver = receiver->lowerToIR(builder);
+            return builder.emitMethodCall(
+                "Int", methodName, loweredReceiver, {}, methodName == "toFloat" ? "Float" : "Double");
+        }
         const std::vector<std::string> supported = {
             "+", "-", "*", "/", "%", "==", "!=", "<", ">", "<=", ">="
         };
@@ -1447,9 +1466,11 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
                 "String", methodName, loweredReceiver, {loweredNeedle},
                 methodName == "contains" ? "Bool" : "Int");
         }
-        if (methodName == "toInt" && arguments.empty()) {
+        if ((methodName == "toInt" || methodName == "toFloat" || methodName == "toDouble") && arguments.empty()) {
             std::string loweredReceiver = receiver->lowerToIR(builder);
-            return builder.emitMethodCall("String", "toInt", loweredReceiver, {}, "Int");
+            return builder.emitMethodCall(
+                "String", methodName, loweredReceiver, {},
+                methodName == "toInt" ? "Int" : methodName == "toFloat" ? "Float" : "Double");
         }
         if (methodName == "toCharArray" && arguments.empty()) {
             std::string loweredReceiver = receiver->lowerToIR(builder);
@@ -1725,6 +1746,8 @@ std::string FunctionCallNode::getType() {
     if (name == "renameFile") return "Bool";
     if (name == "createDir") return "Bool";
     if (name == "parseInt") return "Int";
+    if (name == "parseFloat") return "Float";
+    if (name == "parseDouble") return "Double";
     if (name == "timeSeed") return "Int";
     if (name == "heapUsed") return "Int";
     if (name == "heapCapacity") return "Int";
@@ -1890,17 +1913,17 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
         resolvedType = "Bool";
         return;
     }
-    if (name == "parseInt") {
+    if (name == "parseInt" || name == "parseFloat" || name == "parseDouble") {
         if (arguments.size() != 1) {
-            semanticError("parseInt: 1 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
+            semanticError(name + ": 1 argument(s) attendu(s), " + std::to_string(arguments.size()) + " reçu(s)");
         }
         if (arguments[0]->getType() != "String") {
             throw CompilerError(
                 ErrorKind::Semantic, arguments[0]->getLocation(),
-                "parseInt, paramètre 'value': type 'String' attendu, '" +
+                name + ", paramètre 'value': type 'String' attendu, '" +
                 arguments[0]->getType() + "' reçu");
         }
-        resolvedType = "Int";
+        resolvedType = name == "parseInt" ? "Int" : name == "parseFloat" ? "Float" : "Double";
         return;
     }
     if (name == "timeSeed") {

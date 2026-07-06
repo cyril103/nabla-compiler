@@ -921,6 +921,10 @@ private:
             out << "    call Runtime_createDir\n";
         } else if (instruction.operation == "parseInt") {
             out << "    call Runtime_stringToInt\n";
+        } else if (instruction.operation == "parseFloat") {
+            out << "    call Runtime_stringToFloat\n";
+        } else if (instruction.operation == "parseDouble") {
+            out << "    call Runtime_stringToDouble\n";
         } else if (instruction.operation == "timeSeed") {
             out << "    call Runtime_timeSeed\n";
         } else if (instruction.operation == "heapUsed") {
@@ -1582,6 +1586,16 @@ private:
             }
         } else if (className == "Int" && methodName == "toLong") {
             out << "    mov rax, rdi\n";
+        } else if (className == "Int" && methodName == "toFloat") {
+            out << "    mov rax, rdi\n";
+            out << "    sar rax, 1\n";
+            out << "    cvtsi2ss xmm0, rax\n";
+            out << "    movd eax, xmm0\n";
+        } else if (className == "Int" && methodName == "toDouble") {
+            out << "    mov rax, rdi\n";
+            out << "    sar rax, 1\n";
+            out << "    cvtsi2sd xmm0, rax\n";
+            out << "    movq rax, xmm0\n";
         } else if (className == "String" && methodName == "length") {
             out << "    mov rax, [rdi + 8]\n";
             out << "    shl rax, 1\n";
@@ -1633,6 +1647,10 @@ private:
             out << "    or rax, 1\n";
         } else if (className == "String" && methodName == "toInt") {
             out << "    call Runtime_stringToInt\n";
+        } else if (className == "String" && methodName == "toFloat") {
+            out << "    call Runtime_stringToFloat\n";
+        } else if (className == "String" && methodName == "toDouble") {
+            out << "    call Runtime_stringToDouble\n";
         } else if (className == "String" && methodName == "toCharArray") {
             out << "    call Runtime_stringToCharArray\n";
             out << "    lea r10, [vtable_" << asmSymbolName("ArrayObject[Char]") << "]\n";
