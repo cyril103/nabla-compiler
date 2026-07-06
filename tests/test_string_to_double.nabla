@@ -1,0 +1,10 @@
+def main(): Int = {
+    val positive: Double = "12.5".toDouble()
+    val negative: Double = "-0.25".toDouble()
+    val plus: Double = parseDouble("+3.75")
+    if positive == 12.5 && negative == -0.25 && plus == 3.75 {
+        0
+    } else {
+        1
+    }
+}

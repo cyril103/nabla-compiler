@@ -148,7 +148,7 @@
         },
         {
           "name": "support.function.stdlib.nabla",
-          "match": "\\b(?:print|readLine|parseInt|panic|error|println|input|readFile|writeFile|appendFile|deleteFile|fileExists)\\b"
+          "match": "\\b(?:print|readLine|parseInt|parseFloat|parseDouble|panic|error|println|input|readFile|writeFile|appendFile|deleteFile|fileExists)\\b"
         }
       ]
     },

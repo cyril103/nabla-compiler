@@ -1,0 +1,10 @@
+def main(): Int = {
+    val half: Float = ".5".toFloat()
+    val trailing: Double = "5.".toDouble()
+    val negative: Double = "-.25".toDouble()
+    if half == 0.5F && trailing == 5.0 && negative == -0.25 {
+        0
+    } else {
+        1
+    }
+}

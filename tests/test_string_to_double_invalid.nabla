@@ -1,0 +1,3 @@
+def main(): Int = {
+    "12x".toDouble().toString().length()
+}

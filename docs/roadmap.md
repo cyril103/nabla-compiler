@@ -45,7 +45,9 @@ pour garder un cap clair après le tag `v0.1.0`.
   `Any` et imprime le résultat de `value.toString()`, avec dispatch dynamique
   vers les overrides utilisateur. Les chaînes `String` portent aussi un tag runtime
   dédié afin de conserver `toString`, `hashCode` et `equals` par contenu quand
-  elles sont manipulées via `Any`.
+  elles sont manipulées via `Any`. `String.toFloat()` / `String.toDouble()` et
+  `Int.toFloat()` / `Int.toDouble()` couvrent les conversions numériques
+  explicites de base, avec `parseFloat` / `parseDouble` comme alias globaux.
 - `object Name { ... }` reste un namespace statique et supporte les compagnons
   de surface. `object Name with Trait { ... }` est maintenant un singleton
   runtime V0: valeur stable assignable aux traits, a `AnyRef` et a `Any`, avec

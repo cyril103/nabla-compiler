@@ -1,0 +1,9 @@
+def main(): Int = {
+    val floatValue: Float = 42.toFloat()
+    val doubleValue: Double = (-7).toDouble()
+    if floatValue == 42.0F && doubleValue == -7.0 {
+        0
+    } else {
+        1
+    }
+}
