@@ -1,0 +1,1 @@
+tests/test_error_method_type_parameter_shadows_class.nabla:2:10: parser error: paramètre de type déjà déclaré dans la classe englobante: T

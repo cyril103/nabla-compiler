@@ -1,14 +1,14 @@
 class Box() {
-    def choose[T](value: T): Int = {
+    def choose[T](left: T, right: Int): Int = {
         1
     }
 
-    def choose[U](value: U): Int = {
+    def choose[U](left: Int, right: U): Int = {
         2
     }
 }
 
 def main(): Int = {
     val box = new Box()
-    box.choose(42)
+    box.choose(42, 7)
 }

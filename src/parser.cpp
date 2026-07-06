@@ -2257,6 +2257,12 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
                     ErrorKind::Parser, typeParameterToken.location,
                     "paramètre de type déjà déclaré: " + typeParameterToken.value);
             }
+            if (!clName.empty() && isTypeParameterName(typeParameterToken.value, context.classes[clName].typeParameters)) {
+                throw CompilerError(
+                    ErrorKind::Parser, typeParameterToken.location,
+                    "paramètre de type déjà déclaré dans la classe englobante: " +
+                        typeParameterToken.value);
+            }
             typeParameters.push_back(typeParameterToken.value);
             if (peek().type == TokenType::COMMA) {
                 consume(TokenType::COMMA, "");

@@ -1,0 +1,1 @@
+tests/test_error_local_decl_unknown_type_nothing.nabla:2:3: semantic error: type inconnu 'Bogus' pour la variable 'x'

@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra
-PYTHON ?= python
+PYTHON ?= python3
 SRC ?= tests/test_import.nabla
 BUILD_DIR := build
 BIN := $(BUILD_DIR)/$(notdir $(basename $(SRC)))
@@ -250,7 +250,7 @@ tooling-tests: nablac unit-tests stdlib-docs format-check
 	@$(PYTHON) tests/test_format_sources.py
 
 stdlib-docs:
-	tools/generate_stdlib_docs.py
+	$(PYTHON) tools/generate_stdlib_docs.py
 
 debug: nablac
 	@mkdir -p $(BUILD_DIR)

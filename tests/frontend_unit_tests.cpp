@@ -209,23 +209,23 @@ void testSemanticGlobalOverloadResolvesByArgumentType(const std::string& testNam
 
 void testSemanticFunctionOverloadAmbiguityDiagnostic(const std::string& testName) {
     const std::string source =
-        "def choose[T](value: T): Int = {\n"
+        "def choose[T](left: T, right: Int): Int = {\n"
         "    1\n"
         "}\n"
         "\n"
-        "def choose[U](value: U): Int = {\n"
+        "def choose[U](left: Int, right: U): Int = {\n"
         "    2\n"
         "}\n"
         "\n"
         "def main(): Int = {\n"
-        "    choose(42)\n"
+        "    choose(42, 7)\n"
         "}\n";
     auto error = expectCompilerError(source, "unit_global_overload_ambiguous.nabla", ErrorKind::Semantic);
     expectTrue(testName, error.location.line == 10, "ligne de l'appel ambigu incorrecte");
     expectTrue(testName, error.location.column == 5, "colonne de l'appel ambigu incorrecte");
     expectTrue(
         testName,
-        std::string(error.what()).find("appel de fonction surchargée ambigu pour 'choose(Int)'") != std::string::npos,
+        std::string(error.what()).find("appel de fonction surchargée ambigu pour 'choose(Int, Int)'") != std::string::npos,
         "message d'ambiguïté de surcharge globale incorrect");
 }
 

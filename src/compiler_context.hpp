@@ -1151,12 +1151,24 @@ inline bool functionSignatureParametersMatch(
     const CompilerContext::FunctionSignature& left,
     const CompilerContext::FunctionSignature& right) {
     if (left.parameters.size() != right.parameters.size()) return false;
-    for (size_t i = 0; i < left.parameters.size(); ++i) {
-        if (left.parameters[i].type != right.parameters[i].type) return false;
-        if (left.parameters[i].isRepeated != right.parameters[i].isRepeated) return false;
-        if (left.parameters[i].repeatedElementType != right.parameters[i].repeatedElementType) return false;
+    if (left.typeParameters.size() != right.typeParameters.size()) return false;
+
+    std::map<std::string, std::string> rightToLeftTypeParameters;
+    for (size_t i = 0; i < left.typeParameters.size(); ++i) {
+        rightToLeftTypeParameters[right.typeParameters[i]] = left.typeParameters[i];
     }
-    return left.typeParameters == right.typeParameters;
+
+    for (size_t i = 0; i < left.parameters.size(); ++i) {
+        const auto& leftParameter = left.parameters[i];
+        const auto& rightParameter = right.parameters[i];
+        if (leftParameter.type != substituteType(rightParameter.type, rightToLeftTypeParameters)) return false;
+        if (leftParameter.isRepeated != rightParameter.isRepeated) return false;
+        if (leftParameter.repeatedElementType !=
+            substituteType(rightParameter.repeatedElementType, rightToLeftTypeParameters)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 inline std::string overloadedMethodName(

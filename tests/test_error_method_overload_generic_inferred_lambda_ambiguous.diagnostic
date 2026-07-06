@@ -1,4 +1,4 @@
 tests/test_error_method_overload_generic_inferred_lambda_ambiguous.nabla:13:12: parser error: appel de méthode surchargée ambigu pour 'Runner.run' avec lambda inférée: ajoutez des types explicites aux paramètres de lambda ou annotez la valeur fonction
 candidats:
-- Runner.run(T, Fn(T)->Int): Int
-- Runner.run(U, Fn(U)->Int): Int
+- Runner.run(T, Int, Fn(T)->Int): Int
+- Runner.run(Int, U, Fn(U)->Int): Int

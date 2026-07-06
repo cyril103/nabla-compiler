@@ -1,4 +1,4 @@
-tests/test_error_function_overload_generic_reference_ambiguous.nabla:10:27: parser error: référence de fonction surchargée ambiguë pour 'choose' avec le type attendu Fn(Int)->Int
+tests/test_error_function_overload_generic_reference_ambiguous.nabla:10:32: parser error: référence de fonction surchargée ambiguë pour 'choose' avec le type attendu Fn(Int,Int)->Int
 candidats:
-- choose(T): T
-- choose(U): U
+- choose(T, Int): Int
+- choose(Int, U): Int

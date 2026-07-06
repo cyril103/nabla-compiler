@@ -1,4 +1,4 @@
-tests/test_error_function_overload_generic_ambiguous.nabla:10:5: semantic error: appel de fonction surchargée ambigu pour 'choose(Int)'
+tests/test_error_function_overload_generic_ambiguous.nabla:10:5: semantic error: appel de fonction surchargée ambigu pour 'choose(Int, Int)'
 candidats:
-- choose(T): Int
-- choose(U): Int
+- choose(T, Int): Int
+- choose(Int, U): Int
