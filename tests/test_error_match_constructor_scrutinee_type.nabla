@@ -1,0 +1,12 @@
+class Point(val x: Int, val y: Int) {
+    def sum(): Int = {
+        x + y
+    }
+}
+
+def main(): Int = {
+    match 1 {
+        Point(x, y) => x + y
+        _ => 0
+    }
+}

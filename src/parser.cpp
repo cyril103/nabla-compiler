@@ -1,6 +1,8 @@
 #include "parser.hpp"
 #include <algorithm>
+#include <cctype>
 #include <fstream>
+#include <set>
 #include <sstream>
 
 namespace {
@@ -568,18 +570,62 @@ std::unique_ptr<ASTNode> Parser::parseMatchExpression() {
         }
         bool isWildcard = false;
         bool isNamedPattern = false;
+        bool patternScopePushed = false;
         std::string boundSymbol;
         std::unique_ptr<ASTNode> pattern;
         std::unique_ptr<ASTNode> guard;
+        std::unique_ptr<MatchNode::ConstructorPattern> constructorPattern;
         if (peek().type == TokenType::IDENTIFIER && peek().value == "_") {
             consume(TokenType::IDENTIFIER, "");
             isWildcard = true;
         } else if (peek().type == TokenType::IDENTIFIER) {
             Token token = consume(TokenType::IDENTIFIER, "Nom de variable attendu dans le motif");
-            isNamedPattern = true;
-            boundSymbol = token.value + "#" + std::to_string(nextSymbolId++);
-            localScopes.emplace_back();
-            localScopes.back()[token.value] = {boundSymbol, "Unit", false};
+            const bool hasConstructorArguments = peek().type == TokenType::LPAREN;
+            const bool looksLikeConstructor = !token.value.empty() &&
+                std::isupper(static_cast<unsigned char>(token.value[0]));
+            const bool knownRuntimeSingleton = context.runtimeObjects.count(token.value) > 0;
+            const bool knownClass = context.classes.count(token.value) > 0;
+            if (hasConstructorArguments || knownRuntimeSingleton || (knownClass && looksLikeConstructor)) {
+                constructorPattern = std::make_unique<MatchNode::ConstructorPattern>();
+                constructorPattern->className = token.value;
+                localScopes.emplace_back();
+                patternScopePushed = true;
+                if (hasConstructorArguments) {
+                    consume(TokenType::LPAREN, "");
+                    if (peek().type != TokenType::RPAREN) {
+                        std::set<std::string> seenBindings;
+                        while (true) {
+                            Token arg = consume(TokenType::IDENTIFIER, "identifiant ou '_' attendu dans le motif de constructeur");
+                            MatchNode::PatternBinding binding;
+                            binding.name = arg.value;
+                            binding.isWildcard = arg.value == "_";
+                            if (!binding.isWildcard) {
+                                if (seenBindings.count(arg.value) > 0) {
+                                    throw CompilerError(
+                                        ErrorKind::Parser, arg.location,
+                                        "binding dupliqué dans le motif de constructeur: " + arg.value);
+                                }
+                                seenBindings.insert(arg.value);
+                                binding.symbolName = arg.value + "#" + std::to_string(nextSymbolId++);
+                                localScopes.back()[arg.value] = {binding.symbolName, "Unit", false};
+                            }
+                            constructorPattern->bindings.push_back(binding);
+                            if (peek().type == TokenType::COMMA) {
+                                consume(TokenType::COMMA, "");
+                                continue;
+                            }
+                            break;
+                        }
+                    }
+                    consume(TokenType::RPAREN, "')' attendu après le motif de constructeur");
+                }
+            } else {
+                isNamedPattern = true;
+                boundSymbol = token.value + "#" + std::to_string(nextSymbolId++);
+                localScopes.emplace_back();
+                patternScopePushed = true;
+                localScopes.back()[token.value] = {boundSymbol, "Unit", false};
+            }
         } else {
             if (peek().type == TokenType::INT_LITERAL) {
                 Token token = consume(TokenType::INT_LITERAL, "");
@@ -608,7 +654,7 @@ std::unique_ptr<ASTNode> Parser::parseMatchExpression() {
             } else {
                 throw CompilerError(
                     ErrorKind::Parser, peek().location,
-                    "motif de match invalide: littéral, identifiant ou '_' attendu");
+                    "motif de match invalide: littéral, identifiant, constructeur ou '_' attendu");
             }
         }
         if (peek().type == TokenType::KW_IF) {
@@ -624,13 +670,15 @@ std::unique_ptr<ASTNode> Parser::parseMatchExpression() {
         } else {
             body = parseExpression();
         }
-        if (isNamedPattern) {
+        if (patternScopePushed) {
             localScopes.pop_back();
         }
         if (isWildcard && !guard) {
             sawWildcard = true;
         }
-        branches.push_back({isWildcard, isNamedPattern, std::move(pattern), std::move(guard), boundSymbol, std::move(body), branchToken.location});
+        branches.push_back({
+            isWildcard, isNamedPattern, std::move(pattern), std::move(guard),
+            boundSymbol, std::move(constructorPattern), std::move(body), branchToken.location});
     }
     consume(TokenType::RBRACE, "Fin du bloc 'match' attendue");
     if (branches.empty()) {

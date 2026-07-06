@@ -51,6 +51,122 @@ bool isNativeArrayType(const std::string& type) {
            type == "DoubleArray" || type == "BoolArray" || isObjectArrayType(type);
 }
 
+bool unifyConstructorPatternType(
+    const std::string& patternType,
+    const std::string& scrutineeType,
+    const std::set<std::string>& typeParameters,
+    std::map<std::string, std::string>& bindings) {
+    if (typeParameters.count(patternType)) {
+        auto existing = bindings.find(patternType);
+        if (existing == bindings.end()) {
+            bindings[patternType] = scrutineeType;
+            return true;
+        }
+        return existing->second == scrutineeType;
+    }
+
+    auto patternParameterized = parameterizedTypeFromName(patternType);
+    auto scrutineeParameterized = parameterizedTypeFromName(scrutineeType);
+    if (!patternParameterized || !scrutineeParameterized) return patternType == scrutineeType;
+    if (patternParameterized->first != scrutineeParameterized->first ||
+        patternParameterized->second.size() != scrutineeParameterized->second.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < patternParameterized->second.size(); ++i) {
+        if (!unifyConstructorPatternType(
+                patternParameterized->second[i], scrutineeParameterized->second[i],
+                typeParameters, bindings)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool inferConstructorPatternBindingsFromType(
+    const CompilerContext& context, const std::string& currentType,
+    const std::string& scrutineeType, const std::set<std::string>& constructorTypeParameters,
+    std::map<std::string, std::string>& bindings, std::set<std::string>& visiting) {
+    if (unifyConstructorPatternType(currentType, scrutineeType, constructorTypeParameters, bindings)) {
+        return true;
+    }
+
+    const std::string currentBaseName = genericBaseName(currentType);
+    if (visiting.count(currentBaseName) > 0) return false;
+    auto classIt = context.classes.find(currentBaseName);
+    if (classIt == context.classes.end()) return false;
+
+    std::map<std::string, std::string> currentSubstitution;
+    if (auto genericSubstitution = genericSubstitutionFor(context, currentType)) {
+        currentSubstitution = *genericSubstitution;
+    }
+
+    visiting.insert(currentBaseName);
+    for (const auto& parentType : classIt->second.parentTypes) {
+        const std::string concreteParentType = substituteType(parentType, currentSubstitution);
+        std::map<std::string, std::string> candidateBindings = bindings;
+        if (inferConstructorPatternBindingsFromType(
+                context, concreteParentType, scrutineeType, constructorTypeParameters,
+                candidateBindings, visiting)) {
+            bindings = std::move(candidateBindings);
+            visiting.erase(currentBaseName);
+            return true;
+        }
+    }
+    visiting.erase(currentBaseName);
+    return false;
+}
+
+std::string constructorPatternConcreteType(
+    const CompilerContext& context, const std::string& constructorName,
+    const std::string& scrutineeType, const SourceLocation& location) {
+    auto classIt = context.classes.find(constructorName);
+    if (classIt == context.classes.end()) {
+        throw CompilerError(
+            ErrorKind::Semantic, location,
+            "motif de constructeur '" + constructorName + "': classe ou objet runtime inconnu");
+    }
+    if (classIt->second.isTrait) {
+        throw CompilerError(
+            ErrorKind::Semantic, location,
+            "motif de constructeur '" + constructorName + "': une classe concrete ou un objet runtime est attendu");
+    }
+
+    const auto& typeParameters = classIt->second.typeParameters;
+    if (typeParameters.empty()) return constructorName;
+
+    auto scrutineeParameterized = parameterizedTypeFromName(scrutineeType);
+    std::map<std::string, std::string> bindings;
+    std::set<std::string> parameterNames(typeParameters.begin(), typeParameters.end());
+    if (scrutineeParameterized && scrutineeParameterized->first == constructorName &&
+        scrutineeParameterized->second.size() == typeParameters.size()) {
+        for (size_t i = 0; i < typeParameters.size(); ++i) {
+            bindings[typeParameters[i]] = scrutineeParameterized->second[i];
+        }
+    } else {
+        std::set<std::string> visiting;
+        if (!inferConstructorPatternBindingsFromType(
+                context, constructorName, scrutineeType, parameterNames, bindings, visiting)) {
+            throw CompilerError(
+                ErrorKind::Semantic, location,
+                "motif de constructeur '" + constructorName + "': type compatible avec '" +
+                constructorName + "' attendu, scrutinee de type '" + scrutineeType + "'");
+        }
+    }
+
+    std::vector<std::string> arguments;
+    for (const auto& typeParameter : typeParameters) {
+        auto binding = bindings.find(typeParameter);
+        if (binding == bindings.end()) {
+            throw CompilerError(
+                ErrorKind::Semantic, location,
+                "motif de constructeur '" + constructorName + "': type generique '" +
+                typeParameter + "' non inferable depuis '" + scrutineeType + "'");
+        }
+        arguments.push_back(binding->second);
+    }
+    return formatParameterizedType(constructorName, arguments);
+}
+
 bool isPrimitiveArrayFacadeType(const std::string& type) {
     return type == "ArrayInt" || type == "ArrayLong" || type == "ArrayFloat" ||
            type == "ArrayDouble" || type == "ArrayBool";
@@ -2286,6 +2402,27 @@ void MatchNode::validateSemantics(CompilerContext& context) {
         }
         if (branch.isWildcard) {
             sawWildcard = true;
+        } else if (branch.constructorPattern) {
+            branch.constructorPattern->concreteType = constructorPatternConcreteType(
+                context, branch.constructorPattern->className, scrutineeType, branch.location);
+            if (!isTypeAssignable(context, branch.constructorPattern->concreteType, scrutineeType)) {
+                throw CompilerError(
+                    ErrorKind::Semantic, branch.location,
+                    "motif de constructeur '" + branch.constructorPattern->className +
+                    "': type compatible avec '" + branch.constructorPattern->className +
+                    "' attendu, scrutinee de type '" + scrutineeType + "'");
+            }
+            const auto fields = collectClassFieldsInHierarchyForLayout(context, branch.constructorPattern->concreteType);
+            if (fields.size() != branch.constructorPattern->bindings.size()) {
+                throw CompilerError(
+                    ErrorKind::Semantic, branch.location,
+                    "motif de constructeur '" + branch.constructorPattern->className + "': " +
+                    std::to_string(fields.size()) + " arguments attendus, " +
+                    std::to_string(branch.constructorPattern->bindings.size()) + " reçu");
+            }
+            for (size_t i = 0; i < branch.constructorPattern->bindings.size(); ++i) {
+                branch.constructorPattern->bindings[i].type = fields[i].second;
+            }
         } else {
             if (!branch.isNamedPattern) {
                 branch.pattern->validateSemantics(context);
@@ -2297,15 +2434,28 @@ void MatchNode::validateSemantics(CompilerContext& context) {
                 }
             }
         }
-        bool hadSymbol = false;
-        std::string savedType;
+        struct SavedSymbol {
+            std::string symbol;
+            bool existed;
+            std::string type;
+        };
+        std::vector<SavedSymbol> savedSymbols;
+        auto bindSymbol = [&](const std::string& symbol, const std::string& type) {
+            auto existing = context.semanticSymbolTypes.find(symbol);
+            savedSymbols.push_back({
+                symbol,
+                existing != context.semanticSymbolTypes.end(),
+                existing != context.semanticSymbolTypes.end() ? existing->second : ""});
+            context.semanticSymbolTypes[symbol] = type;
+        };
         if (branch.isNamedPattern) {
-            auto existing = context.semanticSymbolTypes.find(branch.boundSymbol);
-            if (existing != context.semanticSymbolTypes.end()) {
-                hadSymbol = true;
-                savedType = existing->second;
+            bindSymbol(branch.boundSymbol, scrutineeType);
+        }
+        if (branch.constructorPattern) {
+            for (const auto& binding : branch.constructorPattern->bindings) {
+                if (binding.isWildcard) continue;
+                bindSymbol(binding.symbolName, binding.type);
             }
-            context.semanticSymbolTypes[branch.boundSymbol] = scrutineeType;
         }
         if (branch.guard) {
             branch.guard->validateSemantics(context);
@@ -2316,11 +2466,11 @@ void MatchNode::validateSemantics(CompilerContext& context) {
             }
         }
         branch.body->validateSemantics(context);
-        if (branch.isNamedPattern) {
-            if (hadSymbol) {
-                context.semanticSymbolTypes[branch.boundSymbol] = savedType;
+        for (auto it = savedSymbols.rbegin(); it != savedSymbols.rend(); ++it) {
+            if (it->existed) {
+                context.semanticSymbolTypes[it->symbol] = it->type;
             } else {
-                context.semanticSymbolTypes.erase(branch.boundSymbol);
+                context.semanticSymbolTypes.erase(it->symbol);
             }
         }
     }
@@ -2349,6 +2499,19 @@ std::string MatchNode::lowerToIR(IRBuilder& builder) const {
         std::string nextLabel = hasNextBranch ? builder.makeLabel("match.next") : endLabel;
         if (branch.isNamedPattern) {
             builder.emitStore(branch.boundSymbol, scrutineeValue, scrutineeType);
+        } else if (branch.constructorPattern) {
+            std::string condition = builder.emitClassIs(scrutineeValue, branch.constructorPattern->concreteType);
+            builder.emitBranchIfFalse(condition, nextLabel);
+            const auto fields = collectClassFieldsInHierarchyForLayout(
+                builder.getContext(), branch.constructorPattern->concreteType);
+            for (size_t bindingIndex = 0; bindingIndex < branch.constructorPattern->bindings.size(); ++bindingIndex) {
+                const auto& binding = branch.constructorPattern->bindings[bindingIndex];
+                if (binding.isWildcard) continue;
+                std::string fieldValue = builder.emitFieldLoadFrom(
+                    scrutineeValue, branch.constructorPattern->concreteType,
+                    fields[bindingIndex].first, binding.type);
+                builder.emitStore(binding.symbolName, fieldValue, binding.type);
+            }
         } else if (!branch.isWildcard) {
             std::string patternValue = branch.pattern->lowerToIR(builder);
             std::string condition = scrutineeType == "String"

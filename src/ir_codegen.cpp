@@ -646,6 +646,9 @@ private:
             case IROpcode::FieldStore:
                 emitFieldStore(instruction);
                 break;
+            case IROpcode::ClassIs:
+                emitClassIs(instruction);
+                break;
             case IROpcode::Load:
                 loadValue(instruction.operands[0], "rax");
                 storeRegister(instruction.result, "rax");
@@ -1485,6 +1488,23 @@ private:
         out << "    mov [rbx + " << fieldOffsetFor(instruction.operation) << "], rax\n";
     }
 
+    void emitClassIs(const IRInstruction& instruction) {
+        if (instruction.operands.size() != 1) codegenError("test de classe IR invalide");
+        loadValue(instruction.operands[0], "rax");
+        out << "    cmp rax, 0\n";
+        out << "    je .L_class_is_false_" << asmSymbolPart(function.name) << "_" << asmSymbolPart(instruction.result) << "\n";
+        out << "    mov rbx, [rax]\n";
+        out << "    lea r10, [vtable_" << asmSymbolName(instruction.operation) << "]\n";
+        out << "    cmp rbx, r10\n";
+        out << "    jne .L_class_is_false_" << asmSymbolPart(function.name) << "_" << asmSymbolPart(instruction.result) << "\n";
+        out << RuntimeValues::asmMoveTaggedTrue("rax");
+        out << "    jmp .L_class_is_done_" << asmSymbolPart(function.name) << "_" << asmSymbolPart(instruction.result) << "\n";
+        out << ".L_class_is_false_" << asmSymbolPart(function.name) << "_" << asmSymbolPart(instruction.result) << ":\n";
+        out << RuntimeValues::asmMoveTaggedFalse("rax");
+        out << ".L_class_is_done_" << asmSymbolPart(function.name) << "_" << asmSymbolPart(instruction.result) << ":\n";
+        storeRegister(instruction.result, "rax");
+    }
+
     void emitBoxedValue(const IRInstruction& instruction, long long tag) {
         if (instruction.operands.size() != 1) codegenError("boxing IR invalide");
         loadValue(instruction.operands[0], "r10");
@@ -1661,6 +1681,8 @@ std::set<std::string> collectConcreteClassesToEmit(
     for (const auto& function : program.functions) {
         for (const auto& instruction : function.instructions) {
             if (instruction.opcode == IROpcode::NewObject) {
+                concreteClassesToEmit.insert(instruction.operation);
+            } else if (instruction.opcode == IROpcode::ClassIs) {
                 concreteClassesToEmit.insert(instruction.operation);
             } else if (instruction.opcode == IROpcode::MethodCall ||
                        instruction.opcode == IROpcode::StaticMethodCall) {

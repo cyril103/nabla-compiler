@@ -1,0 +1,14 @@
+import collections.list
+
+// Vérifie la substitution générique des champs capturés par Cons[String].
+def score(xs: List[String]): Int = {
+    match xs {
+        Nil => 0
+        Cons(head, tail) => head.length() + score(tail)
+        _ => 99
+    }
+}
+
+def main(): Int = {
+    score(List.cons[String]("ab", List.cons[String]("cde", Nil)))
+}

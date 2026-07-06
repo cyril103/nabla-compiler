@@ -1,0 +1,1 @@
+tests/test_error_match_constructor_scrutinee_type.nabla:9:9: semantic error: motif de constructeur 'Point': type compatible avec 'Point' attendu, scrutinee de type 'Int'

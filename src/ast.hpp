@@ -298,12 +298,26 @@ public:
 
 class MatchNode : public ASTNode {
 public:
+    struct PatternBinding {
+        std::string name;
+        std::string symbolName;
+        std::string type;
+        bool isWildcard = false;
+    };
+
+    struct ConstructorPattern {
+        std::string className;
+        std::string concreteType;
+        std::vector<PatternBinding> bindings;
+    };
+
     struct Branch {
         bool isWildcard;
         bool isNamedPattern;
         std::unique_ptr<ASTNode> pattern;
         std::unique_ptr<ASTNode> guard;
         std::string boundSymbol;
+        std::unique_ptr<ConstructorPattern> constructorPattern;
         std::unique_ptr<ASTNode> body;
         SourceLocation location;
     };
