@@ -328,9 +328,12 @@ def sumTo(limit: Int): Int = {
 - des motifs litteraux `Int`, `Long`, `Float`, `Double`, `Bool`, `String` et
   `Char`;
 - un motif nommé (ex. `valeur`) qui capture la valeur courante;
+- un motif de constructeur V0, par exemple `Point(x, y)`, `Cons(head, tail)` ou
+  le singleton runtime `Nil`;
 - un motif `_` final.
 Le motif peut aussi être suivi d'une garde booléenne avec `if`.
-La variable nommée est locale à la branche et ne sort pas du `match`.
+Les variables capturées par un motif nommé ou un motif de constructeur sont
+locales à la branche et ne sortent pas du `match`.
 
 ```nabla
 def commandCode(command: String): Int = {
@@ -350,6 +353,23 @@ def describe(value: Int): String = {
         1 => "petit un"
         current if current > 1 => "grand"
         _ => "autre"
+    }
+}
+```
+
+Les motifs de constructeur V0 testent le type runtime exact du constructeur puis
+lient les champs du constructeur dans l'ordre. Les sous-motifs imbriqués,
+alternatives et extracteurs ne sont pas encore supportés; chaque argument est un
+identifiant de binding ou `_`.
+
+```nabla
+import collections.list
+
+def sum(values: List[Int]): Int = {
+    match values {
+        Nil => 0
+        Cons(head, tail) => head + sum(tail)
+        _ => 0
     }
 }
 ```

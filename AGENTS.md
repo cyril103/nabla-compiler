@@ -82,8 +82,8 @@ Le détail exhaustif est dans `docs/language.md`, `docs/internals.md`, les tests
 la roadmap. À la date de ce fichier, le compilateur couvre notamment:
 
 - parsing et analyse sémantique des imports, classes, traits/mixins, objets,
-  fonctions, méthodes, blocs, `val`/`var`, `if`/`else if`, `match`, boucles,
-  lambdas et fonctions locales;
+  fonctions, méthodes, blocs, `val`/`var`, `if`/`else if`, `match` avec motifs
+  de constructeur V0, boucles, lambdas et fonctions locales;
 - imports source relatifs, racine projet et `stdlib/`, avec protection contre les
   cycles;
 - classes avec champs constructeur `val`/`var`, getters synthétiques,

@@ -24,7 +24,9 @@ pour garder un cap clair après le tag `v0.1.0`.
 - Surcharge V1 des fonctions globales non generiques par signature exacte :
   plusieurs `def` peuvent partager un nom si leurs types de parametres
   different; les appels sont abaisses vers un symbole IR unique.
-- Controle de flux : `if` expression, `else if`, `match`, `while`, `for`.
+- Controle de flux : `if` expression, `else if`, `match` avec motifs litteraux,
+  captures nommées, `_`, guards et motifs de constructeur V0 (`Nil`,
+  `Cons(head, tail)`, classes simples), `while`, `for`.
 - Support de l'héritage objet avec `extends` + `with` (mixins), hiérarchie
   racine `Any` / `AnyVal` / `AnyRef`, `toString(): String` et
   `hashCode(): Int` redéfinissables sur les classes reference, détection de

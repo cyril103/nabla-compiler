@@ -1,0 +1,12 @@
+class Pair(val left: Int, val right: Int) {
+    def sum(): Int = {
+        left + right
+    }
+}
+
+def main(): Int = {
+    match new Pair(1, 2) {
+        Pair(one) => one
+        _ => 0
+    }
+}

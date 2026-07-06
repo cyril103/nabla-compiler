@@ -1,0 +1,13 @@
+import collections.list
+
+// Vérifie l'inférence transitive: Cons[T] <: List[T] <: Iterable[T].
+def first(xs: Iterable[Int]): Int = {
+    match xs {
+        Cons(head, _) => head
+        _ => 0
+    }
+}
+
+def main(): Int = {
+    first(List.cons[Int](42, Nil))
+}

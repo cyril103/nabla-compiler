@@ -1,0 +1,17 @@
+class Point(val x: Int, val y: Int) {
+    def sum(): Int = {
+        x + y
+    }
+}
+
+def score(point: Point): Int = {
+    match point {
+        Point(x, y) if x > 0 => x * 10 + y
+        Point(_, y) => y
+        _ => 0
+    }
+}
+
+def main(): Int = {
+    score(new Point(3, 7)) + score(new Point(0, 5))
+}

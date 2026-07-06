@@ -1,0 +1,14 @@
+import collections.list
+
+// Somme récursive via motifs Scala-like sur List[Int].
+def sum(xs: List[Int]): Int = {
+    match xs {
+        Nil => 0
+        Cons(head, tail) => head + sum(tail)
+        _ => 99
+    }
+}
+
+def main(): Int = {
+    sum(List.cons[Int](4, List.cons[Int](5, List.cons[Int](6, Nil))))
+}

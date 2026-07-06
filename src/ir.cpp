@@ -171,6 +171,9 @@ std::string IRProgram::format() const {
                 case IROpcode::FieldStore:
                     out << "field_store " << instruction.operands[1] << ", " << instruction.operands[0] << ", " << instruction.operation;
                     break;
+                case IROpcode::ClassIs:
+                    out << "class_is " << instruction.operands[0] << ", " << instruction.operation;
+                    break;
                 case IROpcode::Load:
                     out << "load @" << instruction.operands[0];
                     break;
@@ -622,10 +625,16 @@ std::string IRBuilder::emitFieldLoad(
     if (thisValue.empty()) {
         unsupported(location, "l'accès au champ '" + qualifiedMember(className, fieldName) + "'");
     }
+    return emitFieldLoadFrom(thisValue, className, fieldName, type);
+}
+
+std::string IRBuilder::emitFieldLoadFrom(
+    const std::string& receiver, const std::string& className, const std::string& fieldName,
+    const std::string& type) {
     std::string result = nextValue();
     emit({
         IROpcode::FieldLoad, result, substituteActiveType(type),
-        qualifiedMember(substituteActiveType(className), fieldName), {thisValue}});
+        qualifiedMember(substituteActiveType(className), fieldName), {receiver}});
     return result;
 }
 
@@ -654,6 +663,12 @@ std::string IRBuilder::emitLoad(const std::string& symbol, const std::string& ty
 
 void IRBuilder::emitStore(const std::string& symbol, const std::string& value, const std::string& type) {
     emit({IROpcode::Store, "", substituteActiveType(type), "", {symbol, value}});
+}
+
+std::string IRBuilder::emitClassIs(const std::string& receiver, const std::string& className) {
+    std::string result = nextValue();
+    emit({IROpcode::ClassIs, result, "Bool", substituteActiveType(className), {receiver}});
+    return result;
 }
 
 std::string IRBuilder::emitPhi(const std::string& left, const std::string& right, const std::string& type) {
