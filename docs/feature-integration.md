@@ -30,8 +30,9 @@ avoir confirme que la PR correspondante est mergee.
   guideront les futures features.
 - `docs/stdlib-api.md` classe la surface publique, les compatibilites et les
   details internes avant tout changement de stdlib.
-- `AGENTS.md` reste le resume operatoire pour agents: etat courant, feuille de
-  route, jalons et prochaine etape recommandee.
+- `AGENTS.md` reste le resume operatoire pour agents: regles de reprise, etat
+  courant synthetique, feuille de route condensee et prochaine etape recommandee.
+  Les jalons livres se retrouvent dans l'historique Git et les PR.
 
 Ne pas restaurer un ancien plan supprime pour reprendre un sujet historique:
 creer un delta-plan qui cite les tests, docs et PRs deja livres.
@@ -46,7 +47,8 @@ Une feature est prete a integrer quand elle a :
    collections ou les appels indirects peuvent diverger entre semantique et
    backend;
 3. les docs utilisateur/internals/stdlib mises a jour selon la surface touchee;
-4. `AGENTS.md` aligne dans le meme commit;
+4. `AGENTS.md` relu et mis à jour dans le même commit si le résumé durable
+   change;
 5. une validation locale adaptee, au minimum:
 
 ```bash

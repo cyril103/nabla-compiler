@@ -3,10 +3,10 @@
 Ce répertoire est réservé aux plans de travail encore utiles pour la suite.
 
 Les plans d'implémentation des jalons déjà livrés ont été retirés de l'arbre
-actif; leur résultat est résumé dans [`AGENTS.md`](../../AGENTS.md),
-[`docs/roadmap.md`](../roadmap.md), les tests et l'historique des PRs. Pour les
-jalons inclus dans `v0.1.0`, [`docs/releases/0.1.md`](../releases/0.1.md)
-conserve aussi le périmètre livré et la matrice de validation 0.1.x.
+actif; leur résultat se retrouve dans [`docs/roadmap.md`](../roadmap.md), les
+tests, les release notes et l'historique des PRs. Pour les jalons inclus dans
+`v0.1.0`, [`docs/releases/0.1.md`](../releases/0.1.md) reste la synthèse de
+référence.
 
 Le cap post-0.1 courant est décrit dans [`docs/roadmap.md`](../roadmap.md) :
 durcissement héritage/runtime, nettoyage de la surface stdlib et maintien de
