@@ -4,6 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 INTERNALS = (ROOT / "docs" / "internals.md").read_text(encoding="utf-8")
+LANGUAGE = (ROOT / "docs" / "language.md").read_text(encoding="utf-8")
 PLAN = (ROOT / "docs" / "plans" / "runtime-memory-management.md").read_text(encoding="utf-8")
 PLAN_README = (ROOT / "docs" / "plans" / "README.md").read_text(encoding="utf-8")
 ROADMAP = (ROOT / "docs" / "roadmap.md").read_text(encoding="utf-8")
@@ -101,6 +102,20 @@ required_inventory_terms = [
 
 for term in required_inventory_terms:
     require(term in INTERNALS, f"docs/internals.md should document GC heap inventory term: {term}")
+
+language_flat = " ".join(LANGUAGE.split())
+for term in [
+    "`gcLastAllocSafepointRootSlots(): Int`",
+    "`gcLastAllocSafepointRootBytes(): Int`",
+    "carte exacte non consommée",
+    "nombre de slots déclarés dans l'en-tête de cette carte",
+    "octets correspondants (`slots * 8`)",
+    "sans lire les offsets de racines",
+]:
+    require(
+        term in language_flat,
+        f"docs/language.md should document GC safepoint root metric contract: {term}",
+    )
 
 for term in [
     "Inventaire heap couvert",

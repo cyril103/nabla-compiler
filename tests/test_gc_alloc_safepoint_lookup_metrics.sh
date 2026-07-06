@@ -40,7 +40,7 @@ def main(): Int = {
         13
     } else if gcLastAllocSafepointMapMissed() != 0 {
         14
-    } else if gcLastAllocSafepointRootSlots() <= 0 {
+    } else if gcLastAllocSafepointRootSlots() != 1 {
         15
     } else if gcLastAllocSafepointRootBytes() != gcLastAllocSafepointRootSlots() * 8 {
         16
@@ -118,6 +118,7 @@ required = [
     "call Runtime_gcLastAllocSafepointRootBytes",
     "nabla_gc_alloc_safepoint_tables:",
     "nabla_gc_alloc_safepoints_main:",
+    "nabla_gc_alloc_call_nabla_sym_churn_0: dq 1, 8",
 ]
 missing = [item for item in required if item not in asm]
 if missing:
