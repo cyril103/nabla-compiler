@@ -1,0 +1,4 @@
+def id[T](x: T): T = x
+def id[U](x: U): U = x
+
+def main(): Int = id(1)

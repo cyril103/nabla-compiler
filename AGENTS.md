@@ -113,19 +113,23 @@ Le pipeline implemente actuellement :
   `pi`, `Config.base` appelle `Config.base()`, `value.head` appelle
   `value.head()`, et les membres abstraits de trait peuvent s'ecrire
   `def head: T`;
-- surcharge V1.2 des fonctions globales par signature exacte, avec nom IR unique
-  par variante, priorite aux variantes concretes sur les variantes generiques
-  inferees, references typees capables d'inferer les variantes generiques, et
-  references resolues quand un type fonction est attendu en argument ou via une
-  annotation locale; les echecs et ambiguites de resolution listent la forme
-  appelee et les signatures candidates; `math` consomme directement les noms
-  surcharges idiomatiques pour `abs`, `min`, `max`, `clamp`, `pow` et `sqrt`;
-- surcharge V1 des methodes de classe par signature exacte, avec nom IR unique
-  par variante, resolution par les types d'arguments et priorite aux variantes
-  concretes sur les variantes generiques inferables; les lambdas inferees en
-  argument recoivent un type attendu quand la forme d'appel selectionne une
-  surcharge unique, y compris apres inference de type depuis les arguments deja
-  lus d'une methode generique, et les cas ambigus produisent un diagnostic dedie;
+- surcharge V1.2 des fonctions globales par signature exacte alpha-normalisee,
+  avec nom IR unique par variante, priorite aux variantes concretes sur les
+  variantes generiques inferees, references typees capables d'inferer les
+  variantes generiques, et references resolues quand un type fonction est attendu
+  en argument ou via une annotation locale; les signatures generiques qui ne
+  different que par le nom des parametres de type sont rejetees; les echecs et
+  ambiguites de resolution listent la forme appelee et les signatures candidates;
+  `math` consomme directement les noms surcharges idiomatiques pour `abs`, `min`,
+  `max`, `clamp`, `pow` et `sqrt`;
+- surcharge V1 des methodes de classe par signature exacte alpha-normalisee, avec
+  nom IR unique par variante, resolution par les types d'arguments et priorite
+  aux variantes concretes sur les variantes generiques inferables; un parametre
+  de type de methode ne peut pas masquer un parametre de type de la classe
+  englobante; les lambdas inferees en argument recoivent un type attendu quand la
+  forme d'appel selectionne une surcharge unique, y compris apres inference de
+  type depuis les arguments deja lus d'une methode generique, et les cas ambigus
+  produisent un diagnostic dedie;
 - types fonction-valeur canoniques `Fn(...)->...`, references de fonctions
   nommees et appels indirects, avec lambdas sans capture `() => { ... }`,
   `(x: Int) => { ... }` et `(acc: Int, value: Int) => { ... }`, y compris
@@ -386,6 +390,8 @@ Le pipeline implemente actuellement :
 - cible de formatage sans dependance externe: `make format` normalise les
   espaces de fin de ligne et le retour final des sources/docs suivis, tandis
   que `make format-check` verifie l'arbre et rejoint `make tooling-tests`;
+- les cibles d'outillage utilisent `PYTHON ?= python3`, y compris la generation
+  de documentation stdlib via `$(PYTHON) tools/generate_stdlib_docs.py`;
 - `v0.1.0` est tagué; `docs/releases/0.1.md` conserve les notes de release
   et la matrice de validation 0.1.x;
 - `docs/feature-integration.md` formalise la reprise d'une nouvelle feature:
@@ -1146,6 +1152,20 @@ d'inference generique et de typage contextuel des lambdas.
   `nablac --heap-size <octets>`.
 
 ## Journal Des Jalons
+
+- `local` - Durcir les diagnostics front-end issus de la revue complete: les
+  annotations locales rejettent maintenant les types inconnus avant la regle
+  `Nothing`, les parametres generiques de methode ne peuvent plus masquer ceux
+  de la classe englobante, et les surcharges generiques alpha-equivalentes sont
+  considerees comme une meme signature. Le Makefile utilise aussi `python3` par
+  defaut et route `stdlib-docs` via `$(PYTHON)` pour eviter les environnements
+  sans commande `python`.
+  - Fichiers / tests associes: `src/ast.cpp`, `src/parser.cpp`,
+    `src/compiler_context.hpp`, `tests/frontend_unit_tests.cpp`,
+    `tests/test_error_local_decl_unknown_type_nothing.nabla`,
+    `tests/test_error_method_type_parameter_shadows_class.nabla`,
+    `tests/test_error_generic_alpha_equivalent_overload.nabla`, `Makefile`,
+    `AGENTS.md`.
 
 - `local` - Ajouter le lookup observationnel des safepoints d'allocation GC:
   `Runtime_gc` lit le return PC utilisateur sauvegardé par `Runtime_alloc` à

@@ -1,4 +1,4 @@
-tests/test_error_method_overload_generic_ambiguous.nabla:13:9: semantic error: appel de méthode surchargée ambigu pour 'Box.choose(Int)'
+tests/test_error_method_overload_generic_ambiguous.nabla:13:9: semantic error: appel de méthode surchargée ambigu pour 'Box.choose(Int, Int)'
 candidats:
-- Box.choose(T): Int
-- Box.choose(U): Int
+- Box.choose(T, Int): Int
+- Box.choose(Int, U): Int

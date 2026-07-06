@@ -2717,10 +2717,15 @@ std::string VarDeclNode::getType() {
 
 void VarDeclNode::validateSemantics(CompilerContext& context) {
     initializer->validateSemantics(context);
-    if (!declaredType.empty() && !isTypeAssignable(context, initializer->getType(), declaredType)) {
-        semanticError(
-            "Déclaration invalide pour '" + name + "': type '" + declaredType +
-            "' attendu, '" + initializer->getType() + "' reçu");
+    if (!declaredType.empty()) {
+        if (!isKnownTypeInContext(declaredType, context)) {
+            semanticError("type inconnu '" + declaredType + "' pour la variable '" + name + "'");
+        }
+        if (!isTypeAssignable(context, initializer->getType(), declaredType)) {
+            semanticError(
+                "Déclaration invalide pour '" + name + "': type '" + declaredType +
+                "' attendu, '" + initializer->getType() + "' reçu");
+        }
     }
     context.semanticSymbolTypes[symbolName] = getType();
 }

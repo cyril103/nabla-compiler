@@ -1,0 +1,9 @@
+class Box[T]() {
+  def id[T](x: T): T = x
+}
+
+def main(): Int = {
+  val b = new Box[Int]()
+  val s: String = b.id[String]("ok")
+  0
+}

@@ -1,12 +1,12 @@
-def choose[T](value: T): T = {
-    value
+def choose[T](left: T, right: Int): Int = {
+    left
 }
 
-def choose[U](value: U): U = {
-    value
+def choose[U](left: Int, right: U): Int = {
+    right
 }
 
 def main(): Int = {
-    val f: (Int) => Int = choose
-    f(41)
+    val f: (Int, Int) => Int = choose
+    f(41, 1)
 }
