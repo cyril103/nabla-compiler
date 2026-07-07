@@ -1,0 +1,46 @@
+import core.iterator
+
+
+class CountingIterator(var current: Int, until: Int) with Iterator[Int] {
+    override def hasNext(): Bool = {
+        current < until
+    }
+
+    override def next(): Int = {
+        val value = current
+        current = current + 1
+        value
+    }
+}
+
+def main(): Int = {
+    var score = 0
+
+    val values: Iterator[Int] = new CountingIterator(0, 2)
+    if values.nonEmpty() && !values.isEmpty() && values.next() == 0 {
+        score = score + 10
+    } else {
+        score = score + 100
+    }
+
+    if values.nonEmpty() && !values.isEmpty() && values.next() == 1 {
+        score = score + 10
+    } else {
+        score = score + 100
+    }
+
+    if values.isEmpty() && !values.nonEmpty() {
+        score = score + 10
+    } else {
+        score = score + 100
+    }
+
+    val empty: Iterator[Int] = new CountingIterator(3, 3)
+    if empty.isEmpty() && !empty.nonEmpty() {
+        score = score + 12
+    } else {
+        score = score + 100
+    }
+
+    score
+}

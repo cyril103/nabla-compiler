@@ -38,6 +38,7 @@ pas comme cible idiomatique pour le code applicatif.
 - `Iterator[T]`
   - `hasNext()`
   - `next()`
+  - `isEmpty()`, `nonEmpty()`
   - `foreach(f)`
   - `exists(predicate)`, `forall(predicate)`, `count(predicate)`
 - `Iterable[T]`
@@ -127,8 +128,8 @@ pas comme cible idiomatique pour le code applicatif.
 `Iterable.foreach(...)`, `exists(...)`, `forall(...)` et `count(...)` creent un nouvel
 `iterator()` puis deleguent aux methodes derivees de `Iterator[T]`; les collections
 peuvent garder des overrides specialises si utile. Un `Iterator[T]` expose `hasNext()`,
-`next()`, `foreach(...)`, `exists(...)`, `forall(...)` et `count(...)` pour consommer les
-elements restants avec les memes noms de parcours que les collections.
+`next()`, `isEmpty()`, `nonEmpty()`, `foreach(...)`, `exists(...)`, `forall(...)` et
+`count(...)`; seuls les predicats et `foreach(...)` consomment les elements restants.
 
 Les exemples doivent privilegier `Array[T]` et les fonctions de haut niveau. Les
 facades specialisees restent acceptables dans les tests de backend/runtime et les

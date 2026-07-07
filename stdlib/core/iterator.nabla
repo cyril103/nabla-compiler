@@ -18,6 +18,20 @@ trait Iterator[T] {
     /// @status Recommandee
     def next(): T
 
+    /// Indique si aucun element restant n'est disponible.
+    /// @signature def isEmpty(): Bool
+    /// @status Recommandee
+    def isEmpty(): Bool = {
+        !this.hasNext()
+    }
+
+    /// Indique si au moins un element restant est disponible.
+    /// @signature def nonEmpty(): Bool
+    /// @status Recommandee
+    def nonEmpty(): Bool = {
+        this.hasNext()
+    }
+
     /// Consomme les elements restants en appliquant f a chacun.
     /// @signature def foreach(f: (T) => Unit): Unit
     /// @status Recommandee
