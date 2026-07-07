@@ -1,0 +1,34 @@
+/// @module IterableOps
+/// Traits experimentaux pour preparer les factories/builders de collections.
+
+import core.builder
+import core.iterable
+
+/// Factory generique pour une famille de collections a un parametre de type.
+/// @signature trait IterableFactory[CC[_]]
+/// @status Experimental
+///
+/// CC[_] represente un constructeur de type d'arite 1, par exemple List ou Set.
+/// La factory permet aux operations polymorphes de reconstruire une collection
+/// de la meme famille sans coder directement la collection concrete.
+trait IterableFactory[CC[_]] {
+    /// Cree une collection vide de la famille CC pour le type A.
+    /// @signature def empty[A](): CC[A]
+    /// @status Experimental
+    def empty[A](): CC[A]
+}
+
+/// Base future pour des operations de collection a la Scala IterableOps.
+/// @signature trait IterableOps[A, CC[_], C]
+/// @status Experimental
+///
+/// Cette premiere version ne deplace pas encore les operations de Iterable:
+/// elle expose seulement le lien entre l'Iterable courant, sa famille CC[_] et
+/// le type concret C, afin de stabiliser la representation des constructeurs de
+/// types avant d'ajouter map/filter/builders.
+trait IterableOps[A, CC[_], C] with Iterable[A] {
+    /// Retourne la factory de la famille de collection courante.
+    /// @signature def iterableFactory(): IterableFactory[CC]
+    /// @status Experimental
+    def iterableFactory(): IterableFactory[CC]
+}

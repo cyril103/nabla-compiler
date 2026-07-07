@@ -1,0 +1,9 @@
+import collections.list
+
+def ignoreCC[CC[_], T](value: T): Int = {
+    0
+}
+
+def main(): Int = {
+    ignoreCC[List[Int], Int](42)
+}

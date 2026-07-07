@@ -1,0 +1,20 @@
+import collections.list
+
+trait WrapFactory[CC[_]] {
+    def single[T](value: T): CC[T]
+}
+
+class ListWrapFactory() with WrapFactory[List] {
+    override def single[T](value: T): List[T] = {
+        List.cons[T](value, Nil)
+    }
+}
+
+def useFactory(factory: WrapFactory[List]): Int = {
+    val xs = factory.single[Int](42)
+    xs.head()
+}
+
+def main(): Int = {
+    useFactory(new ListWrapFactory())
+}

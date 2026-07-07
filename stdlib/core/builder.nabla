@@ -1,0 +1,21 @@
+/// @module Builder
+/// Traits publics minimaux pour construire des collections.
+
+/// Accumulateur mutable produisant une collection finale.
+/// @signature trait Builder[A, C]
+/// @status Experimental
+///
+/// Builder[A, C] est volontairement minimal: add(value) ajoute un element et
+/// result() retourne la collection construite. Les operations plus riches
+/// seront ajoutees quand IterableOps pourra s'appuyer sur des factories.
+trait Builder[A, C] {
+    /// Ajoute un element au builder.
+    /// @signature def add(value: A): Unit
+    /// @status Experimental
+    def add(value: A): Unit
+
+    /// Retourne la collection construite.
+    /// @signature def result(): C
+    /// @status Experimental
+    def result(): C
+}

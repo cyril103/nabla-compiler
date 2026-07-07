@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Builder - Nabla stdlib</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <header class="topbar">
+    <a class="brand" href="../index.html">Nabla stdlib</a>
+    <nav class="topnav" aria-label="Navigation principale">
+      <a href="../index.html">Modules</a>
+      <a href="https://github.com/cyril103/nabla-compiler">GitHub</a>
+    </nav>
+  </header>
+  <main id="contenu">
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="../index.html">Modules</a> / core.builder</nav>
+    <section class="module-hero">
+      <p class="eyebrow">Module</p>
+      <h1>Builder</h1>
+      <p class="import"><code>import core.builder</code></p>
+      <p>Traits publics minimaux pour construire des collections.</p>
+
+    </section>
+    <div class="doc-shell">
+      <aside class="sidebar" aria-label="Sommaire des symboles publics">
+        <h2>API publique</h2>
+      <section class="toc-group">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="#Builder" title="trait Builder[A, C]"><span>Builder</span><code>trait Builder[A, C]</code></a></li>
+        </ul>
+      </section>
+      <section class="toc-group">
+        <h3>Methodes</h3>
+        <ul>
+        <li><a href="#add" title="def add(value: A): Unit"><span>add</span><code>def add(value: A): Unit</code></a></li>
+        <li><a href="#result" title="def result(): C"><span>result</span><code>def result(): C</code></a></li>
+        </ul>
+      </section>
+      </aside>
+      <section class="content entries" aria-label="Reference detaillee">
+        <article class="entry" id="Builder">
+          <div class="entry-meta">
+            <span class="kind">trait</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>Builder</h2>
+          <pre class="signature"><code>trait Builder[A, C]</code></pre>
+          <p>Accumulateur mutable produisant une collection finale.</p>
+<p>Builder[A, C] est volontairement minimal: add(value) ajoute un element et result() retourne la collection construite. Les operations plus riches seront ajoutees quand IterableOps pourra s&#x27;appuyer sur des factories.</p>
+
+        </article>
+        <article class="entry" id="add">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>add</h2>
+          <pre class="signature"><code>def add(value: A): Unit</code></pre>
+          <p>Ajoute un element au builder.</p>
+
+        </article>
+        <article class="entry" id="result">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>result</h2>
+          <pre class="signature"><code>def result(): C</code></pre>
+          <p>Retourne la collection construite.</p>
+
+        </article>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

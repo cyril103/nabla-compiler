@@ -1,0 +1,20 @@
+import collections.list
+
+trait WrapFactory[CC[_]] {
+    def single[T](value: T): CC[T]
+}
+
+trait ForwardFactory[CC[_]] with WrapFactory[CC] {
+}
+
+class ForwardListFactory() with ForwardFactory[List] {
+    override def single[T](value: T): List[T] = {
+        List.cons[T](value, Nil)
+    }
+}
+
+def main(): Int = {
+    val factory: WrapFactory[List] = new ForwardListFactory()
+    val values = factory.single[Int](42)
+    values.head()
+}

@@ -242,29 +242,59 @@ std::string nativeArrayElementType(const std::string& type) {
     return "Int";
 }
 
+bool isKnownTypeConstructorArgumentInContext(
+    const std::string& type, int expectedArity, const CompilerContext& context) {
+    if (expectedArity != 1) return false;
+    if (parameterizedTypeFromName(type)) return false;
+    auto classIt = context.classes.find(type);
+    if (classIt != context.classes.end()) {
+        return classIt->second.typeParameters.size() == 1;
+    }
+    return isStdlibTypeAliasFamily(type, 1);
+}
+
 bool isKnownTypeInContext(const std::string& type, const CompilerContext& context) {
     if (isKnownBuiltinType(type) || isFunctionTypeName(type)) return true;
     auto classIt = context.classes.find(type);
     if (classIt != context.classes.end()) return classIt->second.typeParameters.empty();
-    if (isTypeParameterName(type, context.semanticTypeParameters)) return true;
+    const auto& semanticTypeParameterInfos = context.semanticTypeParameterInfos.empty()
+        ? ordinaryTypeParameterInfos(context.semanticTypeParameters)
+        : context.semanticTypeParameterInfos;
+    const int directArity = typeParameterArity(type, semanticTypeParameterInfos);
+    if (directArity >= 0) return directArity == 0;
     auto substitution = genericSubstitutionFor(context, type);
     auto parameterizedType = parameterizedTypeFromName(type);
     if (!substitution) {
         if (!parameterizedType) return false;
         const auto& [baseName, arguments] = *parameterizedType;
+        const int constructorParameterArity = typeParameterArity(baseName, semanticTypeParameterInfos);
+        if (constructorParameterArity >= 0) {
+            if (constructorParameterArity != 1 || arguments.size() != 1) return false;
+            return isKnownTypeInContext(arguments[0], context);
+        }
         if (baseName == "ObjectArray" && arguments.size() == 1) {
             return isKnownTypeInContext(arguments[0], context) ||
                    isTypeParameterName(arguments[0], context.semanticTypeParameters);
         }
         if (!isStdlibTypeAliasFamily(baseName, arguments.size())) return false;
         for (const auto& argument : arguments) {
-            if (!isTypeParameterName(argument, context.semanticTypeParameters)) return false;
+            if (!isKnownTypeInContext(argument, context)) return false;
         }
         return true;
     }
     if (!parameterizedType) return false;
-    for (const auto& argument : parameterizedType->second) {
-        if (!isKnownTypeInContext(argument, context)) return false;
+    auto concreteClassIt = context.classes.find(parameterizedType->first);
+    for (std::size_t i = 0; i < parameterizedType->second.size(); ++i) {
+        const int expectedArity = concreteClassIt != context.classes.end() &&
+                i < concreteClassIt->second.typeParameterInfos.size()
+            ? concreteClassIt->second.typeParameterInfos[i].arity
+            : 0;
+        if (expectedArity == 0) {
+            if (!isKnownTypeInContext(parameterizedType->second[i], context)) return false;
+        } else if (!isKnownTypeConstructorArgumentInContext(
+                parameterizedType->second[i], expectedArity, context)) {
+            return false;
+        }
     }
     return true;
 }
@@ -1806,6 +1836,24 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         builder.registerMethodSpecialization(
             concreteClassName, resolvedOwnerType, loweredSourceMethodName, concreteTypeArguments,
             argumentTypes, concreteReturnType);
+    } else if (shouldRegisterMethodSpecialization &&
+        isAbstractTraitMethod(builder.getContext(), resolvedOwnerType, loweredSourceMethodName)) {
+        const std::string staticOwnerBase = genericBaseName(resolvedOwnerType);
+        for (const auto& [runtimeClassName, runtimeClass] : builder.getContext().classes) {
+            if (runtimeClass.isTrait) continue;
+            if (!isTypeAssignable(builder.getContext(), runtimeClassName, concreteReceiverType)) continue;
+            auto methodLookup = resolveClassMethodInHierarchy(
+                builder.getContext(), runtimeClassName, loweredSourceMethodName);
+            if (!methodLookup || !methodLookup->signature ||
+                methodLookup->signature->typeParameters.empty()) {
+                continue;
+            }
+            const std::string targetOwner = genericBaseName(methodLookup->ownerClassName);
+            if (targetOwner == staticOwnerBase) continue;
+            builder.registerMethodSpecialization(
+                targetOwner, targetOwner, loweredSourceMethodName, concreteTypeArguments,
+                argumentTypes, concreteReturnType);
+        }
     }
     const std::string methodOwnerType =
         shouldSpecializeAsConcreteClass || resolvedOwnerType.empty()
@@ -2771,12 +2819,26 @@ std::string FunctionDefNode::getType() {
 void FunctionDefNode::validateSemantics(CompilerContext& context) {
     context.semanticSymbolTypes.clear();
     context.semanticTypeParameters.clear();
+    context.semanticTypeParameterInfos.clear();
     if (!className.empty()) {
         auto classIt = context.classes.find(className);
         if (classIt != context.classes.end()) {
             context.semanticTypeParameters = classIt->second.typeParameters;
+            context.semanticTypeParameterInfos = classIt->second.typeParameterInfos;
             context.semanticTypeParameters.insert(
                 context.semanticTypeParameters.end(), typeParameters.begin(), typeParameters.end());
+            auto methodIt = classIt->second.methods.find(name);
+            if (methodIt != classIt->second.methods.end()) {
+                context.semanticTypeParameterInfos.insert(
+                    context.semanticTypeParameterInfos.end(),
+                    methodIt->second.typeParameterInfos.begin(),
+                    methodIt->second.typeParameterInfos.end());
+            } else {
+                auto methodTypeParameterInfos = ordinaryTypeParameterInfos(typeParameters);
+                context.semanticTypeParameterInfos.insert(
+                    context.semanticTypeParameterInfos.end(),
+                    methodTypeParameterInfos.begin(), methodTypeParameterInfos.end());
+            }
             context.semanticSymbolTypes["this"] = classIt->second.typeParameters.empty()
                 ? className
                 : formatParameterizedType(className, classIt->second.typeParameters);
@@ -2785,6 +2847,10 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
         }
     } else {
         context.semanticTypeParameters = typeParameters;
+        auto functionIt = context.functions.find(name);
+        context.semanticTypeParameterInfos = functionIt != context.functions.end()
+            ? functionIt->second.typeParameterInfos
+            : ordinaryTypeParameterInfos(typeParameters);
     }
     for (const auto& capture : captures) {
         context.semanticSymbolTypes[capture.symbolName] = capture.type;
@@ -2803,6 +2869,7 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
             "' attendu, '" + body->getType() + "' reçu");
     }
     context.semanticTypeParameters.clear();
+    context.semanticTypeParameterInfos.clear();
 }
 
 std::string FunctionDefNode::lowerToIR(IRBuilder& builder) const {

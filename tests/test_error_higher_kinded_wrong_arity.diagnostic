@@ -1,0 +1,1 @@
+tests/test_error_higher_kinded_wrong_arity.nabla:7:1: semantic error: le paramètre de type 'CC[_]' de 'WrapFactory' attend un constructeur de type d'arité 1, pas le type appliqué 'List[Int]'

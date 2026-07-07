@@ -47,6 +47,18 @@ pas comme cible idiomatique pour le code applicatif.
   - `head()`
   - `foreach(f)`
   - `exists(predicate)`, `forall(predicate)`, `count(predicate)`
+- `Builder[A, C]` (**experimental**)
+  - `add(value)`
+  - `result()`
+- `IterableFactory[CC[_]]` (**experimental**)
+  - `empty[A](): CC[A]`
+  - `CC[_]` est le premier usage public des constructeurs de type d'arite 1,
+    destine aux familles de collections (`List`, `Set`, etc.).
+- `IterableOps[A, CC[_], C]` (**experimental**)
+  - herite de `Iterable[A]`
+  - `iterableFactory(): IterableFactory[CC]`
+  - cette base prepare les operations a la Scala (`map`, `filter`, builders),
+    sans encore deplacer la surface existante de `Iterable[T]`.
 - `Option[T]`
   - `Option.some[T](value)`
   - `Option.none[T]()`

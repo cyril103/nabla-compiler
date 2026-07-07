@@ -1,0 +1,14 @@
+import core.iterable_ops
+import collections.list
+
+class ListFactory() with IterableFactory[List] {
+    override def empty[A](): List[A] = {
+        Nil
+    }
+}
+
+def main(): Int = {
+    val factory: IterableFactory[List] = new ListFactory()
+    val values = factory.empty[Int]()
+    values.size()
+}
