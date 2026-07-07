@@ -45,8 +45,11 @@ pour garder un cap clair après le tag `v0.1.0`.
   `Any` et imprime le résultat de `value.toString()`, avec dispatch dynamique
   vers les overrides utilisateur. Les chaînes `String` portent aussi un tag runtime
   dédié afin de conserver `toString`, `hashCode` et `equals` par contenu quand
-  elles sont manipulées via `Any`. `String.toFloat()` / `String.toDouble()` et
-  `Int.toFloat()` / `Int.toDouble()` couvrent les conversions numériques
+  elles sont manipulées via `Any`. Les promotions implicites suivent
+  `Char -> Int -> Long -> Float -> Double`; `Char` expose les opérations
+  entières/comparaisons et les conversions explicites `toInt` / `toLong` /
+  `toFloat` / `toDouble`. `String.toFloat()` / `String.toDouble()` et
+  `Int.toFloat()` / `Int.toDouble()` couvrent les autres conversions numériques
   explicites de base, avec `parseFloat` / `parseDouble` comme alias globaux.
 - `object Name { ... }` reste un namespace statique et supporte les compagnons
   de surface. `object Name with Trait { ... }` est maintenant un singleton

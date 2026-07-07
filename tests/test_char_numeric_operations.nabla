@@ -1,0 +1,19 @@
+def main(): Int = {
+    val charCode: Int = 'A'
+    val charLong: Long = 'A'
+    val plus = 'A' + 2
+    val reversePlus = 2 + 'A'
+    val diff = 'D' - 'A'
+    val product = 'B' * 2
+    val quotient = 'D' / 2
+    val modulo = 'E' % 4
+    val negative = -'A'
+    if charCode == 65 && charLong == 65L &&
+       plus == 67 && reversePlus == 67 && diff == 3 && product == 132 &&
+       quotient == 34 && modulo == 1 && negative == -65 &&
+       'A' < 'B' && 'C' >= 67 {
+        0
+    } else {
+        1
+    }
+}

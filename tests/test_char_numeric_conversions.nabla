@@ -1,0 +1,24 @@
+def acceptsInt(value: Int): Int = {
+    value + 1
+}
+
+class Box(val value: Double)
+
+def returnsFloat(): Float = {
+    'A'
+}
+
+def main(): Int = {
+    val asInt = 'A'.toInt()
+    val asLong = 'A'.toLong()
+    val asFloat = 'A'.toFloat()
+    val asDouble = 'A'.toDouble()
+    val called = acceptsInt('A')
+    val boxed = new Box('A')
+    if asInt == 65 && asLong == 65L && asFloat == 65.0F && asDouble == 65.0 &&
+       called == 66 && boxed.value == 65.0 && returnsFloat() == 65.0F {
+        0
+    } else {
+        1
+    }
+}

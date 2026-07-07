@@ -108,19 +108,23 @@ applicatif devrait privilegier `Array[T]` et les compagnons publics.
 Les chaines et caracteres sont actuellement byte-based/ASCII pour les operations
 de longueur, indexation et decoupe.
 
-Les types numeriques supportent `+`, `-`, `*`, `/` et les comparaisons. Quand
-une operation ou un type attendu combine plusieurs types numeriques, Nabla
-applique uniquement des promotions implicites elargissantes dans l'ordre
-`Int -> Long -> Float -> Double`: par exemple `Int * Double` produit un
-`Double`, `Long + Float` produit un `Float`, et un argument `Int` peut etre
-passe a un parametre ordinaire `Double` quand l'appel n'a pas besoin de choisir
-entre plusieurs surcharges. Les conversions retrecissantes restent explicites
-ou refusees. Ces promotions sont des conversions de valeurs, pas du sous-typage:
-elles ne rendent pas un `override def f(): Int` compatible avec un parent qui
-retourne `Double`. Le reste de division `%` est disponible seulement quand le type
-promu reste entier (`Int` ou `Long`). Les primitives exposent aussi les
-conversions elargissantes directes disponibles, comme `Int.toLong()`,
-`Int.toFloat()`, `Long.toDouble()` ou `Float.toDouble()`.
+Les types numeriques supportent `+`, `-`, `*`, `/`, `%` et les comparaisons.
+`Char` participe a ces operations comme une valeur entiere byte-based: les
+operations arithmetiques sur des `Char` produisent au minimum un `Int`, tandis
+que les comparaisons produisent un `Bool`. Quand une operation ou un type attendu
+combine plusieurs types numeriques, Nabla applique uniquement des promotions
+implicites elargissantes dans l'ordre `Char -> Int -> Long -> Float -> Double`:
+par exemple `Int * Double` produit un `Double`, `Long + Float` produit un
+`Float`, un argument `Char` peut etre passe a un parametre ordinaire `Int` ou
+`Double`, et un argument `Int` peut etre passe a un parametre ordinaire `Double`
+quand l'appel n'a pas besoin de choisir entre plusieurs surcharges. Les
+conversions retrecissantes restent explicites ou refusees. Ces promotions sont
+des conversions de valeurs, pas du sous-typage: elles ne rendent pas un
+`override def f(): Int` compatible avec un parent qui retourne `Double`. Le reste
+de division `%` est disponible seulement quand le type promu reste entier
+(`Int` ou `Long`). Les primitives exposent aussi les conversions elargissantes
+directes disponibles, comme `Char.toInt()`, `Char.toLong()`, `Int.toFloat()`,
+`Long.toDouble()` ou `Float.toDouble()`.
 
 ## Tuples
 

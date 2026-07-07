@@ -15,7 +15,7 @@ bool isArithmeticMethod(const std::string& methodName) {
 }
 
 bool isIntegerType(const std::string& type) {
-    return type == "Int" || type == "Long";
+    return type == "Char" || type == "Int" || type == "Long";
 }
 
 bool isNumericType(const std::string& type) {
@@ -23,16 +23,18 @@ bool isNumericType(const std::string& type) {
 }
 
 int numericRank(const std::string& type) {
-    if (type == "Int") return 0;
-    if (type == "Long") return 1;
-    if (type == "Float") return 2;
-    if (type == "Double") return 3;
+    if (type == "Char") return 0;
+    if (type == "Int") return 1;
+    if (type == "Long") return 2;
+    if (type == "Float") return 3;
+    if (type == "Double") return 4;
     return -1;
 }
 
 std::string promotedNumericType(const std::string& leftType, const std::string& rightType) {
     if (!isNumericType(leftType) || !isNumericType(rightType)) return leftType;
-    return numericRank(leftType) >= numericRank(rightType) ? leftType : rightType;
+    const std::string promoted = numericRank(leftType) >= numericRank(rightType) ? leftType : rightType;
+    return promoted == "Char" ? "Int" : promoted;
 }
 
 bool isNumericWidening(const std::string& actualType, const std::string& expectedType) {
@@ -41,9 +43,18 @@ bool isNumericWidening(const std::string& actualType, const std::string& expecte
 }
 
 std::string conversionMethodName(const std::string& expectedType) {
+    if (expectedType == "Int") return "toInt";
     if (expectedType == "Long") return "toLong";
     if (expectedType == "Float") return "toFloat";
     return "toDouble";
+}
+
+std::string numericConversionTargetType(const std::string& methodName) {
+    if (methodName == "toInt") return "Int";
+    if (methodName == "toLong") return "Long";
+    if (methodName == "toFloat") return "Float";
+    if (methodName == "toDouble") return "Double";
+    return "";
 }
 
 bool isBoolBinaryMethod(const std::string& methodName) {
@@ -587,7 +598,7 @@ std::string NotNode::lowerToIR(IRBuilder& builder) const {
 UnaryMinusNode::UnaryMinusNode(std::unique_ptr<ASTNode> expr) : expression(std::move(expr)) {}
 
 std::string UnaryMinusNode::getType() {
-    return expression->getType();
+    return expression->getType() == "Char" ? "Int" : expression->getType();
 }
 
 void UnaryMinusNode::validateSemantics(CompilerContext& context) {
@@ -601,8 +612,10 @@ void UnaryMinusNode::validateSemantics(CompilerContext& context) {
 std::string UnaryMinusNode::lowerToIR(IRBuilder& builder) const {
     std::string loweredExpression = expression->lowerToIR(builder);
     const std::string operandType = expression->getType();
-    std::string zero = builder.emitConstant("0", operandType);
-    return builder.emitBinary("-", zero, loweredExpression, operandType);
+    const std::string resultType = operandType == "Char" ? "Int" : operandType;
+    std::string zero = builder.emitConstant("0", resultType);
+    loweredExpression = convertNumericValue(builder, loweredExpression, operandType, resultType);
+    return builder.emitBinary("-", zero, loweredExpression, resultType);
 }
 
 LogicalNode::LogicalNode(
@@ -697,10 +710,12 @@ std::string NewNode::getType() {
 void NewNode::validateSemantics(CompilerContext& context) {
     for (const auto& arg : args) arg->validateSemantics(context);
 
-    if (isPrimitiveArrayFacadeType(className) && args.size() == 1 && args[0]->getType() == "Int") {
+    if (isPrimitiveArrayFacadeType(className) && args.size() == 1 &&
+        isValueAssignable(context, args[0]->getType(), "Int")) {
         return;
     }
-    if (isObjectArrayFacadeType(className) && args.size() == 1 && args[0]->getType() == "Int") {
+    if (isObjectArrayFacadeType(className) && args.size() == 1 &&
+        isValueAssignable(context, args[0]->getType(), "Int")) {
         return;
     }
 
@@ -710,7 +725,7 @@ void NewNode::validateSemantics(CompilerContext& context) {
                 "Constructeur de '" + className + "': 1 argument(s) attendu(s), " +
                 std::to_string(args.size()) + " reçu(s)");
         }
-        if (args[0]->getType() != "Int") {
+        if (!isValueAssignable(context, args[0]->getType(), "Int")) {
             throw CompilerError(
                 ErrorKind::Semantic, args[0]->getLocation(),
                 "Constructeur de '" + className + "', paramètre 'size': type 'Int' attendu, '" +
@@ -818,7 +833,9 @@ void NewNode::validateSemantics(CompilerContext& context) {
 std::string NewNode::lowerToIR(IRBuilder& builder) const {
     std::vector<std::string> loweredArguments;
     for (const auto& argument : args) loweredArguments.push_back(argument->lowerToIR(builder));
-    if (isPrimitiveArrayFacadeType(className) && args.size() == 1 && args[0]->getType() == "Int") {
+    if (isPrimitiveArrayFacadeType(className) && args.size() == 1 &&
+        (args[0]->getType() == "Int" || isNumericWidening(args[0]->getType(), "Int"))) {
+        loweredArguments[0] = coerceValueForExpectedType(builder, loweredArguments[0], args[0]->getType(), "Int");
         const std::string storageType = primitiveArrayFacadeStorageType(className);
         std::string storage;
         if (storageType == "LongArray") storage = builder.emitNewLongArray(loweredArguments[0]);
@@ -828,17 +845,19 @@ std::string NewNode::lowerToIR(IRBuilder& builder) const {
         else storage = builder.emitNewIntArray(loweredArguments[0]);
         return builder.emitNewObject(className, {storage});
     }
-    if (isObjectArrayFacadeType(className) && args.size() == 1 && args[0]->getType() == "Int") {
+    if (isObjectArrayFacadeType(className) && args.size() == 1 &&
+        (args[0]->getType() == "Int" || isNumericWidening(args[0]->getType(), "Int"))) {
+        loweredArguments[0] = coerceValueForExpectedType(builder, loweredArguments[0], args[0]->getType(), "Int");
         const std::string elementType = parameterizedTypeFromName(className)->second[0];
         const std::string storage = builder.emitNewObjectArray(loweredArguments[0], elementType);
         return builder.emitNewObject(className, {storage});
     }
-    if (className == "IntArray") return builder.emitNewIntArray(loweredArguments[0]);
-    if (className == "LongArray") return builder.emitNewLongArray(loweredArguments[0]);
-    if (className == "FloatArray") return builder.emitNewFloatArray(loweredArguments[0]);
-    if (className == "DoubleArray") return builder.emitNewDoubleArray(loweredArguments[0]);
-    if (className == "BoolArray") return builder.emitNewBoolArray(loweredArguments[0]);
-    if (isObjectArrayType(className)) return builder.emitNewObjectArray(loweredArguments[0], nativeArrayElementType(className));
+    if (className == "IntArray") return builder.emitNewIntArray(coerceValueForExpectedType(builder, loweredArguments[0], args[0]->getType(), "Int"));
+    if (className == "LongArray") return builder.emitNewLongArray(coerceValueForExpectedType(builder, loweredArguments[0], args[0]->getType(), "Int"));
+    if (className == "FloatArray") return builder.emitNewFloatArray(coerceValueForExpectedType(builder, loweredArguments[0], args[0]->getType(), "Int"));
+    if (className == "DoubleArray") return builder.emitNewDoubleArray(coerceValueForExpectedType(builder, loweredArguments[0], args[0]->getType(), "Int"));
+    if (className == "BoolArray") return builder.emitNewBoolArray(coerceValueForExpectedType(builder, loweredArguments[0], args[0]->getType(), "Int"));
+    if (isObjectArrayType(className)) return builder.emitNewObjectArray(coerceValueForExpectedType(builder, loweredArguments[0], args[0]->getType(), "Int"), nativeArrayElementType(className));
     std::vector<std::string> coercedArguments;
     const std::string classLookupName = genericBaseName(className);
     auto classIt = builder.getContext().classes.find(classLookupName);
@@ -888,14 +907,10 @@ std::string MethodCallNode::getType() {
     const std::string receiverType = receiver->getType();
     if (isNumericType(receiverType)) {
         if (methodName == "toString") return "String";
-        if (receiverType == "Int" && methodName == "toLong") return "Long";
-        if (receiverType == "Int" && methodName == "toFloat") return "Float";
-        if (receiverType == "Int" && methodName == "toDouble") return "Double";
         if (isComparisonMethod(methodName)) return "Bool";
-        if ((methodName == "toLong" || methodName == "toFloat" || methodName == "toDouble") && arguments.empty()) {
-            if (isNumericWidening(receiverType, methodName == "toLong" ? "Long" : (methodName == "toFloat" ? "Float" : "Double"))) {
-                return methodName == "toLong" ? "Long" : (methodName == "toFloat" ? "Float" : "Double");
-            }
+        if (const std::string conversionTarget = numericConversionTargetType(methodName);
+            !conversionTarget.empty() && arguments.empty() && isNumericWidening(receiverType, conversionTarget)) {
+            return conversionTarget;
         }
         if (arguments.size() == 1 && isArithmeticMethod(methodName) && isNumericType(arguments[0]->getType())) {
             return promotedNumericType(receiverType, arguments[0]->getType());
@@ -1003,19 +1018,12 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             resolvedType = "String";
             return;
         }
-        if (receiverType == "Int" && methodName == "toLong") {
-            if (!arguments.empty()) {
-                semanticError("la méthode Int.toLong n'accepte aucun argument");
-            }
-            resolvedType = "Long";
-            return;
-        }
-        if ((methodName == "toFloat" || methodName == "toDouble") &&
-            isNumericWidening(receiverType, methodName == "toFloat" ? "Float" : "Double")) {
+        if (const std::string conversionTarget = numericConversionTargetType(methodName);
+            !conversionTarget.empty() && isNumericWidening(receiverType, conversionTarget)) {
             if (!arguments.empty()) {
                 semanticError("la méthode " + receiverType + "." + methodName + " n'accepte aucun argument");
             }
-            resolvedType = methodName == "toFloat" ? "Float" : "Double";
+            resolvedType = conversionTarget;
             return;
         }
         semanticError("méthode inconnue: " + receiverType + "." + methodName);
@@ -1135,12 +1143,12 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             if (arguments.size() != 2) {
                 semanticError("la méthode String.substring attend deux arguments");
             }
-            if (arguments[0]->getType() != "Int") {
+            if (!isValueAssignable(context, arguments[0]->getType(), "Int")) {
                 throw CompilerError(
                     ErrorKind::Semantic, arguments[0]->getLocation(),
                     "la méthode String.substring attend un index de début de type Int");
             }
-            if (arguments[1]->getType() != "Int") {
+            if (!isValueAssignable(context, arguments[1]->getType(), "Int")) {
                 throw CompilerError(
                     ErrorKind::Semantic, arguments[1]->getLocation(),
                     "la méthode String.substring attend un index de fin de type Int");
@@ -1152,7 +1160,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             if (arguments.size() != 1) {
                 semanticError("la méthode String.repeat attend un argument");
             }
-            if (arguments[0]->getType() != "Int") {
+            if (!isValueAssignable(context, arguments[0]->getType(), "Int")) {
                 throw CompilerError(
                     ErrorKind::Semantic, arguments[0]->getLocation(),
                     "la méthode String.repeat attend un nombre de répétitions de type Int");
@@ -1176,7 +1184,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             if (arguments.size() != 1) {
                 semanticError("la méthode String.charAt attend un argument");
             }
-            if (arguments[0]->getType() != "Int") {
+            if (!isValueAssignable(context, arguments[0]->getType(), "Int")) {
                 throw CompilerError(
                     ErrorKind::Semantic, arguments[0]->getLocation(),
                     "la méthode String.charAt attend un index de type Int");
@@ -1216,7 +1224,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         }
         if (methodName == "get") {
             if (arguments.size() != 1) semanticError("la méthode " + receiverType + ".get attend un argument");
-            if (arguments[0]->getType() != "Int") {
+            if (!isValueAssignable(context, arguments[0]->getType(), "Int")) {
                 throw CompilerError(
                     ErrorKind::Semantic, arguments[0]->getLocation(),
                     "la méthode " + receiverType + ".get attend un index de type Int");
@@ -1226,7 +1234,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         }
         if (methodName == "set") {
             if (arguments.size() != 2) semanticError("la méthode " + receiverType + ".set attend deux arguments");
-            if (arguments[0]->getType() != "Int") {
+            if (!isValueAssignable(context, arguments[0]->getType(), "Int")) {
                 throw CompilerError(
                     ErrorKind::Semantic, arguments[0]->getLocation(),
                     "la méthode " + receiverType + ".set attend un index de type Int");
@@ -1449,21 +1457,13 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
             std::string loweredReceiver = receiver->lowerToIR(builder);
             return builder.emitMethodCall(receiverType, "toString", loweredReceiver, {}, "String");
         }
-        if (receiverType == "Int" && methodName == "toLong") {
-            if (!arguments.empty()) {
-                builder.unsupported(location, "l'appel de méthode Int.toLong");
-            }
-            std::string loweredReceiver = receiver->lowerToIR(builder);
-            return builder.emitMethodCall("Int", "toLong", loweredReceiver, {}, "Long");
-        }
-        if ((methodName == "toFloat" || methodName == "toDouble") &&
-            isNumericWidening(receiverType, methodName == "toFloat" ? "Float" : "Double")) {
+        if (const std::string conversionTarget = numericConversionTargetType(methodName);
+            !conversionTarget.empty() && isNumericWidening(receiverType, conversionTarget)) {
             if (!arguments.empty()) {
                 builder.unsupported(location, "l'appel de méthode " + receiverType + "." + methodName);
             }
             std::string loweredReceiver = receiver->lowerToIR(builder);
-            return builder.emitMethodCall(
-                receiverType, methodName, loweredReceiver, {}, methodName == "toFloat" ? "Float" : "Double");
+            return builder.emitMethodCall(receiverType, methodName, loweredReceiver, {}, conversionTarget);
         }
         const std::vector<std::string> supported = {
             "+", "-", "*", "/", "%", "==", "!=", "<", ">", "<=", ">="
@@ -1564,14 +1564,17 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         }
         if (methodName == "substring" && arguments.size() == 2) {
             std::string loweredReceiver = receiver->lowerToIR(builder);
-            std::string loweredFrom = arguments[0]->lowerToIR(builder);
-            std::string loweredUntil = arguments[1]->lowerToIR(builder);
+            std::string loweredFrom = coerceValueForExpectedType(
+                builder, arguments[0]->lowerToIR(builder), arguments[0]->getType(), "Int");
+            std::string loweredUntil = coerceValueForExpectedType(
+                builder, arguments[1]->lowerToIR(builder), arguments[1]->getType(), "Int");
             return builder.emitMethodCall(
                 "String", "substring", loweredReceiver, {loweredFrom, loweredUntil}, "String");
         }
         if (methodName == "repeat" && arguments.size() == 1) {
             std::string loweredReceiver = receiver->lowerToIR(builder);
-            std::string loweredCount = arguments[0]->lowerToIR(builder);
+            std::string loweredCount = coerceValueForExpectedType(
+                builder, arguments[0]->lowerToIR(builder), arguments[0]->getType(), "Int");
             return builder.emitMethodCall("String", "repeat", loweredReceiver, {loweredCount}, "String");
         }
         if (methodName == "trim" && arguments.empty()) {
@@ -1584,7 +1587,8 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         }
         if (methodName == "charAt" && arguments.size() == 1) {
             std::string loweredReceiver = receiver->lowerToIR(builder);
-            std::string loweredIndex = arguments[0]->lowerToIR(builder);
+            std::string loweredIndex = coerceValueForExpectedType(
+                builder, arguments[0]->lowerToIR(builder), arguments[0]->getType(), "Int");
             return builder.emitMethodCall("String", "charAt", loweredReceiver, {loweredIndex}, "Char");
         }
         {
@@ -1636,53 +1640,60 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
             return builder.emitIntArrayLength(loweredReceiver);
         }
         if (methodName == "get" && arguments.size() == 1) {
+            std::string loweredIndex = coerceValueForExpectedType(
+                builder, arguments[0]->lowerToIR(builder), arguments[0]->getType(), "Int");
             if (isObjectArrayType(receiverType)) {
                 return builder.emitObjectArrayGet(
-                    loweredReceiver, arguments[0]->lowerToIR(builder), nativeArrayElementType(receiverType));
+                    loweredReceiver, loweredIndex, nativeArrayElementType(receiverType));
             }
             if (receiverType == "BoolArray") {
-                return builder.emitBoolArrayGet(loweredReceiver, arguments[0]->lowerToIR(builder));
+                return builder.emitBoolArrayGet(loweredReceiver, loweredIndex);
             }
             if (receiverType == "DoubleArray") {
-                return builder.emitDoubleArrayGet(loweredReceiver, arguments[0]->lowerToIR(builder));
+                return builder.emitDoubleArrayGet(loweredReceiver, loweredIndex);
             }
             if (receiverType == "FloatArray") {
-                return builder.emitFloatArrayGet(loweredReceiver, arguments[0]->lowerToIR(builder));
+                return builder.emitFloatArrayGet(loweredReceiver, loweredIndex);
             }
             if (receiverType == "LongArray") {
-                return builder.emitLongArrayGet(loweredReceiver, arguments[0]->lowerToIR(builder));
+                return builder.emitLongArrayGet(loweredReceiver, loweredIndex);
             }
-            return builder.emitIntArrayGet(loweredReceiver, arguments[0]->lowerToIR(builder));
+            return builder.emitIntArrayGet(loweredReceiver, loweredIndex);
         }
         if (methodName == "set" && arguments.size() == 2) {
+            std::string loweredValue = arguments[1]->lowerToIR(builder);
+            std::string loweredIndex = coerceValueForExpectedType(
+                builder, arguments[0]->lowerToIR(builder), arguments[0]->getType(), "Int");
             if (isObjectArrayType(receiverType)) {
                 return builder.emitObjectArraySet(
-                    loweredReceiver, arguments[0]->lowerToIR(builder), arguments[1]->lowerToIR(builder));
+                    loweredReceiver, loweredIndex, loweredValue);
             }
             if (receiverType == "BoolArray") {
                 return builder.emitBoolArraySet(
-                    loweredReceiver, arguments[0]->lowerToIR(builder), arguments[1]->lowerToIR(builder));
+                    loweredReceiver, loweredIndex, loweredValue);
             }
             if (receiverType == "DoubleArray") {
-                std::string loweredValue = coerceValueForExpectedType(
-                    builder, arguments[1]->lowerToIR(builder), arguments[1]->getType(), "Double");
+                loweredValue = coerceValueForExpectedType(
+                    builder, loweredValue, arguments[1]->getType(), "Double");
                 return builder.emitDoubleArraySet(
-                    loweredReceiver, arguments[0]->lowerToIR(builder), loweredValue);
+                    loweredReceiver, loweredIndex, loweredValue);
             }
             if (receiverType == "FloatArray") {
-                std::string loweredValue = coerceValueForExpectedType(
-                    builder, arguments[1]->lowerToIR(builder), arguments[1]->getType(), "Float");
+                loweredValue = coerceValueForExpectedType(
+                    builder, loweredValue, arguments[1]->getType(), "Float");
                 return builder.emitFloatArraySet(
-                    loweredReceiver, arguments[0]->lowerToIR(builder), loweredValue);
+                    loweredReceiver, loweredIndex, loweredValue);
             }
             if (receiverType == "LongArray") {
-                std::string loweredValue = coerceValueForExpectedType(
-                    builder, arguments[1]->lowerToIR(builder), arguments[1]->getType(), "Long");
+                loweredValue = coerceValueForExpectedType(
+                    builder, loweredValue, arguments[1]->getType(), "Long");
                 return builder.emitLongArraySet(
-                    loweredReceiver, arguments[0]->lowerToIR(builder), loweredValue);
+                    loweredReceiver, loweredIndex, loweredValue);
             }
+            loweredValue = coerceValueForExpectedType(
+                builder, loweredValue, arguments[1]->getType(), "Int");
             return builder.emitIntArraySet(
-                loweredReceiver, arguments[0]->lowerToIR(builder), arguments[1]->lowerToIR(builder));
+                loweredReceiver, loweredIndex, loweredValue);
         }
         builder.unsupported(location, "la méthode " + receiverType + "." + methodName);
     }

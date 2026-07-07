@@ -1,1 +1,1 @@
-tests/test_error_char_comparison_type.nabla:2:12: semantic error: la méthode Char.== attend un argument de type Char
+tests/test_error_char_comparison_type.nabla:2:12: semantic error: la méthode Char.== attend un argument numérique

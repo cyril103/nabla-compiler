@@ -810,10 +810,11 @@ inline bool isTypeAssignable(
 }
 
 inline int numericWideningRank(const std::string& type) {
-    if (type == "Int") return 0;
-    if (type == "Long") return 1;
-    if (type == "Float") return 2;
-    if (type == "Double") return 3;
+    if (type == "Char") return 0;
+    if (type == "Int") return 1;
+    if (type == "Long") return 2;
+    if (type == "Float") return 3;
+    if (type == "Double") return 4;
     return -1;
 }
 

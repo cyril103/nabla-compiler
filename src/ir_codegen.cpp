@@ -1612,14 +1612,16 @@ private:
                 out << "    call " << fallbackMethod << "\n";
                 out << doneLabel << ":\n";
             }
-        } else if (className == "Int" && methodName == "toLong") {
+        } else if (className == "Char" && methodName == "toInt") {
             out << "    mov rax, rdi\n";
-        } else if ((className == "Int" || className == "Long") && methodName == "toFloat") {
+        } else if ((className == "Char" || className == "Int") && methodName == "toLong") {
+            out << "    mov rax, rdi\n";
+        } else if ((className == "Char" || className == "Int" || className == "Long") && methodName == "toFloat") {
             out << "    mov rax, rdi\n";
             out << "    sar rax, 1\n";
             out << "    cvtsi2ss xmm0, rax\n";
             out << "    movd eax, xmm0\n";
-        } else if ((className == "Int" || className == "Long") && methodName == "toDouble") {
+        } else if ((className == "Char" || className == "Int" || className == "Long") && methodName == "toDouble") {
             out << "    mov rax, rdi\n";
             out << "    sar rax, 1\n";
             out << "    cvtsi2sd xmm0, rax\n";
