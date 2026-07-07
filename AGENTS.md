@@ -62,7 +62,8 @@ des détails internes.
 Principes:
 
 - préférer une API publique uniforme: `Array[T]`, `Option[T]`, `Set[T]`,
-  `Map[K, V]`, `Sized`, `Iterable[T]`, `String`, classes, méthodes et lambdas;
+  `Map[K, V]`, `Sized`, `Iterator[T]`, `Iterable[T]`, `String`, classes,
+  méthodes et lambdas;
 - masquer progressivement `IntArray`, `LongArray`, `ObjectArray[T]`,
   `ArrayObject[T]`, les helpers `arrayBase...` et les fonctions spécialisées;
 - garder les spécialisations runtime comme optimisations internes;

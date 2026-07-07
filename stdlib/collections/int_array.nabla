@@ -1,5 +1,6 @@
 import core.option_int
 import core.iterable
+import core.iterator
 import collections.object_array
 import collections.array_base
 import util
@@ -123,6 +124,18 @@ class RangeIntBase(start: Int, until: Int) {
     }
 }
 
+class RangeIntIterator(var current: Int, until: Int) with Iterator[Int] {
+    override def hasNext(): Bool = {
+        current < until
+    }
+
+    override def next(): Int = {
+        val value = current
+        current = current + 1
+        value
+    }
+}
+
 class RangeInt extends RangeIntBase with Iterable[Int](start, until) {
     override def size(): Int = {
         if until > start {
@@ -146,6 +159,10 @@ class RangeInt extends RangeIntBase with Iterable[Int](start, until) {
             f(value)
             value = value + 1
         }
+    }
+
+    override def iterator(): Iterator[Int] = {
+        new RangeIntIterator(start, until)
     }
 
     def fold(initial: Int, combine: (Int, Int) => Int): Int = {
@@ -1079,6 +1096,10 @@ class ArrayInt(values: IntArray) with Iterable[Int] {
 
     override def foreach(f: (Int) => Unit): Unit = {
         arrayBaseForeach[Int, IntArray](values, intArrayLength, intArrayGet, f)
+    }
+
+    override def iterator(): Iterator[Int] = {
+        new ArrayPrimitiveIterator[Int, IntArray](values, intArrayLength, intArrayGet, 0)
     }
 
     def exists(predicate: (Int) => Bool): Bool = {

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Iterable - Nabla stdlib</title>
+  <title>Iterator - Nabla stdlib</title>
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -16,12 +16,12 @@
     </nav>
   </header>
   <main id="contenu">
-    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="../index.html">Modules</a> / core.iterable</nav>
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="../index.html">Modules</a> / core.iterator</nav>
     <section class="module-hero">
       <p class="eyebrow">Module</p>
-      <h1>Iterable</h1>
-      <p class="import"><code>import core.iterable</code></p>
-      <p>Trait public minimal pour les collections parcourables.</p>
+      <h1>Iterator</h1>
+      <p class="import"><code>import core.iterator</code></p>
+      <p>Trait public minimal pour parcourir sequentiellement les elements d&#x27;une collection.</p>
 
     </section>
     <div class="doc-shell">
@@ -30,44 +30,44 @@
       <section class="toc-group">
         <h3>Types</h3>
         <ul>
-        <li><a href="#Iterable" title="trait Iterable[T]"><span>Iterable</span><code>trait Iterable[T]</code></a></li>
+        <li><a href="#Iterator" title="trait Iterator[T]"><span>Iterator</span><code>trait Iterator[T]</code></a></li>
         </ul>
       </section>
       <section class="toc-group">
         <h3>Methodes</h3>
         <ul>
-        <li><a href="#iterator" title="def iterator(): Iterator[T]"><span>iterator</span><code>def iterator(): Iterator[T]</code></a></li>
-        <li><a href="#foreach" title="def foreach(f: (T) =&gt; Unit): Unit"><span>foreach</span><code>def foreach(f: (T) =&gt; Unit): Unit</code></a></li>
+        <li><a href="#hasNext" title="def hasNext(): Bool"><span>hasNext</span><code>def hasNext(): Bool</code></a></li>
+        <li><a href="#next" title="def next(): T"><span>next</span><code>def next(): T</code></a></li>
         </ul>
       </section>
       </aside>
       <section class="content entries" aria-label="Reference detaillee">
-        <article class="entry" id="Iterable">
+        <article class="entry" id="Iterator">
           <div class="entry-meta">
             <span class="kind">trait</span> <span class="status recommended">Recommandee</span>
           </div>
-          <h2>Iterable</h2>
-          <pre class="signature"><code>trait Iterable[T]</code></pre>
-          <p>Collection parcourable element par element.</p>
-<p>Iterable[T] herite de Sized : un consommateur polymorphe peut donc utiliser size(), isEmpty() et nonEmpty() en plus de foreach et iterator.</p>
+          <h2>Iterator</h2>
+          <pre class="signature"><code>trait Iterator[T]</code></pre>
+          <p>Curseur mutable avance explicitement sur une sequence d&#x27;elements.</p>
+<p>Un Iterator[T] represente un parcours a usage sequentiel: hasNext() indique si next() peut encore produire une valeur, puis next() avance le curseur.</p>
 
         </article>
-        <article class="entry" id="iterator">
+        <article class="entry" id="hasNext">
           <div class="entry-meta">
             <span class="kind">def</span> <span class="status recommended">Recommandee</span>
           </div>
-          <h2>iterator</h2>
-          <pre class="signature"><code>def iterator(): Iterator[T]</code></pre>
-          <p>Cree un curseur mutable independant pour parcourir cette collection.</p>
+          <h2>hasNext</h2>
+          <pre class="signature"><code>def hasNext(): Bool</code></pre>
+          <p>Indique si un prochain element est disponible.</p>
 
         </article>
-        <article class="entry" id="foreach">
+        <article class="entry" id="next">
           <div class="entry-meta">
             <span class="kind">def</span> <span class="status recommended">Recommandee</span>
           </div>
-          <h2>foreach</h2>
-          <pre class="signature"><code>def foreach(f: (T) =&gt; Unit): Unit</code></pre>
-          <p>Applique f a chaque element.</p>
+          <h2>next</h2>
+          <pre class="signature"><code>def next(): T</code></pre>
+          <p>Retourne l&#x27;element courant et avance le curseur.</p>
 
         </article>
       </section>

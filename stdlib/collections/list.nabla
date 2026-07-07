@@ -14,6 +14,7 @@
 /// @end
 
 import core.iterable
+import core.iterator
 import core.option
 import collections.array
 
@@ -171,6 +172,13 @@ trait List[T] with Iterable[T] {
         }
     }
 
+    /// Retourne un itérateur mutable indépendant sur cette liste.
+    /// @signature def iterator(): Iterator[T]
+    /// @status Recommandee
+    override def iterator(): Iterator[T] = {
+        new ListIterator[T](this)
+    }
+
     /// Concatene les elements separes par separator.
     /// @signature def mkString(separator: String): String
     /// @status Experimentale
@@ -199,6 +207,10 @@ object Nil with List[Nothing] {
         }
     }
 
+    override def iterator(): Iterator[Nothing] = {
+        new ListIterator[Nothing](this)
+    }
+
     override def head(): Nothing = {
         panic("Nil.head")
     }
@@ -216,6 +228,18 @@ object Nil with List[Nothing] {
     }
 }
 
+class ListIterator[T](var remaining: List[T]) with Iterator[T] {
+    override def hasNext(): Bool = {
+        remaining.nonEmpty()
+    }
+
+    override def next(): T = {
+        val value = remaining.head()
+        remaining = remaining.tail()
+        value
+    }
+}
+
 /// Cellule non vide.
 /// @status Recommandee
 class Cons[T](val head: T, val tail: List[T]) with List[T] {
@@ -230,6 +254,10 @@ class Cons[T](val head: T, val tail: List[T]) with List[T] {
     override def foreach(f: (T) => Unit): Unit = {
         f(head)
         tail.foreach(f)
+    }
+
+    override def iterator(): Iterator[T] = {
+        new ListIterator[T](this)
     }
 
     override def headOption(): Option[T] = {

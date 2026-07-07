@@ -1,0 +1,31 @@
+import core.iterable
+import collections.array
+import collections.set
+import collections.map
+
+
+def countStrings(values: Iterable[String]): Int = {
+    val iter = values.iterator()
+    var total = 0
+    while iter.hasNext() {
+        total = total + iter.next().length()
+    }
+    total
+}
+
+def sumEntries(values: Iterable[Tuple2[String, Int]]): Int = {
+    val iter = values.iterator()
+    var total = 0
+    while iter.hasNext() {
+        val entry = iter.next()
+        total = total + entry._1.length() + entry._2
+    }
+    total
+}
+
+def main(): Int = {
+    val words: Iterable[String] = Array("aa", "bbb")
+    val names: Iterable[String] = Set("c")
+    val scores: Iterable[Tuple2[String, Int]] = Map("dd" -> 4)
+    countStrings(words) + countStrings(names) + sumEntries(scores)
+}

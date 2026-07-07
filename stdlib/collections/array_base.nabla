@@ -1,3 +1,17 @@
+import core.iterator
+
+class ArrayPrimitiveIterator[T, Raw](rawValues: Raw, lengthFn: (Raw) => Int, getFn: (Raw, Int) => T, var index: Int) with Iterator[T] {
+    override def hasNext(): Bool = {
+        index < lengthFn(rawValues)
+    }
+
+    override def next(): T = {
+        val value = getFn(rawValues, index)
+        index = index + 1
+        value
+    }
+}
+
 def arrayBaseSize[Raw](values: Raw, lengthFn: (Raw) => Int): Int = {
     lengthFn(values)
 }
@@ -103,6 +117,10 @@ class ArrayPrimitiveBase[T, Raw](
 
     def foreach(f: (T) => Unit): Unit = {
         arrayBaseForeach[T, Raw](rawValues, lengthFn, getFn, f)
+    }
+
+    def iterator(): Iterator[T] = {
+        new ArrayPrimitiveIterator[T, Raw](rawValues, lengthFn, getFn, 0)
     }
 
     def raw(): Raw = {

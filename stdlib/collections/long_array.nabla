@@ -1,6 +1,7 @@
 import collections.object_array
 import collections.array_base
 import core.iterable
+import core.iterator
 import util
 
 def longArrayFill(size: Int, value: Long): LongArray = {
@@ -298,6 +299,10 @@ class ArrayLong(values: LongArray) with Iterable[Long] {
 
     override def foreach(f: (Long) => Unit): Unit = {
         arrayBaseForeach[Long, LongArray](values, longArrayLength, longArrayGet, f)
+    }
+
+    override def iterator(): Iterator[Long] = {
+        new ArrayPrimitiveIterator[Long, LongArray](values, longArrayLength, longArrayGet, 0)
     }
 
     def raw(): LongArray = {

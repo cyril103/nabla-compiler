@@ -1,6 +1,7 @@
 import collections.object_array
 import collections.array_base
 import core.iterable
+import core.iterator
 import util
 
 def boolArrayFill(size: Int, value: Bool): BoolArray = {
@@ -351,6 +352,10 @@ class ArrayBool extends ArrayPrimitiveBase[Bool, BoolArray] with Iterable[Bool](
 
     override def foreach(f: (Bool) => Unit): Unit = {
         arrayBaseForeach[Bool, BoolArray](rawValues, lengthFn, getFn, f)
+    }
+
+    override def iterator(): Iterator[Bool] = {
+        new ArrayPrimitiveIterator[Bool, BoolArray](rawValues, lengthFn, getFn, 0)
     }
 }
 

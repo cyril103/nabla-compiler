@@ -1,0 +1,20 @@
+/// @module Iterator
+/// Trait public minimal pour parcourir sequentiellement les elements d'une collection.
+
+/// Curseur mutable avance explicitement sur une sequence d'elements.
+/// @signature trait Iterator[T]
+/// @status Recommandee
+///
+/// Un Iterator[T] represente un parcours a usage sequentiel: hasNext() indique
+/// si next() peut encore produire une valeur, puis next() avance le curseur.
+trait Iterator[T] {
+    /// Indique si un prochain element est disponible.
+    /// @signature def hasNext(): Bool
+    /// @status Recommandee
+    def hasNext(): Bool
+
+    /// Retourne l'element courant et avance le curseur.
+    /// @signature def next(): T
+    /// @status Recommandee
+    def next(): T
+}
