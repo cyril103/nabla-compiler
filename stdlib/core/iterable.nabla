@@ -23,6 +23,13 @@ trait Iterable[T] with Sized {
         this.iterator().foreach(f)
     }
 
+    /// Retourne le premier element de la collection.
+    /// @signature def head(): T
+    /// @status Recommandee
+    def head(): T = {
+        this.iterator().next()
+    }
+
     /// Indique si au moins un element satisfait predicate.
     /// @signature def exists(predicate: (T) => Bool): Bool
     /// @status Recommandee

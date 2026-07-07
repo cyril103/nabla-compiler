@@ -44,6 +44,7 @@ pas comme cible idiomatique pour le code applicatif.
 - `Iterable[T]`
   - herite de `Sized`
   - `iterator()`
+  - `head()`
   - `foreach(f)`
   - `exists(predicate)`, `forall(predicate)`, `count(predicate)`
 - `Option[T]`
@@ -125,11 +126,12 @@ pas comme cible idiomatique pour le code applicatif.
 `Iterable[T]` herite de `Sized` et expose aussi `iterator()`: les appels communs
 `size()`, `isEmpty()`, `nonEmpty()`, `foreach(...)` et le parcours explicite via
 `Iterator[T]` restent disponibles via le meme contrat nominal minimal. Par defaut,
-`Iterable.foreach(...)`, `exists(...)`, `forall(...)` et `count(...)` creent un nouvel
-`iterator()` puis deleguent aux methodes derivees de `Iterator[T]`; les collections
-peuvent garder des overrides specialises si utile. Un `Iterator[T]` expose `hasNext()`,
-`next()`, `isEmpty()`, `nonEmpty()`, `foreach(...)`, `exists(...)`, `forall(...)` et
-`count(...)`; seuls les predicats et `foreach(...)` consomment les elements restants.
+`Iterable.foreach(...)`, `head(...)`, `exists(...)`, `forall(...)` et `count(...)`
+creent un nouvel `iterator()` puis deleguent aux methodes derivees de `Iterator[T]`;
+les collections peuvent garder des overrides specialises si utile. Un `Iterator[T]`
+expose `hasNext()`, `next()`, `isEmpty()`, `nonEmpty()`, `foreach(...)`, `exists(...)`,
+`forall(...)` et `count(...)`; `next()`, les predicats et `foreach(...)` consomment les
+elements restants.
 
 Les exemples doivent privilegier `Array[T]` et les fonctions de haut niveau. Les
 facades specialisees restent acceptables dans les tests de backend/runtime et les
