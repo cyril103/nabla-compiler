@@ -38,9 +38,9 @@ pour garder un cap clair après le tag `v0.1.0`.
   traits, y compris des traits generiques instancies comme `Iterable[T]`, avec
   dispatch via le type du trait. La stdlib expose maintenant `Sized` et
   `Iterable[T]` comme contrats publics minimaux pour les collections; `Iterable[T]`
-  fournit un `foreach(...)` par defaut via `iterator()`, et `Iterator[T]`
-  fournit le curseur explicite commun expose par `Iterable.iterator()` avec sa
-  propre consommation `foreach(...)`.
+  fournit `foreach(...)`, `exists(...)`, `forall(...)` et `count(...)` par defaut
+  via `iterator()`, et `Iterator[T]` fournit le curseur explicite commun expose
+  par `Iterable.iterator()` avec les memes operations de consommation derivees.
   La conversion `toString()` est désormais disponible de façon uniforme pour les
   types primitifs usuels (`Int`, `Long`, `Float`, `Double`, `Bool`, `Char`) au niveau du
   backend runtime, y compris via un paramètre `Any`/`AnyVal` de fonction/méthode

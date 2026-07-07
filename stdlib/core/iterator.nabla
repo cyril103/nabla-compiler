@@ -26,4 +26,49 @@ trait Iterator[T] {
             f(this.next())
         }
     }
+
+    /// Indique si au moins un element restant satisfait predicate.
+    /// @signature def exists(predicate: (T) => Bool): Bool
+    /// @status Recommandee
+    def exists(predicate: (T) => Bool): Bool = {
+        var found = false
+        while this.hasNext() && !found {
+            if predicate(this.next()) {
+                found = true
+            } else {
+                found = found
+            }
+        }
+        found
+    }
+
+    /// Indique si tous les elements restants satisfont predicate.
+    /// @signature def forall(predicate: (T) => Bool): Bool
+    /// @status Recommandee
+    def forall(predicate: (T) => Bool): Bool = {
+        var all = true
+        while this.hasNext() && all {
+            if !predicate(this.next()) {
+                all = false
+            } else {
+                all = all
+            }
+        }
+        all
+    }
+
+    /// Compte les elements restants qui satisfont predicate.
+    /// @signature def count(predicate: (T) => Bool): Int
+    /// @status Recommandee
+    def count(predicate: (T) => Bool): Int = {
+        var total = 0
+        while this.hasNext() {
+            if predicate(this.next()) {
+                total = total + 1
+            } else {
+                total = total
+            }
+        }
+        total
+    }
 }

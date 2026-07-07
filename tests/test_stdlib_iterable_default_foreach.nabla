@@ -21,13 +21,13 @@ class CountingIterator(var current: Int, until: Int) with Iterator[Int] {
     }
 }
 
-class CountingIterable(count: Int) with Iterable[Int] {
+class CountingIterable(sizeValue: Int) with Iterable[Int] {
     override def size(): Int = {
-        count
+        sizeValue
     }
 
     override def iterator(): Iterator[Int] = {
-        new CountingIterator(0, count)
+        new CountingIterator(0, sizeValue)
     }
 }
 
