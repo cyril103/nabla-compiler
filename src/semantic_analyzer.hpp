@@ -19,4 +19,7 @@ private:
     bool isKnownType(const std::string& type) const;
     bool isKnownTypeInScope(
         const std::string& type, const std::vector<std::string>& typeParameters) const;
+    bool isKnownTypeInScope(
+        const std::string& type,
+        const std::vector<CompilerContext::TypeParameterInfo>& typeParameters) const;
 };

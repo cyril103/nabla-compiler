@@ -54,6 +54,7 @@ private:
     std::vector<LambdaCaptureScope> lambdaCaptureScopes;
     std::vector<std::unique_ptr<ASTNode>> generatedFunctions;
     std::vector<std::string> currentFunctionTypeParameters;
+    std::vector<CompilerContext::TypeParameterInfo> currentFunctionTypeParameterInfos;
     int nextSymbolId = 0;
 
     Token peek() const;
@@ -95,6 +96,8 @@ private:
     std::unique_ptr<ASTNode> parseLocalFunctionDef();
     std::unique_ptr<ASTNode> parseFunctionDef(
         std::string clName, std::string objectName = "", bool allowAbstractMethod = false);
+    std::vector<CompilerContext::TypeParameterInfo> parseTypeParameterList(
+        const std::vector<std::string>& enclosingTypeParameters = {});
     std::vector<std::unique_ptr<ASTNode>> parseArguments(
         const std::vector<std::string>& expectedTypes = {},
         const std::vector<bool>& byNameParameters = {});

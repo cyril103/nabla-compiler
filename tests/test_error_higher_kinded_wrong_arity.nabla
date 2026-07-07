@@ -1,0 +1,15 @@
+import collections.list
+
+trait WrapFactory[CC[_]] {
+    def single[T](value: T): CC[T]
+}
+
+class Bad() with WrapFactory[List[Int]] {
+    override def single[T](value: T): List[Int] = {
+        List.cons[Int](1, Nil)
+    }
+}
+
+def main(): Int = {
+    0
+}

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IterableOps - Nabla stdlib</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <header class="topbar">
+    <a class="brand" href="../index.html">Nabla stdlib</a>
+    <nav class="topnav" aria-label="Navigation principale">
+      <a href="../index.html">Modules</a>
+      <a href="https://github.com/cyril103/nabla-compiler">GitHub</a>
+    </nav>
+  </header>
+  <main id="contenu">
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="../index.html">Modules</a> / core.iterable_ops</nav>
+    <section class="module-hero">
+      <p class="eyebrow">Module</p>
+      <h1>IterableOps</h1>
+      <p class="import"><code>import core.iterable_ops</code></p>
+      <p>Traits experimentaux pour preparer les factories/builders de collections.</p>
+
+    </section>
+    <div class="doc-shell">
+      <aside class="sidebar" aria-label="Sommaire des symboles publics">
+        <h2>API publique</h2>
+      <section class="toc-group">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="#IterableFactory" title="trait IterableFactory[CC[_]]"><span>IterableFactory</span><code>trait IterableFactory[CC[_]]</code></a></li>
+        <li><a href="#IterableOps" title="trait IterableOps[A, CC[_], C]"><span>IterableOps</span><code>trait IterableOps[A, CC[_], C]</code></a></li>
+        </ul>
+      </section>
+      <section class="toc-group">
+        <h3>Methodes</h3>
+        <ul>
+        <li><a href="#empty" title="def empty[A](): CC[A]"><span>empty</span><code>def empty[A](): CC[A]</code></a></li>
+        <li><a href="#iterableFactory" title="def iterableFactory(): IterableFactory[CC]"><span>iterableFactory</span><code>def iterableFactory(): IterableFactory[CC]</code></a></li>
+        </ul>
+      </section>
+      </aside>
+      <section class="content entries" aria-label="Reference detaillee">
+        <article class="entry" id="IterableFactory">
+          <div class="entry-meta">
+            <span class="kind">trait</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>IterableFactory</h2>
+          <pre class="signature"><code>trait IterableFactory[CC[_]]</code></pre>
+          <p>Factory generique pour une famille de collections a un parametre de type.</p>
+<p>CC[_] represente un constructeur de type d&#x27;arite 1, par exemple List ou Set. La factory permet aux operations polymorphes de reconstruire une collection de la meme famille sans coder directement la collection concrete.</p>
+
+        </article>
+        <article class="entry" id="empty">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>empty</h2>
+          <pre class="signature"><code>def empty[A](): CC[A]</code></pre>
+          <p>Cree une collection vide de la famille CC pour le type A.</p>
+
+        </article>
+        <article class="entry" id="IterableOps">
+          <div class="entry-meta">
+            <span class="kind">trait</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>IterableOps</h2>
+          <pre class="signature"><code>trait IterableOps[A, CC[_], C]</code></pre>
+          <p>Base future pour des operations de collection a la Scala IterableOps.</p>
+<p>Cette premiere version ne deplace pas encore les operations de Iterable: elle expose seulement le lien entre l&#x27;Iterable courant, sa famille CC[_] et le type concret C, afin de stabiliser la representation des constructeurs de types avant d&#x27;ajouter map/filter/builders.</p>
+
+        </article>
+        <article class="entry" id="iterableFactory">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>iterableFactory</h2>
+          <pre class="signature"><code>def iterableFactory(): IterableFactory[CC]</code></pre>
+          <p>Retourne la factory de la famille de collection courante.</p>
+
+        </article>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

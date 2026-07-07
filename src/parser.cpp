@@ -158,45 +158,77 @@ void Parser::parseImport(std::unique_ptr<ProgramNode>& currentProgram) {
     for (auto& el : subProgram->elements) currentProgram->elements.push_back(std::move(el));
 }
 
+std::vector<CompilerContext::TypeParameterInfo> Parser::parseTypeParameterList(
+    const std::vector<std::string>& enclosingTypeParameters) {
+    std::vector<CompilerContext::TypeParameterInfo> typeParameters;
+    std::vector<std::string> typeParameterNames;
+    consume(TokenType::LBRACKET, "");
+    while (peek().type != TokenType::RBRACKET) {
+        Token typeParameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre de type attendu");
+        if (isBuiltinTypeName(typeParameterToken.value)) {
+            throw CompilerError(
+                ErrorKind::Parser, typeParameterToken.location,
+                "paramètre de type invalide: " + typeParameterToken.value);
+        }
+        if (isTypeParameterName(typeParameterToken.value, typeParameterNames)) {
+            throw CompilerError(
+                ErrorKind::Parser, typeParameterToken.location,
+                "paramètre de type déjà déclaré: " + typeParameterToken.value);
+        }
+        if (isTypeParameterName(typeParameterToken.value, enclosingTypeParameters)) {
+            throw CompilerError(
+                ErrorKind::Parser, typeParameterToken.location,
+                "paramètre de type déjà déclaré dans la classe englobante: " +
+                    typeParameterToken.value);
+        }
+
+        int arity = 0;
+        if (peek().type == TokenType::LBRACKET) {
+            consume(TokenType::LBRACKET, "");
+            Token wildcardToken = consume(TokenType::IDENTIFIER, "'_' attendu dans le paramètre de constructeur de type");
+            if (wildcardToken.value != "_") {
+                throw CompilerError(
+                    ErrorKind::Parser, wildcardToken.location,
+                    "seule la forme de paramètre constructeur de type d'arité 1 'CC[_]' est supportée");
+            }
+            if (peek().type == TokenType::COMMA) {
+                throw CompilerError(
+                    ErrorKind::Parser, peek().location,
+                    "constructeurs de type de plusieurs paramètres non supportés");
+            }
+            consume(TokenType::RBRACKET, "']' attendu après '_' dans le paramètre de constructeur de type");
+            arity = 1;
+        }
+
+        typeParameterNames.push_back(typeParameterToken.value);
+        typeParameters.push_back({typeParameterToken.value, arity});
+        if (peek().type == TokenType::COMMA) {
+            consume(TokenType::COMMA, "");
+        } else if (peek().type != TokenType::RBRACKET) {
+            throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ']' attendu après le paramètre de type");
+        }
+    }
+    consume(TokenType::RBRACKET, "']' attendu après les paramètres de type");
+    return typeParameters;
+}
+
 void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool isTrait) {
     Token classToken = consume(isTrait ? TokenType::KW_TRAIT : TokenType::KW_CLASS, "");
     Token classNameToken = consume(TokenType::IDENTIFIER, isTrait ? "Nom de trait attendu" : "Nom de classe attendu");
     std::string className = classNameToken.value;
     std::vector<std::string> typeParameters;
+    std::vector<CompilerContext::TypeParameterInfo> typeParameterInfos;
     if (peek().type == TokenType::LBRACKET) {
-        consume(TokenType::LBRACKET, "");
-        while (peek().type != TokenType::RBRACKET) {
-            Token typeParameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre de type attendu");
-            if (typeParameterToken.value == "Int" || typeParameterToken.value == "Long" ||
-                typeParameterToken.value == "Float" || typeParameterToken.value == "Double" ||
-                typeParameterToken.value == "Bool" || typeParameterToken.value == "Char" ||
-                typeParameterToken.value == "String" ||
-                typeParameterToken.value == "Unit" || typeParameterToken.value == "Nothing" ||
-                typeParameterToken.value == "IntArray" ||
-                typeParameterToken.value == "LongArray" || typeParameterToken.value == "FloatArray" ||
-                typeParameterToken.value == "DoubleArray" || typeParameterToken.value == "BoolArray") {
-                throw CompilerError(
-                    ErrorKind::Parser, typeParameterToken.location,
-                    "paramètre de type invalide: " + typeParameterToken.value);
-            }
-            if (isTypeParameterName(typeParameterToken.value, typeParameters)) {
-                throw CompilerError(
-                    ErrorKind::Parser, typeParameterToken.location,
-                    "paramètre de type déjà déclaré: " + typeParameterToken.value);
-            }
-            typeParameters.push_back(typeParameterToken.value);
-            if (peek().type == TokenType::COMMA) {
-                consume(TokenType::COMMA, "");
-            } else if (peek().type != TokenType::RBRACKET) {
-                throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ']' attendu après le paramètre de type");
-            }
+        typeParameterInfos = parseTypeParameterList();
+        for (const auto& typeParameter : typeParameterInfos) {
+            typeParameters.push_back(typeParameter.name);
         }
-        consume(TokenType::RBRACKET, "']' attendu après les paramètres de type");
     }
     if (context.classes.count(className)) {
         throw CompilerError(ErrorKind::Parser, classNameToken.location, "classe déjà déclarée: " + className);
     }
     context.classes[className].typeParameters = typeParameters;
+    context.classes[className].typeParameterInfos = typeParameterInfos;
     context.classes[className].location = classToken.location;
     context.classes[className].isTrait = isTrait;
 
@@ -226,7 +258,7 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool is
     auto registerConstructorValAccessor = [&](const Token& fieldToken, const std::string& fieldType) {
         auto& classInfo = context.classes[className];
         CompilerContext::FunctionSignature signature{
-            {}, fieldType, {}, fieldToken.location, fieldToken.location, false, false, true, {}};
+            {}, fieldType, {}, fieldToken.location, fieldToken.location, false, false, true, {}, {}};
         auto& overloads = classInfo.methodOverloads[fieldToken.value];
         for (const auto& overloadName : overloads) {
             const auto existingMethod = classInfo.methods.find(overloadName);
@@ -429,7 +461,9 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool is
     context.classes[className].inheritedConstructorSignature = inheritedConstructorSignature;
     currentParsingClass = className;
     auto previousTypeParameters = currentFunctionTypeParameters;
+    auto previousTypeParameterInfos = currentFunctionTypeParameterInfos;
     currentFunctionTypeParameters = typeParameters;
+    currentFunctionTypeParameterInfos = typeParameterInfos;
 
     if (peek().type == TokenType::LBRACE) {
         consume(TokenType::LBRACE, "");
@@ -460,6 +494,7 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool is
         }
     }
     currentFunctionTypeParameters = previousTypeParameters;
+    currentFunctionTypeParameterInfos = previousTypeParameterInfos;
     currentParsingClass.clear();
 }
 
@@ -929,7 +964,8 @@ std::unique_ptr<ASTNode> Parser::parseLambdaExpression() {
     const std::string returnType = inferLambdaReturnType(*body, parameters, captures);
     std::string lambdaName = "lambda." + std::to_string(context.nextLambdaId++);
     context.functions[lambdaName] = {
-        signatureParameters, returnType, currentFunctionTypeParameters, start.location, start.location, false, false, false, {}};
+        signatureParameters, returnType, currentFunctionTypeParameters, start.location, start.location,
+        false, false, false, {}, currentFunctionTypeParameterInfos};
 
     auto function = located(std::make_unique<FunctionDefNode>(
         "", lambdaName, returnType, currentFunctionTypeParameters,
@@ -1026,7 +1062,8 @@ std::unique_ptr<ASTNode> Parser::parseInferredLambdaExpression(const std::string
     const std::string returnType = inferLambdaReturnType(*body, parameters, captures);
     std::string lambdaName = "lambda." + std::to_string(context.nextLambdaId++);
     context.functions[lambdaName] = {
-        signatureParameters, returnType, currentFunctionTypeParameters, start.location, start.location, false, false, false, {}};
+        signatureParameters, returnType, currentFunctionTypeParameters, start.location, start.location,
+        false, false, false, {}, currentFunctionTypeParameterInfos};
 
     auto function = located(std::make_unique<FunctionDefNode>(
         "", lambdaName, returnType, currentFunctionTypeParameters,
@@ -1101,7 +1138,7 @@ std::unique_ptr<ASTNode> Parser::parseByNameArgument(
     std::string lambdaName = "lambda." + std::to_string(context.nextLambdaId++);
     context.functions[lambdaName] = {
         std::vector<CompilerContext::ParameterInfo>{}, body->getType(), currentFunctionTypeParameters,
-        start.location, start.location, false, false, false, {}};
+        start.location, start.location, false, false, false, {}, currentFunctionTypeParameterInfos};
 
     generatedFunctions.push_back(located(std::make_unique<FunctionDefNode>(
         "", lambdaName, body->getType(), currentFunctionTypeParameters,
@@ -1122,9 +1159,11 @@ std::string Parser::inferLambdaReturnType(
     const std::vector<FunctionDefNode::Capture>& captures) {
     const auto previousSymbolTypes = context.semanticSymbolTypes;
     const auto previousTypeParameters = context.semanticTypeParameters;
+    const auto previousTypeParameterInfos = context.semanticTypeParameterInfos;
 
     context.semanticSymbolTypes.clear();
     context.semanticTypeParameters = currentFunctionTypeParameters;
+    context.semanticTypeParameterInfos = currentFunctionTypeParameterInfos;
     for (const auto& capture : captures) {
         context.semanticSymbolTypes[capture.symbolName] = capture.type;
     }
@@ -1137,6 +1176,7 @@ std::string Parser::inferLambdaReturnType(
 
     context.semanticSymbolTypes = previousSymbolTypes;
     context.semanticTypeParameters = previousTypeParameters;
+    context.semanticTypeParameterInfos = previousTypeParameterInfos;
     return returnType;
 }
 
@@ -2210,7 +2250,7 @@ std::unique_ptr<ASTNode> Parser::parseLocalFunctionDef() {
         "local." + name + "." + std::to_string(context.nextLambdaId++);
     CompilerContext::FunctionSignature signature{
         signatureParameters, returnType, currentFunctionTypeParameters,
-        defToken.location, returnTypeLocation, false, false, false, {}};
+        defToken.location, returnTypeLocation, false, false, false, {}, currentFunctionTypeParameterInfos};
     context.functions[mangledName] = signature;
     std::vector<bool> localFunctionByNameParameters;
     for (const auto& parameter : signatureParameters) {
@@ -2284,41 +2324,13 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
     std::string name = nameToken.value;
     const std::string functionName = objectName.empty() ? name : objectName + "." + name;
     std::vector<std::string> typeParameters;
+    std::vector<CompilerContext::TypeParameterInfo> typeParameterInfos;
     if (peek().type == TokenType::LBRACKET) {
-        consume(TokenType::LBRACKET, "");
-        while (peek().type != TokenType::RBRACKET) {
-            Token typeParameterToken = consume(TokenType::IDENTIFIER, "Nom de paramètre de type attendu");
-            if (typeParameterToken.value == "Int" || typeParameterToken.value == "Long" ||
-                typeParameterToken.value == "Float" || typeParameterToken.value == "Double" ||
-                typeParameterToken.value == "Bool" || typeParameterToken.value == "Char" ||
-                typeParameterToken.value == "String" ||
-                typeParameterToken.value == "Unit" || typeParameterToken.value == "Nothing" ||
-                typeParameterToken.value == "IntArray" ||
-                typeParameterToken.value == "LongArray" || typeParameterToken.value == "FloatArray" ||
-                typeParameterToken.value == "DoubleArray" || typeParameterToken.value == "BoolArray") {
-                throw CompilerError(
-                    ErrorKind::Parser, typeParameterToken.location,
-                    "paramètre de type invalide: " + typeParameterToken.value);
-            }
-            if (isTypeParameterName(typeParameterToken.value, typeParameters)) {
-                throw CompilerError(
-                    ErrorKind::Parser, typeParameterToken.location,
-                    "paramètre de type déjà déclaré: " + typeParameterToken.value);
-            }
-            if (!clName.empty() && isTypeParameterName(typeParameterToken.value, context.classes[clName].typeParameters)) {
-                throw CompilerError(
-                    ErrorKind::Parser, typeParameterToken.location,
-                    "paramètre de type déjà déclaré dans la classe englobante: " +
-                        typeParameterToken.value);
-            }
-            typeParameters.push_back(typeParameterToken.value);
-            if (peek().type == TokenType::COMMA) {
-                consume(TokenType::COMMA, "");
-            } else if (peek().type != TokenType::RBRACKET) {
-                throw CompilerError(ErrorKind::Parser, peek().location, "',' ou ']' attendu après le paramètre de type");
-            }
+        typeParameterInfos = parseTypeParameterList(
+            clName.empty() ? std::vector<std::string>{} : context.classes[clName].typeParameters);
+        for (const auto& typeParameter : typeParameterInfos) {
+            typeParameters.push_back(typeParameter.name);
         }
-        consume(TokenType::RBRACKET, "']' attendu après les paramètres de type");
     }
     std::vector<FunctionDefNode::Parameter> parameters;
     std::vector<CompilerContext::ParameterInfo> signatureParameters;
@@ -2424,7 +2436,8 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
     }
     const bool isAbstract = allowAbstractMethod && peek().type != TokenType::EQUAL;
     CompilerContext::FunctionSignature signature{
-        signatureParameters, returnType, typeParameters, defToken.location, returnTypeLocation, isOverride, isAbstract, false, {}};
+        signatureParameters, returnType, typeParameters, defToken.location, returnTypeLocation,
+        isOverride, isAbstract, false, {}, typeParameterInfos};
     if (!curriedSignatureParameters.empty()) {
         for (const auto& parameter : curriedSignatureParameters) {
             signature.returnFunctionByNameParameters.push_back(parameter.isByName);
@@ -2503,12 +2516,17 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
     }
     consume(TokenType::EQUAL, "");
     auto previousFunctionTypeParameters = currentFunctionTypeParameters;
+    auto previousFunctionTypeParameterInfos = currentFunctionTypeParameterInfos;
     currentFunctionTypeParameters.clear();
+    currentFunctionTypeParameterInfos.clear();
     if (!clName.empty()) {
         currentFunctionTypeParameters = context.classes[clName].typeParameters;
+        currentFunctionTypeParameterInfos = context.classes[clName].typeParameterInfos;
     }
     currentFunctionTypeParameters.insert(
         currentFunctionTypeParameters.end(), typeParameters.begin(), typeParameters.end());
+    currentFunctionTypeParameterInfos.insert(
+        currentFunctionTypeParameterInfos.end(), typeParameterInfos.begin(), typeParameterInfos.end());
     std::unique_ptr<ASTNode> body;
     if (!curriedSignatureParameters.empty()) {
         const size_t outerScopeCount = localScopes.size();
@@ -2537,7 +2555,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
         std::string lambdaName = "lambda." + std::to_string(context.nextLambdaId++);
         context.functions[lambdaName] = {
             curriedSignatureParameters, declaredReturnType, currentFunctionTypeParameters,
-            nameToken.location, returnTypeLocation, false, false, false, {}};
+            nameToken.location, returnTypeLocation, false, false, false, {}, currentFunctionTypeParameterInfos};
         generatedFunctions.push_back(located(std::make_unique<FunctionDefNode>(
             "", lambdaName, declaredReturnType, currentFunctionTypeParameters,
             std::move(curriedParameters), std::move(curriedBody), captures), nameToken.location));
@@ -2558,6 +2576,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
         body = parseExpression();
     }
     currentFunctionTypeParameters = previousFunctionTypeParameters;
+    currentFunctionTypeParameterInfos = previousFunctionTypeParameterInfos;
     localScopes.pop_back();
     std::vector<std::string> ownerTypeParameters;
     if (!clName.empty()) ownerTypeParameters = context.classes[clName].typeParameters;
@@ -2677,6 +2696,19 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseFunctionCallArguments(
     std::map<std::string, std::string> substitution = std::move(initialSubstitution);
     if (auto genericSubstitution = genericFunctionSubstitutionFor(signature, typeArguments)) {
         substitution.insert(genericSubstitution->begin(), genericSubstitution->end());
+    } else if (!typeArguments.empty() && signature.typeParameters.size() == typeArguments.size()) {
+        for (std::size_t i = 0; i < typeArguments.size(); ++i) {
+            const int expectedArity = i < signature.typeParameterInfos.size()
+                ? signature.typeParameterInfos[i].arity
+                : 0;
+            if (expectedArity == 1 && parameterizedTypeFromName(typeArguments[i])) {
+                throw CompilerError(
+                    ErrorKind::Semantic, peek().location,
+                    "le paramètre de type '" + signature.typeParameters[i] +
+                        "[_]' attend un constructeur de type d'arité 1, pas le type appliqué '" +
+                        typeArguments[i] + "'");
+            }
+        }
     }
 
     while (peek().type != TokenType::RPAREN) {

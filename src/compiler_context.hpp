@@ -25,6 +25,11 @@ struct CompilerContext {
         bool isByName = false;
     };
 
+    struct TypeParameterInfo {
+        std::string name;
+        int arity = 0;
+    };
+
     struct FunctionSignature {
         std::vector<ParameterInfo> parameters;
         std::string returnType;
@@ -35,6 +40,7 @@ struct CompilerContext {
         bool isAbstract = false;
         bool isSyntheticAccessor = false;
         std::vector<bool> returnFunctionByNameParameters;
+        std::vector<TypeParameterInfo> typeParameterInfos;
     };
 
     struct FieldInfo {
@@ -55,6 +61,7 @@ struct CompilerContext {
         bool hasExplicitParent = false;
         bool isTrait = false;
         std::vector<std::string> typeParameters;
+        std::vector<TypeParameterInfo> typeParameterInfos;
         SourceLocation location;
     };
 
@@ -70,6 +77,7 @@ struct CompilerContext {
     std::filesystem::path currentFile;
     std::map<std::string, std::string> semanticSymbolTypes;
     std::vector<std::string> semanticTypeParameters;
+    std::vector<TypeParameterInfo> semanticTypeParameterInfos;
     int nextLambdaId = 0;
 };
 
@@ -642,6 +650,23 @@ inline bool isTypeParameterName(const std::string& type, const std::vector<std::
     return false;
 }
 
+inline std::vector<CompilerContext::TypeParameterInfo> ordinaryTypeParameterInfos(
+    const std::vector<std::string>& typeParameters) {
+    std::vector<CompilerContext::TypeParameterInfo> infos;
+    for (const auto& typeParameter : typeParameters) {
+        infos.push_back({typeParameter, 0});
+    }
+    return infos;
+}
+
+inline int typeParameterArity(
+    const std::string& type, const std::vector<CompilerContext::TypeParameterInfo>& typeParameters) {
+    for (const auto& typeParameter : typeParameters) {
+        if (typeParameter.name == type) return typeParameter.arity;
+    }
+    return -1;
+}
+
 inline std::optional<std::map<std::string, std::string>> genericSubstitutionFor(
     const CompilerContext& context, const std::string& concreteType) {
     auto parameterizedType = parameterizedTypeFromName(concreteType);
@@ -663,6 +688,14 @@ inline std::optional<std::map<std::string, std::string>> genericFunctionSubstitu
     if (signature.typeParameters.size() != arguments.size()) return std::nullopt;
     std::map<std::string, std::string> substitution;
     for (size_t i = 0; i < signature.typeParameters.size(); ++i) {
+        const int expectedArity = i < signature.typeParameterInfos.size()
+            ? signature.typeParameterInfos[i].arity
+            : 0;
+        if (expectedArity == 1) {
+            if (parameterizedTypeFromName(arguments[i])) return std::nullopt;
+        } else if (expectedArity != 0) {
+            return std::nullopt;
+        }
         substitution[signature.typeParameters[i]] = arguments[i];
     }
     return substitution;
@@ -736,11 +769,16 @@ inline std::string substituteType(
     auto parameterizedType = parameterizedTypeFromName(type);
     if (parameterizedType) {
         auto [baseName, arguments] = *parameterizedType;
+        auto baseSubstitution = substitution.find(baseName);
         bool anyArgumentChanged = false;
         for (auto& argument : arguments) {
             const std::string originalArgument = argument;
             argument = substituteType(argument, substitution);
             anyArgumentChanged = anyArgumentChanged || argument != originalArgument;
+        }
+        if (baseSubstitution != substitution.end() &&
+            !parameterizedTypeFromName(baseSubstitution->second)) {
+            return canonicalTypeName(formatParameterizedType(baseSubstitution->second, arguments));
         }
         const std::string substitutedType = canonicalTypeName(formatParameterizedType(baseName, arguments));
         if (substitutedType == formatParameterizedType(baseName, arguments) &&
