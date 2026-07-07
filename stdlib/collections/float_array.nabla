@@ -43,7 +43,7 @@ def floatArrayMapObject[U](xs: FloatArray, f: (Float) => U): ArrayObject[U] = {
     new ArrayObject[U](mapped)
 }
 
-def floatArrayFlatMapObject[U](xs: FloatArray, transform: (Float) => ArrayObject[U]): ArrayObject[U] = {
+def floatArrayFlatMapObject[U](xs: FloatArray, transform: (Float) => Array[U]): ArrayObject[U] = {
     var index = 0
     var total = 0
     while (index < xs.length()) {
@@ -254,11 +254,11 @@ class ArrayFloat(values: FloatArray) with Iterable[Float] {
         floatArrayMapObject[U](values, f)
     }
 
-    def flatMapObject[U](transform: (Float) => ArrayObject[U]): ArrayObject[U] = {
+    def flatMapObject[U](transform: (Float) => Array[U]): ArrayObject[U] = {
         floatArrayFlatMapObject[U](values, transform)
     }
 
-    def flatMap[U](transform: (Float) => ArrayObject[U]): ArrayObject[U] = {
+    def flatMap[U](transform: (Float) => Array[U]): ArrayObject[U] = {
         floatArrayFlatMapObject[U](values, transform)
     }
 
@@ -343,7 +343,7 @@ def arrayFloatMapObject[T, U](xs: ArrayFloat, f: (Float) => U): ArrayObject[U] =
     floatArrayMapObject[U](xs.raw(), f)
 }
 
-def arrayFloatFlatMapObject[T, U](xs: ArrayFloat, transform: (Float) => ArrayObject[U]): ArrayObject[U] = {
+def arrayFloatFlatMapObject[T, U](xs: ArrayFloat, transform: (Float) => Array[U]): ArrayObject[U] = {
     floatArrayFlatMapObject[U](xs.raw(), transform)
 }
 

@@ -769,10 +769,17 @@ inline bool isTypeAssignable(
         return true;
     }
     if (actualParameterized && expectedParameterized &&
-        actualParameterized->first == "Array" &&
-        expectedParameterized->first == "ArrayObject" &&
-        actualParameterized->second == expectedParameterized->second) {
+        actualParameterized->second == expectedParameterized->second &&
+        ((actualParameterized->first == "Array" && expectedParameterized->first == "ArrayObject") ||
+         (actualParameterized->first == "ArrayObject" && expectedParameterized->first == "Array"))) {
         return true;
+    }
+    if (expectedParameterized && expectedParameterized->first == "Array") {
+        auto actualAlias = stdlibTypeAliasForResolvedName(actualType);
+        if (actualAlias && actualAlias->baseName == "Array" &&
+            actualAlias->arguments == expectedParameterized->second) {
+            return true;
+        }
     }
     if (expectedType == "Any") return true;
     if (expectedType == "AnyVal") return isBuiltinValueType(actualType);

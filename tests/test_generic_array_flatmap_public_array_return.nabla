@@ -1,0 +1,29 @@
+import collections.array
+
+// Les callbacks de flatMap peuvent déclarer le type public Array[T]
+// même quand T se spécialise vers une facade primitive.
+def intNeighbors(value: Int): Array[Int] = {
+    Array[Int](value, value + 1)
+}
+
+def doubleNeighbors(value: Double): Array[Double] = {
+    Array[Double](value, value + 1.0)
+}
+
+def main(): Int = {
+    val ints = Array[Int](1, 3)
+    val expandedInts = ints.flatMap[Int](intNeighbors)
+    val doubles = Array[Double](1.5, 2.5)
+    val expandedDoubles = doubles.flatMap[Double](doubleNeighbors)
+
+    if expandedInts.size() == 4 &&
+       expandedInts.get(0) == 1 &&
+       expandedInts.get(3) == 4 &&
+       expandedDoubles.size() == 4 &&
+       expandedDoubles.get(0) == 1.5 &&
+       expandedDoubles.get(3) == 3.5 {
+        0
+    } else {
+        1
+    }
+}

@@ -57,7 +57,7 @@ def longArrayMapObject[U](xs: LongArray, f: (Long) => U): ArrayObject[U] = {
     new ArrayObject[U](mapped)
 }
 
-def longArrayFlatMapObject[U](xs: LongArray, transform: (Long) => ArrayObject[U]): ArrayObject[U] = {
+def longArrayFlatMapObject[U](xs: LongArray, transform: (Long) => Array[U]): ArrayObject[U] = {
     var index = 0
     var total = 0
     while (index < xs.length()) {
@@ -260,11 +260,11 @@ class ArrayLong(values: LongArray) with Iterable[Long] {
         longArrayMapObject[U](values, f)
     }
 
-    def flatMapObject[U](transform: (Long) => ArrayObject[U]): ArrayObject[U] = {
+    def flatMapObject[U](transform: (Long) => Array[U]): ArrayObject[U] = {
         longArrayFlatMapObject[U](values, transform)
     }
 
-    def flatMap[U](transform: (Long) => ArrayObject[U]): ArrayObject[U] = {
+    def flatMap[U](transform: (Long) => Array[U]): ArrayObject[U] = {
         longArrayFlatMapObject[U](values, transform)
     }
 
@@ -337,7 +337,7 @@ def arrayLongMapObject[T, U](xs: ArrayLong, f: (Long) => U): ArrayObject[U] = {
     longArrayMapObject[U](xs.raw(), f)
 }
 
-def arrayLongFlatMapObject[T, U](xs: ArrayLong, transform: (Long) => ArrayObject[U]): ArrayObject[U] = {
+def arrayLongFlatMapObject[T, U](xs: ArrayLong, transform: (Long) => Array[U]): ArrayObject[U] = {
     longArrayFlatMapObject[U](xs.raw(), transform)
 }
 
