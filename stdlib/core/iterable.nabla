@@ -16,8 +16,10 @@ trait Iterable[T] with Sized {
     /// @status Recommandee
     def iterator(): Iterator[T]
 
-    /// Applique f a chaque element.
+    /// Applique f a chaque element via un nouvel iterator().
     /// @signature def foreach(f: (T) => Unit): Unit
     /// @status Recommandee
-    def foreach(f: (T) => Unit): Unit
+    def foreach(f: (T) => Unit): Unit = {
+        this.iterator().foreach(f)
+    }
 }
