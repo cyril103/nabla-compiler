@@ -1,0 +1,58 @@
+import core.iterator
+import collections.array
+import collections.list
+import collections.set
+import collections.map
+
+
+class Accumulator(var total: Int) {
+    def add(value: Int): Int = {
+        total = total + value
+        total
+    }
+}
+
+class CountingIterator(var current: Int, until: Int) with Iterator[Int] {
+    override def hasNext(): Bool = {
+        current < until
+    }
+
+    override def next(): Int = {
+        val value = current
+        current = current + 1
+        value
+    }
+}
+
+
+def sumInts(iter: Iterator[Int]): Int = {
+    val acc = new Accumulator(0)
+    iter.foreach(value => {
+        acc.add(value)
+        while false {
+            value
+        }
+    })
+    acc.total
+}
+
+def sumEntries(iter: Iterator[Tuple2[String, Int]]): Int = {
+    val acc = new Accumulator(0)
+    iter.foreach(entry => {
+        acc.add(entry._1.length() + entry._2)
+        while false {
+            entry._2
+        }
+    })
+    acc.total
+}
+
+def main(): Int = {
+    val arrayTotal = sumInts(Array.range(1, 4).iterator())
+    val listTotal = sumInts(List.cons[Int](4, List.cons[Int](5, Nil)).iterator())
+    val setTotal = sumInts(Set(6).iterator())
+    val mapTotal = sumEntries(Map("aa" -> 7).iterator())
+    val customTotal = sumInts(new CountingIterator(1, 3))
+
+    arrayTotal + listTotal + setTotal + mapTotal + customTotal
+}

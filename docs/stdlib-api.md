@@ -38,6 +38,7 @@ pas comme cible idiomatique pour le code applicatif.
 - `Iterator[T]`
   - `hasNext()`
   - `next()`
+  - `foreach(f)`
 - `Iterable[T]`
   - herite de `Sized`
   - `iterator()`
@@ -120,7 +121,9 @@ pas comme cible idiomatique pour le code applicatif.
 `List[T]` implementent `Iterable[...]` pour permettre un `foreach` polymorphe.
 `Iterable[T]` herite de `Sized` et expose aussi `iterator()`: les appels communs
 `size()`, `isEmpty()`, `nonEmpty()`, `foreach(...)` et le parcours explicite via
-`Iterator[T]` restent disponibles via le meme contrat nominal minimal.
+`Iterator[T]` restent disponibles via le meme contrat nominal minimal. Un
+`Iterator[T]` expose `hasNext()`, `next()` et `foreach(...)` pour consommer les
+elements restants avec les memes noms de parcours que les collections.
 
 Les exemples doivent privilegier `Array[T]` et les fonctions de haut niveau. Les
 facades specialisees restent acceptables dans les tests de backend/runtime et les

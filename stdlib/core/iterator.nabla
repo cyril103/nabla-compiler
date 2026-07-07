@@ -17,4 +17,13 @@ trait Iterator[T] {
     /// @signature def next(): T
     /// @status Recommandee
     def next(): T
+
+    /// Consomme les elements restants en appliquant f a chacun.
+    /// @signature def foreach(f: (T) => Unit): Unit
+    /// @status Recommandee
+    def foreach(f: (T) => Unit): Unit = {
+        while this.hasNext() {
+            f(this.next())
+        }
+    }
 }
