@@ -1,0 +1,50 @@
+import core.iterable
+import core.iterator
+
+
+class Accumulator(var total: Int) {
+    def add(value: Int): Int = {
+        total = total + value
+        total
+    }
+}
+
+class CountingIterator(var current: Int, until: Int) with Iterator[Int] {
+    override def hasNext(): Bool = {
+        current < until
+    }
+
+    override def next(): Int = {
+        val value = current
+        current = current + 1
+        value
+    }
+}
+
+class CountingIterable(count: Int) with Iterable[Int] {
+    override def size(): Int = {
+        count
+    }
+
+    override def iterator(): Iterator[Int] = {
+        new CountingIterator(0, count)
+    }
+}
+
+
+def sum(values: Iterable[Int]): Int = {
+    val acc = new Accumulator(0)
+    values.foreach(value => {
+        acc.add(value)
+        while false {
+            value
+        }
+    })
+    acc.total
+}
+
+
+def main(): Int = {
+    val values: Iterable[Int] = new CountingIterable(4)
+    sum(values) + sum(values) + values.size()
+}
