@@ -37,7 +37,8 @@ pour garder un cap clair après le tag `v0.1.0`.
   sans `override` explicite. Les classes generiques peuvent implementer des
   traits, y compris des traits generiques instancies comme `Iterable[T]`, avec
   dispatch via le type du trait. La stdlib expose maintenant `Sized` et
-  `Iterable[T]` comme contrats publics minimaux pour les collections.
+  `Iterable[T]` comme contrats publics minimaux pour les collections; `Iterator[T]`
+  fournit le curseur explicite commun expose par `Iterable.iterator()`.
   La conversion `toString()` est désormais disponible de façon uniforme pour les
   types primitifs usuels (`Int`, `Long`, `Float`, `Double`, `Bool`, `Char`) au niveau du
   backend runtime, y compris via un paramètre `Any`/`AnyVal` de fonction/méthode

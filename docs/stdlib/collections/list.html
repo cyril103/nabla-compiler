@@ -69,6 +69,7 @@ xs.head() + xs.tail().head()</code></pre>
         <li><a href="#take" title="def take(n: Int): List[T]"><span>take</span><code>def take(n: Int): List[T]</code></a></li>
         <li><a href="#drop" title="def drop(n: Int): List[T]"><span>drop</span><code>def drop(n: Int): List[T]</code></a></li>
         <li><a href="#slice" title="def slice(from: Int, until: Int): List[T]"><span>slice</span><code>def slice(from: Int, until: Int): List[T]</code></a></li>
+        <li><a href="#iterator" title="def iterator(): Iterator[T]"><span>iterator</span><code>def iterator(): Iterator[T]</code></a></li>
         <li><a href="#mkString" title="def mkString(separator: String): String"><span>mkString</span><code>def mkString(separator: String): String</code></a></li>
         </ul>
       </section>
@@ -207,6 +208,15 @@ xs.head() + xs.tail().head()</code></pre>
           <h2>slice</h2>
           <pre class="signature"><code>def slice(from: Int, until: Int): List[T]</code></pre>
           <p>Retourne les elements dans l&#x27;intervalle [from, until).</p>
+
+        </article>
+        <article class="entry" id="iterator">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>iterator</h2>
+          <pre class="signature"><code>def iterator(): Iterator[T]</code></pre>
+          <p>Retourne un itérateur mutable indépendant sur cette liste.</p>
 
         </article>
         <article class="entry" id="mkString">

@@ -1,6 +1,7 @@
 import util
 import core.sized
 import core.iterable
+import core.iterator
 import collections.array_base
 
 def objectArrayFill[T](size: Int, value: T): ArrayObject[T] = {
@@ -96,6 +97,18 @@ def objectArraySet[T](xs: ObjectArray[T], index: Int, value: T): Unit = {
 
 def objectStringArrayMkString[T](xs: ArrayObject[String], separator: String): String = {
     objectArrayMkString(xs, separator)
+}
+
+class ArrayObjectIterator[T](values: ObjectArray[T], var index: Int) with Iterator[T] {
+    override def hasNext(): Bool = {
+        index < values.length()
+    }
+
+    override def next(): T = {
+        val value = values.get(index)
+        index = index + 1
+        value
+    }
 }
 
 class ArrayObject[T](values: ObjectArray[T]) with Sized with Iterable[T] {
@@ -243,6 +256,10 @@ class ArrayObject[T](values: ObjectArray[T]) with Sized with Iterable[T] {
 
     override def foreach(f: (T) => Unit): Unit = {
         arrayBaseForeach[T, ObjectArray[T]](values, objectArrayLength[T], objectArrayGet[T], f)
+    }
+
+    override def iterator(): Iterator[T] = {
+        new ArrayObjectIterator[T](values, 0)
     }
 
     def raw(): ObjectArray[T] = {

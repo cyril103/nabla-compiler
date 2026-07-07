@@ -24,6 +24,7 @@
 import collections.object_array
 import core.sized
 import core.iterable
+import core.iterator
 import collections.int_array
 import collections.long_array
 import collections.float_array
@@ -454,6 +455,13 @@ class Set[T](values: ArrayObject[T]) with Sized with Iterable[T] {
     /// @status Recommandee
     override def foreach(f: (T) => Unit): Unit = {
         values.foreach(f)
+    }
+
+    /// Cree un iterateur sur les elements de l'ensemble.
+    /// @signature def iterator(): Iterator[T]
+    /// @status Recommandee
+    override def iterator(): Iterator[T] = {
+        values.iterator()
     }
 
     /// Joint les elements avec un separateur.

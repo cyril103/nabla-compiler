@@ -1,6 +1,7 @@
 import collections.object_array
 import collections.array_base
 import core.iterable
+import core.iterator
 import util
 
 def floatArrayFill(size: Int, value: Float): FloatArray = {
@@ -308,6 +309,18 @@ class ArrayFloat(values: FloatArray) with Iterable[Float] {
         }
 
         arrayBaseForeach[Float, FloatArray](values, floatArrayLength, floatArrayGet, f)
+    }
+
+    override def iterator(): Iterator[Float] = {
+        def floatArrayLength(items: FloatArray): Int = {
+            items.length()
+        }
+
+        def floatArrayGet(items: FloatArray, itemIndex: Int): Float = {
+            items.get(itemIndex)
+        }
+
+        new ArrayPrimitiveIterator[Float, FloatArray](values, floatArrayLength, floatArrayGet, 0)
     }
 
     def raw(): FloatArray = {

@@ -26,6 +26,7 @@
 import core.option
 import core.sized
 import core.iterable
+import core.iterator
 import core.tuple
 import collections.object_array
 
@@ -371,6 +372,13 @@ class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) with Sized with Iterable[Tup
     /// @status Recommandee
     override def foreach(f: (Tuple2[K, V]) => Unit): Unit = {
         entries.foreach(f)
+    }
+
+    /// Cree un iterateur sur les paires cle-valeur.
+    /// @signature def iterator(): Iterator[Tuple2[K, V]]
+    /// @status Recommandee
+    override def iterator(): Iterator[Tuple2[K, V]] = {
+        entries.iterator()
     }
 
     /// Applique une fonction a chaque paire cle-valeur.

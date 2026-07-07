@@ -35,8 +35,12 @@ pas comme cible idiomatique pour le code applicatif.
   - `size()`
   - `isEmpty()`
   - `nonEmpty()`
+- `Iterator[T]`
+  - `hasNext()`
+  - `next()`
 - `Iterable[T]`
   - herite de `Sized`
+  - `iterator()`
   - `foreach(f)`
 - `Option[T]`
   - `Option.some[T](value)`
@@ -114,8 +118,9 @@ pas comme cible idiomatique pour le code applicatif.
 
 `ArrayObject[T]`, les facades de tableaux specialisees, `Set[T]`, `Map[K, V]` et
 `List[T]` implementent `Iterable[...]` pour permettre un `foreach` polymorphe.
-`Iterable[T]` herite de `Sized`, donc les appels communs `size()`, `isEmpty()` et
-`nonEmpty()` restent disponibles via le meme contrat nominal minimal.
+`Iterable[T]` herite de `Sized` et expose aussi `iterator()`: les appels communs
+`size()`, `isEmpty()`, `nonEmpty()`, `foreach(...)` et le parcours explicite via
+`Iterator[T]` restent disponibles via le meme contrat nominal minimal.
 
 Les exemples doivent privilegier `Array[T]` et les fonctions de haut niveau. Les
 facades specialisees restent acceptables dans les tests de backend/runtime et les

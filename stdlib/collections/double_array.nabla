@@ -1,6 +1,7 @@
 import collections.object_array
 import collections.array_base
 import core.iterable
+import core.iterator
 import util
 
 def doubleArrayFill(size: Int, value: Double): DoubleArray = {
@@ -304,6 +305,18 @@ class ArrayDouble(values: DoubleArray) with Iterable[Double] {
         }
 
         arrayBaseForeach[Double, DoubleArray](values, doubleArrayLength, doubleArrayGet, f)
+    }
+
+    override def iterator(): Iterator[Double] = {
+        def doubleArrayLength(items: DoubleArray): Int = {
+            items.length()
+        }
+
+        def doubleArrayGet(items: DoubleArray, itemIndex: Int): Double = {
+            items.get(itemIndex)
+        }
+
+        new ArrayPrimitiveIterator[Double, DoubleArray](values, doubleArrayLength, doubleArrayGet, 0)
     }
 
     def raw(): DoubleArray = {

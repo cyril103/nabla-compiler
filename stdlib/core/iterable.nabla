@@ -2,14 +2,20 @@
 /// Trait public minimal pour les collections parcourables.
 
 import core.sized
+import core.iterator
 
 /// Collection parcourable element par element.
 /// @signature trait Iterable[T]
 /// @status Recommandee
 ///
 /// Iterable[T] herite de Sized : un consommateur polymorphe peut donc utiliser
-/// size(), isEmpty() et nonEmpty() en plus de foreach.
+/// size(), isEmpty() et nonEmpty() en plus de foreach et iterator.
 trait Iterable[T] with Sized {
+    /// Cree un curseur mutable independant pour parcourir cette collection.
+    /// @signature def iterator(): Iterator[T]
+    /// @status Recommandee
+    def iterator(): Iterator[T]
+
     /// Applique f a chaque element.
     /// @signature def foreach(f: (T) => Unit): Unit
     /// @status Recommandee

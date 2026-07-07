@@ -1,0 +1,25 @@
+import core.iterable
+import core.iterator
+import collections.array
+import collections.list
+
+
+def sumIterator(values: Iterable[Int]): Int = {
+    val iter = values.iterator()
+    var total = 0
+    while iter.hasNext() {
+        total = total + iter.next()
+    }
+    total
+}
+
+def main(): Int = {
+    val arrayValues: Iterable[Int] = Array.range(1, 4)
+    val listValues: Iterable[Int] = List.cons[Int](4, List.cons[Int](5, Nil))
+
+    val first = arrayValues.iterator()
+    val second = arrayValues.iterator()
+    val independent = first.next() + first.next() + second.next()
+
+    sumIterator(arrayValues) + sumIterator(listValues) + independent
+}
