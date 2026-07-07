@@ -1,0 +1,64 @@
+import core.iterable
+import core.iterator
+import collections.array
+import collections.list
+
+
+class CountingIterator(var current: Int, until: Int) with Iterator[Int] {
+    override def hasNext(): Bool = {
+        current < until
+    }
+
+    override def next(): Int = {
+        val value = current
+        current = current + 1
+        value
+    }
+}
+
+class CountingIterable(sizeValue: Int) with Iterable[Int] {
+    override def size(): Int = {
+        sizeValue
+    }
+
+    override def iterator(): Iterator[Int] = {
+        new CountingIterator(0, sizeValue)
+    }
+}
+
+def firstValue(values: Iterable[Int]): Int = {
+    values.head()
+}
+
+def main(): Int = {
+    var score = 0
+
+    val custom: Iterable[Int] = new CountingIterable(4)
+    if custom.head() == 0 && custom.head() == 0 {
+        score = score + 10
+    } else {
+        score = score + 100
+    }
+
+    val arrayValues: Iterable[Int] = Array.range(5, 8)
+    if arrayValues.head() == 5 {
+        score = score + 10
+    } else {
+        score = score + 100
+    }
+
+    val listValues: Iterable[Int] = List.cons[Int](9, List.cons[Int](10, Nil))
+    if listValues.head() == 9 {
+        score = score + 10
+    } else {
+        score = score + 100
+    }
+
+    if firstValue(new CountingIterable(42)) == 0 {
+        score = score + 12
+    } else {
+        score = score + 100
+    }
+
+    score
+}

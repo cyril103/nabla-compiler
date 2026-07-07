@@ -37,7 +37,7 @@ trait List[T] with Iterable[T] {
     /// Retourne la tete de liste.
     /// @signature def head(): T
     /// @status Experimentale
-    def head(): T
+    override def head(): T
 
     /// Retourne la queue de liste.
     /// @signature def tail(): List[T]

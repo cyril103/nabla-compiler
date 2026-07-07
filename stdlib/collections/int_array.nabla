@@ -958,7 +958,7 @@ class ArrayInt(values: IntArray) with Iterable[Int] {
         intArrayGetOption(values, index)
     }
 
-    def head(): Int = {
+    override def head(): Int = {
         values.get(0)
     }
 
