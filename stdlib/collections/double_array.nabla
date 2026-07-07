@@ -43,7 +43,7 @@ def doubleArrayMapObject[U](xs: DoubleArray, f: (Double) => U): ArrayObject[U] =
     new ArrayObject[U](mapped)
 }
 
-def doubleArrayFlatMapObject[U](xs: DoubleArray, transform: (Double) => ArrayObject[U]): ArrayObject[U] = {
+def doubleArrayFlatMapObject[U](xs: DoubleArray, transform: (Double) => Array[U]): ArrayObject[U] = {
     var index = 0
     var total = 0
     while (index < xs.length()) {
@@ -250,11 +250,11 @@ class ArrayDouble(values: DoubleArray) with Iterable[Double] {
         doubleArrayMapObject[U](values, f)
     }
 
-    def flatMapObject[U](transform: (Double) => ArrayObject[U]): ArrayObject[U] = {
+    def flatMapObject[U](transform: (Double) => Array[U]): ArrayObject[U] = {
         doubleArrayFlatMapObject[U](values, transform)
     }
 
-    def flatMap[U](transform: (Double) => ArrayObject[U]): ArrayObject[U] = {
+    def flatMap[U](transform: (Double) => Array[U]): ArrayObject[U] = {
         doubleArrayFlatMapObject[U](values, transform)
     }
 
@@ -339,7 +339,7 @@ def arrayDoubleMapObject[T, U](xs: ArrayDouble, f: (Double) => U): ArrayObject[U
     doubleArrayMapObject[U](xs.raw(), f)
 }
 
-def arrayDoubleFlatMapObject[T, U](xs: ArrayDouble, transform: (Double) => ArrayObject[U]): ArrayObject[U] = {
+def arrayDoubleFlatMapObject[T, U](xs: ArrayDouble, transform: (Double) => Array[U]): ArrayObject[U] = {
     doubleArrayFlatMapObject[U](xs.raw(), transform)
 }
 

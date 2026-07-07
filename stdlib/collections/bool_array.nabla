@@ -97,7 +97,7 @@ def boolArrayMapObject[U](xs: BoolArray, f: (Bool) => U): ArrayObject[U] = {
     new ArrayObject[U](mapped)
 }
 
-def boolArrayFlatMapObject[U](xs: BoolArray, transform: (Bool) => ArrayObject[U]): ArrayObject[U] = {
+def boolArrayFlatMapObject[U](xs: BoolArray, transform: (Bool) => Array[U]): ArrayObject[U] = {
     var index = 0
     var total = 0
     while (index < xs.length()) {
@@ -301,11 +301,11 @@ class ArrayBool extends ArrayPrimitiveBase[Bool, BoolArray] with Iterable[Bool](
         boolArrayMapObject[U](rawValues, f)
     }
 
-    def flatMapObject[U](transform: (Bool) => ArrayObject[U]): ArrayObject[U] = {
+    def flatMapObject[U](transform: (Bool) => Array[U]): ArrayObject[U] = {
         boolArrayFlatMapObject[U](rawValues, transform)
     }
 
-    def flatMap[U](transform: (Bool) => ArrayObject[U]): ArrayObject[U] = {
+    def flatMap[U](transform: (Bool) => Array[U]): ArrayObject[U] = {
         boolArrayFlatMapObject[U](rawValues, transform)
     }
 
@@ -390,7 +390,7 @@ def arrayBoolMapObject[T, U](xs: ArrayBool, f: (Bool) => U): ArrayObject[U] = {
     boolArrayMapObject[U](xs.raw(), f)
 }
 
-def arrayBoolFlatMapObject[T, U](xs: ArrayBool, transform: (Bool) => ArrayObject[U]): ArrayObject[U] = {
+def arrayBoolFlatMapObject[T, U](xs: ArrayBool, transform: (Bool) => Array[U]): ArrayObject[U] = {
     boolArrayFlatMapObject[U](xs.raw(), transform)
 }
 
