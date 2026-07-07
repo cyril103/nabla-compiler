@@ -185,7 +185,7 @@ class RangeInt extends RangeIntBase with Iterable[Int](start, until) {
         accumulator
     }
 
-    def exists(predicate: (Int) => Bool): Bool = {
+    override def exists(predicate: (Int) => Bool): Bool = {
         var value = start
         var found = false
         while value < until && !found {
@@ -199,7 +199,7 @@ class RangeInt extends RangeIntBase with Iterable[Int](start, until) {
         found
     }
 
-    def forall(predicate: (Int) => Bool): Bool = {
+    override def forall(predicate: (Int) => Bool): Bool = {
         var value = start
         var all = true
         while value < until && all {
@@ -213,7 +213,7 @@ class RangeInt extends RangeIntBase with Iterable[Int](start, until) {
         all
     }
 
-    def count(predicate: (Int) => Bool): Int = {
+    override def count(predicate: (Int) => Bool): Int = {
         var value = start
         var total = 0
         while value < until {
@@ -1102,11 +1102,11 @@ class ArrayInt(values: IntArray) with Iterable[Int] {
         new ArrayPrimitiveIterator[Int, IntArray](values, intArrayLength, intArrayGet, 0)
     }
 
-    def exists(predicate: (Int) => Bool): Bool = {
+    override def exists(predicate: (Int) => Bool): Bool = {
         intArrayExists(values, predicate)
     }
 
-    def forall(predicate: (Int) => Bool): Bool = {
+    override def forall(predicate: (Int) => Bool): Bool = {
         intArrayForall(values, predicate)
     }
 
@@ -1122,7 +1122,7 @@ class ArrayInt(values: IntArray) with Iterable[Int] {
         intArrayIndexOfOption(values, expected)
     }
 
-    def count(predicate: (Int) => Bool): Int = {
+    override def count(predicate: (Int) => Bool): Int = {
         intArrayCount(values, predicate)
     }
 

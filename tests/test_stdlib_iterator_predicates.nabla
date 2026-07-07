@@ -1,0 +1,95 @@
+import core.iterable
+import core.iterator
+
+
+class CountingIterator(var current: Int, until: Int) with Iterator[Int] {
+    override def hasNext(): Bool = {
+        current < until
+    }
+
+    override def next(): Int = {
+        val value = current
+        current = current + 1
+        value
+    }
+}
+
+class CountingIterable(sizeValue: Int) with Iterable[Int] {
+    override def size(): Int = {
+        sizeValue
+    }
+
+    override def iterator(): Iterator[Int] = {
+        new CountingIterator(0, sizeValue)
+    }
+}
+
+
+def main(): Int = {
+    var score = 0
+
+    val existsIter: Iterator[Int] = new CountingIterator(0, 5)
+    if existsIter.exists(value => value == 3) {
+        score = score + 1
+    } else {
+        score = score
+    }
+    if existsIter.count(value => true) == 1 {
+        score = score + 1
+    } else {
+        score = score
+    }
+
+    val forallIter: Iterator[Int] = new CountingIterator(0, 5)
+    if !forallIter.forall(value => value < 3) {
+        score = score + 1
+    } else {
+        score = score
+    }
+    if forallIter.count(value => true) == 1 {
+        score = score + 1
+    } else {
+        score = score
+    }
+
+    val values: Iterable[Int] = new CountingIterable(5)
+    if values.exists(value => value == 4) {
+        score = score + 1
+    } else {
+        score = score
+    }
+    if !values.exists(value => value == 9) {
+        score = score + 1
+    } else {
+        score = score
+    }
+    if values.forall(value => value < 5) {
+        score = score + 1
+    } else {
+        score = score
+    }
+    if values.count(value => value % 2 == 0) == 3 {
+        score = score + 1
+    } else {
+        score = score
+    }
+    if values.count(value => value > 9) == 0 {
+        score = score + 1
+    } else {
+        score = score
+    }
+    if values.count(value => true) == 5 {
+        score = score + 1
+    } else {
+        score = score
+    }
+
+    val empty: Iterable[Int] = new CountingIterable(0)
+    if empty.forall(value => value < 0) {
+        score = score + 1
+    } else {
+        score = score
+    }
+
+    score
+}

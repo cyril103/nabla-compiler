@@ -38,6 +38,9 @@
         <ul>
         <li><a href="#iterator" title="def iterator(): Iterator[T]"><span>iterator</span><code>def iterator(): Iterator[T]</code></a></li>
         <li><a href="#foreach" title="def foreach(f: (T) =&gt; Unit): Unit"><span>foreach</span><code>def foreach(f: (T) =&gt; Unit): Unit</code></a></li>
+        <li><a href="#exists" title="def exists(predicate: (T) =&gt; Bool): Bool"><span>exists</span><code>def exists(predicate: (T) =&gt; Bool): Bool</code></a></li>
+        <li><a href="#forall" title="def forall(predicate: (T) =&gt; Bool): Bool"><span>forall</span><code>def forall(predicate: (T) =&gt; Bool): Bool</code></a></li>
+        <li><a href="#count" title="def count(predicate: (T) =&gt; Bool): Int"><span>count</span><code>def count(predicate: (T) =&gt; Bool): Int</code></a></li>
         </ul>
       </section>
       </aside>
@@ -68,6 +71,33 @@
           <h2>foreach</h2>
           <pre class="signature"><code>def foreach(f: (T) =&gt; Unit): Unit</code></pre>
           <p>Applique f a chaque element via un nouvel iterator().</p>
+
+        </article>
+        <article class="entry" id="exists">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>exists</h2>
+          <pre class="signature"><code>def exists(predicate: (T) =&gt; Bool): Bool</code></pre>
+          <p>Indique si au moins un element satisfait predicate.</p>
+
+        </article>
+        <article class="entry" id="forall">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>forall</h2>
+          <pre class="signature"><code>def forall(predicate: (T) =&gt; Bool): Bool</code></pre>
+          <p>Indique si tous les elements satisfont predicate.</p>
+
+        </article>
+        <article class="entry" id="count">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status recommended">Recommandee</span>
+          </div>
+          <h2>count</h2>
+          <pre class="signature"><code>def count(predicate: (T) =&gt; Bool): Int</code></pre>
+          <p>Compte les elements qui satisfont predicate.</p>
 
         </article>
       </section>

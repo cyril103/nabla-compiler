@@ -22,4 +22,25 @@ trait Iterable[T] with Sized {
     def foreach(f: (T) => Unit): Unit = {
         this.iterator().foreach(f)
     }
+
+    /// Indique si au moins un element satisfait predicate.
+    /// @signature def exists(predicate: (T) => Bool): Bool
+    /// @status Recommandee
+    def exists(predicate: (T) => Bool): Bool = {
+        this.iterator().exists(predicate)
+    }
+
+    /// Indique si tous les elements satisfont predicate.
+    /// @signature def forall(predicate: (T) => Bool): Bool
+    /// @status Recommandee
+    def forall(predicate: (T) => Bool): Bool = {
+        this.iterator().forall(predicate)
+    }
+
+    /// Compte les elements qui satisfont predicate.
+    /// @signature def count(predicate: (T) => Bool): Int
+    /// @status Recommandee
+    def count(predicate: (T) => Bool): Int = {
+        this.iterator().count(predicate)
+    }
 }
