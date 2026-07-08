@@ -115,6 +115,12 @@ pas comme cible idiomatique pour le code applicatif.
   - `Set.apply[T](values: T*)`
   - `Set(values: _*)` pour dedupliquer un tableau existant
   - `Set.empty[T]()`
+  - `Set.factory()` retourne une `IterableFactory[Set]` experimentale.
+  - `Set.newBuilder[T]()` retourne un `Builder[T, Set[T]]` experimental;
+    le builder applique la semantique de `Set.add` et deduplique les doublons.
+  - `SetFactory` implemente `IterableFactory[Set]`; `SetBuilder[T]`
+    implemente `Builder[T, Set[T]]` et peut etre obtenu via
+    `IterableFactory[Set].newBuilder[T]()`.
   - `Set.fromArray[T](values)`
 - `Map[K, V]`
   - `Map(value1 -> value2, ...)`

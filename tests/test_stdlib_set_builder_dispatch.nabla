@@ -1,0 +1,15 @@
+import core.builder
+import collections.set
+
+def main(): Int = {
+    val builder: Builder[Int, Set[Int]] = Set.newBuilder[Int]()
+    builder.add(4)
+    builder.add(2)
+    builder.add(4)
+    val values = builder.result()
+    if values.contains(4) && values.contains(2) && values.size() == 2 {
+        42
+    } else {
+        1
+    }
+}

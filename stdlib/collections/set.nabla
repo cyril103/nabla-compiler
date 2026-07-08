@@ -30,6 +30,8 @@ import collections.long_array
 import collections.float_array
 import collections.double_array
 import collections.bool_array
+import core.builder
+import core.iterable_ops
 
 def setIndexBucketCount[T](size: Int): Int = {
     var capacity = 8
@@ -338,6 +340,50 @@ def setEmpty[T](): Set[T] = {
     new Set[T](new ArrayObject[T](new ObjectArray[T](0)))
 }
 
+/// Factory experimentale pour la famille Set.
+/// @signature class SetFactory extends IterableFactory[Set]
+/// @status Experimental
+class SetFactory() with IterableFactory[Set] {
+    /// Cree un Set[A] vide.
+    /// @signature def empty[A](): Set[A]
+    /// @status Experimental
+    override def empty[A](): Set[A] = {
+        setEmpty[A]()
+    }
+
+    /// Cree un builder pour produire un Set[A].
+    /// @signature def newBuilder[A](): Builder[A, Set[A]]
+    /// @status Experimental
+    override def newBuilder[A](): Builder[A, Set[A]] = {
+        new SetBuilder[A](setEmpty[A]())
+    }
+}
+
+/// Builder experimental pour produire un Set[A].
+/// @signature class SetBuilder[A] extends Builder[A, Set[A]]
+/// @status Experimental
+///
+/// Le builder applique la semantique d'ensemble de Set.add: les doublons sont
+/// dedupliques dans le resultat.
+class SetBuilder[A](var values: Set[A]) with Builder[A, Set[A]] {
+    /// Ajoute value au resultat logique.
+    /// @signature def add(value: A): Unit
+    /// @status Experimental
+    override def add(value: A): Unit = {
+        values = values.add(value)
+        while false {
+            0
+        }
+    }
+
+    /// Retourne l'ensemble construit.
+    /// @signature def result(): Set[A]
+    /// @status Experimental
+    override def result(): Set[A] = {
+        values
+    }
+}
+
 object Set {
     /// Cree un ensemble depuis les elements donnes.
     /// @signature def Set.apply[T](values: T*): Set[T]
@@ -351,6 +397,20 @@ object Set {
     /// @status Recommandee
     def empty[T](): Set[T] = {
         setEmpty[T]()
+    }
+
+    /// Retourne la factory experimentale de Set.
+    /// @signature def Set.factory(): IterableFactory[Set]
+    /// @status Experimental
+    def factory(): IterableFactory[Set] = {
+        new SetFactory()
+    }
+
+    /// Cree un builder experimental de Set[A].
+    /// @signature def Set.newBuilder[A](): Builder[A, Set[A]]
+    /// @status Experimental
+    def newBuilder[A](): Builder[A, Set[A]] = {
+        new SetBuilder[A](Set.empty[A]())
     }
 
     /// Deduplique un tableau en ensemble.
