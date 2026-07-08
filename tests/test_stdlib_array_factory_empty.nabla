@@ -1,0 +1,7 @@
+import core.iterable_ops
+import collections.array
+
+def main(): Int = {
+    val values: Array[Int] = Array.factory().empty[Int]()
+    values.size()
+}

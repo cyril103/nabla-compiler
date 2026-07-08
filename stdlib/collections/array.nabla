@@ -51,6 +51,8 @@ import collections.float_array
 import collections.double_array
 import collections.bool_array
 import collections.object_array
+import core.builder
+import core.iterable_ops
 
 /// Cree un tableau d'entiers contenant 0, 1, ..., size - 1.
 /// @signature def ArrayRange(size: Int): Array[Int]
@@ -61,12 +63,78 @@ def ArrayRange(size: Int): ArrayInt = {
     new ArrayInt(intArrayRange(size))
 }
 
+/// Factory experimentale pour la famille Array.
+/// @signature class ArrayFactory extends IterableFactory[Array]
+/// @status Experimental
+class ArrayFactory() with IterableFactory[Array] {
+    /// Cree un Array[A] vide.
+    /// @signature def empty[A](): Array[A]
+    /// @status Experimental
+    override def empty[A](): Array[A] = {
+        Array.empty[A]()
+    }
+
+    /// Cree un builder pour produire un Array[A].
+    /// @signature def newBuilder[A](): Builder[A, Array[A]]
+    /// @status Experimental
+    override def newBuilder[A](): Builder[A, Array[A]] = {
+        new ArrayBuilder[A](Array.empty[A]())
+    }
+}
+
+/// Builder experimental pour produire un Array[A] dans l'ordre d'ajout.
+/// @signature class ArrayBuilder[A] extends Builder[A, Array[A]]
+/// @status Experimental
+///
+/// La representation actuelle reconstruit un tableau generique a chaque add;
+/// cette API valide la surface builder/factory sans promettre de stockage
+/// specialise pour les primitives.
+class ArrayBuilder[A](var values: Array[A]) with Builder[A, Array[A]] {
+    /// Ajoute value en fin logique de resultat.
+    /// @signature def add(value: A): Unit
+    /// @status Experimental
+    override def add(value: A): Unit = {
+        val next = new ObjectArray[A](values.size() + 1)
+        var index = 0
+        while index < values.size() {
+            next.set(index, values.get(index))
+            index = index + 1
+        }
+        next.set(values.size(), value)
+        values = new ArrayObject[A](next)
+        while false {
+            0
+        }
+    }
+
+    /// Retourne le tableau construit dans l'ordre d'ajout.
+    /// @signature def result(): Array[A]
+    /// @status Experimental
+    override def result(): Array[A] = {
+        values
+    }
+}
+
 object Array {
     /// Cree un tableau avec les elements donnes.
     /// @signature def Array.apply[T](values: T*): Array[T]
     /// @status Recommandee
     def apply[T](values: T*): Array[T] = {
         values
+    }
+
+    /// Retourne la factory experimentale de Array.
+    /// @signature def Array.factory(): IterableFactory[Array]
+    /// @status Experimental
+    def factory(): IterableFactory[Array] = {
+        new ArrayFactory()
+    }
+
+    /// Cree un builder experimental de Array[A].
+    /// @signature def Array.newBuilder[A](): Builder[A, Array[A]]
+    /// @status Experimental
+    def newBuilder[A](): Builder[A, Array[A]] = {
+        new ArrayBuilder[A](Array.empty[A]())
     }
 
     /// Cree un tableau vide.

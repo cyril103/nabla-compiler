@@ -45,13 +45,17 @@ indexes.mkString(&quot;, &quot;)</code></pre>
         <h3>Types</h3>
         <ul>
         <li><a href="#Array" title="class Array[T](size: Int)"><span>Array</span><code>class Array[T](size: Int)</code></a></li>
+        <li><a href="#ArrayFactory" title="class ArrayFactory extends IterableFactory[Array]"><span>ArrayFactory</span><code>class ArrayFactory extends IterableFactory[Array]</code></a></li>
+        <li><a href="#ArrayBuilder" title="class ArrayBuilder[A] extends Builder[A, Array[A]]"><span>ArrayBuilder</span><code>class ArrayBuilder[A] extends Builder[A, Array[A]]</code></a></li>
         </ul>
       </section>
       <section class="toc-group">
         <h3>Constructeurs et fabriques</h3>
         <ul>
         <li><a href="#apply" title="def Array.apply[T](values: T*): Array[T]"><span>apply</span><code>def Array.apply[T](values: T*): Array[T]</code></a></li>
-        <li><a href="#empty" title="def Array.empty[T](): Array[T]"><span>empty</span><code>def Array.empty[T](): Array[T]</code></a></li>
+        <li><a href="#factory" title="def Array.factory(): IterableFactory[Array]"><span>factory</span><code>def Array.factory(): IterableFactory[Array]</code></a></li>
+        <li><a href="#newBuilder-2" title="def Array.newBuilder[A](): Builder[A, Array[A]]"><span>newBuilder</span><code>def Array.newBuilder[A](): Builder[A, Array[A]]</code></a></li>
+        <li><a href="#empty-2" title="def Array.empty[T](): Array[T]"><span>empty</span><code>def Array.empty[T](): Array[T]</code></a></li>
         <li><a href="#fill" title="def Array.fill[T](size: Int, value: T): Array[T]"><span>fill</span><code>def Array.fill[T](size: Int, value: T): Array[T]</code></a></li>
         <li><a href="#fill-2" title="def Array.fill[T](n: Int)(elem: =&gt; T): Array[T]"><span>fill</span><code>def Array.fill[T](n: Int)(elem: =&gt; T): Array[T]</code></a></li>
         <li><a href="#tabulate" title="def Array.tabulate[T](size: Int, f: (Int) =&gt; T): Array[T]"><span>tabulate</span><code>def Array.tabulate[T](size: Int, f: (Int) =&gt; T): Array[T]</code></a></li>
@@ -66,6 +70,10 @@ indexes.mkString(&quot;, &quot;)</code></pre>
         <li><a href="#ArrayFill" title="def ArrayFill[T](size: Int, value: T): Array[T]"><span>ArrayFill</span><code>def ArrayFill[T](size: Int, value: T): Array[T]</code></a></li>
         <li><a href="#Array-2" title="def Array[T].sorted(lessThan: (T, T) =&gt; Bool): Array[T]"><span>Array</span><code>def Array[T].sorted(lessThan: (T, T) =&gt; Bool): Array[T]</code></a></li>
         <li><a href="#ArrayRange" title="def ArrayRange(size: Int): Array[Int]"><span>ArrayRange</span><code>def ArrayRange(size: Int): Array[Int]</code></a></li>
+        <li><a href="#empty" title="def empty[A](): Array[A]"><span>empty</span><code>def empty[A](): Array[A]</code></a></li>
+        <li><a href="#newBuilder" title="def newBuilder[A](): Builder[A, Array[A]]"><span>newBuilder</span><code>def newBuilder[A](): Builder[A, Array[A]]</code></a></li>
+        <li><a href="#add" title="def add(value: A): Unit"><span>add</span><code>def add(value: A): Unit</code></a></li>
+        <li><a href="#result" title="def result(): Array[A]"><span>result</span><code>def result(): Array[A]</code></a></li>
         </ul>
       </section>
       </aside>
@@ -110,6 +118,61 @@ indexes.mkString(&quot;, &quot;)</code></pre>
 <p>Preferer Array.range(size) dans le nouveau code.</p>
 
         </article>
+        <article class="entry" id="ArrayFactory">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>ArrayFactory</h2>
+          <pre class="signature"><code>class ArrayFactory extends IterableFactory[Array]</code></pre>
+          <p>Factory experimentale pour la famille Array.</p>
+
+        </article>
+        <article class="entry" id="empty">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>empty</h2>
+          <pre class="signature"><code>def empty[A](): Array[A]</code></pre>
+          <p>Cree un Array[A] vide.</p>
+
+        </article>
+        <article class="entry" id="newBuilder">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>newBuilder</h2>
+          <pre class="signature"><code>def newBuilder[A](): Builder[A, Array[A]]</code></pre>
+          <p>Cree un builder pour produire un Array[A].</p>
+
+        </article>
+        <article class="entry" id="ArrayBuilder">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>ArrayBuilder</h2>
+          <pre class="signature"><code>class ArrayBuilder[A] extends Builder[A, Array[A]]</code></pre>
+          <p>Builder experimental pour produire un Array[A] dans l&#x27;ordre d&#x27;ajout.</p>
+<p>La representation actuelle reconstruit un tableau generique a chaque add; cette API valide la surface builder/factory sans promettre de stockage specialise pour les primitives.</p>
+
+        </article>
+        <article class="entry" id="add">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>add</h2>
+          <pre class="signature"><code>def add(value: A): Unit</code></pre>
+          <p>Ajoute value en fin logique de resultat.</p>
+
+        </article>
+        <article class="entry" id="result">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>result</h2>
+          <pre class="signature"><code>def result(): Array[A]</code></pre>
+          <p>Retourne le tableau construit dans l&#x27;ordre d&#x27;ajout.</p>
+
+        </article>
         <article class="entry" id="apply">
           <div class="entry-meta">
             <span class="kind">def</span> <span class="status recommended">Recommandee</span>
@@ -119,7 +182,25 @@ indexes.mkString(&quot;, &quot;)</code></pre>
           <p>Cree un tableau avec les elements donnes.</p>
 
         </article>
-        <article class="entry" id="empty">
+        <article class="entry" id="factory">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>factory</h2>
+          <pre class="signature"><code>def Array.factory(): IterableFactory[Array]</code></pre>
+          <p>Retourne la factory experimentale de Array.</p>
+
+        </article>
+        <article class="entry" id="newBuilder-2">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>newBuilder</h2>
+          <pre class="signature"><code>def Array.newBuilder[A](): Builder[A, Array[A]]</code></pre>
+          <p>Cree un builder experimental de Array[A].</p>
+
+        </article>
+        <article class="entry" id="empty-2">
           <div class="entry-meta">
             <span class="kind">def</span> <span class="status recommended">Recommandee</span>
           </div>
