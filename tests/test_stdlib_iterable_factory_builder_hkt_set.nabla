@@ -1,0 +1,20 @@
+import core.builder
+import core.iterable_ops
+import collections.set
+
+def buildSet[CC[_]](factory: IterableFactory[CC], first: Int, second: Int, duplicate: Int): CC[Int] = {
+    val builder: Builder[Int, CC[Int]] = factory.newBuilder[Int]()
+    builder.add(first)
+    builder.add(second)
+    builder.add(duplicate)
+    builder.result()
+}
+
+def main(): Int = {
+    val values: Set[Int] = buildSet[Set](Set.factory(), 4, 2, 4)
+    if values.contains(4) && values.contains(2) && values.size() == 2 {
+        42
+    } else {
+        1
+    }
+}

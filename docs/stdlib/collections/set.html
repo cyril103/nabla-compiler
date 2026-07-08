@@ -44,6 +44,8 @@ left.union(right).size()</code></pre>
       <section class="toc-group">
         <h3>Types</h3>
         <ul>
+        <li><a href="#SetFactory" title="class SetFactory extends IterableFactory[Set]"><span>SetFactory</span><code>class SetFactory extends IterableFactory[Set]</code></a></li>
+        <li><a href="#SetBuilder" title="class SetBuilder[A] extends Builder[A, Set[A]]"><span>SetBuilder</span><code>class SetBuilder[A] extends Builder[A, Set[A]]</code></a></li>
         <li><a href="#Set" title="class Set[T]"><span>Set</span><code>class Set[T]</code></a></li>
         </ul>
       </section>
@@ -51,15 +53,21 @@ left.union(right).size()</code></pre>
         <h3>Constructeurs et fabriques</h3>
         <ul>
         <li><a href="#apply" title="def Set.apply[T](values: T*): Set[T]"><span>apply</span><code>def Set.apply[T](values: T*): Set[T]</code></a></li>
-        <li><a href="#empty" title="def Set.empty[T](): Set[T]"><span>empty</span><code>def Set.empty[T](): Set[T]</code></a></li>
+        <li><a href="#empty-2" title="def Set.empty[T](): Set[T]"><span>empty</span><code>def Set.empty[T](): Set[T]</code></a></li>
+        <li><a href="#factory" title="def Set.factory(): IterableFactory[Set]"><span>factory</span><code>def Set.factory(): IterableFactory[Set]</code></a></li>
+        <li><a href="#newBuilder-2" title="def Set.newBuilder[A](): Builder[A, Set[A]]"><span>newBuilder</span><code>def Set.newBuilder[A](): Builder[A, Set[A]]</code></a></li>
         <li><a href="#fromArray" title="def Set.fromArray[T](values: Array[T]): Set[T]"><span>fromArray</span><code>def Set.fromArray[T](values: Array[T]): Set[T]</code></a></li>
         </ul>
       </section>
       <section class="toc-group">
         <h3>Methodes</h3>
         <ul>
+        <li><a href="#empty" title="def empty[A](): Set[A]"><span>empty</span><code>def empty[A](): Set[A]</code></a></li>
+        <li><a href="#newBuilder" title="def newBuilder[A](): Builder[A, Set[A]]"><span>newBuilder</span><code>def newBuilder[A](): Builder[A, Set[A]]</code></a></li>
+        <li><a href="#add" title="def add(value: A): Unit"><span>add</span><code>def add(value: A): Unit</code></a></li>
+        <li><a href="#result" title="def result(): Set[A]"><span>result</span><code>def result(): Set[A]</code></a></li>
         <li><a href="#contains" title="def contains(value: T): Bool"><span>contains</span><code>def contains(value: T): Bool</code></a></li>
-        <li><a href="#add" title="def add(value: T): Set[T]"><span>add</span><code>def add(value: T): Set[T]</code></a></li>
+        <li><a href="#add-2" title="def add(value: T): Set[T]"><span>add</span><code>def add(value: T): Set[T]</code></a></li>
         <li><a href="#remove" title="def remove(value: T): Set[T]"><span>remove</span><code>def remove(value: T): Set[T]</code></a></li>
         <li><a href="#union" title="def union(other: Set[T]): Set[T]"><span>union</span><code>def union(other: Set[T]): Set[T]</code></a></li>
         <li><a href="#intersect" title="def intersect(other: Set[T]): Set[T]"><span>intersect</span><code>def intersect(other: Set[T]): Set[T]</code></a></li>
@@ -74,6 +82,61 @@ left.union(right).size()</code></pre>
       </section>
       </aside>
       <section class="content entries" aria-label="Reference detaillee">
+        <article class="entry" id="SetFactory">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>SetFactory</h2>
+          <pre class="signature"><code>class SetFactory extends IterableFactory[Set]</code></pre>
+          <p>Factory experimentale pour la famille Set.</p>
+
+        </article>
+        <article class="entry" id="empty">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>empty</h2>
+          <pre class="signature"><code>def empty[A](): Set[A]</code></pre>
+          <p>Cree un Set[A] vide.</p>
+
+        </article>
+        <article class="entry" id="newBuilder">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>newBuilder</h2>
+          <pre class="signature"><code>def newBuilder[A](): Builder[A, Set[A]]</code></pre>
+          <p>Cree un builder pour produire un Set[A].</p>
+
+        </article>
+        <article class="entry" id="SetBuilder">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>SetBuilder</h2>
+          <pre class="signature"><code>class SetBuilder[A] extends Builder[A, Set[A]]</code></pre>
+          <p>Builder experimental pour produire un Set[A].</p>
+<p>Le builder applique la semantique d&#x27;ensemble de Set.add: les doublons sont dedupliques dans le resultat.</p>
+
+        </article>
+        <article class="entry" id="add">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>add</h2>
+          <pre class="signature"><code>def add(value: A): Unit</code></pre>
+          <p>Ajoute value au resultat logique.</p>
+
+        </article>
+        <article class="entry" id="result">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>result</h2>
+          <pre class="signature"><code>def result(): Set[A]</code></pre>
+          <p>Retourne l&#x27;ensemble construit.</p>
+
+        </article>
         <article class="entry" id="apply">
           <div class="entry-meta">
             <span class="kind">def</span> <span class="status recommended">Recommandee</span>
@@ -83,13 +146,31 @@ left.union(right).size()</code></pre>
           <p>Cree un ensemble depuis les elements donnes.</p>
 
         </article>
-        <article class="entry" id="empty">
+        <article class="entry" id="empty-2">
           <div class="entry-meta">
             <span class="kind">def</span> <span class="status recommended">Recommandee</span>
           </div>
           <h2>empty</h2>
           <pre class="signature"><code>def Set.empty[T](): Set[T]</code></pre>
           <p>Cree un ensemble vide.</p>
+
+        </article>
+        <article class="entry" id="factory">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>factory</h2>
+          <pre class="signature"><code>def Set.factory(): IterableFactory[Set]</code></pre>
+          <p>Retourne la factory experimentale de Set.</p>
+
+        </article>
+        <article class="entry" id="newBuilder-2">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>newBuilder</h2>
+          <pre class="signature"><code>def Set.newBuilder[A](): Builder[A, Set[A]]</code></pre>
+          <p>Cree un builder experimental de Set[A].</p>
 
         </article>
         <article class="entry" id="fromArray">
@@ -121,7 +202,7 @@ left.union(right).size()</code></pre>
           <p>Indique si l&#x27;ensemble contient la valeur donnee.</p>
 
         </article>
-        <article class="entry" id="add">
+        <article class="entry" id="add-2">
           <div class="entry-meta">
             <span class="kind">def</span> <span class="status recommended">Recommandee</span>
           </div>

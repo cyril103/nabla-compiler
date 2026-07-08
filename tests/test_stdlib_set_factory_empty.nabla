@@ -1,0 +1,7 @@
+import core.iterable_ops
+import collections.set
+
+def main(): Int = {
+    val values: Set[Int] = Set.factory().empty[Int]()
+    values.size()
+}
