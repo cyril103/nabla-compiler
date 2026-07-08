@@ -1,0 +1,15 @@
+import collections.list
+
+def keepLarge(values: List[Int]): List[Int] = {
+    List.filter[Int](values, (value: Int) => { value > 2 })
+}
+
+def main(): Int = {
+    val values: List[Int] = List.cons[Int](1, List.cons[Int](2, List.cons[Int](3, List.cons[Int](4, Nil))))
+    val filtered = keepLarge(values)
+    if filtered.mkString("-") == "3-4" {
+        42
+    } else {
+        1
+    }
+}

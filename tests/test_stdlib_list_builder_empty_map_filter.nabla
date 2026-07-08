@@ -1,0 +1,8 @@
+import collections.list
+
+def main(): Int = {
+    val values: List[Int] = List.empty[Int]()
+    val mapped = List.map[Int, Int](values, (value: Int) => { value + 1 })
+    val filtered = List.filter[Int](values, (value: Int) => { value > 0 })
+    if mapped.isEmpty() && filtered.isEmpty() { 42 } else { 1 }
+}

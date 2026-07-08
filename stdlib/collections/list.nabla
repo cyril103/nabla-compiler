@@ -266,6 +266,7 @@ class Cons[T](val head: T, val tail: List[T]) with List[T] {
         Option.some[T](head)
     }
 
+
     override def mkString(separator: String): String = {
         if tail.isEmpty() {
             head.toString()
@@ -364,14 +365,11 @@ object List {
     /// @signature def List.map[T, U](values: List[T], f: (T) => U): List[U]
     /// @status Recommandee
     def map[T, U](values: List[T], f: (T) => U): List[U] = {
-        def mapFrom(current: List[T], transform: (T) => U): List[U] = {
-            if current.isEmpty() {
-                listEmpty[U]()
-            } else {
-                listCons[U](transform(current.head()), mapFrom(current.tail(), transform))
-            }
-        }
-        mapFrom(values, f)
+        val builder = List.newBuilder[U]()
+        values.foreach(value => {
+            builder.add(f(value))
+        })
+        builder.result()
     }
 
 
@@ -379,18 +377,17 @@ object List {
     /// @signature def List.filter[T](values: List[T], predicate: (T) => Bool): List[T]
     /// @status Recommandee
     def filter[T](values: List[T], predicate: (T) => Bool): List[T] = {
-        def filterFrom(current: List[T], keep: (T) => Bool): List[T] = {
-            if current.isEmpty() {
-                listEmpty[T]()
+        val builder = List.newBuilder[T]()
+        values.foreach(value => {
+            if predicate(value) {
+                builder.add(value)
             } else {
-                if keep(current.head()) {
-                    listCons[T](current.head(), filterFrom(current.tail(), keep))
-                } else {
-                    filterFrom(current.tail(), keep)
+                while false {
+                    0
                 }
             }
-        }
-        filterFrom(values, predicate)
+        })
+        builder.result()
     }
 
 

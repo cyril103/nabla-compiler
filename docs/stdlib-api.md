@@ -59,7 +59,7 @@ pas comme cible idiomatique pour le code applicatif.
   - herite de `Iterable[A]`
   - `iterableFactory(): IterableFactory[CC]`
   - cette base prepare les operations a la Scala (`map`, `filter`, builders),
-    sans encore deplacer la surface existante de `Iterable[T]`.
+    sans encore deplacer toute la surface existante de `Iterable[T]`.
 - `Option[T]`
   - `Option.some[T](value)`
   - `Option.none[T]()`
@@ -136,7 +136,8 @@ pas comme cible idiomatique pour le code applicatif.
     `drop(n)`, `slice(from, until)` et `mkString(separator)`
   - operations generiques via compagnon : `List.fold[T, U](values, initial, f)`,
     `List.map[T, U](values, f)`, `List.filter[T](values, predicate)` et
-    `List.fromArray[T](values)`
+    `List.fromArray[T](values)`; `List.map` et `List.filter` passent par
+    `ListBuilder` pour centraliser la reconstruction ordonnee.
   - `Array[T]` reste la collection indexee principale.
 
 `ArrayObject[T]`, les facades de tableaux specialisees, `Set[T]`, `Map[K, V]` et
