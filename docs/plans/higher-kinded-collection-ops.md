@@ -171,7 +171,8 @@ git diff --check
 
 ## Later slices
 
-1. Add `ListFactory` / `ArrayFactory` implementations of `IterableFactory[CC]` where feasible.
+1. Extend factory coverage beyond the delivered experimental `ListFactory` /
+   `ListBuilder[A]` slice, for example with `ArrayFactory` where feasible.
 2. Make `IterableOps[A, CC[_], C]` host builder-driven operations returning `CC[B]` or `C`.
 3. Move safe operations from `Iterable` to `IterableOps` only when their return types are representable.
 4. Consider arity-2 constructors for `Map[K, V]`-like APIs.

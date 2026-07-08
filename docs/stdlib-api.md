@@ -124,6 +124,11 @@ pas comme cible idiomatique pour le code applicatif.
   - `Nil` est le singleton vide runtime, declare comme `List[Nothing]` et
     assignable a `List[T]`.
   - `List.empty[T]()` et `List.cons[T](head, tail)`
+  - `List.factory()` retourne une `IterableFactory[List]` experimentale.
+  - `List.newBuilder[T]()` retourne un `Builder[T, List[T]]` experimental.
+  - `ListFactory` implemente `IterableFactory[List]`; `ListBuilder[T]`
+    implemente `Builder[T, List[T]]` et preserve l'ordre d'ajout dans
+    `result()`.
   - `isEmpty()`, `nonEmpty()`, `size()`, `foreach(f)`, `head()`, `tail()`,
     `headOption()`, `prepend(value)`, `prepended(value)`, `appended(value)`,
     `concat(suffix)`, `reverse()`, `reverseConcat(suffix)`, `take(n)`,
