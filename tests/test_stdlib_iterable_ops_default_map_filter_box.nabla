@@ -1,0 +1,59 @@
+import core.builder
+import core.iterable_ops
+import core.iterator
+import collections.list
+
+class Box[A](val values: List[A]) with IterableOps[A, Box, Box[A]] {
+    override def size(): Int = {
+        values.size()
+    }
+
+    override def iterator(): Iterator[A] = {
+        values.iterator()
+    }
+
+    override def iterableFactory(): IterableFactory[Box] = {
+        new BoxFactory()
+    }
+
+    def mkString(separator: String): String = {
+        values.mkString(separator)
+    }
+}
+
+class BoxFactory() with IterableFactory[Box] {
+    override def empty[A](): Box[A] = {
+        new Box[A](List.empty[A]())
+    }
+
+    override def newBuilder[A](): Builder[A, Box[A]] = {
+        new BoxBuilder[A](List.empty[A]())
+    }
+}
+
+class BoxBuilder[A](var reversed: List[A]) with Builder[A, Box[A]] {
+    override def add(value: A): Unit = {
+        reversed = List.cons[A](value, reversed)
+        while false {
+            0
+        }
+    }
+
+    override def result(): Box[A] = {
+        new Box[A](reversed.reverse())
+    }
+}
+
+def throughOps(values: IterableOps[Int, Box, Box[Int]]): Int = {
+    val mapped: Box[String] = values.map[String](value => "b" + value.toString())
+    val filtered: Box[Int] = values.filter(value => value > 1)
+    if mapped.mkString("|") == "b1|b2|b3" && filtered.mkString(",") == "2,3" {
+        42
+    } else {
+        1
+    }
+}
+
+def main(): Int = {
+    throughOps(new Box[Int](List.cons[Int](1, List.cons[Int](2, List.cons[Int](3, Nil)))))
+}

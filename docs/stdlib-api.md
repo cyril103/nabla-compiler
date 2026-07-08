@@ -58,8 +58,10 @@ pas comme cible idiomatique pour le code applicatif.
 - `IterableOps[A, CC[_], C]` (**experimental**)
   - herite de `Iterable[A]`
   - `iterableFactory(): IterableFactory[CC]`
-  - cette base prepare les operations a la Scala (`map`, `filter`, builders),
-    sans encore deplacer toute la surface existante de `Iterable[T]`.
+  - `map[B](f): CC[B]` et `filter(predicate): CC[A]` reconstruisent via
+    `IterableFactory.newBuilder`; cette surface reste experimentale et validee
+    par une regression de collection generique minimale avant d'etre branchee
+    sur les collections publiques.
 - `Option[T]`
   - `Option.some[T](value)`
   - `Option.none[T]()`
