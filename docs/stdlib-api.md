@@ -52,6 +52,7 @@ pas comme cible idiomatique pour le code applicatif.
   - `result()`
 - `IterableFactory[CC[_]]` (**experimental**)
   - `empty[A](): CC[A]`
+  - `newBuilder[A](): Builder[A, CC[A]]`
   - `CC[_]` est le premier usage public des constructeurs de type d'arite 1,
     destine aux familles de collections (`List`, `Set`, etc.).
 - `IterableOps[A, CC[_], C]` (**experimental**)
@@ -127,8 +128,8 @@ pas comme cible idiomatique pour le code applicatif.
   - `List.factory()` retourne une `IterableFactory[List]` experimentale.
   - `List.newBuilder[T]()` retourne un `Builder[T, List[T]]` experimental.
   - `ListFactory` implemente `IterableFactory[List]`; `ListBuilder[T]`
-    implemente `Builder[T, List[T]]` et preserve l'ordre d'ajout dans
-    `result()`.
+    implemente `Builder[T, List[T]]`, preserve l'ordre d'ajout dans `result()`
+    et peut etre obtenu via `IterableFactory[List].newBuilder[T]()`.
   - `isEmpty()`, `nonEmpty()`, `size()`, `foreach(f)`, `head()`, `tail()`,
     `headOption()`, `prepend(value)`, `prepended(value)`, `appended(value)`,
     `concat(suffix)`, `reverse()`, `reverseConcat(suffix)`, `take(n)`,

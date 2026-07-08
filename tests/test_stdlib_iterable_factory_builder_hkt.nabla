@@ -1,0 +1,15 @@
+import core.builder
+import core.iterable_ops
+import collections.list
+
+def buildTwo[CC[_]](factory: IterableFactory[CC], first: Int, second: Int): CC[Int] = {
+    val builder: Builder[Int, CC[Int]] = factory.newBuilder[Int]()
+    builder.add(first)
+    builder.add(second)
+    builder.result()
+}
+
+def main(): Int = {
+    val values: List[Int] = buildTwo[List](List.factory(), 4, 2)
+    values.head() * 10 + values.tail().head()
+}

@@ -173,7 +173,8 @@ git diff --check
 
 1. Extend factory coverage beyond the delivered experimental `ListFactory` /
    `ListBuilder[A]` slice, for example with `ArrayFactory` where feasible.
-2. Make `IterableOps[A, CC[_], C]` host builder-driven operations returning `CC[B]` or `C`.
+2. Extend the delivered factory-level `newBuilder[A](): Builder[A, CC[A]]` work into
+   `IterableOps[A, CC[_], C]` methods returning `CC[B]` or `C`.
 3. Move safe operations from `Iterable` to `IterableOps` only when their return types are representable.
 4. Consider arity-2 constructors for `Map[K, V]`-like APIs.
 5. Consider variance only after invariant HKT dispatch and substitution are stable.

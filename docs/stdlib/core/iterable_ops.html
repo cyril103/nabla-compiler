@@ -38,6 +38,7 @@
         <h3>Methodes</h3>
         <ul>
         <li><a href="#empty" title="def empty[A](): CC[A]"><span>empty</span><code>def empty[A](): CC[A]</code></a></li>
+        <li><a href="#newBuilder" title="def newBuilder[A](): Builder[A, CC[A]]"><span>newBuilder</span><code>def newBuilder[A](): Builder[A, CC[A]]</code></a></li>
         <li><a href="#iterableFactory" title="def iterableFactory(): IterableFactory[CC]"><span>iterableFactory</span><code>def iterableFactory(): IterableFactory[CC]</code></a></li>
         </ul>
       </section>
@@ -60,6 +61,15 @@
           <h2>empty</h2>
           <pre class="signature"><code>def empty[A](): CC[A]</code></pre>
           <p>Cree une collection vide de la famille CC pour le type A.</p>
+
+        </article>
+        <article class="entry" id="newBuilder">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>newBuilder</h2>
+          <pre class="signature"><code>def newBuilder[A](): Builder[A, CC[A]]</code></pre>
+          <p>Cree un builder pour produire une collection CC[A].</p>
 
         </article>
         <article class="entry" id="IterableOps">
