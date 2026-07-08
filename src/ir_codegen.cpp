@@ -1956,6 +1956,20 @@ void IRCodeGenerator::generateASM(
                     targetFunc = asmFunctionName(candidateFunction);
                     break;
                 }
+
+                // Some trait methods inherited by a parameterized type do not need a
+                // class-level specialization: their emitted implementation remains
+                // under the generic owner (for example LocalList.iterableFactory,
+                // whose body is independent from A).  Still allow the concrete
+                // runtime vtable slot to point at that generic implementation when
+                // the concrete-owner function was not emitted.
+                const std::string genericCandidateFunction =
+                    methodFunctionName(candidate.ownerClassName, targetMethodName);
+                if (genericCandidateFunction != candidateFunction &&
+                    emittedFunctions.count(genericCandidateFunction)) {
+                    targetFunc = asmFunctionName(genericCandidateFunction);
+                    break;
+                }
             }
             if (targetFunc == "Runtime_trait_dispatch_error" &&
                 slotSignature && !slotSignature->isAbstract) {

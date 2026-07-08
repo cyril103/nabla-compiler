@@ -1409,6 +1409,16 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
     resolvedParameterTypes = parameterTypes(parameters);
     resolvedParameters = parameters;
     resolvedOwnerType = methodLookup.ownerClassName;
+    resolvedConcreteOwnerType = methodLookup.ownerClassName;
+    auto ownerClassIt = context.classes.find(methodLookup.ownerClassName);
+    if (ownerClassIt != context.classes.end() && !ownerClassIt->second.typeParameters.empty()) {
+        std::vector<std::string> ownerTypeArguments;
+        for (const auto& typeParameter : ownerClassIt->second.typeParameters) {
+            auto argumentIt = substitution.find(typeParameter);
+            ownerTypeArguments.push_back(argumentIt != substitution.end() ? argumentIt->second : typeParameter);
+        }
+        resolvedConcreteOwnerType = formatParameterizedType(methodLookup.ownerClassName, ownerTypeArguments);
+    }
 }
 
 std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
@@ -1823,16 +1833,20 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         ? loweredSourceMethodName
         : formatParameterizedType(loweredSourceMethodName, concreteTypeArguments);
     const std::string concreteReturnType = builder.substituteActiveType(resolvedType);
-    const bool receiverBaseChanged = !resolvedOwnerType.empty() &&
-        genericBaseName(concreteReceiverType) != genericBaseName(resolvedOwnerType);
+    const std::string concreteOwnerType = resolvedConcreteOwnerType.empty()
+        ? resolvedOwnerType
+        : builder.substituteActiveType(resolvedConcreteOwnerType);
+    const bool receiverBaseChanged = !concreteOwnerType.empty() &&
+        genericBaseName(concreteReceiverType) != genericBaseName(concreteOwnerType);
     const bool shouldRegisterMethodSpecialization =
-        !resolvedOwnerType.empty() && ( !concreteTypeArguments.empty() || concreteReceiverType != resolvedOwnerType );
+        !resolvedOwnerType.empty() &&
+        ( !concreteTypeArguments.empty() || concreteOwnerType != resolvedOwnerType || concreteReceiverType != concreteOwnerType );
     const bool shouldSpecializeAsConcreteClass =
         shouldRegisterMethodSpecialization && !receiverBaseChanged;
     if (shouldRegisterMethodSpecialization &&
         !isAbstractTraitMethod(builder.getContext(), resolvedOwnerType, loweredSourceMethodName)) {
         const std::string concreteClassName =
-            shouldSpecializeAsConcreteClass ? concreteReceiverType : resolvedOwnerType;
+            shouldSpecializeAsConcreteClass ? concreteReceiverType : concreteOwnerType;
         builder.registerMethodSpecialization(
             concreteClassName, resolvedOwnerType, loweredSourceMethodName, concreteTypeArguments,
             argumentTypes, concreteReturnType);
@@ -1858,7 +1872,7 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
     const std::string methodOwnerType =
         shouldSpecializeAsConcreteClass || resolvedOwnerType.empty()
             ? concreteReceiverType
-            : resolvedOwnerType;
+            : concreteOwnerType;
     const bool isSuperCall = dynamic_cast<const SuperNode*>(receiver.get()) != nullptr;
     if (isSuperCall) {
         return builder.emitStaticMethodCall(

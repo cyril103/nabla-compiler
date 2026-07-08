@@ -175,7 +175,10 @@ git diff --check
    `ListBuilder[A]` slice, for example with `ArrayFactory` where feasible.
 2. Broaden the delivered experimental `IterableOps[A, CC[_], C].map/filter`
    defaults from standalone/default-method regressions onto public collections
-   once generic instance-method vtable dispatch is stable for this shape.
+   once generic instance-method vtable dispatch is stable for this shape. A
+   narrow regression now covers the former blocker: a public trait family shaped
+   like `List[T] with IterableOps[T, List, List[T]]` can reuse default
+   `map`/`filter` through its factory and builder.
 3. Move safe operations from `Iterable` to `IterableOps` only when their return types are representable.
 4. Consider arity-2 constructors for `Map[K, V]`-like APIs.
 5. Consider variance only after invariant HKT dispatch and substitution are stable.

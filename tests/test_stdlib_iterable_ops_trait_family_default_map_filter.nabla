@@ -1,0 +1,63 @@
+import core.builder
+import core.iterable_ops
+import core.iterator
+import collections.list
+
+trait LocalList[A] with IterableOps[A, LocalList, LocalList[A]] {
+    override def iterableFactory(): IterableFactory[LocalList] = {
+        new LocalListFactory()
+    }
+
+    def values(): List[A]
+
+    override def size(): Int = {
+        this.values().size()
+    }
+
+    override def iterator(): Iterator[A] = {
+        this.values().iterator()
+    }
+}
+
+class LocalListBox[A](val inner: List[A]) with LocalList[A] {
+    override def values(): List[A] = {
+        inner
+    }
+}
+
+class LocalListFactory() with IterableFactory[LocalList] {
+    override def empty[A](): LocalList[A] = {
+        new LocalListBox[A](List.empty[A]())
+    }
+
+    override def newBuilder[A](): Builder[A, LocalList[A]] = {
+        new LocalListBuilder[A](List.empty[A]())
+    }
+}
+
+class LocalListBuilder[A](var reversed: List[A]) with Builder[A, LocalList[A]] {
+    override def add(value: A): Unit = {
+        reversed = List.cons[A](value, reversed)
+        while false {
+            0
+        }
+    }
+
+    override def result(): LocalList[A] = {
+        new LocalListBox[A](reversed.reverse())
+    }
+}
+
+def throughOps(values: IterableOps[Int, LocalList, LocalList[Int]]): Int = {
+    val mapped: LocalList[String] = values.map[String](value => "x" + value.toString())
+    val filtered: LocalList[Int] = values.filter(value => value > 1)
+    if mapped.values().mkString("|") == "x1|x2" && filtered.values().mkString(",") == "2" {
+        42
+    } else {
+        1
+    }
+}
+
+def main(): Int = {
+    throughOps(new LocalListBox[Int](List.cons[Int](1, List.cons[Int](2, Nil))))
+}
