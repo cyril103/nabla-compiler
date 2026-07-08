@@ -14,6 +14,8 @@
 /// @end
 
 import core.iterable
+import core.builder
+import core.iterable_ops
 import core.iterator
 import core.option
 import collections.array
@@ -273,6 +275,40 @@ class Cons[T](val head: T, val tail: List[T]) with List[T] {
     }
 }
 
+/// Factory experimentale pour la famille List.
+/// @signature class ListFactory extends IterableFactory[List]
+/// @status Experimental
+class ListFactory() with IterableFactory[List] {
+    /// Cree une List[A] vide.
+    /// @signature def empty[A](): List[A]
+    /// @status Experimental
+    override def empty[A](): List[A] = {
+        listEmpty[A]()
+    }
+}
+
+/// Builder experimental qui preserve l'ordre d'ajout dans le resultat.
+/// @signature class ListBuilder[A] extends Builder[A, List[A]]
+/// @status Experimental
+class ListBuilder[A](var reversed: List[A]) with Builder[A, List[A]] {
+    /// Ajoute value en fin logique de resultat.
+    /// @signature def add(value: A): Unit
+    /// @status Experimental
+    override def add(value: A): Unit = {
+        reversed = listCons[A](value, reversed)
+        while false {
+            0
+        }
+    }
+
+    /// Retourne la liste construite dans l'ordre d'ajout.
+    /// @signature def result(): List[A]
+    /// @status Experimental
+    override def result(): List[A] = {
+        reversed.reverse()
+    }
+}
+
 object List {
     /// Construit une liste vide.
     /// @signature def List.empty[T](): List[T]
@@ -287,6 +323,20 @@ object List {
     /// @status Recommandee
     def cons[T](head: T, tail: List[T]): List[T] = {
         listCons[T](head, tail)
+    }
+
+    /// Retourne la factory experimentale de List.
+    /// @signature def List.factory(): IterableFactory[List]
+    /// @status Experimental
+    def factory(): IterableFactory[List] = {
+        new ListFactory()
+    }
+
+    /// Cree un builder experimental de List[A].
+    /// @signature def List.newBuilder[A](): Builder[A, List[A]]
+    /// @status Experimental
+    def newBuilder[A](): Builder[A, List[A]] = {
+        new ListBuilder[A](listEmpty[A]())
     }
 
     /// Replie une liste de gauche a droite.

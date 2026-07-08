@@ -1,0 +1,10 @@
+import core.builder
+import collections.list
+
+def main(): Int = {
+    val builder: Builder[Int, List[Int]] = List.newBuilder[Int]()
+    builder.add(4)
+    builder.add(2)
+    val values = builder.result()
+    values.head() * 10 + values.tail().head()
+}
