@@ -89,6 +89,13 @@ pas comme cible idiomatique pour le code applicatif.
 - `Array.range(size)`
 - `Array.range(start, until)`
 - `Array.rangeUntil(start, until)` — alias de compatibilite
+- `Array.factory()` retourne une `IterableFactory[Array]` experimentale.
+- `Array.newBuilder[T]()` retourne un `Builder[T, Array[T]]` experimental; le
+  builder preserve l'ordre d'ajout mais materialise actuellement un tableau
+  generique, sans promettre de specialisation primitive.
+- `ArrayFactory` implemente `IterableFactory[Array]`; `ArrayBuilder[T]`
+  implemente `Builder[T, Array[T]]` et peut etre obtenu via
+  `IterableFactory[Array].newBuilder[T]()`.
 - `array.map(f)` pour conserver le meme type specialise quand il existe, et
   `array.map[U](f)` pour produire un tableau generique `Array[U]` depuis une
   facade primitive sans passer par le nom de compatibilite `mapObject`.

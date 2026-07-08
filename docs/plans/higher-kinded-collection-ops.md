@@ -172,7 +172,8 @@ git diff --check
 ## Later slices
 
 1. Extend factory coverage beyond the delivered experimental `ListFactory` /
-   `ListBuilder[A]` slice, for example with `ArrayFactory` where feasible.
+   `ListBuilder[A]` and `ArrayFactory` / `ArrayBuilder[A]` slices, for example
+   with `SetFactory` where feasible.
 2. Broaden the delivered experimental `IterableOps[A, CC[_], C].map/filter`
    defaults from standalone/default-method regressions onto public collections
    once generic instance-method vtable dispatch is stable for this shape. A
