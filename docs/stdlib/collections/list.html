@@ -49,7 +49,7 @@ xs.head() + xs.tail().head()</code></pre>
         <li><a href="#empty-2" title="def List.empty[T](): List[T]"><span>empty</span><code>def List.empty[T](): List[T]</code></a></li>
         <li><a href="#cons" title="def List.cons[T](head: T, tail: List[T]): List[T]"><span>cons</span><code>def List.cons[T](head: T, tail: List[T]): List[T]</code></a></li>
         <li><a href="#factory" title="def List.factory(): IterableFactory[List]"><span>factory</span><code>def List.factory(): IterableFactory[List]</code></a></li>
-        <li><a href="#newBuilder" title="def List.newBuilder[A](): Builder[A, List[A]]"><span>newBuilder</span><code>def List.newBuilder[A](): Builder[A, List[A]]</code></a></li>
+        <li><a href="#newBuilder-2" title="def List.newBuilder[A](): Builder[A, List[A]]"><span>newBuilder</span><code>def List.newBuilder[A](): Builder[A, List[A]]</code></a></li>
         <li><a href="#fold" title="def List.fold[T, U](values: List[T], initial: U, f: (U, T) =&gt; U): U"><span>fold</span><code>def List.fold[T, U](values: List[T], initial: U, f: (U, T) =&gt; U): U</code></a></li>
         <li><a href="#map" title="def List.map[T, U](values: List[T], f: (T) =&gt; U): List[U]"><span>map</span><code>def List.map[T, U](values: List[T], f: (T) =&gt; U): List[U]</code></a></li>
         <li><a href="#filter" title="def List.filter[T](values: List[T], predicate: (T) =&gt; Bool): List[T]"><span>filter</span><code>def List.filter[T](values: List[T], predicate: (T) =&gt; Bool): List[T]</code></a></li>
@@ -76,6 +76,7 @@ xs.head() + xs.tail().head()</code></pre>
         <li><a href="#iterator" title="def iterator(): Iterator[T]"><span>iterator</span><code>def iterator(): Iterator[T]</code></a></li>
         <li><a href="#mkString" title="def mkString(separator: String): String"><span>mkString</span><code>def mkString(separator: String): String</code></a></li>
         <li><a href="#empty" title="def empty[A](): List[A]"><span>empty</span><code>def empty[A](): List[A]</code></a></li>
+        <li><a href="#newBuilder" title="def newBuilder[A](): Builder[A, List[A]]"><span>newBuilder</span><code>def newBuilder[A](): Builder[A, List[A]]</code></a></li>
         <li><a href="#add" title="def add(value: A): Unit"><span>add</span><code>def add(value: A): Unit</code></a></li>
         <li><a href="#result" title="def result(): List[A]"><span>result</span><code>def result(): List[A]</code></a></li>
         </ul>
@@ -272,6 +273,15 @@ xs.head() + xs.tail().head()</code></pre>
           <p>Cree une List[A] vide.</p>
 
         </article>
+        <article class="entry" id="newBuilder">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>newBuilder</h2>
+          <pre class="signature"><code>def newBuilder[A](): Builder[A, List[A]]</code></pre>
+          <p>Cree un builder pour produire une List[A].</p>
+
+        </article>
         <article class="entry" id="ListBuilder">
           <div class="entry-meta">
             <span class="kind">class</span> <span class="status experimental">Experimental</span>
@@ -326,7 +336,7 @@ xs.head() + xs.tail().head()</code></pre>
           <p>Retourne la factory experimentale de List.</p>
 
         </article>
-        <article class="entry" id="newBuilder">
+        <article class="entry" id="newBuilder-2">
           <div class="entry-meta">
             <span class="kind">def</span> <span class="status experimental">Experimental</span>
           </div>

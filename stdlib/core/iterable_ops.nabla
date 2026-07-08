@@ -16,6 +16,11 @@ trait IterableFactory[CC[_]] {
     /// @signature def empty[A](): CC[A]
     /// @status Experimental
     def empty[A](): CC[A]
+
+    /// Cree un builder pour produire une collection CC[A].
+    /// @signature def newBuilder[A](): Builder[A, CC[A]]
+    /// @status Experimental
+    def newBuilder[A](): Builder[A, CC[A]]
 }
 
 /// Base future pour des operations de collection a la Scala IterableOps.

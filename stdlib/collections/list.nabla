@@ -285,6 +285,13 @@ class ListFactory() with IterableFactory[List] {
     override def empty[A](): List[A] = {
         listEmpty[A]()
     }
+
+    /// Cree un builder pour produire une List[A].
+    /// @signature def newBuilder[A](): Builder[A, List[A]]
+    /// @status Experimental
+    override def newBuilder[A](): Builder[A, List[A]] = {
+        new ListBuilder[A](listEmpty[A]())
+    }
 }
 
 /// Builder experimental qui preserve l'ordre d'ajout dans le resultat.
