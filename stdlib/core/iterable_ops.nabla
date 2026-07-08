@@ -23,17 +23,44 @@ trait IterableFactory[CC[_]] {
     def newBuilder[A](): Builder[A, CC[A]]
 }
 
-/// Base future pour des operations de collection a la Scala IterableOps.
+/// Base experimentale pour des operations de collection a la Scala IterableOps.
 /// @signature trait IterableOps[A, CC[_], C]
 /// @status Experimental
 ///
-/// Cette premiere version ne deplace pas encore les operations de Iterable:
-/// elle expose seulement le lien entre l'Iterable courant, sa famille CC[_] et
-/// le type concret C, afin de stabiliser la representation des constructeurs de
-/// types avant d'ajouter map/filter/builders.
+/// Cette version expose le lien entre l'Iterable courant, sa famille CC[_] et
+/// le type concret C. Les methodes map/filter sont encore experimentales et
+/// reconstruisent leur resultat via IterableFactory.newBuilder.
 trait IterableOps[A, CC[_], C] with Iterable[A] {
     /// Retourne la factory de la famille de collection courante.
     /// @signature def iterableFactory(): IterableFactory[CC]
     /// @status Experimental
     def iterableFactory(): IterableFactory[CC]
+
+    /// Transforme chaque element et reconstruit une collection de la meme famille.
+    /// @signature def map[B](f: (A) => B): CC[B]
+    /// @status Experimental
+    def map[B](f: (A) => B): CC[B] = {
+        val builder: Builder[B, CC[B]] = this.iterableFactory().newBuilder[B]()
+        this.foreach(value => {
+            builder.add(f(value))
+        })
+        builder.result()
+    }
+
+    /// Conserve les elements qui verifient predicate.
+    /// @signature def filter(predicate: (A) => Bool): CC[A]
+    /// @status Experimental
+    def filter(predicate: (A) => Bool): CC[A] = {
+        val builder: Builder[A, CC[A]] = this.iterableFactory().newBuilder[A]()
+        this.foreach(value => {
+            if predicate(value) {
+                builder.add(value)
+            } else {
+                while false {
+                    0
+                }
+            }
+        })
+        builder.result()
+    }
 }

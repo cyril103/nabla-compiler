@@ -40,6 +40,8 @@
         <li><a href="#empty" title="def empty[A](): CC[A]"><span>empty</span><code>def empty[A](): CC[A]</code></a></li>
         <li><a href="#newBuilder" title="def newBuilder[A](): Builder[A, CC[A]]"><span>newBuilder</span><code>def newBuilder[A](): Builder[A, CC[A]]</code></a></li>
         <li><a href="#iterableFactory" title="def iterableFactory(): IterableFactory[CC]"><span>iterableFactory</span><code>def iterableFactory(): IterableFactory[CC]</code></a></li>
+        <li><a href="#map" title="def map[B](f: (A) =&gt; B): CC[B]"><span>map</span><code>def map[B](f: (A) =&gt; B): CC[B]</code></a></li>
+        <li><a href="#filter" title="def filter(predicate: (A) =&gt; Bool): CC[A]"><span>filter</span><code>def filter(predicate: (A) =&gt; Bool): CC[A]</code></a></li>
         </ul>
       </section>
       </aside>
@@ -78,8 +80,8 @@
           </div>
           <h2>IterableOps</h2>
           <pre class="signature"><code>trait IterableOps[A, CC[_], C]</code></pre>
-          <p>Base future pour des operations de collection a la Scala IterableOps.</p>
-<p>Cette premiere version ne deplace pas encore les operations de Iterable: elle expose seulement le lien entre l&#x27;Iterable courant, sa famille CC[_] et le type concret C, afin de stabiliser la representation des constructeurs de types avant d&#x27;ajouter map/filter/builders.</p>
+          <p>Base experimentale pour des operations de collection a la Scala IterableOps.</p>
+<p>Cette version expose le lien entre l&#x27;Iterable courant, sa famille CC[_] et le type concret C. Les methodes map/filter sont encore experimentales et reconstruisent leur resultat via IterableFactory.newBuilder.</p>
 
         </article>
         <article class="entry" id="iterableFactory">
@@ -89,6 +91,24 @@
           <h2>iterableFactory</h2>
           <pre class="signature"><code>def iterableFactory(): IterableFactory[CC]</code></pre>
           <p>Retourne la factory de la famille de collection courante.</p>
+
+        </article>
+        <article class="entry" id="map">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>map</h2>
+          <pre class="signature"><code>def map[B](f: (A) =&gt; B): CC[B]</code></pre>
+          <p>Transforme chaque element et reconstruit une collection de la meme famille.</p>
+
+        </article>
+        <article class="entry" id="filter">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>filter</h2>
+          <pre class="signature"><code>def filter(predicate: (A) =&gt; Bool): CC[A]</code></pre>
+          <p>Conserve les elements qui verifient predicate.</p>
 
         </article>
       </section>
