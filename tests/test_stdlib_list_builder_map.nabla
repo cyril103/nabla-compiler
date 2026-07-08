@@ -1,0 +1,15 @@
+import collections.list
+
+def transform(values: List[Int]): List[Int] = {
+    List.map[Int, Int](values, (value: Int) => { value + 1 })
+}
+
+def main(): Int = {
+    val values: List[Int] = List.cons[Int](1, List.cons[Int](2, List.cons[Int](3, Nil)))
+    val mapped = transform(values)
+    if mapped.mkString(",") == "2,3,4" {
+        42
+    } else {
+        1
+    }
+}
