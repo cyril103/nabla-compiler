@@ -151,6 +151,7 @@ class MethodCallNode : public ASTNode {
     std::vector<std::string> resolvedTypeArguments;
     std::string resolvedType = "Int";
     std::string resolvedOwnerType;
+    std::string resolvedConcreteOwnerType;
     std::vector<std::string> resolvedParameterTypes;
     std::vector<CompilerContext::ParameterInfo> resolvedParameters;
     bool receiverIsTypeParameter = false;
