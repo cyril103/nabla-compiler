@@ -87,16 +87,44 @@ std::optional<ClassMethodLookupResult> resolveZeroArgumentMethod(
     if (!typeArguments.empty()) return std::nullopt;
     return resolveExactClassMethodOverload(context, receiverType, methodName, {});
 }
+
+void requireUnambiguousTopLevelFunction(
+    const CompilerContext& context, const std::string& sourceName,
+    const SourceLocation& location) {
+    const auto modules = topLevelFunctionModules(context, sourceName);
+    if (modules.size() <= 1) return;
+    throw CompilerError(
+        ErrorKind::Parser, location,
+        ambiguousImportedNameMessage(sourceName, modules));
+}
+
+struct ParserModuleScope {
+    CompilerContext& context;
+    std::string previousModuleName;
+    std::string previousPackageName;
+
+    explicit ParserModuleScope(CompilerContext& context)
+        : context(context),
+          previousModuleName(context.currentModuleName),
+          previousPackageName(context.currentPackageName) {}
+
+    ~ParserModuleScope() {
+        context.currentModuleName = previousModuleName;
+        context.currentPackageName = previousPackageName;
+    }
+};
 }
 
 Parser::Parser(const std::vector<Token>& tokens, CompilerContext& ctx, const std::filesystem::path& currentFile)
     : tokens(tokens), index(0), context(ctx), currentFile(currentFile), currentParsingClass("") {}
 
 std::unique_ptr<ProgramNode> Parser::parseProgram() {
+    ParserModuleScope moduleScope(context);
     auto program = located(std::make_unique<ProgramNode>(), peek().location);
     if (peek().type == TokenType::KW_PACKAGE) {
         consume(TokenType::KW_PACKAGE, "");
         program->packageName = parseQualifiedName("Nom de package attendu", "Sous-package attendu");
+        context.currentPackageName = program->packageName;
     }
     while (peek().type != TokenType::EOF_TOKEN) {
         if (peek().type == TokenType::KW_IMPORT) {
@@ -166,6 +194,9 @@ void Parser::parseImport(std::unique_ptr<ProgramNode>& currentProgram) {
     std::stringstream buffer; buffer << file.rdbuf();
 
     Lexer subLexer(buffer.str(), importPath.string());
+    ParserModuleScope moduleScope(context);
+    context.currentModuleName = moduleName;
+    context.currentPackageName.clear();
     Parser subParser(subLexer.tokenize(), context, importPath);
     auto subProgram = subParser.parseProgram();
     if (!subProgram->packageName.empty() && subProgram->packageName != moduleName) {
@@ -234,6 +265,14 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool is
     Token classToken = consume(isTrait ? TokenType::KW_TRAIT : TokenType::KW_CLASS, "");
     Token classNameToken = consume(TokenType::IDENTIFIER, isTrait ? "Nom de trait attendu" : "Nom de classe attendu");
     std::string className = classNameToken.value;
+    const std::string declaredModuleName = context.currentModuleName.empty()
+        ? std::string{}
+        : (context.currentPackageName.empty() ? context.currentModuleName : context.currentPackageName);
+    const std::string declaredTypeInternalName = topLevelInternalName(declaredModuleName, className);
+    context.topLevelTypesBySourceName[className].push_back({
+        className, declaredTypeInternalName, declaredModuleName, classNameToken.location});
+    context.topLevelTypesByInternalName[declaredTypeInternalName] = {
+        className, declaredTypeInternalName, declaredModuleName, classNameToken.location};
     std::vector<std::string> typeParameters;
     std::vector<CompilerContext::TypeParameterInfo> typeParameterInfos;
     if (peek().type == TokenType::LBRACKET) {
@@ -520,6 +559,14 @@ void Parser::parseObjectDefinition(std::unique_ptr<ProgramNode>& program) {
     consume(TokenType::KW_OBJECT, "");
     Token objectNameToken = consume(TokenType::IDENTIFIER, "Nom d'objet attendu");
     const std::string objectName = objectNameToken.value;
+    const std::string declaredModuleName = context.currentModuleName.empty()
+        ? std::string{}
+        : (context.currentPackageName.empty() ? context.currentModuleName : context.currentPackageName);
+    const std::string declaredTypeInternalName = topLevelInternalName(declaredModuleName, objectName);
+    context.topLevelTypesBySourceName[objectName].push_back({
+        objectName, declaredTypeInternalName, declaredModuleName, objectNameToken.location});
+    context.topLevelTypesByInternalName[declaredTypeInternalName] = {
+        objectName, declaredTypeInternalName, declaredModuleName, objectNameToken.location};
     if (context.objects.count(objectName)) {
         throw CompilerError(ErrorKind::Parser, objectNameToken.location, "objet déjà déclaré: " + objectName);
     }
@@ -1240,6 +1287,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionReferenceWithExpectedType(const st
     if (overloadNames.empty()) {
         return nullptr;
     }
+    requireUnambiguousTopLevelFunction(context, name, nameToken.location);
 
     const size_t referenceStartIndex = index;
     consume(TokenType::IDENTIFIER, "");
@@ -1528,11 +1576,14 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             std::vector<std::string> functionTypeArguments = typeArguments;
             if (!initialSymbol) {
                 if (auto alias = resolveStdlibFunctionAlias(name, typeArguments)) {
-                    auto aliasFunction = context.functions.find(*alias);
-                    if (aliasFunction != context.functions.end()) {
-                        functionLookupName = *alias;
-                        if (aliasFunction->second.typeParameters.empty()) {
-                            functionTypeArguments.clear();
+                    auto aliasInternalName = uniqueFunctionInternalNameForSource(context, *alias);
+                    if (aliasInternalName) {
+                        auto aliasFunction = context.functions.find(*aliasInternalName);
+                        if (aliasFunction != context.functions.end()) {
+                            functionLookupName = *aliasInternalName;
+                            if (aliasFunction->second.typeParameters.empty()) {
+                                functionTypeArguments.clear();
+                            }
                         }
                     }
                 } else if (isStdlibFunctionAliasName(name) && !typeArguments.empty()) {
@@ -1546,6 +1597,9 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                            functionOverloadNames(context, name).empty()) {
                     functionLookupName = name + ".apply";
                 }
+            }
+            if (!initialSymbol && functionLookupName == name) {
+                requireUnambiguousTopLevelFunction(context, name, nameToken.location);
             }
             if (initialSymbol) {
                 auto functionType = functionTypeFromName(initialSymbol->type);
@@ -1645,17 +1699,20 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     const auto inferredTypeArguments =
                         orderedTypeArguments(function->typeParameters, substitution);
                     if (auto alias = resolveStdlibFunctionAlias(functionLookupName, inferredTypeArguments)) {
-                        auto aliasFunction = context.functions.find(*alias);
-                        if (aliasFunction != context.functions.end()) {
-                            functionLookupName = *alias;
-                            functionTypeArguments = aliasFunction->second.typeParameters.empty()
-                                ? std::vector<std::string>{}
-                                : inferredTypeArguments;
-                            function = &aliasFunction->second;
-                            substitution.clear();
-                            if (auto aliasSubstitution =
-                                    genericFunctionSubstitutionFor(*function, functionTypeArguments)) {
-                                substitution = *aliasSubstitution;
+                        auto aliasInternalName = uniqueFunctionInternalNameForSource(context, *alias);
+                        if (aliasInternalName) {
+                            auto aliasFunction = context.functions.find(*aliasInternalName);
+                            if (aliasFunction != context.functions.end()) {
+                                functionLookupName = *aliasInternalName;
+                                functionTypeArguments = aliasFunction->second.typeParameters.empty()
+                                    ? std::vector<std::string>{}
+                                    : inferredTypeArguments;
+                                function = &aliasFunction->second;
+                                substitution.clear();
+                                if (auto aliasSubstitution =
+                                        genericFunctionSubstitutionFor(*function, functionTypeArguments)) {
+                                    substitution = *aliasSubstitution;
+                                }
                             }
                         }
                     }
@@ -1720,6 +1777,7 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         }
         auto overloadNames = functionOverloadNames(context, name);
         if (!overloadNames.empty()) {
+            requireUnambiguousTopLevelFunction(context, name, nameToken.location);
             if (auto zeroArgOverload = resolveExactFunctionOverload(context, name, {}, typeArguments)) {
                 const auto& signature = context.functions[*zeroArgOverload];
                 if (signature.parameters.empty() && signature.typeParameters.empty()) {
@@ -1886,11 +1944,14 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
             }
             if (!selectedQualifiedOverload) {
                 if (auto alias = resolveStdlibFunctionAlias(qualifiedFunctionName, typeArguments)) {
-                    auto aliasFunction = context.functions.find(*alias);
-                    if (aliasFunction != context.functions.end()) {
-                        functionLookupName = *alias;
-                        if (aliasFunction->second.typeParameters.empty()) {
-                            functionTypeArguments.clear();
+                    auto aliasInternalName = uniqueFunctionInternalNameForSource(context, *alias);
+                    if (aliasInternalName) {
+                        auto aliasFunction = context.functions.find(*aliasInternalName);
+                        if (aliasFunction != context.functions.end()) {
+                            functionLookupName = *aliasInternalName;
+                            if (aliasFunction->second.typeParameters.empty()) {
+                                functionTypeArguments.clear();
+                            }
                         }
                     }
                 }
@@ -1946,17 +2007,20 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
                     const auto inferredTypeArguments =
                         orderedTypeArguments(qualifiedFunction->second.typeParameters, substitution);
                     if (auto alias = resolveStdlibFunctionAlias(functionLookupName, inferredTypeArguments)) {
-                        auto aliasFunction = context.functions.find(*alias);
-                        if (aliasFunction != context.functions.end()) {
-                            functionLookupName = *alias;
-                            functionTypeArguments = aliasFunction->second.typeParameters.empty()
-                                ? std::vector<std::string>{}
-                                : inferredTypeArguments;
-                            qualifiedFunction = aliasFunction;
-                            substitution.clear();
-                            if (auto aliasSubstitution =
-                                    genericFunctionSubstitutionFor(qualifiedFunction->second, functionTypeArguments)) {
-                                substitution = *aliasSubstitution;
+                        auto aliasInternalName = uniqueFunctionInternalNameForSource(context, *alias);
+                        if (aliasInternalName) {
+                            auto aliasFunction = context.functions.find(*aliasInternalName);
+                            if (aliasFunction != context.functions.end()) {
+                                functionLookupName = *aliasInternalName;
+                                functionTypeArguments = aliasFunction->second.typeParameters.empty()
+                                    ? std::vector<std::string>{}
+                                    : inferredTypeArguments;
+                                qualifiedFunction = aliasFunction;
+                                substitution.clear();
+                                if (auto aliasSubstitution =
+                                        genericFunctionSubstitutionFor(qualifiedFunction->second, functionTypeArguments)) {
+                                    substitution = *aliasSubstitution;
+                                }
                             }
                         }
                     }
@@ -2507,26 +2571,45 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
                 ErrorKind::Parser, nameToken.location,
                 "nom de fonction réservé pour une primitive runtime: " + functionName);
         }
-        auto& overloads = context.functionOverloads[functionName];
+        const std::string sourceFunctionName = functionName;
+        const std::string moduleName = objectName.empty() && !context.currentModuleName.empty()
+            ? (context.currentPackageName.empty() ? context.currentModuleName : context.currentPackageName)
+            : std::string{};
+        const std::string baseInternalFunctionName =
+            topLevelInternalName(moduleName, sourceFunctionName);
+        auto& overloads = context.functionOverloads[sourceFunctionName];
+        bool hasSameModuleOverload = false;
         for (const auto& overloadName : overloads) {
             const auto existingFunction = context.functions.find(overloadName);
+            const auto existingMetadata =
+                context.topLevelFunctionsByInternalName.find(overloadName);
+            const bool sameModule =
+                existingMetadata != context.topLevelFunctionsByInternalName.end() &&
+                existingMetadata->second.moduleName == moduleName;
+            if (sameModule) hasSameModuleOverload = true;
             if (existingFunction != context.functions.end() &&
+                sameModule &&
                 functionSignatureParametersMatch(existingFunction->second, signature)) {
                 throw CompilerError(
                     ErrorKind::Parser, nameToken.location,
-                    "fonction déjà déclarée avec cette signature: " + functionName);
+                    "fonction déjà déclarée avec cette signature: " + sourceFunctionName);
             }
         }
-        if (!overloads.empty()) {
-            registeredFunctionName = overloadedFunctionName(functionName, signature);
+        registeredFunctionName = baseInternalFunctionName;
+        if (hasSameModuleOverload) {
+            registeredFunctionName = overloadedFunctionName(baseInternalFunctionName, signature);
             if (context.functions.count(registeredFunctionName)) {
                 throw CompilerError(
                     ErrorKind::Parser, nameToken.location,
-                    "fonction déjà déclarée avec cette signature: " + functionName);
+                    "fonction déjà déclarée avec cette signature: " + sourceFunctionName);
             }
         }
         overloads.push_back(registeredFunctionName);
         context.functions[registeredFunctionName] = signature;
+        CompilerContext::TopLevelSymbolInfo symbolInfo{
+            sourceFunctionName, registeredFunctionName, moduleName, nameToken.location};
+        context.topLevelFunctionsBySourceName[sourceFunctionName].push_back(symbolInfo);
+        context.topLevelFunctionsByInternalName[registeredFunctionName] = symbolInfo;
     }
     if (isAbstract) {
         localScopes.pop_back();

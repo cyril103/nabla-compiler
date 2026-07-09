@@ -1,0 +1,5 @@
+package tests.entry.Main
+
+def main(): Int = {
+    0
+}

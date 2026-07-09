@@ -86,7 +86,8 @@ la roadmap. À la date de ce fichier, le compilateur couvre notamment:
   fonctions, méthodes, blocs, `val`/`var`, `if`/`else if`, `match` avec motifs
   de constructeur V0, boucles, lambdas et fonctions locales;
 - imports source relatifs, racine projet et `stdlib/`, packages déclaratifs V0
-  validés contre le chemin importé, avec protection contre les cycles;
+  validés contre le chemin importé, protection contre les cycles et diagnostic
+  d'ambiguïté pour fonctions top-level homonymes importées par nom court;
 - classes avec champs constructeur `val`/`var`, getters synthétiques,
   réassignation interne des `var`, héritage nominal, mixins, `super`, dispatch
   dynamique et vérification `override`;

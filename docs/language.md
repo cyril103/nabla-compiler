@@ -79,9 +79,15 @@ def main(): Int = {
 ```
 
 La V0 reste volontairement compatible avec les imports actuels : les declarations
-importees sont encore visibles par leur nom court dans le programme courant. Les
-noms qualifies, imports selectifs, alias, wildcards explicites et visibilites de
-package sont reserves a une evolution ulterieure.
+importees sont encore visibles par leur nom court dans le programme courant
+quand ce nom est non ambigu. Deux modules peuvent exposer la meme fonction
+top-level courte; importer un seul de ces modules reste valide, mais importer les
+deux puis utiliser ce nom court produit un diagnostic d'ambiguite qui nomme les
+modules concernes.
+
+Les noms qualifies source (`app.math.fortyTwo`), imports selectifs, alias,
+wildcards explicites, visibilites de package et l'ambiguite fine des noms de
+types/classes sont reserves a une evolution ulterieure.
 
 ## Commentaires
 

@@ -1740,9 +1740,11 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
     if (receiverType == "ArrayObject[String]" && methodName == "mkString" && arguments.size() == 1) {
         std::string loweredReceiver = receiver->lowerToIR(builder);
         std::string loweredSeparator = arguments[0]->lowerToIR(builder);
-        builder.registerFunctionSpecialization("objectStringArrayMkString", {"String"}, "String");
+        const std::string mkStringFunction = uniqueFunctionInternalNameForSource(
+            builder.getContext(), "objectStringArrayMkString").value_or("objectStringArrayMkString");
+        builder.registerFunctionSpecialization(mkStringFunction, {"String"}, "String");
         return builder.emitCall(
-            "objectStringArrayMkString[String]", {loweredReceiver, loweredSeparator}, "String");
+            formatParameterizedType(mkStringFunction, {"String"}), {loweredReceiver, loweredSeparator}, "String");
     }
     if (activeReceiverType != receiverType && stdlibTypeAliasMethodSignature(receiverType, methodName)) {
         std::string loweredReceiver = receiver->lowerToIR(builder);
@@ -2119,6 +2121,12 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
         const std::string displayName = diagnosticName.empty() ? name : diagnosticName;
         semanticError("fonction inconnue: " + displayName + recommendedStdlibFunctionSuffix(displayName));
     }
+    if (diagnosticName.empty()) {
+        const auto modules = topLevelFunctionModules(context, name);
+        if (modules.size() > 1) {
+            semanticError(ambiguousImportedNameMessage(name, modules));
+        }
+    }
     std::optional<std::string> overloadName;
     if (overloads.size() == 1) {
         overloadName = overloads[0];
@@ -2235,23 +2243,35 @@ std::string FunctionCallNode::lowerToIR(IRBuilder& builder) const {
         const std::string elementType = concreteTypeArguments[0];
         const std::string concreteReturnType = builder.substituteActiveType(resolvedType);
         if (elementType == "Int") {
-            return builder.emitCall("setFromArrayInt", loweredArguments, concreteReturnType);
+            const std::string functionName = uniqueFunctionInternalNameForSource(
+                builder.getContext(), "setFromArrayInt").value_or("setFromArrayInt");
+            return builder.emitCall(functionName, loweredArguments, concreteReturnType);
         }
         if (elementType == "Long") {
-            return builder.emitCall("setFromArrayLong", loweredArguments, concreteReturnType);
+            const std::string functionName = uniqueFunctionInternalNameForSource(
+                builder.getContext(), "setFromArrayLong").value_or("setFromArrayLong");
+            return builder.emitCall(functionName, loweredArguments, concreteReturnType);
         }
         if (elementType == "Float") {
-            return builder.emitCall("setFromArrayFloat", loweredArguments, concreteReturnType);
+            const std::string functionName = uniqueFunctionInternalNameForSource(
+                builder.getContext(), "setFromArrayFloat").value_or("setFromArrayFloat");
+            return builder.emitCall(functionName, loweredArguments, concreteReturnType);
         }
         if (elementType == "Double") {
-            return builder.emitCall("setFromArrayDouble", loweredArguments, concreteReturnType);
+            const std::string functionName = uniqueFunctionInternalNameForSource(
+                builder.getContext(), "setFromArrayDouble").value_or("setFromArrayDouble");
+            return builder.emitCall(functionName, loweredArguments, concreteReturnType);
         }
         if (elementType == "Bool") {
-            return builder.emitCall("setFromArrayBool", loweredArguments, concreteReturnType);
+            const std::string functionName = uniqueFunctionInternalNameForSource(
+                builder.getContext(), "setFromArrayBool").value_or("setFromArrayBool");
+            return builder.emitCall(functionName, loweredArguments, concreteReturnType);
         }
-        builder.registerFunctionSpecialization("setFromArray", {elementType}, concreteReturnType);
+        const std::string setFromArrayFunction = uniqueFunctionInternalNameForSource(
+            builder.getContext(), "setFromArray").value_or("setFromArray");
+        builder.registerFunctionSpecialization(setFromArrayFunction, {elementType}, concreteReturnType);
         return builder.emitCall(
-            formatParameterizedType("setFromArray", {elementType}),
+            formatParameterizedType(setFromArrayFunction, {elementType}),
             loweredArguments, concreteReturnType);
     }
     if (!concreteTypeArguments.empty()) {

@@ -65,7 +65,11 @@ pour garder un cap clair après le tag `v0.1.0`.
   servir de parents de classe.
 - `package a.b` existe en V0 comme declaration de module en tête de fichier;
   `import a.b` vérifie que le package déclaré correspond au chemin importé, tout
-  en conservant la visibilité par nom court des imports historiques.
+  en conservant la visibilité par nom court des imports historiques quand elle
+  est non ambigue. Les fonctions top-level homonymes de deux modules importes
+  ne collisionnent plus immediatement; utiliser leur nom court produit un
+  diagnostic d'ambiguite. Les references qualifiees source, imports selectifs,
+  alias et ambiguite complete des noms de types/classes restent differes.
 - Standard library deja utile :
   - collections typées et facade `Array[T]`, dont `sorted(lessThan)` retourne
     une copie triee sans mutation et les facades primitives exposent aussi
