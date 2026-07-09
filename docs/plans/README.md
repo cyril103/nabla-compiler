@@ -60,9 +60,9 @@ raffinant `heapUsed()` si nécessaire.
 
 Le chantier actif des noms package-qualifies est suivi dans
 [`package-qualified-symbols.md`](package-qualified-symbols.md): la tranche
-courante pose les metadata de module et le diagnostic d'ambiguite par nom court
-pour les fonctions top-level importees, avant les references source pleinement
-qualifiees et la resolution complete des noms de types/classes.
+courante ajoute les appels et references source pleinement qualifies pour les
+fonctions top-level importees, tout en conservant le diagnostic d'ambiguite par
+nom court; la resolution complete des noms de types/classes reste differee.
 La checklist opérationnelle pour intégrer une nouvelle feature est dans
 [`docs/feature-integration.md`](../feature-integration.md).
 

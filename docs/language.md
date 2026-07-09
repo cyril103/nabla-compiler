@@ -85,9 +85,23 @@ top-level courte; importer un seul de ces modules reste valide, mais importer le
 deux puis utiliser ce nom court produit un diagnostic d'ambiguite qui nomme les
 modules concernes.
 
-Les noms qualifies source (`app.math.fortyTwo`), imports selectifs, alias,
-wildcards explicites, visibilites de package et l'ambiguite fine des noms de
-types/classes sont reserves a une evolution ulterieure.
+Les fonctions top-level importees peuvent aussi etre appelees ou referencees par
+leur nom source pleinement qualifie, ce qui contourne l'ambiguite du nom court
+quand plusieurs modules importes exposent la meme fonction :
+
+```nabla
+import app.alpha.Tools
+import app.beta.Tools
+
+def main(): Int = {
+    val fn = app.alpha.Tools.value
+    fn() + app.beta.Tools.value()
+}
+```
+
+Les imports selectifs, alias, wildcards explicites, visibilites de package et
+l'ambiguite fine des noms de types/classes sont reserves a une evolution
+ulterieure.
 
 ## Commentaires
 

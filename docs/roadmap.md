@@ -68,8 +68,10 @@ pour garder un cap clair après le tag `v0.1.0`.
   en conservant la visibilité par nom court des imports historiques quand elle
   est non ambigue. Les fonctions top-level homonymes de deux modules importes
   ne collisionnent plus immediatement; utiliser leur nom court produit un
-  diagnostic d'ambiguite. Les references qualifiees source, imports selectifs,
-  alias et ambiguite complete des noms de types/classes restent differes.
+  diagnostic d'ambiguite, tandis que leurs appels et references pleinement
+  qualifies (`pkg.module.function` / `pkg.module.function()`) resolvent le
+  symbole importe exact. Les imports selectifs, alias et ambiguite complete des
+  noms de types/classes restent differes.
 - Standard library deja utile :
   - collections typées et facade `Array[T]`, dont `sorted(lessThan)` retourne
     une copie triee sans mutation et les facades primitives exposent aussi
