@@ -60,9 +60,10 @@ raffinant `heapUsed()` si nécessaire.
 
 Le chantier actif des noms package-qualifies est suivi dans
 [`package-qualified-symbols.md`](package-qualified-symbols.md): declarations de
-package, fonctions qualifiees et types/classes qualifies sont couverts; les
-imports selectifs/alias/wildcards, packages multi-fichiers et motifs de
-constructeur qualifies restent des deltas separes.
+package, fonctions qualifiees, types/classes qualifies et migration initiale de
+la stdlib vers `package ...` sont couverts; les imports selectifs/alias/wildcards,
+packages multi-fichiers, reexports/prelude et motifs de constructeur qualifies
+restent des deltas separes.
 La checklist opérationnelle pour intégrer une nouvelle feature est dans
 [`docs/feature-integration.md`](../feature-integration.md).
 

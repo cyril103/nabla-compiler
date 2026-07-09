@@ -1,1 +1,1 @@
-tests/test_error_function_binary_type.nabla:9:16: semantic error: ArrayInt.fold, paramètre 'combine': type 'Fn(Int,Int)->Int' attendu, 'Fn(Int)->Int' reçu
+tests/test_error_function_binary_type.nabla:9:16: semantic error: collections.int_array.ArrayInt.fold, paramètre 'combine': type 'Fn(Int,Int)->Int' attendu, 'Fn(Int)->Int' reçu

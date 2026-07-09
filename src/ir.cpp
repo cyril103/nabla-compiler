@@ -342,10 +342,19 @@ void IRBuilder::registerMethodSpecialization(
     const std::string& concreteClassName, const std::string& templateClassName,
     const std::string& methodName, const std::vector<std::string>& methodTypeArguments,
     const std::vector<std::string>& argumentTypes, const std::string& returnType) {
-    if (concreteClassName == templateClassName && methodTypeArguments.empty()) return;
+    const auto normalizeClassName = [this](const std::string& className) {
+        if (!context) return className;
+        if (auto parameterized = parameterizedTypeFromName(className)) {
+            return formatParameterizedType(classLookupNameFor(*context, parameterized->first), parameterized->second);
+        }
+        return classLookupNameFor(*context, className);
+    };
+    const std::string normalizedTemplateClassName = normalizeClassName(templateClassName);
+    const std::string normalizedConcreteClassName = normalizeClassName(concreteClassName);
+    if (normalizedConcreteClassName == normalizedTemplateClassName && methodTypeArguments.empty()) return;
     for (const auto& specialization : methodSpecializations) {
-        if (specialization.concreteClassName == concreteClassName &&
-            specialization.templateClassName == templateClassName &&
+        if (specialization.concreteClassName == normalizedConcreteClassName &&
+            specialization.templateClassName == normalizedTemplateClassName &&
             specialization.methodName == methodName &&
             specialization.methodTypeArguments == methodTypeArguments &&
             specialization.returnType == returnType) {
@@ -353,7 +362,7 @@ void IRBuilder::registerMethodSpecialization(
         }
     }
     methodSpecializations.push_back({
-        concreteClassName, templateClassName, methodName, methodTypeArguments,
+        normalizedConcreteClassName, normalizedTemplateClassName, methodName, methodTypeArguments,
         argumentTypes, returnType});
 }
 
@@ -414,7 +423,9 @@ void IRBuilder::emitMethodSpecialization(
     for (const auto& element : root.elements) {
         const auto* function = dynamic_cast<const FunctionDefNode*>(element.get());
         if (!function) continue;
-        if (function->getClassName() == specialization.templateClassName &&
+        if (context &&
+            classLookupNameFor(*context, function->getClassName()) ==
+                classLookupNameFor(*context, specialization.templateClassName) &&
             function->getName() == specialization.methodName) {
             function->lowerSpecializedMethodToIR(
                 *this, specialization.concreteClassName, specialization.methodTypeArguments);

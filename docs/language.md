@@ -80,10 +80,12 @@ def main(): Int = {
 
 La V0 reste volontairement compatible avec les imports actuels : les declarations
 importees sont encore visibles par leur nom court dans le programme courant
-quand ce nom est non ambigu. Deux modules peuvent exposer la meme fonction
-top-level courte; importer un seul de ces modules reste valide, mais importer les
-deux puis utiliser ce nom court produit un diagnostic d'ambiguite qui nomme les
-modules concernes.
+quand ce nom est non ambigu. La stdlib elle-meme declare maintenant un package
+par module (`collections.array`, `core.option`, etc.) tout en gardant cette
+visibilite courte pour le code utilisateur existant. Deux modules peuvent exposer
+la meme fonction top-level courte; importer un seul de ces modules reste valide,
+mais importer les deux puis utiliser ce nom court produit un diagnostic
+d'ambiguite qui nomme les modules concernes.
 
 Les fonctions top-level importees peuvent aussi etre appelees ou referencees par
 leur nom source pleinement qualifie, ce qui contourne l'ambiguite du nom court
@@ -104,9 +106,12 @@ peuvent aussi etre nommes par leur nom pleinement qualifie dans les annotations
 de type et les constructions `new`. Le nom court reste disponible quand il est
 unique; s'il est expose par plusieurs imports packages, une annotation comme
 `Box` produit un diagnostic d'ambiguite et il faut utiliser
-`app.alpha.Box.Box` ou `app.beta.Box.Box`. Les modules importes sans declaration
-`package` conservent volontairement leurs noms courts historiques pendant la
-transition de compatibilite.
+`app.alpha.Box.Box` ou `app.beta.Box.Box`. Les types publics stdlib peuvent donc
+etre nommes explicitement dans les annotations, par exemple
+`collections.int_array.ArrayInt` ou `core.option.Option[Int]`, sans obliger le
+code courant a abandonner les noms courts `Array`, `Option` ou `Set`. Les modules
+importes sans declaration `package` conservent volontairement leurs noms courts
+historiques pendant la transition de compatibilite.
 
 Les imports selectifs, alias, wildcards explicites, visibilites de package,
 packages multi-fichiers et motifs de constructeur pleinement qualifies sont

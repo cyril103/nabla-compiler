@@ -385,10 +385,13 @@ bool isKnownTypeConstructorArgument(
     const CompilerContext& context, const std::string& type, int expectedArity) {
     if (expectedArity != 1) return false;
     if (parameterizedTypeFromName(type)) return false;
-    auto classIt = context.classes.find(type);
+    auto classIt = context.classes.find(classLookupNameFor(context, type));
     if (classIt != context.classes.end()) {
         return classIt->second.typeParameters.size() == 1 &&
                typeParameterArity(type, classIt->second.typeParameterInfos) < 0;
+    }
+    if (type.find('.') != std::string::npos && looksLikeTypeVariableName(unqualifiedSourceName(type))) {
+        return true;
     }
     return isStdlibTypeAliasFamily(type, 1);
 }
@@ -489,6 +492,18 @@ void SemanticAnalyzer::validateDeclaredTypes() {
         }
     }
     for (const auto& [functionName, signature] : context.functions) {
+        auto functionTypeParameters = signature.typeParameterInfos;
+        const auto lastDot = functionName.rfind('.');
+        if (lastDot != std::string::npos) {
+            const std::string ownerName = functionName.substr(0, lastDot);
+            auto ownerIt = context.classes.find(classLookupNameFor(context, ownerName));
+            if (ownerIt != context.classes.end()) {
+                functionTypeParameters.insert(
+                    functionTypeParameters.begin(),
+                    ownerIt->second.typeParameterInfos.begin(),
+                    ownerIt->second.typeParameterInfos.end());
+            }
+        }
         if (signature.parameters.size() > 6) {
             throw CompilerError(
                 ErrorKind::Semantic, signature.location,
@@ -503,7 +518,7 @@ void SemanticAnalyzer::validateDeclaredTypes() {
             const bool acceptsNoArguments = signature.parameters.empty();
             const bool acceptsCommandLineArguments =
                 signature.parameters.size() == 1 &&
-                signature.parameters[0].type == formatParameterizedType("ArrayObject", {"String"});
+                signature.parameters[0].type == formatParameterizedType("collections.object_array.ArrayObject", {"String"});
             if (!acceptsNoArguments && !acceptsCommandLineArguments) {
                 throw CompilerError(
                     ErrorKind::Semantic, signature.location,
@@ -516,14 +531,14 @@ void SemanticAnalyzer::validateDeclaredTypes() {
             }
         }
         for (const auto& parameter : signature.parameters) {
-            if (!isKnownTypeInScope(parameter.type, signature.typeParameterInfos)) {
+            if (!isKnownTypeInScope(parameter.type, functionTypeParameters)) {
                 throw CompilerError(
                     ErrorKind::Semantic, parameter.location,
                     "type inconnu '" + parameter.type + "' pour le paramètre '" +
                     functionName + "." + parameter.name + "'");
             }
         }
-        if (!isKnownTypeInScope(signature.returnType, signature.typeParameterInfos)) {
+        if (!isKnownTypeInScope(signature.returnType, functionTypeParameters)) {
             throw CompilerError(
                 ErrorKind::Semantic, signature.returnTypeLocation,
                     "type de retour inconnu '" + signature.returnType + "' pour la fonction '" +
@@ -898,11 +913,18 @@ bool SemanticAnalyzer::isKnownType(const std::string& type) const {
         return true;
     }
     auto parameterizedType = parameterizedTypeFromName(type);
-    if (parameterizedType && parameterizedType->first == "ObjectArray" &&
+    if (parameterizedType && parameterizedType->first.find('.') != std::string::npos) {
+        for (const auto& argument : parameterizedType->second) {
+            if (!isKnownType(argument) && !looksLikeTypeVariableName(argument) &&
+                !isKnownTypeConstructorArgument(context, argument, 1)) return false;
+        }
+        return true;
+    }
+    if (parameterizedType && unqualifiedSourceName(parameterizedType->first) == "ObjectArray" &&
         parameterizedType->second.size() == 1) {
         return isKnownType(parameterizedType->second[0]);
     }
-    auto classIt = context.classes.find(type);
+    auto classIt = context.classes.find(classLookupNameFor(context, type));
     if (classIt != context.classes.end()) return classIt->second.typeParameters.empty();
     auto substitution = genericSubstitutionFor(context, type);
     if (!substitution) return false;
@@ -931,6 +953,13 @@ bool SemanticAnalyzer::isKnownTypeInScope(
         return isKnownTypeInScope(functionType->returnType, typeParameters);
     }
     auto parameterizedType = parameterizedTypeFromName(type);
+    if (parameterizedType && parameterizedType->first.find('.') != std::string::npos) {
+        for (const auto& argument : parameterizedType->second) {
+            if (!isKnownTypeInScope(argument, typeParameters) && !looksLikeTypeVariableName(argument) &&
+                !isKnownTypeConstructorArgument(context, argument, 1)) return false;
+        }
+        return true;
+    }
     if (parameterizedType) {
         const auto& [baseName, arguments] = *parameterizedType;
         const int constructorParameterArity = typeParameterArity(baseName, typeParameters);
@@ -938,11 +967,42 @@ bool SemanticAnalyzer::isKnownTypeInScope(
             if (constructorParameterArity != 1 || arguments.size() != 1) return false;
             return isKnownTypeInScope(arguments[0], typeParameters);
         }
-        if (baseName == "ObjectArray" && arguments.size() == 1) {
+        if (unqualifiedSourceName(baseName) == "ObjectArray" && arguments.size() == 1) {
             return isKnownTypeInScope(arguments[0], typeParameters);
         }
-        auto classIt = context.classes.find(baseName);
+        auto classIt = context.classes.find(classLookupNameFor(context, baseName));
         if (classIt == context.classes.end()) {
+            if (looksLikeTypeVariableName(baseName)) {
+                bool hasTypeConstructorArgument = false;
+                for (const auto& argument : arguments) {
+                    if (isKnownTypeConstructorArgument(context, argument, 1)) {
+                        hasTypeConstructorArgument = true;
+                        continue;
+                    }
+                    if (!isKnownTypeInScope(argument, typeParameters) && !looksLikeTypeVariableName(argument)) return false;
+                }
+                if (hasTypeConstructorArgument) return true;
+            }
+            if (baseName.find('.') != std::string::npos &&
+                context.topLevelTypesBySourceName.count(baseName) > 0) {
+                for (const auto& argument : arguments) {
+                    if (!isKnownTypeInScope(argument, typeParameters) &&
+                        !looksLikeTypeVariableName(argument) &&
+                        !isKnownTypeConstructorArgument(context, argument, 1)) return false;
+                }
+                return true;
+            }
+            if (baseName.find('.') != std::string::npos) {
+                bool hasDeclaredTypeParameterArgument = false;
+                for (const auto& argument : arguments) {
+                    const bool isDeclaredParameter = isDeclaredTypeParameterName(context, argument) ||
+                        looksLikeTypeVariableName(argument);
+                    hasDeclaredTypeParameterArgument = hasDeclaredTypeParameterArgument || isDeclaredParameter;
+                    if (!isKnownTypeInScope(argument, typeParameters) && !isDeclaredParameter &&
+                        !isKnownTypeConstructorArgument(context, argument, 1)) return false;
+                }
+                if (hasDeclaredTypeParameterArgument) return true;
+            }
             if (!isStdlibTypeAliasFamily(baseName, arguments.size())) return false;
             for (const auto& argument : arguments) {
                 if (!isKnownTypeInScope(argument, typeParameters)) return false;
@@ -955,7 +1015,8 @@ bool SemanticAnalyzer::isKnownTypeInScope(
                 ? classIt->second.typeParameterInfos[i].arity
                 : 0;
             if (expectedArity == 0) {
-                if (!isKnownTypeInScope(arguments[i], typeParameters)) return false;
+                if (!isKnownTypeInScope(arguments[i], typeParameters) &&
+                    !looksLikeTypeVariableName(arguments[i])) return false;
             } else if (expectedArity == 1) {
                 if (typeParameterArity(arguments[i], typeParameters) == 1) continue;
                 if (!isKnownTypeConstructorArgument(context, arguments[i], expectedArity)) return false;

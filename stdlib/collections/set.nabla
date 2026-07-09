@@ -1,3 +1,5 @@
+package collections.set
+
 /// @module Set
 /// Ensembles immuables avec valeurs uniques.
 /// Utiliser Set(values...) pour creer un ensemble depuis des elements,

@@ -1,0 +1,22 @@
+import collections.array
+import collections.object_array
+import collections.int_array
+import core.option
+
+class Item(value: Int) {
+    def score(): Int = {
+        value
+    }
+}
+
+def main(): Int = {
+    val ints: collections.int_array.ArrayInt = new collections.int_array.ArrayInt(3)
+    val generic: collections.object_array.ArrayObject[Item] = Array.empty[Item]()
+    val item = new Item(11)
+    val maybe: core.option.Option[Item] = Option.some[Item](item)
+    if maybe.getOrElse(new Item(0)).score() == 11 {
+        42
+    } else {
+        1
+    }
+}

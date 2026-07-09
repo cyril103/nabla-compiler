@@ -1,3 +1,5 @@
+package collections.array
+
 /// @module Array
 /// Tableaux generiques pour le code utilisateur.
 /// Importer collections.array donne acces a Array[T], Array.empty[T](),

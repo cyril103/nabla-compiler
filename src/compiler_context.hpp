@@ -1,6 +1,8 @@
 #pragma once
 
 #include "compiler_error.hpp"
+#include <array>
+#include <cctype>
 #include <cstddef>
 #include <map>
 #include <optional>
@@ -108,11 +110,11 @@ struct StdlibFunctionAlias {
 
 inline const std::vector<StdlibTypeAlias>& stdlibTypeAliases() {
     static const std::vector<StdlibTypeAlias> aliases = {
-        {"Array", {"Int"}, "ArrayInt"},
-        {"Array", {"Long"}, "ArrayLong"},
-        {"Array", {"Float"}, "ArrayFloat"},
-        {"Array", {"Double"}, "ArrayDouble"},
-        {"Array", {"Bool"}, "ArrayBool"},
+        {"Array", {"Int"}, "collections.int_array.ArrayInt"},
+        {"Array", {"Long"}, "collections.long_array.ArrayLong"},
+        {"Array", {"Float"}, "collections.float_array.ArrayFloat"},
+        {"Array", {"Double"}, "collections.double_array.ArrayDouble"},
+        {"Array", {"Bool"}, "collections.bool_array.ArrayBool"},
     };
     return aliases;
 }
@@ -235,28 +237,53 @@ inline std::optional<std::string> resolvePrimitiveArrayFlatMapAlias(
 
 inline std::optional<std::string> resolveStdlibFunctionAlias(
     const std::string& name, const std::vector<std::string>& typeArguments) {
+    const auto stdlibAliasName = [](const std::string& value) {
+        const std::array<std::pair<std::string, std::string>, 9> dottedAliases = {{
+            {"collections.array.Array.fill", "Array.fill"},
+            {"collections.array.Array.empty", "Array.empty"},
+            {"collections.array.Array.tabulate", "Array.tabulate"},
+            {"collections.set.Set.fromArray", "Set.fromArray"},
+            {"collections.map.Map.fromArray", "Map.fromArray"},
+            {"collections.map.Map.empty", "Map.empty"},
+            {"collections.list.List.fromArray", "List.fromArray"},
+            {"collections.list.List.empty", "List.empty"},
+            {"core.option.Option.some", "Option.some"}
+        }};
+        const std::array<std::string, 9> shortAliases = {
+            "Array.fill", "Array.empty", "Array.tabulate", "Set.fromArray", "Map.fromArray",
+            "Map.empty", "List.fromArray", "List.empty", "Option.some"
+        };
+        for (const auto& alias : shortAliases) {
+            if (value == alias) return value;
+        }
+        for (const auto& [qualifiedAlias, sourceAlias] : dottedAliases) {
+            if (value == qualifiedAlias) return sourceAlias;
+        }
+        return value;
+    };
+    const std::string aliasName = stdlibAliasName(name);
     for (const auto& alias : stdlibFunctionAliases()) {
-        if (alias.name == name && alias.typeArguments == typeArguments) return alias.resolvedName;
+        if (alias.name == aliasName && alias.typeArguments == typeArguments) return alias.resolvedName;
     }
     if (typeArguments.size() == 1 && !isPrimitiveArrayElementType(typeArguments[0])) {
-        if (name == "arrayMkString" && typeArguments[0] == "String") return "objectStringArrayMkString";
-        if (name == "arrayFill" || name == "ArrayFill" || name == "Array.fill") return "objectArrayFill";
-        if (name == "Array.empty") return "objectArrayEmpty";
-        if (name == "Array.tabulate") return "objectArrayTabulate";
-        if (name == "Set.fromArray") return "setFromArray";
-        if (name == "arrayMap") return "objectArrayMapSame";
-        if (name == "arrayFilter") return "objectArrayFilter";
-        if (name == "arrayForeach") return "objectArrayForeach";
+        if (aliasName == "arrayMkString" && typeArguments[0] == "String") return "objectStringArrayMkString";
+        if (aliasName == "arrayFill" || aliasName == "ArrayFill" || aliasName == "Array.fill") return "objectArrayFill";
+        if (aliasName == "Array.empty") return "objectArrayEmpty";
+        if (aliasName == "Array.tabulate") return "objectArrayTabulate";
+        if (aliasName == "Set.fromArray") return "setFromArray";
+        if (aliasName == "arrayMap") return "objectArrayMapSame";
+        if (aliasName == "arrayFilter") return "objectArrayFilter";
+        if (aliasName == "arrayForeach") return "objectArrayForeach";
     }
     if (typeArguments.size() == 2 && !isPrimitiveArrayElementType(typeArguments[0])) {
-        if (name == "arrayMap") return "objectArrayMap";
-        if (name == "arrayFold") return "objectArrayFold";
-        if (name == "arrayFlatMap") return "objectArrayFlatMap";
+        if (aliasName == "arrayMap") return "objectArrayMap";
+        if (aliasName == "arrayFold") return "objectArrayFold";
+        if (aliasName == "arrayFlatMap") return "objectArrayFlatMap";
     }
-    if (name == "arrayMap" && typeArguments.size() == 2) {
+    if (aliasName == "arrayMap" && typeArguments.size() == 2) {
         if (auto alias = resolvePrimitiveArrayMapAlias(typeArguments)) return alias;
     }
-    if (name == "arrayFlatMap" && typeArguments.size() == 2) {
+    if (aliasName == "arrayFlatMap" && typeArguments.size() == 2) {
         if (auto alias = resolvePrimitiveArrayFlatMapAlias(typeArguments)) return alias;
     }
     return std::nullopt;
@@ -452,14 +479,25 @@ inline std::optional<CompilerContext::FunctionSignature> stdlibTypeAliasMethodSi
     return std::nullopt;
 }
 
+inline std::string unqualifiedSourceName(const std::string& name) {
+    const auto dot = name.rfind('.');
+    return dot == std::string::npos ? name : name.substr(dot + 1);
+}
+
+inline bool looksLikeTypeVariableName(const std::string& name) {
+    if (name.empty() || name.find('.') != std::string::npos || name.find('[') != std::string::npos) return false;
+    return std::isupper(static_cast<unsigned char>(name.front())) != 0;
+}
+
 inline std::string resolveStdlibTypeAlias(const std::string& type) {
     auto parameterizedType = parameterizedTypeFromName(type);
     if (!parameterizedType) return type;
     const auto& [baseName, arguments] = *parameterizedType;
+    const std::string sourceBaseName = unqualifiedSourceName(baseName);
     for (const auto& alias : stdlibTypeAliases()) {
-        if (alias.baseName == baseName && alias.arguments == arguments) return alias.resolvedName;
+        if (alias.baseName == sourceBaseName && alias.arguments == arguments) return alias.resolvedName;
     }
-    if (baseName == "Array" && arguments.size() == 1) {
+    if (sourceBaseName == "Array" && arguments.size() == 1) {
         const bool concreteArgument =
             arguments[0] == "Int" || arguments[0] == "Long" || arguments[0] == "Float" ||
             arguments[0] == "Double" || arguments[0] == "Bool" || arguments[0] == "Char" ||
@@ -472,15 +510,16 @@ inline std::string resolveStdlibTypeAlias(const std::string& type) {
             functionTypeFromName(arguments[0]).has_value() ||
             parameterizedTypeFromName(arguments[0]).has_value();
         if (!concreteArgument) return type;
-        return formatParameterizedType("ArrayObject", arguments);
+        return formatParameterizedType("collections.object_array.ArrayObject", arguments);
     }
     return type;
 }
 
 inline bool isStdlibTypeAliasFamily(const std::string& baseName, size_t arity) {
-    if (baseName == "Array" && arity == 1) return true;
+    const std::string sourceBaseName = unqualifiedSourceName(baseName);
+    if (sourceBaseName == "Array" && arity == 1) return true;
     for (const auto& alias : stdlibTypeAliases()) {
-        if (alias.baseName == baseName && alias.arguments.size() == arity) return true;
+        if (alias.baseName == sourceBaseName && alias.arguments.size() == arity) return true;
     }
     return false;
 }
@@ -490,7 +529,7 @@ inline std::optional<StdlibTypeAlias> stdlibTypeAliasForResolvedName(const std::
         if (alias.resolvedName == resolvedName) return alias;
     }
     auto parameterizedType = parameterizedTypeFromName(resolvedName);
-    if (parameterizedType && parameterizedType->first == "ArrayObject" &&
+    if (parameterizedType && unqualifiedSourceName(parameterizedType->first) == "ArrayObject" &&
         parameterizedType->second.size() == 1) {
         return StdlibTypeAlias{"Array", parameterizedType->second, resolvedName};
     }
@@ -523,6 +562,28 @@ inline std::string genericBaseName(const std::string& type) {
     return parameterizedType->first;
 }
 
+inline std::string classLookupNameFor(const CompilerContext& context, const std::string& type) {
+    const std::string baseName = genericBaseName(type);
+    if (context.classes.count(baseName)) return baseName;
+    auto sourceIt = context.topLevelTypesBySourceName.find(baseName);
+    if (sourceIt != context.topLevelTypesBySourceName.end() && sourceIt->second.size() == 1 &&
+        context.classes.count(sourceIt->second.front().internalName)) {
+        return sourceIt->second.front().internalName;
+    }
+    const std::string shortBaseName = unqualifiedSourceName(baseName);
+    if (shortBaseName != baseName) {
+        auto shortSourceIt = context.topLevelTypesBySourceName.find(shortBaseName);
+        if (shortSourceIt != context.topLevelTypesBySourceName.end()) {
+            for (const auto& candidate : shortSourceIt->second) {
+                if (candidate.internalName == baseName && context.classes.count(candidate.internalName)) {
+                    return candidate.internalName;
+                }
+            }
+        }
+    }
+    return baseName;
+}
+
 struct ClassMethodLookupResult {
     const CompilerContext::FunctionSignature* signature = nullptr;
     std::string methodName;
@@ -550,7 +611,7 @@ inline void collectVisibleFieldsInHierarchy(
     std::map<std::string, std::set<std::string>>& fieldOwners,
     std::map<std::string, std::string>& fieldTypes,
     std::map<std::string, bool>* fieldMutability = nullptr) {
-    const std::string classLookupName = genericBaseName(receiverType);
+    const std::string classLookupName = classLookupNameFor(context, receiverType);
     if (visiting.count(classLookupName)) return;
     visiting.insert(classLookupName);
 
@@ -588,7 +649,7 @@ inline void collectClassFieldsInHierarchyForLayout(
     const CompilerContext& context, const std::string& receiverType,
     std::set<std::string>& visiting,
     std::vector<std::pair<std::string, std::string>>& fields) {
-    const std::string classLookupName = genericBaseName(receiverType);
+    const std::string classLookupName = classLookupNameFor(context, receiverType);
     if (visiting.count(classLookupName)) return;
     visiting.insert(classLookupName);
 
@@ -663,6 +724,25 @@ inline bool isTypeParameterName(const std::string& type, const std::vector<std::
     return false;
 }
 
+inline bool isDeclaredTypeParameterName(const CompilerContext& context, const std::string& type) {
+    if (type.empty() || type.find('.') != std::string::npos || type.find('[') != std::string::npos) {
+        return false;
+    }
+    for (const auto& [className, classInfo] : context.classes) {
+        (void)className;
+        if (isTypeParameterName(type, classInfo.typeParameters)) return true;
+        for (const auto& [methodName, signature] : classInfo.methods) {
+            (void)methodName;
+            if (isTypeParameterName(type, signature.typeParameters)) return true;
+        }
+    }
+    for (const auto& [functionName, signature] : context.functions) {
+        (void)functionName;
+        if (isTypeParameterName(type, signature.typeParameters)) return true;
+    }
+    return false;
+}
+
 inline std::vector<CompilerContext::TypeParameterInfo> ordinaryTypeParameterInfos(
     const std::vector<std::string>& typeParameters) {
     std::vector<CompilerContext::TypeParameterInfo> infos;
@@ -685,7 +765,7 @@ inline std::optional<std::map<std::string, std::string>> genericSubstitutionFor(
     auto parameterizedType = parameterizedTypeFromName(concreteType);
     if (!parameterizedType) return std::nullopt;
     const auto& [baseName, arguments] = *parameterizedType;
-    auto classIt = context.classes.find(baseName);
+    auto classIt = context.classes.find(classLookupNameFor(context, baseName));
     if (classIt == context.classes.end()) return std::nullopt;
     const auto& typeParameters = classIt->second.typeParameters;
     if (typeParameters.size() != arguments.size()) return std::nullopt;
@@ -796,7 +876,7 @@ inline std::string substituteType(
         const std::string substitutedType = canonicalTypeName(formatParameterizedType(baseName, arguments));
         if (substitutedType == formatParameterizedType(baseName, arguments) &&
             baseName == "Array" && arguments.size() == 1 && anyArgumentChanged) {
-            return formatParameterizedType("ArrayObject", arguments);
+            return formatParameterizedType("collections.object_array.ArrayObject", arguments);
         }
         return substitutedType;
     }
@@ -814,18 +894,26 @@ inline bool isTypeAssignable(
     auto actualParameterized = parameterizedTypeFromName(actualType);
     auto expectedParameterized = parameterizedTypeFromName(expectedType);
     if (actualParameterized && expectedParameterized &&
-        actualParameterized->first == "List" && expectedParameterized->first == "List" &&
+        unqualifiedSourceName(actualParameterized->first) == "List" &&
+        unqualifiedSourceName(expectedParameterized->first) == "List" &&
         actualParameterized->second.size() == 1 && expectedParameterized->second.size() == 1 &&
         actualParameterized->second[0] == "Nothing") {
         return true;
     }
     if (actualParameterized && expectedParameterized &&
         actualParameterized->second == expectedParameterized->second &&
-        ((actualParameterized->first == "Array" && expectedParameterized->first == "ArrayObject") ||
-         (actualParameterized->first == "ArrayObject" && expectedParameterized->first == "Array"))) {
+        unqualifiedSourceName(actualParameterized->first) == unqualifiedSourceName(expectedParameterized->first)) {
         return true;
     }
-    if (expectedParameterized && expectedParameterized->first == "Array") {
+    if (actualParameterized && expectedParameterized &&
+        actualParameterized->second == expectedParameterized->second &&
+        ((unqualifiedSourceName(actualParameterized->first) == "Array" &&
+          unqualifiedSourceName(expectedParameterized->first) == "ArrayObject") ||
+         (unqualifiedSourceName(actualParameterized->first) == "ArrayObject" &&
+          unqualifiedSourceName(expectedParameterized->first) == "Array"))) {
+        return true;
+    }
+    if (expectedParameterized && unqualifiedSourceName(expectedParameterized->first) == "Array") {
         auto actualAlias = stdlibTypeAliasForResolvedName(actualType);
         if (actualAlias && actualAlias->baseName == "Array" &&
             actualAlias->arguments == expectedParameterized->second) {
@@ -836,7 +924,7 @@ inline bool isTypeAssignable(
     if (expectedType == "AnyVal") return isBuiltinValueType(actualType);
     if (expectedType == "AnyRef" && isBuiltinReferenceType(actualType)) return true;
 
-    const std::string actualBaseName = genericBaseName(actualType);
+    const std::string actualBaseName = classLookupNameFor(context, actualType);
     if (visiting.count(actualBaseName)) return false;
 
     auto classIt = context.classes.find(actualBaseName);
@@ -908,7 +996,7 @@ inline void collectClassMethodLookupCandidates(
     const std::string& methodName, std::set<std::string>& visited,
     std::set<std::string>& providerTypes,
     std::vector<ClassMethodLookupResult>& candidates) {
-    const std::string classLookupName = genericBaseName(receiverType);
+    const std::string classLookupName = classLookupNameFor(context, receiverType);
     if (visited.count(classLookupName)) return;
 
     auto classIt = context.classes.find(classLookupName);
@@ -1305,6 +1393,25 @@ inline std::vector<std::string> functionOverloadNames(
     const CompilerContext& context, const std::string& sourceName) {
     auto overloads = context.functionOverloads.find(sourceName);
     if (overloads != context.functionOverloads.end()) return overloads->second;
+    const std::array<std::pair<std::string, std::string>, 9> stdlibQualifiedFunctionAliases = {{
+        {"collections.array.Array.fill", "Array.fill"},
+        {"collections.array.Array.empty", "Array.empty"},
+        {"collections.array.Array.tabulate", "Array.tabulate"},
+        {"collections.set.Set.fromArray", "Set.fromArray"},
+        {"collections.map.Map.fromArray", "Map.fromArray"},
+        {"collections.map.Map.empty", "Map.empty"},
+        {"collections.list.List.fromArray", "List.fromArray"},
+        {"collections.list.List.empty", "List.empty"},
+        {"core.option.Option.some", "Option.some"}
+    }};
+    for (const auto& [qualifiedName, shortName] : stdlibQualifiedFunctionAliases) {
+        if (sourceName == qualifiedName) {
+            auto shortOverloads = context.functionOverloads.find(shortName);
+            if (shortOverloads != context.functionOverloads.end()) return shortOverloads->second;
+            if (context.functions.count(shortName)) return {shortName};
+            break;
+        }
+    }
     if (context.functions.count(sourceName)) return {sourceName};
     return {};
 }

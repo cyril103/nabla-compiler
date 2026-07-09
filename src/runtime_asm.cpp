@@ -246,7 +246,7 @@ void emitText(std::ostream& out, bool mainAcceptsArguments) {
             << "    call Runtime_alloc\n"
             << "    pop r15\n"
             << "    ; gc runtime helper root spill end: restore r15 raw args array after final Runtime_alloc\n"
-            << "    lea r10, [vtable_nabla_sym_ArrayObject_5bString_5d]\n"
+            << "    lea r10, [vtable_nabla_sym_collections_2eobject_5farray_2eArrayObject_5bString_5d]\n"
             << "    mov [rax], r10\n"
             << "    mov [rax + 8], r15\n"
             << "    ret\n\n";

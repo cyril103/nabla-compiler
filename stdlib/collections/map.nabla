@@ -1,3 +1,5 @@
+package collections.map
+
 /// @module Map
 /// Dictionnaires immuables cle-valeur.
 /// Utiliser Map("name" -> value) pour creer une map depuis des paires,

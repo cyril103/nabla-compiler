@@ -1,3 +1,5 @@
+package core.option_int
+
 /// @module Option Int
 /// Variante specialisee de Option[Int].
 /// Elle evite de fournir une valeur par defaut lors de la creation d'une option

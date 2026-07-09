@@ -73,7 +73,11 @@ pour garder un cap clair après le tag `v0.1.0`.
   symbole importe exact. Les types/classes top-level des fichiers declarant un
   package acceptent aussi leur nom pleinement qualifie dans les annotations et
   `new`, avec diagnostic d'ambiguite sur le nom court quand plusieurs imports
-  packages exposent le meme type; les imports sans declaration `package`
+  packages exposent le meme type. Tous les modules source de la stdlib declarent
+  maintenant leur package (`collections.*`, `core.*`, etc.); les imports courts
+  historiques restent valides quand ils sont non ambigus, et les types publics
+  peuvent aussi etre annotations en forme qualifiee (`core.option.Option[Int]`,
+  `collections.int_array.ArrayInt`). Les imports sans declaration `package`
   conservent les noms courts historiques pendant la transition.
   Les imports selectifs, alias, packages multi-fichiers et motifs de
   constructeur qualifies restent differes.

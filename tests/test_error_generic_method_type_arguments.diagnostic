@@ -1,1 +1,1 @@
-tests/test_error_generic_method_type_arguments.nabla:4:21: semantic error: la méthode générique 'Option[Int].map' attend 1 argument(s) de type
+tests/test_error_generic_method_type_arguments.nabla:4:21: semantic error: la méthode générique 'core.option.Option[Int].map' attend 1 argument(s) de type

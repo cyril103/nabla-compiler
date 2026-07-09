@@ -1,3 +1,5 @@
+package core.tuple
+
 object Tuple2 {
     def apply[A, B](_1: A, _2: B): Tuple2[A, B] = {
         new Tuple2[A, B](_1, _2)

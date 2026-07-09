@@ -1,1 +1,1 @@
-tests/test_error_filter_function_type.nabla:9:15: semantic error: ArrayInt.filter, paramètre 'predicate': type 'Fn(Int)->Bool' attendu, 'Fn(Int)->Int' reçu
+tests/test_error_filter_function_type.nabla:9:15: semantic error: collections.int_array.ArrayInt.filter, paramètre 'predicate': type 'Fn(Int)->Bool' attendu, 'Fn(Int)->Int' reçu
