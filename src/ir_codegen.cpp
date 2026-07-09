@@ -47,7 +47,9 @@ bool mainAcceptsCommandLineArguments(const CompilerContext& context) {
     auto it = context.functions.find("main");
     if (it == context.functions.end()) return false;
     return it->second.parameters.size() == 1 &&
-           it->second.parameters[0].type == formatParameterizedType("ArrayObject", {"String"});
+           (it->second.parameters[0].type == formatParameterizedType("ArrayObject", {"String"}) ||
+            it->second.parameters[0].type ==
+                formatParameterizedType("collections.object_array.ArrayObject", {"String"}));
 }
 
 std::string singletonObjectLabel(const std::string& className) {
@@ -80,9 +82,18 @@ std::string asmLabelName(const std::string& functionName, const std::string& lab
 }
 
 std::pair<std::string, std::string> splitQualifiedMember(const std::string& name) {
-    size_t dot = name.rfind('.');
-    if (dot == std::string::npos) codegenError("membre IR non qualifie: " + name);
-    return {name.substr(0, dot), name.substr(dot + 1)};
+    int bracketDepth = 0;
+    for (size_t index = name.size(); index > 0; --index) {
+        const char c = name[index - 1];
+        if (c == ']') {
+            ++bracketDepth;
+        } else if (c == '[') {
+            if (bracketDepth > 0) --bracketDepth;
+        } else if (c == '.' && bracketDepth == 0) {
+            return {name.substr(0, index - 1), name.substr(index)};
+        }
+    }
+    codegenError("membre IR non qualifie: " + name);
 }
 
 std::string methodFunctionName(const std::string& className, const std::string& methodName) {
@@ -109,6 +120,34 @@ std::string methodSpecializationBaseName(const std::string& resolvedMethodName) 
     return resolvedMethodName.substr(0, generic);
 }
 
+bool vtableTypeEquivalent(const std::string& left, const std::string& right) {
+    if (left == right) return true;
+    auto leftFn = functionTypeFromName(left);
+    auto rightFn = functionTypeFromName(right);
+    if (leftFn && rightFn && leftFn->parameterTypes.size() == rightFn->parameterTypes.size()) {
+        for (size_t i = 0; i < leftFn->parameterTypes.size(); ++i) {
+            if (!vtableTypeEquivalent(leftFn->parameterTypes[i], rightFn->parameterTypes[i])) return false;
+        }
+        return vtableTypeEquivalent(leftFn->returnType, rightFn->returnType);
+    }
+    auto leftParam = parameterizedTypeFromName(left);
+    auto rightParam = parameterizedTypeFromName(right);
+    if (leftParam && rightParam && leftParam->second.size() == rightParam->second.size()) {
+        const std::string leftBase = unqualifiedSourceName(leftParam->first);
+        const std::string rightBase = unqualifiedSourceName(rightParam->first);
+        const bool compatibleBase =
+            leftBase == rightBase ||
+            (leftBase == "Array" && rightBase == "ArrayObject") ||
+            (leftBase == "ArrayObject" && rightBase == "Array");
+        if (!compatibleBase) return false;
+        for (size_t i = 0; i < leftParam->second.size(); ++i) {
+            if (!vtableTypeEquivalent(leftParam->second[i], rightParam->second[i])) return false;
+        }
+        return true;
+    }
+    return false;
+}
+
 bool vtableSlotParametersMatch(
     const CompilerContext::FunctionSignature& candidate,
     const CompilerContext::FunctionSignature& slot) {
@@ -119,7 +158,7 @@ bool vtableSlotParametersMatch(
     for (size_t i = 0; i < candidate.parameters.size(); ++i) {
         const std::string& candidateType = candidate.parameters[i].type;
         const std::string& slotType = slot.parameters[i].type;
-        if (candidateType == slotType) continue;
+        if (vtableTypeEquivalent(candidateType, slotType)) continue;
         if (candidateTypeParameters.count(candidateType) && slotTypeParameters.count(slotType)) continue;
         return false;
     }
@@ -1687,11 +1726,11 @@ private:
             out << "    call Runtime_stringToDouble\n";
         } else if (className == "String" && methodName == "toCharArray") {
             out << "    call Runtime_stringToCharArray\n";
-            out << "    lea r10, [vtable_" << asmSymbolName("ArrayObject[Char]") << "]\n";
+            out << "    lea r10, [vtable_" << asmSymbolName("collections.object_array.ArrayObject[Char]") << "]\n";
             out << "    mov [rax], r10\n";
         } else if (className == "String" && methodName == "split") {
             out << "    call Runtime_stringSplit\n";
-            out << "    lea r10, [vtable_" << asmSymbolName("ArrayObject[String]") << "]\n";
+            out << "    lea r10, [vtable_" << asmSymbolName("collections.object_array.ArrayObject[String]") << "]\n";
             out << "    mov [rax], r10\n";
         } else if (className == "String" && methodName == "substring") {
             out << "    call Runtime_stringSubstring\n";
@@ -1718,7 +1757,7 @@ std::set<std::string> collectConcreteClassesToEmit(
     const IRProgram& program, const CompilerContext& context, bool mainUsesCommandLineArguments) {
     std::set<std::string> concreteClassesToEmit;
     if (mainUsesCommandLineArguments) {
-        concreteClassesToEmit.insert(formatParameterizedType("ArrayObject", {"String"}));
+        concreteClassesToEmit.insert(formatParameterizedType("collections.object_array.ArrayObject", {"String"}));
     }
 
     for (const auto& [className, classInfo] : context.classes) {

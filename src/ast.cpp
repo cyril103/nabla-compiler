@@ -125,7 +125,7 @@ bool inferConstructorPatternBindingsFromType(
         return true;
     }
 
-    const std::string currentBaseName = genericBaseName(currentType);
+    const std::string currentBaseName = classLookupNameFor(context, currentType);
     if (visiting.count(currentBaseName) > 0) return false;
     auto classIt = context.classes.find(currentBaseName);
     if (classIt == context.classes.end()) return false;
@@ -203,35 +203,37 @@ std::string constructorPatternConcreteType(
 }
 
 bool isPrimitiveArrayFacadeType(const std::string& type) {
-    return type == "ArrayInt" || type == "ArrayLong" || type == "ArrayFloat" ||
-           type == "ArrayDouble" || type == "ArrayBool";
+    const std::string sourceType = unqualifiedSourceName(type);
+    return sourceType == "ArrayInt" || sourceType == "ArrayLong" || sourceType == "ArrayFloat" ||
+           sourceType == "ArrayDouble" || sourceType == "ArrayBool";
 }
 
 bool isObjectArrayFacadeType(const std::string& type) {
     auto parameterizedType = parameterizedTypeFromName(type);
-    return parameterizedType && parameterizedType->first == "ArrayObject" &&
+    return parameterizedType && unqualifiedSourceName(parameterizedType->first) == "ArrayObject" &&
            parameterizedType->second.size() == 1;
 }
 
 bool isAbstractTraitMethod(
     const CompilerContext& context, const std::string& ownerType, const std::string& methodName) {
-    auto ownerIt = context.classes.find(genericBaseName(ownerType));
+    auto ownerIt = context.classes.find(classLookupNameFor(context, ownerType));
     if (ownerIt == context.classes.end() || !ownerIt->second.isTrait) return false;
     auto methodIt = ownerIt->second.methods.find(methodName);
     return methodIt != ownerIt->second.methods.end() && methodIt->second.isAbstract;
 }
 
 std::string primitiveArrayFacadeStorageType(const std::string& type) {
-    if (type == "ArrayLong") return "LongArray";
-    if (type == "ArrayFloat") return "FloatArray";
-    if (type == "ArrayDouble") return "DoubleArray";
-    if (type == "ArrayBool") return "BoolArray";
+    const std::string sourceType = unqualifiedSourceName(type);
+    if (sourceType == "ArrayLong") return "LongArray";
+    if (sourceType == "ArrayFloat") return "FloatArray";
+    if (sourceType == "ArrayDouble") return "DoubleArray";
+    if (sourceType == "ArrayBool") return "BoolArray";
     return "IntArray";
 }
 
 std::string nativeArrayElementType(const std::string& type) {
     if (auto parameterizedType = parameterizedTypeFromName(type);
-        parameterizedType && parameterizedType->first == "ObjectArray" &&
+        parameterizedType && unqualifiedSourceName(parameterizedType->first) == "ObjectArray" &&
         parameterizedType->second.size() == 1) {
         return parameterizedType->second[0];
     }
@@ -246,27 +248,57 @@ bool isKnownTypeConstructorArgumentInContext(
     const std::string& type, int expectedArity, const CompilerContext& context) {
     if (expectedArity != 1) return false;
     if (parameterizedTypeFromName(type)) return false;
-    auto classIt = context.classes.find(type);
+    auto classIt = context.classes.find(classLookupNameFor(context, type));
     if (classIt != context.classes.end()) {
         return classIt->second.typeParameters.size() == 1;
+    }
+    if (type.find('.') != std::string::npos && looksLikeTypeVariableName(unqualifiedSourceName(type))) {
+        return true;
     }
     return isStdlibTypeAliasFamily(type, 1);
 }
 
 bool isKnownTypeInContext(const std::string& type, const CompilerContext& context) {
     if (isKnownBuiltinType(type) || isFunctionTypeName(type)) return true;
-    auto classIt = context.classes.find(type);
-    if (classIt != context.classes.end()) return classIt->second.typeParameters.empty();
+    auto parameterizedType = parameterizedTypeFromName(type);
+    if (parameterizedType && parameterizedType->first.find('.') != std::string::npos) {
+        for (const auto& argument : parameterizedType->second) {
+            if (!isKnownTypeInContext(argument, context) && !looksLikeTypeVariableName(argument) &&
+                !isKnownTypeConstructorArgumentInContext(argument, 1, context)) return false;
+        }
+        return true;
+    }
+    auto classIt = context.classes.find(classLookupNameFor(context, type));
+    if (!parameterizedType && classIt != context.classes.end()) return classIt->second.typeParameters.empty();
     const auto& semanticTypeParameterInfos = context.semanticTypeParameterInfos.empty()
         ? ordinaryTypeParameterInfos(context.semanticTypeParameters)
         : context.semanticTypeParameterInfos;
     const int directArity = typeParameterArity(type, semanticTypeParameterInfos);
     if (directArity >= 0) return directArity == 0;
     auto substitution = genericSubstitutionFor(context, type);
-    auto parameterizedType = parameterizedTypeFromName(type);
     if (!substitution) {
         if (!parameterizedType) return false;
         const auto& [baseName, arguments] = *parameterizedType;
+        if (baseName.find('.') != std::string::npos &&
+            context.topLevelTypesBySourceName.count(baseName) > 0) {
+            for (const auto& argument : arguments) {
+                if (!isKnownTypeInContext(argument, context) &&
+                    !looksLikeTypeVariableName(argument) &&
+                    !isKnownTypeConstructorArgumentInContext(argument, 1, context)) return false;
+            }
+            return true;
+        }
+        if (baseName.find('.') != std::string::npos) {
+            bool hasDeclaredTypeParameterArgument = false;
+            for (const auto& argument : arguments) {
+                const bool isDeclaredParameter = isDeclaredTypeParameterName(context, argument) ||
+                    looksLikeTypeVariableName(argument);
+                hasDeclaredTypeParameterArgument = hasDeclaredTypeParameterArgument || isDeclaredParameter;
+                if (!isKnownTypeInContext(argument, context) && !isDeclaredParameter &&
+                    !isKnownTypeConstructorArgumentInContext(argument, 1, context)) return false;
+            }
+            if (hasDeclaredTypeParameterArgument) return true;
+        }
         const int constructorParameterArity = typeParameterArity(baseName, semanticTypeParameterInfos);
         if (constructorParameterArity >= 0) {
             if (constructorParameterArity != 1 || arguments.size() != 1) return false;
@@ -276,6 +308,17 @@ bool isKnownTypeInContext(const std::string& type, const CompilerContext& contex
             return isKnownTypeInContext(arguments[0], context) ||
                    isTypeParameterName(arguments[0], context.semanticTypeParameters);
         }
+        if (looksLikeTypeVariableName(baseName)) {
+            bool hasTypeConstructorArgument = false;
+            for (const auto& argument : arguments) {
+                if (isKnownTypeConstructorArgumentInContext(argument, 1, context)) {
+                    hasTypeConstructorArgument = true;
+                    continue;
+                }
+                if (!isKnownTypeInContext(argument, context) && !looksLikeTypeVariableName(argument)) return false;
+            }
+            if (hasTypeConstructorArgument) return true;
+        }
         if (!isStdlibTypeAliasFamily(baseName, arguments.size())) return false;
         for (const auto& argument : arguments) {
             if (!isKnownTypeInContext(argument, context)) return false;
@@ -283,14 +326,15 @@ bool isKnownTypeInContext(const std::string& type, const CompilerContext& contex
         return true;
     }
     if (!parameterizedType) return false;
-    auto concreteClassIt = context.classes.find(parameterizedType->first);
+    auto concreteClassIt = context.classes.find(classLookupNameFor(context, parameterizedType->first));
     for (std::size_t i = 0; i < parameterizedType->second.size(); ++i) {
         const int expectedArity = concreteClassIt != context.classes.end() &&
                 i < concreteClassIt->second.typeParameterInfos.size()
             ? concreteClassIt->second.typeParameterInfos[i].arity
             : 0;
-        if (expectedArity == 0) {
-            if (!isKnownTypeInContext(parameterizedType->second[i], context)) return false;
+            if (expectedArity == 0) {
+                if (!isKnownTypeInContext(parameterizedType->second[i], context) &&
+                    !looksLikeTypeVariableName(parameterizedType->second[i])) return false;
         } else if (!isKnownTypeConstructorArgumentInContext(
                 parameterizedType->second[i], expectedArity, context)) {
             return false;
@@ -764,7 +808,7 @@ void NewNode::validateSemantics(CompilerContext& context) {
         return;
     }
 
-    const std::string classLookupName = genericBaseName(className);
+    const std::string classLookupName = classLookupNameFor(context, className);
     auto classIt = context.classes.find(classLookupName);
     if (classIt == context.classes.end()) {
         semanticError("classe inconnue dans 'new': " + className);
@@ -889,7 +933,7 @@ std::string NewNode::lowerToIR(IRBuilder& builder) const {
     if (className == "BoolArray") return builder.emitNewBoolArray(coerceValueForExpectedType(builder, loweredArguments[0], args[0]->getType(), "Int"));
     if (isObjectArrayType(className)) return builder.emitNewObjectArray(coerceValueForExpectedType(builder, loweredArguments[0], args[0]->getType(), "Int"), nativeArrayElementType(className));
     std::vector<std::string> coercedArguments;
-    const std::string classLookupName = genericBaseName(className);
+    const std::string classLookupName = classLookupNameFor(builder.getContext(), className);
     auto classIt = builder.getContext().classes.find(classLookupName);
     if (classIt != builder.getContext().classes.end() && args.size() == classIt->second.fields.size()) {
         std::map<std::string, std::string> substitution;
@@ -957,8 +1001,8 @@ std::string MethodCallNode::getType() {
         if (methodName == "toInt") return "Int";
         if (methodName == "toFloat") return "Float";
         if (methodName == "toDouble") return "Double";
-        if (methodName == "toCharArray") return "ArrayObject[Char]";
-        if (methodName == "split") return "ArrayObject[String]";
+        if (methodName == "toCharArray") return "collections.object_array.ArrayObject[Char]";
+        if (methodName == "split") return "collections.object_array.ArrayObject[String]";
         if (methodName == "substring" || methodName == "repeat" || methodName == "trim") return "String";
         if (methodName == "length" || methodName == "indexOf") return "Int";
         if (methodName == "charAt") return "Char";
@@ -976,7 +1020,7 @@ std::string MethodCallNode::getType() {
         if (methodName == "length") return "Int";
         if (methodName == "get") return nativeArrayElementType(receiverType);
     }
-    if (receiverType == "ArrayObject[String]" && methodName == "mkString") return "String";
+    if (receiverType == "collections.object_array.ArrayObject[String]" && methodName == "mkString") return "String";
     if (methodName == "toString") return "String";
     if (methodName == "hashCode") return "Int";
     return resolvedType;
@@ -1154,7 +1198,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
             if (!arguments.empty()) {
                 semanticError("la méthode String.toCharArray n'accepte aucun argument");
             }
-            resolvedType = "ArrayObject[Char]";
+            resolvedType = "collections.object_array.ArrayObject[Char]";
             return;
         }
         if (methodName == "split") {
@@ -1166,7 +1210,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
                     ErrorKind::Semantic, arguments[0]->getLocation(),
                     "la méthode String.split attend un séparateur de type String");
             }
-            resolvedType = "ArrayObject[String]";
+            resolvedType = "collections.object_array.ArrayObject[String]";
             return;
         }
         if (methodName == "substring") {
@@ -1280,7 +1324,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         }
         semanticError("méthode inconnue: " + receiverType + "." + methodName);
     }
-    if (receiverType == "ArrayObject[String]" && methodName == "mkString") {
+    if (receiverType == "collections.object_array.ArrayObject[String]" && methodName == "mkString") {
         if (arguments.size() != 1) {
             semanticError("la méthode Array[String].mkString attend un argument");
         }
@@ -1313,7 +1357,7 @@ void MethodCallNode::validateSemantics(CompilerContext& context) {
         return;
     }
 
-    const std::string classLookupName = genericBaseName(receiverType);
+    const std::string classLookupName = classLookupNameFor(context, receiverType);
     auto classIt = context.classes.find(classLookupName);
     if (classIt == context.classes.end()) {
         semanticError("type receveur inconnu pour l'appel de méthode: " + receiverType);
@@ -1594,13 +1638,13 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         }
         if (methodName == "toCharArray" && arguments.empty()) {
             std::string loweredReceiver = receiver->lowerToIR(builder);
-            return builder.emitMethodCall("String", "toCharArray", loweredReceiver, {}, "ArrayObject[Char]");
+            return builder.emitMethodCall("String", "toCharArray", loweredReceiver, {}, "collections.object_array.ArrayObject[Char]");
         }
         if (methodName == "split" && arguments.size() == 1) {
             std::string loweredReceiver = receiver->lowerToIR(builder);
             std::string loweredSeparator = arguments[0]->lowerToIR(builder);
             return builder.emitMethodCall(
-                "String", "split", loweredReceiver, {loweredSeparator}, "ArrayObject[String]");
+                "String", "split", loweredReceiver, {loweredSeparator}, "collections.object_array.ArrayObject[String]");
         }
         if (methodName == "substring" && arguments.size() == 2) {
             std::string loweredReceiver = receiver->lowerToIR(builder);
@@ -1737,7 +1781,7 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
         }
         builder.unsupported(location, "la méthode " + receiverType + "." + methodName);
     }
-    if (receiverType == "ArrayObject[String]" && methodName == "mkString" && arguments.size() == 1) {
+    if (receiverType == "collections.object_array.ArrayObject[String]" && methodName == "mkString" && arguments.size() == 1) {
         std::string loweredReceiver = receiver->lowerToIR(builder);
         std::string loweredSeparator = arguments[0]->lowerToIR(builder);
         const std::string mkStringFunction = uniqueFunctionInternalNameForSource(
@@ -1766,10 +1810,10 @@ std::string MethodCallNode::lowerToIR(IRBuilder& builder) const {
             concreteTypeArguments.push_back(builder.substituteActiveType(typeArgument));
         }
         const std::string concreteReturnType = builder.substituteActiveType(resolvedType);
-        const std::string activeReceiverBase = genericBaseName(activeReceiverType);
+        const std::string activeReceiverBase = unqualifiedSourceName(genericBaseName(activeReceiverType));
         if (concreteTypeArguments.empty() && activeReceiverBase == "ArrayObject" && methodName == "map") {
             auto parameterizedReturnType = parameterizedTypeFromName(concreteReturnType);
-            if (parameterizedReturnType && parameterizedReturnType->first == "ArrayObject" &&
+            if (parameterizedReturnType && unqualifiedSourceName(parameterizedReturnType->first) == "ArrayObject" &&
                 parameterizedReturnType->second.size() == 1) {
                 concreteTypeArguments.push_back(parameterizedReturnType->second[0]);
             }
@@ -2855,7 +2899,7 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
     context.semanticTypeParameters.clear();
     context.semanticTypeParameterInfos.clear();
     if (!className.empty()) {
-        auto classIt = context.classes.find(className);
+        auto classIt = context.classes.find(classLookupNameFor(context, className));
         if (classIt != context.classes.end()) {
             context.semanticTypeParameters = classIt->second.typeParameters;
             context.semanticTypeParameterInfos = classIt->second.typeParameterInfos;
@@ -2880,11 +2924,18 @@ void FunctionDefNode::validateSemantics(CompilerContext& context) {
             context.semanticSymbolTypes["this"] = className;
         }
     } else {
-        context.semanticTypeParameters = typeParameters;
+        context.semanticTypeParameters = ownerTypeParameters;
+        context.semanticTypeParameters.insert(
+            context.semanticTypeParameters.end(), typeParameters.begin(), typeParameters.end());
         auto functionIt = context.functions.find(name);
         context.semanticTypeParameterInfos = functionIt != context.functions.end()
             ? functionIt->second.typeParameterInfos
             : ordinaryTypeParameterInfos(typeParameters);
+        if (!ownerTypeParameters.empty()) {
+            auto ownerInfos = ordinaryTypeParameterInfos(ownerTypeParameters);
+            context.semanticTypeParameterInfos.insert(
+                context.semanticTypeParameterInfos.begin(), ownerInfos.begin(), ownerInfos.end());
+        }
     }
     for (const auto& capture : captures) {
         context.semanticSymbolTypes[capture.symbolName] = capture.type;
@@ -2947,7 +2998,7 @@ std::string FunctionDefNode::lowerSpecializedMethodToIR(
             builder.unsupported(location, "la spécialisation de méthode " + concreteClassName + "." + name);
         }
     } else {
-        if (!parameterizedType || parameterizedType->first != className ||
+        if (!parameterizedType || classLookupNameFor(builder.getContext(), parameterizedType->first) != classLookupNameFor(builder.getContext(), className) ||
             parameterizedType->second.size() != ownerTypeParameters.size()) {
             builder.unsupported(location, "la spécialisation de méthode " + concreteClassName + "." + name);
         }

@@ -1,3 +1,5 @@
+package util
+
 /// @module Util
 /// Generateur pseudo-aleatoire deterministe.
 /// Les fonctions retournent la valeur generee avec le nouvel etat. Conserver et

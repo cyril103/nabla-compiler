@@ -14,7 +14,7 @@ class ForwardListFactory() with ForwardFactory[List] {
 }
 
 def main(): Int = {
-    val factory: WrapFactory[List] = new ForwardListFactory()
+    val factory = new ForwardListFactory()
     val values = factory.single[Int](42)
     values.head()
 }

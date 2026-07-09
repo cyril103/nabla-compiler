@@ -1,3 +1,5 @@
+package math
+
 /// @module Math
 /// Fonctions mathematiques courantes.
 /// Les operations communes utilisent les noms surcharges idiomatiques

@@ -17,6 +17,11 @@ Plan actif court pour la suite du chantier package/namespace.
   constructions `new` acceptent `pkg.module.Type`; le nom court reste utilisable
   quand il est unique et devient ambigu quand plusieurs imports exposent le meme
   type.
+- La stdlib source declare maintenant un `package` pour chaque module sous
+  `stdlib/`. Les imports existants (`import collections.array`) continuent
+  d'exposer les noms courts uniques, tandis que les annotations peuvent nommer
+  explicitement les types publics (`collections.int_array.ArrayInt`,
+  `core.option.Option[T]`, etc.).
 
 ## Tests couverts
 
@@ -25,6 +30,9 @@ Plan actif court pour la suite du chantier package/namespace.
   appels qualifies, references qualifiees et surcharges qualifiees.
 - Classes homonymes importees: annotation et `new` pleinement qualifies,
   import unique par nom court, et diagnostic d'ambiguite par nom court.
+- Surface stdlib packagee: declarations `package ...` sur tous les modules,
+  aliases Array/Set compatibles avec les noms internes qualifies, et regression
+  `test_stdlib_package_qualified_surface.nabla`.
 
 ## Differe
 
@@ -32,6 +40,5 @@ Plan actif court pour la suite du chantier package/namespace.
 - Motifs de constructeur pleinement qualifies dans `match`.
 - Packages multi-fichiers, visibilites package, re-export et ergonomie complete
   des diagnostics pour tous les symboles.
-- Migration stdlib vers declarations `package ...`; les modules stdlib sans
-  declaration package conservent volontairement leurs noms internes courts pour
-  rester compatibles pendant la transition.
+- Nettoyage public de la stdlib: reexports/prelude, choix definitif des noms de
+  package publics, et reecriture plus large des APIs obsoletes.

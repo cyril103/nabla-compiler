@@ -177,6 +177,7 @@ cat >"$TMP_DIR/gc_stress_map_set_stdlib.nabla" <<'NABLA'
 import collections.array
 import collections.map
 import collections.set
+import core.tuple
 
 class Key(name: String, hash: Int) {
     override def hashCode(): Int = {

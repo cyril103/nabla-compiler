@@ -1,3 +1,5 @@
+package core.iterable
+
 /// @module Iterable
 /// Trait public minimal pour les collections parcourables.
 

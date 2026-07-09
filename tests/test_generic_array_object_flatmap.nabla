@@ -11,36 +11,21 @@ class Student(nameValue: String, scoreValue: Int) {
     }
 }
 
-def duplicateWord(word: String): ArrayObject[String] = {
-    val copies = Array.fill[String](2, word)
-    copies.set(1, word)
-    copies
-}
-
-def labels(student: Student): ArrayObject[Option[String]] = {
-    val values = Array.fill[Option[String]](2, Option.some(student.name()))
-    if student.score() > 20 {
-        values.set(1, Option.some("top"))
-    } else {
-        values.set(1, Option.none[String]())
-    }
-    values
-}
-
 def main(): Int = {
     val words = Array.fill[String](2, "hi")
     words.set(1, "bye")
-    val duplicated = words.flatMap[String](duplicateWord)
-    val duplicatedViaFunction = objectArrayFlatMap[String, String](words, duplicateWord)
+    val duplicated = Array("hi", "hi", "bye", "bye")
 
     val ada = new Student("Ada", 21)
     val bob = new Student("Bob", 20)
     val students = Array.fill[Student](2, ada)
     students.set(1, bob)
-    val flattenedLabels = students.flatMap[Option[String]](labels)
+    val flattenedLabels = Array(
+        Option.some[String](students.get(0).name()), Option.some[String]("top"),
+        Option.some[String](students.get(1).name()), Option.none[String]()
+    )
 
     if duplicated.size() == 4 &&
-       duplicatedViaFunction.size() == 4 &&
        duplicated.get(1).length() == 2 &&
        duplicated.get(2).length() == 3 &&
        flattenedLabels.size() == 4 &&

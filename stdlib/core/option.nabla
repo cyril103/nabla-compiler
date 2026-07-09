@@ -1,3 +1,5 @@
+package core.option
+
 /// @module Option
 /// Valeur optionnelle generique.
 /// Option[T] represente soit une valeur presente, soit une absence. C'est le

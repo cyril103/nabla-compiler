@@ -30,7 +30,9 @@ bool isKnownConcreteTypeName(const std::string& type, const CompilerContext& con
 
 bool shouldRetargetInferredFactoryAlias(const std::string& name) {
     return name == "arrayFill" || name == "ArrayFill" ||
-           name == "Array.fill" || name == "Array.tabulate";
+           name == "Array.fill" || name == "Array.tabulate" ||
+           name == "collections.array.Array.fill" ||
+           name == "collections.array.Array.tabulate";
 }
 
 bool isPackageQualifiedTopLevelFunction(
@@ -103,6 +105,21 @@ std::string resolveTopLevelTypeName(
     throw CompilerError(
         ErrorKind::Parser, location,
         "nom de type importé ambigu '" + sourceName + "': exposé par " + providers);
+}
+
+void registerTopLevelTypeSymbol(
+    CompilerContext& context, const std::string& sourceName,
+    const std::string& internalName, const std::string& moduleName,
+    const SourceLocation& location) {
+    auto& bySource = context.topLevelTypesBySourceName[sourceName];
+    const auto alreadyRegistered = std::any_of(
+        bySource.begin(), bySource.end(),
+        [&](const auto& symbol) { return symbol.internalName == internalName; });
+    if (!alreadyRegistered) {
+        bySource.push_back({sourceName, internalName, moduleName, location});
+    }
+    context.topLevelTypesByInternalName[internalName] = {
+        sourceName, internalName, moduleName, location};
 }
 
 std::string formatFieldProviders(const std::set<std::string>& providers) {
@@ -198,6 +215,7 @@ std::unique_ptr<ProgramNode> Parser::parseProgram() {
         program->packageName = parseQualifiedName("Nom de package attendu", "Sous-package attendu");
         context.currentPackageName = program->packageName;
     }
+    predeclareTopLevelTypes();
     while (peek().type != TokenType::EOF_TOKEN) {
         if (peek().type == TokenType::KW_IMPORT) {
             parseImport(program);
@@ -228,6 +246,30 @@ std::string Parser::parseQualifiedName(const std::string& firstIdentifierError, 
         name += "." + consume(TokenType::IDENTIFIER, nextIdentifierError).value;
     }
     return name;
+}
+
+void Parser::predeclareTopLevelTypes() {
+    const std::string declaredModuleName = currentDeclaredModuleName(context);
+    size_t cursor = index;
+    int braceDepth = 0;
+    while (cursor < tokens.size() && tokens[cursor].type != TokenType::EOF_TOKEN) {
+        const Token& token = tokens[cursor];
+        if (token.type == TokenType::LBRACE) {
+            ++braceDepth;
+        } else if (token.type == TokenType::RBRACE && braceDepth > 0) {
+            --braceDepth;
+        } else if (braceDepth == 0 &&
+                   (token.type == TokenType::KW_CLASS || token.type == TokenType::KW_TRAIT ||
+                    token.type == TokenType::KW_OBJECT)) {
+            if (cursor + 1 < tokens.size() && tokens[cursor + 1].type == TokenType::IDENTIFIER) {
+                const Token& nameToken = tokens[cursor + 1];
+                const std::string internalName = topLevelInternalName(declaredModuleName, nameToken.value);
+                registerTopLevelTypeSymbol(
+                    context, nameToken.value, internalName, declaredModuleName, nameToken.location);
+            }
+        }
+        ++cursor;
+    }
 }
 
 Token Parser::peek() const {
@@ -339,10 +381,7 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool is
     const std::string sourceClassName = classNameToken.value;
     const std::string declaredModuleName = currentDeclaredModuleName(context);
     const std::string className = topLevelInternalName(declaredModuleName, sourceClassName);
-    context.topLevelTypesBySourceName[sourceClassName].push_back({
-        sourceClassName, className, declaredModuleName, classNameToken.location});
-    context.topLevelTypesByInternalName[className] = {
-        sourceClassName, className, declaredModuleName, classNameToken.location};
+    registerTopLevelTypeSymbol(context, sourceClassName, className, declaredModuleName, classNameToken.location);
     std::vector<std::string> typeParameters;
     std::vector<CompilerContext::TypeParameterInfo> typeParameterInfos;
     if (peek().type == TokenType::LBRACKET) {
@@ -612,7 +651,7 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool is
             auto body = located(
                 std::make_unique<FieldAccessNode>(className, field.name, field.type),
                 field.location);
-            std::vector<std::string> ownerTypeParameters = context.classes[className].typeParameters;
+            std::vector<std::string> ownerTypeParameters = context.classes[classLookupNameFor(context, className)].typeParameters;
             generatedFunctions.push_back(located(std::make_unique<FunctionDefNode>(
                 className, field.name, field.type, std::vector<std::string>{},
                 std::vector<FunctionDefNode::Parameter>{}, std::move(body),
@@ -631,10 +670,7 @@ void Parser::parseObjectDefinition(std::unique_ptr<ProgramNode>& program) {
     const std::string sourceObjectName = objectNameToken.value;
     const std::string declaredModuleName = currentDeclaredModuleName(context);
     const std::string objectName = topLevelInternalName(declaredModuleName, sourceObjectName);
-    context.topLevelTypesBySourceName[sourceObjectName].push_back({
-        sourceObjectName, objectName, declaredModuleName, objectNameToken.location});
-    context.topLevelTypesByInternalName[objectName] = {
-        sourceObjectName, objectName, declaredModuleName, objectNameToken.location};
+    registerTopLevelTypeSymbol(context, sourceObjectName, objectName, declaredModuleName, objectNameToken.location);
     if (context.objects.count(objectName)) {
         throw CompilerError(ErrorKind::Parser, objectNameToken.location, "objet déjà déclaré: " + objectName);
     }
@@ -751,11 +787,21 @@ std::unique_ptr<ASTNode> Parser::parseMatchExpression() {
             const bool hasConstructorArguments = peek().type == TokenType::LPAREN;
             const bool looksLikeConstructor = !token.value.empty() &&
                 std::isupper(static_cast<unsigned char>(token.value[0]));
-            const bool knownRuntimeSingleton = context.runtimeObjects.count(token.value) > 0;
-            const bool knownClass = context.classes.count(token.value) > 0;
+            std::string patternClassName = token.value;
+            auto sourceTypeIt = context.topLevelTypesBySourceName.find(token.value);
+            if (!context.runtimeObjects.count(patternClassName) &&
+                !context.classes.count(patternClassName) &&
+                sourceTypeIt != context.topLevelTypesBySourceName.end() &&
+                sourceTypeIt->second.size() == 1 &&
+                (context.runtimeObjects.count(sourceTypeIt->second.front().internalName) ||
+                 context.classes.count(sourceTypeIt->second.front().internalName))) {
+                patternClassName = sourceTypeIt->second.front().internalName;
+            }
+            const bool knownRuntimeSingleton = context.runtimeObjects.count(patternClassName) > 0;
+            const bool knownClass = context.classes.count(patternClassName) > 0;
             if (hasConstructorArguments || knownRuntimeSingleton || (knownClass && looksLikeConstructor)) {
                 constructorPattern = std::make_unique<MatchNode::ConstructorPattern>();
-                constructorPattern->className = token.value;
+                constructorPattern->className = patternClassName;
                 localScopes.emplace_back();
                 patternScopePushed = true;
                 if (hasConstructorArguments) {
@@ -1494,11 +1540,13 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             std::vector<std::unique_ptr<ASTNode>> arguments;
             arguments.push_back(std::move(expr));
             arguments.push_back(std::move(second));
+            const std::string tupleBase = resolveTopLevelTypeName(context, "Tuple2", start.location);
             const std::string tupleType =
-                "Tuple2[" + arguments[0]->getType() + ", " + arguments[1]->getType() + "]";
+                tupleBase + "[" + arguments[0]->getType() + ", " + arguments[1]->getType() + "]";
+            const std::string tupleApply = tupleBase + ".apply";
             return located(
                 std::make_unique<FunctionCallNode>(
-                    "Tuple2.apply", std::move(arguments), std::vector<std::string>{},
+                    tupleApply, std::move(arguments), std::vector<std::string>{},
                     tupleType, "Tuple2"),
                 start.location);
         }
@@ -1643,7 +1691,10 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             std::string functionLookupName = name;
             std::vector<std::string> functionTypeArguments = typeArguments;
             if (!initialSymbol) {
-                if (auto alias = resolveStdlibFunctionAlias(name, typeArguments)) {
+                auto alias = (typeArguments.empty() && shouldRetargetInferredFactoryAlias(name))
+                    ? std::optional<std::string>{}
+                    : resolveStdlibFunctionAlias(name, typeArguments);
+                if (alias) {
                     auto aliasInternalName = uniqueFunctionInternalNameForSource(context, *alias);
                     if (aliasInternalName) {
                         auto aliasFunction = context.functions.find(*aliasInternalName);
@@ -1660,10 +1711,20 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                         "la fonction standard générique '" + name +
                         "' ne supporte pas ces arguments de type" +
                         recommendedStdlibFunctionSuffix(name));
-                } else if (context.objects.count(name) &&
-                           !functionOverloadNames(context, name + ".apply").empty() &&
-                           functionOverloadNames(context, name).empty()) {
-                    functionLookupName = name + ".apply";
+                } else {
+                    std::string objectLookupName = name;
+                    auto sourceTypeIt = context.topLevelTypesBySourceName.find(name);
+                    if (!context.objects.count(objectLookupName) &&
+                        sourceTypeIt != context.topLevelTypesBySourceName.end() &&
+                        sourceTypeIt->second.size() == 1 &&
+                        context.objects.count(sourceTypeIt->second.front().internalName)) {
+                        objectLookupName = sourceTypeIt->second.front().internalName;
+                    }
+                    if (context.objects.count(objectLookupName) &&
+                        !functionOverloadNames(context, objectLookupName + ".apply").empty() &&
+                        functionOverloadNames(context, name).empty()) {
+                        functionLookupName = objectLookupName + ".apply";
+                    }
                 }
             }
             if (!initialSymbol && functionLookupName == name) {
@@ -1707,7 +1768,8 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     const auto& candidate = functionIt->second;
                     const bool hasByNameParameter = std::any_of(
                         candidate.parameters.begin(), candidate.parameters.end(),
-                        [](const auto& parameter) { return parameter.isByName; });
+                        [](const auto& parameter) { return parameter.isByName; }) ||
+                        !candidate.returnFunctionByNameParameters.empty();
                     if (hasByNameParameter) byNameOverloadNames.push_back(overloadName);
                 }
                 if (byNameOverloadNames.size() == 1) {
@@ -1835,13 +1897,21 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     nameToken.location);
             }
         }
-        if (context.runtimeObjects.count(name)) {
+        std::string runtimeObjectName = name;
+        auto sourceTypeIt = context.topLevelTypesBySourceName.find(name);
+        if (!context.runtimeObjects.count(runtimeObjectName) &&
+            sourceTypeIt != context.topLevelTypesBySourceName.end() &&
+            sourceTypeIt->second.size() == 1 &&
+            context.runtimeObjects.count(sourceTypeIt->second.front().internalName)) {
+            runtimeObjectName = sourceTypeIt->second.front().internalName;
+        }
+        if (context.runtimeObjects.count(runtimeObjectName)) {
             if (!typeArguments.empty()) {
                 throw CompilerError(
                     ErrorKind::Parser, nameToken.location,
                     "un objet runtime ne supporte pas d'arguments de type: " + name);
             }
-            return located(std::make_unique<SingletonObjectNode>(name), nameToken.location);
+            return located(std::make_unique<SingletonObjectNode>(runtimeObjectName), nameToken.location);
         }
         auto overloadNames = functionOverloadNames(context, name);
         if (!overloadNames.empty()) {
@@ -1967,8 +2037,19 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
             const std::string qualifiedFunctionName = identifier->getName() + "." + method;
             std::string functionLookupName = qualifiedFunctionName;
             std::vector<std::string> functionTypeArguments = typeArguments;
-            const auto packageQualifiedOverloadNames =
+            auto packageQualifiedOverloadNames =
                 packageQualifiedTopLevelFunctionOverloads(context, qualifiedFunctionName);
+            if (packageQualifiedOverloadNames.empty()) {
+                const std::string ownerTypeName =
+                    resolveTopLevelTypeName(context, identifier->getName(), methodToken.location);
+                if (ownerTypeName != identifier->getName() && context.objects.count(ownerTypeName)) {
+                    auto objectOverloads = functionOverloadNames(context, ownerTypeName + "." + method);
+                    if (!objectOverloads.empty()) {
+                        functionLookupName = ownerTypeName + "." + method;
+                        packageQualifiedOverloadNames = std::move(objectOverloads);
+                    }
+                }
+            }
             if (packageQualifiedOverloadNames.size() == 1) {
                 functionLookupName = packageQualifiedOverloadNames.front();
             }
@@ -2034,13 +2115,18 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
                     break;
                 }
             }
-            if (!selectedQualifiedOverload) {
+            const bool selectedCurriedQualifiedOverload = selectedQualifiedOverload &&
+                context.functions.count(functionLookupName) &&
+                !context.functions[functionLookupName].returnFunctionByNameParameters.empty();
+            if (!selectedCurriedQualifiedOverload) {
                 if (auto alias = resolveStdlibFunctionAlias(qualifiedFunctionName, typeArguments)) {
                     auto aliasInternalName = uniqueFunctionInternalNameForSource(context, *alias);
                     if (aliasInternalName) {
                         auto aliasFunction = context.functions.find(*aliasInternalName);
                         if (aliasFunction != context.functions.end()) {
                             functionLookupName = *aliasInternalName;
+                            packageQualifiedOverloadNames.clear();
+                            selectedQualifiedOverload = false;
                             if (aliasFunction->second.typeParameters.empty()) {
                                 functionTypeArguments.clear();
                             }
@@ -2446,11 +2532,13 @@ std::unique_ptr<ASTNode> Parser::parseTupleArrow() {
         std::vector<std::unique_ptr<ASTNode>> arguments;
         arguments.push_back(std::move(expr));
         arguments.push_back(std::move(right));
+        const std::string tupleBase = resolveTopLevelTypeName(context, "Tuple2", op.location);
         const std::string tupleType =
-            "Tuple2[" + arguments[0]->getType() + ", " + arguments[1]->getType() + "]";
+            tupleBase + "[" + arguments[0]->getType() + ", " + arguments[1]->getType() + "]";
+        const std::string tupleApply = tupleBase + ".apply";
         expr = located(
             std::make_unique<FunctionCallNode>(
-                "Tuple2.apply", std::move(arguments), std::vector<std::string>{},
+                tupleApply, std::move(arguments), std::vector<std::string>{},
                 tupleType, "Tuple2"),
             op.location);
     }
@@ -2884,7 +2972,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDef(
     currentFunctionTypeParameterInfos = previousFunctionTypeParameterInfos;
     localScopes.pop_back();
     std::vector<std::string> ownerTypeParameters;
-    if (!clName.empty()) ownerTypeParameters = context.classes[clName].typeParameters;
+    if (!clName.empty()) ownerTypeParameters = context.classes[classLookupNameFor(context, clName)].typeParameters;
     return located(std::make_unique<FunctionDefNode>(
         clName, registeredFunctionName, returnType, std::move(typeParameters),
         std::move(parameters), std::move(body), std::vector<FunctionDefNode::Capture>{},
@@ -2904,7 +2992,6 @@ std::pair<std::string, SourceLocation> Parser::parseType(const std::string& expe
             consume(TokenType::DOT, "");
             typeName += "." + consume(TokenType::IDENTIFIER, "Sous-type attendu").value;
         }
-        typeName = resolveTopLevelTypeName(context, typeName, typeToken.location);
         if (peek().type == TokenType::LBRACKET) {
             consume(TokenType::LBRACKET, "");
             std::vector<std::string> typeArguments;
@@ -2919,7 +3006,12 @@ std::pair<std::string, SourceLocation> Parser::parseType(const std::string& expe
                 }
             }
             consume(TokenType::RBRACKET, "']' attendu après les arguments génériques");
+            if (!isStdlibTypeAliasFamily(typeName, typeArguments.size())) {
+                typeName = resolveTopLevelTypeName(context, typeName, typeToken.location);
+            }
             typeName = formatParameterizedType(typeName, typeArguments);
+        } else if (!isStdlibTypeAliasFamily(typeName, 1)) {
+            typeName = resolveTopLevelTypeName(context, typeName, typeToken.location);
         }
         std::string canonicalType = canonicalTypeName(typeName);
         auto parameterizedType = parameterizedTypeFromName(canonicalType);
@@ -2927,7 +3019,7 @@ std::pair<std::string, SourceLocation> Parser::parseType(const std::string& expe
             parameterizedType->second.size() == 1 &&
             !isTypeParameterName(parameterizedType->second[0], currentFunctionTypeParameters) &&
             isKnownConcreteTypeName(parameterizedType->second[0], context)) {
-            canonicalType = formatParameterizedType("ArrayObject", parameterizedType->second);
+            canonicalType = formatParameterizedType("collections.object_array.ArrayObject", parameterizedType->second);
         }
         return {canonicalType, typeToken.location};
     }
@@ -2957,7 +3049,8 @@ std::pair<std::string, SourceLocation> Parser::parseType(const std::string& expe
         }
         if (parenthesizedTypes.size() == 2) {
             requireTupleModule();
-            return {formatParameterizedType("Tuple2", parenthesizedTypes), start.location};
+            const std::string tupleBase = resolveTopLevelTypeName(context, "Tuple2", start.location);
+            return {formatParameterizedType(tupleBase, parenthesizedTypes), start.location};
         }
         throw CompilerError(
             ErrorKind::Parser, start.location,

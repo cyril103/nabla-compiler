@@ -1,3 +1,5 @@
+package io
+
 /// @module IO
 /// Fonctions d'entree-sortie simples.
 /// Les operations de fichier retournent un Bool ou un code Int pour laisser

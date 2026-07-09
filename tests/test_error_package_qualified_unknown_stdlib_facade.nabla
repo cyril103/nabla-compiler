@@ -1,0 +1,6 @@
+import collections.array
+
+def main(): Int = {
+    val xs = does.not.Array.fill[Int](1, 7)
+    xs.get(0)
+}

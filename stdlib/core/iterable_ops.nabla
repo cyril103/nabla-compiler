@@ -1,3 +1,5 @@
+package core.iterable_ops
+
 /// @module IterableOps
 /// Traits experimentaux pour preparer les factories/builders de collections.
 

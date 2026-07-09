@@ -1,3 +1,5 @@
+package collections.long_array
+
 import collections.object_array
 import collections.array_base
 import core.iterable

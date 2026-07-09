@@ -1,1 +1,1 @@
-tests/test_error_tuple_access_3.nabla:3:10: semantic error: méthode inconnue: Tuple2[Int,Int]._3
+tests/test_error_tuple_access_3.nabla:3:10: semantic error: méthode inconnue: core.tuple.Tuple2[Int,Int]._3

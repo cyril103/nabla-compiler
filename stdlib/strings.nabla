@@ -1,9 +1,12 @@
+package strings
+
 /// @module Strings
 /// Helpers pour travailler avec les chaines. Les operations natives de
 /// String restent documentees dans le guide du langage; ce module ajoute des
 /// fonctions de convenance composees au-dessus de ces primitives.
 
 import collections.array
+import collections.object_array
 
 /// Indique si une chaine contient au moins un caractere.
 /// @status Recommandee
