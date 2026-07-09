@@ -57,6 +57,54 @@ std::vector<std::string> packageQualifiedTopLevelFunctionOverloads(
     return overloads;
 }
 
+std::string currentDeclaredModuleName(const CompilerContext& context) {
+    return context.currentPackageName;
+}
+
+std::string resolveTopLevelTypeName(
+    const CompilerContext& context, const std::string& sourceName,
+    const SourceLocation& location) {
+    auto exact = context.topLevelTypesByInternalName.find(sourceName);
+    if (exact != context.topLevelTypesByInternalName.end()) return exact->second.internalName;
+
+    auto bySource = context.topLevelTypesBySourceName.find(sourceName);
+    if (bySource == context.topLevelTypesBySourceName.end()) return sourceName;
+
+    const std::string currentModule = currentDeclaredModuleName(context);
+    if (!currentModule.empty()) {
+        for (const auto& symbol : bySource->second) {
+            if (symbol.moduleName == currentModule) return symbol.internalName;
+        }
+    }
+
+    std::set<std::string> modules;
+    std::string unqualifiedInternalName;
+    for (const auto& symbol : bySource->second) {
+        if (symbol.moduleName.empty()) {
+            unqualifiedInternalName = symbol.internalName;
+        } else {
+            modules.insert(symbol.moduleName);
+        }
+    }
+    if (modules.empty()) return unqualifiedInternalName.empty() ? sourceName : unqualifiedInternalName;
+    if (modules.size() == 1 && unqualifiedInternalName.empty()) return bySource->second.front().internalName;
+
+    std::string providers;
+    bool first = true;
+    for (const auto& module : modules) {
+        if (!first) providers += ", ";
+        providers += module;
+        first = false;
+    }
+    if (!unqualifiedInternalName.empty()) {
+        if (!providers.empty()) providers += ", ";
+        providers += unqualifiedInternalName;
+    }
+    throw CompilerError(
+        ErrorKind::Parser, location,
+        "nom de type importé ambigu '" + sourceName + "': exposé par " + providers);
+}
+
 std::string formatFieldProviders(const std::set<std::string>& providers) {
     std::string message;
     bool first = true;
@@ -288,15 +336,13 @@ std::vector<CompilerContext::TypeParameterInfo> Parser::parseTypeParameterList(
 void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool isTrait) {
     Token classToken = consume(isTrait ? TokenType::KW_TRAIT : TokenType::KW_CLASS, "");
     Token classNameToken = consume(TokenType::IDENTIFIER, isTrait ? "Nom de trait attendu" : "Nom de classe attendu");
-    std::string className = classNameToken.value;
-    const std::string declaredModuleName = context.currentModuleName.empty()
-        ? std::string{}
-        : (context.currentPackageName.empty() ? context.currentModuleName : context.currentPackageName);
-    const std::string declaredTypeInternalName = topLevelInternalName(declaredModuleName, className);
-    context.topLevelTypesBySourceName[className].push_back({
-        className, declaredTypeInternalName, declaredModuleName, classNameToken.location});
-    context.topLevelTypesByInternalName[declaredTypeInternalName] = {
-        className, declaredTypeInternalName, declaredModuleName, classNameToken.location};
+    const std::string sourceClassName = classNameToken.value;
+    const std::string declaredModuleName = currentDeclaredModuleName(context);
+    const std::string className = topLevelInternalName(declaredModuleName, sourceClassName);
+    context.topLevelTypesBySourceName[sourceClassName].push_back({
+        sourceClassName, className, declaredModuleName, classNameToken.location});
+    context.topLevelTypesByInternalName[className] = {
+        sourceClassName, className, declaredModuleName, classNameToken.location};
     std::vector<std::string> typeParameters;
     std::vector<CompilerContext::TypeParameterInfo> typeParameterInfos;
     if (peek().type == TokenType::LBRACKET) {
@@ -582,15 +628,13 @@ void Parser::parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool is
 void Parser::parseObjectDefinition(std::unique_ptr<ProgramNode>& program) {
     consume(TokenType::KW_OBJECT, "");
     Token objectNameToken = consume(TokenType::IDENTIFIER, "Nom d'objet attendu");
-    const std::string objectName = objectNameToken.value;
-    const std::string declaredModuleName = context.currentModuleName.empty()
-        ? std::string{}
-        : (context.currentPackageName.empty() ? context.currentModuleName : context.currentPackageName);
-    const std::string declaredTypeInternalName = topLevelInternalName(declaredModuleName, objectName);
-    context.topLevelTypesBySourceName[objectName].push_back({
-        objectName, declaredTypeInternalName, declaredModuleName, objectNameToken.location});
-    context.topLevelTypesByInternalName[declaredTypeInternalName] = {
-        objectName, declaredTypeInternalName, declaredModuleName, objectNameToken.location};
+    const std::string sourceObjectName = objectNameToken.value;
+    const std::string declaredModuleName = currentDeclaredModuleName(context);
+    const std::string objectName = topLevelInternalName(declaredModuleName, sourceObjectName);
+    context.topLevelTypesBySourceName[sourceObjectName].push_back({
+        sourceObjectName, objectName, declaredModuleName, objectNameToken.location});
+    context.topLevelTypesByInternalName[objectName] = {
+        sourceObjectName, objectName, declaredModuleName, objectNameToken.location};
     if (context.objects.count(objectName)) {
         throw CompilerError(ErrorKind::Parser, objectNameToken.location, "objet déjà déclaré: " + objectName);
     }
@@ -2856,6 +2900,11 @@ std::pair<std::string, SourceLocation> Parser::parseType(const std::string& expe
     if (peek().type == TokenType::IDENTIFIER) {
         Token typeToken = consume(TokenType::IDENTIFIER, expectedMessage);
         std::string typeName = typeToken.value;
+        while (peek().type == TokenType::DOT) {
+            consume(TokenType::DOT, "");
+            typeName += "." + consume(TokenType::IDENTIFIER, "Sous-type attendu").value;
+        }
+        typeName = resolveTopLevelTypeName(context, typeName, typeToken.location);
         if (peek().type == TokenType::LBRACKET) {
             consume(TokenType::LBRACKET, "");
             std::vector<std::string> typeArguments;

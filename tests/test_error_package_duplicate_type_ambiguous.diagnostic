@@ -1,0 +1,1 @@
+tests/test_error_package_duplicate_type_ambiguous.nabla:5:12: parser error: nom de type importé ambigu 'Box': exposé par tests.utils.packages.alpha.Box, tests.utils.packages.beta.Box

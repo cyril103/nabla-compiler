@@ -1,36 +1,37 @@
 # Package-Qualified Symbols
 
-Plan actif court pour le delta package en cours.
+Plan actif court pour la suite du chantier package/namespace.
 
-## Objectif courant
+## Etat livre
 
-- Permettre les appels source pleinement qualifies vers les fonctions top-level
-  importees: `pkg.module.function(...)` doit selectionner le symbole interne
-  correspondant, meme si le nom court est ambigu entre plusieurs imports.
-- Conserver la visibilite historique par nom court quand un seul module expose
-  ce nom.
-- Conserver le diagnostic exact d'ambiguite quand un nom court est expose par
-  plusieurs modules et utilise sans qualification.
-- Ne pas ajouter encore imports selectifs, alias, wildcards, packages multi-fichiers
-  ou resolution qualifiee des types/classes.
+- `package a.b` est accepte comme premiere declaration optionnelle et valide
+  les imports par chemin.
+- Les fonctions top-level importees sont stockees sous un nom interne qualifie;
+  le nom court reste utilisable quand il est unique, et un nom court ambigu
+  produit un diagnostic.
+- Les appels et references de fonctions pleinement qualifies
+  (`pkg.module.function()` / `pkg.module.function`) resolvent le symbole importe
+  exact, y compris les surcharges d'un meme module package.
+- Les types/classes/objets top-level importes sont stockes sous un nom interne
+  qualifie quand le fichier declare un package. Les annotations de type et
+  constructions `new` acceptent `pkg.module.Type`; le nom court reste utilisable
+  quand il est unique et devient ambigu quand plusieurs imports exposent le meme
+  type.
 
-## Tests
+## Tests couverts
 
-- Deux modules packages exposent la meme fonction courte; les deux appels
-  pleinement qualifies s'executent et retournent des valeurs distinctes.
-- Le meme programme utilisant le nom court ambigu continue de produire le
-  diagnostic d'ambiguite exact.
-- Une reference de fonction qualifiee peut etre affectee a un type fonction quand
-  le symbole est unique.
-- Les appels qualifies resolvent aussi les surcharges d'un meme module package
-  par arite puis par types d'arguments.
-- Tests package existants: declaration, mismatch, package non premier, import
-  unique avec homonyme.
+- Declaration de package, mismatch package/import, et `package` non premier.
+- Fonctions homonymes importees: nom court ambigu, import unique par nom court,
+  appels qualifies, references qualifiees et surcharges qualifiees.
+- Classes homonymes importees: annotation et `new` pleinement qualifies,
+  import unique par nom court, et diagnostic d'ambiguite par nom court.
 
 ## Differe
 
 - Imports selectifs, alias et wildcards explicites.
-- Ambiguite/resolution qualifiee des noms de types/classes: la fondation de
-  metadata existe, mais la resolution de type reste majoritairement indexee par
-  nom court et sera durcie dans une tranche separee pour eviter une reecriture
-  trop large.
+- Motifs de constructeur pleinement qualifies dans `match`.
+- Packages multi-fichiers, visibilites package, re-export et ergonomie complete
+  des diagnostics pour tous les symboles.
+- Migration stdlib vers declarations `package ...`; les modules stdlib sans
+  declaration package conservent volontairement leurs noms internes courts pour
+  rester compatibles pendant la transition.

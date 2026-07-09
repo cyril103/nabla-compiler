@@ -70,8 +70,13 @@ pour garder un cap clair après le tag `v0.1.0`.
   ne collisionnent plus immediatement; utiliser leur nom court produit un
   diagnostic d'ambiguite, tandis que leurs appels et references pleinement
   qualifies (`pkg.module.function` / `pkg.module.function()`) resolvent le
-  symbole importe exact. Les imports selectifs, alias et ambiguite complete des
-  noms de types/classes restent differes.
+  symbole importe exact. Les types/classes top-level des fichiers declarant un
+  package acceptent aussi leur nom pleinement qualifie dans les annotations et
+  `new`, avec diagnostic d'ambiguite sur le nom court quand plusieurs imports
+  packages exposent le meme type; les imports sans declaration `package`
+  conservent les noms courts historiques pendant la transition.
+  Les imports selectifs, alias, packages multi-fichiers et motifs de
+  constructeur qualifies restent differes.
 - Standard library deja utile :
   - collections typées et facade `Array[T]`, dont `sorted(lessThan)` retourne
     une copie triee sans mutation et les facades primitives exposent aussi
