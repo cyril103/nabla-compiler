@@ -33,6 +33,30 @@ bool shouldRetargetInferredFactoryAlias(const std::string& name) {
            name == "Array.fill" || name == "Array.tabulate";
 }
 
+bool isPackageQualifiedTopLevelFunction(
+    const CompilerContext& context, const std::string& internalName) {
+    auto symbol = context.topLevelFunctionsByInternalName.find(internalName);
+    return symbol != context.topLevelFunctionsByInternalName.end() &&
+           !symbol->second.moduleName.empty();
+}
+
+std::vector<std::string> packageQualifiedTopLevelFunctionOverloads(
+    const CompilerContext& context, const std::string& qualifiedName) {
+    auto exact = context.topLevelFunctionsByInternalName.find(qualifiedName);
+    if (exact == context.topLevelFunctionsByInternalName.end()) return {};
+    const auto& sourceName = exact->second.sourceName;
+    const auto& moduleName = exact->second.moduleName;
+    if (moduleName.empty()) return {};
+
+    std::vector<std::string> overloads;
+    auto bySource = context.topLevelFunctionsBySourceName.find(sourceName);
+    if (bySource == context.topLevelFunctionsBySourceName.end()) return {};
+    for (const auto& symbol : bySource->second) {
+        if (symbol.moduleName == moduleName) overloads.push_back(symbol.internalName);
+    }
+    return overloads;
+}
+
 std::string formatFieldProviders(const std::set<std::string>& providers) {
     std::string message;
     bool first = true;
@@ -1899,6 +1923,11 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
             const std::string qualifiedFunctionName = identifier->getName() + "." + method;
             std::string functionLookupName = qualifiedFunctionName;
             std::vector<std::string> functionTypeArguments = typeArguments;
+            const auto packageQualifiedOverloadNames =
+                packageQualifiedTopLevelFunctionOverloads(context, qualifiedFunctionName);
+            if (packageQualifiedOverloadNames.size() == 1) {
+                functionLookupName = packageQualifiedOverloadNames.front();
+            }
             auto countImmediateArguments = [&]() -> std::optional<size_t> {
                 if (peek().type != TokenType::LPAREN) return std::nullopt;
                 size_t cursor = index + 1;
@@ -1931,7 +1960,26 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
             };
             bool selectedQualifiedOverload = false;
             if (auto argumentCount = countImmediateArguments()) {
-                for (const auto& overloadName : functionOverloadNames(context, qualifiedFunctionName)) {
+                if (!packageQualifiedOverloadNames.empty()) {
+                    std::vector<std::string> arityMatches;
+                    for (const auto& overloadName : packageQualifiedOverloadNames) {
+                        auto overloadIt = context.functions.find(overloadName);
+                        if (overloadIt == context.functions.end()) continue;
+                        if (!acceptsArgumentCount(overloadIt->second, *argumentCount)) continue;
+                        if (!functionTypeArguments.empty() &&
+                            !genericFunctionSubstitutionFor(overloadIt->second, functionTypeArguments)) {
+                            continue;
+                        }
+                        arityMatches.push_back(overloadName);
+                    }
+                    if (arityMatches.size() == 1) {
+                        functionLookupName = arityMatches.front();
+                        selectedQualifiedOverload = true;
+                    }
+                }
+                for (const auto& overloadName : packageQualifiedOverloadNames.empty()
+                         ? functionOverloadNames(context, qualifiedFunctionName)
+                         : packageQualifiedOverloadNames) {
                     auto overloadIt = context.functions.find(overloadName);
                     if (overloadIt == context.functions.end()) continue;
                     if (overloadIt->second.parameters.size() != *argumentCount) continue;
@@ -1964,6 +2012,12 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
                     "' ne supporte pas ces arguments de type" +
                     recommendedStdlibFunctionSuffix(qualifiedFunctionName));
             }
+            if (peek().type != TokenType::LPAREN && packageQualifiedOverloadNames.size() > 1) {
+                throw CompilerError(
+                    ErrorKind::Parser, methodToken.location,
+                    "référence de fonction qualifiée surchargée ambiguë pour '" +
+                        qualifiedFunctionName + "'");
+            }
             if (peek().type != TokenType::LPAREN) {
                 if (auto zeroArgOverload = resolveExactFunctionOverload(
                         context, functionLookupName, {}, functionTypeArguments)) {
@@ -1980,8 +2034,104 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
                 std::vector<std::unique_ptr<ASTNode>> arguments;
                 if (peek().type == TokenType::LPAREN) {
                     consume(TokenType::LPAREN, "");
-                    arguments = parseFunctionCallArguments(qualifiedFunction->second, functionTypeArguments);
-                    consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
+                    if (!selectedQualifiedOverload && packageQualifiedOverloadNames.size() > 1) {
+                        arguments = parseArguments({});
+                        consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
+                        std::vector<std::string> actualArgumentTypes;
+                        for (const auto& argument : arguments) actualArgumentTypes.push_back(argument->getType());
+                        std::vector<std::string> concreteMatches;
+                        std::vector<std::string> genericMatches;
+                        for (const auto& overloadName : packageQualifiedOverloadNames) {
+                            auto overloadIt = context.functions.find(overloadName);
+                            if (overloadIt == context.functions.end()) continue;
+                            const auto& signature = overloadIt->second;
+                            if (!acceptsArgumentCount(signature, actualArgumentTypes.size())) continue;
+                            std::map<std::string, std::string> substitution;
+                            if (!functionTypeArguments.empty()) {
+                                auto genericSubstitution = genericFunctionSubstitutionFor(signature, functionTypeArguments);
+                                if (!genericSubstitution) continue;
+                                substitution = *genericSubstitution;
+                            } else if (!signature.typeParameters.empty()) {
+                                auto inferredSubstitution = inferGenericFunctionSubstitution(signature, actualArgumentTypes);
+                                if (!inferredSubstitution) continue;
+                                substitution = *inferredSubstitution;
+                            }
+                            bool compatible = true;
+                            for (size_t i = 0; i < actualArgumentTypes.size(); ++i) {
+                                const std::string expectedType = expectedArgumentTypeAt(signature, i, substitution);
+                                if (!exactOrBottomListAssignable(context, actualArgumentTypes[i], expectedType)) {
+                                    compatible = false;
+                                    break;
+                                }
+                            }
+                            if (!compatible) continue;
+                            if (signature.typeParameters.empty()) {
+                                concreteMatches.push_back(overloadName);
+                            } else {
+                                genericMatches.push_back(overloadName);
+                            }
+                        }
+                        if (concreteMatches.size() == 1) {
+                            functionLookupName = concreteMatches.front();
+                        } else if (concreteMatches.empty() && genericMatches.size() == 1) {
+                            functionLookupName = genericMatches.front();
+                        } else {
+                            throw CompilerError(
+                                ErrorKind::Parser, methodToken.location,
+                                formatNoMatchingFunctionOverloadMessage(
+                                    context, qualifiedFunctionName, actualArgumentTypes));
+                        }
+                        qualifiedFunction = context.functions.find(functionLookupName);
+                    } else {
+                        arguments = parseFunctionCallArguments(qualifiedFunction->second, functionTypeArguments);
+                        consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
+                    }
+                } else if (isPackageQualifiedTopLevelFunction(context, functionLookupName)) {
+                    if (!qualifiedFunction->second.typeParameters.empty()) {
+                        if (functionTypeArguments.empty()) {
+                            throw CompilerError(
+                                ErrorKind::Parser, methodToken.location,
+                                "la fonction générique '" + qualifiedFunctionName +
+                                "' doit être référencée avec des arguments de type");
+                        }
+                        std::string functionType = "Int";
+                        if (auto substitution = genericFunctionSubstitutionFor(
+                                qualifiedFunction->second, functionTypeArguments)) {
+                            CompilerContext::FunctionSignature substitutedSignature = qualifiedFunction->second;
+                            for (auto& parameter : substitutedSignature.parameters) {
+                                parameter.type = substituteType(parameter.type, *substitution);
+                            }
+                            substitutedSignature.returnType =
+                                substituteType(substitutedSignature.returnType, *substitution);
+                            if (auto substitutedFunctionType = functionNameForSignature(substitutedSignature)) {
+                                functionType = *substitutedFunctionType;
+                            }
+                        }
+                        expr = located(
+                            std::make_unique<FunctionReferenceNode>(
+                                qualifiedFunctionName, functionType, std::move(functionTypeArguments),
+                                std::vector<FunctionReferenceNode::Capture>{}, functionLookupName),
+                            methodToken.location);
+                        continue;
+                    }
+                    if (!functionTypeArguments.empty()) {
+                        throw CompilerError(
+                            ErrorKind::Parser, methodToken.location,
+                            "la fonction '" + qualifiedFunctionName + "' n'accepte pas d'arguments de type");
+                    }
+                    auto functionType = functionNameForSignature(qualifiedFunction->second);
+                    if (!functionType) {
+                        throw CompilerError(
+                            ErrorKind::Parser, methodToken.location,
+                            "la fonction '" + qualifiedFunctionName +
+                            "' n'a pas encore de type fonction valeur supporté");
+                    }
+                    expr = located(
+                        std::make_unique<FunctionReferenceNode>(
+                            qualifiedFunctionName, *functionType, std::vector<std::string>{},
+                            std::vector<FunctionReferenceNode::Capture>{}, functionLookupName),
+                        methodToken.location);
+                    continue;
                 } else if (functionTypeArguments.empty() && qualifiedFunction->second.parameters.empty() &&
                            qualifiedFunction->second.typeParameters.empty()) {
                     // Static namespace property sugar: `Object.name` is `Object.name()` for
@@ -2033,6 +2183,16 @@ std::unique_ptr<ASTNode> Parser::parsePostfix() {
                         initialReturnType,
                         functionLookupName == qualifiedFunctionName ? std::string() : qualifiedFunctionName,
                         qualifiedFunction->second.returnFunctionByNameParameters),
+                    methodToken.location);
+                continue;
+            }
+            if (peek().type == TokenType::DOT) {
+                if (!typeArguments.empty()) {
+                    throw CompilerError(ErrorKind::Parser, methodToken.location, "appel attendu après les arguments de type");
+                }
+                expr = located(
+                    std::make_unique<IdentifierNode>(
+                        qualifiedFunctionName, qualifiedFunctionName, "<unresolved>"),
                     methodToken.location);
                 continue;
             }

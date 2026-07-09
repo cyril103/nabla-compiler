@@ -1,0 +1,12 @@
+import tests.utils.packages.alpha.Duplicate
+import tests.utils.packages.beta.Duplicate
+
+def apply(fn: () => Int): Int = {
+    fn()
+}
+
+def main(): Int = {
+    val alphaFn = tests.utils.packages.alpha.Duplicate.duplicateValue
+    val betaFn = tests.utils.packages.beta.Duplicate.duplicateValue
+    apply(alphaFn) * 10 + apply(betaFn)
+}

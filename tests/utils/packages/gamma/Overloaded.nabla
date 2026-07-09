@@ -1,0 +1,9 @@
+package tests.utils.packages.gamma.Overloaded
+
+def pick(): Int = {
+    3
+}
+
+def pick(value: Int): Int = {
+    value + 4
+}

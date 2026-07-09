@@ -1,0 +1,6 @@
+import tests.utils.packages.gamma.Overloaded
+
+def main(): Int = {
+    tests.utils.packages.gamma.Overloaded.pick() * 10 +
+        tests.utils.packages.gamma.Overloaded.pick(2)
+}
