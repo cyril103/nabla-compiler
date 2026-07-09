@@ -1,0 +1,9 @@
+def helper(): Int = {
+    0
+}
+
+package tests.utils.late
+
+def main(): Int = {
+    helper()
+}

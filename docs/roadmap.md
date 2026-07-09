@@ -58,10 +58,14 @@ pour garder un cap clair après le tag `v0.1.0`.
 - `object Name { ... }` reste un namespace statique et supporte les compagnons
   de surface. `object Name with Trait { ... }` est maintenant un singleton
   runtime V0: valeur stable assignable aux traits, a `AnyRef` et a `Any`, avec
-  validation class-like des méthodes abstraites, `override`, signatures et
-  conflits de defaults. Cette V0 exclut encore champs, constructeurs,
-  `extends`, arguments de type et initialisation dédiée; ces singletons ne sont
-  pas instanciables avec `new` et ne peuvent pas servir de parents de classe.
+  methodes d'instance, dispatch dynamique, validation class-like des méthodes
+  abstraites, `override`, signatures et conflits de defaults. Cette V0 exclut
+  encore champs, constructeurs, `extends`, arguments de type et initialisation
+  dédiée; ces singletons ne sont pas instanciables avec `new` et ne peuvent pas
+  servir de parents de classe.
+- `package a.b` existe en V0 comme declaration de module en tête de fichier;
+  `import a.b` vérifie que le package déclaré correspond au chemin importé, tout
+  en conservant la visibilité par nom court des imports historiques.
 - Standard library deja utile :
   - collections typées et facade `Array[T]`, dont `sorted(lessThan)` retourne
     une copie triee sans mutation et les facades primitives exposent aussi

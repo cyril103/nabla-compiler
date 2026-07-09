@@ -1,0 +1,1 @@
+tests/test_error_package_not_first.nabla:5:1: parser error: déclaration package autorisée uniquement en tête de fichier

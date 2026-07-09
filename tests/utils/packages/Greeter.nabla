@@ -1,0 +1,5 @@
+package tests.utils.packages.Greeter
+
+def packageValue(): Int = {
+    0
+}

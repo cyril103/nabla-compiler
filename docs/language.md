@@ -51,6 +51,38 @@ build/nablac --keep-temp tests/test_string_split.nabla
 build/nablac --backend-ir tests/test_arithmetic.nabla
 ```
 
+## Packages Et Imports
+
+Un fichier peut commencer par une declaration `package` Scala-like. Elle donne
+un nom logique au module et doit apparaitre avant les imports et declarations :
+
+```nabla
+package app.math
+
+def fortyTwo(): Int = {
+    42
+}
+```
+
+`import app.math` charge toujours le fichier `app/math.nabla` selon l'ordre de
+resolution existant : d'abord relatif au fichier courant, puis depuis la racine
+du projet, puis depuis `stdlib/`. Si le fichier importé déclare un package, ce
+nom doit correspondre exactement au chemin importé; sinon le compilateur émet un
+diagnostic au point d'import.
+
+```nabla
+import app.math
+
+def main(): Int = {
+    fortyTwo()
+}
+```
+
+La V0 reste volontairement compatible avec les imports actuels : les declarations
+importees sont encore visibles par leur nom court dans le programme courant. Les
+noms qualifies, imports selectifs, alias, wildcards explicites et visibilites de
+package sont reserves a une evolution ulterieure.
+
 ## Commentaires
 
 Les commentaires de ligne utilisent `//`.

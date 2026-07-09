@@ -1,0 +1,1 @@
+tests/test_error_package_mismatch.nabla:1:1: parser error: package déclaré 'tests.utils.packages.OtherName' incompatible avec l'import 'tests.utils.packages.BadName'
