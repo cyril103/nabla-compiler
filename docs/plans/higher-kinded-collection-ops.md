@@ -174,12 +174,13 @@ git diff --check
 1. Extend factory coverage beyond the delivered experimental `ListFactory` /
    `ListBuilder[A]`, `ArrayFactory` / `ArrayBuilder[A]`, and `SetFactory` /
    `SetBuilder[A]` slices; consider whether `Map` needs an arity-2 design first.
-2. Broaden the delivered experimental `IterableOps[A, CC[_], C].map/filter`
-   defaults from standalone/default-method regressions onto public collections
-   once generic instance-method vtable dispatch is stable for this shape. A
-   narrow regression now covers the former blocker: a public trait family shaped
-   like `List[T] with IterableOps[T, List, List[T]]` can reuse default
-   `map`/`filter` through its factory and builder.
+2. `List[T]` now extends the delivered experimental
+   `IterableOps[T, List, List[T]]` slice and reuses default instance
+   `map`/`filter` through `ListFactory` / `ListBuilder`; keep the companion
+   `List.map` / `List.filter` functions as the compatibility surface while
+   this remains experimental. Next public-collection slices should evaluate
+   `Set[T]` and array facades separately instead of broadening every collection
+   at once.
 3. Move safe operations from `Iterable` to `IterableOps` only when their return types are representable.
 4. Consider arity-2 constructors for `Map[K, V]`-like APIs.
 5. Consider variance only after invariant HKT dispatch and substitution are stable.

@@ -36,7 +36,7 @@ xs.head() + xs.tail().head()</code></pre>
       <section class="toc-group">
         <h3>Types</h3>
         <ul>
-        <li><a href="#List" title="trait List[T]"><span>List</span><code>trait List[T]</code></a></li>
+        <li><a href="#List" title="trait List[T] extends IterableOps[T, List, List[T]]"><span>List</span><code>trait List[T] extends IterableOps[T, List, List[T]]</code></a></li>
         <li><a href="#Nil" title="object Nil extends List[Nothing]"><span>Nil</span><code>object Nil extends List[Nothing]</code></a></li>
         <li><a href="#Cons" title="class Cons[T](val head: T, val tail: List[T]) with List[T]"><span>Cons</span><code>class Cons[T](val head: T, val tail: List[T]) with List[T]</code></a></li>
         <li><a href="#ListFactory" title="class ListFactory extends IterableFactory[List]"><span>ListFactory</span><code>class ListFactory extends IterableFactory[List]</code></a></li>
@@ -61,6 +61,7 @@ xs.head() + xs.tail().head()</code></pre>
         <ul>
         <li><a href="#isEmpty" title="def isEmpty(): Bool"><span>isEmpty</span><code>def isEmpty(): Bool</code></a></li>
         <li><a href="#nonEmpty" title="def nonEmpty(): Bool"><span>nonEmpty</span><code>def nonEmpty(): Bool</code></a></li>
+        <li><a href="#iterableFactory" title="def iterableFactory(): IterableFactory[List]"><span>iterableFactory</span><code>def iterableFactory(): IterableFactory[List]</code></a></li>
         <li><a href="#head" title="def head(): T"><span>head</span><code>def head(): T</code></a></li>
         <li><a href="#tail" title="def tail(): List[T]"><span>tail</span><code>def tail(): List[T]</code></a></li>
         <li><a href="#headOption" title="def headOption(): Option[T]"><span>headOption</span><code>def headOption(): Option[T]</code></a></li>
@@ -88,7 +89,7 @@ xs.head() + xs.tail().head()</code></pre>
             <span class="kind">trait</span> <span class="status experimental">Experimentale</span>
           </div>
           <h2>List</h2>
-          <pre class="signature"><code>trait List[T]</code></pre>
+          <pre class="signature"><code>trait List[T] extends IterableOps[T, List, List[T]]</code></pre>
           <p>Liste chainee immutable.</p>
 
         </article>
@@ -108,6 +109,15 @@ xs.head() + xs.tail().head()</code></pre>
           <h2>nonEmpty</h2>
           <pre class="signature"><code>def nonEmpty(): Bool</code></pre>
           <p>Indique si la liste contient au moins un element.</p>
+
+        </article>
+        <article class="entry" id="iterableFactory">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>iterableFactory</h2>
+          <pre class="signature"><code>def iterableFactory(): IterableFactory[List]</code></pre>
+          <p>Retourne la factory utilisee par les operations generiques de collection.</p>
 
         </article>
         <article class="entry" id="head">

@@ -139,6 +139,9 @@ pas comme cible idiomatique pour le code applicatif.
 - `List[T]` (**experimentale**)
   - `Nil` est le singleton vide runtime, declare comme `List[Nothing]` et
     assignable a `List[T]`.
+  - `List[T]` implemente `IterableOps[T, List, List[T]]`; les methodes instance
+    experimentales `map[U](f)` et `filter(predicate)` reconstruisent une
+    `List[...]` via `IterableFactory[List].newBuilder`.
   - `List.empty[T]()` et `List.cons[T](head, tail)`
   - `List.factory()` retourne une `IterableFactory[List]` experimentale.
   - `List.newBuilder[T]()` retourne un `Builder[T, List[T]]` experimental.
@@ -151,8 +154,9 @@ pas comme cible idiomatique pour le code applicatif.
     `drop(n)`, `slice(from, until)` et `mkString(separator)`
   - operations generiques via compagnon : `List.fold[T, U](values, initial, f)`,
     `List.map[T, U](values, f)`, `List.filter[T](values, predicate)` et
-    `List.fromArray[T](values)`; `List.map` et `List.filter` passent par
-    `ListBuilder` pour centraliser la reconstruction ordonnee.
+    `List.fromArray[T](values)`; `List.map` et `List.filter` restent disponibles
+    comme fonctions de compatibilite recommandees et passent par `ListBuilder`
+    pour centraliser la reconstruction ordonnee.
   - `Array[T]` reste la collection indexee principale.
 
 `ArrayObject[T]`, les facades de tableaux specialisees, `Set[T]`, `Map[K, V]` et
