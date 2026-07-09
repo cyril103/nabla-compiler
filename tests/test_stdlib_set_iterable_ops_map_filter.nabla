@@ -1,0 +1,39 @@
+import core.iterable_ops
+import collections.set
+
+def throughOps(values: IterableOps[Int, Set, Set[Int]]): Int = {
+    val mapped: Set[String] = values.map[String](value => "v" + value.toString())
+    val filtered: Set[Int] = values.filter(value => value > 1)
+    if mapped.size() == 3 && mapped.contains("v1") && mapped.contains("v2") && mapped.contains("v3") &&
+       filtered.size() == 2 && filtered.contains(2) && filtered.contains(3) {
+        10
+    } else {
+        0
+    }
+}
+
+def builderDeduplicates(): Bool = {
+    val builder = Set.newBuilder[String]()
+    builder.add("a")
+    builder.add("b")
+    builder.add("a")
+    val result = builder.result()
+    result.size() == 2 && result.contains("a") && result.contains("b")
+}
+
+def main(): Int = {
+    val xs: Set[Int] = Set(1, 2, 2, 3)
+    val mapped: Set[String] = xs.map[String](value => "x" + value.toString())
+    val parity: Set[Int] = xs.map[Int](value => value % 2)
+    val filtered: Set[Int] = xs.filter(value => value > 1)
+    if xs.size() == 3 &&
+       mapped.size() == 3 && mapped.contains("x1") && mapped.contains("x2") && mapped.contains("x3") &&
+       parity.size() == 2 && parity.contains(0) && parity.contains(1) &&
+       filtered.size() == 2 && filtered.contains(2) && filtered.contains(3) &&
+       throughOps(xs) == 10 &&
+       builderDeduplicates() {
+        42
+    } else {
+        1
+    }
+}

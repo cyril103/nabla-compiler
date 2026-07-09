@@ -1,0 +1,30 @@
+import core.iterable_ops
+import collections.list
+
+def throughOps(values: IterableOps[Int, List, List[Int]]): String = {
+    val mapped: List[String] = values.map[String](value => "o" + value.toString())
+    val filtered: List[Int] = values.filter(value => value > 1)
+    mapped.mkString("|") + ":" + filtered.mkString(",")
+}
+
+def builderOrder(): String = {
+    val builder = List.newBuilder[String]()
+    builder.add("a")
+    builder.add("b")
+    builder.add("c")
+    builder.result().mkString("")
+}
+
+def main(): Int = {
+    val xs: List[Int] = List.cons[Int](1, List.cons[Int](2, List.cons[Int](3, Nil)))
+    val mapped: List[String] = xs.map[String](value => "x" + value.toString())
+    val filtered: List[Int] = xs.filter(value => value > 1)
+    if mapped.mkString("|") == "x1|x2|x3" &&
+       filtered.mkString(",") == "2,3" &&
+       throughOps(xs) == "o1|o2|o3:2,3" &&
+       builderOrder() == "abc" {
+        42
+    } else {
+        1
+    }
+}

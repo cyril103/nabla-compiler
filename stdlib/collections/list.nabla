@@ -23,9 +23,9 @@ import core.option
 import collections.array
 
 /// Liste chainee immutable.
-/// @signature trait List[T]
+/// @signature trait List[T] extends IterableOps[T, List, List[T]]
 /// @status Experimentale
-trait List[T] with Iterable[T] {
+trait List[T] with IterableOps[T, List, List[T]] {
     /// Indique si la liste est vide.
     /// @signature def isEmpty(): Bool
     /// @status Recommandee
@@ -36,6 +36,13 @@ trait List[T] with Iterable[T] {
     /// @status Recommandee
     override def nonEmpty(): Bool = {
         !this.isEmpty()
+    }
+
+    /// Retourne la factory utilisee par les operations generiques de collection.
+    /// @signature def iterableFactory(): IterableFactory[List]
+    /// @status Experimental
+    override def iterableFactory(): IterableFactory[List] = {
+        new ListFactory()
     }
 
     /// Retourne la tete de liste.

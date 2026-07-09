@@ -428,14 +428,23 @@ object Set {
 }
 
 /// Ensemble immutable.
-/// @signature class Set[T]
+/// @signature class Set[T] extends IterableOps[T, Set, Set[T]]
 /// @status Recommandee
 ///
 /// Les operations comme add, remove, union, intersect et difference
 /// retournent un nouvel ensemble. L'instance d'origine n'est pas modifiee.
 /// L'egalite repose sur == et l'index interne utilise hashCode(), ce qui permet
 /// aux overrides utilisateur de participer a la deduplication.
-class Set[T](values: ArrayObject[T]) with Sized with Iterable[T] {
+/// Les operations generiques heritees d'IterableOps, comme map et filter,
+/// reconstruisent un Set via SetFactory et conservent donc la deduplication.
+class Set[T](values: ArrayObject[T]) with Sized with IterableOps[T, Set, Set[T]] {
+    /// Retourne la factory utilisee par les operations generiques de collection.
+    /// @signature def iterableFactory(): IterableFactory[Set]
+    /// @status Experimental
+    override def iterableFactory(): IterableFactory[Set] = {
+        new SetFactory()
+    }
+
     override def size(): Int = {
         values.size()
     }
