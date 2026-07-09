@@ -105,6 +105,10 @@ pas comme cible idiomatique pour le code applicatif.
 - `array.sorted(lessThan)` retourne une copie triee par predicat utilisateur;
   les facades primitives `Int`, `Long`, `Float`, `Double` et `Bool` exposent aussi `sorted()` par ordre naturel (`false < true` pour `Bool`)
 - `Set[T]`
+  - implemente `IterableOps[T, Set, Set[T]]`; les methodes instance
+    experimentales `map[U](f)` et `filter(predicate)` reconstruisent un
+    `Set[...]` via `IterableFactory[Set].newBuilder` et conservent la
+    deduplication d'ensemble.
   - `contains(value)`
   - `add(value)`, `remove(value)`, `union(other)`, `intersect(other)`,
     `difference(other)`, `clear()`

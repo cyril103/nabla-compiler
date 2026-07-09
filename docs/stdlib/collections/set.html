@@ -46,7 +46,7 @@ left.union(right).size()</code></pre>
         <ul>
         <li><a href="#SetFactory" title="class SetFactory extends IterableFactory[Set]"><span>SetFactory</span><code>class SetFactory extends IterableFactory[Set]</code></a></li>
         <li><a href="#SetBuilder" title="class SetBuilder[A] extends Builder[A, Set[A]]"><span>SetBuilder</span><code>class SetBuilder[A] extends Builder[A, Set[A]]</code></a></li>
-        <li><a href="#Set" title="class Set[T]"><span>Set</span><code>class Set[T]</code></a></li>
+        <li><a href="#Set" title="class Set[T] extends IterableOps[T, Set, Set[T]]"><span>Set</span><code>class Set[T] extends IterableOps[T, Set, Set[T]]</code></a></li>
         </ul>
       </section>
       <section class="toc-group">
@@ -66,6 +66,7 @@ left.union(right).size()</code></pre>
         <li><a href="#newBuilder" title="def newBuilder[A](): Builder[A, Set[A]]"><span>newBuilder</span><code>def newBuilder[A](): Builder[A, Set[A]]</code></a></li>
         <li><a href="#add" title="def add(value: A): Unit"><span>add</span><code>def add(value: A): Unit</code></a></li>
         <li><a href="#result" title="def result(): Set[A]"><span>result</span><code>def result(): Set[A]</code></a></li>
+        <li><a href="#iterableFactory" title="def iterableFactory(): IterableFactory[Set]"><span>iterableFactory</span><code>def iterableFactory(): IterableFactory[Set]</code></a></li>
         <li><a href="#contains" title="def contains(value: T): Bool"><span>contains</span><code>def contains(value: T): Bool</code></a></li>
         <li><a href="#add-2" title="def add(value: T): Set[T]"><span>add</span><code>def add(value: T): Set[T]</code></a></li>
         <li><a href="#remove" title="def remove(value: T): Set[T]"><span>remove</span><code>def remove(value: T): Set[T]</code></a></li>
@@ -188,9 +189,18 @@ left.union(right).size()</code></pre>
             <span class="kind">class</span> <span class="status recommended">Recommandee</span>
           </div>
           <h2>Set</h2>
-          <pre class="signature"><code>class Set[T]</code></pre>
+          <pre class="signature"><code>class Set[T] extends IterableOps[T, Set, Set[T]]</code></pre>
           <p>Ensemble immutable.</p>
-<p>Les operations comme add, remove, union, intersect et difference retournent un nouvel ensemble. L&#x27;instance d&#x27;origine n&#x27;est pas modifiee. L&#x27;egalite repose sur == et l&#x27;index interne utilise hashCode(), ce qui permet aux overrides utilisateur de participer a la deduplication.</p>
+<p>Les operations comme add, remove, union, intersect et difference retournent un nouvel ensemble. L&#x27;instance d&#x27;origine n&#x27;est pas modifiee. L&#x27;egalite repose sur == et l&#x27;index interne utilise hashCode(), ce qui permet aux overrides utilisateur de participer a la deduplication. Les operations generiques heritees d&#x27;IterableOps, comme map et filter, reconstruisent un Set via SetFactory et conservent donc la deduplication.</p>
+
+        </article>
+        <article class="entry" id="iterableFactory">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>iterableFactory</h2>
+          <pre class="signature"><code>def iterableFactory(): IterableFactory[Set]</code></pre>
+          <p>Retourne la factory utilisee par les operations generiques de collection.</p>
 
         </article>
         <article class="entry" id="contains">
