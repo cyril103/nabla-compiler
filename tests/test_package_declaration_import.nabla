@@ -1,0 +1,11 @@
+import tests.utils.packages.Greeter
+
+class PackageEngine() {
+    def run(): Int = {
+        packageValue()
+    }
+}
+
+def main(): Int = {
+    (new PackageEngine()).run()
+}

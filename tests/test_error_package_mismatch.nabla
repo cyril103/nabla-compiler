@@ -1,0 +1,5 @@
+import tests.utils.packages.BadName
+
+def main(): Int = {
+    0
+}

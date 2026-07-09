@@ -94,9 +94,15 @@ Parser::Parser(const std::vector<Token>& tokens, CompilerContext& ctx, const std
 
 std::unique_ptr<ProgramNode> Parser::parseProgram() {
     auto program = located(std::make_unique<ProgramNode>(), peek().location);
+    if (peek().type == TokenType::KW_PACKAGE) {
+        consume(TokenType::KW_PACKAGE, "");
+        program->packageName = parseQualifiedName("Nom de package attendu", "Sous-package attendu");
+    }
     while (peek().type != TokenType::EOF_TOKEN) {
         if (peek().type == TokenType::KW_IMPORT) {
             parseImport(program);
+        } else if (peek().type == TokenType::KW_PACKAGE) {
+            throw CompilerError(ErrorKind::Parser, peek().location, "déclaration package autorisée uniquement en tête de fichier");
         } else if (peek().type == TokenType::KW_CLASS) {
             parseClassDefinition(program);
         } else if (peek().type == TokenType::KW_TRAIT) {
@@ -115,6 +121,15 @@ std::unique_ptr<ProgramNode> Parser::parseProgram() {
     return program;
 }
 
+std::string Parser::parseQualifiedName(const std::string& firstIdentifierError, const std::string& nextIdentifierError) {
+    std::string name = consume(TokenType::IDENTIFIER, firstIdentifierError).value;
+    while (peek().type == TokenType::DOT) {
+        consume(TokenType::DOT, "");
+        name += "." + consume(TokenType::IDENTIFIER, nextIdentifierError).value;
+    }
+    return name;
+}
+
 Token Parser::peek() const {
     return tokens[index];
 }
@@ -127,11 +142,9 @@ Token Parser::consume(TokenType expected, const std::string& err) {
 
 void Parser::parseImport(std::unique_ptr<ProgramNode>& currentProgram) {
     Token importToken = consume(TokenType::KW_IMPORT, "");
-    std::string path = consume(TokenType::IDENTIFIER, "Nom de module attendu").value;
-    while (peek().type == TokenType::DOT) {
-        consume(TokenType::DOT, "");
-        path += "/" + consume(TokenType::IDENTIFIER, "Sous-module attendu").value;
-    }
+    std::string moduleName = parseQualifiedName("Nom de module attendu", "Sous-module attendu");
+    std::string path = moduleName;
+    std::replace(path.begin(), path.end(), '.', '/');
 
     std::filesystem::path importPath = currentFile.parent_path() / (path + ".nabla");
     if (!std::filesystem::exists(importPath)) {
@@ -155,6 +168,11 @@ void Parser::parseImport(std::unique_ptr<ProgramNode>& currentProgram) {
     Lexer subLexer(buffer.str(), importPath.string());
     Parser subParser(subLexer.tokenize(), context, importPath);
     auto subProgram = subParser.parseProgram();
+    if (!subProgram->packageName.empty() && subProgram->packageName != moduleName) {
+        throw CompilerError(
+            ErrorKind::Parser, importToken.location,
+            "package déclaré '" + subProgram->packageName + "' incompatible avec l'import '" + moduleName + "'");
+    }
     for (auto& el : subProgram->elements) currentProgram->elements.push_back(std::move(el));
 }
 

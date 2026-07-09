@@ -25,6 +25,7 @@ protected:
 
 class ProgramNode : public ASTNode {
 public:
+    std::string packageName;
     std::vector<std::unique_ptr<ASTNode>> elements;
     std::string getType() override;
     void validateSemantics(CompilerContext& context) override;

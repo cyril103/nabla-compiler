@@ -60,6 +60,7 @@ private:
     Token peek() const;
     Token consume(TokenType expected, const std::string& err);
 
+    std::string parseQualifiedName(const std::string& firstIdentifierError, const std::string& nextIdentifierError);
     void parseImport(std::unique_ptr<ProgramNode>& currentProgram);
     void parseClassDefinition(std::unique_ptr<ProgramNode>& program, bool isTrait = false);
     void parseObjectDefinition(std::unique_ptr<ProgramNode>& program);
