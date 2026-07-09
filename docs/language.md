@@ -99,9 +99,18 @@ def main(): Int = {
 }
 ```
 
-Les imports selectifs, alias, wildcards explicites, visibilites de package et
-l'ambiguite fine des noms de types/classes sont reserves a une evolution
-ulterieure.
+Les classes et objets top-level importes depuis un fichier declarant un package
+peuvent aussi etre nommes par leur nom pleinement qualifie dans les annotations
+de type et les constructions `new`. Le nom court reste disponible quand il est
+unique; s'il est expose par plusieurs imports packages, une annotation comme
+`Box` produit un diagnostic d'ambiguite et il faut utiliser
+`app.alpha.Box.Box` ou `app.beta.Box.Box`. Les modules importes sans declaration
+`package` conservent volontairement leurs noms courts historiques pendant la
+transition de compatibilite.
+
+Les imports selectifs, alias, wildcards explicites, visibilites de package,
+packages multi-fichiers et motifs de constructeur pleinement qualifies sont
+reserves a une evolution ulterieure.
 
 ## Commentaires
 

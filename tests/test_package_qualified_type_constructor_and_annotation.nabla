@@ -1,0 +1,8 @@
+import tests.utils.packages.alpha.Box
+import tests.utils.packages.beta.Box
+
+def main(): Int = {
+    val a: tests.utils.packages.alpha.Box.Box = new tests.utils.packages.alpha.Box.Box(7)
+    val b: tests.utils.packages.beta.Box.Box = new tests.utils.packages.beta.Box.Box(9)
+    a.value() + b.value()
+}

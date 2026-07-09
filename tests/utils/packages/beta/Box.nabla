@@ -1,0 +1,3 @@
+package tests.utils.packages.beta.Box
+
+class Box(val value: Int)

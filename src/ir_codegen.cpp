@@ -80,7 +80,7 @@ std::string asmLabelName(const std::string& functionName, const std::string& lab
 }
 
 std::pair<std::string, std::string> splitQualifiedMember(const std::string& name) {
-    size_t dot = name.find('.');
+    size_t dot = name.rfind('.');
     if (dot == std::string::npos) codegenError("membre IR non qualifie: " + name);
     return {name.substr(0, dot), name.substr(dot + 1)};
 }

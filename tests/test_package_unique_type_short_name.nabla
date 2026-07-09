@@ -1,0 +1,6 @@
+import tests.utils.packages.alpha.Box
+
+def main(): Int = {
+    val a: Box = new Box(5)
+    a.value()
+}
