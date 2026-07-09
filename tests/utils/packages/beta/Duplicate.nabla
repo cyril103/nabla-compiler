@@ -1,0 +1,5 @@
+package tests.utils.packages.beta.Duplicate
+
+def duplicateValue(): Int = {
+    9
+}

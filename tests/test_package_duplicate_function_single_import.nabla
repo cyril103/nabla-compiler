@@ -1,0 +1,5 @@
+import tests.utils.packages.alpha.Duplicate
+
+def main(): Int = {
+    duplicateValue()
+}

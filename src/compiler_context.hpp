@@ -65,16 +65,29 @@ struct CompilerContext {
         SourceLocation location;
     };
 
+    struct TopLevelSymbolInfo {
+        std::string sourceName;
+        std::string internalName;
+        std::string moduleName;
+        SourceLocation location;
+    };
+
     std::map<std::string, std::map<std::string, int>> classLayouts;
     std::map<std::string, ClassInfo> classes;
     std::map<std::string, FunctionSignature> functions;
     std::map<std::string, std::vector<std::string>> functionOverloads;
+    std::map<std::string, std::vector<TopLevelSymbolInfo>> topLevelFunctionsBySourceName;
+    std::map<std::string, TopLevelSymbolInfo> topLevelFunctionsByInternalName;
+    std::map<std::string, std::vector<TopLevelSymbolInfo>> topLevelTypesBySourceName;
+    std::map<std::string, TopLevelSymbolInfo> topLevelTypesByInternalName;
     std::set<std::string> objects;
     std::set<std::string> runtimeObjects;
     std::set<std::string> parsedFiles;
     std::filesystem::path rootDir;
     std::filesystem::path stdlibDir;
     std::filesystem::path currentFile;
+    std::string currentModuleName;
+    std::string currentPackageName;
     std::map<std::string, std::string> semanticSymbolTypes;
     std::vector<std::string> semanticTypeParameters;
     std::vector<TypeParameterInfo> semanticTypeParameterInfos;
@@ -1215,6 +1228,43 @@ inline std::string overloadedFunctionName(
     return result;
 }
 
+inline std::string topLevelInternalPrefix(const std::string& moduleName) {
+    return moduleName.empty() ? std::string{} : moduleName + ".";
+}
+
+inline std::string topLevelInternalName(
+    const std::string& moduleName, const std::string& sourceName) {
+    return topLevelInternalPrefix(moduleName) + sourceName;
+}
+
+inline std::set<std::string> topLevelFunctionModules(
+    const CompilerContext& context, const std::string& sourceName) {
+    std::set<std::string> modules;
+    auto it = context.topLevelFunctionsBySourceName.find(sourceName);
+    if (it == context.topLevelFunctionsBySourceName.end()) return modules;
+    for (const auto& symbol : it->second) {
+        modules.insert(symbol.moduleName);
+    }
+    return modules;
+}
+
+inline std::string formatImportedModules(const std::set<std::string>& modules) {
+    std::string result;
+    bool first = true;
+    for (const auto& module : modules) {
+        if (!first) result += ", ";
+        result += module.empty() ? "<programme courant>" : module;
+        first = false;
+    }
+    return result;
+}
+
+inline std::string ambiguousImportedNameMessage(
+    const std::string& sourceName, const std::set<std::string>& modules) {
+    return "nom importé ambigu '" + sourceName + "': exposé par " +
+           formatImportedModules(modules);
+}
+
 inline bool functionSignatureParametersMatch(
     const CompilerContext::FunctionSignature& left,
     const CompilerContext::FunctionSignature& right) {
@@ -1259,11 +1309,18 @@ inline std::vector<std::string> functionOverloadNames(
     return {};
 }
 
-inline const CompilerContext::FunctionSignature* uniqueFunctionSignatureForName(
+inline std::optional<std::string> uniqueFunctionInternalNameForSource(
     const CompilerContext& context, const std::string& sourceName) {
     auto overloads = functionOverloadNames(context, sourceName);
-    if (overloads.size() != 1) return nullptr;
-    return findFunctionSignature(context, overloads[0]);
+    if (overloads.size() != 1) return std::nullopt;
+    return overloads[0];
+}
+
+inline const CompilerContext::FunctionSignature* uniqueFunctionSignatureForName(
+    const CompilerContext& context, const std::string& sourceName) {
+    auto internalName = uniqueFunctionInternalNameForSource(context, sourceName);
+    if (!internalName) return nullptr;
+    return findFunctionSignature(context, *internalName);
 }
 
 inline std::optional<std::string> resolveExactFunctionOverload(
