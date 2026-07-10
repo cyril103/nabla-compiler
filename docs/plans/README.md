@@ -58,12 +58,20 @@ conservateur; la suite du plan consiste à réduire les faux
 positifs conservateurs en consommant progressivement ces cartes exactes et en
 raffinant `heapUsed()` si nécessaire.
 
-Le chantier actif des noms package-qualifies est suivi dans
-[`package-qualified-symbols.md`](package-qualified-symbols.md): declarations de
-package, fonctions qualifiees, types/classes qualifies et migration initiale de
-la stdlib vers `package ...` sont couverts; les imports selectifs/alias/wildcards,
-packages multi-fichiers, reexports/prelude et motifs de constructeur qualifies
-restent des deltas separes.
+Le chantier actif des collections higher-kinded est suivi dans
+[`higher-kinded-collection-ops.md`](higher-kinded-collection-ops.md): le support
+`CC[_]`, les builders/factories expérimentaux et l'intégration `IterableOps` de
+`List[T]` / `Set[T]` sont couverts; l'intégration `Array[T]`, les opérations
+communes supplémentaires, les constructeurs d'arité 2 pour `Map` et la variance
+restent des deltas séparés.
+
+Les plans package/namespaces et parité numérique de `Char` ont été retirés de
+l'arbre actif parce que leurs tranches livrées sont maintenant résumées dans la
+roadmap, les tests et les PRs. Les imports sélectifs/alias/wildcards, packages
+multi-fichiers, reexports/prelude et motifs de constructeur qualifiés restent des
+pistes futures à reprendre par un nouveau plan court si elles redeviennent
+prioritaires.
+
 La checklist opérationnelle pour intégrer une nouvelle feature est dans
 [`docs/feature-integration.md`](../feature-integration.md).
 
