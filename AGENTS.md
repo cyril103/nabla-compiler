@@ -112,7 +112,9 @@ la roadmap. À la date de ce fichier, le compilateur couvre notamment:
 - stdlib structurée autour de `core`, `collections`, `math`, `strings`, `io` et
   `util`, avec documentation HTML générée;
 - backend IR par défaut, génération x86-64, runtime Linux, heap configurable,
-  GC conservateur non compactant, métriques de heap/GC et métadonnées GC inertes;
+  GC conservateur non compactant, métriques de heap/GC et métadonnées GC dont
+  les cartes d'allocation utilisateur commencent à être consommées pour marquer
+  les slots exacts avant le scan conservateur;
 - CLI `nablac`, runner de tests, exemples, tests front-end C++ et outillage de
   formatage sans dépendance externe.
 

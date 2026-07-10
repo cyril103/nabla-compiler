@@ -103,11 +103,16 @@ required = [
     "add r11, 16",
     "mov r13, [r11 + 8]",
     "mov [gc_last_alloc_safepoint_map], r13",
-    "Observational only: read the map header count, not root offsets.",
+    "Consume exact user-frame root offsets from the found allocation map",
+    "then keep the conservative scan active as the fallback/propagation root set.",
     "mov r14, [r13]",
     "mov [gc_last_alloc_safepoint_root_slots], r14",
-    "shl r14, 3",
-    "mov [gc_last_alloc_safepoint_root_bytes], r14",
+    "mov r15, r14",
+    "shl r15, 3",
+    "mov [gc_last_alloc_safepoint_root_bytes], r15",
+    ".L_gc_exact_root_scan:",
+    "sub rdi, [r15]",
+    "call Runtime_gc_mark_candidate",
     "Runtime_gcLastAllocSafepointMapFound:",
     "Runtime_gcLastAllocSafepointMapMissed:",
     "Runtime_gcLastAllocSafepointRootSlots:",
@@ -123,14 +128,19 @@ required = [
 missing = [item for item in required if item not in asm]
 if missing:
     raise SystemExit("missing expected allocation safepoint lookup ASM markers: " + ", ".join(missing))
+forbidden = [
+    "Observational only: read the map header count, not root offsets.",
+    "without consuming root offsets",
+    "sans lire cette carte pour le marquage",
+]
+present_forbidden = [item for item in forbidden if item in asm]
+if present_forbidden:
+    raise SystemExit("allocation safepoint ASM still contains stale non-consuming wording: " + ", ".join(present_forbidden))
 found_start = asm.index(".L_gc_alloc_safepoint_lookup_found:")
 found_end = asm.index(".L_gc_alloc_safepoint_lookup_done:", found_start)
 found_block = asm[found_start:found_end]
-compact_found_block = found_block.replace(" ", "")
-for forbidden in ["[r13+8]", "Runtime_gc_mark_candidate", ".L_gc_exact_root"]:
-    haystack = compact_found_block if forbidden.startswith("[") else found_block
-    if forbidden in haystack:
-        raise SystemExit(f"allocation safepoint lookup should not consume root offsets yet: {forbidden}")
+if "Runtime_gc_mark_candidate" not in found_block or "sub rdi, [r15]" not in found_block:
+    raise SystemExit("allocation safepoint lookup should consume exact root offsets before fallback scan")
 PY
 
 for primitive in \

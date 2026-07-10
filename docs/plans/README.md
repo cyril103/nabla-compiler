@@ -45,18 +45,20 @@ littéraux `String` statiques, les cartes de points d'appel `Runtime_alloc`,
 l'inventaire des allocations internes aux helpers runtime et les cartes
 candidates de racines internes aux helpers runtime sont toujours émis comme
 métadonnées inertes. Les appels `Runtime_alloc` utilisateur portent aussi des
-commentaires ASM `gc alloc safepoint map ... non-consumed` qui les relient aux
+commentaires ASM `gc alloc safepoint map ... exact-frame-offsets-consumed` qui les relient aux
 cartes correspondantes, un label
 `nabla_gc_alloc_return_<fonction>_<index>` immédiatement après l'appel, et un
 index `nabla_gc_alloc_safepoints_<fonction>` qui associe chaque return PC à sa
 carte, plus l'index global `nabla_gc_alloc_safepoint_tables`; `Runtime_gc`
-parcourt désormais ces index pour exposer found/missed et lit seulement le
-header count de la carte trouvée pour exposer slots/octets déclarés, sans
-consommer les racines des cartes. Cette étape reste donc sans consommation des racines exactes:
-elles ne sont pas encore consommées par le marqueur
-conservateur; la suite du plan consiste à réduire les faux
-positifs conservateurs en consommant progressivement ces cartes exactes et en
-raffinant `heapUsed()` si nécessaire.
+parcourt désormais ces index pour exposer found/missed, lit le header count de
+la carte trouvée pour exposer slots/octets déclarés, puis consomme les offsets
+`rbp - offset` de cette carte afin de marquer les slots de frame exacts avant le
+scan conservateur de fallback. Les cartes utilisateur deviennent donc
+partiellement consommées; les cartes helpers runtime, layouts et autres
+métadonnées restent inertes tant qu'elles ne sont pas branchées au marqueur.
+La suite du plan consiste à réduire les faux positifs conservateurs en
+consommant progressivement les autres métadonnées exactes et en raffinant
+`heapUsed()` si nécessaire.
 
 Le chantier actif des collections higher-kinded est suivi dans
 [`higher-kinded-collection-ops.md`](higher-kinded-collection-ops.md): le support

@@ -430,29 +430,33 @@ de pile native inspectés, `gc_last_heap_words` compte les mots payload heap
 inspectés pendant la propagation conservatrice, et
 `gc_last_stack_candidate_words` / `gc_last_heap_candidate_words` comptent les
 mots scannés qui ressemblent effectivement à des pointeurs vers un bloc heap
-alloué. `gc_last_stack_interior_candidate_words` /
+alloué. Les roots exactes consommées depuis une carte d'allocation utilisateur
+sont comptées dans la source pile (`gc_candidate_source = 0`) quand elles
+ressemblent à un pointeur heap, puis peuvent être revues par le scan
+conservateur de pile. `gc_last_stack_interior_candidate_words` /
 `gc_last_heap_interior_candidate_words` comptent le sous-ensemble de ces
 candidats qui tombe à l'intérieur du payload d'un bloc alloué sans être égal au
 début de ce payload. Ces compteurs de candidats ne sont pas des racines exactes
-uniques : ils mesurent le bruit conservateur par source de scan et peuvent
-compter plusieurs fois le même pointeur pendant les passes de propagation. Ils
-restent strictement observationnels et ne modifient pas la décision de marquage.
+uniques : ils mesurent le bruit conservateur et les marquages exacts par source
+stack/heap et peuvent compter plusieurs fois le même pointeur pendant les passes
+de propagation. Ils restent strictement observationnels et ne modifient pas la
+décision de marquage.
 `Runtime_gc` lit aussi l'adresse de retour utilisateur sauvegardée par
 `Runtime_alloc` à `[rsp + 112]`, parcourt
 `nabla_gc_alloc_safepoint_tables` puis les tables
 `nabla_gc_alloc_safepoints_<fonction>`, et stocke en interne le pointeur de
-carte trouvé dans `gc_last_alloc_safepoint_map` sans lire cette carte pour le
-marquage. Les indicateurs `gc_last_alloc_safepoint_map_found` et
+carte trouvé dans `gc_last_alloc_safepoint_map`. Les indicateurs
+`gc_last_alloc_safepoint_map_found` et
 `gc_last_alloc_safepoint_map_missed`, ainsi que
 `gc_last_alloc_safepoint_root_slots` et
 `gc_last_alloc_safepoint_root_bytes`, sont remis à zéro à chaque collecte. Sur
-lookup réussi, `Runtime_gc` lit seulement le premier `dq` de la carte, c'est-à-
-dire son nombre de slots racines déclarés, puis expose aussi le nombre d'octets
-correspondant (`slots * 8`). Il ne lit pas les offsets de racines suivants et ne
-les transmet pas au marqueur. Un miss est attendu pour une collecte déclenchée
-depuis un appel `Runtime_alloc` interne aux helpers runtime, tant que ces
-safepoints ne sont pas dans l'index utilisateur. Ces indicateurs sont eux aussi
-strictement observationnels.
+lookup réussi, `Runtime_gc` lit le premier `dq` de la carte pour connaître son
+nombre de slots racines déclarés, expose aussi le nombre d'octets correspondant
+(`slots * 8`), puis consomme les entrées suivantes comme offsets `rbp - offset`
+pour marquer les slots de frame exacts avant de lancer le scan conservateur
+existant, qui reste le filet de sécurité et le mécanisme de propagation payload. Un miss est attendu
+pour une collecte déclenchée depuis un appel `Runtime_alloc` interne aux helpers
+runtime, tant que ces safepoints ne sont pas dans l'index utilisateur.
 Les primitives
 `gcCollections()`, `gcLastFreedBytes()`, `gcLastLargestFreeBlock()`,
 `gcLastMarkedBlocks()`, `gcLastFreedBlocks()`, `gcLastStackWords()` et
@@ -668,15 +672,14 @@ un futur `Runtime_alloc` exact à la carte déjà émise.
 `dq function_count, table1, table2, ...` : son premier mot est le nombre de
 tables listées, suivi des adresses `nabla_gc_alloc_safepoints_<fonction>`. Il
 permet à `Runtime_gc` de parcourir tous les return PC sans connaître les
-fonctions compilées à l'avance. Le lookup courant ne fait que comparer le
-return PC utilisateur sauvegardé par `Runtime_alloc` à `[rsp + 112]`, enregistrer
-le pointeur de carte trouvé dans un slot runtime interne, et mettre à jour les
-compteurs `gcLastAllocSafepointMapFound()` /
-`gcLastAllocSafepointMapMissed()`. Sur un match, il lit aussi uniquement le
-header `count` de la carte pour exposer
-`gcLastAllocSafepointRootSlots()` et
-`gcLastAllocSafepointRootBytes()` comme métriques de forme de carte; il ne
-consomme pas encore les offsets de la carte pour marquer les racines.
+fonctions compilées à l'avance. Le lookup courant compare le return PC
+utilisateur sauvegardé par `Runtime_alloc` à `[rsp + 112]`, enregistre le
+pointeur de carte trouvé dans un slot runtime interne, met à jour les compteurs
+`gcLastAllocSafepointMapFound()` / `gcLastAllocSafepointMapMissed()`, lit le
+header `count` de la carte pour exposer `gcLastAllocSafepointRootSlots()` et
+`gcLastAllocSafepointRootBytes()`, puis consomme les offsets suivants comme
+adresses de slots `rbp - offset` à marquer avant le scan conservateur de
+fallback.
 
 Chaque carte garde le format minimal `dq count, offset1, offset2, ...`, où les
 offsets réutilisent les mêmes slots `rbp` positifs que
@@ -684,26 +687,27 @@ offsets réutilisent les mêmes slots `rbp` positifs que
 le type d'allocation (`object`, `IntArray`, `ObjectArray`, `closure`,
 `boxed-Int`, etc.), le résultat IR (`; gc alloc call ...`) et les racines de
 frame candidates (`; gc alloc root [rbp - ...]`). Ces cartes sont volontairement
-conservatrices, provisoires et non consommées : elles décrivent les slots de
-frame référence-capables déjà produits dans le parcours IR linéaire avant le point
-d'allocation. Elles ne sont pas encore dominance-aware pour les branches, ne
-protègent pas encore les registres transitoires chargés juste avant
+conservatrices et provisoires : elles décrivent les slots de frame
+référence-capables déjà produits dans le parcours IR linéaire avant le point
+d'allocation et sont maintenant consommées comme première tranche de racines
+exactes d'allocation. Elles ne sont pas encore dominance-aware pour les branches,
+ne protègent pas encore les registres transitoires chargés juste avant
 `Runtime_alloc`, et ne couvrent pas les allocations réalisées à l'intérieur des
 helpers assembleur runtime.
 
-Pour faciliter le raccord futur entre code et données, chaque `call Runtime_alloc`
+Pour faciliter le raccord entre code et données, chaque `call Runtime_alloc`
 émis depuis une instruction IR allocante utilisateur est maintenant précédé dans
-`.text` d'un commentaire inerte de la forme
-`; gc alloc safepoint map nabla_gc_alloc_call_<fonction>_<index> kind ... result ... [op ...] non-consumed`.
+`.text` d'un commentaire actif de la forme
+`; gc alloc safepoint map nabla_gc_alloc_call_<fonction>_<index> kind ... result ... [op ...] exact-frame-offsets-consumed`.
 Ce commentaire identifie la carte correspondante, le type d'allocation, le
 résultat IR et l'opération source si elle existe. Le `call Runtime_alloc` est
 immédiatement suivi d'un label global
 `nabla_gc_alloc_return_<fonction>_<index>:` qui matérialise l'adresse de retour
-que `Runtime_alloc` verra sur `[rsp]` dans une étape future. Le label et l'index
+que `Runtime_alloc` voit sur `[rsp]`. Le label et l'index
 `nabla_gc_alloc_safepoints_<fonction>`, ainsi que l'index global
 `nabla_gc_alloc_safepoint_tables`, ne changent pas la convention d'appel.
-`Runtime_gc` lit désormais ces index pour l'observabilité du lookup, mais les
-cartes exactes restent non consommées par le marqueur.
+`Runtime_gc` lit ces index et consomme la carte exacte trouvée pour marquer les
+slots `rbp - offset` avant de poursuivre avec le scan conservateur.
 
 ### Inventaire Des Allocations Internes Aux Helpers Runtime
 

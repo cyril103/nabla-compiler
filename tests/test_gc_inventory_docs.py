@@ -107,14 +107,26 @@ language_flat = " ".join(LANGUAGE.split())
 for term in [
     "`gcLastAllocSafepointRootSlots(): Int`",
     "`gcLastAllocSafepointRootBytes(): Int`",
-    "carte exacte non consommée",
+    "carte exacte",
     "nombre de slots déclarés dans l'en-tête de cette carte",
     "octets correspondants (`slots * 8`)",
-    "sans lire les offsets de racines",
+    "consommation des offsets `rbp - offset`",
 ]:
     require(
         term in language_flat,
         f"docs/language.md should document GC safepoint root metric contract: {term}",
+    )
+
+combined_docs = "\n".join([INTERNALS, LANGUAGE, PLAN, PLAN_README, ROADMAP])
+for stale in [
+    "sans lire cette carte pour le marquage",
+    "lit seulement le premier `dq` de la carte",
+    "Observational only: read the map header count, not root offsets.",
+    "gc alloc safepoint map ... non-consumed",
+]:
+    require(
+        stale not in combined_docs,
+        f"GC allocation safepoint docs should not keep stale non-consuming wording: {stale}",
     )
 
 for term in [
@@ -157,7 +169,7 @@ for term in [
     "nabla_gc_alloc_safepoints_<fonction>",
     "nabla_gc_alloc_safepoint_tables",
     "return PC",
-    "sans consommation",
+    "consomme les offsets",
     "gcLastAllocSafepointMapFound()",
     "gcLastAllocSafepointMapMissed()",
     "gcLastAllocSafepointRootSlots()",
@@ -266,7 +278,8 @@ for term in [
     "Runtime_gcLastAllocSafepointMapMissed",
     "Runtime_gcLastAllocSafepointRootSlots",
     "Runtime_gcLastAllocSafepointRootBytes",
-    "Observational only: read the map header count, not root offsets.",
+    "Consume exact user-frame root offsets from the found allocation map",
+    ".L_gc_exact_root_scan",
 ]:
     require(term in RUNTIME_ASM, f"expected runtime helper missing: {term}")
 

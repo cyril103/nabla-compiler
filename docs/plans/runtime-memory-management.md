@@ -23,10 +23,11 @@ concret l'impose.
 - Phase 3 choisit le GC traçant simple comme direction par défaut : c'est le modèle qui préserve le mieux la surface Scala-like actuelle (`AnyRef`, `Option[T]`, `Array[T]`, closures) sans introduire de `delete` public ni d'obligations de portée pour le code utilisateur.
 - Le delta actif introduit une première collecte réelle : `Runtime_alloc`
   réutilise une free-list, lance `Runtime_gc` avant overflow, et `Runtime_gc`
-  trace conservativement la pile native puis les payloads heap sans déplacer les
-  objets. `heapUsed()` reste un high-water mark basé sur `heap_pointer`; les
-  métadonnées exactes de racines/layouts/points d'appel restent disponibles mais
-  non consommées.
+  consomme d'abord les offsets exacts `rbp - offset` de la carte de safepoint
+  d'allocation utilisateur quand elle est trouvée, puis trace conservativement la
+  pile native et les payloads heap sans déplacer les objets. `heapUsed()` reste
+  un high-water mark basé sur `heap_pointer`; les autres métadonnées de
+  racines/layouts restent disponibles mais non consommées.
 - Le delta d'observabilité ajoute les compteurs source `gcCollections()`,
   `gcLastFreedBytes()`, `gcLastLargestFreeBlock()`, `gcLastMarkedBlocks()`,
   `gcLastFreedBlocks()`, `gcLastStackWords()`, `gcLastHeapWords()`,
@@ -40,10 +41,11 @@ concret l'impose.
   `heapFreeBytes()`, `heapFreeBlockCount()` et
   `heapLargestFreeBlock()` afin de mesurer le nombre de collectes, le sweep le
   plus récent, le marquage, le volume de scan conservateur, le bruit candidat
-  pile/heap, le sous-ensemble de candidats intérieurs au payload, le lookup
-  observationnel du return PC d'allocation vers une carte exacte non consommée,
-  le payload encore alloué et l'état courant de la free-list sans changer
-  `heapUsed()` ni la portée conservative du marqueur.
+  pile/heap, le sous-ensemble de candidats intérieurs au payload, le lookup du
+  return PC d'allocation vers une carte exacte utilisateur, le nombre de slots
+  déclarés dans cette carte et la première consommation de ces offsets
+  `rbp - offset` avant le scan conservateur de fallback, le payload encore
+  alloué et l'état courant de la free-list sans changer `heapUsed()`.
 - Le delta de fragmentation immédiate découpe les blocs libres surdimensionnés à
   la réallocation: le préfixe sert la demande, la queue reste dans
   `heap_free_list` si elle peut contenir un header et un mot payload aligné, et
@@ -146,14 +148,18 @@ Raisons :
    `call Runtime_alloc` à la carte, et `nabla_gc_alloc_safepoint_tables` liste
    les tables par fonction pour un futur lookup runtime global. Chaque
    `call Runtime_alloc` utilisateur correspondant garde aussi un commentaire ASM
-   inerte
+   actif
    `; gc alloc safepoint map nabla_gc_alloc_call_<fonction>_<index> ...
-   non-consumed` immédiatement avant le safepoint, puis le label
+   exact-frame-offsets-consumed` immédiatement avant le safepoint, puis le label
    `nabla_gc_alloc_return_<fonction>_<index>:` immédiatement après l'appel. Ces
-   cartes restent additives, non consommées et non encore dominance-aware; le
+   cartes restent additives et non encore dominance-aware; le
    runtime parcourt maintenant les tables par fonction et l'index global pour
-   exposer si le return PC courant a une carte correspondante, sans lire les
-   racines de cette carte.
+   exposer si le return PC courant a une carte correspondante. Quand une carte
+   utilisateur est trouvée, il lit son count puis consomme ses offsets
+   `rbp - offset` afin de marquer les slots de frame exacts avant de conserver le
+   scan pile/payload conservateur comme fallback. Les cartes de code utilisateur
+   restent linéaires et non dominance-aware, donc elles ne remplacent pas encore
+   toute la portée conservative du marqueur.
 8. Inventaire des allocations internes aux helpers runtime couvert :
    `tests/test_gc_runtime_helper_alloc_inventory.py` ancre les appels
    `Runtime_alloc` directs de `src/runtime_asm.cpp` dans `docs/internals.md` et
@@ -231,9 +237,10 @@ Raisons :
    `gcLastAllocSafepointMapMissed() == 0`,
    `gcLastAllocSafepointRootSlots() > 0` et
    `gcLastAllocSafepointRootBytes() == slots * 8`, puis inspecte l'ASM conservé pour le
-   parcours de `nabla_gc_alloc_safepoint_tables` et les labels runtime publics.
-   Le pointeur de carte trouvé reste interne; seul le header count de la carte
-   est lu, sans scan des offsets ni consommation par le marquage.
+   parcours de `nabla_gc_alloc_safepoint_tables`, la boucle
+   `.L_gc_exact_root_scan` qui lit les offsets `rbp - offset` et les labels
+   runtime publics. Le scan conservateur pile/payload reste actif après cette
+   consommation exacte partielle.
 19. Ajouter ensuite la protection/spill automatique des registres transitoires et
    slots natifs autour de `Runtime_alloc`, remplacer ou stabiliser les cartes
    candidates en cartes consommables, raffiner `heapUsed()` si besoin, et réduire

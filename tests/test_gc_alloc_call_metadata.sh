@@ -57,14 +57,14 @@ require_asm "; gc alloc call 1 IntArray result"
 require_asm "; gc alloc call 2 ObjectArray result"
 require_asm "; gc alloc call 3 closure result"
 require_asm "; gc alloc call 4 boxed-Int result"
-require_asm "; gc alloc safepoint 0 return nabla_gc_alloc_return_nabla_sym_allocate_0 map nabla_gc_alloc_call_nabla_sym_allocate_0 non-consumed"
-require_asm "; gc alloc safepoint table nabla_sym_allocate -> nabla_gc_alloc_safepoints_nabla_sym_allocate non-consumed"
+require_asm "; gc alloc safepoint 0 return nabla_gc_alloc_return_nabla_sym_allocate_0 map nabla_gc_alloc_call_nabla_sym_allocate_0 exact-frame-offsets-consumed"
+require_asm "; gc alloc safepoint table nabla_sym_allocate -> nabla_gc_alloc_safepoints_nabla_sym_allocate exact-frame-offsets-consumed"
 require_asm "; gc alloc safepoint map nabla_gc_alloc_call_nabla_sym_allocate_0 kind object result"
 require_asm "; gc alloc safepoint map nabla_gc_alloc_call_nabla_sym_allocate_1 kind IntArray result"
 require_asm "; gc alloc safepoint map nabla_gc_alloc_call_nabla_sym_allocate_2 kind ObjectArray result"
 require_asm "; gc alloc safepoint map nabla_gc_alloc_call_nabla_sym_allocate_3 kind closure result"
 require_asm "; gc alloc safepoint map nabla_gc_alloc_call_nabla_sym_allocate_4 kind boxed-Int result"
-require_asm " non-consumed"
+require_asm " exact-frame-offsets-consumed"
 require_asm "; gc alloc root [rbp -"
 require_asm ": String"
 require_asm ": Box"
@@ -152,7 +152,7 @@ for required_table in [
 for i in range(len(labels)):
     expected_comment = (
         f"; gc alloc safepoint {i} return nabla_gc_alloc_return_nabla_sym_allocate_{i} "
-        f"map nabla_gc_alloc_call_nabla_sym_allocate_{i} non-consumed"
+        f"map nabla_gc_alloc_call_nabla_sym_allocate_{i} exact-frame-offsets-consumed"
     )
     if expected_comment not in asm:
         raise SystemExit(f"missing safepoint table comment: {expected_comment}")
@@ -229,7 +229,7 @@ if len(runtime_alloc_calls) != len(metadata_comments):
 
 safepoint_re = re.compile(
     r"; gc alloc safepoint map nabla_gc_alloc_call_nabla_sym_allocate_(?P<index>\d+) "
-    r"kind (?P<kind>\S+) result (?P<result>\S+)(?: op (?P<op>\S+))? non-consumed$"
+    r"kind (?P<kind>\S+) result (?P<result>\S+)(?: op (?P<op>\S+))? exact-frame-offsets-consumed$"
 )
 for line_number, previous_line, next_line in runtime_alloc_calls:
     match = safepoint_re.search(previous_line)

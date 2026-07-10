@@ -409,7 +409,7 @@ public:
         for (size_t i = 0; i < callIndex; ++i) {
             out << "    ; gc alloc safepoint " << i << " return nabla_gc_alloc_return_"
                 << asmFunctionName(function.name) << "_" << i << " map nabla_gc_alloc_call_"
-                << asmFunctionName(function.name) << "_" << i << " non-consumed\n";
+                << asmFunctionName(function.name) << "_" << i << " exact-frame-offsets-consumed\n";
         }
     }
 
@@ -507,7 +507,7 @@ private:
             << asmFunctionName(function.name) << "_" << callIndex
             << " kind " << *kind << " result " << instruction.result;
         if (!instruction.operation.empty()) out << " op " << instruction.operation;
-        out << " non-consumed\n";
+        out << " exact-frame-offsets-consumed\n";
         ++nextGcAllocationCallIndex;
         return callIndex;
     }
@@ -1870,7 +1870,7 @@ void emitGcAllocationSafepointTableIndex(
     for (const auto& function : functions) {
         out << "    ; gc alloc safepoint table " << asmFunctionName(function.name)
             << " -> nabla_gc_alloc_safepoints_" << asmFunctionName(function.name)
-            << " non-consumed\n";
+            << " exact-frame-offsets-consumed\n";
     }
 }
 }
