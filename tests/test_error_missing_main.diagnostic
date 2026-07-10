@@ -1,0 +1,1 @@
+tests/test_error_missing_main.nabla:1:1: semantic error: fonction 'main' absente: utiliser 'def main(): Int' ou 'def main(args: Array[String]): Int'

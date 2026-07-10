@@ -101,10 +101,13 @@ def boolArrayMapObject[U](xs: BoolArray, f: (Bool) => U): ArrayObject[U] = {
 }
 
 def boolArrayFlatMapObject[U](xs: BoolArray, transform: (Bool) => Array[U]): ArrayObject[U] = {
+    val mappedValues = new ObjectArray[Array[U]](xs.length())
     var index = 0
     var total = 0
     while (index < xs.length()) {
-        total = total + transform(xs.get(index)).size()
+        val mapped = transform(xs.get(index))
+        mappedValues.set(index, mapped)
+        total = total + mapped.size()
         index = index + 1
     }
 
@@ -112,7 +115,7 @@ def boolArrayFlatMapObject[U](xs: BoolArray, transform: (Bool) => Array[U]): Arr
     index = 0
     var output = 0
     while (index < xs.length()) {
-        val mapped = transform(xs.get(index))
+        val mapped = mappedValues.get(index)
         var inner = 0
         while (inner < mapped.size()) {
             flattened.set(output, mapped.get(inner))
@@ -125,10 +128,13 @@ def boolArrayFlatMapObject[U](xs: BoolArray, transform: (Bool) => Array[U]): Arr
 }
 
 def boolArrayFlatMap(xs: BoolArray, transform: (Bool) => ArrayBool): BoolArray = {
+    val mappedValues = new ObjectArray[ArrayBool](xs.length())
     var index = 0
     var total = 0
     while (index < xs.length()) {
-        total = total + transform(xs.get(index)).size()
+        val mapped = transform(xs.get(index))
+        mappedValues.set(index, mapped)
+        total = total + mapped.size()
         index = index + 1
     }
 
@@ -136,7 +142,7 @@ def boolArrayFlatMap(xs: BoolArray, transform: (Bool) => ArrayBool): BoolArray =
     index = 0
     var output = 0
     while (index < xs.length()) {
-        val mapped = transform(xs.get(index))
+        val mapped = mappedValues.get(index)
         var inner = 0
         while (inner < mapped.size()) {
             flattened.set(output, mapped.get(inner))
@@ -149,10 +155,13 @@ def boolArrayFlatMap(xs: BoolArray, transform: (Bool) => ArrayBool): BoolArray =
 }
 
 def boolArrayFilter(xs: BoolArray, predicate: (Bool) => Bool): BoolArray = {
+    val selected = new BoolArray(xs.length())
     var index = 0
     var kept = 0
     while (index < xs.length()) {
-        if predicate(xs.get(index)) {
+        val keep = predicate(xs.get(index))
+        selected.set(index, keep)
+        if keep {
             kept = kept + 1
         } else {
             kept
@@ -165,7 +174,7 @@ def boolArrayFilter(xs: BoolArray, predicate: (Bool) => Bool): BoolArray = {
     var output = 0
     while (index < xs.length()) {
         val value = xs.get(index)
-        if predicate(value) {
+        if selected.get(index) {
             filtered.set(output, value)
             output = output + 1
         } else {

@@ -1,0 +1,69 @@
+import collections.array
+import collections.map
+
+class Calls(var count: Int) {
+    def rejectInt(value: Int): Bool = {
+        count = count + 1
+        false
+    }
+
+    def rejectString(value: String): Bool = {
+        count = count + 1
+        false
+    }
+
+    def expandInt(value: Int): Array[String] = {
+        count = count + 1
+        Array.fill[String](count, "int")
+    }
+
+    def expandString(value: String): Array[String] = {
+        count = count + 1
+        Array.fill[String](count, value)
+    }
+}
+
+def main(): Int = {
+    val primitiveFilterCalls = new Calls(0)
+    val primitiveFiltered = Array.range(1).filter((value: Int) => {
+        primitiveFilterCalls.rejectInt(value)
+    })
+
+    val primitiveFlatMapCalls = new Calls(0)
+    val primitiveFlatMapped = Array.range(1).flatMap[String]((value: Int) => {
+        primitiveFlatMapCalls.expandInt(value)
+    })
+
+    val partitionCalls = new Calls(0)
+    val partitioned = Array.range(1).partition((value: Int) => {
+        partitionCalls.rejectInt(value)
+    })
+
+    val objectFilterCalls = new Calls(0)
+    val words = Array.fill[String](1, "word")
+    val objectFiltered = words.filter((value: String) => {
+        objectFilterCalls.rejectString(value)
+    })
+
+    val objectFlatMapCalls = new Calls(0)
+    val objectFlatMapped = words.flatMap[String]((value: String) => {
+        objectFlatMapCalls.expandString(value)
+    })
+
+    val mapFilterCalls = new Calls(0)
+    val filteredMap = Map(1 -> "one").filterKeys((key: Int) => {
+        mapFilterCalls.rejectInt(key)
+    })
+
+    if primitiveFilterCalls.count() == 1 && primitiveFiltered.size() == 0 &&
+       primitiveFlatMapCalls.count() == 1 && primitiveFlatMapped.size() == 1 &&
+       partitionCalls.count() == 1 && partitioned.matching().size() == 0 &&
+       partitioned.nonMatching().size() == 1 &&
+       objectFilterCalls.count() == 1 && objectFiltered.size() == 0 &&
+       objectFlatMapCalls.count() == 1 && objectFlatMapped.size() == 1 &&
+       mapFilterCalls.count() == 1 && filteredMap.size() == 0 {
+        42
+    } else {
+        1
+    }
+}

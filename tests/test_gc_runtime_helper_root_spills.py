@@ -110,6 +110,39 @@ require(
 )
 
 block_match = re.search(
+    r"^Runtime_readLine:\n(.*?)(?=^Runtime_copyPathToCString:)",
+    asm,
+    re.MULTILINE | re.DOTALL,
+)
+require(block_match is not None, "missing Runtime_readLine block in generated ASM")
+read_line = block_match.group(1)
+
+require_ordered(
+    read_line,
+    [
+        "shl r9, 1",
+        "; gc runtime helper root spill begin: preserve current readLine String across growth Runtime_alloc",
+        "push rbx",
+        "call Runtime_alloc",
+        "pop rbx",
+        "; gc runtime helper root spill end: restore current readLine String after growth Runtime_alloc",
+    ],
+    "Runtime_readLine growth allocation spill",
+)
+
+map_match = re.search(
+    r"^\s*nabla_gc_runtime_helper_alloc_Runtime_readLine_1: dq 1"
+    r"(.*?)(?=^\s*nabla_gc_runtime_helper_alloc_|^\s*nabla_gc_runtime_helper_allocs_|^section )",
+    asm,
+    re.MULTILINE | re.DOTALL,
+)
+require(map_match is not None, "missing Runtime_readLine alloc 1 helper root map")
+require(
+    '"native_stack+8", 0' in map_match.group(1),
+    "Runtime_readLine alloc 1 should describe spilled rbx as native_stack+8",
+)
+
+block_match = re.search(
     r"^Runtime_stringToCharArray:\n(.*?)(?=^Runtime_stringSubstring:)",
     asm,
     re.MULTILINE | re.DOTALL,

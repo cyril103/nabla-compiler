@@ -54,7 +54,13 @@ all-tests: nablac
 						fi; \
 						rm -f "$$diagnostic_file.normalized"; \
 					else \
-						echo "${GREEN}PASS (expected compilation failure):${NC} $$testfile"; \
+						if grep -Eq ':[0-9]+:[0-9]+: (lexer|parser|semantic|codegen) error:' "$$diagnostic_file"; then \
+							echo "${GREEN}PASS (expected compiler diagnostic):${NC} $$testfile"; \
+						else \
+							echo "${RED}FAIL:${NC} $$testfile (failed without a compiler diagnostic)"; \
+							cat "$$diagnostic_file"; \
+							all_status=1; \
+						fi; \
 					fi; \
 				else \
 					echo "${RED}FAIL:${NC} $$testfile (expected compilation failure but succeeded)"; \
@@ -225,6 +231,7 @@ format-check:
 
 tooling-tests: nablac unit-tests stdlib-docs format-check
 	@tests/test_missing_external_tools.sh
+	@tests/test_read_line_long.sh
 	@tests/test_configurable_heap_size.sh
 	@tests/test_heap_overflow_diagnostic.sh
 	@tests/test_heap_stats_builtins.sh

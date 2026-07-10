@@ -165,6 +165,12 @@ int main(int argc, char* argv[]) {
         auto globalAST = parser.parseProgram();
         SemanticAnalyzer semanticAnalyzer(context);
         semanticAnalyzer.analyze(*globalAST);
+        if (context.functionOverloads.find("main") == context.functionOverloads.end()) {
+            throw CompilerError(
+                ErrorKind::Semantic, {mainPath.string(), 1, 1},
+                "fonction 'main' absente: utiliser 'def main(): Int' ou "
+                "'def main(args: Array[String]): Int'");
+        }
         IRProgram irProgram;
         if (emitIR) {
             irProgram = IRBuilder().build(*globalAST, context);
@@ -181,6 +187,12 @@ int main(int argc, char* argv[]) {
 
         if (runCommand({"nasm", "-f", "elf64", asmFilename, "-o", objFilename}) != 0 ||
             runCommand({"ld", objFilename, "-o", exePath}) != 0) {
+            if (!keepTemp) {
+                std::remove(objFilename.c_str());
+            }
+            if (!keepAsm) {
+                std::remove(asmFilename.c_str());
+            }
             return 1;
         }
 

@@ -69,8 +69,10 @@ immédiates ou brutes. Quand une primitive builtin est passée à un paramètre
 `Any` ou `AnyVal` d'une fonction ou méthode, ou à la primitive globale
 `print(value)`, le lowering IR insère un boxing heap explicite afin que les
 méthodes dynamiques communes comme `toString()` puissent retrouver le type
-runtime d'origine. `print(value)` est ensuite abaissé en appel à
-`Any.toString()` suivi du runtime d'écriture de chaîne.
+runtime d'origine. Les fallbacks `Any.equals` et `Any.hashCode` reconnaissent
+également les tags de boxing afin de conserver l'égalité et le hash de valeur,
+y compris l'équivalence IEEE de `-0.0` et `0.0`. `print(value)` est ensuite
+abaissé en appel à `Any.toString()` suivi du runtime d'écriture de chaîne.
 
 ### Valeurs taggées
 
@@ -721,7 +723,9 @@ ci-dessous comptent les sites statiques `call Runtime_alloc`; deux sites peuvent
 - `Runtime_cStringToString` (1) : construit un `String` depuis un C string.
 - `Runtime_buildArgsArray` (2) : construit le tableau brut d'arguments puis la
   façade `ArrayObject[String]`.
-- `Runtime_readLine` (1) : alloue le buffer `String` de lecture.
+- `Runtime_readLine` (2) : alloue le buffer `String` initial puis peut le
+  remplacer par un buffer double lors des lectures longues; le propriétaire
+  courant est spill sur la pile native pendant cette croissance.
 - `Runtime_copyPathToCString` (1) : alloue un buffer C transitoire.
 - `Runtime_emptyString` (1) : alloue la chaîne vide runtime.
 - `Runtime_readFile` (1) : alloue le `String` contenant le fichier lu.

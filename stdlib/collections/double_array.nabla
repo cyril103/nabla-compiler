@@ -47,10 +47,13 @@ def doubleArrayMapObject[U](xs: DoubleArray, f: (Double) => U): ArrayObject[U] =
 }
 
 def doubleArrayFlatMapObject[U](xs: DoubleArray, transform: (Double) => Array[U]): ArrayObject[U] = {
+    val mappedValues = new ObjectArray[Array[U]](xs.length())
     var index = 0
     var total = 0
     while (index < xs.length()) {
-        total = total + transform(xs.get(index)).size()
+        val mapped = transform(xs.get(index))
+        mappedValues.set(index, mapped)
+        total = total + mapped.size()
         index = index + 1
     }
 
@@ -58,7 +61,7 @@ def doubleArrayFlatMapObject[U](xs: DoubleArray, transform: (Double) => Array[U]
     index = 0
     var output = 0
     while (index < xs.length()) {
-        val mapped = transform(xs.get(index))
+        val mapped = mappedValues.get(index)
         var inner = 0
         while (inner < mapped.size()) {
             flattened.set(output, mapped.get(inner))
@@ -71,10 +74,13 @@ def doubleArrayFlatMapObject[U](xs: DoubleArray, transform: (Double) => Array[U]
 }
 
 def doubleArrayFlatMap(xs: DoubleArray, transform: (Double) => ArrayDouble): DoubleArray = {
+    val mappedValues = new ObjectArray[ArrayDouble](xs.length())
     var index = 0
     var total = 0
     while (index < xs.length()) {
-        total = total + transform(xs.get(index)).size()
+        val mapped = transform(xs.get(index))
+        mappedValues.set(index, mapped)
+        total = total + mapped.size()
         index = index + 1
     }
 
@@ -82,7 +88,7 @@ def doubleArrayFlatMap(xs: DoubleArray, transform: (Double) => ArrayDouble): Dou
     index = 0
     var output = 0
     while (index < xs.length()) {
-        val mapped = transform(xs.get(index))
+        val mapped = mappedValues.get(index)
         var inner = 0
         while (inner < mapped.size()) {
             flattened.set(output, mapped.get(inner))
@@ -95,10 +101,13 @@ def doubleArrayFlatMap(xs: DoubleArray, transform: (Double) => ArrayDouble): Dou
 }
 
 def doubleArrayFilter(xs: DoubleArray, predicate: (Double) => Bool): DoubleArray = {
+    val selected = new BoolArray(xs.length())
     var index = 0
     var kept = 0
     while (index < xs.length()) {
-        if predicate(xs.get(index)) {
+        val keep = predicate(xs.get(index))
+        selected.set(index, keep)
+        if keep {
             kept = kept + 1
         } else {
             kept
@@ -111,7 +120,7 @@ def doubleArrayFilter(xs: DoubleArray, predicate: (Double) => Bool): DoubleArray
     var output = 0
     while (index < xs.length()) {
         val value = xs.get(index)
-        if predicate(value) {
+        if selected.get(index) {
             filtered.set(output, value)
             output = output + 1
         } else {

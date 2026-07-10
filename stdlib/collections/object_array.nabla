@@ -236,10 +236,13 @@ class ArrayObject[T](values: ObjectArray[T]) with Sized with IterableOps[T, Arra
     }
 
     override def filter(predicate: (T) => Bool): ArrayObject[T] = {
+        val selected = new BoolArray(values.length())
         var index = 0
         var kept = 0
         while (index < values.length()) {
-            if predicate(values.get(index)) {
+            val keep = predicate(values.get(index))
+            selected.set(index, keep)
+            if keep {
                 kept = kept + 1
             } else {
                 kept
@@ -252,7 +255,7 @@ class ArrayObject[T](values: ObjectArray[T]) with Sized with IterableOps[T, Arra
         var output = 0
         while (index < values.length()) {
             val value = values.get(index)
-            if predicate(value) {
+            if selected.get(index) {
                 filtered.set(output, value)
                 output = output + 1
             } else {
@@ -268,10 +271,13 @@ class ArrayObject[T](values: ObjectArray[T]) with Sized with IterableOps[T, Arra
     }
 
     def flatMap[U](transform: (T) => ArrayObject[U]): ArrayObject[U] = {
+        val mappedValues = new ObjectArray[ArrayObject[U]](values.length())
         var index = 0
         var total = 0
         while (index < values.length()) {
-            total = total + transform(values.get(index)).size()
+            val mapped = transform(values.get(index))
+            mappedValues.set(index, mapped)
+            total = total + mapped.size()
             index = index + 1
         }
 
@@ -279,7 +285,7 @@ class ArrayObject[T](values: ObjectArray[T]) with Sized with IterableOps[T, Arra
         index = 0
         var output = 0
         while (index < values.length()) {
-            val mapped = transform(values.get(index))
+            val mapped = mappedValues.get(index)
             var inner = 0
             while (inner < mapped.size()) {
                 flattened.set(output, mapped.get(inner))
