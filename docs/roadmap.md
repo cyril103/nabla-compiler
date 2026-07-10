@@ -83,9 +83,11 @@ pour garder un cap clair après le tag `v0.1.0`.
   constructeur qualifies restent differes.
 - Standard library deja utile :
   - collections typées et facade `Array[T]`, dont `sorted(lessThan)` retourne
-    une copie triee sans mutation et les facades primitives exposent aussi
-    `sorted()` par ordre naturel; les conversions primitives vers tableaux
-    generiques utilisent les noms idiomatiques `map[U]` et `flatMap[U]`
+    une copie triee sans mutation, la facade generique herite experimentalement
+    de `IterableOps[T, Array, ArrayObject[T]]`, et les facades primitives
+    exposent aussi `sorted()` par ordre naturel; les conversions primitives vers
+    tableaux generiques utilisent les noms idiomatiques `map[U]` et
+    `flatMap[U]`
   - `collections.set` avec `Set[T]`, `add`, `remove`, `union`, `intersect`,
     `difference`
   - `collections.map` avec `Map[K, V]`, recherche optionnelle, mises a jour

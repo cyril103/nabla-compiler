@@ -106,7 +106,9 @@ la roadmap. À la date de ce fichier, le compilateur couvre notamment:
   de base, boxing et dispatch des méthodes racines (`toString`, `hashCode`,
   `equals`);
 - tableaux natifs spécialisés et facades `Array[T]` / `ArrayObject[T]`, avec API
-  Scala-like documentée progressivement;
+  Scala-like documentée progressivement; la facade générique s'intègre aussi à
+  `IterableOps[T, Array, ArrayObject[T]]` pour les opérations expérimentales
+  communes;
 - stdlib structurée autour de `core`, `collections`, `math`, `strings`, `io` et
   `util`, avec documentation HTML générée;
 - backend IR par défaut, génération x86-64, runtime Linux, heap configurable,
