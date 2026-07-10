@@ -183,8 +183,12 @@ git diff --check
    `IterableOps[T, Set, Set[T]]` slice and reuses default instance
    `map`/`filter` through `SetFactory` / `SetBuilder`; the inherited defaults
    preserve Set deduplication because reconstruction goes through `Set.add`.
-   Array facades still need a separate receiver/iterator-dispatch slice before
-   public `Array[T]` inherits `IterableOps`.
-4. Move safe operations from `Iterable` to `IterableOps` only when their return types are representable.
-5. Consider arity-2 constructors for `Map[K, V]`-like APIs.
-6. Consider variance only after invariant HKT dispatch and substitution are stable.
+4. `ArrayObject[T]`, the current generic `Array[T]` facade implementation, now
+   extends the delivered experimental `IterableOps[T, Array, ArrayObject[T]]`
+   slice. It keeps its direct `map`/`filter` overrides for the current efficient
+   array reconstruction path, while trait upcasts can dispatch through the
+   `IterableOps` family and `ArrayObjectFactory` / `ArrayObjectBuilder` validate
+   the `Array` type-constructor wiring.
+5. Move safe operations from `Iterable` to `IterableOps` only when their return types are representable.
+6. Consider arity-2 constructors for `Map[K, V]`-like APIs.
+7. Consider variance only after invariant HKT dispatch and substitution are stable.

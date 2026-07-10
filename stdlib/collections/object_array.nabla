@@ -2,8 +2,9 @@ package collections.object_array
 
 import util
 import core.sized
-import core.iterable
+import core.iterable_ops
 import core.iterator
+import core.builder
 import collections.array_base
 
 def objectArrayFill[T](size: Int, value: T): ArrayObject[T] = {
@@ -113,7 +114,37 @@ class ArrayObjectIterator[T](values: ObjectArray[T], var index: Int) with Iterat
     }
 }
 
-class ArrayObject[T](values: ObjectArray[T]) with Sized with Iterable[T] {
+class ArrayObjectBuilder[A](var values: Array[A]) with Builder[A, Array[A]] {
+    override def add(value: A): Unit = {
+        val next = new ObjectArray[A](values.size() + 1)
+        var index = 0
+        while (index < values.size()) {
+            next.set(index, values.get(index))
+            index = index + 1
+        }
+        next.set(values.size(), value)
+        values = new ArrayObject[A](next)
+        while false {
+            0
+        }
+    }
+
+    override def result(): Array[A] = {
+        values
+    }
+}
+
+class ArrayObjectFactory() with IterableFactory[Array] {
+    override def empty[A](): Array[A] = {
+        objectArrayEmpty[A]()
+    }
+
+    override def newBuilder[A](): Builder[A, Array[A]] = {
+        new ArrayObjectBuilder[A](objectArrayEmpty[A]())
+    }
+}
+
+class ArrayObject[T](values: ObjectArray[T]) with Sized with IterableOps[T, Array, ArrayObject[T]] {
     def length(): Int = {
         objectArrayLength(values)
     }
@@ -128,6 +159,10 @@ class ArrayObject[T](values: ObjectArray[T]) with Sized with Iterable[T] {
 
     override def nonEmpty(): Bool = {
         arrayBaseNonEmpty[ObjectArray[T]](values, objectArrayLength[T])
+    }
+
+    override def iterableFactory(): IterableFactory[Array] = {
+        new ArrayObjectFactory()
     }
 
     def get(index: Int): T = {
@@ -168,7 +203,7 @@ class ArrayObject[T](values: ObjectArray[T]) with Sized with Iterable[T] {
         }
     }
 
-    def map[U](f: (T) => U): ArrayObject[U] = {
+    override def map[U](f: (T) => U): ArrayObject[U] = {
         val mapped = new ObjectArray[U](values.length())
         var index = 0
         while (index < values.length()) {
@@ -200,7 +235,7 @@ class ArrayObject[T](values: ObjectArray[T]) with Sized with Iterable[T] {
         new ArrayObject[T](sorted)
     }
 
-    def filter(predicate: (T) => Bool): ArrayObject[T] = {
+    override def filter(predicate: (T) => Bool): ArrayObject[T] = {
         var index = 0
         var kept = 0
         while (index < values.length()) {

@@ -1,0 +1,36 @@
+import core.iterable_ops
+import collections.array
+
+class Score(val name: String, val score: Int) {
+    override def toString(): String = {
+        name + ":" + score.toString()
+    }
+}
+
+def throughOps(values: IterableOps[Score, Array, Array[Score]]): String = {
+    val mapped: Array[String] = values.map[String](value => value.name + "=" + value.score.toString())
+    val filtered: Array[Score] = values.filter(value => value.score > 10)
+    mapped.mkString("|") + ":" + filtered.mkString(",")
+}
+
+def builderOrder(): String = {
+    val builder = Array.newBuilder[String]()
+    builder.add("a")
+    builder.add("b")
+    builder.add("c")
+    builder.result().mkString("")
+}
+
+def main(): Int = {
+    val scores: Array[Score] = Array.apply[Score](new Score("ada", 10), new Score("linus", 20), new Score("grace", 30))
+    val mapped: Array[String] = scores.map[String](value => "m" + value.name)
+    val filtered: Array[Score] = scores.filter(value => value.score > 10)
+    if mapped.mkString("|") == "mada|mlinus|mgrace" &&
+       filtered.mkString(",") == "linus:20,grace:30" &&
+       throughOps(scores) == "ada=10|linus=20|grace=30:linus:20,grace:30" &&
+       builderOrder() == "abc" {
+        42
+    } else {
+        1
+    }
+}

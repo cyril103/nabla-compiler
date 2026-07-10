@@ -393,11 +393,13 @@ void IRBuilder::emitPendingSpecializations(const ProgramNode& root) {
     while (nextFunctionSpecialization < functionSpecializations.size() ||
            nextMethodSpecialization < methodSpecializations.size()) {
         while (nextFunctionSpecialization < functionSpecializations.size()) {
-            emitFunctionSpecialization(functionSpecializations[nextFunctionSpecialization], root);
+            const auto specialization = functionSpecializations[nextFunctionSpecialization];
+            emitFunctionSpecialization(specialization, root);
             ++nextFunctionSpecialization;
         }
         while (nextMethodSpecialization < methodSpecializations.size()) {
-            emitMethodSpecialization(methodSpecializations[nextMethodSpecialization], root);
+            const auto specialization = methodSpecializations[nextMethodSpecialization];
+            emitMethodSpecialization(specialization, root);
             ++nextMethodSpecialization;
         }
     }

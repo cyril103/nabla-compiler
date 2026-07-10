@@ -61,9 +61,9 @@ raffinant `heapUsed()` si nécessaire.
 Le chantier actif des collections higher-kinded est suivi dans
 [`higher-kinded-collection-ops.md`](higher-kinded-collection-ops.md): le support
 `CC[_]`, les builders/factories expérimentaux et l'intégration `IterableOps` de
-`List[T]` / `Set[T]` sont couverts; l'intégration `Array[T]`, les opérations
-communes supplémentaires, les constructeurs d'arité 2 pour `Map` et la variance
-restent des deltas séparés.
+`List[T]` / `Set[T]` / la facade generique `Array[T]` sont couverts; les
+operations communes supplémentaires, les constructeurs d'arité 2 pour `Map` et
+la variance restent des deltas séparés.
 
 Les plans package/namespaces et parité numérique de `Char` ont été retirés de
 l'arbre actif parce que leurs tranches livrées sont maintenant résumées dans la
