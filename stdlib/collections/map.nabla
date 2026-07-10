@@ -30,6 +30,7 @@ import core.sized
 import core.iterable
 import core.iterator
 import core.tuple
+import core.builder
 import collections.object_array
 
 def mapIndexBucketCount[K, V](size: Int): Int = {
@@ -219,6 +220,31 @@ def mapEmpty[K, V](): Map[K, V] = {
     new Map[K, V](new ArrayObject[Tuple2[K, V]](new ObjectArray[Tuple2[K, V]](0)))
 }
 
+/// Builder experimental pour produire une Map[K, V] depuis des paires.
+/// @signature class MapBuilder[K, V] extends Builder[Tuple2[K, V], Map[K, V]]
+/// @status Experimental
+///
+/// Les ajouts successifs appliquent la semantique de Map.fromArray: si une cle
+/// est ajoutee plusieurs fois, la derniere valeur gagne dans le resultat.
+class MapBuilder[K, V](var values: Map[K, V]) with Builder[Tuple2[K, V], Map[K, V]] {
+    /// Ajoute une paire cle-valeur au resultat logique.
+    /// @signature def add(value: Tuple2[K, V]): Unit
+    /// @status Experimental
+    override def add(value: Tuple2[K, V]): Unit = {
+        values = values.updated(value._1, value._2)
+        while false {
+            0
+        }
+    }
+
+    /// Retourne la map construite.
+    /// @signature def result(): Map[K, V]
+    /// @status Experimental
+    override def result(): Map[K, V] = {
+        values
+    }
+}
+
 object Map {
     /// Cree une map depuis les paires donnees.
     /// @signature def Map.apply[K, V](entries: Tuple2[K, V]*): Map[K, V]
@@ -239,6 +265,13 @@ object Map {
     /// @status Recommandee
     def fromArray[K, V](entries: ArrayObject[Tuple2[K, V]]): Map[K, V] = {
         mapFromArray[K, V](entries)
+    }
+
+    /// Cree un builder experimental de Map[K, V].
+    /// @signature def Map.newBuilder[K, V](): Builder[Tuple2[K, V], Map[K, V]]
+    /// @status Experimental
+    def newBuilder[K, V](): Builder[Tuple2[K, V], Map[K, V]] = {
+        new MapBuilder[K, V](Map.empty[K, V]())
     }
 }
 

@@ -172,8 +172,10 @@ git diff --check
 ## Later slices
 
 1. Extend factory coverage beyond the delivered experimental `ListFactory` /
-   `ListBuilder[A]`, `ArrayFactory` / `ArrayBuilder[A]`, and `SetFactory` /
-   `SetBuilder[A]` slices; consider whether `Map` needs an arity-2 design first.
+   `ListBuilder[A]`, `ArrayFactory` / `ArrayBuilder[A]`, `SetFactory` /
+   `SetBuilder[A]`, and non-`IterableFactory` `MapBuilder[K, V]` slices;
+   consider whether `Map` needs an arity-2 design before it can join
+   `IterableOps`.
 2. `List[T]` now extends the delivered experimental
    `IterableOps[T, List, List[T]]` slice and reuses default instance
    `map`/`filter` through `ListFactory` / `ListBuilder`; keep the companion
