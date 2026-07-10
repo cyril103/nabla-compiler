@@ -44,6 +44,7 @@ sizes.values().size()</code></pre>
       <section class="toc-group">
         <h3>Types</h3>
         <ul>
+        <li><a href="#MapBuilder" title="class MapBuilder[K, V] extends Builder[Tuple2[K, V], Map[K, V]]"><span>MapBuilder</span><code>class MapBuilder[K, V] extends Builder[Tuple2[K, V], Map[K, V]]</code></a></li>
         <li><a href="#Map" title="class Map[K, V]"><span>Map</span><code>class Map[K, V]</code></a></li>
         </ul>
       </section>
@@ -53,11 +54,14 @@ sizes.values().size()</code></pre>
         <li><a href="#apply" title="def Map.apply[K, V](entries: Tuple2[K, V]*): Map[K, V]"><span>apply</span><code>def Map.apply[K, V](entries: Tuple2[K, V]*): Map[K, V]</code></a></li>
         <li><a href="#empty" title="def Map.empty[K, V](): Map[K, V]"><span>empty</span><code>def Map.empty[K, V](): Map[K, V]</code></a></li>
         <li><a href="#fromArray" title="def Map.fromArray[K, V](entries: Array[Tuple2[K, V]]): Map[K, V]"><span>fromArray</span><code>def Map.fromArray[K, V](entries: Array[Tuple2[K, V]]): Map[K, V]</code></a></li>
+        <li><a href="#newBuilder" title="def Map.newBuilder[K, V](): Builder[Tuple2[K, V], Map[K, V]]"><span>newBuilder</span><code>def Map.newBuilder[K, V](): Builder[Tuple2[K, V], Map[K, V]]</code></a></li>
         </ul>
       </section>
       <section class="toc-group">
         <h3>Methodes</h3>
         <ul>
+        <li><a href="#add" title="def add(value: Tuple2[K, V]): Unit"><span>add</span><code>def add(value: Tuple2[K, V]): Unit</code></a></li>
+        <li><a href="#result" title="def result(): Map[K, V]"><span>result</span><code>def result(): Map[K, V]</code></a></li>
         <li><a href="#containsKey" title="def containsKey(key: K): Bool"><span>containsKey</span><code>def containsKey(key: K): Bool</code></a></li>
         <li><a href="#contains" title="def contains(key: K): Bool"><span>contains</span><code>def contains(key: K): Bool</code></a></li>
         <li><a href="#getOption" title="def getOption(key: K): Option[V]"><span>getOption</span><code>def getOption(key: K): Option[V]</code></a></li>
@@ -79,6 +83,34 @@ sizes.values().size()</code></pre>
       </section>
       </aside>
       <section class="content entries" aria-label="Reference detaillee">
+        <article class="entry" id="MapBuilder">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>MapBuilder</h2>
+          <pre class="signature"><code>class MapBuilder[K, V] extends Builder[Tuple2[K, V], Map[K, V]]</code></pre>
+          <p>Builder experimental pour produire une Map[K, V] depuis des paires.</p>
+<p>Les ajouts successifs appliquent la semantique de Map.fromArray: si une cle est ajoutee plusieurs fois, la derniere valeur gagne dans le resultat.</p>
+
+        </article>
+        <article class="entry" id="add">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>add</h2>
+          <pre class="signature"><code>def add(value: Tuple2[K, V]): Unit</code></pre>
+          <p>Ajoute une paire cle-valeur au resultat logique.</p>
+
+        </article>
+        <article class="entry" id="result">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>result</h2>
+          <pre class="signature"><code>def result(): Map[K, V]</code></pre>
+          <p>Retourne la map construite.</p>
+
+        </article>
         <article class="entry" id="apply">
           <div class="entry-meta">
             <span class="kind">def</span> <span class="status recommended">Recommandee</span>
@@ -104,6 +136,15 @@ sizes.values().size()</code></pre>
           <h2>fromArray</h2>
           <pre class="signature"><code>def Map.fromArray[K, V](entries: Array[Tuple2[K, V]]): Map[K, V]</code></pre>
           <p>Cree une map depuis un tableau de paires.</p>
+
+        </article>
+        <article class="entry" id="newBuilder">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>newBuilder</h2>
+          <pre class="signature"><code>def Map.newBuilder[K, V](): Builder[Tuple2[K, V], Map[K, V]]</code></pre>
+          <p>Cree un builder experimental de Map[K, V].</p>
 
         </article>
         <article class="entry" id="Map">

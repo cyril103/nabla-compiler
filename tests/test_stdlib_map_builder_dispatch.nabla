@@ -1,0 +1,18 @@
+import collections.map
+
+
+def main(): Int = {
+    val builder: Builder[Tuple2[String, Int], Map[String, Int]] = Map.newBuilder[String, Int]()
+    builder.add(Tuple2("alice", 10))
+    builder.add(Tuple2("bob", 7))
+    builder.add(Tuple2("alice", 12))
+    val scores = builder.result()
+    if scores.size() == 2 &&
+       scores.getOrElse("alice", 0) == 12 &&
+       scores.getOrElse("bob", 0) == 7 &&
+       scores.getOrElse("charlie", 99) == 99 {
+        42
+    } else {
+        1
+    }
+}

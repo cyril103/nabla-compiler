@@ -131,6 +131,12 @@ pas comme cible idiomatique pour le code applicatif.
   - `Map.apply[K, V](entries: Tuple2[K, V]*)`
   - `Map.empty[K, V]()`
   - `Map.fromArray[K, V](entries)`
+  - `Map.newBuilder[K, V]()` retourne un `Builder[Tuple2[K, V], Map[K, V]]`
+    experimental; le builder applique la semantique de `updated`, donc la
+    derniere valeur ajoutee pour une meme cle gagne.
+  - `MapBuilder[K, V]` implemente `Builder[Tuple2[K, V], Map[K, V]]`. `Map` ne
+    rejoint pas encore `IterableOps`, car les constructeurs de type d'arite 2
+    restent reportes.
   - `contains(key)` / `containsKey(key)`
   - `getOption(key)`
   - `getOrElse(key, default)`
