@@ -179,8 +179,9 @@ features.
   `heapFreeBytes()`, `heapFreeBlockCount()` et `heapLargestFreeBlock()` aident à
   diagnostiquer les collectes, le marquage, le volume de scan conservateur, le
   bruit candidat pile/heap, les candidats intérieurs au payload, le lookup
-  observationnel du return PC d'allocation vers une carte exacte non consommée
-  et le nombre de slots déclarés dans cette carte sans lire leurs offsets,
+  observationnel du return PC d'allocation vers une carte exacte utilisateur,
+  le nombre de slots déclarés dans cette carte et la première consommation de
+  ces offsets `rbp - offset` avant le scan conservateur de fallback,
   le payload encore alloué et la free-list. Le filet de stress
   `tests/test_gc_memory_stress.sh` exerce également sous heaps serrés les
   temporaires imbriqués, helpers de chaînes, `Array[T]`, tableaux d'objets,
@@ -188,19 +189,21 @@ features.
   l'inventaire interne des familles heap et des racines backend, les métadonnées
   de racines de frame, les descripteurs champs/captures pour classes/closures,
   l'index `nabla_gc_static_roots` des singletons runtime et littéraux `String`
-  statiques, les cartes de points d'appel `Runtime_alloc` du code utilisateur,
-  l'inventaire outillé des allocations internes aux helpers runtime et les
-  cartes candidates de racines internes aux helpers runtime restent inertes et
-  non consommées par le marqueur. Les appels `Runtime_alloc` utilisateur portent
-  aussi des commentaires ASM `gc alloc safepoint map ... non-consumed` et des
+  statiques, l'inventaire outillé des allocations internes aux helpers runtime et
+  les cartes candidates de racines internes aux helpers runtime restent inertes et
+  non consommées par le marqueur. Les cartes de points d'appel `Runtime_alloc` du
+  code utilisateur, elles, sont désormais consommées par `Runtime_gc`; les cartes de points d'appel `Runtime_alloc` du code gardent donc leur rôle d'ancre.
+  Les appels `Runtime_alloc` utilisateur portent aussi des commentaires ASM
+  `gc alloc safepoint map ... exact-frame-offsets-consumed` et des
   labels `nabla_gc_alloc_return_<fonction>_<index>` indexés par
   `nabla_gc_alloc_safepoints_<fonction>`, eux-mêmes listés dans l'index global
   `nabla_gc_alloc_safepoint_tables`, qui lient chaque return PC de safepoint à
   sa carte. `Runtime_gc` parcourt désormais cet index pour exposer found/missed,
-  puis lit seulement le header count de la carte trouvée pour exposer
-  slots/octets racines déclarés, sans consommer les racines exactes. La prochaine
-  cible est de remplacer progressivement le scan conservateur par ces cartes
-  exactes consommables, de réduire les faux positifs et de raffiner `heapUsed()`
+  lit le header count de la carte trouvée pour exposer slots/octets racines
+  déclarés, puis marque les slots `rbp - offset` listés par cette carte avant de
+  poursuivre avec le scan conservateur. La prochaine cible est de remplacer
+  progressivement le reste du scan conservateur par des cartes exactes
+  consommables, de réduire les faux positifs et de raffiner `heapUsed()`
   si nécessaire; les métadonnées de racines de frame, les descripteurs
   champs/captures pour classes/closures, l'index des racines statiques,
   l'inventaire outillé des allocations internes aux helpers runtime et les

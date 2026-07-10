@@ -1304,10 +1304,11 @@ projet, puis dans `stdlib/`.
   diagnostics: nombre de collectes, octets/libre le plus grand bloc de la
   dernière collecte, blocs marqués/libérés, volume de scan conservateur pile/heap,
   mots candidats qui ressemblent à des pointeurs heap, sous-ensemble de
-  candidats intérieurs au payload, résolution observationnelle du return PC
-  d'allocation utilisateur vers une carte exacte non consommée, nombre de slots
-  déclarés dans l'en-tête de cette carte et octets correspondants (`slots * 8`)
-  sans lire les offsets de racines, puis état courant de la free-list et payload
+  candidats intérieurs au payload, résolution du return PC d'allocation
+  utilisateur vers une carte exacte, nombre de slots déclarés dans l'en-tête de
+  cette carte et octets correspondants (`slots * 8`), avec consommation des
+  offsets `rbp - offset` pour marquer ces slots exacts avant le scan
+  conservateur de fallback, puis état courant de la free-list et payload
   encore alloué. En cas de
   dépassement persistant après collecte, le runtime écrit `Nabla runtime error:
   heap exhausted` sur stderr et termine avec le code 255. Les sections `Chaines`
