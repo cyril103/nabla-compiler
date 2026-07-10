@@ -501,10 +501,13 @@ def intArrayMapObject[U](xs: IntArray, f: (Int) => U): ArrayObject[U] = {
 }
 
 def intArrayFlatMapObject[U](xs: IntArray, transform: (Int) => Array[U]): ArrayObject[U] = {
+    val mappedValues = new ObjectArray[Array[U]](xs.length())
     var index = 0
     var total = 0
     while (index < xs.length()) {
-        total = total + transform(xs.get(index)).size()
+        val mapped = transform(xs.get(index))
+        mappedValues.set(index, mapped)
+        total = total + mapped.size()
         index = index + 1
     }
 
@@ -512,7 +515,7 @@ def intArrayFlatMapObject[U](xs: IntArray, transform: (Int) => Array[U]): ArrayO
     index = 0
     var output = 0
     while (index < xs.length()) {
-        val mapped = transform(xs.get(index))
+        val mapped = mappedValues.get(index)
         var inner = 0
         while (inner < mapped.size()) {
             flattened.set(output, mapped.get(inner))
@@ -525,10 +528,13 @@ def intArrayFlatMapObject[U](xs: IntArray, transform: (Int) => Array[U]): ArrayO
 }
 
 def intArrayFilter(xs: IntArray, predicate: (Int) => Bool): IntArray = {
+    val selected = new BoolArray(xs.length())
     var index = 0
     var kept = 0
     while (index < xs.length()) {
-        if (predicate(xs.get(index))) {
+        val keep = predicate(xs.get(index))
+        selected.set(index, keep)
+        if (keep) {
             kept = kept + 1
         } else {
             kept
@@ -541,7 +547,7 @@ def intArrayFilter(xs: IntArray, predicate: (Int) => Bool): IntArray = {
     var output = 0
     while (index < xs.length()) {
         val value = xs.get(index)
-        if (predicate(value)) {
+        if (selected.get(index)) {
             filtered.set(output, value)
             output = output + 1
         } else {
@@ -861,8 +867,36 @@ def intArraySpan(xs: IntArray, predicate: (Int) => Bool): ArrayIntSpan = {
 }
 
 def intArrayPartition(xs: IntArray, predicate: (Int) => Bool): ArrayIntPartition = {
-    val matching = intArrayFilter(xs, predicate)
-    val notMatching = intArrayFilter(xs, value => !predicate(value))
+    val selected = new BoolArray(xs.length())
+    var index = 0
+    var matchingCount = 0
+    while (index < xs.length()) {
+        val keep = predicate(xs.get(index))
+        selected.set(index, keep)
+        if keep {
+            matchingCount = matchingCount + 1
+        } else {
+            matchingCount
+        }
+        index = index + 1
+    }
+
+    val matching = new IntArray(matchingCount)
+    val notMatching = new IntArray(xs.length() - matchingCount)
+    index = 0
+    var matchingIndex = 0
+    var notMatchingIndex = 0
+    while (index < xs.length()) {
+        val value = xs.get(index)
+        if selected.get(index) {
+            matching.set(matchingIndex, value)
+            matchingIndex = matchingIndex + 1
+        } else {
+            notMatching.set(notMatchingIndex, value)
+            notMatchingIndex = notMatchingIndex + 1
+        }
+        index = index + 1
+    }
     new ArrayIntPartition(new ArrayInt(matching), new ArrayInt(notMatching))
 }
 

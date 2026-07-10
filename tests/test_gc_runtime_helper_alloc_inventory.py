@@ -13,7 +13,7 @@ ALLOC_RE = re.compile(r'call Runtime_alloc')
 expected_counts = {
     "Runtime_cStringToString": 1,
     "Runtime_buildArgsArray": 2,
-    "Runtime_readLine": 1,
+    "Runtime_readLine": 2,
     "Runtime_copyPathToCString": 1,
     "Runtime_emptyString": 1,
     "Runtime_readFile": 1,

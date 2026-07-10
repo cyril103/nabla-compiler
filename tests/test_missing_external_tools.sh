@@ -12,9 +12,10 @@ cat >"$TMP_DIR/ld" <<'SH'
 exit 0
 SH
 chmod +x "$TMP_DIR/ld"
+mkdir -p "$TMP_DIR/build"
 
 set +e
-PATH="$TMP_DIR" NABLA_BUILD_DIR=build build/nablac tests/test_arithmetic.nabla >"$TMP_DIR/stdout" 2>"$TMP_DIR/stderr"
+PATH="$TMP_DIR" NABLA_BUILD_DIR="$TMP_DIR/build" build/nablac tests/test_arithmetic.nabla >"$TMP_DIR/stdout" 2>"$TMP_DIR/stderr"
 status=$?
 set -e
 
@@ -27,5 +28,11 @@ if ! grep -q "commande externe introuvable: nasm" "$TMP_DIR/stderr"; then
     echo "missing clear nasm diagnostic" >&2
     echo "--- stderr ---" >&2
     cat "$TMP_DIR/stderr" >&2
+    exit 1
+fi
+
+if [ -e "$TMP_DIR/build/test_arithmetic_tmp.asm" ] ||
+   [ -e "$TMP_DIR/build/test_arithmetic_tmp.o" ]; then
+    echo "temporary files should be removed after an external tool failure" >&2
     exit 1
 fi

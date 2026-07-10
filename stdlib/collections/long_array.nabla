@@ -61,10 +61,13 @@ def longArrayMapObject[U](xs: LongArray, f: (Long) => U): ArrayObject[U] = {
 }
 
 def longArrayFlatMapObject[U](xs: LongArray, transform: (Long) => Array[U]): ArrayObject[U] = {
+    val mappedValues = new ObjectArray[Array[U]](xs.length())
     var index = 0
     var total = 0
     while (index < xs.length()) {
-        total = total + transform(xs.get(index)).size()
+        val mapped = transform(xs.get(index))
+        mappedValues.set(index, mapped)
+        total = total + mapped.size()
         index = index + 1
     }
 
@@ -72,7 +75,7 @@ def longArrayFlatMapObject[U](xs: LongArray, transform: (Long) => Array[U]): Arr
     index = 0
     var output = 0
     while (index < xs.length()) {
-        val mapped = transform(xs.get(index))
+        val mapped = mappedValues.get(index)
         var inner = 0
         while (inner < mapped.size()) {
             flattened.set(output, mapped.get(inner))
@@ -85,10 +88,13 @@ def longArrayFlatMapObject[U](xs: LongArray, transform: (Long) => Array[U]): Arr
 }
 
 def longArrayFlatMap(xs: LongArray, transform: (Long) => ArrayLong): LongArray = {
+    val mappedValues = new ObjectArray[ArrayLong](xs.length())
     var index = 0
     var total = 0
     while (index < xs.length()) {
-        total = total + transform(xs.get(index)).size()
+        val mapped = transform(xs.get(index))
+        mappedValues.set(index, mapped)
+        total = total + mapped.size()
         index = index + 1
     }
 
@@ -96,7 +102,7 @@ def longArrayFlatMap(xs: LongArray, transform: (Long) => ArrayLong): LongArray =
     index = 0
     var output = 0
     while (index < xs.length()) {
-        val mapped = transform(xs.get(index))
+        val mapped = mappedValues.get(index)
         var inner = 0
         while (inner < mapped.size()) {
             flattened.set(output, mapped.get(inner))
@@ -109,10 +115,13 @@ def longArrayFlatMap(xs: LongArray, transform: (Long) => ArrayLong): LongArray =
 }
 
 def longArrayFilter(xs: LongArray, predicate: (Long) => Bool): LongArray = {
+    val selected = new BoolArray(xs.length())
     var index = 0
     var kept = 0
     while (index < xs.length()) {
-        if predicate(xs.get(index)) {
+        val keep = predicate(xs.get(index))
+        selected.set(index, keep)
+        if keep {
             kept = kept + 1
         } else {
             kept
@@ -125,7 +134,7 @@ def longArrayFilter(xs: LongArray, predicate: (Long) => Bool): LongArray = {
     var output = 0
     while (index < xs.length()) {
         val value = xs.get(index)
-        if predicate(value) {
+        if selected.get(index) {
             filtered.set(output, value)
             output = output + 1
         } else {

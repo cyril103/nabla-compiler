@@ -1,0 +1,28 @@
+def same(left: Any, right: Any): Bool = {
+    left.equals(right)
+}
+
+def sameHash(left: Any, right: Any): Bool = {
+    left.hashCode() == right.hashCode()
+}
+
+def main(): Int = {
+    if same(7, 7) &&
+       same(7L, 7L) &&
+       same(true, true) &&
+       same('Z', 'Z') &&
+       same(1.5F, 1.5F) &&
+       same(2.5, 2.5) &&
+       same("-0.0".toFloat(), 0.0F) &&
+       same("-0.0".toDouble(), 0.0) &&
+       !same(7, 8) &&
+       sameHash(7, 7) &&
+       sameHash(1.5F, 1.5F) &&
+       sameHash(2.5, 2.5) &&
+       sameHash("-0.0".toFloat(), 0.0F) &&
+       sameHash("-0.0".toDouble(), 0.0) {
+        42
+    } else {
+        1
+    }
+}

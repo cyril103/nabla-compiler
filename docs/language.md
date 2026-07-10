@@ -722,7 +722,10 @@ methodes peuvent etre redefinies dans les sous-classes. Les appels a
 `toString()`, `hashCode()` et `equals(...)` redispatchent vers l'override runtime
 quand la valeur est manipulée via `Any`, un type parent ou un paramètre générique
 spécialisé. Pour les objets, `==` et `!=` s'appuient sur `equals(...)`; le
-fallback de `Any.equals` conserve l'égalité par identité. Les primitives
+fallback de `Any.equals` conserve l'égalité par identité. Les primitives boxees
+dans `Any` / `AnyVal` conservent toutefois leur égalité et leur hash de valeur :
+deux boxing distincts d'un même `Int`, `Bool`, `Char`, `Float` ou `Double` restent
+égaux. Les primitives
 disposent aussi de chemins specialises comme `Int.toString()` ou
 `Double.toString()`. Quand une primitive est passée à un paramètre `Any` ou
 `AnyVal` de fonction/méthode, le compilateur insère un boxing runtime minimal :
@@ -993,6 +996,11 @@ Operations courantes :
 - `foreach`
 - `mkString(separator)` pour les tableaux de `Int`, `Long`, `Bool` et `String`
 
+Les callbacks de `filter`, `flatMap` et `partition`, ainsi que le prédicat de
+`Map.filterKeys`, sont évalués une seule fois par élément. Ils peuvent donc
+observer ou modifier un état sans être rejoués pendant le dimensionnement du
+résultat.
+
 Les anciens noms `ArrayFill[T](...)`, `ArrayRange(size)` et les noms bas niveau
 comme `arrayFill[Int](...)`, `arrayIntRange(size)`,
 `arrayIntRangeUntil(start, until)`, `new IntArray(size)` ou
@@ -1120,6 +1128,9 @@ Operations utiles :
 - `filterKeys(predicate)`
 - `mkString(separator)` / `toString()`
 
+Comme les opérations de tableaux, `filterKeys` n'évalue son prédicat qu'une
+fois par entrée.
+
 Les tableaux retournes par `keys()`, `values()` et `toArray()` utilisent
 actuellement `ArrayObject[...]` pour les entrees generiques. C'est un detail de
 representation ; les exemples et le code applicatif devraient utiliser
@@ -1196,6 +1207,9 @@ existent aussi, mais le module `io` est l'interface recommandee. `print` abaisse
 son argument vers `Any.toString()` puis imprime la chaine obtenue : les primitives
 conservent leur rendu specialise et les classes utilisateur passent par leur
 override de `toString()` quand il existe.
+`readLine()` agrandit son buffer jusqu'au retour à la ligne ou à la fin de
+l'entrée; une ligne dépassant 1024 octets n'est donc ni tronquée ni laissée
+partiellement pour l'appel suivant.
 
 Lecture et ecriture de fichiers texte :
 

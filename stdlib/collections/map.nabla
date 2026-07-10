@@ -441,10 +441,13 @@ class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) with Sized with Iterable[Tup
     /// @signature def filterKeys(predicate: (K) => Bool): Map[K, V]
     /// @status Recommandee
     def filterKeys(predicate: (K) => Bool): Map[K, V] = {
+        val selected = new BoolArray(entries.size())
         var index = 0
         var kept = 0
         while index < entries.size() {
-            if predicate(entries.get(index)._1) {
+            val keep = predicate(entries.get(index)._1)
+            selected.set(index, keep)
+            if keep {
                 kept = kept + 1
             } else {
                 kept
@@ -457,7 +460,7 @@ class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) with Sized with Iterable[Tup
         var output = 0
         while index < entries.size() {
             val entry = entries.get(index)
-            if predicate(entry._1) {
+            if selected.get(index) {
                 filtered.set(output, entry)
                 output = output + 1
             } else {
