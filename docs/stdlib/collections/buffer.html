@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Buffer - Nabla stdlib</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <header class="topbar">
+    <a class="brand" href="../index.html">Nabla stdlib</a>
+    <nav class="topnav" aria-label="Navigation principale">
+      <a href="../index.html">Modules</a>
+      <a href="https://github.com/cyril103/nabla-compiler">GitHub</a>
+    </nav>
+  </header>
+  <main id="contenu">
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="../index.html">Modules</a> / collections.buffer</nav>
+    <section class="module-hero">
+      <p class="eyebrow">Module</p>
+      <h1>Buffer</h1>
+      <p class="import"><code>import collections.buffer</code></p>
+      <p>Traits publics pour les sequences mutables a taille variable. Cette surface s&#x27;inspire de scala.collection.mutable.Buffer: un Buffer est une collection parcourable qui peut grandir, retrecir et modifier ses elements par index. Nabla garde des noms explicites et retourne Unit pour les primitives de mutation; les methodes *InPlace retournent le buffer pour permettre le chainage polymorphe.</p>
+
+    </section>
+    <div class="doc-shell">
+      <aside class="sidebar" aria-label="Sommaire des symboles publics">
+        <h2>API publique</h2>
+      <section class="toc-group">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="#Buffer" title="trait Buffer[A] extends Iterable[A]"><span>Buffer</span><code>trait Buffer[A] extends Iterable[A]</code></a></li>
+        </ul>
+      </section>
+      <section class="toc-group">
+        <h3>Methodes</h3>
+        <ul>
+        <li><a href="#get" title="def get(index: Int): A"><span>get</span><code>def get(index: Int): A</code></a></li>
+        <li><a href="#set" title="def set(index: Int, value: A): Unit"><span>set</span><code>def set(index: Int, value: A): Unit</code></a></li>
+        <li><a href="#insert" title="def insert(index: Int, value: A): Unit"><span>insert</span><code>def insert(index: Int, value: A): Unit</code></a></li>
+        <li><a href="#insertAll" title="def insertAll(index: Int, values: Iterable[A]): Unit"><span>insertAll</span><code>def insertAll(index: Int, values: Iterable[A]): Unit</code></a></li>
+        <li><a href="#removeAt" title="def removeAt(index: Int): A"><span>removeAt</span><code>def removeAt(index: Int): A</code></a></li>
+        <li><a href="#removeRange" title="def removeRange(index: Int, count: Int): Unit"><span>removeRange</span><code>def removeRange(index: Int, count: Int): Unit</code></a></li>
+        <li><a href="#clear" title="def clear(): Unit"><span>clear</span><code>def clear(): Unit</code></a></li>
+        <li><a href="#append" title="def append(value: A): Unit"><span>append</span><code>def append(value: A): Unit</code></a></li>
+        <li><a href="#addOne" title="def addOne(value: A): Unit"><span>addOne</span><code>def addOne(value: A): Unit</code></a></li>
+        <li><a href="#appendAll" title="def appendAll(values: Iterable[A]): Unit"><span>appendAll</span><code>def appendAll(values: Iterable[A]): Unit</code></a></li>
+        <li><a href="#prepend" title="def prepend(value: A): Unit"><span>prepend</span><code>def prepend(value: A): Unit</code></a></li>
+        <li><a href="#prependAll" title="def prependAll(values: Iterable[A]): Unit"><span>prependAll</span><code>def prependAll(values: Iterable[A]): Unit</code></a></li>
+        <li><a href="#indexOf" title="def indexOf(value: A): Int"><span>indexOf</span><code>def indexOf(value: A): Int</code></a></li>
+        <li><a href="#subtractOne" title="def subtractOne(value: A): Bool"><span>subtractOne</span><code>def subtractOne(value: A): Bool</code></a></li>
+        <li><a href="#trimStart" title="def trimStart(n: Int): Unit"><span>trimStart</span><code>def trimStart(n: Int): Unit</code></a></li>
+        <li><a href="#trimEnd" title="def trimEnd(n: Int): Unit"><span>trimEnd</span><code>def trimEnd(n: Int): Unit</code></a></li>
+        <li><a href="#dropInPlace" title="def dropInPlace(n: Int): Buffer[A]"><span>dropInPlace</span><code>def dropInPlace(n: Int): Buffer[A]</code></a></li>
+        <li><a href="#dropRightInPlace" title="def dropRightInPlace(n: Int): Buffer[A]"><span>dropRightInPlace</span><code>def dropRightInPlace(n: Int): Buffer[A]</code></a></li>
+        <li><a href="#takeInPlace" title="def takeInPlace(n: Int): Buffer[A]"><span>takeInPlace</span><code>def takeInPlace(n: Int): Buffer[A]</code></a></li>
+        <li><a href="#takeRightInPlace" title="def takeRightInPlace(n: Int): Buffer[A]"><span>takeRightInPlace</span><code>def takeRightInPlace(n: Int): Buffer[A]</code></a></li>
+        <li><a href="#sliceInPlace" title="def sliceInPlace(start: Int, end: Int): Buffer[A]"><span>sliceInPlace</span><code>def sliceInPlace(start: Int, end: Int): Buffer[A]</code></a></li>
+        <li><a href="#filterInPlace" title="def filterInPlace(predicate: (A) =&gt; Bool): Buffer[A]"><span>filterInPlace</span><code>def filterInPlace(predicate: (A) =&gt; Bool): Buffer[A]</code></a></li>
+        <li><a href="#padToInPlace" title="def padToInPlace(len: Int, value: A): Buffer[A]"><span>padToInPlace</span><code>def padToInPlace(len: Int, value: A): Buffer[A]</code></a></li>
+        </ul>
+      </section>
+      </aside>
+      <section class="content entries" aria-label="Reference detaillee">
+        <article class="entry" id="Buffer">
+          <div class="entry-meta">
+            <span class="kind">trait</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>Buffer</h2>
+          <pre class="signature"><code>trait Buffer[A] extends Iterable[A]</code></pre>
+          <p>Sequence mutable a taille variable.</p>
+<p>Les implementations fournissent les operations indexees primitives get/set/insert/removeAt/removeRange. Les helpers append, prepend, trimStart, dropInPlace, takeInPlace, sliceInPlace, subtractOne, filterInPlace et padToInPlace sont derives de ces primitives, comme dans la hierarchie Scala mutable.Buffer.</p>
+
+        </article>
+        <article class="entry" id="get">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>get</h2>
+          <pre class="signature"><code>def get(index: Int): A</code></pre>
+          <p>Retourne l&#x27;element a index.</p>
+
+        </article>
+        <article class="entry" id="set">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>set</h2>
+          <pre class="signature"><code>def set(index: Int, value: A): Unit</code></pre>
+          <p>Remplace l&#x27;element a index par value.</p>
+
+        </article>
+        <article class="entry" id="insert">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>insert</h2>
+          <pre class="signature"><code>def insert(index: Int, value: A): Unit</code></pre>
+          <p>Insere value avant l&#x27;element a index.</p>
+
+        </article>
+        <article class="entry" id="insertAll">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>insertAll</h2>
+          <pre class="signature"><code>def insertAll(index: Int, values: Iterable[A]): Unit</code></pre>
+          <p>Insere tous les elements de values avant l&#x27;element a index.</p>
+
+        </article>
+        <article class="entry" id="removeAt">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>removeAt</h2>
+          <pre class="signature"><code>def removeAt(index: Int): A</code></pre>
+          <p>Retire et retourne l&#x27;element a index.</p>
+
+        </article>
+        <article class="entry" id="removeRange">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>removeRange</h2>
+          <pre class="signature"><code>def removeRange(index: Int, count: Int): Unit</code></pre>
+          <p>Retire count elements a partir de index.</p>
+
+        </article>
+        <article class="entry" id="clear">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>clear</h2>
+          <pre class="signature"><code>def clear(): Unit</code></pre>
+          <p>Retire tous les elements.</p>
+
+        </article>
+        <article class="entry" id="append">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>append</h2>
+          <pre class="signature"><code>def append(value: A): Unit</code></pre>
+          <p>Ajoute value en fin de buffer.</p>
+
+        </article>
+        <article class="entry" id="addOne">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>addOne</h2>
+          <pre class="signature"><code>def addOne(value: A): Unit</code></pre>
+          <p>Alias mutable de append inspire de Growable.addOne.</p>
+
+        </article>
+        <article class="entry" id="appendAll">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>appendAll</h2>
+          <pre class="signature"><code>def appendAll(values: Iterable[A]): Unit</code></pre>
+          <p>Ajoute les elements de values en fin de buffer.</p>
+
+        </article>
+        <article class="entry" id="prepend">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>prepend</h2>
+          <pre class="signature"><code>def prepend(value: A): Unit</code></pre>
+          <p>Ajoute value en tete de buffer.</p>
+
+        </article>
+        <article class="entry" id="prependAll">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>prependAll</h2>
+          <pre class="signature"><code>def prependAll(values: Iterable[A]): Unit</code></pre>
+          <p>Ajoute les elements de values en tete de buffer en conservant leur ordre.</p>
+
+        </article>
+        <article class="entry" id="indexOf">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>indexOf</h2>
+          <pre class="signature"><code>def indexOf(value: A): Int</code></pre>
+          <p>Retourne le premier index contenant value, ou -1 si absent.</p>
+
+        </article>
+        <article class="entry" id="subtractOne">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>subtractOne</h2>
+          <pre class="signature"><code>def subtractOne(value: A): Bool</code></pre>
+          <p>Retire la premiere occurrence de value si elle existe.</p>
+<p>Retourne true quand un element a ete retire, false sinon.</p>
+
+        </article>
+        <article class="entry" id="trimStart">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>trimStart</h2>
+          <pre class="signature"><code>def trimStart(n: Int): Unit</code></pre>
+          <p>Retire les n premiers elements, avec n borne a [0, size].</p>
+
+        </article>
+        <article class="entry" id="trimEnd">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>trimEnd</h2>
+          <pre class="signature"><code>def trimEnd(n: Int): Unit</code></pre>
+          <p>Retire les n derniers elements, avec n borne a [0, size].</p>
+
+        </article>
+        <article class="entry" id="dropInPlace">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>dropInPlace</h2>
+          <pre class="signature"><code>def dropInPlace(n: Int): Buffer[A]</code></pre>
+          <p>Retire les n premiers elements et retourne ce buffer.</p>
+
+        </article>
+        <article class="entry" id="dropRightInPlace">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>dropRightInPlace</h2>
+          <pre class="signature"><code>def dropRightInPlace(n: Int): Buffer[A]</code></pre>
+          <p>Retire les n derniers elements et retourne ce buffer.</p>
+
+        </article>
+        <article class="entry" id="takeInPlace">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>takeInPlace</h2>
+          <pre class="signature"><code>def takeInPlace(n: Int): Buffer[A]</code></pre>
+          <p>Conserve les n premiers elements et retourne ce buffer.</p>
+
+        </article>
+        <article class="entry" id="takeRightInPlace">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>takeRightInPlace</h2>
+          <pre class="signature"><code>def takeRightInPlace(n: Int): Buffer[A]</code></pre>
+          <p>Conserve les n derniers elements et retourne ce buffer.</p>
+
+        </article>
+        <article class="entry" id="sliceInPlace">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>sliceInPlace</h2>
+          <pre class="signature"><code>def sliceInPlace(start: Int, end: Int): Buffer[A]</code></pre>
+          <p>Conserve la tranche [start, end) et retourne ce buffer.</p>
+
+        </article>
+        <article class="entry" id="filterInPlace">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>filterInPlace</h2>
+          <pre class="signature"><code>def filterInPlace(predicate: (A) =&gt; Bool): Buffer[A]</code></pre>
+          <p>Retire les elements qui ne satisfont pas predicate et retourne ce buffer.</p>
+
+        </article>
+        <article class="entry" id="padToInPlace">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>padToInPlace</h2>
+          <pre class="signature"><code>def padToInPlace(len: Int, value: A): Buffer[A]</code></pre>
+          <p>Ajoute value jusqu&#x27;a atteindre len elements et retourne ce buffer.</p>
+
+        </article>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
