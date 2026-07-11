@@ -1,0 +1,242 @@
+package collections.buffer
+
+/// @module Buffer
+/// Traits publics pour les sequences mutables a taille variable.
+///
+/// Cette surface s'inspire de scala.collection.mutable.Buffer: un Buffer est
+/// une collection parcourable qui peut grandir, retrecir et modifier ses
+/// elements par index. Nabla garde des noms explicites et retourne Unit pour les
+/// primitives de mutation; les methodes *InPlace retournent le buffer pour
+/// permettre le chainage polymorphe.
+
+import core.iterable
+
+/// Sequence mutable a taille variable.
+/// @signature trait Buffer[A] extends Iterable[A]
+/// @status Experimental
+///
+/// Les implementations fournissent les operations indexees primitives
+/// get/set/insert/removeAt/removeRange. Les helpers append, prepend, trimStart,
+/// dropInPlace, takeInPlace, sliceInPlace, subtractOne, filterInPlace et
+/// padToInPlace sont derives de ces primitives, comme dans la hierarchie Scala
+/// mutable.Buffer.
+trait Buffer[A] with Iterable[A] {
+    /// Retourne l'element a index.
+    /// @signature def get(index: Int): A
+    /// @status Experimental
+    def get(index: Int): A
+
+    /// Remplace l'element a index par value.
+    /// @signature def set(index: Int, value: A): Unit
+    /// @status Experimental
+    def set(index: Int, value: A): Unit
+
+    /// Insere value avant l'element a index.
+    /// @signature def insert(index: Int, value: A): Unit
+    /// @status Experimental
+    def insert(index: Int, value: A): Unit
+
+    /// Insere tous les elements de values avant l'element a index.
+    /// @signature def insertAll(index: Int, values: Iterable[A]): Unit
+    /// @status Experimental
+    def insertAll(index: Int, values: Iterable[A]): Unit
+
+    /// Retire et retourne l'element a index.
+    /// @signature def removeAt(index: Int): A
+    /// @status Experimental
+    def removeAt(index: Int): A
+
+    /// Retire count elements a partir de index.
+    /// @signature def removeRange(index: Int, count: Int): Unit
+    /// @status Experimental
+    def removeRange(index: Int, count: Int): Unit
+
+    /// Retire tous les elements.
+    /// @signature def clear(): Unit
+    /// @status Experimental
+    def clear(): Unit = {
+        this.removeRange(0, this.size())
+    }
+
+    /// Ajoute value en fin de buffer.
+    /// @signature def append(value: A): Unit
+    /// @status Experimental
+    def append(value: A): Unit = {
+        this.insert(this.size(), value)
+    }
+
+    /// Alias mutable de append inspire de Growable.addOne.
+    /// @signature def addOne(value: A): Unit
+    /// @status Experimental
+    def addOne(value: A): Unit = {
+        this.append(value)
+    }
+
+    /// Ajoute les elements de values en fin de buffer.
+    /// @signature def appendAll(values: Iterable[A]): Unit
+    /// @status Experimental
+    def appendAll(values: Iterable[A]): Unit = {
+        this.insertAll(this.size(), values)
+    }
+
+    /// Ajoute value en tete de buffer.
+    /// @signature def prepend(value: A): Unit
+    /// @status Experimental
+    def prepend(value: A): Unit = {
+        this.insert(0, value)
+    }
+
+    /// Ajoute les elements de values en tete de buffer en conservant leur ordre.
+    /// @signature def prependAll(values: Iterable[A]): Unit
+    /// @status Experimental
+    def prependAll(values: Iterable[A]): Unit = {
+        this.insertAll(0, values)
+    }
+
+    /// Retourne le premier index contenant value, ou -1 si absent.
+    /// @signature def indexOf(value: A): Int
+    /// @status Experimental
+    def indexOf(value: A): Int = {
+        var index = 0
+        var found = -1
+        while index < this.size() {
+            if found == -1 && this.get(index) == value {
+                found = index
+            } else {
+                while false {
+                    0
+                }
+            }
+            index = index + 1
+        }
+        found
+    }
+
+    /// Retire la premiere occurrence de value si elle existe.
+    /// @signature def subtractOne(value: A): Bool
+    /// @status Experimental
+    ///
+    /// Retourne true quand un element a ete retire, false sinon.
+    def subtractOne(value: A): Bool = {
+        val index = this.indexOf(value)
+        if index == -1 {
+            false
+        } else {
+            this.removeAt(index)
+            true
+        }
+    }
+
+    /// Retire les n premiers elements, avec n borne a [0, size].
+    /// @signature def trimStart(n: Int): Unit
+    /// @status Experimental
+    def trimStart(n: Int): Unit = {
+        this.removeRange(0, this.normalizedCount(n))
+    }
+
+    /// Retire les n derniers elements, avec n borne a [0, size].
+    /// @signature def trimEnd(n: Int): Unit
+    /// @status Experimental
+    def trimEnd(n: Int): Unit = {
+        val count = this.normalizedCount(n)
+        this.removeRange(this.size() - count, count)
+    }
+
+    /// Retire les n premiers elements et retourne ce buffer.
+    /// @signature def dropInPlace(n: Int): Buffer[A]
+    /// @status Experimental
+    def dropInPlace(n: Int): Buffer[A] = {
+        this.trimStart(n)
+        this
+    }
+
+    /// Retire les n derniers elements et retourne ce buffer.
+    /// @signature def dropRightInPlace(n: Int): Buffer[A]
+    /// @status Experimental
+    def dropRightInPlace(n: Int): Buffer[A] = {
+        this.trimEnd(n)
+        this
+    }
+
+    /// Conserve les n premiers elements et retourne ce buffer.
+    /// @signature def takeInPlace(n: Int): Buffer[A]
+    /// @status Experimental
+    def takeInPlace(n: Int): Buffer[A] = {
+        val keep = this.normalizedCount(n)
+        this.removeRange(keep, this.size() - keep)
+        this
+    }
+
+    /// Conserve les n derniers elements et retourne ce buffer.
+    /// @signature def takeRightInPlace(n: Int): Buffer[A]
+    /// @status Experimental
+    def takeRightInPlace(n: Int): Buffer[A] = {
+        val keep = this.normalizedCount(n)
+        this.removeRange(0, this.size() - keep)
+        this
+    }
+
+    /// Conserve la tranche [start, end) et retourne ce buffer.
+    /// @signature def sliceInPlace(start: Int, end: Int): Buffer[A]
+    /// @status Experimental
+    def sliceInPlace(start: Int, end: Int): Buffer[A] = {
+        val from = this.normalizedIndex(start)
+        val until = this.normalizedIndex(end)
+        if until < from {
+            this.clear()
+        } else {
+            this.removeRange(until, this.size() - until)
+            this.removeRange(0, from)
+        }
+        this
+    }
+
+    /// Retire les elements qui ne satisfont pas predicate et retourne ce buffer.
+    /// @signature def filterInPlace(predicate: (A) => Bool): Buffer[A]
+    /// @status Experimental
+    def filterInPlace(predicate: (A) => Bool): Buffer[A] = {
+        var index = 0
+        while index < this.size() {
+            if predicate(this.get(index)) {
+                index = index + 1
+            } else {
+                this.removeAt(index)
+            }
+        }
+        this
+    }
+
+    /// Ajoute value jusqu'a atteindre len elements et retourne ce buffer.
+    /// @signature def padToInPlace(len: Int, value: A): Buffer[A]
+    /// @status Experimental
+    def padToInPlace(len: Int, value: A): Buffer[A] = {
+        while this.size() < len {
+            this.append(value)
+        }
+        this
+    }
+
+    def normalizedCount(n: Int): Int = {
+        if n < 0 {
+            0
+        } else {
+            if n > this.size() {
+                this.size()
+            } else {
+                n
+            }
+        }
+    }
+
+    def normalizedIndex(index: Int): Int = {
+        if index < 0 {
+            0
+        } else {
+            if index > this.size() {
+                this.size()
+            } else {
+                index
+            }
+        }
+    }
+}

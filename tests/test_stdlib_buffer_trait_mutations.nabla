@@ -1,0 +1,111 @@
+import collections.array
+import collections.buffer
+import collections.object_array
+import core.iterable
+import core.iterator
+
+class TestBuffer[A](var values: ArrayObject[A]) with Buffer[A] {
+    override def size(): Int = {
+        values.size()
+    }
+
+    override def iterator(): Iterator[A] = {
+        values.iterator()
+    }
+
+    override def get(index: Int): A = {
+        values.get(index)
+    }
+
+    override def set(index: Int, value: A): Unit = {
+        values.set(index, value)
+    }
+
+    override def insert(index: Int, value: A): Unit = {
+        val next = new ObjectArray[A](values.size() + 1)
+        var source = 0
+        var target = 0
+        while target < next.length() {
+            if target == index {
+                next.set(target, value)
+            } else {
+                next.set(target, values.get(source))
+                source = source + 1
+            }
+            target = target + 1
+        }
+        values = new ArrayObject[A](next)
+        while false {
+            0
+        }
+    }
+
+    override def insertAll(index: Int, items: Iterable[A]): Unit = {
+        var at = index
+        val iterator = items.iterator()
+        while iterator.hasNext() {
+            this.insert(at, iterator.next())
+            at = at + 1
+        }
+    }
+
+    override def removeAt(index: Int): A = {
+        val removed = values.get(index)
+        val next = new ObjectArray[A](values.size() - 1)
+        var source = 0
+        var target = 0
+        while source < values.size() {
+            if source == index {
+                source = source + 1
+            } else {
+                next.set(target, values.get(source))
+                source = source + 1
+                target = target + 1
+            }
+        }
+        values = new ArrayObject[A](next)
+        removed
+    }
+
+    override def removeRange(index: Int, count: Int): Unit = {
+        var remaining = count
+        while remaining > 0 {
+            this.removeAt(index)
+            remaining = remaining - 1
+        }
+    }
+
+    def mkString(separator: String): String = {
+        values.mkString(separator)
+    }
+}
+
+def mutate(values: Buffer[Int]): Int = {
+    values.append(3)
+    values.prepend(1)
+    values.insert(1, 2)
+    values.appendAll(Array.apply[Int](4, 5))
+    values.prependAll(Array.apply[Int](0))
+    values.set(3, 30)
+    val removed = values.subtractOne(30)
+    values.trimEnd(1)
+    values.padToInPlace(5, 9)
+    values.filterInPlace(value => value != 2)
+    values.dropInPlace(1)
+    values.takeInPlace(2)
+    if removed && values.get(0) == 1 && values.get(1) == 4 && values.size() == 2 {
+        42
+    } else {
+        1
+    }
+}
+
+def main(): Int = {
+    val buffer = new TestBuffer[Int](objectArrayEmpty[Int]())
+    val result = mutate(buffer)
+    if result == 42 && buffer.mkString(",") == "1,4" {
+        42
+    } else {
+        2
+    }
+}
