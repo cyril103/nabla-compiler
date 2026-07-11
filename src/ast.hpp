@@ -177,6 +177,7 @@ class FunctionCallNode : public ASTNode {
     std::vector<CompilerContext::ParameterInfo> resolvedParameters;
     std::string resolvedType = "Int";
     std::vector<bool> returnFunctionByNameParameters;
+    bool callWithCurrentClosure = false;
 public:
     FunctionCallNode(
         std::string functionName, std::vector<std::unique_ptr<ASTNode>> args,

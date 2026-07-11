@@ -1,0 +1,11 @@
+def outer(base: Int): Int = {
+    def add(value: Int): Int = {
+        value + base
+    }
+    val f: (Int) => Int = add
+    f(2)
+}
+
+def main(): Int = {
+    outer(40)
+}

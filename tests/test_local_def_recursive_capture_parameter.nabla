@@ -1,0 +1,14 @@
+def outer(base: Int): Int = {
+    def loop(n: Int): Int = {
+        if n == 0 {
+            base
+        } else {
+            loop(n - 1)
+        }
+    }
+    loop(3)
+}
+
+def main(): Int = {
+    outer(42)
+}

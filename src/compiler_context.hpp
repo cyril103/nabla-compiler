@@ -43,6 +43,7 @@ struct CompilerContext {
         bool isSyntheticAccessor = false;
         std::vector<bool> returnFunctionByNameParameters;
         std::vector<TypeParameterInfo> typeParameterInfos;
+        bool hasClosureParameter = false;
     };
 
     struct FieldInfo {

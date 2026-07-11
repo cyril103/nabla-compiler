@@ -95,8 +95,9 @@ la roadmap. À la date de ce fichier, le compilateur couvre notamment:
   alpha-normalisée; priorité aux variantes concrètes, inférence générique,
   références typées et diagnostics d'ambiguïté;
 - fonctions locales `def` abaissées en symboles cachés, avec récursion locale,
-  appels directs et réutilisation des paramètres génériques englobants; captures
-  implicites et fonctions locales explicitement génériques restent reportées;
+  appels directs, réutilisation des paramètres génériques englobants et captures
+  par valeur des paramètres/valeurs englobants; fonctions locales explicitement
+  génériques restent reportées;
 - propriétés calculées `def name: T = expr` utilisables sans parenthèses;
 - types fonction canoniques `Fn(...)->...`, lambdas sans capture, closures avec
   capture par valeur, fonctions retournant des fonctions et formes curryfiées;

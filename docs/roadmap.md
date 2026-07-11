@@ -338,9 +338,10 @@ reprise séparées :
 - Les fonctions locales `def` avec parametres sont supportees dans les blocs via
   des fonctions cachees non exposees comme API publique; elles couvrent l'appel
   direct, la recursion directe, les references comme valeurs fonction pour les
-  helpers declares hors contexte generique, les appels vers des helpers locaux deja declares et les
-  contextes generiques de fonctions/methodes/classes/traits. Les captures
-  implicites et fonctions locales generiques restent explicitement reportees.
+  helpers declares hors contexte generique, les appels vers des helpers locaux deja declares, les
+  contextes generiques de fonctions/methodes/classes/traits et les captures par
+  valeur de parametres/valeurs englobants. Les fonctions locales generiques
+  restent explicitement reportees.
 - `docs/plans/` est reserve aux plans actifs: les plans historiques des jalons
   deja livres ont ete retires, et les prochains chantiers doivent creer un plan
   court centre sur le delta restant, puis suivre la checklist

@@ -21,17 +21,24 @@ private:
     CompilerContext& context;
     std::filesystem::path currentFile;
     std::string currentParsingClass;
+    struct CapturedSymbol {
+        std::string name;
+        std::string symbolName;
+        std::string type;
+    };
     struct ParsedSymbol {
         ParsedSymbol() = default;
         ParsedSymbol(
             std::string internalName, std::string type, bool isMutable,
             bool isLocalFunction = false, bool isForbiddenCapture = false, bool isByName = false,
             std::vector<bool> parameterByNameParameters = {},
-            std::vector<bool> returnFunctionByNameParameters = {})
+            std::vector<bool> returnFunctionByNameParameters = {},
+            std::vector<CapturedSymbol> capturedValues = {})
             : internalName(std::move(internalName)), type(std::move(type)), isMutable(isMutable),
               isLocalFunction(isLocalFunction), isForbiddenCapture(isForbiddenCapture), isByName(isByName),
               parameterByNameParameters(std::move(parameterByNameParameters)),
-              returnFunctionByNameParameters(std::move(returnFunctionByNameParameters)) {}
+              returnFunctionByNameParameters(std::move(returnFunctionByNameParameters)),
+              captures(std::move(capturedValues)) {}
         std::string internalName;
         std::string type;
         bool isMutable;
@@ -40,11 +47,7 @@ private:
         bool isByName = false;
         std::vector<bool> parameterByNameParameters;
         std::vector<bool> returnFunctionByNameParameters;
-    };
-    struct CapturedSymbol {
-        std::string name;
-        std::string symbolName;
-        std::string type;
+        std::vector<CapturedSymbol> captures;
     };
     struct LambdaCaptureScope {
         size_t outerScopeCount;

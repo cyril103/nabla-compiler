@@ -1659,7 +1659,7 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             (void) initialScopeIndex;
             std::string fieldFunctionType;
             std::string fieldOwnerType;
-            if (initialSymbol && initialSymbol->isForbiddenCapture) {
+            if (initialSymbol && initialSymbol->isForbiddenCapture && lambdaCaptureScopes.empty()) {
                 throw CompilerError(
                     ErrorKind::Parser, nameToken.location,
                     "les fonctions locales ne capturent pas encore les variables ou paramètres englobants: " + name);
@@ -1680,6 +1680,23 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                 consume(TokenType::LPAREN, "");
                 auto arguments = parseArguments(expectedArgumentTypes, initialSymbol->parameterByNameParameters);
                 consume(TokenType::RPAREN, "Parenthèse fermante attendue après l'appel de fonction");
+                if (!initialSymbol->captures.empty()) {
+                    std::vector<FunctionReferenceNode::Capture> referenceCaptures;
+                    for (const auto& capture : initialSymbol->captures) {
+                        referenceCaptures.push_back({capture.name, capture.symbolName, capture.type});
+                    }
+                    auto callee = located(
+                        std::make_unique<FunctionReferenceNode>(
+                            name, initialSymbol->type, std::vector<std::string>{},
+                            std::move(referenceCaptures), initialSymbol->internalName),
+                        nameToken.location);
+                    return located(
+                        std::make_unique<FunctionExpressionCallNode>(
+                            name, std::move(callee), std::move(arguments),
+                            functionType ? functionType->returnType : "Int",
+                            initialSymbol->returnFunctionByNameParameters),
+                        nameToken.location);
+                }
                 return located(
                     std::make_unique<FunctionCallNode>(
                         initialSymbol->internalName, std::move(arguments),
@@ -1860,7 +1877,7 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         }
         auto [symbol, scopeIndex] = findLocalWithScope(name);
         if (symbol) {
-            if (symbol->isForbiddenCapture) {
+            if (symbol->isForbiddenCapture && lambdaCaptureScopes.empty()) {
                 throw CompilerError(
                     ErrorKind::Parser, nameToken.location,
                     "les fonctions locales ne capturent pas encore les variables ou paramètres englobants: " + name);
@@ -1871,10 +1888,14 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
                     "les arguments de type ne sont supportés que pour les fonctions nommées");
             }
             if (symbol->isLocalFunction) {
+                std::vector<FunctionReferenceNode::Capture> referenceCaptures;
+                for (const auto& capture : symbol->captures) {
+                    referenceCaptures.push_back({capture.name, capture.symbolName, capture.type});
+                }
                 return located(
                     std::make_unique<FunctionReferenceNode>(
                         name, symbol->type, std::vector<std::string>{},
-                        std::vector<FunctionReferenceNode::Capture>{}, symbol->internalName),
+                        std::move(referenceCaptures), symbol->internalName),
                     nameToken.location);
             }
             if (symbol->isByName) {
@@ -2657,6 +2678,8 @@ std::unique_ptr<ASTNode> Parser::parseLocalFunctionDef() {
         }
         if (!visibleScope.empty()) localScopes.push_back(std::move(visibleScope));
     }
+    const size_t outerScopeCount = localScopes.size();
+    lambdaCaptureScopes.push_back({outerScopeCount, {}});
     localScopes.push_back(std::move(functionScope));
     currentParsingClass.clear();
 
@@ -2669,13 +2692,30 @@ std::unique_ptr<ASTNode> Parser::parseLocalFunctionDef() {
         body = parseExpression();
     }
 
+    std::vector<FunctionDefNode::Capture> captures;
+    std::vector<CapturedSymbol> symbolCaptures;
+    for (const auto& [capturedSymbolName, capture] : lambdaCaptureScopes.back().capturesBySymbol) {
+        (void) capturedSymbolName;
+        captures.push_back({capture.name, capture.symbolName, capture.type});
+        symbolCaptures.push_back(capture);
+    }
+    lambdaCaptureScopes.pop_back();
+
     localScopes = std::move(savedLocalScopes);
     currentFunctionTypeParameters = std::move(savedTypeParameters);
     currentParsingClass = std::move(savedParsingClass);
 
+    if (!localScopes.empty()) {
+        auto symbolIt = localScopes.back().find(name);
+        if (symbolIt != localScopes.back().end()) {
+            symbolIt->second.captures = symbolCaptures;
+        }
+    }
+    context.functions[mangledName].hasClosureParameter = !captures.empty();
+
     generatedFunctions.push_back(located(std::make_unique<FunctionDefNode>(
         "", mangledName, returnType, currentFunctionTypeParameters,
-        std::move(parameters), std::move(body), std::vector<FunctionDefNode::Capture>{}),
+        std::move(parameters), std::move(body), std::move(captures)),
         defToken.location));
 
     return located(std::make_unique<LocalFunctionDeclNode>(name), defToken.location);

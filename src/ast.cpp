@@ -2212,6 +2212,7 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
         resolvedParameterTypes = parameterTypes(function->second.parameters);
         resolvedParameters = function->second.parameters;
         returnFunctionByNameParameters = function->second.returnFunctionByNameParameters;
+        callWithCurrentClosure = function->second.hasClosureParameter;
         resolvedTypeArguments.clear();
         return;
     }
@@ -2242,6 +2243,7 @@ void FunctionCallNode::validateSemantics(CompilerContext& context) {
     resolvedParameterTypes = parameterTypes(parameters);
     resolvedParameters = parameters;
     returnFunctionByNameParameters = function->second.returnFunctionByNameParameters;
+    callWithCurrentClosure = function->second.hasClosureParameter;
     resolvedTypeArguments = orderedTypeArguments(function->second.typeParameters, *substitution);
 }
 
@@ -2321,10 +2323,12 @@ std::string FunctionCallNode::lowerToIR(IRBuilder& builder) const {
     if (!concreteTypeArguments.empty()) {
         const std::string concreteReturnType = builder.substituteActiveType(resolvedType);
         builder.registerFunctionSpecialization(resolvedFunctionName, concreteTypeArguments, concreteReturnType);
+        if (callWithCurrentClosure) loweredArguments.insert(loweredArguments.begin(), "%closure");
         return builder.emitCall(
             formatParameterizedType(resolvedFunctionName, concreteTypeArguments),
             loweredArguments, concreteReturnType);
     }
+    if (callWithCurrentClosure) loweredArguments.insert(loweredArguments.begin(), "%closure");
     return builder.emitCall(resolvedFunctionName, loweredArguments, resolvedType);
 }
 

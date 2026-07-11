@@ -242,10 +242,11 @@ symboles de fonction cachés non surchargés. Les appels directs restent des app
 de fonction directs vers ce symbole caché; une référence en position valeur
 réutilise le chemin `FunctionReferenceNode` / `Fn` pour les helpers déclarés hors
 contexte générique. La V1 autorise récursion directe, appels vers des helpers locaux
-déclarés précédemment, et réutilisation des paramètres de type des fonctions,
-méthodes, classes et traits englobants. Les signatures et corps de helpers
+déclarés précédemment, réutilisation des paramètres de type des fonctions,
+méthodes, classes et traits englobants, et captures par valeur des symboles
+englobants depuis le corps du helper local. Les signatures et corps de helpers
 locaux peuvent donc mentionner `T`, `U`, `List[T]` ou `(T) => U` quand ces types
-sont déjà en portée. Les captures implicites de valeurs/paramètres englobants,
+sont déjà en portée, et le corps peut lire un paramètre ou `val` englobant. Les
 fonctions locales génériques et overloads locaux dans une même portée restent
 rejetés explicitement.
 
