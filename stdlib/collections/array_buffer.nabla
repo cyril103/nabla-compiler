@@ -1,0 +1,453 @@
+package collections.array_buffer
+
+/// @module ArrayBuffer
+/// Buffer mutable indexe adosse a un tableau redimensionnable.
+///
+/// Cette implementation s'inspire de scala.collection.mutable.ArrayBuffer:
+/// append, update et acces aleatoire sont amortis en temps constant; prepend,
+/// insertions et suppressions au milieu restent lineaires car elles decalent les
+/// elements. La V0 Nabla garde une implementation generique ObjectArray[A] et
+/// expose une surface volontairement plus petite que Scala.
+
+import collections.array
+import collections.buffer
+import collections.object_array
+import core.builder
+import core.iterable
+import core.iterable_ops
+import core.iterator
+
+def arrayBufferDefaultInitialSize(): Int = {
+    16
+}
+
+/// Iterateur borne au nombre d'elements logiques d'un ArrayBuffer.
+/// @signature class ArrayBufferIterator[A] extends Iterator[A]
+/// @status Experimental
+class ArrayBufferIterator[A](values: ObjectArray[A], limit: Int, var index: Int) with Iterator[A] {
+    override def hasNext(): Bool = {
+        index < limit
+    }
+
+    override def next(): A = {
+        val value = values.get(index)
+        index = index + 1
+        value
+    }
+}
+
+/// Buffer mutable indexe et redimensionnable.
+/// @signature class ArrayBuffer[A] extends Buffer[A]
+/// @status Experimental
+///
+/// La capacite interne double quand elle devient insuffisante, comme Scala
+/// ArrayBuffer. clear() conserve la capacite courante; trimToSize() reconstruit
+/// un tableau plus petit pour liberer les cases inutilisees.
+class ArrayBuffer[A](var elements: ObjectArray[A], var used: Int) with Buffer[A] with IterableOps[A, ArrayBuffer, ArrayBuffer[A]] {
+    /// Retourne la factory utilisee par map/filter generiques.
+    /// @signature def iterableFactory(): IterableFactory[ArrayBuffer]
+    /// @status Experimental
+    override def iterableFactory(): IterableFactory[ArrayBuffer] = {
+        new ArrayBufferFactory()
+    }
+
+    /// Nombre d'elements logiques.
+    /// @signature def size(): Int
+    /// @status Experimental
+    override def size(): Int = {
+        used
+    }
+
+    /// Capacite interne courante.
+    /// @signature def capacity(): Int
+    /// @status Experimental
+    def capacity(): Int = {
+        elements.length()
+    }
+
+    /// Reserve au moins requested cases internes.
+    /// @signature def sizeHint(requested: Int): Unit
+    /// @status Experimental
+    def sizeHint(requested: Int): Unit = {
+        if requested > used && requested >= 1 {
+            this.ensureCapacity(requested)
+        } else {
+            while false {
+                0
+            }
+        }
+    }
+
+    /// Reduit la capacite interne au plus proche du nombre d'elements courant.
+    /// @signature def trimToSize(): Unit
+    /// @status Experimental
+    def trimToSize(): Unit = {
+        this.resize(this.naturalCapacity(used))
+    }
+
+    /// Retourne l'element a index.
+    /// @signature def get(index: Int): A
+    /// @status Experimental
+    override def get(index: Int): A = {
+        this.checkElementIndex(index)
+        elements.get(index)
+    }
+
+    /// Alias Scala-like de get(index).
+    /// @signature def apply(index: Int): A
+    /// @status Experimental
+    def apply(index: Int): A = {
+        this.get(index)
+    }
+
+    /// Remplace l'element a index par value.
+    /// @signature def set(index: Int, value: A): Unit
+    /// @status Experimental
+    override def set(index: Int, value: A): Unit = {
+        this.checkElementIndex(index)
+        elements.set(index, value)
+    }
+
+    /// Alias Scala-like de set(index, value).
+    /// @signature def update(index: Int, value: A): Unit
+    /// @status Experimental
+    def update(index: Int, value: A): Unit = {
+        this.set(index, value)
+    }
+
+    /// Ajoute value en fin de buffer.
+    /// @signature def append(value: A): Unit
+    /// @status Experimental
+    override def append(value: A): Unit = {
+        this.ensureCapacity(used + 1)
+        elements.set(used, value)
+        used = used + 1
+        while false {
+            0
+        }
+    }
+
+    /// Alias mutable de append inspire de Scala Growable.addOne.
+    /// @signature def addOne(value: A): Unit
+    /// @status Experimental
+    override def addOne(value: A): Unit = {
+        this.append(value)
+    }
+
+    /// Ajoute tous les elements de values en fin de buffer.
+    /// @signature def appendAll(values: Iterable[A]): Unit
+    /// @status Experimental
+    override def appendAll(values: Iterable[A]): Unit = {
+        this.insertAll(used, values)
+    }
+
+    /// Insere value avant l'element a index.
+    /// @signature def insert(index: Int, value: A): Unit
+    /// @status Experimental
+    override def insert(index: Int, value: A): Unit = {
+        this.checkInsertIndex(index)
+        this.ensureCapacity(used + 1)
+        var cursor = used
+        while cursor > index {
+            elements.set(cursor, elements.get(cursor - 1))
+            cursor = cursor - 1
+        }
+        elements.set(index, value)
+        used = used + 1
+        while false {
+            0
+        }
+    }
+
+    /// Insere tous les elements de values a index en conservant leur ordre.
+    /// @signature def insertAll(index: Int, values: Iterable[A]): Unit
+    /// @status Experimental
+    override def insertAll(index: Int, values: Iterable[A]): Unit = {
+        this.checkInsertIndex(index)
+        val count = values.size()
+        if count > 0 {
+            this.ensureCapacity(used + count)
+            var cursor = used - 1
+            while cursor >= index {
+                elements.set(cursor + count, elements.get(cursor))
+                cursor = cursor - 1
+            }
+            val iterator = values.iterator()
+            var output = index
+            while iterator.hasNext() {
+                elements.set(output, iterator.next())
+                output = output + 1
+            }
+            used = used + count
+        } else {
+            while false {
+                0
+            }
+        }
+        while false {
+            0
+        }
+    }
+
+    /// Retire et retourne l'element a index.
+    /// @signature def removeAt(index: Int): A
+    /// @status Experimental
+    override def removeAt(index: Int): A = {
+        this.checkElementIndex(index)
+        val removed = elements.get(index)
+        var cursor = index
+        while cursor < used - 1 {
+            elements.set(cursor, elements.get(cursor + 1))
+            cursor = cursor + 1
+        }
+        used = used - 1
+        removed
+    }
+
+    /// Retire count elements a partir de index.
+    /// @signature def removeRange(index: Int, count: Int): Unit
+    /// @status Experimental
+    override def removeRange(index: Int, count: Int): Unit = {
+        if count < 0 {
+            panic("ArrayBuffer.removeRange: negative count")
+        } else {
+            if count == 0 {
+                while false {
+                    0
+                }
+            } else {
+                this.checkRange(index, count)
+                var cursor = index
+                while cursor < used - count {
+                    elements.set(cursor, elements.get(cursor + count))
+                    cursor = cursor + 1
+                }
+                used = used - count
+                while false {
+                    0
+                }
+            }
+        }
+    }
+
+    /// Retire tous les elements sans reduire la capacite interne.
+    /// @signature def clear(): Unit
+    /// @status Experimental
+    override def clear(): Unit = {
+        used = 0
+        while false {
+            0
+        }
+    }
+
+    /// Copie les elements logiques dans un Array[A] compact.
+    /// @signature def toArray(): Array[A]
+    /// @status Experimental
+    def toArray(): ArrayObject[A] = {
+        val copied = new ObjectArray[A](used)
+        var index = 0
+        while index < used {
+            copied.set(index, elements.get(index))
+            index = index + 1
+        }
+        new ArrayObject[A](copied)
+    }
+
+    /// Cree un iterateur borne a size().
+    /// @signature def iterator(): Iterator[A]
+    /// @status Experimental
+    override def iterator(): Iterator[A] = {
+        new ArrayBufferIterator[A](elements, used, 0)
+    }
+
+    /// Joint les elements avec separator.
+    /// @signature def mkString(separator: String): String
+    /// @status Experimental
+    def mkString(separator: String): String = {
+        this.toArray().mkString(separator)
+    }
+
+    /// Representation chaine du buffer.
+    /// @signature def toString(): String
+    /// @status Experimental
+    override def toString(): String = {
+        "ArrayBuffer(" + this.mkString(", ") + ")"
+    }
+
+    def ensureCapacity(required: Int): Unit = {
+        if required > elements.length() {
+            this.resize(this.grownCapacity(required))
+        } else {
+            while false {
+                0
+            }
+        }
+    }
+
+    def grownCapacity(required: Int): Int = {
+        var next = elements.length() * 2
+        if next < arrayBufferDefaultInitialSize() {
+            next = arrayBufferDefaultInitialSize()
+        } else {
+            while false {
+                0
+            }
+        }
+        while next < required {
+            next = next * 2
+        }
+        next
+    }
+
+    def naturalCapacity(required: Int): Int = {
+        var next = arrayBufferDefaultInitialSize()
+        while next < required {
+            next = next * 2
+        }
+        next
+    }
+
+    def resize(newCapacity: Int): Unit = {
+        val next = new ObjectArray[A](newCapacity)
+        var index = 0
+        while index < used {
+            next.set(index, elements.get(index))
+            index = index + 1
+        }
+        elements = next
+        while false {
+            0
+        }
+    }
+
+    def checkElementIndex(index: Int): Unit = {
+        if index < 0 || index >= used {
+            panic("ArrayBuffer index out of bounds")
+        } else {
+            while false {
+                0
+            }
+        }
+    }
+
+    def checkInsertIndex(index: Int): Unit = {
+        if index < 0 || index > used {
+            panic("ArrayBuffer insert index out of bounds")
+        } else {
+            while false {
+                0
+            }
+        }
+    }
+
+    def checkRange(index: Int, count: Int): Unit = {
+        if index < 0 || index + count > used {
+            panic("ArrayBuffer range out of bounds")
+        } else {
+            while false {
+                0
+            }
+        }
+    }
+}
+
+/// Factory experimentale pour la famille ArrayBuffer.
+/// @signature class ArrayBufferFactory extends IterableFactory[ArrayBuffer]
+/// @status Experimental
+class ArrayBufferFactory() with IterableFactory[ArrayBuffer] {
+    /// Cree un ArrayBuffer[A] vide.
+    /// @signature def empty[A](): ArrayBuffer[A]
+    /// @status Experimental
+    override def empty[A](): ArrayBuffer[A] = {
+        new ArrayBuffer[A](new ObjectArray[A](arrayBufferDefaultInitialSize()), 0)
+    }
+
+    /// Cree un builder produisant un ArrayBuffer[A].
+    /// @signature def newBuilder[A](): Builder[A, ArrayBuffer[A]]
+    /// @status Experimental
+    override def newBuilder[A](): Builder[A, ArrayBuffer[A]] = {
+        new ArrayBufferBuilder[A](new ArrayBuffer[A](new ObjectArray[A](arrayBufferDefaultInitialSize()), 0))
+    }
+}
+
+/// Builder experimental qui accumule dans un ArrayBuffer.
+/// @signature class ArrayBufferBuilder[A] extends Builder[A, ArrayBuffer[A]]
+/// @status Experimental
+class ArrayBufferBuilder[A](val values: ArrayBuffer[A]) with Builder[A, ArrayBuffer[A]] {
+    /// Ajoute value au buffer en construction.
+    /// @signature def add(value: A): Unit
+    /// @status Experimental
+    override def add(value: A): Unit = {
+        values.append(value)
+    }
+
+    /// Retourne le buffer construit.
+    /// @signature def result(): ArrayBuffer[A]
+    /// @status Experimental
+    override def result(): ArrayBuffer[A] = {
+        values
+    }
+}
+
+object ArrayBuffer {
+    /// Taille initiale par defaut, comme Scala ArrayBuffer.
+    /// @signature def ArrayBuffer.defaultInitialSize(): Int
+    /// @status Experimental
+    def defaultInitialSize(): Int = {
+        16
+    }
+
+    /// Cree un ArrayBuffer[A] vide.
+    /// @signature def ArrayBuffer.empty[A](): ArrayBuffer[A]
+    /// @status Experimental
+    def empty[A](): ArrayBuffer[A] = {
+        new ArrayBuffer[A](new ObjectArray[A](arrayBufferDefaultInitialSize()), 0)
+    }
+
+    /// Cree un ArrayBuffer[A] vide avec une capacite initiale minimale.
+    /// @signature def ArrayBuffer.withCapacity[A](initialSize: Int): ArrayBuffer[A]
+    /// @status Experimental
+    def withCapacity[A](initialSize: Int): ArrayBuffer[A] = {
+        if initialSize > 1 {
+            new ArrayBuffer[A](new ObjectArray[A](initialSize), 0)
+        } else {
+            new ArrayBuffer[A](new ObjectArray[A](1), 0)
+        }
+    }
+
+    /// Cree un ArrayBuffer avec les valeurs donnees.
+    /// @signature def ArrayBuffer.apply[A](values: A*): ArrayBuffer[A]
+    /// @status Experimental
+    def apply[A](values: A*): ArrayBuffer[A] = {
+        val buffer = new ArrayBuffer[A](new ObjectArray[A](values.size()), 0)
+        var index = 0
+        while index < values.size() {
+            buffer.append(values.get(index))
+            index = index + 1
+        }
+        buffer
+    }
+
+    /// Copie une collection parcourable dans un nouvel ArrayBuffer.
+    /// @signature def ArrayBuffer.from[A](values: Iterable[A]): ArrayBuffer[A]
+    /// @status Experimental
+    def from[A](values: Iterable[A]): ArrayBuffer[A] = {
+        val buffer = new ArrayBuffer[A](new ObjectArray[A](values.size()), 0)
+        buffer.appendAll(values)
+        buffer
+    }
+
+    /// Retourne la factory experimentale de ArrayBuffer.
+    /// @signature def ArrayBuffer.factory(): IterableFactory[ArrayBuffer]
+    /// @status Experimental
+    def factory(): IterableFactory[ArrayBuffer] = {
+        new ArrayBufferFactory()
+    }
+
+    /// Cree un builder produisant un ArrayBuffer[A].
+    /// @signature def ArrayBuffer.newBuilder[A](): Builder[A, ArrayBuffer[A]]
+    /// @status Experimental
+    def newBuilder[A](): Builder[A, ArrayBuffer[A]] = {
+        new ArrayBufferBuilder[A](new ArrayBuffer[A](new ObjectArray[A](arrayBufferDefaultInitialSize()), 0))
+    }
+}

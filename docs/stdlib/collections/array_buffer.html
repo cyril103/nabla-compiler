@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArrayBuffer - Nabla stdlib</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <header class="topbar">
+    <a class="brand" href="../index.html">Nabla stdlib</a>
+    <nav class="topnav" aria-label="Navigation principale">
+      <a href="../index.html">Modules</a>
+      <a href="https://github.com/cyril103/nabla-compiler">GitHub</a>
+    </nav>
+  </header>
+  <main id="contenu">
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="../index.html">Modules</a> / collections.array_buffer</nav>
+    <section class="module-hero">
+      <p class="eyebrow">Module</p>
+      <h1>ArrayBuffer</h1>
+      <p class="import"><code>import collections.array_buffer</code></p>
+      <p>Buffer mutable indexe adosse a un tableau redimensionnable. Cette implementation s&#x27;inspire de scala.collection.mutable.ArrayBuffer: append, update et acces aleatoire sont amortis en temps constant; prepend, insertions et suppressions au milieu restent lineaires car elles decalent les elements. La V0 Nabla garde une implementation generique ObjectArray[A] et expose une surface volontairement plus petite que Scala.</p>
+
+    </section>
+    <div class="doc-shell">
+      <aside class="sidebar" aria-label="Sommaire des symboles publics">
+        <h2>API publique</h2>
+      <section class="toc-group">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="#ArrayBufferIterator" title="class ArrayBufferIterator[A] extends Iterator[A]"><span>ArrayBufferIterator</span><code>class ArrayBufferIterator[A] extends Iterator[A]</code></a></li>
+        <li><a href="#ArrayBuffer" title="class ArrayBuffer[A] extends Buffer[A]"><span>ArrayBuffer</span><code>class ArrayBuffer[A] extends Buffer[A]</code></a></li>
+        <li><a href="#ArrayBufferFactory" title="class ArrayBufferFactory extends IterableFactory[ArrayBuffer]"><span>ArrayBufferFactory</span><code>class ArrayBufferFactory extends IterableFactory[ArrayBuffer]</code></a></li>
+        <li><a href="#ArrayBufferBuilder" title="class ArrayBufferBuilder[A] extends Builder[A, ArrayBuffer[A]]"><span>ArrayBufferBuilder</span><code>class ArrayBufferBuilder[A] extends Builder[A, ArrayBuffer[A]]</code></a></li>
+        </ul>
+      </section>
+      <section class="toc-group">
+        <h3>Constructeurs et fabriques</h3>
+        <ul>
+        <li><a href="#defaultInitialSize" title="def ArrayBuffer.defaultInitialSize(): Int"><span>defaultInitialSize</span><code>def ArrayBuffer.defaultInitialSize(): Int</code></a></li>
+        <li><a href="#empty-2" title="def ArrayBuffer.empty[A](): ArrayBuffer[A]"><span>empty</span><code>def ArrayBuffer.empty[A](): ArrayBuffer[A]</code></a></li>
+        <li><a href="#withCapacity" title="def ArrayBuffer.withCapacity[A](initialSize: Int): ArrayBuffer[A]"><span>withCapacity</span><code>def ArrayBuffer.withCapacity[A](initialSize: Int): ArrayBuffer[A]</code></a></li>
+        <li><a href="#apply-2" title="def ArrayBuffer.apply[A](values: A*): ArrayBuffer[A]"><span>apply</span><code>def ArrayBuffer.apply[A](values: A*): ArrayBuffer[A]</code></a></li>
+        <li><a href="#from" title="def ArrayBuffer.from[A](values: Iterable[A]): ArrayBuffer[A]"><span>from</span><code>def ArrayBuffer.from[A](values: Iterable[A]): ArrayBuffer[A]</code></a></li>
+        <li><a href="#factory" title="def ArrayBuffer.factory(): IterableFactory[ArrayBuffer]"><span>factory</span><code>def ArrayBuffer.factory(): IterableFactory[ArrayBuffer]</code></a></li>
+        <li><a href="#newBuilder-2" title="def ArrayBuffer.newBuilder[A](): Builder[A, ArrayBuffer[A]]"><span>newBuilder</span><code>def ArrayBuffer.newBuilder[A](): Builder[A, ArrayBuffer[A]]</code></a></li>
+        </ul>
+      </section>
+      <section class="toc-group">
+        <h3>Methodes</h3>
+        <ul>
+        <li><a href="#iterableFactory" title="def iterableFactory(): IterableFactory[ArrayBuffer]"><span>iterableFactory</span><code>def iterableFactory(): IterableFactory[ArrayBuffer]</code></a></li>
+        <li><a href="#size" title="def size(): Int"><span>size</span><code>def size(): Int</code></a></li>
+        <li><a href="#capacity" title="def capacity(): Int"><span>capacity</span><code>def capacity(): Int</code></a></li>
+        <li><a href="#sizeHint" title="def sizeHint(requested: Int): Unit"><span>sizeHint</span><code>def sizeHint(requested: Int): Unit</code></a></li>
+        <li><a href="#trimToSize" title="def trimToSize(): Unit"><span>trimToSize</span><code>def trimToSize(): Unit</code></a></li>
+        <li><a href="#get" title="def get(index: Int): A"><span>get</span><code>def get(index: Int): A</code></a></li>
+        <li><a href="#apply" title="def apply(index: Int): A"><span>apply</span><code>def apply(index: Int): A</code></a></li>
+        <li><a href="#set" title="def set(index: Int, value: A): Unit"><span>set</span><code>def set(index: Int, value: A): Unit</code></a></li>
+        <li><a href="#update" title="def update(index: Int, value: A): Unit"><span>update</span><code>def update(index: Int, value: A): Unit</code></a></li>
+        <li><a href="#append" title="def append(value: A): Unit"><span>append</span><code>def append(value: A): Unit</code></a></li>
+        <li><a href="#addOne" title="def addOne(value: A): Unit"><span>addOne</span><code>def addOne(value: A): Unit</code></a></li>
+        <li><a href="#appendAll" title="def appendAll(values: Iterable[A]): Unit"><span>appendAll</span><code>def appendAll(values: Iterable[A]): Unit</code></a></li>
+        <li><a href="#insert" title="def insert(index: Int, value: A): Unit"><span>insert</span><code>def insert(index: Int, value: A): Unit</code></a></li>
+        <li><a href="#insertAll" title="def insertAll(index: Int, values: Iterable[A]): Unit"><span>insertAll</span><code>def insertAll(index: Int, values: Iterable[A]): Unit</code></a></li>
+        <li><a href="#removeAt" title="def removeAt(index: Int): A"><span>removeAt</span><code>def removeAt(index: Int): A</code></a></li>
+        <li><a href="#removeRange" title="def removeRange(index: Int, count: Int): Unit"><span>removeRange</span><code>def removeRange(index: Int, count: Int): Unit</code></a></li>
+        <li><a href="#clear" title="def clear(): Unit"><span>clear</span><code>def clear(): Unit</code></a></li>
+        <li><a href="#toArray" title="def toArray(): Array[A]"><span>toArray</span><code>def toArray(): Array[A]</code></a></li>
+        <li><a href="#iterator" title="def iterator(): Iterator[A]"><span>iterator</span><code>def iterator(): Iterator[A]</code></a></li>
+        <li><a href="#mkString" title="def mkString(separator: String): String"><span>mkString</span><code>def mkString(separator: String): String</code></a></li>
+        <li><a href="#toString" title="def toString(): String"><span>toString</span><code>def toString(): String</code></a></li>
+        <li><a href="#empty" title="def empty[A](): ArrayBuffer[A]"><span>empty</span><code>def empty[A](): ArrayBuffer[A]</code></a></li>
+        <li><a href="#newBuilder" title="def newBuilder[A](): Builder[A, ArrayBuffer[A]]"><span>newBuilder</span><code>def newBuilder[A](): Builder[A, ArrayBuffer[A]]</code></a></li>
+        <li><a href="#add" title="def add(value: A): Unit"><span>add</span><code>def add(value: A): Unit</code></a></li>
+        <li><a href="#result" title="def result(): ArrayBuffer[A]"><span>result</span><code>def result(): ArrayBuffer[A]</code></a></li>
+        </ul>
+      </section>
+      </aside>
+      <section class="content entries" aria-label="Reference detaillee">
+        <article class="entry" id="ArrayBufferIterator">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>ArrayBufferIterator</h2>
+          <pre class="signature"><code>class ArrayBufferIterator[A] extends Iterator[A]</code></pre>
+          <p>Iterateur borne au nombre d&#x27;elements logiques d&#x27;un ArrayBuffer.</p>
+
+        </article>
+        <article class="entry" id="ArrayBuffer">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>ArrayBuffer</h2>
+          <pre class="signature"><code>class ArrayBuffer[A] extends Buffer[A]</code></pre>
+          <p>Buffer mutable indexe et redimensionnable.</p>
+<p>La capacite interne double quand elle devient insuffisante, comme Scala ArrayBuffer. clear() conserve la capacite courante; trimToSize() reconstruit un tableau plus petit pour liberer les cases inutilisees.</p>
+
+        </article>
+        <article class="entry" id="iterableFactory">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>iterableFactory</h2>
+          <pre class="signature"><code>def iterableFactory(): IterableFactory[ArrayBuffer]</code></pre>
+          <p>Retourne la factory utilisee par map/filter generiques.</p>
+
+        </article>
+        <article class="entry" id="size">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>size</h2>
+          <pre class="signature"><code>def size(): Int</code></pre>
+          <p>Nombre d&#x27;elements logiques.</p>
+
+        </article>
+        <article class="entry" id="capacity">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>capacity</h2>
+          <pre class="signature"><code>def capacity(): Int</code></pre>
+          <p>Capacite interne courante.</p>
+
+        </article>
+        <article class="entry" id="sizeHint">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>sizeHint</h2>
+          <pre class="signature"><code>def sizeHint(requested: Int): Unit</code></pre>
+          <p>Reserve au moins requested cases internes.</p>
+
+        </article>
+        <article class="entry" id="trimToSize">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>trimToSize</h2>
+          <pre class="signature"><code>def trimToSize(): Unit</code></pre>
+          <p>Reduit la capacite interne au plus proche du nombre d&#x27;elements courant.</p>
+
+        </article>
+        <article class="entry" id="get">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>get</h2>
+          <pre class="signature"><code>def get(index: Int): A</code></pre>
+          <p>Retourne l&#x27;element a index.</p>
+
+        </article>
+        <article class="entry" id="apply">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>apply</h2>
+          <pre class="signature"><code>def apply(index: Int): A</code></pre>
+          <p>Alias Scala-like de get(index).</p>
+
+        </article>
+        <article class="entry" id="set">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>set</h2>
+          <pre class="signature"><code>def set(index: Int, value: A): Unit</code></pre>
+          <p>Remplace l&#x27;element a index par value.</p>
+
+        </article>
+        <article class="entry" id="update">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>update</h2>
+          <pre class="signature"><code>def update(index: Int, value: A): Unit</code></pre>
+          <p>Alias Scala-like de set(index, value).</p>
+
+        </article>
+        <article class="entry" id="append">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>append</h2>
+          <pre class="signature"><code>def append(value: A): Unit</code></pre>
+          <p>Ajoute value en fin de buffer.</p>
+
+        </article>
+        <article class="entry" id="addOne">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>addOne</h2>
+          <pre class="signature"><code>def addOne(value: A): Unit</code></pre>
+          <p>Alias mutable de append inspire de Scala Growable.addOne.</p>
+
+        </article>
+        <article class="entry" id="appendAll">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>appendAll</h2>
+          <pre class="signature"><code>def appendAll(values: Iterable[A]): Unit</code></pre>
+          <p>Ajoute tous les elements de values en fin de buffer.</p>
+
+        </article>
+        <article class="entry" id="insert">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>insert</h2>
+          <pre class="signature"><code>def insert(index: Int, value: A): Unit</code></pre>
+          <p>Insere value avant l&#x27;element a index.</p>
+
+        </article>
+        <article class="entry" id="insertAll">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>insertAll</h2>
+          <pre class="signature"><code>def insertAll(index: Int, values: Iterable[A]): Unit</code></pre>
+          <p>Insere tous les elements de values a index en conservant leur ordre.</p>
+
+        </article>
+        <article class="entry" id="removeAt">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>removeAt</h2>
+          <pre class="signature"><code>def removeAt(index: Int): A</code></pre>
+          <p>Retire et retourne l&#x27;element a index.</p>
+
+        </article>
+        <article class="entry" id="removeRange">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>removeRange</h2>
+          <pre class="signature"><code>def removeRange(index: Int, count: Int): Unit</code></pre>
+          <p>Retire count elements a partir de index.</p>
+
+        </article>
+        <article class="entry" id="clear">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>clear</h2>
+          <pre class="signature"><code>def clear(): Unit</code></pre>
+          <p>Retire tous les elements sans reduire la capacite interne.</p>
+
+        </article>
+        <article class="entry" id="toArray">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>toArray</h2>
+          <pre class="signature"><code>def toArray(): Array[A]</code></pre>
+          <p>Copie les elements logiques dans un Array[A] compact.</p>
+
+        </article>
+        <article class="entry" id="iterator">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>iterator</h2>
+          <pre class="signature"><code>def iterator(): Iterator[A]</code></pre>
+          <p>Cree un iterateur borne a size().</p>
+
+        </article>
+        <article class="entry" id="mkString">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>mkString</h2>
+          <pre class="signature"><code>def mkString(separator: String): String</code></pre>
+          <p>Joint les elements avec separator.</p>
+
+        </article>
+        <article class="entry" id="toString">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>toString</h2>
+          <pre class="signature"><code>def toString(): String</code></pre>
+          <p>Representation chaine du buffer.</p>
+
+        </article>
+        <article class="entry" id="ArrayBufferFactory">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>ArrayBufferFactory</h2>
+          <pre class="signature"><code>class ArrayBufferFactory extends IterableFactory[ArrayBuffer]</code></pre>
+          <p>Factory experimentale pour la famille ArrayBuffer.</p>
+
+        </article>
+        <article class="entry" id="empty">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>empty</h2>
+          <pre class="signature"><code>def empty[A](): ArrayBuffer[A]</code></pre>
+          <p>Cree un ArrayBuffer[A] vide.</p>
+
+        </article>
+        <article class="entry" id="newBuilder">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>newBuilder</h2>
+          <pre class="signature"><code>def newBuilder[A](): Builder[A, ArrayBuffer[A]]</code></pre>
+          <p>Cree un builder produisant un ArrayBuffer[A].</p>
+
+        </article>
+        <article class="entry" id="ArrayBufferBuilder">
+          <div class="entry-meta">
+            <span class="kind">class</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>ArrayBufferBuilder</h2>
+          <pre class="signature"><code>class ArrayBufferBuilder[A] extends Builder[A, ArrayBuffer[A]]</code></pre>
+          <p>Builder experimental qui accumule dans un ArrayBuffer.</p>
+
+        </article>
+        <article class="entry" id="add">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>add</h2>
+          <pre class="signature"><code>def add(value: A): Unit</code></pre>
+          <p>Ajoute value au buffer en construction.</p>
+
+        </article>
+        <article class="entry" id="result">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>result</h2>
+          <pre class="signature"><code>def result(): ArrayBuffer[A]</code></pre>
+          <p>Retourne le buffer construit.</p>
+
+        </article>
+        <article class="entry" id="defaultInitialSize">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>defaultInitialSize</h2>
+          <pre class="signature"><code>def ArrayBuffer.defaultInitialSize(): Int</code></pre>
+          <p>Taille initiale par defaut, comme Scala ArrayBuffer.</p>
+
+        </article>
+        <article class="entry" id="empty-2">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>empty</h2>
+          <pre class="signature"><code>def ArrayBuffer.empty[A](): ArrayBuffer[A]</code></pre>
+          <p>Cree un ArrayBuffer[A] vide.</p>
+
+        </article>
+        <article class="entry" id="withCapacity">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>withCapacity</h2>
+          <pre class="signature"><code>def ArrayBuffer.withCapacity[A](initialSize: Int): ArrayBuffer[A]</code></pre>
+          <p>Cree un ArrayBuffer[A] vide avec une capacite initiale minimale.</p>
+
+        </article>
+        <article class="entry" id="apply-2">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>apply</h2>
+          <pre class="signature"><code>def ArrayBuffer.apply[A](values: A*): ArrayBuffer[A]</code></pre>
+          <p>Cree un ArrayBuffer avec les valeurs donnees.</p>
+
+        </article>
+        <article class="entry" id="from">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>from</h2>
+          <pre class="signature"><code>def ArrayBuffer.from[A](values: Iterable[A]): ArrayBuffer[A]</code></pre>
+          <p>Copie une collection parcourable dans un nouvel ArrayBuffer.</p>
+
+        </article>
+        <article class="entry" id="factory">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>factory</h2>
+          <pre class="signature"><code>def ArrayBuffer.factory(): IterableFactory[ArrayBuffer]</code></pre>
+          <p>Retourne la factory experimentale de ArrayBuffer.</p>
+
+        </article>
+        <article class="entry" id="newBuilder-2">
+          <div class="entry-meta">
+            <span class="kind">def</span> <span class="status experimental">Experimental</span>
+          </div>
+          <h2>newBuilder</h2>
+          <pre class="signature"><code>def ArrayBuffer.newBuilder[A](): Builder[A, ArrayBuffer[A]]</code></pre>
+          <p>Cree un builder produisant un ArrayBuffer[A].</p>
+
+        </article>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
