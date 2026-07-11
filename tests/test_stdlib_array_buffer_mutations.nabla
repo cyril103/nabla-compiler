@@ -1,0 +1,71 @@
+import collections.array
+import collections.array_buffer
+import collections.buffer
+import core.builder
+import core.iterable_ops
+
+class Score(val name: String, val value: Int) {
+    override def toString(): String = {
+        name + ":" + value.toString()
+    }
+}
+
+def mutate(values: Buffer[Int]): Int = {
+    values.append(3)
+    values.prepend(1)
+    values.insert(1, 2)
+    values.appendAll(Array.apply[Int](4, 5))
+    values.prependAll(Array.apply[Int](0))
+    values.set(3, 30)
+    val removed = values.subtractOne(30)
+    values.trimEnd(1)
+    values.padToInPlace(5, 9)
+    values.filterInPlace(value => value != 2)
+    values.dropInPlace(1)
+    values.takeInPlace(2)
+    if removed && values.get(0) == 1 && values.get(1) == 4 && values.size() == 2 {
+        20
+    } else {
+        1
+    }
+}
+
+def throughOps(values: IterableOps[Score, ArrayBuffer, ArrayBuffer[Score]]): Int = {
+    val mapped: ArrayBuffer[String] = values.map[String](score => score.name + "=" + score.value.toString())
+    val filtered: ArrayBuffer[Score] = values.filter(score => score.value > 10)
+    if mapped.mkString("|") == "a=5|b=20|c=30" && filtered.mkString(",") == "b:20,c:30" {
+        22
+    } else {
+        2
+    }
+}
+
+def builderResult(): Int = {
+    val builder: Builder[Int, ArrayBuffer[Int]] = ArrayBuffer.newBuilder[Int]()
+    builder.add(7)
+    builder.add(8)
+    val built = builder.result()
+    if built.mkString(",") == "7,8" {
+        0
+    } else {
+        3
+    }
+}
+
+def main(): Int = {
+    val buffer = ArrayBuffer.empty[Int]()
+    buffer.sizeHint(2)
+    val before = buffer.capacity()
+    val mutationScore = mutate(buffer)
+    buffer.trimToSize()
+    val compact = buffer.capacity() >= buffer.size()
+    val scores = ArrayBuffer.apply[Score](new Score("a", 5), new Score("b", 20), new Score("c", 30))
+    val opsScore = throughOps(scores)
+    val copied = ArrayBuffer.from[Int](Array.apply[Int](1, 2, 3))
+    copied.removeRange(1, 1)
+    if mutationScore == 20 && opsScore == 22 && builderResult() == 0 && before >= 2 && compact && buffer.mkString(",") == "1,4" && copied.mkString("-") == "1-3" {
+        42
+    } else {
+        4
+    }
+}
