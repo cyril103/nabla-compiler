@@ -5,8 +5,8 @@ package collections.set
 /// Utiliser Set(values...) pour creer un ensemble depuis des elements,
 /// Set.empty[T]() pour construire progressivement un ensemble, ou
 /// Set.fromArray[T](values) pour dedupliquer un tableau.
-/// toArray() retourne encore la representation generique actuelle ; preferer
-/// Array[T] pour construire ou passer de nouveaux tableaux.
+/// toArray() expose la facade Array[T] ; la representation generique reste un
+/// detail interne.
 ///
 /// @example Creer et tester un ensemble
 /// import collections.set
@@ -514,9 +514,8 @@ class Set[T](values: ArrayObject[T]) with Sized with IterableOps[T, Set, Set[T]]
     /// @signature def toArray(): Array[T]
     /// @status Recommandee
     ///
-    /// La representation visible actuelle est ArrayObject[T]. Manipuler le
-    /// resultat via les operations communes et preferer Array[T] pour les
-    /// nouvelles constructions applicatives.
+    /// Le stockage interne reste objet-backed, mais le contrat utilisateur est
+    /// la facade Array[T].
     def toArray(): ArrayObject[T] = {
         values
     }

@@ -7,8 +7,7 @@ package collections.array
 /// Les anciens noms ArrayFill[T] et ArrayRange restent disponibles pour
 /// compatibilite. Les types bas niveau comme IntArray, ArrayInt,
 /// ObjectArray[T] et ArrayObject[T] sont des details de representation dans
-/// les cas courants : ils peuvent apparaitre dans certains retours ou
-/// diagnostics, mais les exemples applicatifs devraient nommer Array[T].
+/// les cas courants : les exemples applicatifs devraient nommer Array[T].
 ///
 /// @example Creer et parcourir un tableau
 /// import collections.array

@@ -837,14 +837,14 @@ Operations disponibles sur `String` :
 
 - `length(): Int`
 - `charAt(index: Int): Char`
-- `toCharArray(): ArrayObject[Char]`
+- `toCharArray(): Array[Char]`
 - `toInt(): Int`
 - `toFloat(): Float`
 - `toDouble(): Double`
 - `substring(from: Int, until: Int): String`
 - `repeat(count: Int): String`
 - `trim(): String`
-- `split(separator: String): ArrayObject[String]`
+- `split(separator: String): Array[String]`
 - `indexOf(needle: String): Int`
 - `contains(needle: String): Bool`
 - `startsWith(prefix: String): Bool`
@@ -853,11 +853,10 @@ Operations disponibles sur `String` :
 - `nonEmpty(): Bool`
 - `+`, `==`, `!=`
 
-`toCharArray()` et `split(...)` exposent actuellement `ArrayObject[...]`. C'est
-la representation actuelle des tableaux de types non primitifs ; le code
-utilisateur devrait surtout utiliser les operations communes (`size`, `get`,
-`mkString`, `foreach`, etc.) et garder `Array[T]` pour construire ses propres
-tableaux.
+`toCharArray()` et `split(...)` retournent la facade publique `Array[...]`.
+Le runtime peut conserver une representation generique interne, mais le code
+utilisateur doit raisonner en termes de `Array[T]` et utiliser les operations
+communes (`size`, `get`, `mkString`, `foreach`, etc.).
 
 `toInt()`, `toFloat()` et `toDouble()` échouent avec le code runtime `253` si la
 chaine ne contient pas un nombre valide. Les formes globales `parseInt(value)`,
@@ -1027,9 +1026,8 @@ def main(): Int = {
 
 `Array[Int]`, `Array[Long]`, `Array[Float]`, `Array[Double]` et `Array[Bool]`
 sont specialises en interne vers des facades primitives. Les autres types
-passent aujourd'hui par `ArrayObject[T]`. Ces noms de representation peuvent
-apparaitre dans certains retours ou diagnostics, mais ne sont pas l'API
-idiomatique.
+peuvent passer par une representation objet interne, mais les signatures,
+exemples et diagnostics utilisateur doivent privilegier `Array[T]`.
 
 Le module `collections.set` fournit une structure `Set[T]` immutable basée sur
 un tableau interne, avec déduplication par `==` et table de hachage interne
@@ -1074,17 +1072,13 @@ Operations utiles :
 - `intersect(other: Set[T]): Set[T]`
 - `difference(other: Set[T]): Set[T]`
 - `clear(): Set[T]`
-- `toArray(): ArrayObject[T]`
+- `toArray(): Array[T]`
 - `toString(): String`
 
 Les noms bas niveau `setEmpty`, `setFromArray`, `ObjectArray[T]` et
-`ArrayObject[T]` restent visibles dans certains diagnostics et modules importes.
-Le code utilisateur devrait preferer `Set.empty[T]()` et
-`Set.fromArray[T](values)`.
-
-`toArray()` retourne encore `ArrayObject[T]`, qui est la representation actuelle
-du tableau generique d'objets. Pour construire ou passer des tableaux dans le
-code applicatif, preferer la facade `Array[T]`.
+`ArrayObject[T]` restent des details d'implementation ou de compatibilite. Le
+code utilisateur devrait preferer `Set.empty[T]()`, `Set.fromArray[T](values)`
+et `toArray(): Array[T]`.
 
 ## Map
 
@@ -1131,10 +1125,10 @@ Operations utiles :
 Comme les opérations de tableaux, `filterKeys` n'évalue son prédicat qu'une
 fois par entrée.
 
-Les tableaux retournes par `keys()`, `values()` et `toArray()` utilisent
-actuellement `ArrayObject[...]` pour les entrees generiques. C'est un detail de
-representation ; les exemples et le code applicatif devraient utiliser
-`Map(...)`, `Map.empty`, `Map.fromArray` et `Array[T]` comme surface publique.
+Les tableaux retournes par `keys()`, `values()` et `toArray()` sont exposes
+comme `Array[...]`. Leur representation runtime reste un detail interne ; les
+exemples et le code applicatif devraient utiliser `Map(...)`, `Map.empty`,
+`Map.fromArray` et `Array[T]` comme surface publique.
 
 ## Option
 
