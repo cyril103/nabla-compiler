@@ -1,0 +1,1 @@
+tests/test_error_array_factory_reports_public_array_type.nabla:12:15: semantic error: needsBool, paramètre 'value': type 'Bool' attendu, 'Array[Box]' reçu

@@ -1,0 +1,15 @@
+import collections.array
+
+class Box(label: String) {}
+
+def needsBool(value: Bool): Unit = {
+    while false {
+        0
+    }
+}
+
+def main(): Int = {
+    val boxes = Array.fill[Box](2, new Box("x"))
+    needsBool(boxes)
+    0
+}
