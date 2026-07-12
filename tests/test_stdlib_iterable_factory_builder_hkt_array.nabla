@@ -1,5 +1,5 @@
-import core.builder
-import core.iterable_ops
+import collections.builder
+import collections.iterable_ops
 import collections.array
 
 def buildTwo[CC[_]](factory: IterableFactory[CC], first: Int, second: Int): CC[Int] = {

@@ -1,6 +1,6 @@
 package collections.array_base
 
-import core.iterator
+import collections.iterator
 
 class ArrayPrimitiveIterator[T, Raw](rawValues: Raw, lengthFn: (Raw) => Int, getFn: (Raw, Int) => T, var index: Int) with Iterator[T] {
     override def hasNext(): Bool = {

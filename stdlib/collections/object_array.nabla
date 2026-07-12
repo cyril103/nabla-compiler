@@ -1,10 +1,10 @@
 package collections.object_array
 
 import util
-import core.sized
-import core.iterable_ops
-import core.iterator
-import core.builder
+import collections.sized
+import collections.iterable_ops
+import collections.iterator
+import collections.builder
 import collections.array_base
 
 def objectArrayFill[T](size: Int, value: T): ArrayObject[T] = {

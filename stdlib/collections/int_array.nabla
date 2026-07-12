@@ -1,8 +1,8 @@
 package collections.int_array
 
 import core.option_int
-import core.iterable
-import core.iterator
+import collections.iterable
+import collections.iterator
 import collections.object_array
 import collections.array_base
 import util

@@ -1,4 +1,4 @@
-import core.iterator
+import collections.iterator
 
 
 class CountingIterator(var current: Int, until: Int) with Iterator[Int] {

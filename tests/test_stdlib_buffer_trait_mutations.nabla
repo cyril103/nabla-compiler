@@ -1,8 +1,8 @@
 import collections.array
 import collections.buffer
 import collections.object_array
-import core.iterable
-import core.iterator
+import collections.iterable
+import collections.iterator
 
 class TestBuffer[A](var values: ArrayObject[A]) with Buffer[A] {
     override def size(): Int = {

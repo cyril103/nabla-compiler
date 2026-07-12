@@ -15,10 +15,10 @@ package collections.list
 /// xs.head() + xs.tail().head()
 /// @end
 
-import core.iterable
-import core.builder
-import core.iterable_ops
-import core.iterator
+import collections.iterable
+import collections.builder
+import collections.iterable_ops
+import collections.iterator
 import core.option
 import collections.array
 

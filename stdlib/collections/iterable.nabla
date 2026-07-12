@@ -1,10 +1,10 @@
-package core.iterable
+package collections.iterable
 
 /// @module Iterable
 /// Trait public minimal pour les collections parcourables.
 
-import core.sized
-import core.iterator
+import collections.sized
+import collections.iterator
 
 /// Collection parcourable element par element.
 /// @signature trait Iterable[T]

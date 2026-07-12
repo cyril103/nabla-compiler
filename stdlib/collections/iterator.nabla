@@ -1,4 +1,4 @@
-package core.iterator
+package collections.iterator
 
 /// @module Iterator
 /// Trait public minimal pour parcourir sequentiellement les elements d'une collection.

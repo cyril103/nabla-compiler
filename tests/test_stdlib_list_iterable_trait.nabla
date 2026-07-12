@@ -1,4 +1,4 @@
-import core.iterable
+import collections.iterable
 import collections.list
 
 def visit(values: Iterable[Int]): Int = {

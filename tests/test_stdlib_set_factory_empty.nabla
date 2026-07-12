@@ -1,4 +1,4 @@
-import core.iterable_ops
+import collections.iterable_ops
 import collections.set
 
 def main(): Int = {

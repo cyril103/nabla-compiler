@@ -1,4 +1,4 @@
-package core.sized
+package collections.sized
 
 /// @module Sized
 /// Trait public minimal pour les collections ayant une taille logique.

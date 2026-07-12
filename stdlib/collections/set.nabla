@@ -24,16 +24,16 @@ package collections.set
 /// @end
 
 import collections.object_array
-import core.sized
-import core.iterable
-import core.iterator
+import collections.sized
+import collections.iterable
+import collections.iterator
 import collections.int_array
 import collections.long_array
 import collections.float_array
 import collections.double_array
 import collections.bool_array
-import core.builder
-import core.iterable_ops
+import collections.builder
+import collections.iterable_ops
 
 def setIndexBucketCount[T](size: Int): Int = {
     var capacity = 8

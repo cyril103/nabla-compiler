@@ -3,7 +3,7 @@ import collections.array
 import collections.set
 import collections.map
 import core.option
-import core.sized
+import collections.sized
 
 def showSized(label: String, value: Sized): Unit = {
     println(label + ": " + value.size().toString())

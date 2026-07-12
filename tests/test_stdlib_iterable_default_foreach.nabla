@@ -1,5 +1,5 @@
-import core.iterable
-import core.iterator
+import collections.iterable
+import collections.iterator
 
 
 class Accumulator(var total: Int) {

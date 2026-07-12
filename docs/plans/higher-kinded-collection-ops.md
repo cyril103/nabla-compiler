@@ -123,8 +123,8 @@ Expected diagnostic should clearly mention that `CC[_]` expects a type construct
 **Objective:** Introduce names and direction without overclaiming full Scala parity.
 
 **Files:**
-- Create: `stdlib/core/builder.nabla`
-- Create or modify: `stdlib/core/iterable_ops.nabla`
+- Create: `stdlib/collections/builder.nabla`
+- Create or modify: `stdlib/collections/iterable_ops.nabla`
 - Modify: `docs/stdlib-api.md`
 - Run: `make stdlib-docs`
 
