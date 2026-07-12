@@ -537,6 +537,13 @@ inline std::optional<StdlibTypeAlias> stdlibTypeAliasForResolvedName(const std::
     return std::nullopt;
 }
 
+inline std::string publicTypeNameForDiagnostics(const std::string& type) {
+    if (auto alias = stdlibTypeAliasForResolvedName(type)) {
+        return formatParameterizedType(alias->baseName, alias->arguments);
+    }
+    return type;
+}
+
 inline std::string canonicalTypeName(const std::string& type) {
     auto functionType = functionTypeFromName(type);
     if (functionType) {
