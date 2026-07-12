@@ -388,7 +388,8 @@ void validateArguments(
             if (!isValueAssignable(context, splat->getType(), parameter.type)) {
                 throw CompilerError(ErrorKind::Semantic, arguments[i]->getLocation(),
                     callableName + ", paramètre '" + parameter.name + "': type '" +
-                    parameter.type + "' attendu, '" + splat->getType() + "' reçu" +
+                    publicTypeNameForDiagnostics(parameter.type) + "' attendu, '" +
+                    publicTypeNameForDiagnostics(splat->getType()) + "' reçu" +
                     recommendedStdlibFunctionSuffix(callableName));
             }
             continue;
@@ -399,7 +400,8 @@ void validateArguments(
         if (!isValueAssignable(context, arguments[i]->getType(), expectedType)) {
             throw CompilerError(ErrorKind::Semantic, arguments[i]->getLocation(),
                 callableName + ", paramètre '" + parameter.name + "': type '" +
-                expectedType + "' attendu, '" + arguments[i]->getType() + "' reçu" +
+                publicTypeNameForDiagnostics(expectedType) + "' attendu, '" +
+                publicTypeNameForDiagnostics(arguments[i]->getType()) + "' reçu" +
                 recommendedStdlibFunctionSuffix(callableName));
         }
     }
