@@ -18,6 +18,20 @@ stdlib, tout en conservant les representations specialisees (`ArrayInt`,
 - Les specialisations primitives restent disponibles via le lowering et les
   alias existants.
 
+## Option B retenue : facade publique, backends internes
+
+`Array[T]` devient la facade nominale que l'utilisateur voit dans les
+signatures, les annotations et les diagnostics. Les classes specialisees
+existantes (`ArrayInt`, `ArrayLong`, `ArrayObject[T]`, etc.) restent les
+backends de representation et de compatibilite : le compilateur peut les choisir
+pour le lowering, mais la surface stdlib recommandee doit continuer a parler de
+`Array[T]`.
+
+Cette option evite deux mondes publics de tableaux. Elle impose en revanche que
+les signatures publiques et les messages d'erreur effacent les noms de backend,
+et que les tests de regression couvrent les chemins ou ces noms pourraient
+reapparaitre.
+
 ## Etapes
 
 1. Ajouter une regression montrant que les fabriques generiques `Array` se
@@ -29,3 +43,14 @@ stdlib, tout en conservant les representations specialisees (`ArrayInt`,
 4. Regenerer la documentation stdlib si les commentaires ou signatures publiques
    changent.
 5. Valider avec les tests cibles array puis la matrice pertinente.
+
+## Critere d'acceptation
+
+- Les fabriques recommandees (`Array.apply`, `Array.empty`, `Array.fill`,
+  `Array.tabulate`, `Array.range`) annoncent `Array[...]` dans leur signature
+  publique.
+- Les retours specialises restent autorises comme implementation interne, mais
+  un code utilisateur annote avec `Array[T]` doit compiler pour les primitives
+  comme pour les types reference/generiques supportes.
+- Les diagnostics destines a l'utilisateur ne doivent pas exposer
+  `ArrayObject[...]` quand `Array[...]` est le type de facade equivalent.
