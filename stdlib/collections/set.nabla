@@ -422,7 +422,7 @@ object Set {
     /// Le compilateur accepte les facades Array[T] usuelles et choisit la
     /// representation adaptee. Le code utilisateur n'a pas a nommer les
     /// tableaux bas niveau pour construire un Set.
-    def fromArray[T](values: ArrayObject[T]): Set[T] = {
+    def fromArray[T](values: Array[T]): Set[T] = {
         setFromArray[T](values)
     }
 }
@@ -438,6 +438,10 @@ object Set {
 /// Les operations generiques heritees d'IterableOps, comme map et filter,
 /// reconstruisent un Set via SetFactory et conservent donc la deduplication.
 class Set[T](values: ArrayObject[T]) with Sized with IterableOps[T, Set, Set[T]] {
+    def rawValues(): ArrayObject[T] = {
+        values
+    }
+
     /// Retourne la factory utilisee par les operations generiques de collection.
     /// @signature def iterableFactory(): IterableFactory[Set]
     /// @status Experimental
@@ -486,21 +490,21 @@ class Set[T](values: ArrayObject[T]) with Sized with IterableOps[T, Set, Set[T]]
     /// @signature def union(other: Set[T]): Set[T]
     /// @status Recommandee
     def union(other: Set[T]): Set[T] = {
-        new Set[T](setUnion[T](values, other.toArray()))
+        new Set[T](setUnion[T](values, other.rawValues()))
     }
 
     /// Retourne l'intersection de deux ensembles.
     /// @signature def intersect(other: Set[T]): Set[T]
     /// @status Recommandee
     def intersect(other: Set[T]): Set[T] = {
-        new Set[T](setIntersect[T](values, other.toArray()))
+        new Set[T](setIntersect[T](values, other.rawValues()))
     }
 
     /// Retourne les elements de this absents de other.
     /// @signature def difference(other: Set[T]): Set[T]
     /// @status Recommandee
     def difference(other: Set[T]): Set[T] = {
-        new Set[T](setDifference[T](values, other.toArray()))
+        new Set[T](setDifference[T](values, other.rawValues()))
     }
 
     /// Retourne un ensemble vide du meme type d'elements.
@@ -516,7 +520,7 @@ class Set[T](values: ArrayObject[T]) with Sized with IterableOps[T, Set, Set[T]]
     ///
     /// Le stockage interne reste objet-backed, mais le contrat utilisateur est
     /// la facade Array[T].
-    def toArray(): ArrayObject[T] = {
+    def toArray(): Array[T] = {
         values
     }
 
