@@ -1,10 +1,10 @@
-package core.iterable_ops
+package collections.iterable_ops
 
 /// @module IterableOps
 /// Traits experimentaux pour preparer les factories/builders de collections.
 
-import core.builder
-import core.iterable
+import collections.builder
+import collections.iterable
 
 /// Factory generique pour une famille de collections a un parametre de type.
 /// @signature trait IterableFactory[CC[_]]

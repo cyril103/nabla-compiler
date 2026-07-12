@@ -2,8 +2,8 @@ package collections.double_array
 
 import collections.object_array
 import collections.array_base
-import core.iterable
-import core.iterator
+import collections.iterable
+import collections.iterator
 import util
 
 def doubleArrayFill(size: Int, value: Double): DoubleArray = {

@@ -31,6 +31,22 @@ pas comme cible idiomatique pour le code applicatif.
 - `panic(message: String): Nothing` / `error(message: String): Nothing`
   - primitives compilateur pour les chemins qui ne retournent pas normalement;
     elles quittent l'executable avec le statut runtime `250`.
+- `Option[T]`
+  - `Option.some[T](value)`
+  - `Option.none[T]()`
+  - `isDefined()`
+  - `isEmpty()`
+  - `getOrElse(default)`
+  - `map(...)`
+  - `flatMap(...)`
+  - `filter(...)`
+  - `foreach(...)`
+  - `orElse(...)`
+- `OptionInt` reste public tant que les generiques primitifs ne couvrent pas
+  totalement les besoins de performance/representation.
+
+### Collections
+
 - `Sized`
   - `size()`
   - `isEmpty()`
@@ -62,22 +78,6 @@ pas comme cible idiomatique pour le code applicatif.
     `IterableFactory.newBuilder`; cette surface reste experimentale et validee
     par une regression de collection generique minimale avant d'etre branchee
     sur les collections publiques.
-- `Option[T]`
-  - `Option.some[T](value)`
-  - `Option.none[T]()`
-  - `isDefined()`
-  - `isEmpty()`
-  - `getOrElse(default)`
-  - `map(...)`
-  - `flatMap(...)`
-  - `filter(...)`
-  - `foreach(...)`
-  - `orElse(...)`
-- `OptionInt` reste public tant que les generiques primitifs ne couvrent pas
-  totalement les besoins de performance/representation.
-
-### Collections
-
 - `Array[T]`
 - `Array(value1, value2, ...)`
 - `Array.apply[T](values: T*)`

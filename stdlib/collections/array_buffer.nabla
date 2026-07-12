@@ -12,10 +12,10 @@ package collections.array_buffer
 import collections.array
 import collections.buffer
 import collections.object_array
-import core.builder
-import core.iterable
-import core.iterable_ops
-import core.iterator
+import collections.builder
+import collections.iterable
+import collections.iterable_ops
+import collections.iterator
 
 def arrayBufferDefaultInitialSize(): Int = {
     16

@@ -1,4 +1,4 @@
-package core.builder
+package collections.builder
 
 /// @module Builder
 /// Traits publics minimaux pour construire des collections.

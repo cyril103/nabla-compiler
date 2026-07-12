@@ -53,8 +53,8 @@ import collections.float_array
 import collections.double_array
 import collections.bool_array
 import collections.object_array
-import core.builder
-import core.iterable_ops
+import collections.builder
+import collections.iterable_ops
 
 /// Cree un tableau d'entiers contenant 0, 1, ..., size - 1.
 /// @signature def ArrayRange(size: Int): Array[Int]

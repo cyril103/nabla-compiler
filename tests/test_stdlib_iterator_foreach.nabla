@@ -1,4 +1,4 @@
-import core.iterator
+import collections.iterator
 import collections.array
 import collections.list
 import collections.set

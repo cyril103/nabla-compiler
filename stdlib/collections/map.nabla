@@ -26,11 +26,11 @@ package collections.map
 /// @end
 
 import core.option
-import core.sized
-import core.iterable
-import core.iterator
+import collections.sized
+import collections.iterable
+import collections.iterator
 import core.tuple
-import core.builder
+import collections.builder
 import collections.object_array
 
 def mapIndexBucketCount[K, V](size: Int): Int = {

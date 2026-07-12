@@ -9,7 +9,7 @@ package collections.buffer
 /// primitives de mutation; les methodes *InPlace retournent le buffer pour
 /// permettre le chainage polymorphe.
 
-import core.iterable
+import collections.iterable
 
 /// Sequence mutable a taille variable.
 /// @signature trait Buffer[A] extends Iterable[A]

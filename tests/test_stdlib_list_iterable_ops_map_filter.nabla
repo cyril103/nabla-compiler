@@ -1,4 +1,4 @@
-import core.iterable_ops
+import collections.iterable_ops
 import collections.list
 
 def throughOps(values: IterableOps[Int, List, List[Int]]): String = {

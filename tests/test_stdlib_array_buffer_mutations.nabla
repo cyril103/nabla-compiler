@@ -1,8 +1,8 @@
 import collections.array
 import collections.array_buffer
 import collections.buffer
-import core.builder
-import core.iterable_ops
+import collections.builder
+import collections.iterable_ops
 
 class Score(val name: String, val value: Int) {
     override def toString(): String = {

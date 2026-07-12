@@ -1,6 +1,6 @@
-import core.builder
-import core.iterable_ops
-import core.iterator
+import collections.builder
+import collections.iterable_ops
+import collections.iterator
 import collections.list
 
 trait LocalList[A] with IterableOps[A, LocalList, LocalList[A]] {

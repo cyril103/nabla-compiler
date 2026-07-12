@@ -1,5 +1,5 @@
-import core.iterable
-import core.iterator
+import collections.iterable
+import collections.iterator
 import collections.array
 import collections.list
 
