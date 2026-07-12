@@ -1,0 +1,27 @@
+import collections.array
+
+class Box(val label: String) {
+    def name(): String = {
+        label
+    }
+}
+
+def acceptBoxes(values: Array[Box]): Int = {
+    values.size()
+}
+
+def main(): Int = {
+    val emptyStrings: Array[String] = Array.empty[String]()
+    val filledBoxes: Array[Box] = Array.fill[Box](2, new Box("ok"))
+    val tabulatedWords: Array[String] = Array.tabulate[String](2, index => "w" + index.toString())
+    val ranged: Array[Int] = Array.range(3)
+
+    if emptyStrings.size() == 0 &&
+       acceptBoxes(filledBoxes) == 2 &&
+       tabulatedWords.get(1) == "w1" &&
+       ranged.sum() == 3 {
+        42
+    } else {
+        1
+    }
+}
