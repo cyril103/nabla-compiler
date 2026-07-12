@@ -207,7 +207,7 @@ indexes.mkString(&quot;, &quot;)</code></pre>
           <h2>empty</h2>
           <pre class="signature"><code>def Array.empty[T](): Array[T]</code></pre>
           <p>Cree un tableau vide.</p>
-<p>La representation concrete peut encore etre ArrayObject[T] pour les types generiques. Le code utilisateur doit la manipuler comme un Array[T] via les operations communes.</p>
+<p>La representation concrete reste un backend choisi par le compilateur. Le code utilisateur manipule toujours le resultat comme un Array[T].</p>
 
         </article>
         <article class="entry" id="fill">
@@ -237,7 +237,7 @@ indexes.mkString(&quot;, &quot;)</code></pre>
           <h2>tabulate</h2>
           <pre class="signature"><code>def Array.tabulate[T](size: Int, f: (Int) =&gt; T): Array[T]</code></pre>
           <p>Cree un tableau en calculant chaque element depuis son index.</p>
-<p>Comme Array.fill, cette fabrique garde le nom public Array[T] meme si la representation visible est specialisee ou generique selon T.</p>
+<p>Comme Array.fill, cette fabrique garde le nom public Array[T] meme si le backend est specialise ou generique selon T.</p>
 
         </article>
         <article class="entry" id="range">

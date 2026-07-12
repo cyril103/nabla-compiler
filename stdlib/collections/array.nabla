@@ -143,10 +143,9 @@ object Array {
     /// @signature def Array.empty[T](): Array[T]
     /// @status Recommandee
     ///
-    /// La representation concrete peut encore etre ArrayObject[T] pour les
-    /// types generiques. Le code utilisateur doit la manipuler comme un
-    /// Array[T] via les operations communes.
-    def empty[T](): ArrayObject[T] = {
+    /// La representation concrete reste un backend choisi par le compilateur.
+    /// Le code utilisateur manipule toujours le resultat comme un Array[T].
+    def empty[T](): Array[T] = {
         objectArrayEmpty[T]()
     }
 
@@ -157,7 +156,7 @@ object Array {
     /// Pour T = Int, Long, Float, Double ou Bool, le compilateur choisit une
     /// specialisation primitive. Les autres types utilisent la representation
     /// generique actuelle, sans que le code utilisateur doive la nommer.
-    def fill[T](size: Int, value: T): ArrayObject[T] = {
+    def fill[T](size: Int, value: T): Array[T] = {
         objectArrayFill[T](size, value)
     }
 
@@ -168,7 +167,7 @@ object Array {
     /// La forme curryfiee accepte un parametre par nom: elem est evalue une fois
     /// par case, de gauche a droite, ce qui permet de produire des valeurs
     /// differentes a chaque iteration.
-    def fill[T](n: Int)(elem: => T): ArrayObject[T] = {
+    def fill[T](n: Int)(elem: => T): Array[T] = {
         Array.tabulate[T](n, index => elem)
     }
 
@@ -176,23 +175,23 @@ object Array {
     /// @signature def Array.tabulate[T](size: Int, f: (Int) => T): Array[T]
     /// @status Recommandee
     ///
-    /// Comme Array.fill, cette fabrique garde le nom public Array[T] meme si la
-    /// representation visible est specialisee ou generique selon T.
-    def tabulate[T](size: Int, f: (Int) => T): ArrayObject[T] = {
+    /// Comme Array.fill, cette fabrique garde le nom public Array[T] meme si le
+    /// backend est specialise ou generique selon T.
+    def tabulate[T](size: Int, f: (Int) => T): Array[T] = {
         objectArrayTabulate[T](size, f)
     }
 
     /// Cree un tableau d'entiers contenant 0, 1, ..., size - 1.
     /// @signature def Array.range(size: Int): Array[Int]
     /// @status Recommandee
-    def range(size: Int): ArrayInt = {
+    def range(size: Int): Array[Int] = {
         new ArrayInt(intArrayRange(size))
     }
 
     /// Cree un tableau d'entiers contenant start, ..., until - 1.
     /// @signature def Array.range(start: Int, until: Int): Array[Int]
     /// @status Recommandee
-    def range(start: Int, until: Int): ArrayInt = {
+    def range(start: Int, until: Int): Array[Int] = {
         new ArrayInt(intArrayRangeUntil(start, until))
     }
 
