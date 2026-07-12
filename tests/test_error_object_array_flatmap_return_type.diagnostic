@@ -1,1 +1,1 @@
-tests/test_error_object_array_flatmap_return_type.nabla:4:45: semantic error: collections.object_array.ArrayObject[String].flatMap, paramètre 'transform': type 'Fn(String)->collections.object_array.ArrayObject[Int]' attendu, 'Fn(String)->collections.object_array.ArrayObject[String]' reçu
+tests/test_error_object_array_flatmap_return_type.nabla:4:45: semantic error: collections.object_array.ArrayObject[String].flatMap, paramètre 'transform': type 'Fn(String)->Array[Int]' attendu, 'Fn(String)->Array[String]' reçu
