@@ -228,7 +228,7 @@ sizes.values().size()</code></pre>
           <h2>keys</h2>
           <pre class="signature"><code>def keys(): Array[K]</code></pre>
           <p>Retourne les cles sous forme de tableau.</p>
-<p>La representation visible actuelle est ArrayObject[K]. Manipuler le resultat via les operations communes et preferer Array[T] pour les nouvelles constructions applicatives.</p>
+<p>Le stockage interne reste objet-backed, mais le contrat utilisateur est la facade Array[K].</p>
 
         </article>
         <article class="entry" id="values">
@@ -238,7 +238,7 @@ sizes.values().size()</code></pre>
           <h2>values</h2>
           <pre class="signature"><code>def values(): Array[V]</code></pre>
           <p>Retourne les valeurs sous forme de tableau.</p>
-<p>La representation visible actuelle est ArrayObject[V].</p>
+<p>Le stockage interne reste objet-backed, mais le contrat utilisateur est la facade Array[V].</p>
 
         </article>
         <article class="entry" id="toArray">
@@ -248,7 +248,7 @@ sizes.values().size()</code></pre>
           <h2>toArray</h2>
           <pre class="signature"><code>def toArray(): Array[Tuple2[K, V]]</code></pre>
           <p>Retourne les paires cle-valeur sous forme de tableau.</p>
-<p>La representation visible actuelle est ArrayObject[Tuple2[K, V]].</p>
+<p>Le stockage interne reste objet-backed, mais le contrat utilisateur est la facade Array[Tuple2[K, V]].</p>
 
         </article>
         <article class="entry" id="foreach">
