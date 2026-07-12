@@ -21,7 +21,7 @@
       <p class="eyebrow">Module</p>
       <h1>Set</h1>
       <p class="import"><code>import collections.set</code></p>
-      <p>Ensembles immuables avec valeurs uniques. Utiliser Set(values...) pour creer un ensemble depuis des elements, Set.empty[T]() pour construire progressivement un ensemble, ou Set.fromArray[T](values) pour dedupliquer un tableau. toArray() retourne encore la representation generique actuelle ; preferer Array[T] pour construire ou passer de nouveaux tableaux.</p>
+      <p>Ensembles immuables avec valeurs uniques. Utiliser Set(values...) pour creer un ensemble depuis des elements, Set.empty[T]() pour construire progressivement un ensemble, ou Set.fromArray[T](values) pour dedupliquer un tableau. toArray() expose la facade Array[T] ; la representation generique reste un detail interne.</p>
       <figure class="example">
         <figcaption>Creer et tester un ensemble</figcaption>
         <pre><code>import collections.set
@@ -273,7 +273,7 @@ left.union(right).size()</code></pre>
           <h2>toArray</h2>
           <pre class="signature"><code>def toArray(): Array[T]</code></pre>
           <p>Retourne les elements sous forme de tableau.</p>
-<p>La representation visible actuelle est ArrayObject[T]. Manipuler le resultat via les operations communes et preferer Array[T] pour les nouvelles constructions applicatives.</p>
+<p>Le stockage interne reste objet-backed, mais le contrat utilisateur est la facade Array[T].</p>
 
         </article>
         <article class="entry" id="foreach">

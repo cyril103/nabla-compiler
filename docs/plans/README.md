@@ -67,6 +67,10 @@ Le chantier actif des collections higher-kinded est suivi dans
 operations communes supplémentaires, les constructeurs d'arité 2 pour `Map` et
 la variance restent des deltas séparés.
 
+Le plan [`array-monomorphization.md`](array-monomorphization.md) décrit la suite
+possible pour spécialiser `Array[T]` en interne sans élargir la surface publique
+au-delà de la facade unique.
+
 Les plans package/namespaces et parité numérique de `Char` ont été retirés de
 l'arbre actif parce que leurs tranches livrées sont maintenant résumées dans la
 roadmap, les tests et les PRs. Les imports sélectifs/alias/wildcards, packages

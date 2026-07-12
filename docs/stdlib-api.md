@@ -19,10 +19,10 @@ helpers sans commentaire public doivent rester absents de `docs/stdlib/`. Les
 commentaires publics peuvent inclure des blocs `@example ... @end` ; ces blocs
 sont rendus comme exemples de code sur la page du module ou du symbole.
 
-Quand une signature publique abstraite mentionne `Array[T]`, l'implementation
-peut encore retourner une facade specialisee (`ArrayInt`, `ArrayObject[T]`,
-etc.). La documentation doit presenter ces noms comme representation actuelle,
-pas comme cible idiomatique pour le code applicatif.
+Quand une signature publique mentionne `Array[T]`, l'implementation peut encore
+utiliser une facade specialisee (`ArrayInt`, `ArrayObject[T]`, etc.) en interne.
+La documentation utilisateur doit presenter `Array[T]` comme contrat observable
+et reserver ces noms aux sections internes ou de compatibilite.
 
 ## Surface Publique Recommandee
 
@@ -200,12 +200,11 @@ idiomatiques.
 La semantique actuelle est byte-based/ASCII ; le code utilisateur ne doit pas
 supposer une prise en charge Unicode complete.
 
-`String.toCharArray()` et `String.split(...)` retournent aujourd'hui une
-representation `ArrayObject[...]`. C'est un detail de representation visible
-tant que la facade `Array[T]` n'efface pas tous les retours specialises ; les
-exemples doivent continuer a manipuler ces valeurs par les operations communes
-de tableau (`size`, `get`, `mkString`, `foreach`, etc.) et preferer `Array[T]`
-pour construire de nouveaux tableaux.
+`String.toCharArray()` et `String.split(...)` retournent la facade publique
+`Array[...]`. Leur stockage runtime peut rester objet-backed; les exemples
+doivent manipuler ces valeurs par les operations communes de tableau (`size`,
+`get`, `mkString`, `foreach`, etc.) et preferer `Array[T]` pour construire de
+nouveaux tableaux.
 
 ### IO
 

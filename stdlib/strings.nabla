@@ -20,6 +20,6 @@ def stringNonEmpty(value: String): Bool = {
 /// Les espaces de debut et de fin sont retires avant la separation. La
 /// separation se fait sur le caractere espace simple; les segments vides
 /// sont ensuite filtres.
-def words(text: String): ArrayObject[String] = {
+def words(text: String): Array[String] = {
     text.trim().split(" ").filter(stringNonEmpty)
 }

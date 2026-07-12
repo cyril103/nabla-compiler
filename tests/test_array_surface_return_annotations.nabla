@@ -1,0 +1,38 @@
+import collections.array
+import collections.map
+import collections.set
+import strings
+
+class Student(name: String) {
+    override def toString(): String = {
+        name
+    }
+}
+
+def main(): Int = {
+    val chars: Array[Char] = "nabla".toCharArray()
+    val parts: Array[String] = "a b".split(" ")
+    val wordsArray: Array[String] = words("  alpha beta  ")
+
+    val students = Array[Student](new Student("ada"), new Student("linus"), new Student("ada"))
+    val studentSet = Set.fromArray[Student](students)
+    val roundTrip: Array[Student] = studentSet.toArray()
+
+    val entries = Array(Tuple2("x", 1), Tuple2("y", 2))
+    val table = Map.fromArray[String, Int](entries)
+    val keys: Array[String] = table.keys()
+    val values: Array[Int] = table.values()
+    val pairs: Array[Tuple2[String, Int]] = table.toArray()
+
+    if chars.size() > 0 &&
+       parts.size() > 0 &&
+       wordsArray.size() > 0 &&
+       roundTrip.size() > 0 &&
+       keys.size() > 0 &&
+       values.size() > 0 &&
+       pairs.size() > 0 {
+        42
+    } else {
+        1
+    }
+}

@@ -263,7 +263,7 @@ object Map {
     /// Cree une map depuis un tableau de paires.
     /// @signature def Map.fromArray[K, V](entries: Array[Tuple2[K, V]]): Map[K, V]
     /// @status Recommandee
-    def fromArray[K, V](entries: ArrayObject[Tuple2[K, V]]): Map[K, V] = {
+    def fromArray[K, V](entries: Array[Tuple2[K, V]]): Map[K, V] = {
         mapFromArray[K, V](entries)
     }
 
@@ -365,10 +365,9 @@ class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) with Sized with Iterable[Tup
     /// @signature def keys(): Array[K]
     /// @status Recommandee
     ///
-    /// La representation visible actuelle est ArrayObject[K]. Manipuler le
-    /// resultat via les operations communes et preferer Array[T] pour les
-    /// nouvelles constructions applicatives.
-    def keys(): ArrayObject[K] = {
+    /// Le stockage interne reste objet-backed, mais le contrat utilisateur est
+    /// la facade Array[K].
+    def keys(): Array[K] = {
         val raw = new ObjectArray[K](entries.size())
         var index = 0
         while index < entries.size() {
@@ -382,8 +381,9 @@ class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) with Sized with Iterable[Tup
     /// @signature def values(): Array[V]
     /// @status Recommandee
     ///
-    /// La representation visible actuelle est ArrayObject[V].
-    def values(): ArrayObject[V] = {
+    /// Le stockage interne reste objet-backed, mais le contrat utilisateur est
+    /// la facade Array[V].
+    def values(): Array[V] = {
         val raw = new ObjectArray[V](entries.size())
         var index = 0
         while index < entries.size() {
@@ -397,8 +397,9 @@ class Map[K, V](entries: ArrayObject[Tuple2[K, V]]) with Sized with Iterable[Tup
     /// @signature def toArray(): Array[Tuple2[K, V]]
     /// @status Recommandee
     ///
-    /// La representation visible actuelle est ArrayObject[Tuple2[K, V]].
-    def toArray(): ArrayObject[Tuple2[K, V]] = {
+    /// Le stockage interne reste objet-backed, mais le contrat utilisateur est
+    /// la facade Array[Tuple2[K, V]].
+    def toArray(): Array[Tuple2[K, V]] = {
         entries
     }
 

@@ -12,7 +12,7 @@ non-interactifs et verifies par `make examples` avec sortie console attendue.
   traitement de texte deterministe.
 
 Ces exemples evitent de construire directement les representations internes
-comme `ObjectArray[T]`, `ArrayObject[T]` ou `ArrayInt`. Certains retours de la
-stdlib, notamment `String.split`, restent toutefois des valeurs de tableau de la
-representation actuelle; le code applicatif doit les manipuler via leurs
-methodes publiques (`size`, `get`, `map`, `filter`, `fold`, `mkString`, etc.).
+comme `ObjectArray[T]`, `ArrayObject[T]` ou `ArrayInt`. Les retours de tableaux
+de la stdlib, notamment `String.split`, sont a manipuler comme `Array[T]` via
+leurs methodes publiques (`size`, `get`, `map`, `filter`, `fold`, `mkString`,
+etc.).
